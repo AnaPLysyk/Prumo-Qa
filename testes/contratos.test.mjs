@@ -73,6 +73,7 @@ test('MCP: servidor real lista exatamente as quatro ferramentas e o catálogo de
   await servidor.connect(b);
   const cliente = new Client({ name: 'teste-contrato', version: '1.0.0' }); await cliente.connect(a);
   t.after(() => cliente.close());
+  assert.equal(cliente.getServerVersion().version, JSON.parse(ler('package.json')).version, 'o MCP informa a versão do package.json');
   const ferramentas = (await cliente.listTools()).tools;
   assert.deepEqual(ferramentas.map((x) => x.name).sort(), ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'revisar_cobertura']);
   assert.deepEqual(mcpCatalogo.map((o) => o.nome).sort(), ferramentas.map((x) => x.name).sort());
@@ -92,4 +93,10 @@ test('catálogo não inventa HTTP: nenhuma URL, porta ou método REST nas descri
 test('cada módulo citado como destino existe em src/', () => {
   const nomes = new Set(fs.readdirSync('src').map((n) => n.replace(/\.ts$/, '')).concat(fs.readdirSync('src/desktop').map((n) => 'desktop/' + n.replace(/\.ts$/, ''))));
   for (const o of catalogo()) for (const m of o.destino.matchAll(/\b([a-z]+)\.(?:ts|[a-zA-Z]+)/g)) if (nomes.has(m[1])) assert.ok(fs.existsSync(path.join('src', m[1] + '.ts')), `${o.nome}: ${m[1]}`);
+});
+
+test('docs/CONTRATOS.md está sincronizado com o catálogo real (rode npm run contratos)', async () => {
+  const { documento } = await import('../scripts/gerar-contratos.mjs');
+  const normal = (s) => s.split('\r').join('');
+  assert.equal(normal(ler('docs/CONTRATOS.md')), normal(documento()));
 });

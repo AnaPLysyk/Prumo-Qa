@@ -9,6 +9,10 @@ import { pathToFileURL } from 'node:url';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import type { Projeto } from './projeto.js';
 import { iniciarAtividade } from './atividades.js';
+import { readFileSync } from 'node:fs';
+
+/** Versão do pacote (package.json), para o MCP informar sempre a versão realmente instalada. */
+const versaoPacote:string=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).version;
 
 /** Observa tools/call na fronteira do protocolo, inclusive rejeições de schema do SDK. */
 function transporteObservado(transporte:Transport,p:Projeto,cliente:()=>string|undefined):Transport {
@@ -56,7 +60,7 @@ export async function criarServidor(raiz:string, contratoLeitura?:string) {
     if(atual.manifesto.id!==vinculo.manifesto.id)throw new ErroQa('PROJECT_BINDING_CHANGED','Identidade do projeto mudou; reinicie o servidor para vincular o novo histórico.');
     return atual;
   };
-  const servidor=new McpServer({name:'prumo-qa',version:'2.2.0'});
+  const servidor=new McpServer({name:'prumo-qa',version:versaoPacote});
   const conectar=servidor.connect.bind(servidor);
   servidor.connect=t=>conectar(transporteObservado(t,vinculo,()=>servidor.server.getClientVersion()?.name));
   const resposta=async(fn:()=>Promise<unknown>)=>{
