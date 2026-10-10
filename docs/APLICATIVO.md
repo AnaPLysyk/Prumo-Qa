@@ -1,4 +1,4 @@
-# Aplicativo desktop (Windows) — Prumo QA 2.2
+# Aplicativo desktop (Windows) — Prumo QA 2.3
 
 A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama `src/painel.ts`, que delega a `projeto`, `atividades`, `evidencias` e `conexoes`.
 
@@ -6,7 +6,7 @@ A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não
 
 ```text
 Janela (app/renderer: HTML+CSS+JS, sandbox, CSP, sem rede)
-   │  window.prumo.*  (app/preload.cjs — 13 funções, objeto congelado)
+   │  window.prumo.*  (app/preload.cjs — 20 funções, objeto congelado)
    ▼
 Processo principal Electron (src/desktop/main.ts)
    │  canais IPC `prumo:*`: confere remetente, valida com zod, devolve {ok,data|error}
@@ -30,6 +30,22 @@ O **servidor MCP não roda dentro da janela**. Cada cliente de IA inicia o seu p
 
 Cada `tools/call` MCP (e cada comando do CLI) grava um registro de início e outro de término em `%LOCALAPPDATA%\PrumoQA\projects\<hash>\<operação>.jsonl` (um arquivo por operação, sem disputa entre processos). A janela só **lê** esses arquivos: a aba Logs, ao marcar “Acompanhar”, consulta de novo a cada 2 s. Registros corrompidos são excluídos e a tela avisa que as métricas são parciais.
 
+### Contratos técnicos (IPC e MCP)
+
+`src/contratos.ts` é a fonte única: os mesmos esquemas Zod que validam cada chamada IPC em `main.ts` alimentam o catálogo mostrado em **Ajuda › Integrações técnicas** e o arquivo gerado [docs/CONTRATOS.md](CONTRATOS.md) (`npm run contratos`). Testes comparam o catálogo com `main.ts`, `preload.cjs` e o servidor MCP real; uma operação nova sem documentação, ou um catálogo desatualizado, quebra a suíte. Não existe API HTTP.
+
+### Versões e atualização
+
+`app/versoes.json` (validado por `src/versoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`scripts/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
+
+### Dados locais: exportar e excluir
+
+Ajuda › Privacidade e dados mostra a pasta real, o espaço usado por categoria, a retenção (nenhuma automática) e o que não é transmitido. A exportação grava onde você escolher. A exclusão tem escopos **separados** — histórico operacional do projeto, evidências do projeto e diagnóstico da interface —, sempre com confirmação nativa, apagando só arquivos do padrão esperado (um a um, sem seguir links) e informando falhas parciais. Código-fonte nunca é tocado, **Desvincular** continua sendo outra ação (só tira o item da lista) e nada disso é exposto como ferramenta MCP.
+
+### Diagnóstico da interface
+
+Cada chamada IPC grava, em `%LOCALAPPDATA%\PrumoQA\diagnostico`, apenas canal, estado, duração, código de erro e um identificador de correlação — nunca argumentos, caminhos ou conteúdo. É separado do histórico de QA: atualizar a tela não conta como análise do Prumo e não altera métricas. Consultas frequentes só deixam rastro quando falham (evita encher o arquivo e qualquer recursão); o arquivo tem teto de 1 MiB por dia.
+
 ### Onde ficam os dados
 
 | Dado | Local |
@@ -38,6 +54,7 @@ Cada `tools/call` MCP (e cada comando do CLI) grava um registro de início e out
 | Projetos vinculados | `%LOCALAPPDATA%\PrumoQA\vinculos.json` (só caminhos) |
 | Projeto de demonstração copiado | `%LOCALAPPDATA%\PrumoQA\demonstracao\` |
 | Dados internos do Electron | `%LOCALAPPDATA%\PrumoQA\app\` |
+| Diagnóstico IPC | `%LOCALAPPDATA%\PrumoQA\diagnostico\` |
 | Evidências de execução | `<projeto>\.prumo\evidencias\` |
 
 `PRUMO_DATA_DIR` troca a pasta base (usado nos testes). Desinstalar **não** apaga nada disso.
@@ -75,6 +92,10 @@ git push origin v2.2.0
 ### Limitação do build local com Smart App Control
 
 Com **Smart App Control** (ou Controle de Aplicativo) em modo ativo, o Windows bloqueia executáveis novos e sem assinatura. O electron-builder executa um instalador provisório para gerar o desinstalador e o build local falha com `spawn UNKNOWN`; do mesmo modo, `aprovar.exe` recém-compilado pode ser bloqueado. O Prumo **não** desliga nem contorna essa proteção. Em máquinas sem esse bloqueio (ou com certificado de assinatura configurado no electron-builder) `npm run dist` funciona; o workflow do GitHub é a alternativa.
+
+## Atualizar de uma versão anterior
+
+Instale a nova versão sobre a antiga (mesma pasta). Projetos vinculados, histórico, métricas e evidências ficam em `%LOCALAPPDATA%\PrumoQA` e nos projetos, fora da pasta de instalação, e são preservados; isso é testado no CI instalando a 2.2.0 publicada, criando dados reais com ela e atualizando por cima (`testes/migracao.test.mjs`). Conexões MCP continuam válidas enquanto o executável permanecer na mesma pasta; se mudar, reconfigure em Conexões. Nada é reconfigurado em silêncio.
 
 ## Instalar em outra máquina
 

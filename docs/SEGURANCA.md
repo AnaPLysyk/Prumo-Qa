@@ -47,3 +47,10 @@ Limites: 10.000 arquivos, 32 KiB por arquivo, 32 MiB por leitura. Não há reten
 Falha de escrita de atividade mantém o resultado do núcleo e avisa em stderr (`PRUMO_OBSERVABILITY_ERROR`, fase e UUID), nunca no stdout MCP. CLI usa 3 quando só a observabilidade falha, preservando 1/2 de falhas/bloqueios do núcleo. MCP mantém a resposta contratual: operadores devem capturar stderr. Disco indisponível impede registrar o evento; não alegamos contabilidade completa dessas chamadas. Em produção, monitore stderr e mantenha diretório de dados gravável. Os testes reproduzem falha no início/término e preservação de FAIL/BLOCKED.
 
 `prumo conectar codex` apresenta destino e comando; alteração exige a confirmação textual exibida em terminal interativo. `--json`, execução não interativa e confirmação incorreta não escrevem configuração. A inspeção oficial de servidores precede a adição: nome existente ou inspeção falha impede sobrescrita. Não execute outro configurador concorrente durante essa operação. O comando manual exibido continua sujeito à revisão da pessoa. Nenhuma conexão configurada equivale a permissão de execução protegida.
+
+## Aplicativo 2.3: rede, dados e exclusão
+
+- A janela continua sem rede (CSP e filtro de requisições). A **única** saída é a verificação de atualização, iniciada por você, feita pelo processo principal com destino fixo (`https://api.github.com/repos/AnaPLysyk/Prumo-Qa/releases/latest`), sem corpo, cookies ou redirecionamento, com timeout e resposta validada por esquema. O endereço da página de download é reconstruído a partir da tag validada, nunca copiado da resposta. Nada é baixado ou executado.
+- Exclusão de dados locais exige confirmação nativa, restringe-se a arquivos de formato conhecido, recusa links simbólicos, hardlinks e pastas substituídas por junction, e informa falhas parciais. Não existe como ferramenta MCP.
+- O diagnóstico IPC grava só metadados e tem teto diário; não entra nas métricas.
+- Limites: o instalador não é assinado; o checksum SHA-256 da release detecta corrupção ou troca do arquivo, não prova autoria.

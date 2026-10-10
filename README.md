@@ -1,4 +1,4 @@
-# Prumo QA 2.2 — Aplicativo Windows, Observabilidade e Terminal
+# Prumo QA 2.3 — Engenharia, contratos e laboratório
 
 Camada local de engenharia de qualidade para agentes que já desenvolvem software. Entende o contexto autorizado de um projeto, confere estrutura de planos de teste, controla execução e preserva evidências. A IA hospedeira interpreta requisitos e riscos; o núcleo impõe regras determinísticas. Não exige outra chave de LLM.
 
@@ -22,6 +22,15 @@ Claude / Codex / IA compatível
 ```
 
 O terminal consulta arquivos locais; a IA não precisa permanecer ligada. Uma chamada MCP concluída não equivale a teste PASS. A imagem de referência usa números ilustrativos; o programa mostra somente o seu histórico.
+
+## Novidades da 2.3
+
+- **Ajuda › Integrações técnicas**: catálogo das 20 operações IPC da janela e das 4 ferramentas MCP, gerado do código ([docs/CONTRATOS.md](docs/CONTRATOS.md)) e conferido por testes. Não existe API HTTP.
+- **Ajuda › Versões**: histórico detalhado de 2.0.0 a 2.3.0, offline, de uma fonte única (`app/versoes.json`) que também gera as notas de release.
+- **Ajuda › Atualizações**: verificação **manual** da release oficial; nada é baixado nem instalado. Atualizar sobre a versão anterior preserva projetos, histórico, métricas e evidências (testado no CI com a 2.2.0 publicada).
+- **Ajuda › Privacidade e dados**: pasta real, espaço usado, retenção, exportação e exclusão controlada por escopo, com confirmação nativa.
+- **Central de ajuda** reorganizada (guia, perguntas frequentes expansíveis, problemas comuns) e **diagnóstico da interface** separado das métricas de QA.
+- **Prumo QA Lab**: projeto independente (pasta irmã Prumo-QA-Lab; o repositório remoto AnaPLysyk/Prumo-QA-Lab ainda precisa ser criado, veja [docs/ENTREGA-2.3.md](docs/ENTREGA-2.3.md)) com oito situações controladas para avaliar o próprio Prumo pelo MCP real.
 
 ## Aplicativo desktop (2.2)
 
@@ -141,6 +150,10 @@ Também pode usar `node .\dist\cli.js`, `npm.cmd run prumo --` ou o script compa
 | `src/conexoes.ts` | Proposta revisável e configuração Codex mediante confirmação, sem sobrescrita |
 | `src/vinculos.ts` | Lista local de projetos vinculados; diagnóstico sem escrever na pasta do projeto |
 | `src/painel.ts` | Adaptador da janela: valida, exige projeto vinculado e delega ao núcleo (sem regra própria) |
+| `src/contratos.ts` | Fonte única dos esquemas IPC e do catálogo técnico (IPC + MCP) |
+| `src/versoes.ts`, `app/versoes.json` | Histórico de versões validado, comparação semântica e notas de release |
+| `src/atualizacao.ts` | Verificação manual de atualização: destino fixo, timeout, resposta validada, sem download |
+| `src/dados.ts`, `src/diagnostico.ts` | Resumo dos dados locais e diagnóstico IPC (só metadados, fora das métricas) |
 | `src/desktop/main.ts` | Processo Electron: janela, IPC validado, diálogos nativos |
 | `app/preload.cjs`, `app/renderer/` | Ponte mínima (`window.prumo`) e interface HTML/CSS/JS sem frameworks |
 | `app/ajuda/*.md` | Documentos da aba Ajuda (inclui privacidade e termos em rascunho) |
@@ -327,6 +340,6 @@ Testes sintéticos cobrem PASS/FAIL/BLOCKED/NOT_RUN, paths, symlinks, manifesto,
 
 ## Estado e limites
 
-Implementados núcleo local, contrato, quatro tools, CLI/menu, atividades, métricas, Pino, conector Codex, aprovação Windows, Skill, exemplo, testes e, na 2.2, a janela desktop com instalador Windows (NSIS, não assinado). Fora desta versão: dashboard web, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas, sandbox forte, assinatura de código, atualização automática, Ink, OpenTelemetry e métricas de provedores. Sem transferência automática entre empresas. Detalhes da entrega atual em [docs/ENTREGA-2.2.md](docs/ENTREGA-2.2.md); relatórios 2.0 e 2.1 são históricos.
+Implementados núcleo local, contrato, quatro tools, CLI/menu, atividades, métricas, Pino, conector Codex, aprovação Windows, Skill, exemplo, testes e, na 2.2, a janela desktop com instalador Windows (NSIS, não assinado). Fora desta versão: atualização automática, dashboard web, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas, sandbox forte, assinatura de código, atualização automática, Ink, OpenTelemetry e métricas de provedores. Sem transferência automática entre empresas. Detalhes da entrega atual em [docs/ENTREGA-2.2.md](docs/ENTREGA-2.2.md); relatórios 2.0 e 2.1 são históricos.
 
 G3 é inspecionado por contrato externo readOnly e commands vazio, sem alterar seu repositório. E2E permanece bloqueado. Diagnóstico real e validações estão em docs/DIAGNOSTICO-G3.md e docs/VALIDACAO.md. Autenticação humana end-to-end e plataformas sem Windows podem exigir participação posterior, descrita no relatório de entrega. Nenhuma pendência é mascarada por PASS.

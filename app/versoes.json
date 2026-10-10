@@ -19,9 +19,13 @@
       "improvements": [
         "Esquemas IPC centralizados em src/contratos.ts e compartilhados entre validação e catálogo.",
         "Notas de release geradas da mesma fonte do histórico de versões.",
-        "SHA-256 do instalador publicado junto com a release."
+        "SHA-256 do instalador publicado junto com a release (confere o arquivo; não substitui assinatura digital).",
+        "O CI instala a 2.2.0 publicada, cria dados reais e atualiza por cima para provar a preservação dos dados."
       ],
-      "fixes": [],
+      "fixes": [
+        "O servidor MCP informava sempre a versão 2.2.0; agora informa a versão real do pacote (package.json).",
+        "Excluir o diagnóstico da interface não deixa mais um registro novo de si mesmo."
+      ],
       "differential": "Da 2.2 para a 2.3 o produto deixa de apenas mostrar dados e passa a explicar a si mesmo (contratos, versões, privacidade) e a ser avaliado por um laboratório separado.",
       "howItWorks": [
         "O catálogo técnico é montado por src/contratos.ts a partir dos mesmos esquemas que validam cada chamada IPC; um teste compara catálogo, main.ts, preload e o servidor MCP real.",
