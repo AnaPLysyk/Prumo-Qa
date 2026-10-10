@@ -62,6 +62,9 @@ dl { display: grid; grid-template-columns: 170px 1fr; gap: 4px 16px; margin: 0; 
 dt { color: var(--suave); font-size: 12px; padding-top: 2px; }
 dd { margin: 0; overflow-wrap: anywhere; }
 .ajuda li.grupo { font-size: 12px; color: var(--suave); padding: 14px 8px 4px; text-transform: uppercase; letter-spacing: .04em; }
+.APROVADO { color: var(--ok); } .CONFLITANTE { color: var(--aviso); } .RASCUNHO { color: var(--neutro); } .DESATUALIZADO { color: var(--falha); }
+textarea { font: inherit; color: var(--texto); background: var(--painel); border: 1px solid var(--linha); border-radius: var(--raio); padding: 6px 8px; width: 100%; resize: vertical; }
+label input:not([type=checkbox]), label select { min-width: 160px; }
 button.perigo:not(:disabled):hover { border-color: var(--falha); color: var(--falha); }
 button:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 760px) { dl { grid-template-columns: 1fr; } }

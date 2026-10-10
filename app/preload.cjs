@@ -23,5 +23,13 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   abrirRelease: () => chamar('atualizacao:abrir'),
   resumoDados: () => chamar('dados:resumo'),
   excluirDados: (escopo, root) => chamar('dados:excluir', escopo === 'diagnostico' ? { escopo } : { escopo, root }),
-  diagnostico: () => chamar('diagnostico:listar')
+  diagnostico: () => chamar('diagnostico:listar'),
+  contextosListar: (root, filter) => chamar('contextos:listar', { root, filter }),
+  contextosObter: (root, id) => chamar('contextos:obter', { root, id }),
+  contextosSalvar: (root, dados) => chamar('contextos:salvar', { root, id: dados.id, substituir: dados.substituir, dados: dados.dados }),
+  contextosAprovar: (root, id) => chamar('contextos:aprovar', { root, id }),
+  contextosDesatualizar: (root, id) => chamar('contextos:desatualizar', { root, id }),
+  contextosConflito: (root, id, outroId) => chamar('contextos:conflito', { root, id, outroId }),
+  contextosExcluir: (root, id) => chamar('contextos:excluir', { root, id }),
+  contextosMcp: (root, habilitar) => chamar('contextos:mcp', { root, habilitar })
 }));

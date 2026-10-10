@@ -6,6 +6,7 @@ Rascunho técnico consistente com o funcionamento atual. Requer revisão humana 
 
 - **Histórico de operações**: %LOCALAPPDATA%\PrumoQA\projects. Identificadores com hash, ferramenta, cliente declarado, estado, duração, contagens de achados e referências a evidências. Não guarda o texto de requisitos nem respostas completas.
 - **Diagnóstico da interface**: %LOCALAPPDATA%\PrumoQA\diagnostico. Somente canal, estado, duração, código e correlação das chamadas da janela; nunca argumentos, caminhos ou conteúdo. Não entra nas métricas.
+- **Contextos**: %LOCALAPPDATA%\PrumoQA\contextos. Requisitos e regras que você cadastra, por projeto, com histórico verificável. Só vão ao agente de IA se você habilitar essa opção para o projeto, e então o provedor da IA conectada pode processar o texto.
 - **Projetos vinculados**: %LOCALAPPDATA%\PrumoQA\vinculos.json (caminhos locais que você escolheu).
 - **Evidências de execução**: pasta .prumo/evidencias dentro de cada projeto, com logs mascarados.
 - **Dados internos da janela**: %LOCALAPPDATA%\PrumoQA\app.

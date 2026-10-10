@@ -4,7 +4,7 @@
 
 O Prumo não tem API HTTP. Existem duas interfaces:
 
-- **IPC** (20 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (28 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (4 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -31,13 +31,21 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 | `prumo:dados:resumo` | — | Consulta local; não altera o projeto. |
 | `prumo:dados:excluir` | `escopo`, `root` | Apaga somente arquivos do escopo, validados por nome, tipo e caminho canônico. Nunca apaga código-fonte; não é exposto ao MCP. |
 | `prumo:diagnostico:listar` | — | Consulta local; não altera o projeto. |
+| `prumo:contextos:listar` | `filter`, `root` | Consulta local; não altera o projeto. |
+| `prumo:contextos:obter` | `id`, `root` | Consulta local; não altera o projeto. |
+| `prumo:contextos:salvar` | `dados`, `id`, `root`, `substituir` | Grava no armazenamento local de contextos. Editar sempre invalida a aprovação anterior. |
+| `prumo:contextos:aprovar` | `id`, `root` | Registra a aprovação do conteúdo exato; recusa sem origem, com conflito ou desatualizado. |
+| `prumo:contextos:desatualizar` | `id`, `root` | Registra o estado; contexto desatualizado não pode mais ser editado nem aprovado. |
+| `prumo:contextos:conflito` | `id`, `outroId`, `root` | Registra a decisão da pessoa; o Prumo nunca escolhe um lado nem resolve conflito em silêncio. |
+| `prumo:contextos:excluir` | `id`, `root` | Apaga o arquivo do contexto e o seu histórico; mantém só um registro mínimo (id, data e hash) de que existiu. Nunca toca no projeto. |
+| `prumo:contextos:mcp` | `habilitar`, `root` | Quando habilitado, contexto_projeto e revisar_cobertura passam a ler os contextos deste projeto; o texto pode ser processado pelo provedor da IA conectada. |
 
 ## MCP (agentes de IA)
 
 | Operação | Argumentos | Efeito |
 |---|---|---|
 | `contexto_projeto` | — | Somente leitura. |
-| `revisar_cobertura` | `candidates`, `contradictions`, `existingTests`, `requirement`, `source`, `sourcePath` | Somente leitura; não afirma que executou algo. |
+| `revisar_cobertura` | `candidates`, `contextoId`, `contradictions`, `existingTests`, `requirement`, `source`, `sourcePath` | Somente leitura; não afirma que executou algo. |
 | `executar_validacao` | `capability`, `solicitarAprovacao` | Pode executar processo local autorizado e gravar evidência. Sem aprovação retorna BLOCKED. |
 | `consultar_evidencias` | `criterio`, `jobId` | Somente leitura. |
 
@@ -319,7 +327,7 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 - **Finalidade:** Excluir histórico operacional, evidências de um projeto ou diagnósticos do aplicativo.
 - **Origem:** Interface > Ajuda > Privacidade e dados
 - **Destino:** main.ts (confirmação nativa) > atividades/evidencias/diagnostico
-- **Entrada:** escopo (historico, evidencias ou diagnostico) + projeto quando aplicável
+- **Entrada:** escopo (historico, evidencias, contextos ou diagnostico) + projeto quando aplicável
 - **Saída:** deleted, failed
 - **Permissões:** Projeto previamente vinculado (vinculos.json). Confirmação nativa destrutiva.
 - **Efeito:** Apaga somente arquivos do escopo, validados por nome, tipo e caminho canônico. Nunca apaga código-fonte; não é exposto ao MCP.
@@ -342,6 +350,126 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Somente metadados, sem argumentos
 - **Registro:** Não se registra (evita recursão)
+
+### `prumo:contextos:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar e pesquisar os contextos do projeto (requisitos, regras, critérios, restrições, decisões).
+- **Origem:** Interface > Contextos
+- **Destino:** painel.ts > contextos.listarContextos
+- **Entrada:** Projeto selecionado + filtros (tipo, estado, busca, chave)
+- **Saída:** Resumos com estado efetivo, versão, origem, hash e conflitos
+- **Permissões:** Projeto previamente vinculado (vinculos.json).
+- **Efeito:** Consulta local; não altera o projeto.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, PROJECT_NOT_LINKED, CONTEXT_LIMIT
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash
+- **Registro:** Diagnóstico IPC (somente erros)
+
+### `prumo:contextos:obter`
+
+- **Tipo:** IPC
+- **Finalidade:** Ver um contexto com seu histórico completo de alterações.
+- **Origem:** Interface > Contextos > detalhe
+- **Destino:** painel.ts > contextos.obterContexto
+- **Entrada:** Projeto selecionado + id do contexto
+- **Saída:** Contexto, texto, estado efetivo e histórico (quem, quando, hash)
+- **Permissões:** Projeto previamente vinculado (vinculos.json).
+- **Efeito:** Consulta local; não altera o projeto.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CONTEXT_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash
+- **Registro:** Diagnóstico IPC (somente erros)
+
+### `prumo:contextos:salvar`
+
+- **Tipo:** IPC
+- **Finalidade:** Criar um contexto, editá-lo (nova versão em rascunho) ou substituí-lo por uma versão posterior.
+- **Origem:** Interface > Contextos > formulário
+- **Destino:** painel.ts > contextos.criar/editar/substituirContexto
+- **Entrada:** Projeto, dados do contexto e, para editar ou substituir, o id
+- **Saída:** Contexto salvo com nova versão
+- **Permissões:** Projeto previamente vinculado (vinculos.json).
+- **Efeito:** Grava no armazenamento local de contextos. Editar sempre invalida a aprovação anterior.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CONTEXT_NO_CHANGE, CONTEXT_OUTDATED, CONTEXT_TAMPERED, CONTEXT_LIMIT
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash
+- **Registro:** Diagnóstico IPC
+
+### `prumo:contextos:aprovar`
+
+- **Tipo:** IPC
+- **Finalidade:** Aprovar explicitamente o conteúdo atual de um contexto.
+- **Origem:** Interface > Contextos > Aprovar
+- **Destino:** main.ts (confirmação nativa) > contextos.aprovarContexto
+- **Entrada:** Projeto selecionado + id do contexto
+- **Saída:** Contexto APROVADO com quem aprovou e quando
+- **Permissões:** Projeto previamente vinculado (vinculos.json). Confirmação nativa que a página não consegue simular; o aprovador é o usuário do Windows lido pelo processo principal. Não existe como ferramenta MCP.
+- **Efeito:** Registra a aprovação do conteúdo exato; recusa sem origem, com conflito ou desatualizado.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CONTEXT_SOURCE_REQUIRED, CONTEXT_CONFLICT, CONTEXT_OUTDATED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash; Confirmação nativa
+- **Registro:** Diagnóstico IPC
+
+### `prumo:contextos:desatualizar`
+
+- **Tipo:** IPC
+- **Finalidade:** Marcar um contexto como desatualizado (sem validade atual).
+- **Origem:** Interface > Contextos > Marcar desatualizado
+- **Destino:** main.ts (confirmação nativa) > contextos.desatualizarContexto
+- **Entrada:** Projeto selecionado + id do contexto
+- **Saída:** Contexto DESATUALIZADO
+- **Permissões:** Projeto previamente vinculado (vinculos.json). Confirmação nativa.
+- **Efeito:** Registra o estado; contexto desatualizado não pode mais ser editado nem aprovado.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CONTEXT_NO_CHANGE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash; Confirmação nativa
+- **Registro:** Diagnóstico IPC
+
+### `prumo:contextos:conflito`
+
+- **Tipo:** IPC
+- **Finalidade:** Marcar ou resolver explicitamente um conflito entre contextos.
+- **Origem:** Interface > Contextos > Conflito
+- **Destino:** painel.ts > contextos.marcarConflito/resolverConflito
+- **Entrada:** Projeto, id e (para marcar) o id do outro contexto
+- **Saída:** Contexto com o conflito registrado ou resolvido
+- **Permissões:** Projeto previamente vinculado (vinculos.json).
+- **Efeito:** Registra a decisão da pessoa; o Prumo nunca escolhe um lado nem resolve conflito em silêncio.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CONTEXT_CONFLICT, CONTEXT_OUTDATED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash
+- **Registro:** Diagnóstico IPC
+
+### `prumo:contextos:excluir`
+
+- **Tipo:** IPC
+- **Finalidade:** Excluir definitivamente um contexto.
+- **Origem:** Interface > Contextos > Excluir
+- **Destino:** main.ts (confirmação nativa) > contextos.excluirContexto
+- **Entrada:** Projeto selecionado + id do contexto
+- **Saída:** deleted
+- **Permissões:** Projeto previamente vinculado (vinculos.json). Confirmação nativa destrutiva. Não existe como ferramenta MCP.
+- **Efeito:** Apaga o arquivo do contexto e o seu histórico; mantém só um registro mínimo (id, data e hash) de que existiu. Nunca toca no projeto.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CONTEXT_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash; Confirmação nativa
+- **Registro:** Diagnóstico IPC
+
+### `prumo:contextos:mcp`
+
+- **Tipo:** IPC
+- **Finalidade:** Escolher se os contextos do projeto são disponibilizados ao agente de IA conectado por MCP.
+- **Origem:** Interface > Contextos > Disponibilizar ao agente
+- **Destino:** main.ts (confirmação nativa ao habilitar) > contextos.gravarConfig
+- **Entrada:** Projeto selecionado + habilitar (true/false)
+- **Saída:** disponibilizarAoMcp
+- **Permissões:** Projeto previamente vinculado (vinculos.json). Habilitar exige confirmação nativa. Padrão: desabilitado.
+- **Efeito:** Quando habilitado, contexto_projeto e revisar_cobertura passam a ler os contextos deste projeto; o texto pode ser processado pelo provedor da IA conectada.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash; Padrão seguro: desabilitado; Confirmação nativa ao habilitar
+- **Registro:** Diagnóstico IPC
 
 ### `contexto_projeto`
 

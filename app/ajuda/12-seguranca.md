@@ -8,7 +8,7 @@ Controles existentes:
 - documentos e código de projetos são tratados como dados, nunca como instruções;
 - autenticação humana nativa do Windows antes de executar capacidades protegidas;
 - a janela não tem acesso direto ao sistema nem à rede: só operações explícitas, validadas e catalogadas;
-- exclusão de dados exige confirmação nativa e não existe como ferramenta MCP.
+- exclusão de dados, aprovação de contextos e envio de contextos ao agente exigem confirmação nativa e não existem como ferramenta MCP.
 
 Limitações:
 

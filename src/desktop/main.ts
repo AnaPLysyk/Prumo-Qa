@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Menu, dialog, ipcMain, session, shell, type IpcMainInvokeEvent } from 'electron';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -7,6 +8,7 @@ import { z } from 'zod';
 import { mascarar } from '../projeto.js';
 import { diretorioDados, excluirAtividades } from '../atividades.js';
 import { excluirEvidencias } from '../evidencias.js';
+import { excluirTodosContextos } from '../contextos.js';
 import { prepararConexao, aplicarConexao } from '../conexoes.js';
 import { adicionarVinculo, copiarDemonstracao, projetoVinculado } from '../vinculos.js';
 import { esquemasIpc, canaisFrequentes, catalogo, type CanalIpc } from '../contratos.js';
@@ -102,14 +104,14 @@ canal('logs:exportar', async (a, janela) => {
 });
 
 // Exclusão: escopo explícito, confirmação nativa destrutiva e módulos donos de cada formato. Não existe equivalente em MCP.
-const textoExclusao = { historico: 'Excluir o histórico operacional (logs, histórico e métricas) deste projeto?', evidencias: 'Excluir as evidências de execução deste projeto (pasta .prumo\\evidencias)?', diagnostico: 'Excluir o diagnóstico técnico da interface?' } as const;
+const textoExclusao = { historico: 'Excluir o histórico operacional (logs, histórico e métricas) deste projeto?', evidencias: 'Excluir as evidências de execução deste projeto (pasta .prumo\\evidencias)?', contextos: 'Excluir TODOS os contextos (requisitos, regras e decisões) deste projeto?', diagnostico: 'Excluir o diagnóstico técnico da interface?' } as const;
 canal('dados:excluir', async (a, janela) => {
   const r = await dialog.showMessageBox(janela!, { type: 'warning', title: 'Confirmar exclusão', buttons: ['Cancelar', 'Excluir'], defaultId: 0, cancelId: 0, noLink: true,
     message: textoExclusao[a.escopo], detail: 'Esta ação não pode ser desfeita. Código-fonte e demais arquivos do projeto não são tocados e o vínculo do projeto é mantido.' });
   if (r.response !== 1) return { canceled: true, deleted: 0, failed: [] };
   if (a.escopo === 'diagnostico') return { canceled: false, ...excluirDiagnostico() };
   const p = await projetoVinculado(a.root);
-  return { canceled: false, ...(a.escopo === 'historico' ? excluirAtividades(p) : await excluirEvidencias(p)) };
+  return { canceled: false, ...(a.escopo === 'historico' ? excluirAtividades(p) : a.escopo === 'contextos' ? excluirTodosContextos(p) : await excluirEvidencias(p)) };
 });
 
 // Atualização: consulta manual no processo principal (a janela segue sem rede). Nada é baixado nem instalado.
@@ -129,6 +131,35 @@ canal('atualizacao:abrir', async (_a, janela) => {
     message: 'Abrir a página oficial da nova versão?', detail: `${ultimaRelease}\n\nO Prumo não baixa nem instala nada. Confira o SHA-256 informado na página antes de executar o instalador.` });
   if (r.response !== 1) return { opened: false };
   await shell.openExternal(ultimaRelease); return { opened: true };
+});
+
+
+// ---- Contextos persistentes (2.4). Aprovar, desatualizar, excluir e habilitar o MCP exigem confirmação NATIVA
+// (a página não a simula). O aprovador é o usuário do Windows, lido aqui no processo principal, nunca informado pela página. ----
+const usuarioWindows = () => os.userInfo().username;
+const confirmar = async (janela: BrowserWindow | null, titulo: string, mensagem: string, detalhe: string, botao: string) => (await dialog.showMessageBox(janela!, { type: 'warning', title: titulo, buttons: ['Cancelar', botao], defaultId: 0, cancelId: 0, noLink: true, message: mensagem, detail: detalhe })).response === 1;
+canal('contextos:listar', a => painel.contextosListar(a.root, a.filter));
+canal('contextos:obter', a => painel.contextosObter(a.root, a.id));
+canal('contextos:salvar', a => painel.contextosSalvar(a.root, { id: a.id, substituir: a.substituir, dados: a.dados }, usuarioWindows()));
+canal('contextos:aprovar', async (a, janela) => {
+  const c = await painel.contextosObter(a.root, a.id);
+  if (!(await confirmar(janela, 'Aprovar contexto', `Aprovar "${c.titulo}" (versão ${c.versao})?`, `Você confirma que este conteúdo é uma regra válida, na origem informada: ${c.origem.referencia || '(sem origem)'}.\nA aprovação vale só para este texto exato; qualquer edição volta o contexto a rascunho. Aprovador registrado: ${usuarioWindows()}.`, 'Aprovar'))) return { canceled: true };
+  return { canceled: false, contexto: await painel.contextosAprovar(a.root, a.id, usuarioWindows()) };
+});
+canal('contextos:desatualizar', async (a, janela) => {
+  const c = await painel.contextosObter(a.root, a.id);
+  if (!(await confirmar(janela, 'Marcar como desatualizado', `Marcar "${c.titulo}" como desatualizado?`, 'Um contexto desatualizado deixa de valer, não pode mais ser editado nem aprovado e deixa de ser tratado como regra atual. O histórico é preservado.', 'Marcar desatualizado'))) return { canceled: true };
+  return { canceled: false, contexto: await painel.contextosDesatualizar(a.root, a.id, usuarioWindows()) };
+});
+canal('contextos:conflito', async a => painel.contextosConflito(a.root, a.id, usuarioWindows(), a.outroId));
+canal('contextos:excluir', async (a, janela) => {
+  const c = await painel.contextosObter(a.root, a.id);
+  if (!(await confirmar(janela, 'Excluir contexto', `Excluir definitivamente "${c.titulo}"?`, 'O contexto e o seu histórico serão apagados; só ficam o identificador, a data e o hash de que ele existiu. O código e os demais arquivos do projeto não são tocados.', 'Excluir'))) return { canceled: true, deleted: false };
+  return { canceled: false, ...(await painel.contextosExcluir(a.root, a.id)) };
+});
+canal('contextos:mcp', async (a, janela) => {
+  if (a.habilitar && !(await confirmar(janela, 'Disponibilizar ao agente de IA', 'Disponibilizar os contextos deste projeto ao agente de IA conectado?', 'O texto dos contextos (até 4000 caracteres cada, com segredos mascarados) passará a ser retornado pelas ferramentas MCP e poderá ser processado pelo provedor da IA conectada. Contextos adulterados nunca são enviados. Você pode desabilitar a qualquer momento.', 'Disponibilizar'))) return { canceled: true };
+  return { canceled: false, ...(await painel.contextosMcp(a.root, a.habilitar)) };
 });
 
 function criarJanela() {
