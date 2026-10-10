@@ -100,6 +100,14 @@ jobs:
           $hash = (Get-FileHash $setup.FullName -Algorithm SHA256).Hash.ToLower()
           "$hash *$($setup.Name)" | Out-File -Encoding ascii "release\$($setup.Name).sha256"
           "SHA-256 $($setup.Name): $hash"
+      - name: Estado da assinatura do instalador (verificado, não presumido)
+        shell: pwsh
+        run: |
+          $setup = (Get-ChildItem releasePrumo-QA-Setup-*.exe).FullName
+          $ass = Get-AuthenticodeSignature $setup
+          "Assinatura do instalador: $($ass.Status)"
+          $assinado = ($ass.Status -eq 'Valid')
+          "PRUMO_ASSINADO=$($assinado.ToString().ToLower())" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
       - uses: actions/upload-artifact@v4
         with:
           name: prumo-qa-instalador
