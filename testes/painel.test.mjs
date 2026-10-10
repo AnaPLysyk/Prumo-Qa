@@ -93,6 +93,17 @@ test('métricas, logs e histórico vêm de operações reais e filtram por ferra
   await assert.rejects(painel.logs(f.root, { extra: 1 }));
 });
 
+test('início de operação concluída é STARTED nos logs; só operação sem término vira SEM_TERMINO_OBSERVADO', async (t) => {
+  const f = await fixture(t); await painel.vincular(f.root);
+  await registrar(f.root, 'contexto_projeto', { state: 'NOT_VERIFIED' });
+  iniciarAtividade(await carregarProjeto(f.root), 'revisar_cobertura', { origin: 'MCP', client: 'codex' }); // nunca finalizada
+  const logs = await painel.logs(f.root);
+  assert.deepEqual(logs.events.map((e) => e.state).sort(), ['NOT_VERIFIED', 'STARTED', 'STARTED']);
+  const h = (await painel.historico(f.root)).activities;
+  assert.deepEqual(h.map((a) => a.state).sort(), ['NOT_VERIFIED', 'SEM_TERMINO_OBSERVADO']);
+  assert.equal((await painel.visao(f.root)).metrics.unfinished, 1);
+});
+
 test('filtragem por projeto: histórico de um projeto nunca aparece em outro', async (t) => {
   const a = await fixture(t); const b = await fixture(t, { id: 'outro', name: 'Outro' });
   await painel.vincular(a.root); await painel.vincular(b.root);

@@ -21,9 +21,10 @@ export const filtroSchema = z.object({
 export type Filtro = z.input<typeof filtroSchema>;
 const base = () => process.env.PRUMO_DATA_DIR;
 
-function apresentar(e: Evento) {
+/** `consolidado`: o último evento da operação; se ainda for o início, nenhum término foi observado. */
+function apresentar(e: Evento, consolidado = false) {
   return { operationId: e.operationId, at: e.at, phase: e.phase, tool: e.tool, origin: e.origin, client: e.client, clientIdentity: e.clientIdentity,
-    state: e.phase === 'start' ? 'SEM_TERMINO_OBSERVADO' : e.state, durationMs: e.durationMs, input: e.input, summary: e.summary, findingsText: descreverAchados(e) };
+    state: consolidado && e.phase === 'start' ? 'SEM_TERMINO_OBSERVADO' : e.state, durationMs: e.durationMs, input: e.input, summary: e.summary, findingsText: descreverAchados(e) };
 }
 function filtrar(eventos: Evento[], f: z.output<typeof filtroSchema>) {
   return eventos.filter(e => (!f.tool || e.tool === f.tool) && (!f.state || e.state === f.state) && (!f.since || e.at >= f.since) && (!f.until || e.at <= f.until));
@@ -44,12 +45,12 @@ export async function visao(raiz: string) {
 export async function logs(raiz: string, filtro: Filtro = {}) {
   const f = filtroSchema.parse(filtro); const p = await projetoVinculado(raiz, base());
   const h = consultarAtividades(p, base());
-  return { events: filtrar(h.events, f).slice(-f.limit).map(apresentar), problems: h.problems, complete: h.complete };
+  return { events: filtrar(h.events, f).slice(-f.limit).map(e => apresentar(e)), problems: h.problems, complete: h.complete };
 }
 export async function historico(raiz: string, filtro: Filtro = {}) {
   const f = filtroSchema.parse(filtro); const p = await projetoVinculado(raiz, base());
   const h = consultarAtividades(p, base());
-  return { activities: filtrar(h.activities, f).slice(-f.limit).reverse().map(apresentar), problems: h.problems, complete: h.complete,
+  return { activities: filtrar(h.activities, f).slice(-f.limit).reverse().map(a => apresentar(a, true)), problems: h.problems, complete: h.complete,
     notice: 'Recomendações são orientações do Prumo. Ele não observa se a IA as aplicou.' };
 }
 export async function evidencias(raiz: string, jobId?: string) {
