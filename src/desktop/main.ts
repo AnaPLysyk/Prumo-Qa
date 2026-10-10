@@ -16,6 +16,8 @@ import { carregarVersoes, apresentarVersoes, conferirInstalada, repositorio } fr
 import { verificarAtualizacao, mensagemOffline, urlConsulta } from '../atualizacao.js';
 import { registrarDiagnostico, lerDiagnostico, excluirDiagnostico } from '../diagnostico.js';
 import { resumirDados } from '../dados.js';
+import { lerPreferencias, alterarPreferencias, marcarVisualizada, avisoPendente, registrarConsulta } from '../preferencias.js';
+import { prepararSolicitacao, urlOficial } from '../suporte.js';
 import * as painel from '../painel.js';
 
 /**
@@ -123,8 +125,14 @@ canal('atualizacao:verificar', async () => {
   try { r = await verificarAtualizacao(versao, teste ? { url: teste, permitirLocal: true } : { url: urlConsulta }); }
   catch { r = { status: 'INDISPONIVEL' as const, installed: versao, message: mensagemOffline }; }
   ultimaRelease = r.status === 'ATUALIZACAO_DISPONIVEL' ? r.url : undefined;
-  return r;
+  // Só respostas válidas alteram o aviso persistente; falha de rede mantém o que já se sabia (o sino continua offline).
+  const valido = r.status === 'ATUALIZACAO_DISPONIVEL' || r.status === 'ATUALIZADO' || r.status === 'INSTALADA_MAIS_NOVA';
+  const notificacao = valido ? registrarConsulta(r.status === 'ATUALIZACAO_DISPONIVEL' ? { versao: r.latest!, notas: r.notes ?? '' } : null) : { indicador: avisoPendente(versao).indicador, tocarSom: false, versao: null, notas: '' };
+  return { ...r, notificacao };
 });
+canal('preferencias:obter', () => ({ preferencias: lerPreferencias(), aviso: avisoPendente(versao), instalada: versao }));
+canal('preferencias:salvar', a => ({ preferencias: alterarPreferencias(a) }));
+canal('preferencias:visualizada', a => ({ preferencias: marcarVisualizada(a.versao), aviso: avisoPendente(versao) }));
 canal('atualizacao:abrir', async (_a, janela) => {
   if (!ultimaRelease || !new RegExp(`^https://github\\.com/${repositorio}/releases/tag/v\\d+\\.\\d+\\.\\d+$`).test(ultimaRelease)) throw new Error('NO_VERIFIED_RELEASE: verifique as atualizações antes.');
   const r = await dialog.showMessageBox(janela!, { type: 'question', title: 'Abrir página oficial', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true,
@@ -133,6 +141,32 @@ canal('atualizacao:abrir', async (_a, janela) => {
   await shell.openExternal(ultimaRelease); return { opened: true };
 });
 
+
+// ---- Suporte (2.5). Nada é enviado sem revisão e confirmação NATIVA; a URL é reconstruída aqui, nunca recebida da página. Logs nunca são anexados sem marcação. ----
+const resumoDiagnostico = () => lerDiagnostico(undefined, 20).events.map(e => `${e.at} ${e.channel} ${e.state}${e.code ? ' ' + e.code : ''} ${e.durationMs}ms`).join('\n');
+const prepararSuporte = (a: Parameters<typeof prepararSolicitacao>[0]) => prepararSolicitacao(a, { versao, diagnostico: (a as { incluirDiagnostico?: boolean }).incluirDiagnostico ? resumoDiagnostico() : undefined });
+canal('suporte:preparar', a => prepararSuporte(a));
+canal('suporte:abrir', async (a, janela) => {
+  const p = prepararSuporte(a);
+  if (!p.ok || !('url' in p)) throw new Error('SUPPORT_BLOCKED_SECRET: o relato contém algo que parece segredo ou está incompleto; revise antes de enviar.');
+  if (!urlOficial(p.url)) throw new Error('SUPPORT_URL_FORBIDDEN: endereço não autorizado.');
+  const r = await dialog.showMessageBox(janela!, { type: 'warning', title: 'Abrir formulário do GitHub', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true,
+    message: 'Abrir o formulário de issue já preenchido?', detail: `${p.aviso}
+
+Issues do repositório público ${repositorio} são visíveis para qualquer pessoa. Nada é publicado até você enviar no navegador.
+
+Título: ${p.titulo}${p.truncado ? '\nO texto foi encurtado para caber no endereço; confira no formulário.' : ''}` });
+  if (r.response !== 1) return { opened: false };
+  await shell.openExternal(p.url); return { opened: true };
+});
+canal('suporte:exportar', async (a, janela) => {
+  const p = prepararSuporte(a);
+  if (!p.ok || !('markdown' in p)) throw new Error('SUPPORT_BLOCKED_SECRET: o relato contém algo que parece segredo ou está incompleto; revise antes de exportar.');
+  const destino = await dialog.showSaveDialog(janela!, { title: 'Salvar relato', defaultPath: 'prumo-relato.md', filters: [{ name: 'Markdown', extensions: ['md'] }] });
+  if (destino.canceled || !destino.filePath) return { exported: false };
+  fs.writeFileSync(destino.filePath, p.markdown, { flag: 'w', mode: 0o600 });
+  return { exported: true, path: destino.filePath };
+});
 
 // ---- Contextos persistentes (2.4). Aprovar, desatualizar, excluir e habilitar o MCP exigem confirmação NATIVA
 // (a página não a simula). O aprovador é o usuário do Windows, lido aqui no processo principal, nunca informado pela página. ----

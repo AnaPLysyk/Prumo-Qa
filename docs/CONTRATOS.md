@@ -4,7 +4,7 @@
 
 O Prumo não tem API HTTP. Existem duas interfaces:
 
-- **IPC** (28 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (34 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (4 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -26,7 +26,7 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 | `prumo:ajuda:documentos` | — | Consulta local; não altera o projeto. |
 | `prumo:ajuda:versoes` | — | Consulta local; não altera o projeto. |
 | `prumo:ajuda:integracoes` | — | Consulta local; não altera o projeto. |
-| `prumo:atualizacao:verificar` | — | Uma requisição HTTPS GET ao GitHub; não baixa nem instala nada. |
+| `prumo:atualizacao:verificar` | — | Uma requisição HTTPS GET ao GitHub; não baixa nem instala nada. Grava só a versão disponível e as decisões de aviso em preferencias.json. |
 | `prumo:atualizacao:abrir` | — | Abre o navegador padrão na página da release; não baixa nem executa instalador. |
 | `prumo:dados:resumo` | — | Consulta local; não altera o projeto. |
 | `prumo:dados:excluir` | `escopo`, `root` | Apaga somente arquivos do escopo, validados por nome, tipo e caminho canônico. Nunca apaga código-fonte; não é exposto ao MCP. |
@@ -39,6 +39,12 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 | `prumo:contextos:conflito` | `id`, `outroId`, `root` | Registra a decisão da pessoa; o Prumo nunca escolhe um lado nem resolve conflito em silêncio. |
 | `prumo:contextos:excluir` | `id`, `root` | Apaga o arquivo do contexto e o seu histórico; mantém só um registro mínimo (id, data e hash) de que existiu. Nunca toca no projeto. |
 | `prumo:contextos:mcp` | `habilitar`, `root` | Quando habilitado, contexto_projeto e revisar_cobertura passam a ler os contextos deste projeto; o texto pode ser processado pelo provedor da IA conectada. |
+| `prumo:preferencias:obter` | — | Consulta local; não altera o projeto. |
+| `prumo:preferencias:salvar` | `silenciar`, `som`, `verificarAoIniciar` | Grava preferencias.json. Não cria serviço, tarefa agendada nem consulta em segundo plano. |
+| `prumo:preferencias:visualizada` | `versao` | Grava preferencias.json. |
+| `prumo:suporte:preparar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Sem rede e sem gravação: só calcula o relato. |
+| `prumo:suporte:abrir` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Abre o navegador no formulário; nada é publicado até a pessoa enviar lá. Issues em repositório público são públicas. |
+| `prumo:suporte:exportar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Grava um .md onde a pessoa escolher. Nenhum upload. |
 
 ## MCP (agentes de IA)
 
@@ -283,9 +289,9 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 - **Origem:** Interface > Ajuda > Atualizações
 - **Destino:** main.ts > atualizacao.verificarAtualizacao
 - **Entrada:** Nenhuma: nada do usuário é enviado
-- **Saída:** status, versão instalada, versão mais recente, notas e página oficial
-- **Permissões:** Ação explícita da pessoa
-- **Efeito:** Uma requisição HTTPS GET ao GitHub; não baixa nem instala nada.
+- **Saída:** status, versão instalada, versão mais recente, notas, página oficial e notificacao (indicador, som)
+- **Permissões:** Ação explícita da pessoa ou preferência "verificar ao iniciar" (desligada por padrão)
+- **Efeito:** Uma requisição HTTPS GET ao GitHub; não baixa nem instala nada. Grava só a versão disponível e as decisões de aviso em preferencias.json.
 - **Arquivos consultados:** Nenhum
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, INDISPONIVEL, RESPOSTA_INVALIDA
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Destino fixo (api.github.com); Timeout; Sem corpo, sem cookies, sem redirecionamento; Resposta validada
@@ -469,6 +475,96 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 - **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\contextos\<projeto> (somente este projeto)
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolado por projeto; Texto limitado e tratado como dado, nunca como instrução; Histórico encadeado por hash; Padrão seguro: desabilitado; Confirmação nativa ao habilitar
+- **Registro:** Diagnóstico IPC
+
+### `prumo:preferencias:obter`
+
+- **Tipo:** IPC
+- **Finalidade:** Ler as preferências de notificação e o aviso de atualização pendente.
+- **Origem:** Interface > cabeçalho (sino) e Ajuda > Atualizações
+- **Destino:** main.ts > preferencias.ts
+- **Entrada:** Nenhuma
+- **Saída:** preferencias (verificar ao iniciar, som, silenciar), aviso pendente (indicador, versão, notas)
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local; não altera o projeto.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\preferencias.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados
+- **Registro:** Diagnóstico IPC (somente erros)
+
+### `prumo:preferencias:salvar`
+
+- **Tipo:** IPC
+- **Finalidade:** Alterar verificar ao iniciar, som e silenciar.
+- **Origem:** Interface > Ajuda > Atualizações > Preferências
+- **Destino:** main.ts > preferencias.alterarPreferencias
+- **Entrada:** Campos booleanos opcionais
+- **Saída:** preferencias
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava preferencias.json. Não cria serviço, tarefa agendada nem consulta em segundo plano.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\preferencias.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Somente campos booleanos conhecidos
+- **Registro:** Diagnóstico IPC
+
+### `prumo:preferencias:visualizada`
+
+- **Tipo:** IPC
+- **Finalidade:** Marcar a versão disponível como vista (o indicador some até haver versão mais nova).
+- **Origem:** Interface > sino
+- **Destino:** main.ts > preferencias.marcarVisualizada
+- **Entrada:** Número da versão
+- **Saída:** preferencias
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava preferencias.json.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\preferencias.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, INVALID_VERSION
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados
+- **Registro:** Diagnóstico IPC
+
+### `prumo:suporte:preparar`
+
+- **Tipo:** IPC
+- **Finalidade:** Montar localmente o relato (bug, melhoria ou sugestão) e revisar a privacidade antes de qualquer envio.
+- **Origem:** Interface > Suporte > Revisar
+- **Destino:** main.ts > suporte.prepararSolicitacao
+- **Entrada:** Categoria, título, descrição, passos, o que incluir (versão, sistema, diagnóstico) e consentimento
+- **Saída:** Texto final, bloqueios (segredos), avisos (dados pessoais), endereço oficial e aviso de issue pública
+- **Permissões:** Ação explícita da pessoa; nada é anexado sem marcação
+- **Efeito:** Sem rede e sem gravação: só calcula o relato.
+- **Arquivos consultados:** Nenhum
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Segredos bloqueiam o envio; Logs nunca são anexados automaticamente
+- **Registro:** Diagnóstico IPC
+
+### `prumo:suporte:abrir`
+
+- **Tipo:** IPC
+- **Finalidade:** Abrir o formulário oficial de GitHub Issues já preenchido, depois de revisado e confirmado.
+- **Origem:** Interface > Suporte > Abrir no GitHub
+- **Destino:** main.ts (confirmação nativa) > shell.openExternal
+- **Entrada:** O mesmo relato revisado
+- **Saída:** opened
+- **Permissões:** Confirmação nativa que a página não consegue simular
+- **Efeito:** Abre o navegador no formulário; nada é publicado até a pessoa enviar lá. Issues em repositório público são públicas.
+- **Arquivos consultados:** Nenhum
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SUPPORT_BLOCKED_SECRET
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Endereço reconstruído no processo principal; Somente github.com/AnaPLysyk/Prumo-Qa/issues/new; Segredos detectados bloqueiam
+- **Registro:** Diagnóstico IPC
+
+### `prumo:suporte:exportar`
+
+- **Tipo:** IPC
+- **Finalidade:** Salvar o relato em um arquivo local (Markdown), sem usar o GitHub.
+- **Origem:** Interface > Suporte > Exportar
+- **Destino:** main.ts (diálogo nativo) > fs
+- **Entrada:** O mesmo relato revisado
+- **Saída:** exported, path
+- **Permissões:** Destino escolhido no diálogo
+- **Efeito:** Grava um .md onde a pessoa escolher. Nenhum upload.
+- **Arquivos consultados:** Arquivo de destino
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SUPPORT_BLOCKED_SECRET
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Segredos detectados bloqueiam
 - **Registro:** Diagnóstico IPC
 
 ### `contexto_projeto`

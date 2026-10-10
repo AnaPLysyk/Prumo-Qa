@@ -31,5 +31,11 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   contextosDesatualizar: (root, id) => chamar('contextos:desatualizar', { root, id }),
   contextosConflito: (root, id, outroId) => chamar('contextos:conflito', { root, id, outroId }),
   contextosExcluir: (root, id) => chamar('contextos:excluir', { root, id }),
-  contextosMcp: (root, habilitar) => chamar('contextos:mcp', { root, habilitar })
+  contextosMcp: (root, habilitar) => chamar('contextos:mcp', { root, habilitar }),
+  preferencias: () => chamar('preferencias:obter'),
+  salvarPreferencias: (alteracao) => chamar('preferencias:salvar', alteracao),
+  marcarVisualizada: (versao) => chamar('preferencias:visualizada', { versao }),
+  suportePreparar: (relato) => chamar('suporte:preparar', relato),
+  suporteAbrir: (relato) => chamar('suporte:abrir', relato),
+  suporteExportar: (relato) => chamar('suporte:exportar', relato)
 }));
