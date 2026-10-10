@@ -1,0 +1,40 @@
+/* Identidade Quality Control (2.8): esfera com anel, campo de órbitas e estados honestos.
+   Adaptado do portfólio (.brain-orb, v28RingSpin, quantum field), reduzido a poucos componentes. */
+.qc-orb { position: relative; display: inline-block; width: var(--qc-tam, 96px); height: var(--qc-tam, 96px); flex: none; }
+.qc-orb img { position: relative; display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; z-index: 1; }
+.qc-orb::before { content: ""; position: absolute; inset: -6%; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 220deg, rgba(var(--qc-vermelho), 0) 0deg 144deg, rgba(var(--qc-vermelho), .95) 150deg 224deg, rgba(var(--qc-branco), .9) 240deg 286deg, rgba(var(--qc-azul), .92) 300deg 360deg);
+  -webkit-mask: radial-gradient(circle, transparent 76%, #000 77%); mask: radial-gradient(circle, transparent 76%, #000 77%); opacity: .55; }
+/* Só gira e flutua quando há trabalho REAL em execução. Parado = imagem estática, para não sugerir atividade. */
+.qc-orb[data-estado="executando"]::before { opacity: 1; animation: qc-giro 7.2s linear infinite; }
+.qc-orb[data-estado="executando"] img { animation: qc-flutua 7.2s ease-in-out infinite; }
+.qc-orb[data-estado="parado"] { filter: grayscale(.85) opacity(.7); }
+@keyframes qc-giro { to { transform: rotate(360deg); } }
+@keyframes qc-flutua { 0%, 100% { transform: translate3d(0, 0, 0); } 30% { transform: translate3d(2px, -3px, 0); } 65% { transform: translate3d(-2px, 2px, 0); } }
+.qc-campo { position: relative; display: grid; place-items: center; width: min(360px, 100%); aspect-ratio: 360 / 230; }
+.qc-campo canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.qc-campo .qc-orb { z-index: 1; }
+.qc-hero { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 24px; align-items: center; margin: 4px 0 18px; }
+.qc-hero h1 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); letter-spacing: -.02em; margin: 0 0 6px; }
+.qc-legenda { font-size: 12px; color: var(--suave); margin-top: 6px; }
+.marca .qc-orb { --qc-tam: 30px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border: 1px solid var(--linha); border-radius: 999px; font-size: 12px; color: var(--suave); background: var(--painel); white-space: nowrap; }
+.chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--neutro); display: inline-block; }
+.chip[data-nivel="ok"] i { background: var(--ok); } .chip[data-nivel="aviso"] i { background: var(--aviso); } .chip[data-nivel="falha"] i { background: var(--falha); }
+.controles { display: flex; gap: 6px; align-items: center; }
+.controles select { padding: 3px 6px; min-width: 0; }
+.agenda-rotina { border: 1px solid var(--linha); border-radius: var(--raio); background: var(--painel); padding: 12px 14px; margin: 10px 0; }
+.agenda-rotina h2 { margin: 0 0 4px; }
+.agenda-rotina ul { margin: 4px 0; padding-left: 18px; }
+.agenda-acoes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: end; }
+.agenda-acoes label { font-size: 12px; }
+.agenda-acoes input[type=number] { width: 80px; min-width: 0; }
+.dias-semana { display: flex; flex-wrap: wrap; gap: 8px; }
+.PAUSADA, .DESATIVADA, .AUSENTE, .EXPIRADA, .REVOGADA, .ESGOTADA, .PERDIDO, .CANCELADO { color: var(--aviso); } .ATIVA, .VIGENTE, .PUBLICADO, .CONCLUIDO { color: var(--ok); }
+.PENDENTE, .EXECUTANDO, .PREPARADO, .INFO, .NAO_APLICAVEL, .CONCLUIDA { color: var(--neutro); } .ERRO_INFRA, .FALHA { color: var(--falha); }
+.rolagem { overflow-x: auto; }
+@media (max-width: 700px) { .qc-hero { grid-template-columns: 1fr; } .qc-campo { margin: 0 auto; } }
+@media (prefers-reduced-motion: reduce) { .qc-orb[data-estado="executando"]::before, .qc-orb[data-estado="executando"] img { animation: none !important; } }
+
+/* Cabeçalho: marca, projeto, estado e controles em cima; navegação em linha própria. */
+header .marca { order: 1; } header .projeto { order: 2; } header #worker-estado { order: 3; } header #controles { order: 4; } header .sino-caixa { order: 5; margin-left: 0; } header nav { order: 6; flex-basis: 100%; }

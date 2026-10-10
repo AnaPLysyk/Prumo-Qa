@@ -3,7 +3,7 @@
 // Todo texto entra no DOM por textContent (nunca innerHTML).
 const api = window.prumo;
 const $ = (s) => document.querySelector(s);
-const estado = { aba: 'projetos', root: null, timer: null, jobId: undefined, ajudaAlvo: null, aviso: null, prefs: null };
+const estado = { aba: 'inicio', root: null, timer: null, jobId: undefined, ajudaAlvo: null, aviso: null, prefs: null };
 
 function h(tag, attrs, ...filhos) {
   const el = document.createElement(tag);
@@ -13,7 +13,8 @@ function h(tag, attrs, ...filhos) {
   for (const f of filhos.flat()) if (f != null && f !== false) el.append(f.nodeType ? f : document.createTextNode(String(f)));
   return el;
 }
-const selo = (s) => h('span', { class: 'estado ' + s }, s==='NAO_CONFIGURADO'?'NÃO CONFIGURADO':s.replaceAll('_', ' '));
+const rotulosSelo = { NAO_CONFIGURADO: 'NÃO CONFIGURADO', NAO_APLICAVEL: 'NÃO APLICÁVEL', ERRO_INFRA: 'ERRO DE INFRAESTRUTURA', EXECUTANDO: 'EXECUTANDO' };
+const selo = (s) => h('span', { class: 'estado ' + s }, rotulosSelo[s] || s.replaceAll('_', ' '));
 const hora = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR') : '—');
 const ms = (n) => (n === null || n === undefined ? 'indisponível' : Math.round(n * 10) / 10 + ' ms');
 
@@ -466,9 +467,12 @@ async function mostrar(aba) {
 }
 
 (async () => {
+  // Espera todos os scripts da página (plataforma.js, agenda.js) terminarem de executar antes de montar a primeira tela.
+  if (document.readyState === 'loading') await new Promise((ok) => document.addEventListener('DOMContentLoaded', ok, { once: true }));
   const info = await chamar(api.info); if (info) $('#versao').textContent = 'v' + info.version;
   try { estado.root = localStorage.getItem('raiz'); } catch { /* ignora */ }
   for (const b of document.querySelectorAll('#nav button')) b.addEventListener('click', () => mostrar(b.dataset.aba));
-  mostrar('projetos');
+  await iniciarAgenda();
+  mostrar('inicio');
   iniciarNotificacoes();
 })();

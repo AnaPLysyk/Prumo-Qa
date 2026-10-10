@@ -26,6 +26,7 @@ import { prepararSolicitacao, urlOficial } from '../suporte.js';
 import { consultarChamado } from '../chamados.js';
 import * as painel from '../painel.js';
 import { Worker, type EventoWorker } from '../worker.js';
+import { tm, resumoEstado, modeloMenuBandeja, dicaBandeja, type Idioma, type ItemMenu } from '../textosDesktop.js';
 import * as agendaCore from '../agenda.js';
 import * as agendaOp from '../agendaOperacoes.js';
 import * as autorizacoesCore from '../autorizacoes.js';
@@ -244,10 +245,8 @@ canal('contextos:mcp', async (a, janela) => {
 });
 
 // ---- 2.8: agenda, worker residente, execuções e comentário Jira. A página nunca informa comando, caminho nem aprovação. ----
-const worker = new Worker({
-  servicos: servicos as never,
-  aoEvento: e => publicarEvento(e)
-});
+const idiomaAtual = (): Idioma => lerPreferencias().idioma;
+const worker = new Worker({ servicos: servicos as never, aoEvento: e => publicarEvento(e) });
 type Aviso = { n: number; tipo: string; titulo: string; detalhe: string; rotinaId?: string; destino?: string; at: string };
 const avisos: Aviso[] = []; let contadorAviso = 0;
 function empilhar(a: Omit<Aviso, 'n' | 'at'>) { avisos.push({ ...a, n: ++contadorAviso, at: new Date().toISOString() }); if (avisos.length > 100) avisos.shift(); }
@@ -268,22 +267,21 @@ canal('agenda:listar', a => agendaOp.listarAgenda(a.espacoId));
 canal('agenda:salvar', async a => { await agendaOp.validarRotina(a.dados); return a.id ? agendaCore.editarRotina(a.id, a.dados) : agendaCore.criarRotina(a.dados); });
 canal('agenda:estado', a => (a.acao === 'pausar' ? agendaCore.pausarRotina(a.id) : a.acao === 'retomar' ? agendaCore.retomarRotina(a.id) : agendaCore.desativarRotina(a.id)));
 canal('agenda:excluir', async (a, j) => {
-  const r = agendaCore.obterRotina(a.id);
-  if (!(await confirmar(j, 'Excluir rotina', `Excluir a rotina "${r.nome}"?`, 'A rotina deixa de executar. As execuções já registradas e as evidências permanecem.', 'Excluir'))) return { canceled: true };
+  const i = idiomaAtual(); const r = agendaCore.obterRotina(a.id);
+  if (!(await confirmar(j, tm('excluirTitulo', i), tm('excluirMsg', i, { n: r.nome }), tm('excluirDet', i), tm('excluirBtn', i)))) return { canceled: true };
   return { canceled: false, ...agendaCore.excluirRotina(a.id) };
 });
 canal('agenda:executar', async a => { const t = worker.executarAgora(a.id); void worker.tick(); return { trabalho: t.id, estado: t.estado }; });
 canal('agenda:autorizar', async (a, j) => {
-  const r = agendaCore.obterRotina(a.id);
-  const resumo = agendaOp.permissoesDaRotina(r).join('\n');
-  if (!(await confirmar(j, 'Autorizar execuções agendadas', `Autorizar a rotina "${r.nome}" por ${a.dias} dia(s) e até ${a.maxUsos} execução(ões)?`, `${resumo}\n\nAmbiente: ${r.ambiente}.\nA autorização vale somente para este projeto, ambiente e comando exatos; se o comando, o contrato ou as fontes mudarem, ela deixa de valer. Você pode revogá-la a qualquer momento. Em seguida o Windows pedirá a sua autenticação.`, 'Continuar'))) return { canceled: true };
+  const i = idiomaAtual(); const r = agendaCore.obterRotina(a.id);
+  if (!(await confirmar(j, tm('autTitulo', i), tm('autMsg', i, { n: r.nome, d: a.dias, u: a.maxUsos }), tm('autDet', i, { r: agendaOp.permissoesDaRotina(r).join('\n'), a: r.ambiente }), tm('continuar', i)))) return { canceled: true };
   return { canceled: false, autorizacoes: await agendaOp.autorizarRotina(a.id, { dias: a.dias, maxUsos: a.maxUsos }, solicitarAprovacao) };
 });
 canal('agenda:revogar', a => ({ autorizacao: autorizacoesCore.revogarExecucao(a.id) }));
 canal('agenda:permissoes', a => agendaOp.listarPermissoes(a.espacoId));
 canal('agenda:politica', async (a, j) => {
-  const e = espacos.obterEspaco(a.espacoId);
-  if (!(await confirmar(j, 'Política de publicação no Jira', `Permitir comentários automáticos de resultado nestes tickets?\n${a.tickets.join(', ')}`, `Projeto Prumo: ${e.nome}\nTipos de rotina: ${a.tipos.join(', ')}\nValidade: ${a.dias} dia(s). Máximo: ${a.maxPublicacoes} comentário(s).\n\nSó serão publicados comentários de resultado (sem alterar o status dos tickets), em tickets do projeto Jira vinculado. Você pode revogar a política a qualquer momento.`, 'Aprovar política'))) return { canceled: true };
+  const i = idiomaAtual(); const e = espacos.obterEspaco(a.espacoId);
+  if (!(await confirmar(j, tm('polTitulo', i), tm('polMsg', i, { t: a.tickets.join(', ') }), tm('polDet', i, { p: e.nome, i: a.tipos.join(', '), d: a.dias, m: a.maxPublicacoes }), tm('polBtn', i)))) return { canceled: true };
   return { canceled: false, politica: autorizacoesCore.criarPoliticaPublicacao(a.espacoId, { tickets: a.tickets, tipos: a.tipos, dias: a.dias, maxPublicacoes: a.maxPublicacoes }, usuarioWindows()) };
 });
 canal('agenda:revogarpolitica', a => ({ politica: autorizacoesCore.revogarPublicacao(a.id) }));
@@ -291,8 +289,8 @@ canal('execucoes:listar', a => listarExecucoes(a.filtro));
 canal('execucoes:metricas', a => metricas(a.espacoId));
 canal('jira:previa', a => prepararPublicacao(a.trabalhoId));
 canal('jira:publicar', async (a, j) => {
-  const prev = prepararPublicacao(a.trabalhoId);
-  if (!(await confirmar(j, 'Publicar comentário no Jira', `Publicar este resultado no ticket ${prev.ticket}?`, `${prev.texto.slice(0, 1500)}\n\nSerá criado um comentário. O status do ticket não será alterado.`, 'Publicar'))) return { canceled: true };
+  const i = idiomaAtual(); const prev = prepararPublicacao(a.trabalhoId);
+  if (!(await confirmar(j, tm('pubTitulo', i), tm('pubMsg', i, { t: prev.ticket }), tm('pubDet', i, { x: prev.texto.slice(0, 1500) }), tm('pubBtn', i)))) return { canceled: true };
   const r = await publicarComentario(a.trabalhoId, 'MANUAL', servicos, undefined, true);
   return { canceled: false, estado: r.estado, comentarioId: r.comentarioId ?? null, erro: r.erro ?? null };
 });
@@ -318,7 +316,7 @@ function criarJanela(): BrowserWindow {
   janela.on('close', e => {
     if (saindo) return;
     e.preventDefault(); janela.hide();
-    if (!avisouBandeja && Notification.isSupported()) { avisouBandeja = true; new Notification({ title: 'Prumo QA continua na bandeja', body: 'As rotinas agendadas seguem ativas. Use o ícone da bandeja para abrir ou sair.', silent: true }).show(); }
+    if (!avisouBandeja && Notification.isSupported()) { avisouBandeja = true; const i = idiomaAtual(); new Notification({ title: tm('bandejaTitulo', i), body: tm('bandejaCorpo', i), silent: true }).show(); }
   });
   janela.on('closed', () => { if (janelaPrincipal === janela) janelaPrincipal = null; });
   void janela.loadFile(path.join(rendererDir, 'index.html'));
@@ -328,21 +326,18 @@ function mostrarJanela() {
   if (!janelaPrincipal || janelaPrincipal.isDestroyed()) janelaPrincipal = criarJanela();
   const j = janelaPrincipal; if (j.isMinimized()) j.restore(); j.show(); j.focus();
 }
-function montarMenuBandeja() {
-  const e = worker.estado(); const pausado = e.pausado;
-  const estado = !e.executando ? 'Worker parado' : pausado ? 'Agendamentos pausados' : e.emExecucao ? 'Executando uma rotina' : `Ativo — ${e.rotinasAtivas} rotina(s), ${e.pendentes} pendente(s)`;
-  return Menu.buildFromTemplate([
-    { label: 'Abrir Prumo', click: () => mostrarJanela() },
-    { label: 'Ver agendamentos', click: () => navegar('agenda') },
-    { label: 'Consultar execuções', click: () => navegar('execucoes') },
-    { type: 'separator' },
-    pausado ? { label: 'Retomar agendamentos', click: () => { agendaCore.definirPausaGlobal(false); atualizarBandeja(); } } : { label: 'Pausar agendamentos', click: () => { agendaCore.definirPausaGlobal(true); atualizarBandeja(); } },
-    { label: `Estado do worker: ${estado}`, click: () => { const j = janelaPrincipal && !janelaPrincipal.isDestroyed() && janelaPrincipal.isVisible() ? janelaPrincipal : undefined; const opcoes = { type: 'info' as const, title: 'Estado do worker', message: estado, detail: `Próxima execução: ${e.proximaExecucao ?? 'nenhuma agendada'}\nTrabalhos pendentes: ${e.pendentes}\nPausado: ${pausado ? 'sim' : 'não'}\nÚltimo erro: ${e.ultimoErro ?? 'nenhum'}\n\nSe o computador estiver desligado ou suspenso, nada é executado nesse período.`, buttons: ['Fechar'] }; void (j ? dialog.showMessageBox(j, opcoes) : dialog.showMessageBox(opcoes)); } },
-    { type: 'separator' },
-    { label: 'Sair do Prumo', click: () => app.quit() }
-  ]);
+function acaoMenu(id: ItemMenu['id']) {
+  if (id === 'abrir') mostrarJanela(); else if (id === 'agenda') navegar('agenda'); else if (id === 'execucoes') navegar('execucoes');
+  else if (id === 'pausar' || id === 'retomar') { agendaCore.definirPausaGlobal(id === 'pausar'); atualizarBandeja(); }
+  else if (id === 'sair') app.quit();
+  else if (id === 'estado') {
+    const e = worker.estado(); const i = idiomaAtual(); const j = janelaPrincipal && !janelaPrincipal.isDestroyed() && janelaPrincipal.isVisible() ? janelaPrincipal : undefined;
+    const opcoes = { type: 'info' as const, title: tm('tituloEstado', i), message: resumoEstado(e, i), buttons: [tm('fechar', i)], detail: tm('detalheEstado', i, { n: e.proximaExecucao ?? tm('nenhuma', i), p: e.pendentes, z: e.pausado ? tm('sim', i) : tm('nao', i), u: e.ultimoErro ?? tm('nenhum', i) }) };
+    void (j ? dialog.showMessageBox(j, opcoes) : dialog.showMessageBox(opcoes));
+  }
 }
-function atualizarBandeja() { if (bandeja) { bandeja.setContextMenu(montarMenuBandeja()); const e = worker.estado(); bandeja.setToolTip(`Prumo QA — ${!e.executando ? 'worker parado' : e.pausado ? 'agendamentos pausados' : e.emExecucao ? 'executando' : 'ativo'}`); } }
+const menuBandeja = () => Menu.buildFromTemplate(modeloMenuBandeja(worker.estado(), idiomaAtual()).map(x => (x.id === 'separador' ? { type: 'separator' as const } : { label: x.rotulo, click: () => acaoMenu(x.id) })));
+function atualizarBandeja() { if (bandeja) { bandeja.setContextMenu(menuBandeja()); bandeja.setToolTip(dicaBandeja(worker.estado(), idiomaAtual())); } }
 function criarBandeja() {
   const icone = nativeImage.createFromPath(path.join(raizApp, 'assets', 'prumo-icon.png')).resize({ width: 16, height: 16 });
   bandeja = new Tray(icone); bandeja.on('click', () => mostrarJanela()); bandeja.on('double-click', () => mostrarJanela()); atualizarBandeja();
@@ -364,7 +359,7 @@ else {
     session.defaultSession.webRequest.onBeforeRequest((d, cb) => cb({ cancel: !(d.url.startsWith('file:') || d.url.startsWith('devtools:')) }));
     session.defaultSession.setPermissionRequestHandler((_w, _p, cb) => cb(false));
     criarBandeja();
-    try { worker.iniciar(); } catch (err) { empilhar({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Worker não iniciou', detalhe: (err as Error).message }); }
+    try { worker.iniciar(); } catch (err) { empilhar({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Worker', detalhe: (err as Error).message }); }
     atualizarBandeja();
     if (!iniciouOculto) mostrarJanela();
   });

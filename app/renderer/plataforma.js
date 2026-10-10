@@ -98,7 +98,7 @@ async function consultaManual(el,servico,operacoes){
 }
 abas.tickets=async el=>{el.append(h('h1',{},'Tickets'));await consultaManual(el,'jira',{tickets:'Tickets do projeto',ticket:'Detalhe de ticket',campos:'Descobrir campos de critérios de aceite',comentarios:'Comentários de ticket'});};
 abas.testes=async el=>{el.append(h('h1',{},'Testes'));await consultaManual(el,'qase',{suites:'Suites',casos:'Casos manuais e automatizados',caso:'Detalhe e passos do caso',planos:'Planos'});};
-abas.execucoes=async el=>{el.append(h('h1',{},'Execuções'),h('p',{},'Execuções externas do Qase. Evidências locais permanecem na seção Evidências.'));await consultaManual(el,'qase',{runs:'Runs',run:'Detalhe do run',resultados:'Resultados (informe o ID do run para filtrar)'});};
+const execucoesExternas=async el=>{el.append(h('h2',{},'Execuções externas do Qase'),h('p',{},'Execuções externas do Qase. Evidências locais permanecem na seção Evidências.'));await consultaManual(el,'qase',{runs:'Runs',run:'Detalhe do run',resultados:'Resultados (informe o ID do run para filtrar)'});};
 abas.automacoes=async el=>{
   el.append(h('h1',{},'Automações'));const e=estado.espaco;if(!e)return el.append(faltaEspaco());
   const a=await chamar(()=>api.espacoAutomacoes(e.id));if(a)el.append(h('h2',{},'Contrato local opcional'),h('p',{},a.pastaLocal||'Sem pasta local de automação.'),dadosVisiveis(a),h('p',{},'A pasta mantém seu contrato e sua própria identidade. Nenhum arquivo é clonado ou modificado automaticamente.'));

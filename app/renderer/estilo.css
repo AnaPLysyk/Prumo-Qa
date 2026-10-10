@@ -1,13 +1,24 @@
+/* Tokens de tema (2.8). Escuro e claro vêm do Quality Control do portfólio; "sistema" segue prefers-color-scheme. */
 :root {
-  --fundo: #14171c; --painel: #1b1f26; --linha: #2b313b; --texto: #e6e9ee; --suave: #9aa4b2;
-  --acento: #5eb6a6; --ok: #5eb6a6; --falha: #e5796d; --aviso: #d9a94a; --neutro: #8a94a3;
-  --raio: 6px; font-family: "Segoe UI", system-ui, sans-serif; font-size: 14px; color-scheme: dark light;
+  --fundo: #040712; --fundo2: #070d1d; --painel: #0a1122; --linha: #1c2742; --texto: #f3f6fc; --suave: #9aa8c2;
+  --acento: #6ea8ff; --acento-texto: #04101f; --ok: #54d39b; --falha: #ff7b8c; --aviso: #e8b84a; --neutro: #9aa8c2;
+  --qc-azul: 116,173,255; --qc-branco: 244,247,255; --qc-vermelho: 255,82,108; --halo: rgba(37,99,235,.14);
+  --raio: 8px; font-family: "Segoe UI", system-ui, sans-serif; font-size: 14px; color-scheme: dark;
+}
+:root[data-tema="claro"] {
+  --fundo: #f5f8fc; --fundo2: #eef3fb; --painel: #ffffff; --linha: #cfd9ea; --texto: #14233d; --suave: #465875;
+  --acento: #1f56b8; --acento-texto: #ffffff; --ok: #0f6b4a; --falha: #b3243b; --aviso: #7a5200; --neutro: #465875;
+  --qc-azul: 43,98,184; --qc-branco: 112,128,156; --qc-vermelho: 181,70,96; --halo: rgba(81,130,214,.14); color-scheme: light;
 }
 @media (prefers-color-scheme: light) {
-  :root { --fundo: #f6f7f9; --painel: #ffffff; --linha: #d9dde3; --texto: #1c2128; --suave: #5b6573; --acento: #1d7a6b; --ok: #1d7a6b; --falha: #b3392d; --aviso: #8a6200; --neutro: #5b6573; }
+  :root:not([data-tema="escuro"]):not([data-tema="claro"]) {
+    --fundo: #f5f8fc; --fundo2: #eef3fb; --painel: #ffffff; --linha: #cfd9ea; --texto: #14233d; --suave: #465875;
+    --acento: #1f56b8; --acento-texto: #ffffff; --ok: #0f6b4a; --falha: #b3243b; --aviso: #7a5200; --neutro: #465875;
+    --qc-azul: 43,98,184; --qc-branco: 112,128,156; --qc-vermelho: 181,70,96; --halo: rgba(81,130,214,.14); color-scheme: light;
+  }
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--fundo); color: var(--texto); min-height: 100vh; display: flex; flex-direction: column; }
+body { margin: 0; background: radial-gradient(circle at 82% 4%, var(--halo), transparent 26rem), var(--fundo); color: var(--texto); min-height: 100vh; display: flex; flex-direction: column; }
 header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 10px 20px; border-bottom: 1px solid var(--linha); background: var(--painel); }
 .marca { display: flex; align-items: center; gap: 8px; }
 .marca img { display: block; }
@@ -28,7 +39,7 @@ label.linha { flex-direction: row; align-items: center; gap: 6px; }
 select, input, button.acao { font: inherit; color: var(--texto); background: var(--painel); border: 1px solid var(--linha); border-radius: var(--raio); padding: 5px 8px; }
 button.acao { cursor: pointer; }
 button.acao:hover { border-color: var(--acento); }
-button.primaria { background: var(--acento); color: #0d1512; border-color: var(--acento); font-weight: 600; }
+button.primaria { background: var(--acento); color: var(--acento-texto); border-color: var(--acento); font-weight: 600; }
 table { width: 100%; border-collapse: collapse; margin-top: 8px; }
 th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--linha); vertical-align: top; }
 th { font-size: 12px; font-weight: 600; color: var(--suave); }

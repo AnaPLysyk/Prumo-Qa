@@ -13,7 +13,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 export const repo = path.resolve('.');
 export const versao = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
 export const exe = process.env.PRUMO_APP_EXE;
-export const abas = ['projetos', 'contextos', 'tickets', 'testes', 'automacoes', 'execucoes', 'rastreabilidade', 'metricas', 'logs', 'historico', 'evidencias', 'conexoes', 'agentes', 'suporte', 'ajuda'];
+export const abas = ['inicio', 'projetos', 'contextos', 'tickets', 'testes', 'automacoes', 'agenda', 'execucoes', 'rastreabilidade', 'metricas', 'logs', 'historico', 'evidencias', 'conexoes', 'agentes', 'suporte', 'ajuda'];
 
 // Cada teste tem seu diretório de dados; ao final os aplicativos abertos são fechados ANTES de apagá-lo.
 const abertos = new Map();
@@ -22,7 +22,7 @@ export const novoDados = (t) => {
   t.after(async () => { for (const fechar of abertos.get(d)) await fechar().catch(() => {}); abertos.delete(d); fs.rmSync(d, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
   return d;
 };
-export async function abrir(t, dados, extra = [], envExtra = {}) {
+export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   // VS Code/Claude definem ELECTRON_RUN_AS_NODE; com ele o Electron viraria Node puro e não abriria janela.
   const env = { ...process.env, ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ...envExtra }; delete env.ELECTRON_RUN_AS_NODE; if (!dados) delete env.PRUMO_DATA_DIR; // sem dados: diretório padrão do usuário
   const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [repo, ...extra], env });
@@ -32,6 +32,8 @@ export async function abrir(t, dados, extra = [], envExtra = {}) {
   const page = await app.firstWindow();
   const erros = []; page.on('pageerror', (e) => erros.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
   await page.waitForSelector('#nav button');
+  // A janela abre em Início (2.8). Os testes anteriores partem de Projetos; Início tem teste próprio (desktop-agenda.test.mjs).
+  if (!opcoes.inicio) await ir(page, 'projetos');
   return { app, page, erros, fechar };
 }
 export const ir = async (page, aba) => { await page.click(`[data-aba=${aba}]`); await page.waitForFunction((a) => document.querySelector(`[data-aba=${a}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(150); };

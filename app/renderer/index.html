@@ -6,18 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Prumo QA</title>
   <link rel="stylesheet" href="estilo.css">
+  <link rel="stylesheet" href="qc.css">
   <link rel="stylesheet" href="status.css">
 </head>
 <body>
   <header>
     <div class="marca"><img src="../../assets/prumo-icon.png" alt="" width="24" height="24"><strong>Prumo QA</strong><span id="versao" class="suave"></span></div>
     <div class="projeto"><span class="suave">Projeto</span> <strong id="projeto-atual">nenhum selecionado</strong></div>
+    <span id="worker-estado" class="chip" data-nivel="aviso" role="status"><i></i>Worker</span>
+    <div id="controles" class="controles"></div>
     <nav id="nav" aria-label="Seções">
+      <button data-aba="inicio">Início</button>
       <button data-aba="projetos">Projetos</button>
       <button data-aba="contextos">Contextos</button>
       <button data-aba="tickets">Tickets</button>
       <button data-aba="testes">Testes</button>
       <button data-aba="automacoes">Automações</button>
+      <button data-aba="agenda">Agendamentos</button>
       <button data-aba="execucoes">Execuções</button>
       <button data-aba="rastreabilidade">Rastreabilidade</button>
       <button data-aba="metricas">Métricas</button>
@@ -39,7 +44,11 @@
   </header>
   <main id="conteudo" tabindex="-1"></main>
   <div id="aviso" role="status" aria-live="polite" hidden></div>
+  <script src="i18n-en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="qc.js"></script>
   <script src="app.js"></script>
   <script src="plataforma.js"></script>
+  <script src="agenda.js"></script>
 </body>
 </html>
