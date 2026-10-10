@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.3.1",
-      "status": "planejada",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-10",
       "title": "Estabilização e instalação segura",
       "objective": "Corrigir imprecisões encontradas na validação final da 2.3 e preparar o build para assinatura digital legítima, sem fingir assinatura enquanto não houver credencial.",
       "features": [
@@ -38,7 +38,7 @@
       "afterUpdate": [
         "Nada a fazer; configurações MCP e dados continuam válidos."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.3.1"
     },
     {
       "version": "2.3.0",
