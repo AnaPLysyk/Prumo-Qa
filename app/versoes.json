@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.5.0",
-      "status": "planejada",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-10",
       "title": "Suporte e avisos de atualização",
       "objective": "Dar à pessoa um caminho seguro para reportar problemas e sugerir melhorias, e avisá-la de novas versões sem serviço em segundo plano, sem download automático e sem enviar dados privados.",
       "features": [
@@ -44,7 +44,7 @@
       "afterUpdate": [
         "Se quiser avisos de versão, ligue as opções em Ajuda › Atualizações."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.5.0"
     },
     {
       "version": "2.4.0",
