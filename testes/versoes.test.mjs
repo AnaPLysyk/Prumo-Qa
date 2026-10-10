@@ -59,7 +59,8 @@ test('validação rejeita inconsistências', () => {
   assert.throws(faz((b) => b.versions.push({ ...b.versions[0] })), /VERSIONS_ORDER/);
   assert.throws(faz((b) => { b.versions[1].releaseUrl = 'https://github.com/outro/repo/releases/tag/v2.2.0'; }), /VERSIONS_INCONSISTENT/);
   assert.throws(faz((b) => { b.versions[1].date = null; }), /VERSIONS_INCONSISTENT/);
-  assert.throws(faz((b) => { b.versions[0].date = '2026-10-11'; }), /VERSIONS_INCONSISTENT/);
+  assert.throws(faz((b) => { b.versions[0].status = 'planejada'; }), /VERSIONS_INCONSISTENT/, 'planejada não pode ter data nem release');
+  assert.throws(faz((b) => { b.versions[0].releaseUrl = null; }), /VERSIONS_INCONSISTENT/, 'publicada exige o link oficial');
   assert.throws(faz((b) => { b.versions[2].releaseUrl = urlRelease('2.1.0'); }), /VERSIONS_INCONSISTENT/);
   assert.throws(faz((b) => { b.versions[0].extra = 1; }));
   assert.throws(faz((b) => { b.versions[0].version = '2.3'; }));
@@ -70,7 +71,8 @@ test('validação rejeita inconsistências', () => {
 test('versão em execução vira "instalada"; as demais mantêm o estado da fonte', () => {
   const r = apresentarVersoes(carregarVersoes('app/versoes.json'), '2.2.0');
   assert.equal(r.find((v) => v.version === '2.2.0').state, 'instalada');
-  assert.equal(r.find((v) => v.version === '2.3.0').state, 'planejada');
+  assert.equal(r.find((v) => v.version === '2.3.0').state, 'publicada');
+  assert.equal(apresentarVersoes(carregarVersoes('app/versoes.json'), '2.3.0').find((v) => v.version === '2.3.0').state, 'instalada');
   assert.equal(r.find((v) => v.version === '2.1.0').state, 'repositorio');
 });
 

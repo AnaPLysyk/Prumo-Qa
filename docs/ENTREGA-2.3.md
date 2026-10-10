@@ -65,6 +65,13 @@ Resultados reais gravados em `avaliacoes/resultados/`:
 - Em desenvolvimento (servidor local controlado, só fora do pacote): release mais nova, e destino inalcançável → mensagem exigida e app funcional.
 - Atualização 2.2.0 → 2.3.0 sobre dados reais: etapa "Migração" do CI.
 
+## Release publicada
+
+- Release: https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.3.0 (tag `v2.3.0` no commit `5c26ff1`).
+- Instalador `Prumo-QA-Setup-2.3.0.exe` (114.441.904 bytes), SHA-256 `656735bc440137cf32002025746620cb95ca19ff69b5642d8e3e0bb3d0f1a117`, conferido por download independente contra o arquivo `.sha256` da release. O checksum não substitui assinatura digital.
+- A primeira tentativa de release (tag no commit `bc61af5`) falhou num teste meu de consistência das versões e não publicou nada; corrigi o teste e recriei a tag no commit seguinte (a tag nunca tinha gerado release).
+- A fonte de versões dentro do instalador mostra a 2.3.0 como "instalada"; a marcação "publicada" entrou num commit posterior à release, como exige a regra de não declarar publicação antes de ela existir.
+
 ## Estado de assinatura, autenticação e licença
 
 - **Assinatura digital:** o instalador **não é assinado**; o SHA-256 publicado confere o arquivo, não a autoria.

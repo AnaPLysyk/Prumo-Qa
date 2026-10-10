@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.3.0",
-      "status": "planejada",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-10",
       "title": "Consolidação de engenharia",
       "objective": "Tornar o produto compreensível e verificável: contratos técnicos documentados, histórico de versões, atualização manual, central de ajuda, gestão dos dados locais e um laboratório independente para avaliar o próprio Prumo.",
       "features": [
@@ -51,7 +51,7 @@
         "Abra o aplicativo e confira em Ajuda › Versões se a versão instalada é a 2.3.0.",
         "Se instalou em outra pasta, reconfigure a conexão MCP em Conexões."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.3.0"
     },
     {
       "version": "2.2.0",
@@ -81,13 +81,18 @@
         "contextIsolation, sandbox, CSP restritiva, rede bloqueada na janela, validação de remetente e de argumentos no IPC.",
         "Confirmação nativa para alterar a configuração do Codex."
       ],
-      "compatibility": ["Windows 10/11 x64.", "Dados da 2.1 lidos sem conversão."],
+      "compatibility": [
+        "Windows 10/11 x64.",
+        "Dados da 2.1 lidos sem conversão."
+      ],
       "limitations": [
         "Instalador não assinado: SmartScreen e Smart App Control podem alertar ou bloquear.",
         "Pacote sem npm: capacidades npm run exigem Node.js com npm instalado."
       ],
       "migration": "Nenhuma.",
-      "afterUpdate": ["Vincule os projetos na janela e, se usar IA, reconecte pelo botão Conexões."],
+      "afterUpdate": [
+        "Vincule os projetos na janela e, se usar IA, reconecte pelo botão Conexões."
+      ],
       "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.2.0"
     },
     {
@@ -102,13 +107,24 @@
         "Comandos de terminal: atividade, logs (com --follow), metricas e conectar.",
         "Assistente de conexão que propõe a configuração do Codex e exige confirmação."
       ],
-      "improvements": ["Tratamento de histórico corrompido ou parcial, sinalizado em vez de escondido."],
+      "improvements": [
+        "Tratamento de histórico corrompido ou parcial, sinalizado em vez de escondido."
+      ],
       "fixes": [],
       "differential": "Da 2.0 para a 2.1 o Prumo passou a mostrar o que foi feito, sem inventar tokens, custos ou ações da IA.",
-      "howItWorks": ["Cada chamada MCP ou de terminal grava um arquivo próprio no diretório de dados do usuário; métricas são derivadas dele."],
-      "security": ["Registros guardam contagens e tipos de achado, nunca o texto de requisitos nem respostas completas."],
-      "compatibility": ["Núcleo, contrato v2 e as quatro ferramentas MCP da 2.0 permanecem."],
-      "limitations": ["Execução protegida intermitente se o Windows bloquear o aprovar.exe.", "Sem release oficial no GitHub: código publicado apenas no repositório."],
+      "howItWorks": [
+        "Cada chamada MCP ou de terminal grava um arquivo próprio no diretório de dados do usuário; métricas são derivadas dele."
+      ],
+      "security": [
+        "Registros guardam contagens e tipos de achado, nunca o texto de requisitos nem respostas completas."
+      ],
+      "compatibility": [
+        "Núcleo, contrato v2 e as quatro ferramentas MCP da 2.0 permanecem."
+      ],
+      "limitations": [
+        "Execução protegida intermitente se o Windows bloquear o aprovar.exe.",
+        "Sem release oficial no GitHub: código publicado apenas no repositório."
+      ],
       "migration": "Nenhuma.",
       "afterUpdate": [],
       "releaseUrl": null
@@ -129,10 +145,19 @@
       "improvements": [],
       "fixes": [],
       "differential": "Primeira versão: o núcleo e os controles de segurança que as versões seguintes preservam.",
-      "howItWorks": ["A IA hospedeira raciocina; o Prumo valida contrato, aplica políticas, executa só o autorizado e registra evidências."],
-      "security": ["Leitura restrita à raiz, sem links nem credenciais; ambiente por lista de permissão; sem shell; timeout e limite de saída."],
-      "compatibility": ["Node.js 22 ou superior."],
-      "limitations": ["Sem release oficial no GitHub.", "Sem sandbox forte."],
+      "howItWorks": [
+        "A IA hospedeira raciocina; o Prumo valida contrato, aplica políticas, executa só o autorizado e registra evidências."
+      ],
+      "security": [
+        "Leitura restrita à raiz, sem links nem credenciais; ambiente por lista de permissão; sem shell; timeout e limite de saída."
+      ],
+      "compatibility": [
+        "Node.js 22 ou superior."
+      ],
+      "limitations": [
+        "Sem release oficial no GitHub.",
+        "Sem sandbox forte."
+      ],
       "migration": "Não se aplica.",
       "afterUpdate": [],
       "releaseUrl": null
