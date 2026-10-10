@@ -68,3 +68,16 @@ label input:not([type=checkbox]), label select { min-width: 160px; }
 button.perigo:not(:disabled):hover { border-color: var(--falha); color: var(--falha); }
 button:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 760px) { dl { grid-template-columns: 1fr; } }
+.sino-caixa { position: relative; margin-left: auto; }
+.sino { position: relative; background: none; border: 1px solid transparent; border-radius: var(--raio); color: var(--suave); padding: 6px 8px; cursor: pointer; display: inline-flex; }
+.sino:hover, .sino:focus-visible { color: var(--texto); border-color: var(--linha); }
+.sino.novo { color: var(--aviso); }
+.sino .ponto { position: absolute; top: 3px; right: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--aviso); border: 2px solid var(--painel); }
+.dica { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; width: 300px; max-width: 80vw; background: var(--painel); border: 1px solid var(--linha); border-radius: var(--raio); padding: 10px 12px; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.dica p { margin: 4px 0; }
+.dica ul { margin: 4px 0; padding-left: 18px; }
+.formulario { max-width: 640px; }
+.campo { display: flex; flex-direction: column; gap: 4px; margin: 10px 0; }
+.campo input, .campo select, .campo textarea { width: 100%; }
+.opcao { display: inline-flex; align-items: center; gap: 4px; margin: 4px 0; cursor: pointer; }
+.nota.erro { border-color: var(--falha); }

@@ -1,0 +1,32 @@
+name: Bug
+description: Algo no Prumo QA não funciona como esperado
+title: "[Bug] "
+labels: ["tipo: bug", "triagem: pendente"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Esta issue é pública.** Não inclua senhas, tokens, documentos privados, código confidencial ou dados pessoais.
+        Não cole logs inteiros: descreva o problema com suas palavras.
+  - type: textarea
+    id: descricao
+    attributes:
+      label: Descrição
+      description: O que aconteceu?
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Comportamento esperado
+  - type: textarea
+    id: ambiente
+    attributes:
+      label: Ambiente
+      description: Versão do Prumo QA e, se quiser, o sistema. Nada é obrigatório.

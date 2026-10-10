@@ -1,0 +1,24 @@
+name: Sugestão
+description: Uma ideia nova para o Prumo QA
+title: "[Sugestão] "
+labels: ["tipo: sugestão", "triagem: pendente"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Esta issue é pública.** Não inclua senhas, tokens, documentos privados, código confidencial ou dados pessoais.
+  - type: textarea
+    id: descricao
+    attributes:
+      label: Descrição
+      description: Qual é a ideia?
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Benefício esperado
+  - type: textarea
+    id: ambiente
+    attributes:
+      label: Ambiente

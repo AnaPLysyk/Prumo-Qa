@@ -1,0 +1,30 @@
+name: Triagem de issues
+
+# Triagem SEGURA: só classifica por rótulo. Não faz checkout, não executa nem interpola o texto da issue em nenhum comando,
+# não corrige código, não abre pull request e não toca na branch main. Texto de issue é dado não confiável.
+on:
+  issues:
+    types: [opened, reopened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  classificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const atuais = issue.labels.map((l) => (typeof l === 'string' ? l : l.name));
+            const titulo = String(issue.title || '');
+            const porPrefixo = [['[Bug]', 'tipo: bug'], ['[Melhoria]', 'tipo: melhoria'], ['[Sugestão]', 'tipo: sugestão']];
+            const novos = [];
+            if (!atuais.some((n) => n.startsWith('tipo: '))) {
+              const achado = porPrefixo.find(([p]) => titulo.startsWith(p));
+              novos.push(achado ? achado[1] : 'tipo: indefinido');
+            }
+            if (!atuais.includes('triagem: pendente')) novos.push('triagem: pendente');
+            if (novos.length) await github.rest.issues.addLabels({ owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number, labels: novos });

@@ -3,7 +3,7 @@
 // Todo texto entra no DOM por textContent (nunca innerHTML).
 const api = window.prumo;
 const $ = (s) => document.querySelector(s);
-const estado = { aba: 'projetos', root: null, timer: null, jobId: undefined };
+const estado = { aba: 'projetos', root: null, timer: null, jobId: undefined, ajudaAlvo: null, aviso: null, prefs: null };
 
 function h(tag, attrs, ...filhos) {
   const el = document.createElement(tag);
@@ -221,6 +221,43 @@ const abas = {
     }
   },
 
+  async suporte(el) {
+    el.append(h('h1', {}, 'Suporte'), h('p', { class: 'suave' }, 'Relate um bug, peça uma melhoria ou envie uma sugestão. O Prumo prepara o texto aqui, mostra o que será enviado e só abre o formulário oficial do GitHub depois da sua confirmação. Nada é enviado por este aplicativo.'));
+    el.append(h('div', { class: 'nota', id: 'aviso-publico' }, h('strong', {}, 'Atenção: '), 'issues do repositório oficial são públicas. Não inclua senhas, tokens, documentos privados, código confidencial ou dados pessoais. Nenhum e-mail de suporte é oferecido; o canal oficial é o GitHub Issues.'));
+    const campo = (id, rotulo, el2) => h('label', { class: 'campo' }, rotulo, el2);
+    const categoria = h('select', { id: 'sup-categoria' }, h('option', { value: 'bug' }, 'Bug'), h('option', { value: 'melhoria' }, 'Melhoria'), h('option', { value: 'sugestao' }, 'Sugestão'));
+    const titulo = h('input', { id: 'sup-titulo', type: 'text', maxlength: '120' });
+    const descricao = h('textarea', { id: 'sup-descricao', rows: '5', maxlength: '4000' });
+    const passos = h('textarea', { id: 'sup-passos', rows: '4', maxlength: '2000' });
+    const esperado = h('textarea', { id: 'sup-esperado', rows: '3', maxlength: '2000' });
+    const marca = (id, rotulo, ligado) => { const i = h('input', { type: 'checkbox', id, checked: ligado }); return [i, h('label', { class: 'opcao', for: id }, ' ' + rotulo)]; };
+    const [incVersao, lVersao] = marca('sup-versao', 'Incluir a versão do Prumo QA', true);
+    const [incSistema, lSistema] = marca('sup-sistema', 'Incluir o sistema operacional (somente se você autorizar)', false);
+    const [incDiag, lDiag] = marca('sup-diagnostico', 'Incluir os últimos eventos do diagnóstico da interface (somente metadados)', false);
+    const [consente, lConsente] = marca('sup-consentimento', 'Entendo que o texto abaixo será exibido a qualquer pessoa se eu enviar a issue', false);
+    const saida = h('div', { id: 'sup-saida', 'aria-live': 'polite' });
+    const relato = () => ({ categoria: categoria.value, titulo: titulo.value, descricao: descricao.value, passos: passos.value || undefined, esperado: esperado.value || undefined,
+      incluirVersao: incVersao.checked, incluirSistema: incSistema.checked, incluirDiagnostico: incDiag.checked, consentimento: consente.checked });
+   
+    const revisar = async () => {
+      if (!consente.checked) { avisar('Marque o entendimento sobre issues públicas para revisar.', true); return; }
+      const p = await chamar(() => api.suportePreparar(relato())); if (!p) return;
+      const nos = [h('h2', {}, 'Revisão antes de enviar'), h('p', { class: 'suave' }, p.aviso)];
+      if (p.bloqueios.length) nos.push(h('div', { class: 'nota erro', id: 'sup-bloqueios' }, h('strong', {}, 'Envio bloqueado: '), p.bloqueios.map((b) => b.tipo + (b.trecho ? ' (' + b.trecho + ')' : '')).join('; '), '. Remova ou substitua antes de continuar.'));
+      if (p.avisos.length) nos.push(h('div', { class: 'nota', id: 'sup-avisos' }, h('strong', {}, 'Revise: '), p.avisos.map((b) => b.tipo + ' (' + b.trecho + ')').join('; '), '. Você decide se mantém.'));
+      if (p.markdown) nos.push(h('p', { class: 'suave' }, 'Este é exatamente o texto que será usado:'), h('pre', { id: 'sup-previa' }, p.markdown), p.truncado ? h('p', { class: 'suave' }, 'O texto é longo e será encurtado no formulário; use Exportar para guardar a versão completa.') : null,
+        h('div', { class: 'barra' },
+          h('button', { class: 'acao primaria', id: 'sup-abrir', disabled: !p.ok, onclick: async () => { const x = await chamar(() => api.suporteAbrir(relato())); if (x && x.opened) avisar('Formulário aberto no navegador. Revise e envie por lá.'); } }, 'Abrir formulário no GitHub…'),
+          h('button', { class: 'acao', id: 'sup-exportar', disabled: !p.ok, onclick: async () => { const x = await chamar(() => api.suporteExportar(relato())); if (x && x.exported) avisar('Relato exportado.'); } }, 'Exportar para arquivo…')));
+      saida.replaceChildren(...nos.filter(Boolean));
+    };
+    el.append(h('div', { class: 'formulario' }, campo('c', 'Tipo', categoria), campo('t', 'Título', titulo), campo('d', 'Descrição', descricao),
+      campo('p', 'Passos para reproduzir (obrigatório em bug)', passos), campo('e', 'Resultado ou benefício esperado', esperado),
+      h('h2', {}, 'O que incluir'), h('div', {}, incVersao, lVersao), h('div', {}, incSistema, lSistema), h('div', {}, incDiag, lDiag),
+      h('p', { class: 'suave' }, 'Logs, evidências, caminhos, contextos e código do seu projeto nunca são anexados.'),
+      h('div', {}, consente, lConsente), h('div', { class: 'barra' }, h('button', { class: 'acao primaria', id: 'sup-revisar', onclick: revisar }, 'Revisar')), saida));
+  },
+
   async ajuda(el) {
     const docs = await chamar(api.ajuda); if (!docs) return;
     const corpo = h('article', {}); const indice = h('ul', { class: 'indice' });
@@ -239,7 +276,8 @@ const abas = {
       indice.append(h('li', {}, h('button', { 'data-id': it.id, onclick: () => abrir(it) }, it.title)));
     }
     el.append(h('div', { class: 'ajuda' }, indice, corpo));
-    abrir(itens[0]);
+    const alvo = itens.find((i) => i.id === estado.ajudaAlvo) || itens[0]; estado.ajudaAlvo = null;
+    abrir(alvo);
   }
 };
 
@@ -261,22 +299,33 @@ async function painelVersoes() {
 }
 
 async function painelAtualizacoes() {
-  const info = await chamar(api.info); const saida = h('div', { 'aria-live': 'polite' });
-  const botao = h('button', { class: 'acao primaria', onclick: async () => {
+  const info = await chamar(api.info); const saida = h('div', { 'aria-live': 'polite', id: 'saida-atualizacao' });
+  const pref = await chamar(api.preferencias); const p = pref ? pref.preferencias : null;
+  const detalhes = (versao, notas) => [h('h2', {}, 'O que mudou na ' + versao), ...markdown(notas || 'A release não traz notas.'),
+    h('p', { class: 'suave' }, 'Compatibilidade e limitações estão nas notas acima e em Versões. Seus projetos, histórico e evidências são preservados; se o executável mudar de pasta, reconfigure a conexão MCP. O instalador não é assinado: confira o SHA-256 na página oficial antes de executar.'),
+    h('button', { class: 'acao', id: 'abrir-release', onclick: async () => { const x = await chamar(api.abrirRelease); if (x && x.opened) avisar('Página oficial aberta no navegador.'); } }, 'Abrir página oficial…')];
+  const botao = h('button', { class: 'acao primaria', id: 'verificar-atualizacao', onclick: async () => {
     botao.disabled = true; saida.replaceChildren(h('p', { class: 'suave' }, 'Consultando a release oficial…'));
     const r = await chamar(api.verificarAtualizacao); botao.disabled = false; if (!r) return saida.replaceChildren();
+    await aplicarNotificacao(r);
     const nos = [h('p', {}, selo(r.status), ' ', r.message)];
     if (r.latest) nos.push(h('p', {}, 'Instalada: ', h('strong', {}, r.installed), ' · Mais recente publicada: ', h('strong', {}, r.latest)));
-    if (r.status === 'ATUALIZACAO_DISPONIVEL') {
-      nos.push(h('h2', {}, 'O que mudou'), ...markdown(r.notes || 'A release não traz notas.'),
-        h('p', { class: 'suave' }, 'Compatibilidade e limitações estão nas notas acima e em Versões. Seus projetos, histórico e evidências são preservados; se o executável mudar de pasta, reconfigure a conexão MCP. O instalador não é assinado: confira o SHA-256 na página.'),
-        h('button', { class: 'acao', onclick: async () => { const x = await chamar(api.abrirRelease); if (x && x.opened) avisar('Página oficial aberta no navegador.'); } }, 'Abrir página oficial…'));
-    }
+    if (r.status === 'ATUALIZACAO_DISPONIVEL') nos.push(...detalhes(r.latest, r.notes));
     saida.replaceChildren(...nos);
   } }, 'Verificar atualizações');
+  const opcao = (campo, rotulo) => h('label', { class: 'opcao' }, h('input', { type: 'checkbox', id: 'pref-' + campo, checked: p ? p[campo] : false, onchange: async (e) => {
+    const x = await chamar(() => api.salvarPreferencias({ [campo]: e.target.checked })); if (!x) { e.target.checked = !e.target.checked; return; } await atualizarSino(); avisar('Preferência salva.');
+  } }), ' ' + rotulo);
+  const pendente = p && p.disponivel && info ? p.disponivel : null;
   return [h('h1', {}, 'Atualizações'), h('p', {}, 'Versão instalada: ', h('strong', {}, info ? info.version : '?')),
-    h('p', { class: 'suave' }, 'A consulta só acontece quando você clica. O Prumo envia ao GitHub apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.'),
-    botao, saida];
+    h('p', { class: 'suave' }, 'O Prumo só consulta o GitHub quando você clica em verificar ou, se você ligar a opção abaixo, uma vez ao abrir o aplicativo. Nunca em segundo plano: não há serviço nem tarefa agendada. É enviada apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.'),
+    botao, saida,
+    pendente ? h('div', { id: 'ultima-conhecida' }, h('p', { class: 'nota' }, 'Última consulta' + (p.ultimaConsulta ? ' (' + hora(p.ultimaConsulta) + ')' : '') + ': a versão ' + pendente.versao + ' estava disponível.'), ...detalhes(pendente.versao, pendente.notas)) : null,
+    h('h2', {}, 'Preferências de aviso'),
+    opcao('verificarAoIniciar', 'Verificar atualizações ao abrir o aplicativo'),
+    opcao('som', 'Tocar um som curto quando houver uma versão nova (uma vez por versão)'),
+    opcao('silenciar', 'Silenciar: nunca tocar som, mesmo com o som ligado'),
+    h('p', { class: 'suave' }, 'O sino no cabeçalho mostra um ponto enquanto houver uma versão que você ainda não viu. Clicar nele marca a versão como vista.')];
 }
 
 async function painelIntegracoes() {
@@ -309,6 +358,55 @@ async function painelDados() {
     h('button', { class: 'acao', id: 'exportar-dados', disabled: !alvo, onclick: async () => { const x = await chamar(() => api.exportarLogs(alvo)); if (x && x.exported) avisar('Dados exportados.'); } }, 'Exportar dados do projeto selecionado…'),
     h('h2', {}, 'Excluir'), h('p', { class: 'suave' }, alvo ? 'Cada ação é separada, pede confirmação e nunca apaga código-fonte. Para apenas remover o projeto da lista, use Desvincular em Projetos.' : 'Selecione um projeto em Projetos para excluir os registros dele. O diagnóstico da interface não depende de projeto.'),
     h('div', { class: 'barra' }, excluir('historico', 'Excluir histórico operacional do projeto…'), excluir('evidencias', 'Excluir evidências do projeto…'), excluir('contextos', 'Excluir todos os contextos do projeto…'), excluir('diagnostico', 'Excluir diagnóstico da interface…')), saida];
+}
+
+/* ---- Notificações de atualização (2.5): sino, som opcional e preferências. Sem processo em segundo plano. ---- */
+const resumoNotas = (notas) => (notas || '').split(/\r?\n/).map((l) => l.replace(/^[-*#>\s]+/, '').replace(/[`*]/g, '').trim()).filter((l) => l.length > 3).slice(0, 3);
+function tocarSom() {
+  // Dois tons curtos (≈0,3 s) sintetizados na hora: sem arquivo de áudio e sem biblioteca. Falha de áudio nunca atrapalha o uso.
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
+    const ctx = new Ctx(); const t0 = ctx.currentTime;
+    [[660, 0], [880, 0.14]].forEach(([freq, atraso]) => {
+      const osc = ctx.createOscillator(); const ganho = ctx.createGain(); osc.type = 'sine'; osc.frequency.value = freq;
+      ganho.gain.setValueAtTime(0.0001, t0 + atraso); ganho.gain.exponentialRampToValueAtTime(0.12, t0 + atraso + 0.02); ganho.gain.exponentialRampToValueAtTime(0.0001, t0 + atraso + 0.14);
+      osc.connect(ganho).connect(ctx.destination); osc.start(t0 + atraso); osc.stop(t0 + atraso + 0.16);
+    });
+    setTimeout(() => ctx.close().catch(() => {}), 600);
+    window.__prumoSom = (window.__prumoSom || 0) + 1; // contador observável pelos testes automatizados
+  } catch { /* sem áudio: ignora */ }
+}
+function desenharSino(aviso) {
+  const sino = $('#sino'); const ponto = $('#sino-ponto'); const dica = $('#sino-dica');
+  estado.aviso = aviso && aviso.indicador ? aviso : null;
+  ponto.hidden = !estado.aviso; sino.classList.toggle('novo', !!estado.aviso);
+  sino.setAttribute('aria-label', estado.aviso ? 'Atualizações do Prumo QA: versão ' + estado.aviso.versao + ' disponível' : 'Atualizações do Prumo QA: nenhuma novidade');
+  const itens = estado.aviso ? resumoNotas(estado.aviso.notas) : [];
+  dica.replaceChildren(...(estado.aviso
+    ? [h('p', {}, h('strong', {}, 'Versão ' + estado.aviso.versao + ' disponível')), itens.length ? h('ul', {}, itens.map((i) => h('li', {}, i))) : null,
+       h('p', { class: 'suave' }, 'Clique para ver as notas completas (correções, segurança e compatibilidade). Nada é baixado nem instalado automaticamente.')]
+    : [h('p', {}, 'Nenhuma atualização pendente.'), h('p', { class: 'suave' }, 'Clique para abrir Atualizações e verificar.')]));
+}
+async function atualizarSino() { const r = await chamar(api.preferencias); if (r) { estado.prefs = r.preferencias; desenharSino(r.aviso); } return r; }
+function ligarSino() {
+  const sino = $('#sino'); const dica = $('#sino-dica'); let preso = false;
+  const mostrarDica = () => { dica.hidden = false; }; const esconder = () => { if (!preso) dica.hidden = true; };
+  sino.addEventListener('mouseenter', mostrarDica); sino.addEventListener('mouseleave', esconder); sino.addEventListener('focus', mostrarDica); sino.addEventListener('blur', esconder);
+  sino.addEventListener('keydown', (e) => { if (e.key === 'Escape') { preso = false; dica.hidden = true; } });
+  sino.addEventListener('click', async () => {
+    dica.hidden = true;
+    if (estado.aviso) { await chamar(() => api.marcarVisualizada(estado.aviso.versao)); await atualizarSino(); }
+    estado.ajudaAlvo = 'atualizacoes'; mostrar('ajuda');
+  });
+}
+/** Aplica o resultado de uma verificação: atualiza o sino e toca o som no máximo uma vez por versão (decidido e gravado pelo núcleo). */
+async function aplicarNotificacao(r) {
+  if (!r || !r.notificacao) return; const n = r.notificacao;
+  await atualizarSino(); if (n.tocarSom) tocarSom();
+}
+async function iniciarNotificacoes() {
+  const p = await atualizarSino(); ligarSino();
+  if (p && p.preferencias.verificarAoIniciar) { const r = await chamar(api.verificarAtualizacao); await aplicarNotificacao(r); }
 }
 
 /** Markdown mínimo (títulos, listas, código, parágrafos), sempre via nós de texto. */
@@ -349,4 +447,5 @@ async function mostrar(aba) {
   try { estado.root = localStorage.getItem('raiz'); } catch { /* ignora */ }
   for (const b of document.querySelectorAll('#nav button')) b.addEventListener('click', () => mostrar(b.dataset.aba));
   mostrar('projetos');
+  iniciarNotificacoes();
 })();

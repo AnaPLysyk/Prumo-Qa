@@ -1,0 +1,24 @@
+name: Melhoria
+description: Algo que já existe e poderia funcionar melhor
+title: "[Melhoria] "
+labels: ["tipo: melhoria", "triagem: pendente"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Esta issue é pública.** Não inclua senhas, tokens, documentos privados, código confidencial ou dados pessoais.
+  - type: textarea
+    id: descricao
+    attributes:
+      label: Descrição
+      description: O que poderia melhorar e por quê?
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Benefício esperado
+  - type: textarea
+    id: ambiente
+    attributes:
+      label: Ambiente
