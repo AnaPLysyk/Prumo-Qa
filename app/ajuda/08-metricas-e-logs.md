@@ -13,3 +13,7 @@ Tudo que aparece em Métricas, Logs e Histórico vem de registros reais feitos p
 Tokens e custos de IA não aparecem porque o Prumo não tem dados verificáveis sobre eles. Conversas privadas de Codex ou Claude Code não são capturadas.
 
 Se algum registro estiver corrompido, a tela avisa que as métricas são parciais; o registro inválido é excluído, não corrigido.
+
+## Diagnóstico da interface
+
+A aba Logs também oferece o diagnóstico técnico das chamadas da própria janela (canal, estado, duração, código). Ele é separado do histórico de QA: atualizar uma tela **não** conta como análise do Prumo e não altera as métricas.

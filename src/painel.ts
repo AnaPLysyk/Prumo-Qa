@@ -74,7 +74,7 @@ export async function exportarLogs(raiz: string) {
 }
 
 /** Documentos da Ajuda: lista fixa, lidos da pasta do aplicativo. O nome nunca vem da interface em formato livre. */
-export const documentosAjuda = ['01-o-que-e.md', '02-qualidade.md', '03-mcp-e-integracao.md', '04-metricas-e-logs.md', '05-estados.md', '06-privacidade.md', '07-termos.md', '08-seguranca.md', '09-sobre.md'] as const;
+export const documentosAjuda = ['01-o-que-e.md', '02-como-funciona.md', '03-instalar.md', '04-vincular.md', '05-conectar-ia.md', '06-sem-ia-e-com-ia.md', '07-resultados.md', '08-metricas-e-logs.md', '09-problemas.md', '10-perguntas.md', '11-privacidade.md', '12-seguranca.md', '13-termos.md', '14-sobre.md'] as const;
 export function ajuda(pasta: string, versao: string) {
   return documentosAjuda.map(arq => {
     const texto = fs.readFileSync(path.join(pasta, arq), 'utf8').replaceAll('{{VERSAO}}', versao);

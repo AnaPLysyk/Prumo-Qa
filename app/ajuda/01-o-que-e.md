@@ -10,4 +10,4 @@ Ele ajuda a IA a:
 - executar somente verificações declaradas no contrato do projeto e autorizadas por uma pessoa;
 - devolver resultados e evidências reais.
 
-Este aplicativo é a janela de consulta: mostra projetos, métricas, logs, histórico, evidências e conexões. O raciocínio semântico continua sendo da IA hospedeira; o Prumo mantém o núcleo determinístico (contratos, permissões, execução e evidências).
+Este aplicativo é a janela de consulta: mostra projetos, métricas, logs, histórico, evidências e conexões, e explica o próprio funcionamento. Tudo roda neste computador, sem servidor remoto, sem outra IA e sem telemetria.

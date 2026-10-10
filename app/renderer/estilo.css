@@ -53,3 +53,15 @@ pre { background: var(--painel); border: 1px solid var(--linha); border-radius: 
 .ajuda article { max-width: 70ch; }
 @media (max-width: 760px) { .ajuda { grid-template-columns: 1fr; } .ajuda ul.indice { position: static; } main { padding: 14px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+details { border-bottom: 1px solid var(--linha); padding: 8px 2px; }
+details > summary { cursor: pointer; padding: 2px 0; }
+details > summary:hover { color: var(--acento); }
+details[open] > summary { margin-bottom: 8px; }
+dl { display: grid; grid-template-columns: 170px 1fr; gap: 4px 16px; margin: 0; }
+dt { color: var(--suave); font-size: 12px; padding-top: 2px; }
+dd { margin: 0; overflow-wrap: anywhere; }
+.ajuda li.grupo { font-size: 12px; color: var(--suave); padding: 14px 8px 4px; text-transform: uppercase; letter-spacing: .04em; }
+button.perigo:not(:disabled):hover { border-color: var(--falha); color: var(--falha); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 760px) { dl { grid-template-columns: 1fr; } }

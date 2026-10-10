@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "versions": [
+    {
+      "version": "2.3.0",
+      "status": "planejada",
+      "date": null,
+      "title": "Consolidação de engenharia",
+      "objective": "Tornar o produto compreensível e verificável: contratos técnicos documentados, histórico de versões, atualização manual, central de ajuda, gestão dos dados locais e um laboratório independente para avaliar o próprio Prumo.",
+      "features": [
+        "Ajuda › Integrações técnicas: catálogo das operações IPC da janela e das quatro ferramentas MCP, gerado de uma fonte única e conferido por testes contra o código.",
+        "Ajuda › Versões: histórico detalhado de 2.0.0 a 2.3.0, offline.",
+        "Ajuda › Atualizações: verificação manual da release oficial no GitHub, sem baixar nem instalar nada.",
+        "Ajuda › Privacidade e dados: pasta real, tamanhos, política de retenção, exportação e exclusão controlada com confirmação nativa.",
+        "Diagnóstico técnico das chamadas da interface, separado das métricas de QA.",
+        "Central de ajuda reorganizada, com perguntas frequentes expansíveis e funcionamento offline.",
+        "Prumo-QA-Lab: projeto independente com oito situações controladas para avaliar o Prumo."
+      ],
+      "improvements": [
+        "Esquemas IPC centralizados em src/contratos.ts e compartilhados entre validação e catálogo.",
+        "Notas de release geradas da mesma fonte do histórico de versões.",
+        "SHA-256 do instalador publicado junto com a release."
+      ],
+      "fixes": [],
+      "differential": "Da 2.2 para a 2.3 o produto deixa de apenas mostrar dados e passa a explicar a si mesmo (contratos, versões, privacidade) e a ser avaliado por um laboratório separado.",
+      "howItWorks": [
+        "O catálogo técnico é montado por src/contratos.ts a partir dos mesmos esquemas que validam cada chamada IPC; um teste compara catálogo, main.ts, preload e o servidor MCP real.",
+        "A verificação de atualização roda no processo principal, com destino fixo (api.github.com), timeout e resposta validada; a interface nunca recebe acesso à rede.",
+        "A exclusão só apaga arquivos do escopo escolhido (histórico operacional, evidências de um projeto ou diagnóstico), um a um, depois de confirmação nativa; não é exposta ao MCP."
+      ],
+      "security": [
+        "Nenhum acesso geral à rede para a janela; a consulta de atualização é uma operação específica do processo principal.",
+        "A exclusão de dados exige confirmação nativa que a página não consegue simular e não pode ser chamada por uma IA conectada.",
+        "Diagnóstico IPC grava somente metadados, nunca argumentos, caminhos ou conteúdo."
+      ],
+      "compatibility": [
+        "Contrato qa.project.json v2, as quatro ferramentas MCP e a CLI permanecem compatíveis.",
+        "Configurações MCP criadas pela 2.2 continuam válidas enquanto o executável permanecer na mesma pasta."
+      ],
+      "limitations": [
+        "Instalador sem assinatura digital.",
+        "Atualização é manual: o Prumo não baixa nem instala novas versões sozinho.",
+        "Autenticação humana protegida depende de o Windows permitir a execução do aprovar.exe."
+      ],
+      "migration": "Nenhuma migração: histórico, vínculos e evidências da 2.2 são lidos sem conversão.",
+      "afterUpdate": [
+        "Abra o aplicativo e confira em Ajuda › Versões se a versão instalada é a 2.3.0.",
+        "Se instalou em outra pasta, reconfigure a conexão MCP em Conexões."
+      ],
+      "releaseUrl": null
+    },
+    {
+      "version": "2.2.0",
+      "status": "publicada",
+      "date": "2026-10-10",
+      "title": "Aplicativo Windows",
+      "objective": "Oferecer uma janela desktop instalável para consultar projetos, métricas, logs, histórico, evidências e conexões, sem depender do PowerShell.",
+      "features": [
+        "Aplicativo Electron com Projetos, Métricas, Logs, Histórico, Evidências, Conexões e Ajuda.",
+        "Projetos vinculados localmente e projeto de demonstração.",
+        "Instalador Windows (NSIS) por usuário, com atalhos e desinstalador.",
+        "MCP e execução usando o runtime embutido do aplicativo (ELECTRON_RUN_AS_NODE), sem Node.js separado.",
+        "Pipeline do GitHub Actions que gera, instala e testa o instalador."
+      ],
+      "improvements": [
+        "Início de operação concluída aparece como STARTED nos logs; só operação sem término vira SEM TÉRMINO OBSERVADO."
+      ],
+      "fixes": [
+        "O mascaramento de segredos deixava o token visível em Authorization: Bearer <token>; corrigido."
+      ],
+      "differential": "Da 2.1 para a 2.2 a consulta deixou de exigir terminal: tudo passou a ser acessível por uma janela nativa sobre o mesmo núcleo.",
+      "howItWorks": [
+        "A página só conhece 13 funções expostas pelo preload; cada uma vira um canal IPC validado no processo principal, que chama o adaptador painel.ts e o núcleo.",
+        "O servidor MCP continua sendo iniciado pelo cliente de IA e não depende da janela."
+      ],
+      "security": [
+        "contextIsolation, sandbox, CSP restritiva, rede bloqueada na janela, validação de remetente e de argumentos no IPC.",
+        "Confirmação nativa para alterar a configuração do Codex."
+      ],
+      "compatibility": ["Windows 10/11 x64.", "Dados da 2.1 lidos sem conversão."],
+      "limitations": [
+        "Instalador não assinado: SmartScreen e Smart App Control podem alertar ou bloquear.",
+        "Pacote sem npm: capacidades npm run exigem Node.js com npm instalado."
+      ],
+      "migration": "Nenhuma.",
+      "afterUpdate": ["Vincule os projetos na janela e, se usar IA, reconecte pelo botão Conexões."],
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.2.0"
+    },
+    {
+      "version": "2.1.0",
+      "status": "repositorio",
+      "date": "2026-10-10",
+      "title": "Observabilidade e terminal",
+      "objective": "Registrar o que o Prumo realmente faz e permitir acompanhar isso por terminal.",
+      "features": [
+        "Histórico local de operações com registro de início e término, fora do repositório dos projetos.",
+        "Logs estruturados com Pino e métricas calculadas só de dados reais.",
+        "Comandos de terminal: atividade, logs (com --follow), metricas e conectar.",
+        "Assistente de conexão que propõe a configuração do Codex e exige confirmação."
+      ],
+      "improvements": ["Tratamento de histórico corrompido ou parcial, sinalizado em vez de escondido."],
+      "fixes": [],
+      "differential": "Da 2.0 para a 2.1 o Prumo passou a mostrar o que foi feito, sem inventar tokens, custos ou ações da IA.",
+      "howItWorks": ["Cada chamada MCP ou de terminal grava um arquivo próprio no diretório de dados do usuário; métricas são derivadas dele."],
+      "security": ["Registros guardam contagens e tipos de achado, nunca o texto de requisitos nem respostas completas."],
+      "compatibility": ["Núcleo, contrato v2 e as quatro ferramentas MCP da 2.0 permanecem."],
+      "limitations": ["Execução protegida intermitente se o Windows bloquear o aprovar.exe.", "Sem release oficial no GitHub: código publicado apenas no repositório."],
+      "migration": "Nenhuma.",
+      "afterUpdate": [],
+      "releaseUrl": null
+    },
+    {
+      "version": "2.0.0",
+      "status": "repositorio",
+      "date": "2026-10-10",
+      "title": "Núcleo de engenharia de qualidade",
+      "objective": "Entregar o núcleo determinístico de QA para agentes de IA: contratos, metodologia, MCP, execução controlada e evidências.",
+      "features": [
+        "Contrato de projeto qa.project.json v2 com validação estrita.",
+        "Skill de QA baseada em fundamentos aplicáveis do ISTQB CTFL.",
+        "Servidor MCP local (stdio) com quatro ferramentas: contexto_projeto, revisar_cobertura, executar_validacao e consultar_evidencias.",
+        "Execução controlada de capacidades declaradas, com aprovação humana autenticada no Windows.",
+        "Evidências preservando PASS, FAIL, BLOCKED e NOT_RUN."
+      ],
+      "improvements": [],
+      "fixes": [],
+      "differential": "Primeira versão: o núcleo e os controles de segurança que as versões seguintes preservam.",
+      "howItWorks": ["A IA hospedeira raciocina; o Prumo valida contrato, aplica políticas, executa só o autorizado e registra evidências."],
+      "security": ["Leitura restrita à raiz, sem links nem credenciais; ambiente por lista de permissão; sem shell; timeout e limite de saída."],
+      "compatibility": ["Node.js 22 ou superior."],
+      "limitations": ["Sem release oficial no GitHub.", "Sem sandbox forte."],
+      "migration": "Não se aplica.",
+      "afterUpdate": [],
+      "releaseUrl": null
+    }
+  ]
+}

@@ -201,3 +201,18 @@ export async function acompanharLogs(p:Projeto,emitir:(e:Evento)=>void,opcoes:{s
     try{await esperar(opcoes.intervalMs??1000,undefined,{signal:opcoes.signal});}catch(e){if(!opcoes.signal.aborted)throw e;}
   }
 }
+
+/**
+ * Exclusão controlada do histórico OPERACIONAL de um projeto (nunca código nem evidências).
+ * Só apaga arquivos <uuid>.jsonl regulares, um a um, sem links; falhas parciais (arquivo em uso, permissão) são devolvidas.
+ */
+export function excluirAtividades(p:Projeto,base?:string) {
+  const pasta=pastaAtividades(p,base);const falhas:{file:string;code:string}[]=[];let apagados=0;
+  for(const nome of nomes(pasta)) {
+    const alvo=path.join(pasta,nome);
+    try { semLinks(alvo);const st=fs.lstatSync(alvo);if(!st.isFile()||st.nlink!==1)falha('HISTORY_FILE_INVALID');fs.unlinkSync(alvo);apagados++; }
+    catch(e) { falhas.push({file:nome,code:(e as NodeJS.ErrnoException).code??(e as Error).message.slice(0,40)}); }
+  }
+  try { fs.rmdirSync(pasta); } catch { /* restam arquivos ou a pasta não existe */ }
+  return {deleted:apagados,failed:falhas};
+}
