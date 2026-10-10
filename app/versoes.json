@@ -3,7 +3,7 @@
   "versions": [
     {
       "version": "2.6.0",
-      "status": "repositorio",
+      "status": "publicada",
       "date": "2026-10-10",
       "title": "Integrações verificáveis e documentação pública",
       "objective": "Separar configuração, protocolo e uso observado de MCP; aprofundar revisão de engenharia, simplificar acompanhamento do suporte e gerar documentação pública das fontes existentes.",
@@ -22,7 +22,7 @@
       "limitations": ["Identidade no handshake é declarada e não autenticada; chamada observada não comprova sessão ativa.", "Claude Code e leitores de tela exigem validação em clientes reais disponíveis.", "Instalador continua sem assinatura; autenticação humana ponta a ponta não comprovada nesta máquina.", "Esta entrada descreve código; a release só deve ser marcada publicada após CI e publicação reais."],
       "migration": "Dados existentes preservados. Se a instalação ou o diretório de dados mudar, revise a configuração MCP; não há migração silenciosa de configurações.",
       "afterUpdate": ["Abra Conexões, revise a configuração e use Testar integração.", "Para comprovar uso de cliente, faça uma chamada nesse cliente e consulte o registro; SDK de teste permanece separado."],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.6.0"
     },
     {
       "version": "2.5.0",

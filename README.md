@@ -1,6 +1,6 @@
 # Prumo QA 2.6 — Integrações verificáveis e documentação pública
 
-Código da evolução 2.6; o estado de publicação fica em `app/versoes.json`. Baseline real da 2.5 em [docs/BASELINE-2.6.md](docs/BASELINE-2.6.md).
+Versão [2.6.0 publicada](https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.6.0), com instalador e checksum após CI completo. [Documentação pública](https://prumo-qa-docs.onrender.com) · [relatório de entrega](docs/ENTREGA-2.6.md). O instalador permanece sem assinatura. Baseline real da 2.5 em [docs/BASELINE-2.6.md](docs/BASELINE-2.6.md).
 
 ## Evolução 2.6
 

@@ -30,7 +30,7 @@ Finalidade dos dados opcionais: versão identifica o build (package.json); siste
 
 ## Triagem segura
 
-`.github/workflows/triagem.yml` roda quando uma issue é aberta ou reaberta e **só aplica rótulos** (`tipo: bug|melhoria|sugestão|indefinido`, `triagem: pendente`) com base no prefixo do título. Ele:
+`.github/workflows/triagem.yml` disponibiliza os cinco rótulos de status do catálogo quando essa configuração é publicada ou quando o workflow é acionado manualmente, sem criar ou alterar chamados. Ao abrir ou reabrir uma issue, aplica recebido somente quando não há status, além dos rótulos `tipo: bug|melhoria|sugestão|indefinido` e `triagem: pendente` com base no prefixo do título. Ele:
 
 - não faz checkout do código nem executa scripts do repositório;
 - não interpola título ou corpo em comandos de shell (o texto é lido como dado pela API);
