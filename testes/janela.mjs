@@ -13,7 +13,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 export const repo = path.resolve('.');
 export const versao = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
 export const exe = process.env.PRUMO_APP_EXE;
-export const abas = ['projetos', 'contextos', 'metricas', 'logs', 'historico', 'evidencias', 'conexoes', 'suporte', 'ajuda'];
+export const abas = ['projetos', 'contextos', 'tickets', 'testes', 'automacoes', 'execucoes', 'rastreabilidade', 'metricas', 'logs', 'historico', 'evidencias', 'conexoes', 'agentes', 'suporte', 'ajuda'];
 
 // Cada teste tem seu diretório de dados; ao final os aplicativos abertos são fechados ANTES de apagá-lo.
 const abertos = new Map();

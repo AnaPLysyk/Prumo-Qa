@@ -3,6 +3,10 @@ import { filtroSchema } from './painel.js';
 import { alteracaoSchema } from './preferencias.js';
 import { solicitacaoSchema } from './suporte.js';
 import { numeroChamado } from './chamados.js';
+import {dadosEspaco,servicoSchema,identidadeRecurso,associacaoSchema} from './espacos.js';
+import {conexaoEntrada} from './servicos.js';
+import {paginaSchema,codigosServico} from './httpServicos.js';
+import {operacoesServico} from './adaptadoresServicos.js';
 import { conteudoSchema, tipos as tiposContexto, estados as estadosContexto } from './contextos.js';
 
 /**
@@ -16,6 +20,24 @@ const raiz = z.string().min(1).max(1000);
 const soRaiz = z.object({ root: raiz }).strict();
 const vazio = z.object({}).strict();
 export const esquemasIpc = {
+  'espacos:listar': vazio,
+  'espacos:criar': dadosEspaco,
+  'espacos:obter': z.object({id:z.string().uuid()}).strict(),
+  'espacos:editar': z.object({id:z.string().uuid(),dados:dadosEspaco}).strict(),
+  'espacos:pasta': z.object({id:z.string().uuid()}).strict(),
+  'espacos:automacoes': z.object({id:z.string().uuid()}).strict(),
+  'espacos:associar': z.object({id:z.string().uuid(),dados:associacaoSchema}).strict(),
+  'servicos:listar': vazio,
+  'servicos:adicionar': conexaoEntrada,
+  'servicos:validar': z.object({id:z.string().uuid()}).strict(),
+  'servicos:remover': z.object({id:z.string().uuid()}).strict(),
+  'servicos:recursos': z.object({id:z.string().uuid(),pagina:paginaSchema.optional()}).strict(),
+  'servicos:vincular': z.object({espacoId:z.string().uuid(),conexaoId:z.string().uuid(),recurso:identidadeRecurso}).strict(),
+  'servicos:desvincular': z.object({espacoId:z.string().uuid(),servico:servicoSchema}).strict(),
+  'servicos:conferir': z.object({espacoId:z.string().uuid(),servico:servicoSchema}).strict(),
+  'servicos:consultar': z.object({espacoId:z.string().uuid(),servico:servicoSchema,operacao:z.enum(operacoesServico),pagina:paginaSchema.optional(),id:z.string().max(200).optional()}).strict(),
+  'servicos:aceite': z.object({espacoId:z.string().uuid(),campo:z.string().regex(/^customfield_\d+$/)}).strict(),
+  'servicos:importar': z.object({espacoId:z.string().uuid(),ticket:z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/)}).strict(),
   'app:info': vazio,
   'projetos:listar': vazio,
   'projetos:escolher': vazio,
@@ -119,7 +141,11 @@ Object.assign(ipc, {
   'contextos:mcp': { finalidade: 'Escolher se os contextos do projeto são disponibilizados ao agente de IA conectado por MCP.', origem: 'Interface > Contextos > Disponibilizar ao agente', destino: 'main.ts (confirmação nativa ao habilitar) > contextos.gravarConfig', entrada: 'Projeto selecionado + habilitar (true/false)', saida: 'disponibilizarAoMcp', permissoes: vinculado + ' Habilitar exige confirmação nativa. Padrão: desabilitado.', efeito: 'Quando habilitado, contexto_projeto e revisar_cobertura passam a ler os contextos deste projeto; o texto pode ser processado pelo provedor da IA conectada.', arquivos: ctxArquivos, erros: ipcErros, protecoes: [...ctxProt, 'Padrão seguro: desabilitado', 'Confirmação nativa ao habilitar'], registro: 'Diagnóstico IPC' }
 });
 /** Canais de consulta frequente: só erros vão ao diagnóstico, para não encher o arquivo nem gerar recursão. */
-export const canaisFrequentes: ReadonlySet<string> = new Set(['preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter']);
+for(const nome of Object.keys(esquemasIpc).filter(n=>n.startsWith('espacos:')||n.startsWith('servicos:')) as CanalIpc[]) {
+  const leitura=/:listar$|:obter$|:automacoes$|:recursos$|:consultar$|:conferir$|:validar$/.test(nome);
+  ipc[nome]={finalidade:`${nome}: gestão explícita do projeto Prumo e integrações de leitura.`,origem:'Interface > Projetos, Tickets, Testes ou Conexões',destino:nome.startsWith('espacos:')?'main.ts > espacos.ts':'main.ts > servicos.ts > adaptadoresServicos.ts',entrada:'Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário',saida:leitura?'Metadados ou dados da consulta com origem, data e cache:false':'Registro local ou confirmação de cancelamento',permissoes:'Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.',efeito:leitura?'Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.':'Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.',arquivos:'Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional',erros:[...ipcErros,...codigosServico,'WORKSPACE_NOT_FOUND','CREDENTIAL_PROTECTION_UNAVAILABLE'],protecoes:[...ipcProtecoes,'Isolamento por identificador de projeto, conexão e instância','Sem conteúdo remoto ou token nos logs','Não exposto ao MCP'],registro:'Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido'};
+}
+export const canaisFrequentes: ReadonlySet<string> = new Set(['espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter']);
 
 const mcpProtecoes = ['Projeto fixado na configuração do servidor, nunca pela ferramenta', 'Leitura limitada à raiz autorizada', 'Registro de início e término'];
 const mcp: { nome: string; campos: string[]; d: Descricao }[] = [

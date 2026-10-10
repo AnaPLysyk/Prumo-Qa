@@ -11,7 +11,7 @@ export function documento() {
 
 > Arquivo **gerado** por \`npm run contratos\` a partir de \`src/contratos.ts\`. Não edite à mão: um teste compara este texto com o catálogo real.
 
-O Prumo não tem API HTTP. Existem duas interfaces:
+O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
 - **IPC** (${ipc.length} operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (${mcp.length} ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.

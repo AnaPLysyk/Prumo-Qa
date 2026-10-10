@@ -2,6 +2,52 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.7.0",
+      "status": "repositorio",
+      "date": "2026-10-10",
+      "title": "Plataforma desktop de engenharia de qualidade",
+      "objective": "Trabalho manual sem IA, projetos com identidade própria e consultas autenticadas de leitura ao Jira Cloud, Qase v1 e GitHub, sem mudar o núcleo MCP/CLI.",
+      "features": [
+        "Projetos Prumo com UUID, nome, descrição, contextos próprios e pasta local opcional.",
+        "Conexões desktop próprias, seleção dinâmica e revalidação por instância, principal disponível e ID de recurso.",
+        "Tickets, casos, suites, planos, runs, resultados, branches, commits, PRs e check runs consultados por APIs oficiais.",
+        "Rastreabilidade declarada, importação Jira em RASCUNHO e histórico de metadados, sem cobertura inventada."
+      ],
+      "improvements": [
+        "Agentes preserva configuração e verificação MCP; novas telas são utilizáveis sem IA.",
+        "Catálogo REST separado do IPC, help e site gerados das fontes do produto."
+      ],
+      "fixes": [
+        "Validação de IDs antes de montar JQL e conferência do projeto de cada ticket retornado.",
+        "Formulários e listas de recursos verificados no Electron com dados sintéticos."
+      ],
+      "differential": "O profissional trabalha manualmente; as relações preservam origem e escopo, sem assumir que nomes iguais comprovam integração.",
+      "howItWorks": [
+        "Credenciais protegidas pelo Electron safeStorage/DPAPI no Windows, nunca por criptografia própria.",
+        "Processo principal executa somente GET nos hosts oficiais permitidos; sem servidor HTTP local ou cache persistido."
+      ],
+      "security": [
+        "Tokens não retornam ao renderer nem ao MCP; sem proteção do Windows a configuração é recusada.",
+        "HTTPS, DNS público fixado, redirects bloqueados, timeout e limite de resposta; esquemas IPC estritos."
+      ],
+      "compatibility": [
+        "Contrato qa.project.json v2, quatro tools MCP e CLI preservados.",
+        "Pastas existentes, contextos, logs e evidências não são sobrescritos pela criação de projeto Prumo."
+      ],
+      "limitations": [
+        "Autenticação real de serviços não verificada sem credenciais próprias; fixtures não equivalem a acesso em produção.",
+        "Qase v1 não informa ID de conta: código do projeto é limitado à conexão validada.",
+        "Jira gateway OAuth/tokens com escopos e GitHub commit status legado não estão implementados.",
+        "Instalador sem assinatura; publicação só após CI e verificações obrigatórias."
+      ],
+      "migration": "A instalação preserva dados existentes. Projetos Prumo são registros novos; não há conversão automática de pastas nem de credenciais de conectores.",
+      "afterUpdate": [
+        "Crie um projeto Prumo em Projetos; pasta de automação é opcional.",
+        "Configure leitura em Conexões, liste recursos e confirme os vínculos. Agentes mantém o MCP."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.6.0",
       "status": "publicada",
       "date": "2026-10-10",
@@ -13,15 +59,36 @@
         "Relato Markdown com identificador LOCAL e consulta explícita de status e histórico do chamado oficial.",
         "Site estático gerado da ajuda, contratos e histórico de versões, preparado para Render."
       ],
-      "improvements": ["Skills de QA e Playwright aprofundadas; roteiro de revisão de engenharia e Skill de acessibilidade."],
-      "fixes": ["Clientes SDK de teste com nome Codex/Claude deixam de contar como uso observado desses clientes."],
+      "improvements": [
+        "Skills de QA e Playwright aprofundadas; roteiro de revisão de engenharia e Skill de acessibilidade."
+      ],
+      "fixes": [
+        "Clientes SDK de teste com nome Codex/Claude deixam de contar como uso observado desses clientes."
+      ],
       "differential": "A pessoa pode distinguir o que foi configurado, o que passou no protocolo e qual chamada de cliente foi observada, com evidências distintas.",
-      "howItWorks": ["O SDK executa somente consultar_evidencias no MCP do próprio produto; configuração externa não é executada.", "Chamados usam GET público ao GitHub oficial, sem upload, credenciais ou segunda base sincronizada."],
-      "security": ["Quatro tools MCP preservadas; autenticação humana e escopo de execução mantidos.", "Registros de protocolo contêm apenas metadados conhecidos e hashes; fontes privadas não entram no site."],
-      "compatibility": ["Contrato qa.project.json v2 preservado; referências novas no histórico são opcionais.", "Logs antigos permanecem legíveis; o site não acessa projetos locais."],
-      "limitations": ["Identidade no handshake é declarada e não autenticada; chamada observada não comprova sessão ativa.", "Claude Code e leitores de tela exigem validação em clientes reais disponíveis.", "Instalador continua sem assinatura; autenticação humana ponta a ponta não comprovada nesta máquina.", "Esta entrada descreve código; a release só deve ser marcada publicada após CI e publicação reais."],
+      "howItWorks": [
+        "O SDK executa somente consultar_evidencias no MCP do próprio produto; configuração externa não é executada.",
+        "Chamados usam GET público ao GitHub oficial, sem upload, credenciais ou segunda base sincronizada."
+      ],
+      "security": [
+        "Quatro tools MCP preservadas; autenticação humana e escopo de execução mantidos.",
+        "Registros de protocolo contêm apenas metadados conhecidos e hashes; fontes privadas não entram no site."
+      ],
+      "compatibility": [
+        "Contrato qa.project.json v2 preservado; referências novas no histórico são opcionais.",
+        "Logs antigos permanecem legíveis; o site não acessa projetos locais."
+      ],
+      "limitations": [
+        "Identidade no handshake é declarada e não autenticada; chamada observada não comprova sessão ativa.",
+        "Claude Code e leitores de tela exigem validação em clientes reais disponíveis.",
+        "Instalador continua sem assinatura; autenticação humana ponta a ponta não comprovada nesta máquina.",
+        "Esta entrada descreve código; a release só deve ser marcada publicada após CI e publicação reais."
+      ],
       "migration": "Dados existentes preservados. Se a instalação ou o diretório de dados mudar, revise a configuração MCP; não há migração silenciosa de configurações.",
-      "afterUpdate": ["Abra Conexões, revise a configuração e use Testar integração.", "Para comprovar uso de cliente, faça uma chamada nesse cliente e consulte o registro; SDK de teste permanece separado."],
+      "afterUpdate": [
+        "Abra Conexões, revise a configuração e use Testar integração.",
+        "Para comprovar uso de cliente, faça uma chamada nesse cliente e consulte o registro; SDK de teste permanece separado."
+      ],
       "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.6.0"
     },
     {

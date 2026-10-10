@@ -37,7 +37,7 @@ function diagnostico(s) {
 
 const abas = {
   async projetos(el) {
-    el.append(h('h1', {}, 'Projetos'), h('p', { class: 'suave' }, 'Somente pastas que você vincula são lidas. O Prumo não cria nem altera arquivos dos projetos.'));
+    el.append(h('h2', {}, 'Pastas com contrato local'), h('p', { class: 'suave' }, 'Pastas existentes continuam disponíveis. Apenas as pastas que você vincula são lidas.'));
     const caixa = h('div', { id: 'diagnostico' });
     el.append(h('div', { class: 'barra' },
       h('button', { class: 'acao primaria', onclick: async () => {
@@ -49,7 +49,8 @@ const abas = {
         const r = await chamar(api.adicionarDemo); if (!r) return;
         if (r.linked) { estado.root = r.situation.root; salvarRaiz(); mostrar('projetos'); } else caixa.replaceChildren(diagnostico(r.situation));
       } }, 'Adicionar projeto de demonstração')), caixa);
-    const lista = await chamar(api.projetos); if (!lista) return;
+    const todas = await chamar(api.projetos); if (!todas) return;
+    const gerenciados = await chamar(api.espacos); const lista = todas.filter(p => !gerenciados?.some(e => e.raizContextos === p.root));
     if (!lista.length) { el.append(h('div', { class: 'vazio' }, 'Nenhum projeto vinculado ainda.')); return; }
     el.append(h('table', {}, h('thead', {}, h('tr', {}, ['Projeto', 'Situação', 'Capacidades', 'Pasta', ''].map((t) => h('th', {}, t)))),
       h('tbody', {}, lista.map((p) => h('tr', {},
@@ -210,7 +211,7 @@ const abas = {
   },
 
   async conexoes(el) {
-    el.append(h('h1', {}, 'Conexões de IA'), h('p', { class: 'suave' }, 'O servidor MCP é iniciado pelo próprio cliente de IA e continua funcionando mesmo com esta janela fechada. A configuração abaixo é uma proposta: nada é alterado sem sua confirmação.'));
+    el.append(h('h1', {}, 'Agentes e MCP'), h('p', { class: 'suave' }, 'O servidor MCP é iniciado pelo próprio cliente de IA e continua funcionando mesmo com esta janela fechada. A configuração abaixo é uma proposta: nada é alterado sem sua confirmação.'));
     if (!estado.root) return el.append(semProjeto());
     const r = await chamar(() => api.conexoes(estado.root)); if (!r) return;
     for (const c of r) {
@@ -446,17 +447,19 @@ function markdown(texto, sanfona = false) {
 }
 function inline(s) { return s.split(/(`[^`]+`|\*\*[^*]+\*\*)/).map((p) => (p.startsWith('`') ? h('code', {}, p.slice(1, -1)) : p.startsWith('**') ? h('strong', {}, p.slice(2, -2)) : p)); }
 
-function salvarRaiz() { try { if (estado.root) localStorage.setItem('raiz', estado.root); else localStorage.removeItem('raiz'); } catch { /* sem armazenamento: ignora */ } }
+function salvarRaiz() { if (estado.espaco && estado.espaco.raizContextos !== estado.root) estado.espaco = null; try { if (estado.root) localStorage.setItem('raiz', estado.root); else localStorage.removeItem('raiz'); if (estado.espaco) localStorage.setItem('espaco', estado.espaco.id); else localStorage.removeItem('espaco'); } catch { /* sem armazenamento: ignora */ } }
 async function mostrar(aba) {
   clearInterval(estado.timer); estado.aba = aba;
   for (const b of document.querySelectorAll('#nav button')) { if (b.dataset.aba === aba) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
   // Corrida de navegação: cada renderização usa um token e constrói num contêiner separado; só a mais recente é anexada.
   // Sem isso, duas trocas rápidas de aba escreviam no mesmo elemento e misturavam conteúdos ou duplicavam ids.
   const token = (estado.render = (estado.render || 0) + 1); const el = document.createElement('div');
-  const nome = (await chamar(api.projetos))?.find((p) => p.root === estado.root);
+  const locais = await chamar(api.projetos); const espacos = await chamar(api.espacos);
+  estado.espaco = espacos?.find(e => e.raizContextos === estado.root) || null;
+  const nome = estado.espaco || locais?.find((p) => p.root === estado.root);
   if (token !== estado.render) return;
   if (estado.root && !nome) estado.root = null;
-  $('#projeto-atual').textContent = nome ? (nome.name || nome.id) : 'nenhum selecionado';
+  $('#projeto-atual').textContent = nome ? (nome.nome || nome.name || nome.id) : 'nenhum selecionado';
   try { await abas[aba](el); } catch (e) { if (token === estado.render) avisar('Falha ao carregar a seção.', true); }
   if (token !== estado.render) return;
   $('#conteudo').replaceChildren(...el.childNodes);

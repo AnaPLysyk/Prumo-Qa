@@ -18,6 +18,8 @@ Sem retenção automática: nada é apagado sozinho. Você exclui quando quiser,
 
 ## O que é enviado a terceiros
 
+Nas consultas explícitas Jira/Qase/GitHub, o processo principal envia a credencial ao host oficial do serviço, junto dos IDs, filtros e parâmetros de paginação escolhidos. Nenhum documento, código ou log local é anexado. Respostas não são persistidas como cache nem transferidas automaticamente para IA. Tokens ficam protegidos pelo Windows em plataforma/credenciais.json; metadados de conexões/vínculos ficam em plataforma, com contextos de projetos manuais na estrutura própria espacos. Remover conexão elimina a credencial; remover vínculo preserva histórico.
+
 O servidor MCP responde ao cliente de IA que o iniciou. O que ele devolve (contexto autorizado, análises, evidências) passa a ser tratado por esse cliente e por seu provedor. O Prumo não recebe as conversas da IA.
 
 Ao verificar atualizações (somente quando você clica), o aplicativo faz uma requisição HTTPS ao GitHub sem enviar logs, projetos, caminhos ou identificadores. Como em qualquer conexão, o servidor remoto vê o seu endereço IP e dados normais de rede; isso não é anonimato.

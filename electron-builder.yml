@@ -13,6 +13,7 @@ files:
   - app/**
   - assets/**
   - skills/**
+  - docs/SERVICOS.md
   - package.json
   - "!dist/**/*.map"
   - "!dist/**/*.d.ts"

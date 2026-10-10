@@ -25,7 +25,7 @@ test('segurança da janela: isolamento, sem Node na página, ponte mínima e sem
   assert.deepEqual(prefs, { contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true });
   const visivel = await page.evaluate(() => ({ require: typeof require, process: typeof process, ipc: typeof window.ipcRenderer, chaves: Object.keys(window.prumo).sort(), congelado: Object.isFrozen(window.prumo) }));
   assert.equal(visivel.require, 'undefined'); assert.equal(visivel.process, 'undefined'); assert.equal(visivel.ipc, 'undefined'); assert.ok(visivel.congelado);
-  assert.deepEqual(visivel.chaves, ['abrirRelease', 'adicionarDemo', 'ajuda', 'conectar', 'conexoes', 'contextosAprovar', 'contextosConflito', 'contextosDesatualizar', 'contextosExcluir', 'contextosListar', 'contextosMcp', 'contextosObter', 'contextosSalvar', 'desvincular', 'diagnostico', 'escolherProjeto', 'evidencias', 'excluirDados', 'exportarLogs', 'historico', 'info', 'integracoes', 'logs', 'marcarVisualizada', 'preferencias', 'projetos', 'resumoDados', 'salvarPreferencias', 'suporteAbrir', 'suporteChamado', 'suporteConsultar', 'suporteExportar', 'suportePreparar', 'testarIntegracao', 'verificarAtualizacao', 'versoes', 'visao']);
+  assert.deepEqual(visivel.chaves, ["abrirRelease","adicionarDemo","ajuda","conectar","conexoes","contextosAprovar","contextosConflito","contextosDesatualizar","contextosExcluir","contextosListar","contextosMcp","contextosObter","contextosSalvar","desvincular","diagnostico","escolherProjeto","espacoAssociar","espacoAutomacoes","espacoCriar","espacoEditar","espacoObter","espacoPasta","espacos","evidencias","excluirDados","exportarLogs","historico","info","integracoes","logs","marcarVisualizada","preferencias","projetos","resumoDados","salvarPreferencias","servicoAceite","servicoAdicionar","servicoConferir","servicoConsultar","servicoDesvincular","servicoImportar","servicoRecursos","servicoRemover","servicoValidar","servicoVincular","servicos","suporteAbrir","suporteChamado","suporteConsultar","suporteExportar","suportePreparar","testarIntegracao","verificarAtualizacao","versoes","visao"]);
   // Rede: CSP e filtro de requisições impedem qualquer saída; a navegação para fora também é bloqueada.
   assert.equal(await page.evaluate(() => fetch('https://example.com/').then(() => 'saiu', () => 'bloqueado')), 'bloqueado');
   await page.evaluate(() => { location.href = 'https://example.com/'; }); await page.waitForTimeout(500);
@@ -145,7 +145,7 @@ test('conexões: proposta de configuração visível, sem alterar clientes de IA
   const antes = (p) => (fs.existsSync(p) ? fs.statSync(p).mtimeMs : null);
   const codex = path.join(process.env.CODEX_HOME || path.join(os.homedir(), '.codex'), 'config.toml'); const antesCodex = antes(codex);
   await escolherPasta(app, f.root); await page.click('text=Vincular pasta…'); await page.waitForSelector('table');
-  await ir(page, 'conexoes');
+  await ir(page, 'agentes');
   const texto = await page.textContent('#conteudo');
   assert.match(texto, /Codex/); assert.match(texto, /Claude Code/); assert.match(texto, /mcp\.js/); assert.match(texto, /continua funcionando mesmo com esta janela fechada/);
   assert.equal(antes(codex), antesCodex);
