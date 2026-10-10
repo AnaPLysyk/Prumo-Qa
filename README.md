@@ -1,8 +1,27 @@
-# Prumo QA 2.0
+# Prumo QA 2.1 — Observabilidade e Terminal
 
 Camada local de engenharia de qualidade para agentes que já desenvolvem software. Entende o contexto autorizado de um projeto, confere estrutura de planos de teste, controla execução e preserva evidências. A IA hospedeira interpreta requisitos e riscos; o núcleo impõe regras determinísticas. Não exige outra chave de LLM.
 
 CLI e servidor MCP stdio usam o mesmo núcleo. São quatro tools: `contexto_projeto`, `revisar_cobertura`, `executar_validacao`, `consultar_evidencias`. A Skill orienta o raciocínio; não é um modelo nem um mecanismo de permissão.
+
+A versão 2.1 acrescenta um terminal de acompanhamento, histórico local e métricas derivadas das operações realmente observadas. Contexto, revisão estrutural, consultas, logs e métricas funcionam sem IA conectada. A IA externa continua responsável por interpretar requisitos e riscos. Não há chat independente, segunda chave de LLM nem telemetria remota.
+
+```text
+Claude / Codex / IA compatível
+               |
+          MCP local stdio
+               |
+     Prumo QA: quatro ferramentas <--- CLI
+               |
+        Núcleo de qualidade
+               |
+    Atividades       Evidências de testes
+    dados do usuário .prumo do projeto
+               |
+         Terminal Prumo
+```
+
+O terminal consulta arquivos locais; a IA não precisa permanecer ligada. Uma chamada MCP concluída não equivale a teste PASS. A imagem de referência usa números ilustrativos; o programa mostra somente o seu histórico.
 
 ## Instalar no Windows PowerShell
 
@@ -16,6 +35,74 @@ npm.cmd run build
 npm.cmd run check
 ```
 
+Para instalar o comando localmente a partir deste código, sem publicar no npm:
+
+```powershell
+npm.cmd pack                  # prepack compila TypeScript e broker
+npm.cmd install --global '.\prumo-qa-2.1.0.tgz'
+prumo.cmd help
+$demo = Join-Path (Get-Location) 'exemplos\projeto-demo'
+prumo.cmd --root "$demo"
+```
+
+Use `prumo` quando a política do PowerShell permitir; `prumo.cmd` evita selecionar o shim `.ps1`. O único binário npm registrado agora é **prumo**: a instalação não cria nem substitui `qa`. Não usamos `force`. Se já existir outro programa chamado prumo, escolha `npm.cmd install --global --prefix '<pasta própria>' '<pacote.tgz>'` e execute seu `prumo.cmd` por caminho absoluto. Node deve estar no PATH.
+
+O pacote contém dist (incluindo o broker Windows quando compilado no Windows), Skill, documentação e fonte do broker. Não inclui projetos analisados, histórico, prompts, testes privados, dependências instaladas ou anexos. `private: true` e `UNLICENSED` foram preservados; a titular ainda precisa decidir uma licença para distribuição a terceiros. Este fluxo comprova instalação local, sem npm publish ou instalador desktop. Em outra máquina Windows, prefira clonar e empacotar nela; políticas de Controle de Aplicativo podem bloquear o broker não assinado. Nunca desative políticas para liberar uma rodada.
+
+## Terminal e acompanhamento
+
+```powershell
+prumo.cmd doctor --root "$demo"
+prumo.cmd --root "$demo"                 # menu em terminal interativo
+prumo.cmd atividade --root "$demo"
+prumo.cmd logs --follow --root "$demo"   # Ctrl+C encerra; sem daemon
+prumo.cmd metricas --root "$demo"
+prumo.cmd evidencias --root "$demo"
+prumo.cmd atividade --json --root "$demo"
+prumo.cmd metricas --json --root "$demo"
+prumo.cmd logs --json --root "$demo"     # JSONL, uma linha por evento
+```
+
+Sem `--root`, usa o diretório atual, sem busca por projetos vizinhos. Se não houver contrato válido, o menu interativo solicita uma raiz absoluta; não cria manifesto nem altera o projeto. `doctor` explica problemas de contrato. Fora de TTY, o painel termina após imprimir; não fica esperando entrada. Os comandos antigos `context`, `review`, `run`, `approve`, `evidence` continuam disponíveis via prumo/node e preservam saída JSON. Consultar atividade/logs/métricas não gera novas operações; consultar evidências usa o núcleo e é registrado.
+
+O painel informa a **última chamada MCP observada**, com identidade declarada pelo cliente. Não anuncia conexão ativa ou acesso a conversas externas. Histórico vazio mostra zero operações, nenhuma atividade e duração indisponível.
+
+### Logs e métricas verificáveis
+
+No Windows, histórico em `%LOCALAPPDATA%\PrumoQA\projects\<hash-da-raiz-e-id>\<operação-UUID>.jsonl`. Em outros sistemas, `~/.local/share/prumo-qa/projects/…`. Pode escolher um diretório absoluto externo com `$env:PRUMO_DATA_DIR = 'C:\dados\PrumoQA'`; configure o mesmo ambiente para servidor e terminal. Raízes/diretórios com links e destinos dentro do projeto analisado são recusados.
+
+O assistente `conectar` inclui somente PRUMO_DATA_DIR na proposta quando essa variável foi definida; não copia outras variáveis do processo para a configuração. O terminal precisa usar o mesmo valor nas sessões seguintes.
+
+Cada operação tem início e término, timestamps UTC, duração monotônica, origem CLI/MCP, ferramenta, estado e resumo. Projeto e raiz são identificados por hashes; nomes/caminhos completos são resolvidos localmente pelo contrato. Entradas de revisão armazenam somente quantidades e presença de requisito/origem. Saídas armazenam tipos/contagens e recomendações genéricas do catálogo público, sem copiar texto de requisito, cenário, conflito, credencial, código ou resposta extensa. `evidenceJobId` referencia a evidência existente; seu conteúdo não é duplicado. Pino emite JSON e severidades info/warn/error, com redação defensiva e sem stdout do MCP.
+
+`manifestHash` identifica o vínculo carregado ao iniciar o CLI/servidor. Tools revalidam o contrato; evidências de execução preservam seu próprio hash/escopo efetivo. Alterar o id do projeto durante uma sessão MCP exige reiniciar o servidor e não transfere histórico para a nova identidade.
+
+| Indicador | Definição |
+|---|---|
+| Chamadas MCP | Operações tools/call observadas, incluindo erros; handshake/tools/list não são análises |
+| Contextos e revisões | Términos NOT_VERIFIED dessas ferramentas; rejeição de entrada não conta como análise feita |
+| Achados/recomendações | Ocorrências retornadas; repetir revisão soma ocorrências, não mede problemas únicos ou mudanças aplicadas |
+| Lacunas | Achados MISSING_*, UNVERIFIED_*, TRACEABILITY_GAP, COVERAGE_GAP e CONTRADICTORY_REQUIREMENT |
+| Redundâncias candidatas | Ocorrências POTENTIAL_REDUNDANCY, sem declarar equivalência semântica comprovada |
+| Execuções solicitadas | Chamadas à ferramenta de execução, inclusive inválidas/incompletas |
+| PASS/FAIL/BLOCKED/NOT_RUN | Somente estados retornados pela execução; consultas/revisões não incrementam PASS |
+| Duração média | Términos válidos; início sem término não recebe duração inventada |
+| Tokens, custos, alterações aplicadas | Indisponíveis; não recebemos comprovação do cliente/provedor |
+
+Histórico usa arquivo exclusivo por operação e fsync, schema estrito, checksum e vínculo de projeto. Limites: 10.000 arquivos, 32 KiB por operação e 32 MiB por leitura. Não apaga dados por rotação automática; ao atingir limite, arquive manualmente a pasta fora de `projects` com processos parados. Métricas abrangem os registros presentes. Uma linha final parcial é sinalizada; arquivo inválido é excluído das métricas com aviso **HISTORY_INCOMPLETE**, nunca silenciosamente. Início sem término aparece como “sem término observado”, não PASS/NOT_RUN. Hashes detectam corrupção, não adulteração por quem pode reescrevê-los.
+
+Falha ao gravar gera `PRUMO_OBSERVABILITY_ERROR` em stderr com UUID/fase, sem texto privado de erro. O resultado original do núcleo é preservado; CLI mantém exit 1/2 de FAIL/BLOCKED e usa 3 quando uma consulta bem-sucedida perde observabilidade. MCP preserva o contrato de resposta e comunica o problema por stderr do processo, que o cliente deve capturar. Sem acesso ao disco, o evento não pode ser persistido: contadores não representam operações perdidas. Logs de teste permanecem isolados do perfil real.
+
+## Assistente de conexão
+
+```powershell
+prumo.cmd conectar codex --root "$demo"
+prumo.cmd conectar codex --json --root "$demo"   # só proposta, nenhuma escrita
+prumo.cmd conectar claude --root "$demo"         # comando manual revisável
+```
+
+O assistente valida o contrato, localiza o cliente e apresenta raiz, destino, nome único e comando PowerShell com caminhos escapados. No Codex nativo, exige digitar a confirmação exibida em TTY antes de chamar o configurador oficial. Consulta configurações existentes e recusa sobrescrever o mesmo nome; falha de inspeção impede escrita. Não há `--yes`. Fora de TTY/JSON ou com cliente ausente/shim .cmd, mostra a proposta para execução posterior. Execute o comando proposto somente após revisar o destino e verificar que o nome não existe. Configuração não comprova sessão ativa; reabra o cliente e peça uma chamada `contexto_projeto`. Claude Code está documentado, mas não foi executado neste ambiente.
+
 Para usar os nomes `qa` sem alterar uma instalação anterior do QA Orchestrator, crie uma função só nesta sessão:
 
 ```powershell
@@ -24,7 +111,7 @@ function qa { & node $prumoEntry @args }
 qa help
 ```
 
-Também pode usar `node .\dist\cli.js` ou `npm.cmd run qa --`. `npm.cmd link` instala o binário global `qa`, mas só faça isso quando ele não conflitar com outro programa. A construção não sobrescreve o `qa` antigo.
+Também pode usar `node .\dist\cli.js`, `npm.cmd run prumo --` ou o script compatível `npm.cmd run qa --`. A função qa acima só existe na sessão; o pacote 2.1 registra exclusivamente prumo.
 
 ## Estrutura
 
@@ -35,6 +122,8 @@ Também pode usar `node .\dist\cli.js` ou `npm.cmd run qa --`. `npm.cmd link` in
 | `src/aprovacao.ts` + `scripts/aprovar.cs` | Broker de autenticação humana Windows compilado em dist/aprovar.exe, escopo/expiração, sem token da IA |
 | `src/execucao.ts` | Capability declarada, preflight, ambiente mínimo, subprocesso, limites e classificação |
 | `src/evidencias.ts` | Resultados da rodada/casos, armazenamento local, integridade e consulta isolada |
+| `src/atividades.ts` | Diário JSONL externo com Pino, privacidade, integridade, contadores e acompanhamento |
+| `src/conexoes.ts` | Proposta revisável e configuração Codex mediante confirmação, sem sobrescrita |
 | `src/mcp.ts` | Adaptador do SDK oficial, exatamente quatro tools, stdout só para protocolo |
 | `src/cli.ts` | Adaptador terminal, mesmos controles do núcleo |
 | `skills/qa/SKILL.md` | Método de qualidade aplicável do ISTQB, sem meta fixa de cenários |
@@ -103,7 +192,7 @@ npm.cmd run demo
 
 `approve` autentica a pessoa e executa uma única rodada no mesmo processo; não cria uma autorização reutilizável. A janela mostra projeto, raiz, capability, comando e SHA256. Cancelamento, senha inválida, alteração do escopo e expiração bloqueiam. Não aceite uma IA preencher credenciais. Conta só com PIN/Hello precisa de uma senha Windows compatível com LogonUser; outros sistemas permanecem bloqueados para execução. CLI funciona para contexto/revisão/evidências em outras plataformas, ainda sem aprovação nativa implementada.
 
-Exit do CLI: 0 para consulta/PASS, 1 para FAIL, 2 para BLOCKED/NOT_RUN/entrada inválida. `doctor` valida contrato e disponibilidade do provedor; não declara teste funcional aprovado.
+Exit do CLI: 0 para consulta/PASS, 1 para FAIL, 2 para BLOCKED/NOT_RUN/entrada inválida, 3 para histórico parcial/falha de observabilidade quando não há falha do núcleo. `doctor` valida contrato e informa o provedor; não comprova autenticação nem liberação pelo Windows.
 
 ## Conectar MCP local
 
@@ -216,6 +305,6 @@ Testes sintéticos cobrem PASS/FAIL/BLOCKED/NOT_RUN, paths, symlinks, manifesto,
 
 ## Estado e limites
 
-Implementados núcleo local, contrato, quatro tools, CLI, aprovação Windows, Skill, exemplo e testes. Fora desta versão: frontend, dashboard, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas e sandbox forte. Sem transferência automática entre empresas.
+Implementados núcleo local, contrato, quatro tools, CLI/menu, atividades, métricas, Pino, conector Codex, aprovação Windows, Skill, exemplo e testes. Fora desta versão: frontend, dashboard, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas e sandbox forte. Ink, OpenTelemetry, executável único/instalador e métricas de provedores ficam para necessidades futuras. Sem transferência automática entre empresas. Detalhes da entrega atual em [docs/ENTREGA-2.1.md](docs/ENTREGA-2.1.md); relatórios 2.0 são históricos.
 
 G3 é inspecionado por contrato externo readOnly e commands vazio, sem alterar seu repositório. E2E permanece bloqueado. Diagnóstico real e validações estão em docs/DIAGNOSTICO-G3.md e docs/VALIDACAO.md. Autenticação humana end-to-end e plataformas sem Windows podem exigir participação posterior, descrita no relatório de entrega. Nenhuma pendência é mascarada por PASS.
