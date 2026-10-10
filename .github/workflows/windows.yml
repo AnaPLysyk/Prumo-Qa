@@ -34,8 +34,12 @@ jobs:
           $codigo = $LASTEXITCODE
           Get-Content check.txt -Tail 12
           # Anotações públicas: o log completo do Actions exige login, então as falhas sobem como erro do job.
-          Select-String -Path check.txt -Pattern '^\s+(AssertionError|Error|TypeError|SyntaxError)|expected:|ℹ fail ' |
-            Select-Object -First 9 | ForEach-Object { '::error::' + $_.Line.Trim().Substring(0, [Math]::Min(300, $_.Line.Trim().Length)) }
+          $linhas = Get-Content check.txt; $i = [Array]::IndexOf($linhas, 'ℹ failing tests:')
+          if ($i -lt 0) { $i = [Array]::FindIndex($linhas, [Predicate[string]]{ param($l) $l -match 'failing tests:' }) }
+          $nome = ''; $n = 0
+          if ($i -ge 0) { foreach ($l in $linhas[$i..($linhas.Count - 1)]) {
+            if ($l -match '^✖ (.+?) \(') { $nome = $Matches[1] }
+            elseif ($nome -and $l -match '^\s+(\w*Error[^:]*:.*|.*Error: .*)') { if ($n++ -lt 9) { '::error::' + $nome.Substring(0, [Math]::Min(70, $nome.Length)) + ' => ' + $Matches[1].Trim().Substring(0, [Math]::Min(220, $Matches[1].Trim().Length)) }; $nome = '' } } }
           exit $codigo
       - name: Gerar instalador
         run: npm run dist

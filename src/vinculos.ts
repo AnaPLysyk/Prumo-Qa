@@ -16,6 +16,8 @@ export type Situacao = {
 };
 export const instrucoesManifesto = 'Crie um arquivo qa.project.json (schemaVersion 2) na raiz do projeto, declarando context (documentation, tests, code), commands e execution.requireApproval=true. O Prumo não cria nem altera arquivos do projeto; veja a seção Ajuda › Integrar um projeto.';
 
+/** Forma canônica para comparar: resolve links, 8.3 (RUNNER~1) e caixa, como o núcleo faz ao carregar o projeto. */
+const canonica = (raiz: string) => { try { return fs.realpathSync.native(raiz).toLowerCase(); } catch { return String(raiz).toLowerCase(); } };
 const arquivo = (base?: string) => path.join(diretorioDados(base), 'vinculos.json');
 function ler(base?: string) {
   try { return arquivoSchema.parse(JSON.parse(fs.readFileSync(arquivo(base), 'utf8'))).projects; }
@@ -49,18 +51,18 @@ export async function adicionarVinculo(raiz: string, base?: string) {
   const s = await situacaoProjeto(raiz);
   if (s.state !== 'INTEGRADO') return { linked: false as const, situation: s };
   const atuais = ler(base);
-  if (!atuais.some(v => v.root.toLowerCase() === s.root.toLowerCase())) gravar([...atuais, { root: s.root, addedAt: new Date().toISOString() }], base);
+  if (!atuais.some(v => canonica(v.root) === canonica(s.root))) gravar([...atuais, { root: s.root, addedAt: new Date().toISOString() }], base);
   return { linked: true as const, situation: s };
 }
 /** Remove apenas o vínculo; histórico, evidências e arquivos do projeto permanecem. */
 export function removerVinculo(raiz: string, base?: string) {
-  const atuais = ler(base); const restantes = atuais.filter(v => v.root.toLowerCase() !== String(raiz).toLowerCase());
+  const atuais = ler(base); const alvo = canonica(raiz); const restantes = atuais.filter(v => canonica(v.root) !== alvo);
   if (restantes.length !== atuais.length) gravar(restantes, base);
   return { removed: restantes.length !== atuais.length };
 }
 /** Exige que a raiz tenha sido vinculada: a interface nunca abre pastas arbitrárias. */
 export async function projetoVinculado(raiz: string, base?: string): Promise<Projeto> {
-  if (typeof raiz !== 'string' || !ler(base).some(v => v.root.toLowerCase() === raiz.toLowerCase())) throw new Error('PROJECT_NOT_LINKED: selecione um projeto vinculado.');
+  if (typeof raiz !== 'string' || !ler(base).some(v => canonica(v.root) === canonica(raiz))) throw new Error('PROJECT_NOT_LINKED: selecione um projeto vinculado.');
   return carregarProjeto(raiz);
 }
 /** Copia o projeto de demonstração para uma pasta gravável (a instalação é somente leitura). */
