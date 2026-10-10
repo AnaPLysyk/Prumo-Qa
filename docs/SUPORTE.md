@@ -1,5 +1,15 @@
 # Suporte e triagem (2.5)
 
+## Evolução 2.6: relato local e acompanhamento
+
+O Markdown exportado traz frontmatter com `id: LOCAL-<hash>`, categoria, `status: rascunho_local` e origem aplicativo. A versão só entra se marcada. O hash identifica o conteúdo local; não é um número global nem uma issue recebida. GitHub emite o número real depois do envio humano.
+
+**Consultar chamado** usa somente o número para consultar a issue oficial e até 100 eventos públicos. A tela mostra status por rótulo, atualização da issue, responsável quando disponível e eventos de alteração; ausência/conflito de rótulos e histórico parcial são explícitos. O aplicativo não grava nem sincroniza uma segunda base e não altera status. **Abrir chamado** pede confirmação nativa e abre o endereço oficial para acompanhar ou responder por comentário. Notificações são as do GitHub, conforme preferência do autor.
+
+Os cinco rótulos e suas cores têm fonte em `app/suporte-status.json`: recebido, em análise, em desenvolvimento, implementado e concluído. Mantenha somente um rótulo de status por issue. A triagem aplica recebido apenas quando não existe status; as transições posteriores são humanas. Implementado indica código incorporado; disponível exige a release publicada indicada na resolução. Concluído exige explicação da resolução, não só fechamento.
+
+Finalidade dos dados opcionais: versão identifica o build (package.json); sistema indica compatibilidade (os.platform/release/arch); diagnóstico informa erros IPC (somente metadados). IP, hostname, hardware e usuário Windows não são anexados automaticamente. Textos longos encurtados na URL não substituem o Markdown completo exportado.
+
 ## Fluxo da central de Suporte
 
 1. **Preparar localmente** (`suporte:preparar`): o núcleo (`src/suporte.ts`) valida o relato com esquema estrito, monta o texto Markdown e revisa a privacidade. Não há rede nem gravação.

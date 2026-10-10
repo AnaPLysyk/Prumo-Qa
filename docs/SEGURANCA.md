@@ -1,5 +1,15 @@
 # Segurança e limites de confiança
 
+## Evolução 2.6
+
+O diagnóstico de integração inspeciona configurações por projeção de metadados, sem devolver segredos; o teste executa exclusivamente o runtime e servidor do próprio Prumo, nunca command/args/env livres encontrados na configuração externa. A consulta SDK é `consultar_evidencias`, sem capability executável. Evidência de protocolo fica em `integracoes`, fora do projeto; SDK não conta como uso observado Codex/Claude. Identidade declarada não é autenticação, e registros antigos não comprovam UTILIZADO nesta tela.
+
+O histórico registra referências de contextos efetivamente incluídos na resposta ou consultados na revisão: id, versão, hash, estado e finalidade; no máximo 100 por operação. Não registra texto privado, título, origem textual ou aprovador. Disponibilidade não comprova obediência do modelo. Campos novos são opcionais para manter logs anteriores legíveis.
+
+Além da atualização descrita historicamente abaixo, a 2.6 permite consulta **explícita** de chamados públicos: GET somente em `api.github.com/repos/AnaPLysyk/Prumo-Qa/issues/<n>` e `/events?per_page=100`. Sem cookies, credenciais, redirecionamento ou upload; timeout de 8 s por requisição e até 1 MiB de resposta. O número vem de esquema estrito. Texto de issue é dado exibido por textContent; nenhum comando é formado a partir dele. Status e datas vêm dos rótulos/eventos retornados, com histórico parcial declarado; issue fechada não comprova correção publicada.
+
+O site é gerado somente de fontes públicas selecionadas de ajuda, segurança, contratos e versões. Não inclui históricos locais, laboratório, requisitos privados ou dados de projetos; o navegador do visitante não acessa o núcleo nem o filesystem local. HTTPS do site não substitui assinatura de código Windows.
+
 A raiz absoluta é escolhida no CLI ou na configuração local do cliente MCP. Tools não aceitam raiz nem comando livre. Não há descoberta de outros diretórios, cadastro global ou transferência de contexto entre projetos. Contrato v1 é recusado: migre explicitamente para v2.
 
 Manifestos usam validação estrita de tipos e campos. Caminhos relativos, existência de contexto/cwd/entrypoint, arquivos regulares, tamanho, symlinks/junctions, traversal, caminhos absolutos, UNC e streams NTFS são verificados. Links são recusados inclusive quando apontam para dentro da raiz. `.env`, chaves, configurações de credenciais, Git, dependências e builds não entram no contexto. Arquivos grandes/binários são recusados ou omitidos com indicação. Leitura do contexto limita 2.000 entradas, 20 níveis, 256 KiB por arquivo e 8 MiB totais; retorno de conteúdo é truncado em 12.000 caracteres por fonte.

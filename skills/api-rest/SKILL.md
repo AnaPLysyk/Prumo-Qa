@@ -1,6 +1,6 @@
 ---
 name: api-rest
-description: Fundamentos para revisar testes de API REST: contrato, status, corpo, autorização (positivo e negativo), idempotência, persistência após a operação e massa de dados. Usar quando o projeto tiver testes que chamam endpoints reais declarados nos requisitos.
+description: "Fundamentos para revisar testes de API REST: contrato, status, corpo, autorização (positivo e negativo), idempotência, persistência após a operação e massa de dados. Usar quando o projeto tiver testes que chamam endpoints reais declarados nos requisitos."
 ---
 
 # Testes de API REST — fundamentos

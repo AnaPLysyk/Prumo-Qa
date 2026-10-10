@@ -1,6 +1,6 @@
 ---
 name: playwright
-description: Revisar e orientar testes Playwright (TypeScript/JavaScript): locators, assertions, isolamento, esperas, retentativas, testes de API e E2E. Usar só quando o Prumo confirmar Playwright no projeto. Complementa a Skill qa; não a substitui.
+description: "Revisar e orientar testes Playwright (TypeScript/JavaScript): locators, assertions, isolamento, esperas, retentativas, testes de API e E2E. Usar só quando o Prumo confirmar Playwright no projeto. Complementa a Skill qa; não a substitui."
 ---
 
 # Playwright — conhecimento especializado
@@ -61,5 +61,15 @@ const r = await request.get(`/pedidos/${id}`); expect(await r.json()).toMatchObj
 ```
 
 ## Avaliação
+
+## Fixtures, paralelismo e manutenção
+
+Use fixtures quando houver setup/teardown reutilizado e estado controlado; mantenha seu escopo por teste ou worker explícito. BrowserContext novo não isola dados no servidor. Consulte [fixtures](https://playwright.dev/docs/test-fixtures). Page Objects são adequados quando centralizam interação repetida de uma página; não crie helpers para uma única instrução sem ganho demonstrado.
+
+No paralelismo, use dados independentes e limpeza segura, sem depender da execução anterior. Confira configuração e capacidade real do ambiente antes de alterar workers; prefira eliminar dependência entre testes a impor serial. Referência: [paralelismo](https://playwright.dev/docs/test-parallel).
+
+Em UI/E2E, valide resultado funcional e, quando exigido, persistência após recarregar ou consultar o contrato existente; em recusa, confira ausência de mutação. Teste cenários negativos e resoluções com risco demonstrado pelo requisito. Diagnostique flaky com trace, rede, massa, clock e concorrência; uma retentativa bem-sucedida não corrige a causa. Traces podem conter conteúdo privado: mantenha-os no escopo autorizado.
+
+Para teclado, nomes acessíveis, foco, contraste, zoom e reflow, aplique a Skill acessibilidade e a [orientação oficial](https://playwright.dev/docs/accessibility-testing). Não declare auditoria manual completa só com verificação automática.
 
 O laboratório (`Prumo-QA-Lab`) mantém casos com testes Playwright estáticos (locator frágil, espera fixa, sem assertion, ignorado, duplicado, falso positivo) e critérios objetivos. Resultados reais, não suposições, indicam se estas orientações melhoram a análise de uma IA.

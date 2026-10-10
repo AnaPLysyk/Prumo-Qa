@@ -4,7 +4,7 @@
 
 O Prumo não tem API HTTP. Existem duas interfaces:
 
-- **IPC** (34 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (37 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (4 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -20,8 +20,9 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 | `prumo:projeto:logs` | `filter`, `root` | Consulta local; não altera o projeto. |
 | `prumo:projeto:historico` | `filter`, `root` | Consulta local; não altera o projeto. |
 | `prumo:projeto:evidencias` | `jobId`, `root` | Consulta local; não altera o projeto. |
-| `prumo:projeto:conexoes` | `root` | Nenhuma alteração: só propõe. |
+| `prumo:projeto:conexoes` | `root` | Só consulta; não altera configurações ou executa capabilities. |
 | `prumo:conexao:aplicar` | `client`, `root` | Executa "codex mcp add" sem shell, sem sobrescrever configuração existente. |
+| `prumo:conexao:testar` | `client`, `root` | Inicia o MCP do próprio produto e realiza somente consulta; não executa capabilities nem altera configuração. |
 | `prumo:logs:exportar` | `root` | Grava um JSON no destino escolhido. Nenhum upload. |
 | `prumo:ajuda:documentos` | — | Consulta local; não altera o projeto. |
 | `prumo:ajuda:versoes` | — | Consulta local; não altera o projeto. |
@@ -45,6 +46,8 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 | `prumo:suporte:preparar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Sem rede e sem gravação: só calcula o relato. |
 | `prumo:suporte:abrir` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Abre o navegador no formulário; nada é publicado até a pessoa enviar lá. Issues em repositório público são públicas. |
 | `prumo:suporte:exportar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Grava um .md onde a pessoa escolher. Nenhum upload. |
+| `prumo:suporte:consultar` | `numero` | GET público ao GitHub oficial; sem credenciais, upload ou sincronização. |
+| `prumo:suporte:chamado` | `numero` | Abre somente o chamado no navegador; não publica comentário. |
 
 ## MCP (agentes de IA)
 
@@ -195,16 +198,16 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 ### `prumo:projeto:conexoes`
 
 - **Tipo:** IPC
-- **Finalidade:** Propor a configuração MCP para Codex e Claude Code.
+- **Finalidade:** Propor configuração e consultar diagnóstico de integração por cliente.
 - **Origem:** Interface > Conexões
-- **Destino:** painel.ts > conexoes.prepararConexao
+- **Destino:** painel.ts > conexoes.prepararConexao > integracoes.diagnosticarIntegracao
 - **Entrada:** Projeto selecionado
-- **Saída:** Comando, destino e configuração proposta por cliente
+- **Saída:** Comando proposto, estado, inspeção, último protocolo e uso observado
 - **Permissões:** Projeto previamente vinculado (vinculos.json).
-- **Efeito:** Nenhuma alteração: só propõe.
-- **Arquivos consultados:** Procura codex/claude no PATH; não lê a configuração dos clientes
+- **Efeito:** Só consulta; não altera configurações ou executa capabilities.
+- **Arquivos consultados:** Configuração Codex pela CLI e Claude local; metadados de integração e histórico deste projeto
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, PROJECT_NOT_LINKED
-- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Configurações projetadas sem segredos; Registros antigos não comprovam UTILIZADO
 - **Registro:** Diagnóstico IPC
 
 ### `prumo:conexao:aplicar`
@@ -221,6 +224,21 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CONNECTION_INSPECTION_FAILED, CONNECTION_WRITE_FAILED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Diálogo nativo com destino e comando; Não sobrescreve
 - **Registro:** Diagnóstico IPC
+
+### `prumo:conexao:testar`
+
+- **Tipo:** IPC
+- **Finalidade:** Verificar handshake, quatro ferramentas e consulta de evidências pelo SDK real, separadamente do uso observado pelo cliente.
+- **Origem:** Interface > Conexões > Testar integração
+- **Destino:** painel.ts > integracoes.testarProtocolo/diagnosticarIntegracao
+- **Entrada:** Projeto vinculado e cliente codex ou claude
+- **Saída:** Estado, inspeção, último protocolo, última chamada observada e referências de contexto
+- **Permissões:** Projeto previamente vinculado (vinculos.json).
+- **Efeito:** Inicia o MCP do próprio produto e realiza somente consulta; não executa capabilities nem altera configuração.
+- **Arquivos consultados:** Configuração do cliente (projeção segura); histórico e integracoes do projeto no diretório de dados
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, PROJECT_NOT_LINKED, INTEGRATION_LIMIT
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Nunca executa comandos vindos da configuração; SDK de teste não conta como uso Codex/Claude; Não persiste texto privado
+- **Registro:** Evidência SDK separada e diagnóstico IPC
 
 ### `prumo:logs:exportar`
 
@@ -565,6 +583,36 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 - **Arquivos consultados:** Arquivo de destino
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SUPPORT_BLOCKED_SECRET
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Segredos detectados bloqueiam
+- **Registro:** Diagnóstico IPC
+
+### `prumo:suporte:consultar`
+
+- **Tipo:** IPC
+- **Finalidade:** Consultar estado e histórico público de um chamado oficial por ação explícita.
+- **Origem:** Interface > Suporte > Consultar chamado
+- **Destino:** main.ts > chamados.consultarChamado
+- **Entrada:** Número inteiro de issue
+- **Saída:** Rótulo real, responsáveis, datas e histórico limitado ou indisponibilidade
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** GET público ao GitHub oficial; sem credenciais, upload ou sincronização.
+- **Arquivos consultados:** Nenhum
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SUPPORT_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Destino fixo; Sem redirecionamento; Limite e timeout; Texto remoto tratado como dado
+- **Registro:** Diagnóstico IPC
+
+### `prumo:suporte:chamado`
+
+- **Tipo:** IPC
+- **Finalidade:** Abrir a página oficial de um chamado para ler ou responder pelo GitHub.
+- **Origem:** Interface > Suporte > Abrir chamado
+- **Destino:** main.ts > shell.openExternal
+- **Entrada:** Número inteiro de issue
+- **Saída:** opened
+- **Permissões:** Confirmação nativa
+- **Efeito:** Abre somente o chamado no navegador; não publica comentário.
+- **Arquivos consultados:** Nenhum
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; URL reconstruída de número validado; Confirmação nativa
 - **Registro:** Diagnóstico IPC
 
 ### `contexto_projeto`

@@ -1,4 +1,10 @@
-# Aplicativo desktop (Windows) — Prumo QA 2.5
+# Aplicativo desktop (Windows) — Prumo QA 2.6
+
+Na 2.6, Conexões usa `painel.ts > integracoes.ts`: inspeciona metadados compatíveis, testa o MCP do próprio produto via SDK e mostra separadamente chamadas observadas com classificação atual. O núcleo e as quatro ferramentas permanecem os mesmos. Evidências de protocolo ficam em `integracoes/<hash>/<uuid>.json`; o teste chama somente consultar_evidencias.
+
+Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `src/chamados.ts` lê os rótulos definidos em `app/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
+
+O gerador `scripts/gerar-site.mjs` usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes em [../site/README.md](../site/README.md).
 
 A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama `src/painel.ts`, que delega a `projeto`, `atividades`, `evidencias` e `conexoes`.
 
@@ -6,7 +12,7 @@ A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não
 
 ```text
 Janela (app/renderer: HTML+CSS+JS, sandbox, CSP, sem rede)
-   │  window.prumo.*  (app/preload.cjs — 28 funções, objeto congelado)
+   │  window.prumo.*  (app/preload.cjs — ponte mínima catalogada, objeto congelado)
    ▼
 Processo principal Electron (src/desktop/main.ts)
    │  canais IPC `prumo:*`: confere remetente, valida com zod, devolve {ok,data|error}

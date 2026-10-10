@@ -1,4 +1,14 @@
-# Prumo QA 2.5 — Suporte, avisos de versão, contextos e laboratório
+# Prumo QA 2.6 — Integrações verificáveis e documentação pública
+
+Código da evolução 2.6; o estado de publicação fica em `app/versoes.json`. Baseline real da 2.5 em [docs/BASELINE-2.6.md](docs/BASELINE-2.6.md).
+
+## Evolução 2.6
+
+- Conexões distingue configuração compatível, validação de protocolo SDK e chamada observada de cliente. O botão **Testar integração** verifica handshake, quatro ferramentas e leitura, com UUID próprio. Não executa capabilities nem comprova que Claude/Codex usou o servidor.
+- Registros novos guardam somente referências de contextos incluídos/consultados (id, versão, hash, estado e finalidade). Não afirmam que o agente seguiu as regras.
+- Suporte exporta Markdown com id explicitamente LOCAL e consulta, por ação sua, rótulos e eventos da issue oficial. Status e respostas continuam no GitHub, sem segunda base sincronizada.
+- Documentação pública: `npm.cmd run site` gera `site/public` das fontes de ajuda, contratos e versões; configuração Render em `render.yaml`. O site não acessa projetos locais nem executa testes.
+- Skills QA e Playwright aprofundadas, referência de engenharia e Skill `acessibilidade`. As especializações precisam ser instaladas no cliente; MCP não as carrega universalmente.
 
 Camada local de engenharia de qualidade para agentes que já desenvolvem software. Entende o contexto autorizado de um projeto, confere estrutura de planos de teste, controla execução e preserva evidências. A IA hospedeira interpreta requisitos e riscos; o núcleo impõe regras determinísticas. Não exige outra chave de LLM.
 

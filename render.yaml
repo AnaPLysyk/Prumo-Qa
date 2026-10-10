@@ -1,0 +1,25 @@
+services:
+  - type: web
+    runtime: static
+    name: prumo-qa-docs
+    repo: https://github.com/AnaPLysyk/Prumo-Qa
+    branch: main
+    buildCommand: node scripts/gerar-site.mjs
+    staticPublishPath: site/public
+    autoDeployTrigger: "off"
+    envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action https://github.com"
