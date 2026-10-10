@@ -4,7 +4,7 @@ import {lerLocal,gravarLocal} from './armazenamentoLocal.js';
 import {servicoSchema,obterEspaco,listarEspacos,gravarVinculo,estadoVinculo,registrarConsulta,configurarAceite,type Servico,type Recurso} from './espacos.js';
 import {cofreCredenciais,type Protetor} from './credenciais.js';
 import {AdaptadorServico,type OperacaoServico} from './adaptadoresServicos.js';
-import {ErroServico,instanciaServico,paginaSchema,transporteHttps,type TransporteServico} from './httpServicos.js';
+import {ErroServico,instanciaServico,paginaSchema,transporteHttps,transporteEscritaJira,type TransporteServico,type TransporteEscrita} from './httpServicos.js';
 import {mascarar} from './projeto.js';
 
 export const conexaoEntrada=z.object({servico:servicoSchema,nome:z.string().trim().min(1).max(100),instancia:z.string().max(300).optional(),usuario:z.string().email().max(200).optional(),token:z.string().min(1).max(6000).regex(/^[^\x00-\x1f]+$/)}).strict();
@@ -14,10 +14,10 @@ const registro=z.object({version:z.literal(1),contas:z.array(contaSchema).max(10
 const ler=(base?:string)=>lerLocal('contas.json',registro,{version:1,contas:[]},base);
 export const listarContas=(base?:string)=>ler(base).contas;
 /** Dependências só do processo principal. Testes fornecem doubles; nenhum toggle em produção. */
-export function nucleoServicos(protetor:Protetor,transporte:TransporteServico=transporteHttps,base?:string){
+export function nucleoServicos(protetor:Protetor,transporte:TransporteServico=transporteHttps,base?:string,escrita:TransporteEscrita=transporteEscritaJira){
   const cofre=cofreCredenciais(protetor,base);
   const conta=(id:string)=>{const c=ler(base).contas.find(c=>c.id===id&&c.ativa);if(!c)throw new ErroServico('CREDENTIAL_UNAVAILABLE');return c;};
-  const adaptador=(c:Conta)=>new AdaptadorServico({...c,token:cofre.ler(c.id)},transporte);
+  const adaptador=(c:Conta)=>new AdaptadorServico({...c,token:cofre.ler(c.id)},transporte,escrita);
   const estadoErro=(e:unknown)=>e instanceof ErroServico?(e.codigo==='SERVICE_PERMISSION'?'SEM_PERMISSAO':e.codigo==='CREDENTIAL_INVALID_OR_EXPIRED'||e.codigo==='CREDENTIAL_UNAVAILABLE'?'SEM_CREDENCIAL':e.codigo==='SERVICE_NOT_FOUND'||e.codigo==='SERVICE_SCOPE_CHANGED'?'DESATUALIZADO':'INDISPONIVEL'):'INDISPONIVEL';
   const codigoErro=(e:unknown)=>e instanceof ErroServico?e.codigo:'CREDENTIAL_UNAVAILABLE';
   const vinculo=(espacoId:string,servico:Servico)=>{const v=obterEspaco(espacoId,base).vinculos.find(v=>v.servico===servico);if(!v)throw new Error('WORKSPACE_LINK_NOT_FOUND');return v;};
@@ -50,6 +50,9 @@ export function nucleoServicos(protetor:Protetor,transporte:TransporteServico=tr
       try{const v=await verificar(espacoId,servico);const r=await v.adaptador.consultar(v.recurso,operacao,pagina,id,v.campoAceite);registrarConsulta(espacoId,servico,'OK',base);return r;}
       catch(e){registrarConsulta(espacoId,servico,codigoErro(e),base);throw e;}
     },
+    /** Escrita controlada (2.8): só comentário Jira, depois de revalidar conta, vínculo e projeto. */
+    async comentarJira(espacoId:string,ticket:string,adf:unknown){try{const v=await verificar(espacoId,'jira');const r=await v.adaptador.publicarComentario(v.recurso,ticket,adf);registrarConsulta(espacoId,'jira','COMMENT_OK',base);return {...r,vinculoId:vinculo(espacoId,'jira').id,conexaoId:vinculo(espacoId,'jira').conexaoId};}catch(e){registrarConsulta(espacoId,'jira',codigoErro(e),base);throw e;}},
+    async procurarComentarioJira(espacoId:string,ticket:string,marcador:string){const v=await verificar(espacoId,'jira');return v.adaptador.procurarComentario(v.recurso,ticket,marcador);},
     async campoAceite(espacoId:string,campo:string){const v=await verificar(espacoId,'jira');const r=await v.adaptador.consultar(v.recurso,'campos');if(!Array.isArray(r.dados)||!r.dados.some(x=>x.id===campo&&x.custom===true))throw new Error('JIRA_FIELD_NOT_AVAILABLE');return configurarAceite(espacoId,campo,base);}
   };
 }

@@ -20,24 +20,30 @@ export function enderecoPublico(ip:string){
 }
 export type PedidoServico={servico:Servico;instancia:string;caminho:string;headers:Record<string,string>;timeoutMs?:number};
 export type TransporteServico=(pedido:PedidoServico)=>Promise<unknown>;
-export const transporteHttps:TransporteServico=async p=>{
+async function requisitar(p:PedidoServico,metodo:'GET'|'POST',corpo?:string):Promise<unknown>{
   const origem=instanciaServico(p.servico,p.instancia);if(origem!==p.instancia||!p.caminho.startsWith('/')||p.caminho.startsWith('//'))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   const u=new URL(p.caminho,origem);if(u.origin!==origem)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   const base=p.servico==='jira'?'/rest/api/3/':p.servico==='qase'?'/v1/':'/';if(!u.pathname.startsWith(base))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
-  // Resolve UMA vez e fixa o IP no socket TLS. Não segue redirects e nunca envia corpo.
+  if(metodo==='POST'&&(p.servico!=='jira'||!/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/comment$/.test(u.pathname)||u.search))throw new ErroServico('SERVICE_WRITE_BLOCKED');
+  // Resolve UMA vez e fixa o IP no socket TLS. Não segue redirects. Corpo só existe no POST de comentário (2.8).
   let ip:string;let dnsTimer:ReturnType<typeof setTimeout>|undefined;try{const r=await Promise.race([lookup(u.hostname,{family:4}),new Promise<never>((_,reject)=>{dnsTimer=setTimeout(()=>reject(new ErroServico('SERVICE_TIMEOUT')),3000);dnsTimer.unref();})]);ip=r.address;}catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_UNAVAILABLE');}finally{clearTimeout(dnsTimer);}
   if(!enderecoPublico(ip))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   return new Promise((resolve,reject)=>{
     let encerrado=false;const fim=(e?:Error,v?:unknown)=>{if(encerrado)return;encerrado=true;clearTimeout(timer);e?reject(e):resolve(v);};
-    const req=https.request(u,{method:'GET',agent:false,headers:{Accept:'application/json','User-Agent':'Prumo-QA-desktop',...p.headers},lookup:(_h,_o,cb)=>cb(null,ip,4)},res=>{
+    const req=https.request(u,{method:metodo,agent:false,headers:{Accept:'application/json','User-Agent':'Prumo-QA-desktop',...(corpo!==undefined?{'Content-Type':'application/json','Content-Length':String(Buffer.byteLength(corpo))}:{}),...p.headers},lookup:(_h,_o,cb)=>cb(null,ip,4)},res=>{
       const status=res.statusCode??0;
-      if(status!==200){res.resume();const code=status===401?'CREDENTIAL_INVALID_OR_EXPIRED':status===403?(res.headers['x-ratelimit-remaining']==='0'?'SERVICE_RATE_LIMIT':'SERVICE_PERMISSION'):status===404?'SERVICE_NOT_FOUND':status===429?'SERVICE_RATE_LIMIT':status>=300&&status<400?'SERVICE_REDIRECT_BLOCKED':status>=500?'SERVICE_UNAVAILABLE':'SERVICE_RESPONSE_INVALID';fim(new ErroServico(code));return;}
+      if(status!==(metodo==='POST'?201:200)){res.resume();const code=status===401?'CREDENTIAL_INVALID_OR_EXPIRED':status===403?(res.headers['x-ratelimit-remaining']==='0'?'SERVICE_RATE_LIMIT':'SERVICE_PERMISSION'):status===404?'SERVICE_NOT_FOUND':status===429?'SERVICE_RATE_LIMIT':status>=300&&status<400?'SERVICE_REDIRECT_BLOCKED':status>=500?'SERVICE_UNAVAILABLE':'SERVICE_RESPONSE_INVALID';fim(new ErroServico(code));return;}
       if(!/\bapplication\/(?:[a-z.+-]*\+)?json\b/i.test(String(res.headers['content-type']??''))){res.destroy();fim(new ErroServico('SERVICE_RESPONSE_INVALID'));return;}
       let size=0;const chunks:Buffer[]=[];res.on('data',b=>{size+=b.length;if(size>2*1024*1024){res.destroy();fim(new ErroServico('SERVICE_RESPONSE_LIMIT'));}else chunks.push(b);});
       res.on('end',()=>{try{fim(undefined,JSON.parse(Buffer.concat(chunks).toString('utf8')));}catch{fim(new ErroServico('SERVICE_RESPONSE_INVALID'));}});res.on('error',()=>fim(new ErroServico('SERVICE_UNAVAILABLE')));
     });
     const timer=setTimeout(()=>{req.destroy();fim(new ErroServico('SERVICE_TIMEOUT'));},p.timeoutMs??10000);
-    req.on('error',()=>fim(new ErroServico('SERVICE_UNAVAILABLE')));req.end();
+    req.on('error',()=>fim(new ErroServico('SERVICE_UNAVAILABLE')));req.end(corpo);
   });
-};
+}
+export const transporteHttps:TransporteServico=p=>requisitar(p,'GET');
+/** Única escrita remota do produto (2.8): um comentário em um ticket Jira. Qualquer outro caminho é recusado. */
+export type PedidoEscrita=PedidoServico&{corpo:string};
+export type TransporteEscrita=(pedido:PedidoEscrita)=>Promise<unknown>;
+export const transporteEscritaJira:TransporteEscrita=p=>{if(p.corpo.length>40000)throw new ErroServico('SERVICE_WRITE_BLOCKED');return requisitar(p,'POST',p.corpo);};
 export const paginaSchema=z.object({offset:z.number().int().min(0).max(100000).default(0),cursor:z.string().max(2000).optional(),limite:z.number().int().min(1).max(100).default(50)}).strict();

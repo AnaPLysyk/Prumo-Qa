@@ -1,6 +1,6 @@
 import {z} from 'zod';
 import {mascarar} from './projeto.js';
-import {ErroServico,instanciaServico,paginaSchema,transporteHttps,type TransporteServico} from './httpServicos.js';
+import {ErroServico,instanciaServico,paginaSchema,transporteHttps,transporteEscritaJira,type TransporteServico,type TransporteEscrita} from './httpServicos.js';
 import {identidadeRecurso,type Recurso,type Servico} from './espacos.js';
 
 export const operacoesServico=['tickets','ticket','campos','comentarios','suites','casos','caso','planos','runs','run','resultados','repositorio','branches','commits','prs','pr','verificacoes'] as const;
@@ -23,11 +23,32 @@ export function textoRemoto(v:unknown,limite=20000):string {
   return JSON.stringify(v).slice(0,limite);
 }
 export class AdaptadorServico {
-  constructor(readonly c:ConfigServico,readonly transporte:TransporteServico=transporteHttps){if(instanciaServico(c.servico,c.instancia)!==c.instancia)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');}
+  constructor(readonly c:ConfigServico,readonly transporte:TransporteServico=transporteHttps,readonly escrita:TransporteEscrita=transporteEscritaJira){if(instanciaServico(c.servico,c.instancia)!==c.instancia)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');}
   private async get(caminho:string):Promise<unknown>{
     if(!this.c.token)throw new ErroServico('CREDENTIAL_UNAVAILABLE');
     const headers:Record<string,string>=this.c.servico==='jira'?{Authorization:'Basic '+Buffer.from(this.c.usuario+':'+this.c.token).toString('base64')}:this.c.servico==='github'?{Authorization:'Bearer '+this.c.token,'X-GitHub-Api-Version':'2022-11-28'}:{Token:this.c.token};
     try{return await this.transporte({servico:this.c.servico,instancia:this.c.instancia,caminho,headers});}catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_UNAVAILABLE');}
+  }
+  private cabecalhos():Record<string,string>{return {Authorization:'Basic '+Buffer.from(this.c.usuario+':'+this.c.token).toString('base64')};}
+  /** Única escrita do produto: um comentário em ticket do projeto vinculado. Confirma o projeto antes de enviar. */
+  async publicarComentario(r:Recurso,ticket:string,adf:unknown):Promise<{id:string}>{
+    if(this.c.servico!=='jira'||!this.c.token)throw new ErroServico('SERVICE_WRITE_BLOCKED');
+    if(!/^[A-Z][A-Z0-9_]*-\d+$/.test(ticket))throw new ErroServico('SERVICE_RESPONSE_INVALID');
+    await this.consultar(r,'ticket',{},ticket);
+    let resposta:unknown;
+    try{resposta=await this.escrita({servico:'jira',instancia:this.c.instancia,caminho:'/rest/api/3/issue/'+enc(ticket)+'/comment',headers:this.cabecalhos(),corpo:JSON.stringify({body:adf})});}
+    catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_UNAVAILABLE');}
+    try{return {id:z.string().regex(/^\d{1,20}$/).parse(obj.parse(resposta).id)};}catch{throw new ErroServico('SERVICE_RESPONSE_INVALID');}
+  }
+  /** Procura um marcador nos comentários do ticket (até 500), para não duplicar após falha de rede ambígua. */
+  async procurarComentario(r:Recurso,ticket:string,marcador:string):Promise<string|null>{
+    let offset=0;
+    for(let i=0;i<5;i++){
+      const pag=await this.consultar(r,'comentarios',{offset,limite:100},ticket);
+      for(const c of pag.dados as Record<string,unknown>[]){if(textoRemoto(c.body).includes(marcador))return String(c.id);}
+      if(typeof pag.proxima!=='number')return null;offset=pag.proxima;
+    }
+    return null;
   }
   private limpar(v:unknown):unknown {
     if(typeof v==='string')return mascarar(v.slice(0,20000),[this.c.token,Buffer.from((this.c.usuario??'')+':'+this.c.token).toString('base64')]);
