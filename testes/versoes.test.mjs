@@ -37,7 +37,12 @@ test('histórico confere com o Git: tag e release só existem para versões marc
   const tags = execFileSync('git', ['tag'], { encoding: 'utf8' }).split(/\s+/).filter(Boolean);
   for (const v of carregarVersoes('app/versoes.json')) {
     if (v.status === 'publicada' && process.env.CI !== 'true' && tags.length) assert.ok(tags.includes('v' + v.version), `tag v${v.version} ausente`);
-    if (v.status === 'planejada' || v.status === 'repositorio') assert.ok(!tags.includes('v' + v.version) || v.status !== 'planejada', `${v.version} marcada como planejada mas já tem tag`);
+    // Uma versão planejada só pode ter tag enquanto a própria release está sendo construída (a tag aponta para o HEAD);
+    // depois de publicada, a fonte passa a "publicada". Tag antiga apontando para outro commit com a versão ainda planejada é inconsistência.
+    if (v.status === 'planejada' && tags.includes('v' + v.version)) {
+      const git = (...a) => execFileSync('git', a, { encoding: 'utf8' }).trim();
+      assert.equal(git('rev-parse', `v${v.version}^{commit}`), git('rev-parse', 'HEAD'), `${v.version} está planejada mas sua tag aponta para outro commit`);
+    }
   }
 });
 
