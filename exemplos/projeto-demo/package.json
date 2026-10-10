@@ -1,0 +1,1 @@
+{ "name": "prumo-demo", "private": true, "type": "module", "scripts": { "test:e2e": "node testes/validar.mjs" } }

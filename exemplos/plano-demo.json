@@ -1,0 +1,10 @@
+{
+  "requirement": "R1: Somente Editor pode salvar uma publicação.",
+  "source": "README.md R1 e R3, exemplo fictício",
+  "sourcePath": "README.md",
+  "existingTests": [{ "id": "editor-existente", "behavior": "Editor salva publicação", "source": "README.md R1/R3", "risk": "Perda de publicação", "expected": "status 200 e título persistido", "oracle": "retorno e nova leitura", "technique": "equivalence", "partition": "Editor", "testPath": "testes/publicacao.test.mjs" }],
+  "candidates": [
+    { "id": "editor-duplicado", "behavior": "Editor salva publicação", "source": "README.md R1/R3", "risk": "Perda de publicação", "expected": "status 200 e título persistido", "oracle": "retorno e nova leitura", "technique": "equivalence", "partition": "Editor" },
+    { "id": "leitor-negativo", "behavior": "Leitor tenta salvar publicação", "source": "README.md R1/R3", "risk": "Gravação não autorizada", "expected": "status 403 e nenhum dado alterado", "oracle": "retorno e comparação antes/depois", "technique": "equivalence", "partition": "Leitor" }
+  ]
+}
