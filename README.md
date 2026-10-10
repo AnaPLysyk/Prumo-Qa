@@ -1,4 +1,4 @@
-# Prumo QA 2.1 — Observabilidade e Terminal
+# Prumo QA 2.2 — Aplicativo Windows, Observabilidade e Terminal
 
 Camada local de engenharia de qualidade para agentes que já desenvolvem software. Entende o contexto autorizado de um projeto, confere estrutura de planos de teste, controla execução e preserva evidências. A IA hospedeira interpreta requisitos e riscos; o núcleo impõe regras determinísticas. Não exige outra chave de LLM.
 
@@ -23,6 +23,21 @@ Claude / Codex / IA compatível
 
 O terminal consulta arquivos locais; a IA não precisa permanecer ligada. Uma chamada MCP concluída não equivale a teste PASS. A imagem de referência usa números ilustrativos; o programa mostra somente o seu histórico.
 
+## Aplicativo desktop (2.2)
+
+A versão 2.2 acrescenta uma **janela desktop** (Electron) para consultar projetos, métricas, logs, histórico, evidências, conexões de IA e a ajuda (privacidade e termos em rascunho). É só apresentação: usa o mesmo núcleo, não executa testes e não altera projetos. O servidor MCP continua sendo iniciado pelo cliente de IA e **não depende da janela**.
+
+Para usar sem PowerShell, baixe o instalador `Prumo-QA-Setup-<versão>.exe` na página de *Releases* do repositório (não exige Node.js). O instalador **não é assinado**: o SmartScreen ou o Smart App Control podem alertar ou bloquear, e o Prumo não contorna isso. Para desenvolver ou gerar o instalador:
+
+```powershell
+npm.cmd ci
+Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue   # se definido pelo terminal
+npm.cmd run app      # abre a janela em desenvolvimento
+npm.cmd run dist     # release\Prumo-QA-Setup-<versão>.exe
+```
+
+Arquitetura, dados, segurança da janela, troca do ícone (`assets/`), release pelo GitHub Actions e limitações do Smart App Control estão em [docs/APLICATIVO.md](docs/APLICATIVO.md).
+
 ## Instalar no Windows PowerShell
 
 Node **24 LTS** recomendado. Produção requer Node 22 ou superior; suíte usa module mocks experimentais do Node. Git para obter o projeto. Sem Docker, banco, frontend ou servidor remoto.
@@ -39,7 +54,7 @@ Para instalar o comando localmente a partir deste código, sem publicar no npm:
 
 ```powershell
 npm.cmd pack                  # prepack compila TypeScript e broker
-npm.cmd install --global '.\prumo-qa-2.1.0.tgz'
+npm.cmd install --global '.\prumo-qa-2.2.0.tgz'
 prumo.cmd help
 $demo = Join-Path (Get-Location) 'exemplos\projeto-demo'
 prumo.cmd --root "$demo"
@@ -124,6 +139,13 @@ Também pode usar `node .\dist\cli.js`, `npm.cmd run prumo --` ou o script compa
 | `src/evidencias.ts` | Resultados da rodada/casos, armazenamento local, integridade e consulta isolada |
 | `src/atividades.ts` | Diário JSONL externo com Pino, privacidade, integridade, contadores e acompanhamento |
 | `src/conexoes.ts` | Proposta revisável e configuração Codex mediante confirmação, sem sobrescrita |
+| `src/vinculos.ts` | Lista local de projetos vinculados; diagnóstico sem escrever na pasta do projeto |
+| `src/painel.ts` | Adaptador da janela: valida, exige projeto vinculado e delega ao núcleo (sem regra própria) |
+| `src/desktop/main.ts` | Processo Electron: janela, IPC validado, diálogos nativos |
+| `app/preload.cjs`, `app/renderer/` | Ponte mínima (`window.prumo`) e interface HTML/CSS/JS sem frameworks |
+| `app/ajuda/*.md` | Documentos da aba Ajuda (inclui privacidade e termos em rascunho) |
+| `electron-builder.yml`, `assets/` | Instalador NSIS e ícone substituível |
+| `.github/workflows/windows.yml` | Testes, instalador, instalação em pasta com espaços e release por tag |
 | `src/mcp.ts` | Adaptador do SDK oficial, exatamente quatro tools, stdout só para protocolo |
 | `src/cli.ts` | Adaptador terminal, mesmos controles do núcleo |
 | `skills/qa/SKILL.md` | Método de qualidade aplicável do ISTQB, sem meta fixa de cenários |
@@ -305,6 +327,6 @@ Testes sintéticos cobrem PASS/FAIL/BLOCKED/NOT_RUN, paths, symlinks, manifesto,
 
 ## Estado e limites
 
-Implementados núcleo local, contrato, quatro tools, CLI/menu, atividades, métricas, Pino, conector Codex, aprovação Windows, Skill, exemplo e testes. Fora desta versão: frontend, dashboard, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas e sandbox forte. Ink, OpenTelemetry, executável único/instalador e métricas de provedores ficam para necessidades futuras. Sem transferência automática entre empresas. Detalhes da entrega atual em [docs/ENTREGA-2.1.md](docs/ENTREGA-2.1.md); relatórios 2.0 são históricos.
+Implementados núcleo local, contrato, quatro tools, CLI/menu, atividades, métricas, Pino, conector Codex, aprovação Windows, Skill, exemplo, testes e, na 2.2, a janela desktop com instalador Windows (NSIS, não assinado). Fora desta versão: dashboard web, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas, sandbox forte, assinatura de código, atualização automática, Ink, OpenTelemetry e métricas de provedores. Sem transferência automática entre empresas. Detalhes da entrega atual em [docs/ENTREGA-2.2.md](docs/ENTREGA-2.2.md); relatórios 2.0 e 2.1 são históricos.
 
 G3 é inspecionado por contrato externo readOnly e commands vazio, sem alterar seu repositório. E2E permanece bloqueado. Diagnóstico real e validações estão em docs/DIAGNOSTICO-G3.md e docs/VALIDACAO.md. Autenticação humana end-to-end e plataformas sem Windows podem exigir participação posterior, descrita no relatório de entrega. Nenhuma pendência é mascarada por PASS.

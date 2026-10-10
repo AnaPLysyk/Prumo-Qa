@@ -1,0 +1,69 @@
+name: Windows — testes, instalador e release
+
+# Gera o instalador NSIS numa máquina Windows limpa, instala em pasta com espaços,
+# roda a automação de interface sobre o executável INSTALADO, testa o MCP sem Node na PATH
+# e desinstala verificando que os dados do usuário permanecem.
+# Release (instalador NÃO ASSINADO) só é criada para tags v*.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Verificação completa (tipos, build, unitários, MCP, segurança, CLI, janela em desenvolvimento)
+        run: npm run check
+      - name: Gerar instalador
+        run: npm run dist
+      - name: Instalar em pasta com espaços e acentos
+        shell: pwsh
+        run: |
+          $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
+          $dir = 'C:\Prumo QA instalação'
+          Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -Wait
+          if (-not (Test-Path "$dir\Prumo QA.exe")) { throw 'Executável não instalado' }
+          if (-not (Test-Path "$dir\Uninstall Prumo QA.exe")) { throw 'Desinstalador ausente' }
+          $menu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Prumo QA.lnk'
+          $desktop = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Prumo QA.lnk'
+          foreach ($atalho in $menu, $desktop) { if (-not (Test-Path $atalho)) { throw "Atalho ausente: $atalho" } }
+          "PRUMO_APP_EXE=$dir\Prumo QA.exe" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+      - name: Janela e MCP do programa instalado (sem Node.js dedicado ao app)
+        run: node --test --test-concurrency=1 testes/desktop.test.mjs
+      - name: Desinstalar e conferir que dados do usuário permanecem
+        shell: pwsh
+        run: |
+          $dados = Join-Path $env:LOCALAPPDATA 'PrumoQA'
+          New-Item -ItemType Directory -Force $dados | Out-Null
+          Set-Content (Join-Path $dados 'marca-de-teste.txt') 'preservar'
+          $dir = 'C:\Prumo QA instalação'
+          Start-Process -FilePath "$dir\Uninstall Prumo QA.exe" -ArgumentList '/S' -Wait
+          for ($i = 0; $i -lt 60 -and (Test-Path "$dir\Prumo QA.exe"); $i++) { Start-Sleep 1 }
+          if (Test-Path "$dir\Prumo QA.exe") { throw 'Programa não foi removido' }
+          if (-not (Test-Path (Join-Path $dados 'marca-de-teste.txt'))) { throw 'Desinstalação apagou dados do usuário' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prumo-qa-instalador
+          path: release/Prumo-QA-Setup-*.exe
+          if-no-files-found: error
+      - name: Criar release (instalador não assinado)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/Prumo-QA-Setup-*.exe
+          body_path: .github/release-notes.md
