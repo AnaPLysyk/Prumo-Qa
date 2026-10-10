@@ -103,7 +103,7 @@ jobs:
       - name: Estado da assinatura do instalador (verificado, não presumido)
         shell: pwsh
         run: |
-          $setup = (Get-ChildItem releasePrumo-QA-Setup-*.exe).FullName
+          $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
           $ass = Get-AuthenticodeSignature $setup
           "Assinatura do instalador: $($ass.Status)"
           $assinado = ($ass.Status -eq 'Valid')
