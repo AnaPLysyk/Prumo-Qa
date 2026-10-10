@@ -10,6 +10,7 @@ Ambiente: Windows, PowerShell, Node v24.20.0, npm 11.19.0, SDK MCP 1.32.1, TypeS
 | `npm run typecheck` | PASS, TypeScript sem erros |
 | `npm run build` | PASS, dist e broker Windows compilados |
 | `npm run check` | PASS: tipos + build + **40 testes, 40 aprovados, zero falhas/skip/todo** |
+| `npm ci` + `npm run check` em clone limpo com caminho `Prumo instalação limpa` | PASS: instalação do lock, compilação e os mesmos **40 testes aprovados** |
 | `npm run demo` | CLI e cliente MCP real; consultas aprovadas; execução Prumo BLOCKED sem consentimento |
 | `node --test testes/publicacao.test.mjs` no demo (executado pelo script de demonstração) | 3 testes aprovados: persistência, autorização negativa e limites 0/1/80/81 |
 | MCP Inspector CLI `--method tools/list` | Quatro tools listadas pelo servidor real |
@@ -52,6 +53,7 @@ Após correções, suíte inteira foi repetida e passou. Não alteramos assertio
 Em `C:\Users\DELL\projetos-github\Prumo-Qa\.prumo\demonstracao\`:
 
 - `checks-finais.txt`: tipos/build e resultados individuais da suíte.
+- `instalacao-limpa.txt`: instalação/build/testes de outro checkout, com espaços e acentos no caminho.
 - `demonstracao.json`: CLI, consultas e bloqueio real.
 - `protocolo-mcp.json`: tools/list e quatro tools/call do SDK Client.
 - `inspector-list.json`, `inspector-contexto.json`: MCP Inspector CLI real.
