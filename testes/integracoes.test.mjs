@@ -40,6 +40,11 @@ test('referências de contexto preservam somente id, versão, hash e estado; nom
   const e=consultarAtividades(p).activities[0]; assert.equal(e.client,'sdk');
   assert.deepEqual(e.summary.contextReferences,[{id:ref.id,versao:2,hash:ref.hash,estado:ref.estado,uso:'incluido_na_resposta'}]);
   assert.doesNotMatch(JSON.stringify(e),/conteudo-privado|pessoa-privada/);
+  const revisao=iniciarAtividade(p,'revisar_cobertura',{origin:'MCP',client:'codex'});
+  revisao.finalizar({state:'NOT_VERIFIED',executed:false,facts:[{...ref,kind:'context_used'}],findings:[{type:'PW_ESPERA_FIXA',recommendation:'recomendação sintética'}]});
+  const historico=consultarAtividades(p);assert.equal(historico.complete,true);
+  const fim=historico.activities.find(a=>a.tool==='revisar_cobertura');assert.equal(fim.summary.executed,false);
+  assert.equal(fim.summary.contextReferences[0].uso,'consultado_na_revisao');assert.equal(fim.summary.findings,1);
 });
 test('falha real na leitura de evidência preserva handshake e lista, registra erro e não executa capability',async t=>{
   const f=await fixture(t);const p=await carregarProjeto(f.root);fs.mkdirSync(path.join(f.root,'.prumo/evidencias'),{recursive:true});

@@ -188,11 +188,17 @@ export function consultarAtividades(p:Projeto,base?:string) {
       const linhas=raw.split('\n');const incompleta=linhas.pop();
       if(incompleta)problemas.push({file:nome,code:'TRUNCATED_LINE'});
       if(!linhas.length || linhas.length>2)falha('HISTORY_CORRUPT');
-      const lidos=linhas.map(l=>eventoSchema.parse(JSON.parse(l)));
+      const lidos=linhas.map(l=>{
+        const raw=JSON.parse(l);const e=eventoSchema.parse(raw);
+        // O digest corresponde à ordem efetivamente gravada. Zod projeta as chaves
+        // na ordem do esquema; isso não pode invalidar um registro íntegro antigo.
+        const {level,digest,...conteudo}=raw;
+        if(hash(JSON.stringify(conteudo))!==digest)falha('HISTORY_DIGEST_MISMATCH');
+        return e;
+      });
       for(const e of lidos)if(e.operationId+'.jsonl'!==nome||e.rootHash!==hash(p.raiz)||e.projectId!==hash(p.manifesto.id))falha('HISTORY_PROJECT_MISMATCH');
       for(const e of lidos) {
-        const {level,digest,...conteudo}=e;
-        if(hash(JSON.stringify(conteudo))!==digest)falha('HISTORY_DIGEST_MISMATCH');
+        const {level}=e;
         if(level!==(e.state==='ERROR'||e.state==='FAIL'?50:e.state==='BLOCKED'?40:30))falha('HISTORY_LEVEL_MISMATCH');
         const s=e.summary;
         if(new Set(s.types.map(t=>t.type)).size!==s.types.length || s.findings!==s.types.reduce((n,t)=>n+t.count,0) || s.recommendations>s.findings || s.gaps!==s.types.filter(t=>ehLacuna(t.type)).reduce((n,t)=>n+t.count,0) || s.candidateRedundancies!==(s.types.find(t=>t.type==='POTENTIAL_REDUNDANCY')?.count??0))falha('HISTORY_COUNTER_MISMATCH');

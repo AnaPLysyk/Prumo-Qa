@@ -83,7 +83,7 @@ jobs:
           if ($codigo -ne 0) { exit $codigo }
           if ((Select-String -Path migracao.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Testes de migração foram ignorados: etapa inválida' }
       - name: Janela e MCP do programa instalado (sem Node.js dedicado ao app)
-        run: node --test --test-concurrency=1 testes/desktop.test.mjs testes/desktop-ajuda.test.mjs
+        run: node --test --test-concurrency=1 testes/desktop.test.mjs testes/desktop-ajuda.test.mjs testes/desktop-integracoes.test.mjs
       - name: Desinstalar e conferir que dados do usuário permanecem
         shell: pwsh
         run: |
