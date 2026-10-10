@@ -56,7 +56,7 @@ async function menu(p:Projeto,contrato?:string,json=false) {
     const h=consultarAtividades(p);const m=calcularMetricas(h);problemas(h.problems);
     const ultima=h.activities.filter(e=>e.origin==='MCP').at(-1);
     if(json){imprimir({project:p.manifesto.name,metrics:m,lastObservedClient:ultima?.client??null,connection:'Sessão ativa não verificada'});return;}
-    console.log(`\nPRUMO QA · v2.1\nEngenharia de Qualidade\n\nProjeto: ${texto(p.manifesto.name)}\nConexão: ${ultima?'última chamada observada de '+ultima.client+' (identidade declarada)':'nenhuma chamada MCP observada'}; sessão ativa não verificada\nÚltima atividade: ${m.lastActivity??'nenhuma'}\n\nATIVIDADES\n  ${m.totalOperations} operações registradas · ${m.mcpCalls} via MCP\n  ${m.coverageReviews} revisões de cobertura\n  ${m.gaps} lacunas identificadas\n\nOPÇÕES\n  1. Atividades recentes\n  2. Logs\n  3. Métricas\n  4. Evidências\n  5. Conexões\n  0. Sair\n`);
+    console.log(`\nPRUMO QA · v2.2\nEngenharia de Qualidade\n\nProjeto: ${texto(p.manifesto.name)}\nConexão: ${ultima?'última chamada observada de '+ultima.client+' (identidade declarada)':'nenhuma chamada MCP observada'}; sessão ativa não verificada\nÚltima atividade: ${m.lastActivity??'nenhuma'}\n\nATIVIDADES\n  ${m.totalOperations} operações registradas · ${m.mcpCalls} via MCP\n  ${m.coverageReviews} revisões de cobertura\n  ${m.gaps} lacunas identificadas\n\nOPÇÕES\n  1. Atividades recentes\n  2. Logs\n  3. Métricas\n  4. Evidências\n  5. Conexões\n  0. Sair\n`);
   };
   painel();if(json||!process.stdin.isTTY||!process.stdout.isTTY)return;
   const rl=createInterface({input:process.stdin,output:process.stdout});rl.setPrompt('Opção: ');rl.prompt();

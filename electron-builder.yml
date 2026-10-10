@@ -1,0 +1,44 @@
+# Instalador Windows (NSIS). Gerar: npm run dist  ->  release/Prumo-QA-Setup-<versão>.exe
+appId: com.anaplysyk.prumoqa
+productName: Prumo QA
+executableName: Prumo QA
+copyright: Ana P. Lysyk
+# Sem asar: o servidor MCP (dist/mcp.js) e o aprovar.exe precisam existir como arquivos reais no disco.
+asar: false
+directories:
+  output: release
+  buildResources: assets
+files:
+  - dist/**
+  - app/**
+  - assets/**
+  - skills/**
+  - package.json
+  - "!dist/**/*.map"
+  - "!dist/**/*.d.ts"
+extraResources:
+  # Projeto de demonstração (somente leitura na instalação; o app o copia para LOCALAPPDATA ao vincular).
+  - from: exemplos/projeto-demo
+    to: demo
+    filter: ["**/*", "!.prumo/**", "!node_modules/**"]
+win:
+  icon: assets/prumo-icon.ico
+  target:
+    - target: nsis
+      arch: x64
+  # Sem certificado de assinatura: o instalador sai NÃO ASSINADO (veja docs/APLICATIVO.md).
+  signAndEditExecutable: true
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Prumo QA
+  runAfterFinish: true
+  # Desinstalar não apaga histórico nem evidências do usuário.
+  deleteAppDataOnUninstall: false
+  artifactName: Prumo-QA-Setup-${version}.exe
+  installerIcon: assets/prumo-icon.ico
+  uninstallerIcon: assets/prumo-icon.ico
+publish: null

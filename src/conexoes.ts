@@ -26,9 +26,12 @@ export function prepararConexao(p:Projeto,cliente:string,contrato?:string) {
   const nome=`prumo-${p.manifesto.id}-${hash(p.raiz).slice(0,8)}`;
   const server=fileURLToPath(new URL('./mcp.js',import.meta.url));
   if(process.env.PRUMO_DATA_DIR)pastaAtividades(p); // valida destino externo, sem escrever
-  const env=process.env.PRUMO_DATA_DIR?{PRUMO_DATA_DIR:process.env.PRUMO_DATA_DIR}:{};
+  const env:Record<string,string>={...(process.env.PRUMO_DATA_DIR?{PRUMO_DATA_DIR:process.env.PRUMO_DATA_DIR}:{})};
+  // No aplicativo empacotado, process.execPath é o executável do Prumo (Electron), não um Node avulso:
+  // este modo o faz comportar-se como Node puro para o servidor MCP, sem abrir janela.
+  if(process.versions.electron)env.ELECTRON_RUN_AS_NODE='1';
   const configuracao={command:process.execPath,args:[server,p.raiz,...(contrato?[contrato]:[])],env};
-  const ambiente=env.PRUMO_DATA_DIR?['--env',`PRUMO_DATA_DIR=${env.PRUMO_DATA_DIR}`]:[];
+  const ambiente=Object.entries(env).flatMap(([k,v])=>['--env',`${k}=${v}`]);
   const args=cliente==='codex'?['mcp','add',nome,...ambiente,'--',configuracao.command,...configuracao.args]:['mcp','add','--transport','stdio','--scope','user',nome,...ambiente,'--',configuracao.command,...configuracao.args];
   const instalado=localizar(cliente);
   const destino=cliente==='codex'?path.join(process.env.CODEX_HOME||path.join(os.homedir(),'.codex'),'config.toml'):path.join(os.homedir(),'.claude.json');

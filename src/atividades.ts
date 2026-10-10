@@ -65,10 +65,15 @@ function semLinks(alvo:string) {
     catch(e) { if((e as NodeJS.ErrnoException).code==='ENOENT')return;throw e; }
   }
 }
-export function pastaAtividades(p:Projeto, base=process.env.PRUMO_DATA_DIR):string {
+/** Diretório de dados do usuário (histórico, vínculos). PRUMO_DATA_DIR sobrepõe o padrão. */
+export function diretorioDados(base=process.env.PRUMO_DATA_DIR):string {
   const padrao=process.platform==='win32' ? path.join(process.env.LOCALAPPDATA || path.join(os.homedir(),'AppData','Local'),'PrumoQA') : path.join(os.homedir(),'.local','share','prumo-qa');
   const dados=base ?? padrao;
   if(!path.isAbsolute(dados))falha('HISTORY_ABSOLUTE_PATH_REQUIRED');
+  return dados;
+}
+export function pastaAtividades(p:Projeto, base=process.env.PRUMO_DATA_DIR):string {
+  const dados=diretorioDados(base);
   const alvo=path.resolve(dados,'projects',hash(p.raiz+'\0'+p.manifesto.id));
   if(dentro(p.raiz,path.resolve(dados)) || dentro(p.raiz,alvo))falha('HISTORY_INSIDE_PROJECT');
   semLinks(alvo);return alvo;

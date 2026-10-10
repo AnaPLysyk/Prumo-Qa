@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' file:; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prumo QA</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header>
+    <div class="marca"><img src="../../assets/prumo-icon.png" alt="" width="24" height="24"><strong>Prumo QA</strong><span id="versao" class="suave"></span></div>
+    <div class="projeto"><span class="suave">Projeto</span> <strong id="projeto-atual">nenhum selecionado</strong></div>
+    <nav id="nav" aria-label="Seções">
+      <button data-aba="projetos">Projetos</button>
+      <button data-aba="metricas">Métricas</button>
+      <button data-aba="logs">Logs</button>
+      <button data-aba="historico">Histórico</button>
+      <button data-aba="evidencias">Evidências</button>
+      <button data-aba="conexoes">Conexões</button>
+      <button data-aba="ajuda">Ajuda</button>
+    </nav>
+  </header>
+  <main id="conteudo" tabindex="-1"></main>
+  <div id="aviso" role="status" aria-live="polite" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>

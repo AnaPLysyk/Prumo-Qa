@@ -1,7 +1,7 @@
 {
   "name": "prumo-qa",
-  "version": "2.1.0",
-  "description": "Engenharia de qualidade local: contexto, contratos, MCP e evidências",
+  "version": "2.2.0",
+  "description": "Engenharia de qualidade local: contexto, contratos, MCP, evidências e aplicativo desktop Windows",
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
@@ -15,6 +15,8 @@
     "dist",
     "skills",
     "docs",
+    "app",
+    "assets",
     "scripts/aprovar.cs",
     "README.md"
   ],
@@ -27,7 +29,10 @@
     "demo": "node scripts/demonstrar.mjs",
     "check": "npm run typecheck && npm test",
     "prumo": "node dist/cli.js",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "app": "npm run build && electron .",
+    "icone": "node scripts/gerar-icone.mjs",
+    "dist": "npm run build && electron-builder --win nsis --publish never"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
@@ -36,6 +41,15 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "playwright-core": "1.64.0",
     "typescript": "^5.9.3"
-  }
+  },
+  "author": {
+    "name": "Ana P. Lysyk",
+    "url": "https://github.com/AnaPLysyk"
+  },
+  "homepage": "https://github.com/AnaPLysyk/Prumo-Qa",
+  "main": "dist/desktop/main.js"
 }

@@ -56,7 +56,7 @@ export async function criarServidor(raiz:string, contratoLeitura?:string) {
     if(atual.manifesto.id!==vinculo.manifesto.id)throw new ErroQa('PROJECT_BINDING_CHANGED','Identidade do projeto mudou; reinicie o servidor para vincular o novo histórico.');
     return atual;
   };
-  const servidor=new McpServer({name:'prumo-qa',version:'2.1.0'});
+  const servidor=new McpServer({name:'prumo-qa',version:'2.2.0'});
   const conectar=servidor.connect.bind(servidor);
   servidor.connect=t=>conectar(transporteObservado(t,vinculo,()=>servidor.server.getClientVersion()?.name));
   const resposta=async(fn:()=>Promise<unknown>)=>{
