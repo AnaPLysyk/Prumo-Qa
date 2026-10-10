@@ -13,7 +13,7 @@ function h(tag, attrs, ...filhos) {
   for (const f of filhos.flat()) if (f != null && f !== false) el.append(f.nodeType ? f : document.createTextNode(String(f)));
   return el;
 }
-const selo = (s) => h('span', { class: 'estado ' + s }, s.replaceAll('_', ' '));
+const selo = (s) => h('span', { class: 'estado ' + s }, s==='NAO_CONFIGURADO'?'NÃO CONFIGURADO':s.replaceAll('_', ' '));
 const hora = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR') : '—');
 const ms = (n) => (n === null || n === undefined ? 'indisponível' : Math.round(n * 10) / 10 + ' ms');
 
@@ -187,7 +187,7 @@ const abas = {
     el.append(h('table', {}, h('thead', {}, h('tr', {}, ['Quando', 'Operação', 'Resultado', 'Achados', 'Evidência'].map((t) => h('th', {}, t)))),
       h('tbody', {}, r.activities.map((a) => h('tr', {},
         h('td', {}, hora(a.at), h('div', { class: 'suave' }, a.origin + '/' + a.client + ' (declarado)')),
-        h('td', {}, a.tool, h('div', { class: 'suave' }, h('code', {}, a.operationId))),
+        h('td', {}, a.tool, h('div', { class: 'suave' }, h('code', {}, a.operationId)),a.summary.contextReferences?.length?h('details',{},h('summary',{},'Referências de contexto'),h('pre',{},JSON.stringify(a.summary.contextReferences,null,2))):null),
         h('td', {}, selo(a.state), h('div', { class: 'suave' }, a.phase === 'start' ? 'sem término observado' : ms(a.durationMs)), a.summary.code ? h('div', { class: 'suave' }, a.summary.code) : null),
         h('td', {}, a.summary.findings + ' achados · ' + a.summary.recommendations + ' recomendações · ' + a.summary.gaps + ' lacunas · ' + a.summary.candidateRedundancies + ' redundâncias candidatas', a.findingsText ? h('div', { class: 'suave' }, a.findingsText) : null),
         h('td', {}, a.summary.evidenceJobId ? h('button', { class: 'acao', onclick: () => { estado.jobId = a.summary.evidenceJobId; mostrar('evidencias'); } }, a.summary.evidenceJobId.slice(0, 8) + (a.summary.evidencePersisted === false ? ' (não persistida)' : '')) : '—'))))));
@@ -214,15 +214,34 @@ const abas = {
     if (!estado.root) return el.append(semProjeto());
     const r = await chamar(() => api.conexoes(estado.root)); if (!r) return;
     for (const c of r) {
+      const diagnostico = h('div', { 'aria-live': 'polite' });
+      const mostrar = (d) => diagnostico.replaceChildren(...[h('p', {}, 'Estado: ', selo(d.state)),
+        h('p', {}, 'Projeto: ', d.project, ' · Configuração: ', d.inspection?.code||'diagnóstico indisponível'),
+        h('p', {}, 'Último teste de protocolo (SDK): ', d.lastProtocol ? `${hora(d.lastProtocol.at)} · ${d.lastProtocol.state} · ${ms(d.lastProtocol.durationMs)} · ${d.lastProtocol.code}${d.protocolCurrent ? '' : ' · escopo anterior'}` : 'não executado'),
+        d.lastProtocol ? h('p', {}, 'Evidência SDK: ', h('code', {}, d.lastProtocol.id), ' · handshake: ', String(d.lastProtocol.handshake), ' · ferramentas: ', d.lastProtocol.tools.join(', '), ' · leitura: ', String(d.lastProtocol.read)) : null,
+        h('p', {}, 'Última chamada observada do cliente (identidade declarada): ', d.lastObserved ? `${hora(d.lastObserved.at)} · ${d.lastObserved.tool} · ${ms(d.lastObserved.durationMs)} · ${d.lastObserved.id}` : 'nenhuma'),
+        h('p', {}, 'Ferramentas utilizadas pelo cliente: ', d.toolsUsed.join(', ') || 'nenhuma'),
+        d.lastObserved?.contextReferences.length ? h('pre', {}, JSON.stringify(d.lastObserved.contextReferences, null, 2)) : null,
+        h('p', { class: 'suave' }, d.notice), d.problems ? h('p', { class: 'nota erro' }, 'Há registros inválidos: ', String(d.problems)) : null].filter(Boolean));
+      mostrar(c);
       el.append(h('h2', {}, c.client === 'codex' ? 'Codex' : 'Claude Code', ' ', h('span', { class: 'suave' }, c.installed ? '(cliente localizado)' : '(cliente não localizado)')),
-        h('p', { class: 'suave' }, 'Destino da configuração: ', h('code', {}, c.destination)), h('pre', {}, c.command), h('p', { class: 'suave' }, c.notice),
+        diagnostico, h('button', { class: 'acao', onclick: async (e) => { const b=e.currentTarget; b.disabled=true; try { const x=await chamar(()=>api.testarIntegracao(estado.root,c.client)); if(x)mostrar(x); } finally { b.disabled=false; } } }, `Testar integração ${c.client}`),
+        h('p', { class: 'suave' }, 'Destino da configuração: ', h('code', {}, c.destination)), h('pre', {}, c.command),
         c.automatic ? h('button', { class: 'acao', onclick: async () => { const x = await chamar(() => api.conectar(estado.root, 'codex')); if (x) avisar(x.configured ? 'Configuração adicionada. Reabra o cliente.' : x.reason, !x.configured); } }, 'Adicionar ao Codex…')
           : h('p', { class: 'suave' }, 'Copie o comando acima e execute no PowerShell depois de revisar o destino.'));
     }
   },
 
   async suporte(el) {
-    el.append(h('h1', {}, 'Suporte'), h('p', { class: 'suave' }, 'Relate um bug, peça uma melhoria ou envie uma sugestão. O Prumo prepara o texto aqui, mostra o que será enviado e só abre o formulário oficial do GitHub depois da sua confirmação. Nada é enviado por este aplicativo.'));
+    el.append(h('h1',{},'Suporte'));
+    const numero=h('input',{type:'number',min:'1',max:'999999999',id:'sup-numero'});const chamado=h('div',{'aria-live':'polite'});
+    el.append(h('h2',{},'Acompanhar chamado no GitHub'),h('label',{class:'campo'},'Número do chamado',numero),
+      h('button',{class:'acao',onclick:async()=>{
+        const r=await chamar(()=>api.suporteConsultar(Number(numero.value)));if(!r)return;
+        chamado.replaceChildren(r.ok?h('div',{},h('h3',{},`#${r.numero} · ${r.title}`),h('p',{},'Status: ',r.status?h('span',{class:`estado status-${r.status.id}`},r.status.nome):(r.ambiguous?'rótulos conflitantes':'sem status informado')),h('p',{},r.status?.explicacao||''),h('p',{},'Última aplicação do status no histórico consultado: ',r.statusAt?hora(r.statusAt):'indisponível'),h('p',{},'Atualização da issue: ',hora(r.updatedAt),' · Responsáveis: ',r.responsible.join(', ')||'não informados'),
+          h('ul',{},r.history.map(e=>h('li',{},`${hora(e.at)} · ${e.event==='labeled'?'Aplicado':'Removido'} ${e.status} · ${e.actor||'responsável indisponível'}`))),!r.historyComplete?h('p',{class:'nota'},'Histórico parcial ou indisponível.'):null,h('p',{class:'suave'},r.notice),h('button',{class:'acao',onclick:()=>chamar(()=>api.suporteChamado(r.numero))},'Abrir chamado no GitHub…')):h('p',{class:'nota erro'},r.code));
+      }},'Consultar chamado'),chamado);
+    el.append(h('p', { class: 'suave' }, 'Relate um bug, peça uma melhoria ou envie uma sugestão. O Prumo prepara o texto aqui, mostra o que será enviado e só abre o formulário oficial do GitHub depois da sua confirmação. Nada é enviado por este aplicativo.'));
     el.append(h('div', { class: 'nota', id: 'aviso-publico' }, h('strong', {}, 'Atenção: '), 'issues do repositório oficial são públicas. Não inclua senhas, tokens, documentos privados, código confidencial ou dados pessoais. Nenhum e-mail de suporte é oferecido; o canal oficial é o GitHub Issues.'));
     const campo = (id, rotulo, el2) => h('label', { class: 'campo' }, rotulo, el2);
     const categoria = h('select', { id: 'sup-categoria' }, h('option', { value: 'bug' }, 'Bug'), h('option', { value: 'melhoria' }, 'Melhoria'), h('option', { value: 'sugestao' }, 'Sugestão'));
@@ -245,6 +264,7 @@ const abas = {
       const nos = [h('h2', {}, 'Revisão antes de enviar'), h('p', { class: 'suave' }, p.aviso)];
       if (p.bloqueios.length) nos.push(h('div', { class: 'nota erro', id: 'sup-bloqueios' }, h('strong', {}, 'Envio bloqueado: '), p.bloqueios.map((b) => b.tipo + (b.trecho ? ' (' + b.trecho + ')' : '')).join('; '), '. Remova ou substitua antes de continuar.'));
       if (p.avisos.length) nos.push(h('div', { class: 'nota', id: 'sup-avisos' }, h('strong', {}, 'Revise: '), p.avisos.map((b) => b.tipo + ' (' + b.trecho + ')').join('; '), '. Você decide se mantém.'));
+      if(!p.ok&&!p.markdown)nos.push(h('div',{class:'barra'},h('button',{class:'acao',id:'sup-abrir',disabled:true},'Abrir formulário no GitHub…'),h('button',{class:'acao',id:'sup-exportar',disabled:true},'Exportar Markdown…')));
       if (p.markdown) nos.push(h('p', { class: 'suave' }, 'Este é exatamente o texto que será usado:'), h('pre', { id: 'sup-previa' }, p.markdown), p.truncado ? h('p', { class: 'suave' }, 'O texto é longo e será encurtado no formulário; use Exportar para guardar a versão completa.') : null,
         h('div', { class: 'barra' },
           h('button', { class: 'acao primaria', id: 'sup-abrir', disabled: !p.ok, onclick: async () => { const x = await chamar(() => api.suporteAbrir(relato())); if (x && x.opened) avisar('Formulário aberto no navegador. Revise e envie por lá.'); } }, 'Abrir formulário no GitHub…'),

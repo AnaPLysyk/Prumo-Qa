@@ -87,10 +87,11 @@ test('revisar_cobertura aplica a análise aos testes Playwright realmente lidos,
   const original = spec("test('ruim', async ({ page }) => {\n  await page.waitForTimeout(2000);\n  expect(await page.title()).toBeTruthy();\n});");
   await f.write('tests/test.mjs', 'console.log("x")'); await f.write('tests/ruim.spec.ts', original); await f.write('tests/outro.test.mjs', "import test from 'node:test'; test.skip('x', () => {});");
   const p = await carregarProjeto(f.root);
-  const r = await revisarCobertura(p, { requirement: 'R1: Apenas Editor grava.', source: 'README', sourcePath: 'README.md', existingTests: [{ id: 'T1', behavior: 'ruim', testPath: 'tests/ruim.spec.ts' }, { id: 'T2', behavior: 'node', testPath: 'tests/test.mjs' }], candidates: [] });
+  const r = await revisarCobertura(p, { requirement: 'R1: Apenas Editor grava.', source: 'README', sourcePath: 'README.md', existingTests: [{ id: 'T1', behavior: 'ruim', testPath: 'tests/ruim.spec.ts' }, { id: 'T2', behavior: 'node', testPath: 'tests/test.mjs' },{id:'T3',behavior:'outra referência ao mesmo arquivo',testPath:'tests/ruim.spec.ts'}], candidates: [] });
   const pw = r.findings.filter((x) => x.type.startsWith('PW_')); assert.deepEqual(pw.map((x) => x.type).sort(), ['PW_ASSERTION_FRACA', 'PW_ESPERA_FIXA']);
   assert.ok(pw.every((x) => x.scenario === 'T1' && x.evidence[0].fonteOficial.startsWith('https://playwright.dev/docs/') && x.evidence[0].linha > 0));
   assert.equal(r.state, 'NOT_VERIFIED'); assert.equal(r.executed, false);
+  assert.equal(r.facts.filter(f=>f.kind==='test_read').length,3,'mantém rastreio dos três cenários sem duplicar achados do arquivo');
   assert.equal(fs.readFileSync(`${f.root}/tests/ruim.spec.ts`, 'utf8'), original, 'o teste do projeto não foi alterado');
 });
 

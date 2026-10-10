@@ -18,6 +18,7 @@ import { registrarDiagnostico, lerDiagnostico, excluirDiagnostico } from '../dia
 import { resumirDados } from '../dados.js';
 import { lerPreferencias, alterarPreferencias, marcarVisualizada, avisoPendente, registrarConsulta } from '../preferencias.js';
 import { prepararSolicitacao, urlOficial } from '../suporte.js';
+import { consultarChamado } from '../chamados.js';
 import * as painel from '../painel.js';
 
 /**
@@ -78,6 +79,13 @@ canal('projeto:logs', a => painel.logs(a.root, a.filter));
 canal('projeto:historico', a => painel.historico(a.root, a.filter));
 canal('projeto:evidencias', a => painel.evidencias(a.root, a.jobId));
 canal('projeto:conexoes', a => painel.conexoes(a.root));
+canal('suporte:consultar', a => consultarChamado(a.numero));
+canal('suporte:chamado', async (a,janela) => {
+  const r=await dialog.showMessageBox(janela!,{type:'question',buttons:['Cancelar','Abrir chamado'],defaultId:0,cancelId:0,message:`Abrir o chamado #${a.numero} no GitHub oficial?`});
+  if(r.response!==1)return {opened:false};
+  await shell.openExternal(`https://github.com/${repositorio}/issues/${a.numero}`);return {opened:true};
+});
+canal('conexao:testar', a => painel.testarIntegracao(a.root,a.client));
 canal('ajuda:documentos', () => painel.ajuda(path.join(raizApp, 'app', 'ajuda'), versao));
 canal('ajuda:versoes', () => { const v = carregarVersoes(arquivoVersoes); conferirInstalada(v, versao); return { installed: versao, versions: apresentarVersoes(v, versao) }; });
 canal('ajuda:integracoes', () => catalogo());

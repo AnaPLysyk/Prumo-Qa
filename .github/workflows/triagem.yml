@@ -22,6 +22,15 @@ jobs:
             const titulo = String(issue.title || '');
             const porPrefixo = [['[Bug]', 'tipo: bug'], ['[Melhoria]', 'tipo: melhoria'], ['[Sugestão]', 'tipo: sugestão']];
             const novos = [];
+            // Fonte pública de estados; somente dados validados, nunca eval ou comando de shell.
+            const arquivo = await github.rest.repos.getContent({ owner: context.repo.owner, repo: context.repo.repo, path: 'app/suporte-status.json' });
+            const estados = JSON.parse(Buffer.from(arquivo.data.content, 'base64').toString('utf8'));
+            if (!Array.isArray(estados) || estados.length !== 5 || estados.some(s => !/^status: [\p{L} ]+$/u.test(s.rotulo) || !/^[a-f0-9]{6}$/.test(s.cor))) throw new Error('Catálogo de status inválido');
+            for (const s of estados) {
+              try { await github.rest.issues.getLabel({ owner: context.repo.owner, repo: context.repo.repo, name: s.rotulo }); }
+              catch (e) { if (e.status !== 404) throw e; await github.rest.issues.createLabel({ owner: context.repo.owner, repo: context.repo.repo, name: s.rotulo, color: s.cor, description: s.explicacao.slice(0, 100) }); }
+            }
+            if (!atuais.some(n => n.startsWith('status: '))) novos.push(estados.find(s => s.id === 'recebido').rotulo);
             if (!atuais.some((n) => n.startsWith('tipo: '))) {
               const achado = porPrefixo.find(([p]) => titulo.startsWith(p));
               novos.push(achado ? achado[1] : 'tipo: indefinido');

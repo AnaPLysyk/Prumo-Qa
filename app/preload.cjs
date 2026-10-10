@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   evidencias: (root, jobId) => chamar('projeto:evidencias', { root, jobId }),
   conexoes: (root) => chamar('projeto:conexoes', { root }),
   conectar: (root, client) => chamar('conexao:aplicar', { root, client }),
+  testarIntegracao: (root, client) => chamar('conexao:testar', { root, client }),
   exportarLogs: (root) => chamar('logs:exportar', { root }),
   ajuda: () => chamar('ajuda:documentos'),
   versoes: () => chamar('ajuda:versoes'),
@@ -37,5 +38,7 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   marcarVisualizada: (versao) => chamar('preferencias:visualizada', { versao }),
   suportePreparar: (relato) => chamar('suporte:preparar', relato),
   suporteAbrir: (relato) => chamar('suporte:abrir', relato),
-  suporteExportar: (relato) => chamar('suporte:exportar', relato)
+  suporteExportar: (relato) => chamar('suporte:exportar', relato),
+  suporteConsultar: (numero) => chamar('suporte:consultar', { numero }),
+  suporteChamado: (numero) => chamar('suporte:chamado', { numero })
 }));

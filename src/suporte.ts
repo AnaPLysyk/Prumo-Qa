@@ -1,6 +1,6 @@
 import os from 'node:os';
 import { z } from 'zod';
-import { mascarar } from './projeto.js';
+import { hash, mascarar } from './projeto.js';
 import { repositorio } from './versoes.js';
 
 /**
@@ -42,20 +42,22 @@ export function revisarPrivacidade(textos: Record<string, string | undefined>) {
   ];
   for (const [campo, texto] of Object.entries(textos)) {
     if (!texto) continue;
-    for (const r of regras) { const m = r.re.exec(texto); if (m) (r.grave ? bloqueios : avisos).push({ tipo: `${r.tipo} (${campo})`, trecho: mascarar(m[0]).slice(0, 60) }); }
+    for (const r of regras) { const m = r.re.exec(texto); if (m) (r.grave ? bloqueios : avisos).push({ tipo: `${r.tipo} (${campo})`, trecho: r.grave?'[REDACTED]':mascarar(m[0]).slice(0, 60) }); }
   }
   return { bloqueios, avisos };
 }
 
 /** Texto do relatório (Markdown), incluindo só o que a pessoa autorizou. */
 export function montarCorpo(s: Solicitacao, c: Contexto) {
+  const idLocal = 'LOCAL-' + hash(JSON.stringify({ categoria:s.categoria,titulo:s.titulo,descricao:s.descricao,esperado:s.esperado,passos:s.passos })).slice(0,16);
   const ambiente: string[] = [];
   if (s.incluirVersao) ambiente.push(`Prumo QA ${c.versao}`);
   if (s.incluirSistema) ambiente.push(`Sistema: ${os.platform()} ${os.release()} (${os.arch()})`);
   if (s.incluirDiagnostico) ambiente.push('Diagnóstico da interface (somente metadados):\n' + (c.diagnostico || '(nenhum evento registrado)'));
   return {
     descricao: s.descricao, esperado: s.esperado ?? '', passos: s.passos ?? '', ambiente: ambiente.join('\n'),
-    markdown: [`# [${rotulo[s.categoria]}] ${s.titulo}`, '', '## Descrição', s.descricao,
+    idLocal,
+    markdown: ['---', `id: ${idLocal}`, `tipo: ${s.categoria}`, 'status: rascunho_local', 'origem: aplicativo', ...(s.incluirVersao ? [`versao: ${JSON.stringify(c.versao)}`] : []), '---', '', `# [${rotulo[s.categoria]}] ${s.titulo}`, '', 'Identificador local do relato; não é número de chamado GitHub.', '', '## Descrição', s.descricao,
       ...(s.esperado ? ['', s.categoria === 'bug' ? '## Comportamento esperado' : '## Benefício esperado', s.esperado] : []),
       ...(s.passos ? ['', '## Passos para reproduzir', s.passos] : []), ...(ambiente.length ? ['', '## Ambiente', ambiente.join('\n')] : [])].join('\n')
   };
@@ -83,6 +85,7 @@ export function prepararSolicitacao(entrada: unknown, c: Contexto) {
   if (s.categoria === 'bug' && !s.passos) return { ok: false as const, bloqueios: [{ tipo: 'passos para reproduzir são obrigatórios em bug', trecho: '' }], avisos: [], aviso: AVISO_PUBLICO };
   const corpo = montarCorpo(s, c);
   const { bloqueios, avisos } = revisarPrivacidade({ titulo: s.titulo, descricao: s.descricao, esperado: s.esperado, passos: s.passos, diagnostico: s.incluirDiagnostico ? c.diagnostico : undefined });
+  if(bloqueios.length)return {ok:false as const,bloqueios,avisos:[],aviso:AVISO_PUBLICO};
   const { url, truncado } = montarUrl(s, corpo);
-  return { ok: bloqueios.length === 0, bloqueios, avisos, aviso: AVISO_PUBLICO, titulo: `[${rotulo[s.categoria]}] ${s.titulo}`, markdown: corpo.markdown, url, truncado, publico: true, campos: { descricao: corpo.descricao, esperado: corpo.esperado, passos: corpo.passos, ambiente: corpo.ambiente } };
+  return { ok:true as const, bloqueios, avisos, aviso: AVISO_PUBLICO, idLocal:corpo.idLocal, titulo: `[${rotulo[s.categoria]}] ${s.titulo}`, markdown: corpo.markdown, url, truncado, publico: true, campos: { descricao: corpo.descricao, esperado: corpo.esperado, passos: corpo.passos, ambiente: corpo.ambiente } };
 }

@@ -34,6 +34,7 @@ test('segredos BLOQUEIAM e nunca aparecem por inteiro; dados pessoais e caminhos
   const p = prepararSolicitacao({ ...bug, descricao: `Meu token ${token} falhou`, passos: 'senha=hunter2abc' }, ctx);
   assert.equal(p.ok, false); assert.ok(p.bloqueios.length >= 2);
   assert.ok(!JSON.stringify(p.bloqueios).includes(token), 'o segredo não é repetido na revisão');
+  assert.ok(!JSON.stringify(p).includes(token),'nenhuma projeção da resposta devolve o segredo, inclusive Markdown/URL');
   const a = prepararSolicitacao({ ...bug, descricao: 'Fale com ana@exemplo.com. Arquivo C:\\Users\\Ana\\projeto\\x.ts falhou. CPF 123.456.789-09' }, ctx);
   assert.equal(a.ok, true); const tipos = a.avisos.map((x) => x.tipo).join('|');
   assert.match(tipos, /e-mail/); assert.match(tipos, /caminho local/); assert.match(tipos, /CPF/);

@@ -2,6 +2,29 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.6.0",
+      "status": "repositorio",
+      "date": "2026-10-10",
+      "title": "Integrações verificáveis e documentação pública",
+      "objective": "Separar configuração, protocolo e uso observado de MCP; aprofundar revisão de engenharia, simplificar acompanhamento do suporte e gerar documentação pública das fontes existentes.",
+      "features": [
+        "Conexões com diagnóstico por cliente, teste MCP real de leitura e evidência de protocolo separada do uso observado.",
+        "Referências de contexto nos registros, sem guardar texto, título privado ou aprovador.",
+        "Relato Markdown com identificador LOCAL e consulta explícita de status e histórico do chamado oficial.",
+        "Site estático gerado da ajuda, contratos e histórico de versões, preparado para Render."
+      ],
+      "improvements": ["Skills de QA e Playwright aprofundadas; roteiro de revisão de engenharia e Skill de acessibilidade."],
+      "fixes": ["Clientes SDK de teste com nome Codex/Claude deixam de contar como uso observado desses clientes."],
+      "differential": "A pessoa pode distinguir o que foi configurado, o que passou no protocolo e qual chamada de cliente foi observada, com evidências distintas.",
+      "howItWorks": ["O SDK executa somente consultar_evidencias no MCP do próprio produto; configuração externa não é executada.", "Chamados usam GET público ao GitHub oficial, sem upload, credenciais ou segunda base sincronizada."],
+      "security": ["Quatro tools MCP preservadas; autenticação humana e escopo de execução mantidos.", "Registros de protocolo contêm apenas metadados conhecidos e hashes; fontes privadas não entram no site."],
+      "compatibility": ["Contrato qa.project.json v2 preservado; referências novas no histórico são opcionais.", "Logs antigos permanecem legíveis; o site não acessa projetos locais."],
+      "limitations": ["Identidade no handshake é declarada e não autenticada; chamada observada não comprova sessão ativa.", "Claude Code e leitores de tela exigem validação em clientes reais disponíveis.", "Instalador continua sem assinatura; autenticação humana ponta a ponta não comprovada nesta máquina.", "Esta entrada descreve código; a release só deve ser marcada publicada após CI e publicação reais."],
+      "migration": "Dados existentes preservados. Se a instalação ou o diretório de dados mudar, revise a configuração MCP; não há migração silenciosa de configurações.",
+      "afterUpdate": ["Abra Conexões, revise a configuração e use Testar integração.", "Para comprovar uso de cliente, faça uma chamada nesse cliente e consulte o registro; SDK de teste permanece separado."],
+      "releaseUrl": null
+    },
+    {
       "version": "2.5.0",
       "status": "publicada",
       "date": "2026-10-10",

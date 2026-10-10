@@ -12,6 +12,8 @@ export async function contextoCompleto(p: Projeto, base?: string) {
   const frameworks = detectarFrameworks(b.sources.map(s => ({ path: s.path, content: s.content })), b.omitted);
   return {
     ...b, frameworks,
+    orientacoes: { qa:'skills/qa/SKILL.md', engenharia:'skills/qa/references/engenharia.md', acessibilidade:'skills/acessibilidade/SKILL.md',
+      condicoes:'QA: requisitos e cobertura; engenharia: revisão de código/arquitetura; acessibilidade: interfaces e interação. Referências portáteis; cliente deve instalar e invocar, sem carregamento universal garantido.' },
     conhecimento: frameworks.filter(f => f.estado !== 'INCERTO').map(f => ({ id: f.id, skill: f.skill, fontes: conhecimento[f.id].fontes, aplicar: f.estado === 'CONFIRMADO' ? 'sim' : 'somente após confirmar o framework' })),
     contextos: contextosParaMcp(p, base)
   };

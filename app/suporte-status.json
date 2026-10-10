@@ -1,0 +1,7 @@
+[
+  {"id":"recebido","nome":"Recebido","rotulo":"status: recebido","cor":"c5def5","explicacao":"Solicitação recebida, aguardando análise."},
+  {"id":"em_analise","nome":"Em análise","rotulo":"status: em análise","cor":"fbca04","explicacao":"Requisitos, reprodução e diagnóstico em investigação."},
+  {"id":"em_desenvolvimento","nome":"Em desenvolvimento","rotulo":"status: em desenvolvimento","cor":"d4c5f9","explicacao":"Alteração em desenvolvimento; ainda não disponível em release."},
+  {"id":"implementado","nome":"Implementado","rotulo":"status: implementado","cor":"bfdadc","explicacao":"Alteração incorporada ao código. A publicação exige indicação da release."},
+  {"id":"concluido","nome":"Concluído","rotulo":"status: concluído","cor":"0e8a16","explicacao":"Solicitação finalizada; consulte a resolução e a versão no chamado."}
+]

@@ -130,7 +130,7 @@ test('Privacidade e dados: resumo real, exportação, exclusão separada por esc
   await mcp(f.root, dados, [['contexto_projeto', {}], ['executar_validacao', { capability: 'unit' }]]);
   await abrirAjuda(page, 'Privacidade e dados');
   const painel = await page.textContent('article');
-  assert.ok(painel.includes(dados)); assert.match(painel, /Projetos vinculados: 1/); assert.match(painel, /Sem retenção automática/); assert.match(painel, /não recebe as conversas/); assert.match(painel, /única consulta externa é a verificação de atualização/);
+  assert.ok(painel.includes(dados)); assert.match(painel, /Projetos vinculados: 1/); assert.match(painel, /Sem retenção automática/); assert.match(painel, /não recebe as conversas/); assert.match(painel, /processo principal consulta atualizações.*chamados públicos no GitHub oficial/i); assert.match(painel,/nenhum dado de projeto é enviado/);
   assert.match(painel, /historico/); assert.match(painel, /vinculos/);
   // exportar
   const destino = path.join(dados, 'exportado.json');

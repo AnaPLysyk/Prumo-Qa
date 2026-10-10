@@ -51,13 +51,18 @@ export async function revisarCobertura(p: Projeto, entrada: unknown) {
   for (const c of r.contradictions) registrar('CONTRADICTORY_REQUIREMENT', `Resolver conflito informado: ${c.statement} (${c.source}).`, undefined, 'high');
   const norm = (s: string | undefined) => (s ?? '').trim().toLowerCase().replace(/\s+/g,' ');
   const existentes = new Set<string>();
+  const arquivosPlaywrightAnalisados=new Set<string>();
   for (const t of r.existingTests) {
     if (!t.testPath) { missing.push(`Teste ${t.id} sem caminho verificável`); continue; }
     try {
       if (!p.manifesto.context.tests.some(d => t.testPath === d || t.testPath!.startsWith(d.replace(/[\\/]$/, '') + '/') || t.testPath!.startsWith(d.replace(/[\\/]$/, '') + '\\'))) throw new Error('Fora dos testes');
       await caminhoSeguro(p.raiz, t.testPath); const content = await lerSeguro(p.raiz, t.testPath);
       facts.push({ kind: 'test_read', id: t.id, path: t.testPath, sha256: hash(content) });
-      if (ehTestePlaywright(t.testPath, content)) for (const a of analisarPlaywright(t.testPath, content).slice(0, 40)) findings.push({ type: a.regra, severity: a.severidade, scenario: t.id, source: `${a.arquivo}:${a.linha}`, recommendation: a.orientacao, evidence: [{ arquivo: a.arquivo, linha: a.linha, trecho: mascarar(a.trecho), fonteOficial: a.fonte }] });
+      const chave=t.testPath.replaceAll('\\','/');
+      if (ehTestePlaywright(t.testPath, content)&&!arquivosPlaywrightAnalisados.has(chave)) {
+        arquivosPlaywrightAnalisados.add(chave);
+        for (const a of analisarPlaywright(t.testPath, content).slice(0, 40)) findings.push({ type: a.regra, severity: a.severidade, scenario:t.id, source: `${a.arquivo}:${a.linha}`, recommendation: a.orientacao, evidence: [{ arquivo: a.arquivo, linha: a.linha, trecho: mascarar(a.trecho), fonteOficial: a.fonte }] });
+      }
       const ignoradas = content.split('\n').filter(l => /\b(?:skip|fixme|todo)\s*\(/.test(l));
       if (ignoradas.length) {
         // A detecção é por arquivo (não sabemos qual teste o cenário representa). Se o comportamento do cenário aparece numa

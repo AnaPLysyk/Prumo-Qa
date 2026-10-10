@@ -5,6 +5,7 @@ import { mascarar } from './projeto.js';
 import { consultarAtividades, calcularMetricas, descreverAchados, ferramentas, type Evento } from './atividades.js';
 import { consultarEvidencias } from './evidencias.js';
 import { prepararConexao } from './conexoes.js';
+import { diagnosticarIntegracao, testarProtocolo, type clientes } from './integracoes.js';
 import { projetoVinculado, listarVinculos, adicionarVinculo, removerVinculo } from './vinculos.js';
 
 /**
@@ -64,7 +65,12 @@ export async function evidencias(raiz: string, jobId?: string) {
 /** Propõe a configuração; nada é alterado aqui. */
 export async function conexoes(raiz: string) {
   const p = await projetoVinculado(raiz, base());
-  return (['codex', 'claude'] as const).map(c => { const x = prepararConexao(p, c); return { client: c, name: x.name, installed: x.installed, destination: x.destination, command: x.command, configuration: x.configuration, notice: x.notice, automatic: c === 'codex' && x.installed && !x.manualOnly }; });
+  return (['codex', 'claude'] as const).map(c => { const x = prepararConexao(p, c); const d=diagnosticarIntegracao(p,c); return { ...d, name: x.name, installed: x.installed, destination: x.destination, command: x.command, configuration:x.configuration, notice:x.notice+' '+d.notice, automatic: c === 'codex' && x.installed && !x.manualOnly }; });
+}
+export async function testarIntegracao(raiz:string, client:typeof clientes[number]) {
+  const p=await projetoVinculado(raiz,base());
+  await testarProtocolo(p,client);
+  return diagnosticarIntegracao(p,client);
 }
 /** Exporta o histórico bruto do projeto (somente campos do esquema, sem texto livre). */
 export async function exportarLogs(raiz: string) {

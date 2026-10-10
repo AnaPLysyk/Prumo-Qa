@@ -51,17 +51,20 @@ const orientacoes: Record<string,string> = {
   OTHER_FINDING:'Consultar a resposta original; texto privado omitido do histórico.'
 };
 const contagem = z.number().int().nonnegative().max(1000000);
+const referenciaSchema = z.object({ id:z.string().uuid(), versao:z.number().int().positive(), hash:z.string().regex(/^[a-f0-9]{64}$/), estado:z.enum(['RASCUNHO','APROVADO','CONFLITANTE','DESATUALIZADO']), uso:z.enum(['incluido_na_resposta','consultado_na_revisao']) }).strict();
 const resumoSchema = z.object({
   findings:contagem, recommendations:contagem, gaps:contagem, candidateRedundancies:contagem,
   types:z.array(z.object({type:z.enum(Object.keys(orientacoes) as [string,...string[]]),count:contagem}).strict()).max(30),
   evidenceJobId:z.string().uuid().optional(), evidencePersisted:z.boolean().optional(), executed:z.boolean().optional(),
-  code:z.string().regex(/^[A-Z_]{1,64}$/).optional()
+  code:z.string().regex(/^[A-Z_]{1,64}$/).optional(),
+  contextReferences:z.array(referenciaSchema).max(100).optional()
 }).strict();
 const entradaSchema = z.object({candidates:contagem.optional(),existingTests:contagem.optional(),hasRequirement:z.boolean().optional(),hasSource:z.boolean().optional()}).strict();
 export const eventoSchema = z.object({
   version:z.literal(1), operationId:z.string().uuid(), projectId:z.string().max(100), rootHash:z.string().regex(/^[a-f0-9]{64}$/),
   manifestHash:z.string().regex(/^[a-f0-9]{64}$/), tool:z.enum(ferramentas), origin:z.enum(['CLI','MCP']),
   client:z.enum(['codex','claude','sdk','outro','terminal']), clientIdentity:z.literal('declarada'),
+  clientClassificationVersion:z.literal(2).optional(),
   phase:z.enum(['start','end']), at:z.string().datetime(), durationMs:z.number().finite().nonnegative(),
   state:z.enum(estados), input:entradaSchema, summary:resumoSchema,
   digest:z.string().regex(/^[a-f0-9]{64}$/),
@@ -127,9 +130,9 @@ function gravar(alvo:string,evento:Omit<Evento,'level'|'digest'>,inicio:boolean)
 const diagnosticoPadrao = (fase:string,id:string) => { process.stderr.write(`PRUMO_OBSERVABILITY_ERROR phase=${fase} operationId=${id}; resultado do núcleo preservado; verifique PRUMO_DATA_DIR/permissões/limites.\n`); };
 export function iniciarAtividade(p:Projeto,tool:string,origem:Origem,entrada:unknown={},opcoes:{base?:string;diagnostico?:(fase:string,id:string)=>void}={}) {
   const id=randomUUID();const inicio=performance.now();const r=objeto(entrada);
-  const cliente=origem.origin==='CLI'?'terminal':/codex/i.test(origem.client??'')?'codex':/claude/i.test(origem.client??'')?'claude':/sdk|test|acceptance/i.test(origem.client??'')?'sdk':'outro';
+  const cliente=origem.origin==='CLI'?'terminal':/sdk|test|acceptance|demonstracao|lab-avaliador|inspector/i.test(origem.client??'')?'sdk':/codex/i.test(origem.client??'')?'codex':/claude/i.test(origem.client??'')?'claude':'outro';
   const e:Omit<Evento,'level'|'digest'>={version:1,operationId:id,projectId:hash(p.manifesto.id),rootHash:hash(p.raiz),manifestHash:p.manifestoHash,
-    tool:ferramentas.includes(tool as typeof ferramentas[number])?tool as typeof ferramentas[number]:'desconhecida',origin:origem.origin,client:cliente,clientIdentity:'declarada',
+    tool:ferramentas.includes(tool as typeof ferramentas[number])?tool as typeof ferramentas[number]:'desconhecida',origin:origem.origin,client:cliente,clientIdentity:'declarada',clientClassificationVersion:2,
     phase:'start',at:new Date().toISOString(),durationMs:0,state:'STARTED',input:tool==='revisar_cobertura'?{candidates:Math.min(lista(r.candidates).length,1000000),existingTests:Math.min(lista(r.existingTests).length,1000000),hasRequirement:typeof r.requirement==='string'&&!!r.requirement.trim(),hasSource:typeof r.source==='string'&&!!r.source.trim()}:{},summary:vazio()};
   const avisar=opcoes.diagnostico??diagnosticoPadrao;let alvo:string|undefined;let encerrado=false;
   try {
@@ -141,6 +144,12 @@ export function iniciarAtividade(p:Projeto,tool:string,origem:Origem,entrada:unk
   return {id, finalizar(resultado:unknown,erro=false) {
     if(encerrado)return;encerrado=true;
     const saida=objeto(resultado);const summary=vazio();const encontrados=lista(saida.findings);
+    // Guarda só referências efetivamente devolvidas/consultadas, sem texto, título, origem privada ou aprovador.
+    const referencias:Record<string,unknown>[] = tool==='contexto_projeto'
+      ? lista(objeto(saida.contextos).referencias).map(v=>({...objeto(v),uso:'incluido_na_resposta'}))
+      : tool==='revisar_cobertura' ? lista(saida.facts).filter(v=>objeto(v).kind==='context_used').map(v=>({...objeto(v),uso:'consultado_na_revisao'})) : [];
+    const refs = referencias.map(v=>referenciaSchema.safeParse({id:v.id,versao:v.versao,hash:v.hash,estado:v.estado,uso:v.uso})).filter(v=>v.success).map(v=>v.data!);
+    if(refs.length)summary.contextReferences=refs.slice(0,100);
     summary.findings=encontrados.length;
     summary.recommendations=encontrados.filter(f=>typeof objeto(f).recommendation==='string'&&!!(objeto(f).recommendation as string).trim()).length;
     const tipos=new Map<string,number>();
