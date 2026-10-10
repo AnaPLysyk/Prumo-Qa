@@ -1,4 +1,4 @@
-# Aplicativo desktop (Windows) — Prumo QA 2.4
+# Aplicativo desktop (Windows) — Prumo QA 2.5
 
 A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama `src/painel.ts`, que delega a `projeto`, `atividades`, `evidencias` e `conexoes`.
 
@@ -33,6 +33,10 @@ Cada `tools/call` MCP (e cada comando do CLI) grava um registro de início e out
 ### Contratos técnicos (IPC e MCP)
 
 `src/contratos.ts` é a fonte única: os mesmos esquemas Zod que validam cada chamada IPC em `main.ts` alimentam o catálogo mostrado em **Ajuda › Integrações técnicas** e o arquivo gerado [docs/CONTRATOS.md](CONTRATOS.md) (`npm run contratos`). Testes comparam o catálogo com `main.ts`, `preload.cjs` e o servidor MCP real; uma operação nova sem documentação, ou um catálogo desatualizado, quebra a suíte. Não existe API HTTP.
+
+### Suporte e avisos de versão (2.5)
+
+A aba **Suporte** prepara bug, melhoria ou sugestão (`src/suporte.ts`), mostra o texto exato e a revisão de privacidade e só abre o formulário oficial do GitHub após confirmação nativa; o processo principal refaz a preparação e valida o destino. O sino do cabeçalho e as preferências (`src/preferencias.ts`, `%LOCALAPPDATA%\PrumoQA\preferencias.json`) avisam de versões novas: a verificação ao iniciar é opcional e desligada por padrão, o som toca no máximo uma vez por versão e não há processo em segundo plano. Ver [SUPORTE.md](SUPORTE.md).
 
 ### Contextos persistentes e conhecimento de QA (2.4)
 

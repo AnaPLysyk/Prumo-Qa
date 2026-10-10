@@ -1,4 +1,4 @@
-# Prumo QA 2.4 — Contextos, conhecimento de QA e laboratório
+# Prumo QA 2.5 — Suporte, avisos de versão, contextos e laboratório
 
 Camada local de engenharia de qualidade para agentes que já desenvolvem software. Entende o contexto autorizado de um projeto, confere estrutura de planos de teste, controla execução e preserva evidências. A IA hospedeira interpreta requisitos e riscos; o núcleo impõe regras determinísticas. Não exige outra chave de LLM.
 
@@ -22,6 +22,11 @@ Claude / Codex / IA compatível
 ```
 
 O terminal consulta arquivos locais; a IA não precisa permanecer ligada. Uma chamada MCP concluída não equivale a teste PASS. A imagem de referência usa números ilustrativos; o programa mostra somente o seu histórico.
+
+## Novidades da 2.5
+
+- **Suporte**: aba para relatar bug, melhoria ou sugestão. O relato é montado e revisado localmente (segredos bloqueiam, dados pessoais avisam), nada é anexado sem marcação e o formulário oficial de GitHub Issues só é aberto após confirmação nativa. Também exporta para arquivo, sem GitHub. Detalhes e triagem segura em [docs/SUPORTE.md](docs/SUPORTE.md).
+- **Sino de atualização** no cabeçalho (mouse, teclado e clique) e **som opcional** que toca uma vez por versão; preferências persistentes; sem serviço nem tarefa agendada; nada é baixado ou instalado automaticamente.
 
 ## Novidades da 2.4
 
@@ -159,6 +164,8 @@ Também pode usar `node .\dist\cli.js`, `npm.cmd run prumo --` ou o script compa
 | `src/painel.ts` | Adaptador da janela: valida, exige projeto vinculado e delega ao núcleo (sem regra própria) |
 | `src/contratos.ts` | Fonte única dos esquemas IPC e do catálogo técnico (IPC + MCP) |
 | `src/contextos.ts` | Contextos persistentes por projeto: estados, aprovação, conflito, histórico encadeado por hash, leitura controlada pelo MCP |
+| `src/suporte.ts` | Central de suporte: esquema do relato, revisão de privacidade, texto, endereço oficial do GitHub Issues e exportação local (sem rede) |
+| `src/preferencias.ts` | Preferências de aviso de versão: decide e grava indicador e som (uma vez por versão) |
 | `src/frameworks.ts`, `skills/playwright`, `skills/api-rest` | Detecção de framework por evidência e análise de testes Playwright (`PW_*`) com fontes oficiais |
 | `src/contextoCompleto.ts` | Resposta de `contexto_projeto`: contexto autorizado + frameworks + contextos habilitados |
 | `src/versoes.ts`, `app/versoes.json` | Histórico de versões validado, comparação semântica e notas de release |

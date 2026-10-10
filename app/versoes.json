@@ -2,6 +2,51 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.5.0",
+      "status": "planejada",
+      "date": null,
+      "title": "Suporte e avisos de atualização",
+      "objective": "Dar à pessoa um caminho seguro para reportar problemas e sugerir melhorias, e avisá-la de novas versões sem serviço em segundo plano, sem download automático e sem enviar dados privados.",
+      "features": [
+        "Aba Suporte: bug, melhoria ou sugestão, com revisão de privacidade, exportação local e abertura do formulário oficial de GitHub Issues somente depois de confirmação nativa.",
+        "Nada é anexado automaticamente: versão, sistema e eventos do diagnóstico só entram se você marcar. Logs, evidências, contextos, código e caminhos nunca são anexados.",
+        "Templates de issue (bug, melhoria, sugestão) e triagem automática que apenas aplica rótulos, sem executar texto de issue.",
+        "Sino de atualização no cabeçalho (mouse, teclado e clique) com versão e resumo; o clique abre as notas completas e marca a versão como vista.",
+        "Som opcional de dois tons, no máximo uma vez por versão, respeitando \"silenciar\"; verificação ao abrir o aplicativo opcional e desligada por padrão."
+      ],
+      "improvements": [
+        "Catálogo técnico e docs/CONTRATOS.md com 6 novas operações (preferências e suporte).",
+        "Ajuda › Atualizações guarda a última versão conhecida e mostra as notas mesmo sem conexão."
+      ],
+      "fixes": [],
+      "differential": "A pessoa passa a ter um canal de suporte e um aviso de versão que respeitam a privacidade: tudo é revisado, confirmado e opcional.",
+      "howItWorks": [
+        "O relato é preparado e revisado localmente; o processo principal refaz a preparação, valida o destino oficial e pede confirmação nativa antes de abrir o navegador.",
+        "O aviso de versão é calculado e gravado pelo núcleo em preferencias.json; a interface apenas exibe o sino e toca o som quando o núcleo manda."
+      ],
+      "security": [
+        "Segredos detectados bloqueiam o envio e nunca são repetidos na revisão; e-mails, telefones, CPF e caminhos locais geram aviso.",
+        "O endereço do GitHub é reconstruído no processo principal e restrito a github.com/AnaPLysyk/Prumo-Qa/issues/new.",
+        "A triagem automática não faz checkout, não executa nem interpola texto de issue e não altera a branch principal.",
+        "Sem serviço, tarefa agendada, download ou instalação automática."
+      ],
+      "compatibility": [
+        "Contrato qa.project.json v2 e as quatro ferramentas MCP inalterados.",
+        "Dados e preferências das versões anteriores são preservados."
+      ],
+      "limitations": [
+        "Issues do repositório público são públicas; o aplicativo só avisa e ajuda a revisar.",
+        "A revisão de privacidade é heurística e pode não reconhecer todo dado sensível: leia o texto antes de enviar.",
+        "O aviso de versão exige o aplicativo aberto; não há notificação do sistema.",
+        "O instalador continua não assinado."
+      ],
+      "migration": "Nenhuma migração: preferencias.json é um arquivo novo; sem ele valem os padrões (tudo desligado).",
+      "afterUpdate": [
+        "Se quiser avisos de versão, ligue as opções em Ajuda › Atualizações."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.4.0",
       "status": "publicada",
       "date": "2026-10-10",

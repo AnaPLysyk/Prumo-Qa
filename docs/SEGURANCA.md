@@ -54,3 +54,10 @@ Falha de escrita de atividade mantém o resultado do núcleo e avisa em stderr (
 - Exclusão de dados locais exige confirmação nativa, restringe-se a arquivos de formato conhecido, recusa links simbólicos, hardlinks e pastas substituídas por junction, e informa falhas parciais. Não existe como ferramenta MCP.
 - O diagnóstico IPC grava só metadados e tem teto diário; não entra nas métricas.
 - Limites: o instalador não é assinado; o checksum SHA-256 da release detecta corrupção ou troca do arquivo, não prova autoria.
+
+## Aplicativo 2.5: suporte e avisos de versão
+
+- **Suporte não envia nada.** O aplicativo só prepara o relato e, após revisão e confirmação nativa, abre no navegador o formulário oficial `https://github.com/AnaPLysyk/Prumo-Qa/issues/new`; o endereço é reconstruído no processo principal e validado, a página não escolhe destino. Quem publica é a pessoa. Issues de repositório público são públicas.
+- **Nada é anexado automaticamente:** versão, sistema e diagnóstico (só metadados) dependem de marcação; logs, evidências, contextos, caminhos e código nunca entram. Segredos detectados (tokens, chaves privadas, senhas atribuídas) bloqueiam o envio e não são repetidos na revisão; e-mail, telefone, CPF e caminhos locais apenas geram aviso. A revisão é heurística.
+- **Texto de issue é dado.** A triagem (`.github/workflows/triagem.yml`) só aplica rótulos, não faz checkout, não interpola o texto em comandos, não corrige código nem altera a `main`. Nenhuma IA exclui contextos, publica issues ou altera configurações externas: essas ações não existem como ferramenta MCP.
+- **Avisos de versão:** preferências locais (`preferencias.json`); consulta somente ao GitHub oficial, sob demanda ou, se ligado, uma vez ao abrir; nenhum serviço, tarefa agendada, download ou instalação automática; o som toca no máximo uma vez por versão.

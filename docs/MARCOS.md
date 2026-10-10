@@ -28,6 +28,8 @@ Critérios definidos antes da implementação. Evidências: `testes/contextos.te
 
 ## 2.5.0 — Suporte e notificações
 
+Evidências: `testes/suporte.test.mjs`, `testes/preferencias.test.mjs`, `testes/desktop-suporte.test.mjs`, `docs/SUPORTE.md`.
+
 - Central de suporte (bug, melhoria, sugestão) que prepara a solicitação localmente, mostra aviso de privacidade e abre o GitHub Issues oficial só após revisão e confirmação; exportação local sem GitHub; nada anexado automaticamente.
 - Templates de issue e triagem segura (classificação apenas, sem executar texto de usuário).
 - Indicador de atualização no cabeçalho (mouse, teclado e clique), som opcional que toca uma vez por versão, preferências persistentes, sem processo em segundo plano.
