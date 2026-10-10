@@ -32,7 +32,8 @@
     "prepack": "npm run build",
     "app": "npm run build && electron .",
     "icone": "node scripts/gerar-icone.mjs",
-    "dist": "npm run build && electron-builder --win nsis --publish never"
+    "dist": "npm run build && electron-builder --win nsis --publish never",
+    "contratos": "npm run build && node scripts/gerar-contratos.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

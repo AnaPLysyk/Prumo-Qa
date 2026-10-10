@@ -1,9 +1,10 @@
-name: Windows — testes, instalador e release
+name: Windows — testes, instalador, atualização 2.2→atual e release
 
-# Gera o instalador NSIS numa máquina Windows limpa, instala em pasta com espaços,
-# roda a automação de interface sobre o executável INSTALADO, testa o MCP sem Node na PATH
-# e desinstala verificando que os dados do usuário permanecem.
-# Release (instalador NÃO ASSINADO) só é criada para tags v*.
+# Numa máquina Windows limpa: roda a suíte, gera o instalador NSIS, instala a 2.2.0 PUBLICADA (hash fixado),
+# cria dados reais com ela, instala a versão atual SOBRE a 2.2.0 em pasta com espaços e acentos, confere que os dados
+# foram preservados, roda a automação da janela e o cliente MCP real sobre o executável INSTALADO,
+# desinstala verificando que os dados do usuário permanecem e gera o SHA-256 do instalador.
+# Release (instalador NÃO ASSINADO) só é criada para tags v* e somente se todas as etapas anteriores passarem.
 on:
   push:
     branches: [main]
@@ -17,7 +18,7 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     permissions:
       contents: write
     steps:
@@ -34,8 +35,7 @@ jobs:
           $codigo = $LASTEXITCODE
           Get-Content check.txt -Tail 12
           # Anotações públicas: o log completo do Actions exige login, então as falhas sobem como erro do job.
-          $linhas = Get-Content check.txt; $i = [Array]::IndexOf($linhas, 'ℹ failing tests:')
-          if ($i -lt 0) { $i = [Array]::FindIndex($linhas, [Predicate[string]]{ param($l) $l -match 'failing tests:' }) }
+          $linhas = Get-Content check.txt; $i = [Array]::FindIndex($linhas, [Predicate[string]]{ param($l) $l -match 'failing tests:' })
           $nome = ''; $n = 0
           if ($i -ge 0) { foreach ($l in $linhas[$i..($linhas.Count - 1)]) {
             if ($l -match '^✖ (.+?) \(') { $nome = $Matches[1] }
@@ -43,39 +43,82 @@ jobs:
           exit $codigo
       - name: Gerar instalador
         run: npm run dist
-      - name: Instalar em pasta com espaços e acentos
+      - name: Instalar a versão 2.2.0 publicada (hash fixado) em pasta com espaços e acentos
+        shell: pwsh
+        run: |
+          $antigo = Join-Path $env:RUNNER_TEMP 'Prumo-QA-Setup-2.2.0.exe'
+          Invoke-WebRequest 'https://github.com/AnaPLysyk/Prumo-Qa/releases/download/v2.2.0/Prumo-QA-Setup-2.2.0.exe' -OutFile $antigo
+          $hash = (Get-FileHash $antigo -Algorithm SHA256).Hash.ToLower()
+          "SHA-256 do 2.2.0 baixado: $hash"
+          if ($hash -ne 'a902ca0eb4bc81d97d2c82f3de1756a137823ce042c034da389277a1d126edfe') { throw 'O instalador 2.2.0 baixado não confere com o hash publicado na entrega 2.2' }
+          $dir = 'C:\Prumo QA instalação'
+          Start-Process -FilePath $antigo -ArgumentList '/S', "/D=$dir" -Wait
+          if (-not (Test-Path "$dir\Prumo QA.exe")) { throw '2.2.0 não instalada' }
+          $v = (Get-Content "$dir\resources\app\package.json" -Raw | ConvertFrom-Json).version
+          if ($v -ne '2.2.0') { throw "Versão instalada inesperada: $v" }
+      - name: Criar dados reais com a 2.2.0 (vínculo, chamadas MCP, evidência BLOCKED)
+        run: node scripts/preparar-dados-22.mjs "C:\Prumo QA instalação"
+      - name: Atualizar para a versão atual instalando SOBRE a 2.2.0
         shell: pwsh
         run: |
           $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
           $dir = 'C:\Prumo QA instalação'
           Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -Wait
-          if (-not (Test-Path "$dir\Prumo QA.exe")) { throw 'Executável não instalado' }
+          $esperada = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $v = (Get-Content "$dir\resources\app\package.json" -Raw | ConvertFrom-Json).version
+          if ($v -ne $esperada) { throw "Após atualizar a versão é $v, esperada $esperada" }
           if (-not (Test-Path "$dir\Uninstall Prumo QA.exe")) { throw 'Desinstalador ausente' }
           $menu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Prumo QA.lnk'
           $desktop = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Prumo QA.lnk'
           foreach ($atalho in $menu, $desktop) { if (-not (Test-Path $atalho)) { throw "Atalho ausente: $atalho" } }
           "PRUMO_APP_EXE=$dir\Prumo QA.exe" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+      - name: Migração 2.2.0 → atual preservou projetos, histórico, métricas, evidências e MCP
+        shell: pwsh
+        env:
+          PRUMO_MIGRACAO: '1'
+        run: |
+          node --test --test-concurrency=1 testes/migracao.test.mjs *> migracao.txt
+          $codigo = $LASTEXITCODE
+          Get-Content migracao.txt | Select-String '^(✔|✖|﹣|ℹ (tests|pass|fail|skipped))'
+          if ($codigo -ne 0) { exit $codigo }
+          if ((Select-String -Path migracao.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Testes de migração foram ignorados: etapa inválida' }
       - name: Janela e MCP do programa instalado (sem Node.js dedicado ao app)
-        run: node --test --test-concurrency=1 testes/desktop.test.mjs
+        run: node --test --test-concurrency=1 testes/desktop.test.mjs testes/desktop-ajuda.test.mjs
       - name: Desinstalar e conferir que dados do usuário permanecem
         shell: pwsh
         run: |
           $dados = Join-Path $env:LOCALAPPDATA 'PrumoQA'
-          New-Item -ItemType Directory -Force $dados | Out-Null
-          Set-Content (Join-Path $dados 'marca-de-teste.txt') 'preservar'
           $dir = 'C:\Prumo QA instalação'
           Start-Process -FilePath "$dir\Uninstall Prumo QA.exe" -ArgumentList '/S' -Wait
           for ($i = 0; $i -lt 60 -and (Test-Path "$dir\Prumo QA.exe"); $i++) { Start-Sleep 1 }
           if (Test-Path "$dir\Prumo QA.exe") { throw 'Programa não foi removido' }
-          if (-not (Test-Path (Join-Path $dados 'marca-de-teste.txt'))) { throw 'Desinstalação apagou dados do usuário' }
+          foreach ($item in 'marca-migracao.txt', 'vinculos.json', 'projects') { if (-not (Test-Path (Join-Path $dados $item))) { throw "Desinstalação apagou dados do usuário: $item" } }
+      - name: SHA-256 do instalador
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem release\Prumo-QA-Setup-*.exe
+          $hash = (Get-FileHash $setup.FullName -Algorithm SHA256).Hash.ToLower()
+          "$hash *$($setup.Name)" | Out-File -Encoding ascii "release\$($setup.Name).sha256"
+          "SHA-256 $($setup.Name): $hash"
       - uses: actions/upload-artifact@v4
         with:
           name: prumo-qa-instalador
-          path: release/Prumo-QA-Setup-*.exe
+          path: |
+            release/Prumo-QA-Setup-*.exe
+            release/Prumo-QA-Setup-*.exe.sha256
           if-no-files-found: error
+      - name: Notas da release (geradas de app/versoes.json)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:GITHUB_REF_NAME -ne "v$v") { throw "A tag $($env:GITHUB_REF_NAME) não corresponde à versão $v do package.json" }
+          node scripts/notas-versao.mjs $v | Out-File -Encoding utf8 release-notes.md
       - name: Criar release (instalador não assinado)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: release/Prumo-QA-Setup-*.exe
-          body_path: .github/release-notes.md
+          files: |
+            release/Prumo-QA-Setup-*.exe
+            release/Prumo-QA-Setup-*.exe.sha256
+          body_path: release-notes.md

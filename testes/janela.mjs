@@ -24,11 +24,11 @@ export const novoDados = (t) => {
 };
 export async function abrir(t, dados, extra = [], envExtra = {}) {
   // VS Code/Claude definem ELECTRON_RUN_AS_NODE; com ele o Electron viraria Node puro e não abriria janela.
-  const env = { ...process.env, PRUMO_DATA_DIR: dados, ...envExtra }; delete env.ELECTRON_RUN_AS_NODE;
+  const env = { ...process.env, ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ...envExtra }; delete env.ELECTRON_RUN_AS_NODE; if (!dados) delete env.PRUMO_DATA_DIR; // sem dados: diretório padrão do usuário
   const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [repo, ...extra], env });
   let fechado = false;
   const fechar = async () => { if (!fechado) { fechado = true; await app.close(); } };
-  abertos.get(dados).push(fechar);
+  if (dados) abertos.get(dados).push(fechar);
   const page = await app.firstWindow();
   const erros = []; page.on('pageerror', (e) => erros.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
   await page.waitForSelector('#nav button');
@@ -40,8 +40,14 @@ export async function mcp(root, dados, chamadas) {
   const client = new Client({ name: 'codex-desktop-test', version: '1.0.0' });
   // Instalado: o servidor roda no runtime embutido do aplicativo (sem Node.js na máquina), como configura src/conexoes.ts.
   const transport = exe
-    ? new StdioClientTransport({ command: exe, args: [path.join(path.dirname(exe), 'resources', 'app', 'dist', 'mcp.js'), root], env: { PRUMO_DATA_DIR: dados, ELECTRON_RUN_AS_NODE: '1' } })
-    : new StdioClientTransport({ command: process.execPath, args: [path.join(repo, 'dist/mcp.js'), root], env: { PRUMO_DATA_DIR: dados } });
+    ? new StdioClientTransport({ command: exe, args: [path.join(path.dirname(exe), 'resources', 'app', 'dist', 'mcp.js'), root], env: { ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ELECTRON_RUN_AS_NODE: '1' } })
+    : new StdioClientTransport({ command: process.execPath, args: [path.join(repo, 'dist/mcp.js'), root], env: dados ? { PRUMO_DATA_DIR: dados } : {} });
   await client.connect(transport);
   try { const out = []; for (const [name, args] of chamadas) out.push(await client.callTool({ name, arguments: args })); return out; } finally { await client.close(); }
+}
+/** Abre o app no diretório de dados PADRÃO do usuário (testes de migração do instalador); fecha ao final do teste. */
+export async function abrirPadrao(t) {
+  const r = await abrir(t, null);
+  t.after(() => r.fechar());
+  return r;
 }
