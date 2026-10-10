@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.4.0",
-      "status": "planejada",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-10",
       "title": "Contextos e conhecimento de QA",
       "objective": "Permitir que cada projeto registre requisitos e regras com estado de confiança e histórico verificável, entregá-los à IA somente com a permissão da pessoa e especializar a análise de testes em Playwright e fundamentos de API.",
       "features": [
@@ -51,7 +51,7 @@
       "afterUpdate": [
         "Para usar contextos com uma IA, habilite \"Disponibilizar ao agente\" na aba Contextos do projeto."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.4.0"
     },
     {
       "version": "2.3.1",
