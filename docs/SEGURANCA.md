@@ -1,5 +1,11 @@
 # Segurança e limites de confiança
 
+## Evolução 2.7
+
+Credenciais desktop de Jira/Qase/GitHub são protegidas exclusivamente pelo `safeStorage` do Electron/DPAPI no Windows. Não são herdadas do ChatGPT, devolvidas aos agentes nem persistidas em texto claro. Sem proteção, a configuração falha. O processo principal faz somente GET nos hosts oficiais permitidos, com DNS público fixado no socket TLS, timeout, limite de 2 MiB e redirects recusados. Não há servidor HTTP local nem escrita em serviços. Consulte [SERVICOS.md](SERVICOS.md) para endpoints, permissões, limites e identidade Qase por conexão.
+
+Projetos Prumo têm UUID independente da pasta local opcional. Leituras e relações são limitadas ao vínculo selecionado, à instância e à conexão; nomes iguais não associam projetos. Não há cache persistido de respostas. Logs guardam somente metadados. Importação Jira é explícita e entra como RASCUNHO, com prévia nativa; compartilhamento de contexto ao MCP mantém o opt-in existente. Dados remotos não são instruções executáveis. Associações declaradas não são cobertura comprovada. Instrumentação de API simulada existe só no runner, não no app distribuído.
+
 ## Evolução 2.6
 
 O diagnóstico de integração inspeciona configurações por projeção de metadados, sem devolver segredos; o teste executa exclusivamente o runtime e servidor do próprio Prumo, nunca command/args/env livres encontrados na configuração externa. A consulta SDK é `consultar_evidencias`, sem capability executável. Evidência de protocolo fica em `integracoes`, fora do projeto; SDK não conta como uso observado Codex/Claude. Identidade declarada não é autenticação, e registros antigos não comprovam UTILIZADO nesta tela.

@@ -2,15 +2,33 @@
 
 > Arquivo **gerado** por `npm run contratos` a partir de `src/contratos.ts`. Não edite à mão: um teste compara este texto com o catálogo real.
 
-O Prumo não tem API HTTP. Existem duas interfaces:
+O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (37 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (55 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (4 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
 
 | Operação | Argumentos | Efeito |
 |---|---|---|
+| `prumo:espacos:listar` | — | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
+| `prumo:espacos:criar` | `descricao`, `nome` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:espacos:obter` | `id` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
+| `prumo:espacos:editar` | `dados`, `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:espacos:pasta` | `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:espacos:automacoes` | `id` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
+| `prumo:espacos:associar` | `dados`, `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:servicos:listar` | — | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
+| `prumo:servicos:adicionar` | `instancia`, `nome`, `servico`, `token`, `usuario` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:servicos:validar` | `id` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
+| `prumo:servicos:remover` | `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:servicos:recursos` | `id`, `pagina` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
+| `prumo:servicos:vincular` | `conexaoId`, `espacoId`, `recurso` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:servicos:desvincular` | `espacoId`, `servico` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:servicos:conferir` | `espacoId`, `servico` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
+| `prumo:servicos:consultar` | `espacoId`, `id`, `operacao`, `pagina`, `servico` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
+| `prumo:servicos:aceite` | `campo`, `espacoId` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:servicos:importar` | `espacoId`, `ticket` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
 | `prumo:app:info` | — | Consulta local; não altera o projeto. |
 | `prumo:projetos:listar` | — | Consulta local; não altera o projeto. |
 | `prumo:projetos:escolher` | — | Grava vinculos.json somente se o contrato for válido; nunca escreve na pasta do projeto. |
@@ -59,6 +77,276 @@ O Prumo não tem API HTTP. Existem duas interfaces:
 | `consultar_evidencias` | `criterio`, `jobId` | Somente leitura. |
 
 ## Detalhes
+
+### `prumo:espacos:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** espacos:listar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > espacos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Metadados ou dados da consulta com origem, data e cache:false
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:espacos:criar`
+
+- **Tipo:** IPC
+- **Finalidade:** espacos:criar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > espacos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:espacos:obter`
+
+- **Tipo:** IPC
+- **Finalidade:** espacos:obter: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > espacos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Metadados ou dados da consulta com origem, data e cache:false
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:espacos:editar`
+
+- **Tipo:** IPC
+- **Finalidade:** espacos:editar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > espacos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:espacos:pasta`
+
+- **Tipo:** IPC
+- **Finalidade:** espacos:pasta: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > espacos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:espacos:automacoes`
+
+- **Tipo:** IPC
+- **Finalidade:** espacos:automacoes: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > espacos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Metadados ou dados da consulta com origem, data e cache:false
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:espacos:associar`
+
+- **Tipo:** IPC
+- **Finalidade:** espacos:associar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > espacos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:listar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Metadados ou dados da consulta com origem, data e cache:false
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:adicionar`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:adicionar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:validar`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:validar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Metadados ou dados da consulta com origem, data e cache:false
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:remover`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:remover: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:recursos`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:recursos: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Metadados ou dados da consulta com origem, data e cache:false
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:vincular`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:vincular: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:desvincular`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:desvincular: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:conferir`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:conferir: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Metadados ou dados da consulta com origem, data e cache:false
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:consultar`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:consultar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Metadados ou dados da consulta com origem, data e cache:false
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:aceite`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:aceite: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:servicos:importar`
+
+- **Tipo:** IPC
+- **Finalidade:** servicos:importar: gestão explícita do projeto Prumo e integrações de leitura.
+- **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
+- **Destino:** main.ts > servicos.ts > adaptadoresServicos.ts
+- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Saída:** Registro local ou confirmação de cancelamento
+- **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
+- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
+- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
 
 ### `prumo:app:info`
 

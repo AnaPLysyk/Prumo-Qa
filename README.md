@@ -1,6 +1,12 @@
-# Prumo QA 2.6 — Integrações verificáveis e documentação pública
+# Prumo QA 2.7 — Plataforma desktop de engenharia de qualidade
 
-Versão [2.6.0 publicada](https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.6.0), com instalador e checksum após CI completo. [Documentação pública](https://prumo-qa-docs.onrender.com) · [relatório de entrega](docs/ENTREGA-2.6.md). O instalador permanece sem assinatura. Baseline real da 2.5 em [docs/BASELINE-2.6.md](docs/BASELINE-2.6.md).
+Versão 2.7.0 em validação; a última release publicada é [2.6.0](https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.6.0). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+
+## Evolução 2.7
+
+Projetos Prumo com identidade própria, contexto manual e pasta de automação opcional. Conexões desktop independentes para Jira Cloud, Qase v1 e GitHub: seleção dinâmica, leitura explícita, origem e data, isolamento por projeto/instância/conexão e credenciais protegidas pelo Windows. IA continua opcional; Agentes preserva os quatro tools MCP. Não existe servidor HTTP local, escrita em serviços, clone privado ou aprovação automática.
+
+Tickets, Testes, Automações, Execuções e Rastreabilidade completam o trabalho manual. Associações declaradas não comprovam cobertura. Respostas são consultadas sem cache persistido; falhas aparecem com códigos próprios. [Guia manual](app/ajuda/17-plataforma.md) e [endpoints, autenticação e limites](docs/SERVICOS.md). Autenticação real em produção requer credenciais próprias; fixtures não a comprovam.
 
 ## Evolução 2.6
 
