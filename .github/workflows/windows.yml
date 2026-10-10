@@ -34,7 +34,7 @@ jobs:
           $codigo = $LASTEXITCODE
           Get-Content check.txt -Tail 12
           # Anotações públicas: o log completo do Actions exige login, então as falhas sobem como erro do job.
-          Select-String -Path check.txt -Pattern '^\s*(✖|failureType|code:|expected:|actual:)|AssertionError|Error:|ℹ (pass|fail) ' |
+          Select-String -Path check.txt -Pattern '^\s+(AssertionError|Error|TypeError|SyntaxError)|expected:|ℹ fail ' |
             Select-Object -First 9 | ForEach-Object { '::error::' + $_.Line.Trim().Substring(0, [Math]::Min(300, $_.Line.Trim().Length)) }
           exit $codigo
       - name: Gerar instalador
