@@ -28,6 +28,10 @@ win:
       arch: x64
   # Sem certificado de assinatura: o instalador sai NÃO ASSINADO (veja docs/APLICATIVO.md).
   signAndEditExecutable: true
+  # Gancho de assinatura: assina só se PRUMO_ASSINATURA_THUMBPRINT existir (certificado legítimo no ambiente de build);
+  # sem credencial o arquivo permanece não assinado, e com credencial qualquer falha interrompe o build. Ver docs/ASSINATURA.md.
+  signtoolOptions:
+    sign: scripts/assinar-windows.cjs
 nsis:
   oneClick: false
   perMachine: false

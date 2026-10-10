@@ -48,4 +48,5 @@ test('WEAK_TEST distingue o cenário ignorado do teste válido no mesmo arquivo,
   assert.equal(t1.severity,'medium');assert.match(t1.recommendation,/associado a este cenário/);
   assert.equal(t2.severity,'low');assert.match(t2.recommendation,/não foi associado a este cenário/);
   assert.ok(!r.findings.some(x=>x.type==='POTENTIAL_REDUNDANCY'),'teste ignorado nunca vira base de redundância');
+  assert.deepEqual(r.suggestedSelection,['C1'],'nenhum dos dois conta como cobertura comprovada: o candidato idêntico ao T2 continua necessário');
 });
