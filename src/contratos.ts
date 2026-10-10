@@ -7,6 +7,8 @@ import {dadosEspaco,servicoSchema,identidadeRecurso,associacaoSchema} from './es
 import {conexaoEntrada} from './servicos.js';
 import {paginaSchema,codigosServico} from './httpServicos.js';
 import {operacoesServico} from './adaptadoresServicos.js';
+import {dadosRotinaSchema} from './agenda.js';
+import {filtroExecucoes} from './historicoCentral.js';
 import { conteudoSchema, tipos as tiposContexto, estados as estadosContexto } from './contextos.js';
 
 /**
@@ -38,6 +40,23 @@ export const esquemasIpc = {
   'servicos:consultar': z.object({espacoId:z.string().uuid(),servico:servicoSchema,operacao:z.enum(operacoesServico),pagina:paginaSchema.optional(),id:z.string().max(200).optional()}).strict(),
   'servicos:aceite': z.object({espacoId:z.string().uuid(),campo:z.string().regex(/^customfield_\d+$/)}).strict(),
   'servicos:importar': z.object({espacoId:z.string().uuid(),ticket:z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/)}).strict(),
+  'agenda:listar': z.object({espacoId:z.string().uuid().optional()}).strict(),
+  'agenda:salvar': z.object({id:z.string().uuid().optional(),dados:dadosRotinaSchema}).strict(),
+  'agenda:estado': z.object({id:z.string().uuid(),acao:z.enum(['pausar','retomar','desativar'])}).strict(),
+  'agenda:excluir': z.object({id:z.string().uuid()}).strict(),
+  'agenda:executar': z.object({id:z.string().uuid()}).strict(),
+  'agenda:autorizar': z.object({id:z.string().uuid(),dias:z.number().int().min(1).max(30),maxUsos:z.number().int().min(1).max(1000)}).strict(),
+  'agenda:revogar': z.object({id:z.string().uuid()}).strict(),
+  'agenda:permissoes': z.object({espacoId:z.string().uuid().optional()}).strict(),
+  'agenda:politica': z.object({espacoId:z.string().uuid(),tickets:z.array(z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/)).min(1).max(20),tipos:z.array(z.enum(['smoke','regressao','validacao-ticket','k6'])).min(1).max(4),dias:z.number().int().min(1).max(30),maxPublicacoes:z.number().int().min(1).max(1000)}).strict(),
+  'agenda:revogarpolitica': z.object({id:z.string().uuid()}).strict(),
+  'execucoes:listar': z.object({filtro:filtroExecucoes.optional()}).strict(),
+  'execucoes:metricas': z.object({espacoId:z.string().uuid().optional()}).strict(),
+  'jira:previa': z.object({trabalhoId:z.string().uuid()}).strict(),
+  'jira:publicar': z.object({trabalhoId:z.string().uuid()}).strict(),
+  'worker:estado': vazio,
+  'worker:pausa': z.object({pausado:z.boolean()}).strict(),
+  'worker:eventos': z.object({desde:z.number().int().min(0).max(1000000000)}).strict(),
   'app:info': vazio,
   'projetos:listar': vazio,
   'projetos:escolher': vazio,
@@ -145,7 +164,30 @@ for(const nome of Object.keys(esquemasIpc).filter(n=>n.startsWith('espacos:')||n
   const leitura=/:listar$|:obter$|:automacoes$|:recursos$|:consultar$|:conferir$|:validar$/.test(nome);
   ipc[nome]={finalidade:`${nome}: gestão explícita do projeto Prumo e integrações de leitura.`,origem:'Interface > Projetos, Tickets, Testes ou Conexões',destino:nome.startsWith('espacos:')?'main.ts > espacos.ts':'main.ts > servicos.ts > adaptadoresServicos.ts',entrada:'Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário',saida:leitura?'Metadados ou dados da consulta com origem, data e cache:false':'Registro local ou confirmação de cancelamento',permissoes:'Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.',efeito:leitura?'Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.':'Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.',arquivos:'Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional',erros:[...ipcErros,...codigosServico,'WORKSPACE_NOT_FOUND','CREDENTIAL_PROTECTION_UNAVAILABLE'],protecoes:[...ipcProtecoes,'Isolamento por identificador de projeto, conexão e instância','Sem conteúdo remoto ou token nos logs','Não exposto ao MCP'],registro:'Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido'};
 }
-export const canaisFrequentes: ReadonlySet<string> = new Set(['espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter']);
+// ---- 2.8: agenda, execuções, comentário Jira e worker ----
+const agendaProt = [...ipcProtecoes, 'Isolamento por projeto Prumo', 'Sem comando livre: só capabilities declaradas', 'Não exposto ao MCP'];
+const agendaErros = [...ipcErros, 'SCHEDULE_NOT_FOUND', 'SCHEDULE_LIMIT', 'SCHEDULE_IN_THE_PAST', 'SCHEDULE_PROJECT_IMMUTABLE', 'WORKSPACE_NOT_FOUND'];
+const agendaDesc = (finalidade: string, entrada: string, saida: string, efeito: string, permissoes: string, extra: Partial<Descricao> = {}): Descricao => ({ finalidade, origem: 'Interface > Agendamentos / Execuções, ou menu da bandeja', destino: 'main.ts > agenda.ts / fila.ts / worker.ts', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agenda.json, fila.json, autorizacoes.json', erros: agendaErros, protecoes: agendaProt, registro: 'Diagnóstico IPC e histórico de execuções por projeto', ...extra });
+Object.assign(ipc, {
+  'agenda:listar': agendaDesc('Listar as rotinas agendadas com próxima e última execução, permissões e autorizações.', 'Projeto opcional', 'Rotinas com estado, próxima execução (calculada), última execução, permissões em linguagem simples e autorizações', 'Consulta local.', 'Nenhuma'),
+  'agenda:salvar': agendaDesc('Criar ou editar uma rotina (único, intervalo, diário ou semanal, com fuso).', 'Projeto, tipo, capability declarada, ambiente, frequência, fuso, política de horários perdidos, ticket opcional', 'Rotina salva', 'Grava agenda.json. Editar reinicia a âncora; não autoriza nada.', 'Ação explícita da pessoa', { erros: [...agendaErros, 'INVALID_ARGUMENTS'] }),
+  'agenda:estado': agendaDesc('Pausar, retomar ou desativar uma rotina.', 'Id da rotina e ação', 'Rotina atualizada', 'Grava agenda.json. Retomar não executa horários que passaram durante a pausa.', 'Ação explícita da pessoa'),
+  'agenda:excluir': agendaDesc('Excluir uma rotina (histórico de execuções permanece).', 'Id da rotina', 'excluded', 'Remove a rotina de agenda.json; execuções já registradas permanecem.', 'Confirmação nativa que a página não consegue simular', { protecoes: [...agendaProt, 'Confirmação nativa'] }),
+  'agenda:executar': agendaDesc('Executar uma rotina agora (trabalho manual).', 'Id da rotina', 'Trabalho enfileirado', 'Enfileira um trabalho manual. Testes e k6 pedem a autenticação nativa do Windows a cada execução; consultas apenas leem.', 'Autenticação humana nativa para executar testes', { erros: [...agendaErros, 'HUMAN_APPROVAL_REQUIRED'], protecoes: [...agendaProt, 'Broker nativo do Windows'] }),
+  'agenda:autorizar': agendaDesc('Autorizar previamente execuções agendadas de um escopo exato, com validade e limite de usos.', 'Id da rotina, dias (1-30) e máximo de usos', 'Autorizações criadas (id, capability, validade, usos)', 'Grava autorizacoes.json somente depois da autenticação nativa do Windows para o escopo exato (hash de projeto, comando, ambiente e fontes). Qualquer mudança invalida.', 'Confirmação nativa + autenticação humana do Windows (broker não alterado)', { erros: [...agendaErros, 'HUMAN_APPROVAL_REQUIRED', 'PROJECT_FOLDER_REQUIRED', 'RUNTIME_MISSING', 'NO_VERIFIED_LINK'], protecoes: [...agendaProt, 'Broker nativo do Windows', 'Escopo por hash', 'Validade máxima de 30 dias', 'Revogável'] }),
+  'agenda:revogar': agendaDesc('Revogar uma autorização de execução.', 'Id da autorização', 'Autorização revogada', 'Grava autorizacoes.json; execuções futuras daquele escopo ficam BLOCKED.', 'Ação explícita da pessoa'),
+  'agenda:permissoes': agendaDesc('Listar autorizações de execução e políticas de publicação com seus estados.', 'Projeto opcional', 'Autorizações e políticas (vigente, expirada, revogada, esgotada)', 'Consulta local.', 'Nenhuma'),
+  'agenda:politica': agendaDesc('Aprovar uma política de publicação de comentários no Jira restrita a tickets, tipos, validade e limite.', 'Projeto, tickets explícitos, tipos de rotina, dias e máximo de publicações', 'Política criada', 'Grava autorizacoes.json. Sem política, nenhuma rotina agendada comenta no Jira.', 'Confirmação nativa que lista tickets, tipos e limites', { erros: [...agendaErros, 'AUTH_VALIDITY_INVALID'], protecoes: [...agendaProt, 'Confirmação nativa', 'Somente tickets listados'] }),
+  'agenda:revogarpolitica': agendaDesc('Revogar uma política de publicação.', 'Id da política', 'Política revogada', 'Grava autorizacoes.json; publicações agendadas deixam de ocorrer.', 'Ação explícita da pessoa'),
+  'execucoes:listar': agendaDesc('Histórico centralizado de execuções por projeto, repositório, ticket, rotina, estado e período.', 'Filtros opcionais e limite', 'Execuções com resultado, contagens, tentativas, evidência, comentário Jira e erros', 'Consulta local; não altera nada.', 'Nenhuma', { origem: 'Interface > Execuções', destino: 'main.ts > historicoCentral.ts' }),
+  'execucoes:metricas': agendaDesc('Indicadores reais das execuções registradas.', 'Projeto opcional', 'Totais PASS/FAIL/BLOCKED/NOT_RUN, última e próxima execução, rotinas ativas/pausadas, falhas de agendamento, comentários pendentes e publicados', 'Consulta local. Não calcula porcentagem de qualidade; consulta à interface não conta como execução.', 'Nenhuma', { origem: 'Interface > Execuções e Métricas', destino: 'main.ts > historicoCentral.ts' }),
+  'jira:previa': agendaDesc('Mostrar o comentário de resultado que seria publicado no Jira.', 'Id da execução', 'Texto do comentário e estado de publicação', 'Sem rede e sem gravação.', 'Nenhuma', { origem: 'Interface > Execuções > Comentário Jira', destino: 'main.ts > jiraComentario.prepararPublicacao', erros: [...agendaErros, 'JOB_NOT_FOUND', 'JIRA_COMMENT_NOT_APPLICABLE', 'JIRA_TICKET_REQUIRED'] }),
+  'jira:publicar': agendaDesc('Publicar o comentário de resultado em um ticket do projeto vinculado (única escrita remota do produto).', 'Id da execução', 'Estado da publicação e id remoto do comentário', 'Uma requisição POST ao Jira Cloud vinculado (comentário). Não altera status do ticket. Idempotente por execução e por marcador no comentário.', 'Confirmação nativa que mostra o texto exato; credencial protegida no Windows com permissão de comentar', { origem: 'Interface > Execuções > Publicar no Jira', destino: 'main.ts (confirmação nativa) > jiraComentario.publicar > servicos.comentarJira', erros: [...agendaErros, 'HUMAN_CONFIRMATION_REQUIRED', 'JOB_NOT_FOUND', 'SERVICE_PERMISSION', 'SERVICE_SCOPE_CHANGED', 'SERVICE_WRITE_BLOCKED'], protecoes: [...agendaProt, 'Confirmação nativa', 'Host Atlassian fixo, caminho de comentário fixo', 'Projeto do ticket conferido', 'Sem duplicar'] }),
+  'worker:estado': agendaDesc('Estado real do worker de agendamentos.', 'Nenhuma', 'Em execução, pausado, batimento, pendentes, próxima execução, último erro', 'Consulta local.', 'Nenhuma', { origem: 'Interface > cabeçalho e bandeja', destino: 'main.ts > worker.ts' }),
+  'worker:eventos': agendaDesc('Receber avisos do worker e pedidos de navegação da bandeja desde o último número visto.', 'Último número de evento recebido', 'Eventos (iniciado, concluído, falhou, bloqueado, publicação falhou, worker interrompido, navegar) e último número', 'Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte).', 'Nenhuma', { origem: 'Interface > avisos e navegação pela bandeja', destino: 'main.ts > worker.ts' }),
+  'worker:pausa': agendaDesc('Pausar ou retomar todos os agendamentos.', 'pausado (true/false)', 'Estado do worker', 'Grava a pausa global; trabalho em andamento termina sem ser corrompido.', 'Ação explícita da pessoa', { origem: 'Interface > Agendamentos ou menu da bandeja' })
+});
+export const canaisFrequentes: ReadonlySet<string> = new Set(['worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter']);
 
 const mcpProtecoes = ['Projeto fixado na configuração do servidor, nunca pela ferramenta', 'Leitura limitada à raiz autorizada', 'Registro de início e término'];
 const mcp: { nome: string; campos: string[]; d: Descricao }[] = [

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, dialog, ipcMain, session, shell, safeStorage, type IpcMainInvokeEvent } from 'electron';
+import { app, BrowserWindow, Menu, Tray, Notification, nativeImage, dialog, ipcMain, session, shell, safeStorage, type IpcMainInvokeEvent } from 'electron';
 import * as espacos from '../espacos.js';
 import {nucleoServicos} from '../servicos.js';
 import {textoRemoto} from '../adaptadoresServicos.js';
@@ -25,6 +25,13 @@ import { lerPreferencias, alterarPreferencias, marcarVisualizada, avisoPendente,
 import { prepararSolicitacao, urlOficial } from '../suporte.js';
 import { consultarChamado } from '../chamados.js';
 import * as painel from '../painel.js';
+import { Worker, type EventoWorker } from '../worker.js';
+import * as agendaCore from '../agenda.js';
+import * as agendaOp from '../agendaOperacoes.js';
+import * as autorizacoesCore from '../autorizacoes.js';
+import { solicitarAprovacao } from '../aprovacao.js';
+import { listarExecucoes, metricas } from '../historicoCentral.js';
+import { prepararPublicacao, publicar as publicarComentario } from '../jiraComentario.js';
 
 /**
  * Processo principal: janela + IPC. Toda regra vive no núcleo (src/*.ts); aqui só validamos
@@ -144,7 +151,12 @@ canal('atualizacao:verificar', async () => {
   return { ...r, notificacao };
 });
 canal('preferencias:obter', () => ({ preferencias: lerPreferencias(), aviso: avisoPendente(versao), instalada: versao }));
-canal('preferencias:salvar', a => ({ preferencias: alterarPreferencias(a) }));
+canal('preferencias:salvar', a => {
+  const preferencias = alterarPreferencias(a);
+  // Iniciar com o Windows só existe se a pessoa ligar explicitamente; desligar remove o registro.
+  if (a.iniciarComWindows !== undefined && app.isPackaged) app.setLoginItemSettings({ openAtLogin: preferencias.iniciarComWindows, args: preferencias.iniciarComWindows ? ['--oculto'] : [] });
+  return { preferencias };
+});
 canal('preferencias:visualizada', a => ({ preferencias: marcarVisualizada(a.versao), aviso: avisoPendente(versao) }));
 canal('atualizacao:abrir', async (_a, janela) => {
   if (!ultimaRelease || !new RegExp(`^https://github\\.com/${repositorio}/releases/tag/v\\d+\\.\\d+\\.\\d+$`).test(ultimaRelease)) throw new Error('NO_VERIFIED_RELEASE: verifique as atualizações antes.');
@@ -231,9 +243,70 @@ canal('contextos:mcp', async (a, janela) => {
   return { canceled: false, ...(await painel.contextosMcp(a.root, a.habilitar)) };
 });
 
-function criarJanela() {
+// ---- 2.8: agenda, worker residente, execuções e comentário Jira. A página nunca informa comando, caminho nem aprovação. ----
+const worker = new Worker({
+  servicos: servicos as never,
+  aoEvento: e => publicarEvento(e)
+});
+type Aviso = { n: number; tipo: string; titulo: string; detalhe: string; rotinaId?: string; destino?: string; at: string };
+const avisos: Aviso[] = []; let contadorAviso = 0;
+function empilhar(a: Omit<Aviso, 'n' | 'at'>) { avisos.push({ ...a, n: ++contadorAviso, at: new Date().toISOString() }); if (avisos.length > 100) avisos.shift(); }
+function publicarEvento(e: EventoWorker) {
+  empilhar({ tipo: e.tipo, titulo: e.titulo, detalhe: e.detalhe, rotinaId: e.rotinaId || undefined });
+  const p = lerPreferencias();
+  if (p.notificarAgenda && !p.silenciar && Notification.isSupported() && e.tipo !== 'AGENDAMENTO_INICIADO') {
+    const n = new Notification({ title: `Prumo QA — ${e.titulo}`, body: e.detalhe.slice(0, 200), silent: !p.som });
+    n.on('click', () => navegar('execucoes')); n.show();
+  }
+  atualizarBandeja();
+}
+function navegar(destino: string) { empilhar({ tipo: 'NAVEGAR', titulo: destino, detalhe: '', destino }); mostrarJanela(); }
+canal('worker:eventos', a => ({ eventos: avisos.filter(x => x.n > a.desde), ultimo: contadorAviso }));
+canal('worker:estado', () => ({ ...worker.estado(), bandeja: bandeja !== null }));
+canal('worker:pausa', a => { agendaCore.definirPausaGlobal(a.pausado); atualizarBandeja(); return worker.estado(); });
+canal('agenda:listar', a => agendaOp.listarAgenda(a.espacoId));
+canal('agenda:salvar', async a => { await agendaOp.validarRotina(a.dados); return a.id ? agendaCore.editarRotina(a.id, a.dados) : agendaCore.criarRotina(a.dados); });
+canal('agenda:estado', a => (a.acao === 'pausar' ? agendaCore.pausarRotina(a.id) : a.acao === 'retomar' ? agendaCore.retomarRotina(a.id) : agendaCore.desativarRotina(a.id)));
+canal('agenda:excluir', async (a, j) => {
+  const r = agendaCore.obterRotina(a.id);
+  if (!(await confirmar(j, 'Excluir rotina', `Excluir a rotina "${r.nome}"?`, 'A rotina deixa de executar. As execuções já registradas e as evidências permanecem.', 'Excluir'))) return { canceled: true };
+  return { canceled: false, ...agendaCore.excluirRotina(a.id) };
+});
+canal('agenda:executar', async a => { const t = worker.executarAgora(a.id); void worker.tick(); return { trabalho: t.id, estado: t.estado }; });
+canal('agenda:autorizar', async (a, j) => {
+  const r = agendaCore.obterRotina(a.id);
+  const resumo = agendaOp.permissoesDaRotina(r).join('\n');
+  if (!(await confirmar(j, 'Autorizar execuções agendadas', `Autorizar a rotina "${r.nome}" por ${a.dias} dia(s) e até ${a.maxUsos} execução(ões)?`, `${resumo}\n\nAmbiente: ${r.ambiente}.\nA autorização vale somente para este projeto, ambiente e comando exatos; se o comando, o contrato ou as fontes mudarem, ela deixa de valer. Você pode revogá-la a qualquer momento. Em seguida o Windows pedirá a sua autenticação.`, 'Continuar'))) return { canceled: true };
+  return { canceled: false, autorizacoes: await agendaOp.autorizarRotina(a.id, { dias: a.dias, maxUsos: a.maxUsos }, solicitarAprovacao) };
+});
+canal('agenda:revogar', a => ({ autorizacao: autorizacoesCore.revogarExecucao(a.id) }));
+canal('agenda:permissoes', a => agendaOp.listarPermissoes(a.espacoId));
+canal('agenda:politica', async (a, j) => {
+  const e = espacos.obterEspaco(a.espacoId);
+  if (!(await confirmar(j, 'Política de publicação no Jira', `Permitir comentários automáticos de resultado nestes tickets?\n${a.tickets.join(', ')}`, `Projeto Prumo: ${e.nome}\nTipos de rotina: ${a.tipos.join(', ')}\nValidade: ${a.dias} dia(s). Máximo: ${a.maxPublicacoes} comentário(s).\n\nSó serão publicados comentários de resultado (sem alterar o status dos tickets), em tickets do projeto Jira vinculado. Você pode revogar a política a qualquer momento.`, 'Aprovar política'))) return { canceled: true };
+  return { canceled: false, politica: autorizacoesCore.criarPoliticaPublicacao(a.espacoId, { tickets: a.tickets, tipos: a.tipos, dias: a.dias, maxPublicacoes: a.maxPublicacoes }, usuarioWindows()) };
+});
+canal('agenda:revogarpolitica', a => ({ politica: autorizacoesCore.revogarPublicacao(a.id) }));
+canal('execucoes:listar', a => listarExecucoes(a.filtro));
+canal('execucoes:metricas', a => metricas(a.espacoId));
+canal('jira:previa', a => prepararPublicacao(a.trabalhoId));
+canal('jira:publicar', async (a, j) => {
+  const prev = prepararPublicacao(a.trabalhoId);
+  if (!(await confirmar(j, 'Publicar comentário no Jira', `Publicar este resultado no ticket ${prev.ticket}?`, `${prev.texto.slice(0, 1500)}\n\nSerá criado um comentário. O status do ticket não será alterado.`, 'Publicar'))) return { canceled: true };
+  const r = await publicarComentario(a.trabalhoId, 'MANUAL', servicos, undefined, true);
+  return { canceled: false, estado: r.estado, comentarioId: r.comentarioId ?? null, erro: r.erro ?? null };
+});
+
+// ---- Janela, bandeja do Windows e ciclo de vida residente (2.8) ----
+let janelaPrincipal: BrowserWindow | null = null;
+let bandeja: Tray | null = null;
+let saindo = false;
+let avisouBandeja = false;
+const iniciouOculto = process.argv.includes('--oculto');
+
+function criarJanela(): BrowserWindow {
   const janela = new BrowserWindow({
-    width: 1080, height: 720, minWidth: 820, minHeight: 560, show: false, backgroundColor: '#14171c', title: 'Prumo QA',
+    width: 1080, height: 720, minWidth: 820, minHeight: 560, show: false, backgroundColor: '#0b1020', title: 'Prumo QA',
     icon: path.join(raizApp, 'assets', 'prumo-icon.png'),
     webPreferences: { preload: path.join(raizApp, 'app', 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, devTools: !app.isPackaged }
   });
@@ -241,18 +314,60 @@ function criarJanela() {
   janela.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   janela.webContents.on('will-navigate', e => e.preventDefault());
   janela.webContents.on('will-attach-webview', e => e.preventDefault());
+  // Fechar a janela NÃO encerra o Prumo: ele continua na bandeja para que as rotinas sigam funcionando.
+  janela.on('close', e => {
+    if (saindo) return;
+    e.preventDefault(); janela.hide();
+    if (!avisouBandeja && Notification.isSupported()) { avisouBandeja = true; new Notification({ title: 'Prumo QA continua na bandeja', body: 'As rotinas agendadas seguem ativas. Use o ícone da bandeja para abrir ou sair.', silent: true }).show(); }
+  });
+  janela.on('closed', () => { if (janelaPrincipal === janela) janelaPrincipal = null; });
   void janela.loadFile(path.join(rendererDir, 'index.html'));
+  return janela;
+}
+function mostrarJanela() {
+  if (!janelaPrincipal || janelaPrincipal.isDestroyed()) janelaPrincipal = criarJanela();
+  const j = janelaPrincipal; if (j.isMinimized()) j.restore(); j.show(); j.focus();
+}
+function montarMenuBandeja() {
+  const e = worker.estado(); const pausado = e.pausado;
+  const estado = !e.executando ? 'Worker parado' : pausado ? 'Agendamentos pausados' : e.emExecucao ? 'Executando uma rotina' : `Ativo — ${e.rotinasAtivas} rotina(s), ${e.pendentes} pendente(s)`;
+  return Menu.buildFromTemplate([
+    { label: 'Abrir Prumo', click: () => mostrarJanela() },
+    { label: 'Ver agendamentos', click: () => navegar('agenda') },
+    { label: 'Consultar execuções', click: () => navegar('execucoes') },
+    { type: 'separator' },
+    pausado ? { label: 'Retomar agendamentos', click: () => { agendaCore.definirPausaGlobal(false); atualizarBandeja(); } } : { label: 'Pausar agendamentos', click: () => { agendaCore.definirPausaGlobal(true); atualizarBandeja(); } },
+    { label: `Estado do worker: ${estado}`, click: () => { const j = janelaPrincipal && !janelaPrincipal.isDestroyed() && janelaPrincipal.isVisible() ? janelaPrincipal : undefined; const opcoes = { type: 'info' as const, title: 'Estado do worker', message: estado, detail: `Próxima execução: ${e.proximaExecucao ?? 'nenhuma agendada'}\nTrabalhos pendentes: ${e.pendentes}\nPausado: ${pausado ? 'sim' : 'não'}\nÚltimo erro: ${e.ultimoErro ?? 'nenhum'}\n\nSe o computador estiver desligado ou suspenso, nada é executado nesse período.`, buttons: ['Fechar'] }; void (j ? dialog.showMessageBox(j, opcoes) : dialog.showMessageBox(opcoes)); } },
+    { type: 'separator' },
+    { label: 'Sair do Prumo', click: () => app.quit() }
+  ]);
+}
+function atualizarBandeja() { if (bandeja) { bandeja.setContextMenu(montarMenuBandeja()); const e = worker.estado(); bandeja.setToolTip(`Prumo QA — ${!e.executando ? 'worker parado' : e.pausado ? 'agendamentos pausados' : e.emExecucao ? 'executando' : 'ativo'}`); } }
+function criarBandeja() {
+  const icone = nativeImage.createFromPath(path.join(raizApp, 'assets', 'prumo-icon.png')).resize({ width: 16, height: 16 });
+  bandeja = new Tray(icone); bandeja.on('click', () => mostrarJanela()); bandeja.on('double-click', () => mostrarJanela()); atualizarBandeja();
+  setInterval(atualizarBandeja, 15000).unref();
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  app.on('second-instance', () => { const j = BrowserWindow.getAllWindows()[0]; if (j) { if (j.isMinimized()) j.restore(); j.focus(); } });
+  app.on('second-instance', () => mostrarJanela());
+  // Encerramento controlado: para o worker (mata filhos, registra interrupção, libera a trava) antes de sair de verdade.
+  let encerrando = false;
+  app.on('before-quit', e => {
+    if (encerrando) return; e.preventDefault(); encerrando = true; saindo = true;
+    void worker.parar().catch(() => undefined).finally(() => { bandeja?.destroy(); bandeja = null; app.quit(); });
+  });
   void app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
     // Nada de rede na janela: só file:// (a própria página) e devtools em desenvolvimento.
     session.defaultSession.webRequest.onBeforeRequest((d, cb) => cb({ cancel: !(d.url.startsWith('file:') || d.url.startsWith('devtools:')) }));
     session.defaultSession.setPermissionRequestHandler((_w, _p, cb) => cb(false));
-    criarJanela();
+    criarBandeja();
+    try { worker.iniciar(); } catch (err) { empilhar({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Worker não iniciou', detalhe: (err as Error).message }); }
+    atualizarBandeja();
+    if (!iniciouOculto) mostrarJanela();
   });
-  app.on('window-all-closed', () => app.quit());
+  // Sem `window-all-closed` => app.quit(): o Prumo fica residente até "Sair do Prumo".
+  app.on('window-all-closed', () => undefined);
 }

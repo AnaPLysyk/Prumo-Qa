@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (55 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (72 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (4 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -29,6 +29,23 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:servicos:consultar` | `espacoId`, `id`, `operacao`, `pagina`, `servico` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
 | `prumo:servicos:aceite` | `campo`, `espacoId` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
 | `prumo:servicos:importar` | `espacoId`, `ticket` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:agenda:listar` | `espacoId` | Consulta local. |
+| `prumo:agenda:salvar` | `dados`, `id` | Grava agenda.json. Editar reinicia a âncora; não autoriza nada. |
+| `prumo:agenda:estado` | `acao`, `id` | Grava agenda.json. Retomar não executa horários que passaram durante a pausa. |
+| `prumo:agenda:excluir` | `id` | Remove a rotina de agenda.json; execuções já registradas permanecem. |
+| `prumo:agenda:executar` | `id` | Enfileira um trabalho manual. Testes e k6 pedem a autenticação nativa do Windows a cada execução; consultas apenas leem. |
+| `prumo:agenda:autorizar` | `dias`, `id`, `maxUsos` | Grava autorizacoes.json somente depois da autenticação nativa do Windows para o escopo exato (hash de projeto, comando, ambiente e fontes). Qualquer mudança invalida. |
+| `prumo:agenda:revogar` | `id` | Grava autorizacoes.json; execuções futuras daquele escopo ficam BLOCKED. |
+| `prumo:agenda:permissoes` | `espacoId` | Consulta local. |
+| `prumo:agenda:politica` | `dias`, `espacoId`, `maxPublicacoes`, `tickets`, `tipos` | Grava autorizacoes.json. Sem política, nenhuma rotina agendada comenta no Jira. |
+| `prumo:agenda:revogarpolitica` | `id` | Grava autorizacoes.json; publicações agendadas deixam de ocorrer. |
+| `prumo:execucoes:listar` | `filtro` | Consulta local; não altera nada. |
+| `prumo:execucoes:metricas` | `espacoId` | Consulta local. Não calcula porcentagem de qualidade; consulta à interface não conta como execução. |
+| `prumo:jira:previa` | `trabalhoId` | Sem rede e sem gravação. |
+| `prumo:jira:publicar` | `trabalhoId` | Uma requisição POST ao Jira Cloud vinculado (comentário). Não altera status do ticket. Idempotente por execução e por marcador no comentário. |
+| `prumo:worker:estado` | — | Consulta local. |
+| `prumo:worker:pausa` | `pausado` | Grava a pausa global; trabalho em andamento termina sem ser corrompido. |
+| `prumo:worker:eventos` | `desde` | Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte). |
 | `prumo:app:info` | — | Consulta local; não altera o projeto. |
 | `prumo:projetos:listar` | — | Consulta local; não altera o projeto. |
 | `prumo:projetos:escolher` | — | Grava vinculos.json somente se o contrato for válido; nunca escreve na pasta do projeto. |
@@ -59,7 +76,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:contextos:excluir` | `id`, `root` | Apaga o arquivo do contexto e o seu histórico; mantém só um registro mínimo (id, data e hash) de que existiu. Nunca toca no projeto. |
 | `prumo:contextos:mcp` | `habilitar`, `root` | Quando habilitado, contexto_projeto e revisar_cobertura passam a ler os contextos deste projeto; o texto pode ser processado pelo provedor da IA conectada. |
 | `prumo:preferencias:obter` | — | Consulta local; não altera o projeto. |
-| `prumo:preferencias:salvar` | `silenciar`, `som`, `verificarAoIniciar` | Grava preferencias.json. Não cria serviço, tarefa agendada nem consulta em segundo plano. |
+| `prumo:preferencias:salvar` | `idioma`, `iniciarComWindows`, `notificarAgenda`, `silenciar`, `som`, `tema`, `verificarAoIniciar` | Grava preferencias.json. Não cria serviço, tarefa agendada nem consulta em segundo plano. |
 | `prumo:preferencias:visualizada` | `versao` | Grava preferencias.json. |
 | `prumo:suporte:preparar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Sem rede e sem gravação: só calcula o relato. |
 | `prumo:suporte:abrir` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Abre o navegador no formulário; nada é publicado até a pessoa enviar lá. Issues em repositório público são públicas. |
@@ -347,6 +364,261 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
 - **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:agenda:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar as rotinas agendadas com próxima e última execução, permissões e autorizações.
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Projeto opcional
+- **Saída:** Rotinas com estado, próxima execução (calculada), última execução, permissões em linguagem simples e autorizações
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:salvar`
+
+- **Tipo:** IPC
+- **Finalidade:** Criar ou editar uma rotina (único, intervalo, diário ou semanal, com fuso).
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Projeto, tipo, capability declarada, ambiente, frequência, fuso, política de horários perdidos, ticket opcional
+- **Saída:** Rotina salva
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava agenda.json. Editar reinicia a âncora; não autoriza nada.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND, INVALID_ARGUMENTS
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:estado`
+
+- **Tipo:** IPC
+- **Finalidade:** Pausar, retomar ou desativar uma rotina.
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Id da rotina e ação
+- **Saída:** Rotina atualizada
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava agenda.json. Retomar não executa horários que passaram durante a pausa.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:excluir`
+
+- **Tipo:** IPC
+- **Finalidade:** Excluir uma rotina (histórico de execuções permanece).
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Id da rotina
+- **Saída:** excluded
+- **Permissões:** Confirmação nativa que a página não consegue simular
+- **Efeito:** Remove a rotina de agenda.json; execuções já registradas permanecem.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP; Confirmação nativa
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:executar`
+
+- **Tipo:** IPC
+- **Finalidade:** Executar uma rotina agora (trabalho manual).
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Id da rotina
+- **Saída:** Trabalho enfileirado
+- **Permissões:** Autenticação humana nativa para executar testes
+- **Efeito:** Enfileira um trabalho manual. Testes e k6 pedem a autenticação nativa do Windows a cada execução; consultas apenas leem.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND, HUMAN_APPROVAL_REQUIRED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP; Broker nativo do Windows
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:autorizar`
+
+- **Tipo:** IPC
+- **Finalidade:** Autorizar previamente execuções agendadas de um escopo exato, com validade e limite de usos.
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Id da rotina, dias (1-30) e máximo de usos
+- **Saída:** Autorizações criadas (id, capability, validade, usos)
+- **Permissões:** Confirmação nativa + autenticação humana do Windows (broker não alterado)
+- **Efeito:** Grava autorizacoes.json somente depois da autenticação nativa do Windows para o escopo exato (hash de projeto, comando, ambiente e fontes). Qualquer mudança invalida.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND, HUMAN_APPROVAL_REQUIRED, PROJECT_FOLDER_REQUIRED, RUNTIME_MISSING, NO_VERIFIED_LINK
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP; Broker nativo do Windows; Escopo por hash; Validade máxima de 30 dias; Revogável
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:revogar`
+
+- **Tipo:** IPC
+- **Finalidade:** Revogar uma autorização de execução.
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Id da autorização
+- **Saída:** Autorização revogada
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava autorizacoes.json; execuções futuras daquele escopo ficam BLOCKED.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:permissoes`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar autorizações de execução e políticas de publicação com seus estados.
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Projeto opcional
+- **Saída:** Autorizações e políticas (vigente, expirada, revogada, esgotada)
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:politica`
+
+- **Tipo:** IPC
+- **Finalidade:** Aprovar uma política de publicação de comentários no Jira restrita a tickets, tipos, validade e limite.
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Projeto, tickets explícitos, tipos de rotina, dias e máximo de publicações
+- **Saída:** Política criada
+- **Permissões:** Confirmação nativa que lista tickets, tipos e limites
+- **Efeito:** Grava autorizacoes.json. Sem política, nenhuma rotina agendada comenta no Jira.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND, AUTH_VALIDITY_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP; Confirmação nativa; Somente tickets listados
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:agenda:revogarpolitica`
+
+- **Tipo:** IPC
+- **Finalidade:** Revogar uma política de publicação.
+- **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** Id da política
+- **Saída:** Política revogada
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava autorizacoes.json; publicações agendadas deixam de ocorrer.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:execucoes:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Histórico centralizado de execuções por projeto, repositório, ticket, rotina, estado e período.
+- **Origem:** Interface > Execuções
+- **Destino:** main.ts > historicoCentral.ts
+- **Entrada:** Filtros opcionais e limite
+- **Saída:** Execuções com resultado, contagens, tentativas, evidência, comentário Jira e erros
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local; não altera nada.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:execucoes:metricas`
+
+- **Tipo:** IPC
+- **Finalidade:** Indicadores reais das execuções registradas.
+- **Origem:** Interface > Execuções e Métricas
+- **Destino:** main.ts > historicoCentral.ts
+- **Entrada:** Projeto opcional
+- **Saída:** Totais PASS/FAIL/BLOCKED/NOT_RUN, última e próxima execução, rotinas ativas/pausadas, falhas de agendamento, comentários pendentes e publicados
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local. Não calcula porcentagem de qualidade; consulta à interface não conta como execução.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:jira:previa`
+
+- **Tipo:** IPC
+- **Finalidade:** Mostrar o comentário de resultado que seria publicado no Jira.
+- **Origem:** Interface > Execuções > Comentário Jira
+- **Destino:** main.ts > jiraComentario.prepararPublicacao
+- **Entrada:** Id da execução
+- **Saída:** Texto do comentário e estado de publicação
+- **Permissões:** Nenhuma
+- **Efeito:** Sem rede e sem gravação.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND, JOB_NOT_FOUND, JIRA_COMMENT_NOT_APPLICABLE, JIRA_TICKET_REQUIRED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:jira:publicar`
+
+- **Tipo:** IPC
+- **Finalidade:** Publicar o comentário de resultado em um ticket do projeto vinculado (única escrita remota do produto).
+- **Origem:** Interface > Execuções > Publicar no Jira
+- **Destino:** main.ts (confirmação nativa) > jiraComentario.publicar > servicos.comentarJira
+- **Entrada:** Id da execução
+- **Saída:** Estado da publicação e id remoto do comentário
+- **Permissões:** Confirmação nativa que mostra o texto exato; credencial protegida no Windows com permissão de comentar
+- **Efeito:** Uma requisição POST ao Jira Cloud vinculado (comentário). Não altera status do ticket. Idempotente por execução e por marcador no comentário.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND, HUMAN_CONFIRMATION_REQUIRED, JOB_NOT_FOUND, SERVICE_PERMISSION, SERVICE_SCOPE_CHANGED, SERVICE_WRITE_BLOCKED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP; Confirmação nativa; Host Atlassian fixo, caminho de comentário fixo; Projeto do ticket conferido; Sem duplicar
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:worker:estado`
+
+- **Tipo:** IPC
+- **Finalidade:** Estado real do worker de agendamentos.
+- **Origem:** Interface > cabeçalho e bandeja
+- **Destino:** main.ts > worker.ts
+- **Entrada:** Nenhuma
+- **Saída:** Em execução, pausado, batimento, pendentes, próxima execução, último erro
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:worker:pausa`
+
+- **Tipo:** IPC
+- **Finalidade:** Pausar ou retomar todos os agendamentos.
+- **Origem:** Interface > Agendamentos ou menu da bandeja
+- **Destino:** main.ts > agenda.ts / fila.ts / worker.ts
+- **Entrada:** pausado (true/false)
+- **Saída:** Estado do worker
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava a pausa global; trabalho em andamento termina sem ser corrompido.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
+
+### `prumo:worker:eventos`
+
+- **Tipo:** IPC
+- **Finalidade:** Receber avisos do worker e pedidos de navegação da bandeja desde o último número visto.
+- **Origem:** Interface > avisos e navegação pela bandeja
+- **Destino:** main.ts > worker.ts
+- **Entrada:** Último número de evento recebido
+- **Saída:** Eventos (iniciado, concluído, falhou, bloqueado, publicação falhou, worker interrompido, navegar) e último número
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte).
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agenda.json, fila.json, autorizacoes.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SCHEDULE_NOT_FOUND, SCHEDULE_LIMIT, SCHEDULE_IN_THE_PAST, SCHEDULE_PROJECT_IMMUTABLE, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo; Sem comando livre: só capabilities declaradas; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e histórico de execuções por projeto
 
 ### `prumo:app:info`
 
