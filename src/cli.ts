@@ -2,7 +2,8 @@
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
-import { carregarProjeto, contextoProjeto, mascarar, type Projeto } from './projeto.js';
+import { carregarProjeto, mascarar, type Projeto } from './projeto.js';
+import { contextoCompleto } from './contextoCompleto.js';
 import { executarValidacao } from './execucao.js';
 import { consultarEvidencias } from './evidencias.js';
 import { revisarCobertura } from './qualidade.js';
@@ -98,7 +99,7 @@ async function main() {
   if(cmd==='logs'){await logs(p,json,resto[0]==='--follow');return;}
   if(cmd==='conectar'){await conexao(p,resto[0]??'codex',contrato,json);return;}
   if(cmd==='doctor'){const h=consultarAtividades(p);problemas(h.problems);imprimir({ok:true,node:process.version,root:p.raiz,projectId:p.manifesto.id,schemaVersion:2,commands:Object.keys(p.manifesto.commands),readOnly:p.manifesto.execution.readOnly,approval:{required:true,provider:process.platform==='win32'?'Windows CredUI + LogonUser (senha da conta atual)':'indisponível: execução bloqueada',maxMs:120000},observability:calcularMetricas(h)});return;}
-  if(cmd==='context'){imprimir(await chamada(p,'contexto_projeto',{},()=>contextoProjeto(p)));return;}
+  if(cmd==='context'){imprimir(await chamada(p,'contexto_projeto',{},()=>contextoCompleto(p)));return;}
   if(cmd==='evidence'||cmd==='evidencias'){await evidencias(p,resto[0],json||cmd==='evidence');return;}
   if(!resto[0])throw new Error('Informe capability ou arquivo do plano.');
   if(cmd==='review') {

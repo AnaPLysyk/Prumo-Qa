@@ -18,7 +18,7 @@ export const limitesPrivacidade = [
   'O Prumo não recebe as conversas, o raciocínio nem os prompts do cliente de IA; só vê as chamadas que chegam às suas quatro ferramentas.',
   'Metadados do histórico (identificadores, contagens, estados, horários) podem revelar informações sobre o projeto se forem exportados.'
 ];
-const categorias: Record<string, string> = { projects: 'historico', diagnostico: 'diagnostico', demonstracao: 'demonstracao', app: 'aplicativo', 'vinculos.json': 'vinculos' };
+const categorias: Record<string, string> = { projects: 'historico', contextos: 'contextos', diagnostico: 'diagnostico', demonstracao: 'demonstracao', app: 'aplicativo', 'vinculos.json': 'vinculos' };
 
 function medir(dir: string, limite = { n: 0 }): { bytes: number; arquivos: number; truncado: boolean } {
   let bytes = 0, arquivos = 0, truncado = false;
