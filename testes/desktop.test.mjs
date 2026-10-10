@@ -3,52 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { _electron as electron } from 'playwright-core';
-import electronPath from 'electron';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { fixture } from './fixtures.mjs';
 
-/**
- * Testes da janela desktop com automação real (Playwright sobre o Electron).
- * Por padrão abrem o aplicativo em modo de desenvolvimento; com PRUMO_APP_EXE rodam o executável instalado.
- * Dados isolados em PRUMO_DATA_DIR temporário (fixtures.mjs); nada toca perfil ou projeto real.
- */
-const repo = path.resolve('.');
-const versao = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
-const exe = process.env.PRUMO_APP_EXE;
-const abas = ['projetos', 'metricas', 'logs', 'historico', 'evidencias', 'conexoes', 'ajuda'];
+import { repo, versao, exe, abas, novoDados, abrir, ir, escolherPasta, mcp } from './janela.mjs';
 
-// Cada teste tem seu diretório de dados; ao final os aplicativos abertos são fechados ANTES de apagá-lo.
-const abertos = new Map();
-const novoDados = (t) => {
-  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo dados desktop ')); abertos.set(d, []);
-  t.after(async () => { for (const fechar of abertos.get(d)) await fechar().catch(() => {}); abertos.delete(d); fs.rmSync(d, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
-  return d;
-};
-async function abrir(t, dados, extra = []) {
-  // VS Code/Claude definem ELECTRON_RUN_AS_NODE; com ele o Electron viraria Node puro e não abriria janela.
-  const env = { ...process.env, PRUMO_DATA_DIR: dados }; delete env.ELECTRON_RUN_AS_NODE;
-  const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [repo, ...extra], env });
-  let fechado = false;
-  const fechar = async () => { if (!fechado) { fechado = true; await app.close(); } };
-  abertos.get(dados).push(fechar);
-  const page = await app.firstWindow();
-  const erros = []; page.on('pageerror', (e) => erros.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
-  await page.waitForSelector('#nav button');
-  return { app, page, erros, fechar };
-}
-const ir = async (page, aba) => { await page.click(`[data-aba=${aba}]`); await page.waitForFunction((a) => document.querySelector(`[data-aba=${a}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(150); };
-const escolherPasta = (app, pasta) => app.evaluate(({ dialog }, p) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [p] }); }, pasta);
-async function mcp(root, dados, chamadas) {
-  const client = new Client({ name: 'codex-desktop-test', version: '1.0.0' });
-  // Instalado: o servidor roda no runtime embutido do aplicativo (sem Node.js na máquina), como configura src/conexoes.ts.
-  const transport = exe
-    ? new StdioClientTransport({ command: exe, args: [path.join(path.dirname(exe), 'resources', 'app', 'dist', 'mcp.js'), root], env: { PRUMO_DATA_DIR: dados, ELECTRON_RUN_AS_NODE: '1' } })
-    : new StdioClientTransport({ command: process.execPath, args: [path.join(repo, 'dist/mcp.js'), root], env: { PRUMO_DATA_DIR: dados } });
-  await client.connect(transport);
-  try { const out = []; for (const [name, args] of chamadas) out.push(await client.callTool({ name, arguments: args })); return out; } finally { await client.close(); }
-}
 
 test('janela nativa abre com identidade, versão e as sete seções sem erros', async (t) => {
   const dados = novoDados(t);
@@ -67,7 +25,7 @@ test('segurança da janela: isolamento, sem Node na página, ponte mínima e sem
   assert.deepEqual(prefs, { contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true });
   const visivel = await page.evaluate(() => ({ require: typeof require, process: typeof process, ipc: typeof window.ipcRenderer, chaves: Object.keys(window.prumo).sort(), congelado: Object.isFrozen(window.prumo) }));
   assert.equal(visivel.require, 'undefined'); assert.equal(visivel.process, 'undefined'); assert.equal(visivel.ipc, 'undefined'); assert.ok(visivel.congelado);
-  assert.deepEqual(visivel.chaves, ['adicionarDemo', 'ajuda', 'conectar', 'conexoes', 'desvincular', 'escolherProjeto', 'evidencias', 'exportarLogs', 'historico', 'info', 'logs', 'projetos', 'visao']);
+  assert.deepEqual(visivel.chaves, ['abrirRelease', 'adicionarDemo', 'ajuda', 'conectar', 'conexoes', 'desvincular', 'diagnostico', 'escolherProjeto', 'evidencias', 'excluirDados', 'exportarLogs', 'historico', 'info', 'integracoes', 'logs', 'projetos', 'resumoDados', 'verificarAtualizacao', 'versoes', 'visao']);
   // Rede: CSP e filtro de requisições impedem qualquer saída; a navegação para fora também é bloqueada.
   assert.equal(await page.evaluate(() => fetch('https://example.com/').then(() => 'saiu', () => 'bloqueado')), 'bloqueado');
   await page.evaluate(() => { location.href = 'https://example.com/'; }); await page.waitForTimeout(500);
@@ -172,7 +130,7 @@ test('ajuda: documentos locais, versão e documentos jurídicos marcados como ra
   const { page } = await abrir(t, dados);
   await ir(page, 'ajuda');
   const titulos = await page.locator('.indice button').allTextContents();
-  assert.ok(titulos.length >= 9);
+  assert.ok(titulos.length >= 18);
   for (const alvo of ['Política de privacidade', 'Termos de uso', 'Sobre']) {
     await page.click(`.indice button:has-text("${alvo}")`);
     const corpo = await page.textContent('article'); assert.ok(corpo.length > 100);
