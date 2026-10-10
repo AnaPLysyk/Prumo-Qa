@@ -37,3 +37,15 @@ test('teste inexistente não comprova cobertura nem remove candidato',async t=>{
 test('payload não admite resultado fabricado ou execução arbitrária',async t=>{
   const f=await fixture(t);await assert.rejects(revisarCobertura(await carregarProjeto(f.root),{...plano,status:'PASS',command:'apagar'}));
 });
+test('WEAK_TEST distingue o cenário ignorado do teste válido no mesmo arquivo, sem contar nenhum como cobertura',async t=>{
+  const f=await fixture(t);await f.write('tests/test.mjs','test.skip("Editor grava com sucesso",()=>{});\ntest("Leitor é recusado",()=>{});');
+  const ignorado={...candidato,id:'T1',behavior:'Editor grava com sucesso',testPath:'tests/test.mjs'};
+  const valido={...candidato,id:'T2',behavior:'Leitor é recusado',testPath:'tests/test.mjs'};
+  const r=await revisarCobertura(await carregarProjeto(f.root),{...plano,existingTests:[ignorado,valido],candidates:[{...candidato,id:'C1',behavior:'Leitor é recusado'}]});
+  const fracos=r.findings.filter(x=>x.type==='WEAK_TEST');
+  assert.equal(fracos.length,2,'ambos continuam sem cobertura comprovada (decisão conservadora)');
+  const t1=fracos.find(x=>x.scenario==='T1'),t2=fracos.find(x=>x.scenario==='T2');
+  assert.equal(t1.severity,'medium');assert.match(t1.recommendation,/associado a este cenário/);
+  assert.equal(t2.severity,'low');assert.match(t2.recommendation,/não foi associado a este cenário/);
+  assert.ok(!r.findings.some(x=>x.type==='POTENTIAL_REDUNDANCY'),'teste ignorado nunca vira base de redundância');
+});

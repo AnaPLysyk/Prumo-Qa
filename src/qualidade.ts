@@ -29,6 +29,7 @@ export async function revisarCobertura(p: Projeto, entrada: unknown) {
     } catch { missing.push('Fonte documental não acessível no escopo'); registrar('UNVERIFIED_SOURCE','Fornecer documentação autorizada.'); }
   } else hypotheses.push({ kind: 'user_provided_requirement', requirement: r.requirement, source: r.source });
   for (const c of r.contradictions) registrar('CONTRADICTORY_REQUIREMENT', `Resolver conflito informado: ${c.statement} (${c.source}).`, undefined, 'high');
+  const norm = (s: string | undefined) => (s ?? '').trim().toLowerCase().replace(/\s+/g,' ');
   const existentes = new Set<string>();
   for (const t of r.existingTests) {
     if (!t.testPath) { missing.push(`Teste ${t.id} sem caminho verificável`); continue; }
@@ -36,11 +37,16 @@ export async function revisarCobertura(p: Projeto, entrada: unknown) {
       if (!p.manifesto.context.tests.some(d => t.testPath === d || t.testPath!.startsWith(d.replace(/[\\/]$/, '') + '/') || t.testPath!.startsWith(d.replace(/[\\/]$/, '') + '\\'))) throw new Error('Fora dos testes');
       await caminhoSeguro(p.raiz, t.testPath); const content = await lerSeguro(p.raiz, t.testPath);
       facts.push({ kind: 'test_read', id: t.id, path: t.testPath, sha256: hash(content) });
-      if (/\b(?:skip|fixme|todo)\s*\(/.test(content)) registrar('WEAK_TEST','Revisar teste pendente/ignorado; não contar como cobertura.',t.id);
-      else existentes.add(t.id);
+      const ignoradas = content.split('\n').filter(l => /\b(?:skip|fixme|todo)\s*\(/.test(l));
+      if (ignoradas.length) {
+        // A detecção é por arquivo (não sabemos qual teste o cenário representa). Se o comportamento do cenário aparece numa
+        // linha ignorada, a associação é direta; senão o aviso é de severidade menor e diz que não houve associação.
+        // Nos dois casos o cenário NÃO conta como cobertura comprovada (decisão conservadora, inalterada).
+        const associado = !!norm(t.behavior) && ignoradas.some(l => norm(l).includes(norm(t.behavior)));
+        registrar('WEAK_TEST', associado ? 'Teste pendente/ignorado associado a este cenário; não contar como cobertura.' : 'O arquivo contém teste pendente/ignorado que não foi associado a este cenário; conferir antes de contar cobertura.', t.id, associado ? 'medium' : 'low');
+      } else existentes.add(t.id);
     } catch { registrar('UNVERIFIED_TEST','Teste existente não pôde ser lido; cobertura não comprovada.',t.id); }
   }
-  const norm = (s: string | undefined) => (s ?? '').trim().toLowerCase().replace(/\s+/g,' ');
   const vistos = r.existingTests.filter(t => existentes.has(t.id));
   const selecionados: string[] = []; const ids = new Set<string>();
   for (const c of r.candidates) {
