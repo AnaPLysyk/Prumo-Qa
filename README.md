@@ -1,4 +1,4 @@
-# Prumo QA 2.3 — Engenharia, contratos e laboratório
+# Prumo QA 2.4 — Contextos, conhecimento de QA e laboratório
 
 Camada local de engenharia de qualidade para agentes que já desenvolvem software. Entende o contexto autorizado de um projeto, confere estrutura de planos de teste, controla execução e preserva evidências. A IA hospedeira interpreta requisitos e riscos; o núcleo impõe regras determinísticas. Não exige outra chave de LLM.
 
@@ -22,6 +22,13 @@ Claude / Codex / IA compatível
 ```
 
 O terminal consulta arquivos locais; a IA não precisa permanecer ligada. Uma chamada MCP concluída não equivale a teste PASS. A imagem de referência usa números ilustrativos; o programa mostra somente o seu histórico.
+
+## Novidades da 2.4
+
+- **Contextos por projeto**: requisitos, regras, critérios, restrições e decisões com estados RASCUNHO/APROVADO/CONFLITANTE/DESATUALIZADO, aprovação humana, histórico verificável por hash, isolamento e exclusão com confirmação. Só vão à IA se você habilitar (ver [docs/APLICATIVO.md](docs/APLICATIVO.md)).
+- **`revisar_cobertura` com `contextoId`** e **`contexto_projeto`** com contextos autorizados, frameworks detectados e conhecimento aplicável.
+- **Playwright e API REST**: detecção por evidência real, 12 regras de análise de testes com fonte oficial e Skills especializadas.
+- Marcos: [docs/MARCOS.md](docs/MARCOS.md) (2.3.1 estabilização/assinatura, 2.4.0 contextos, 2.5.0 suporte e notificações); [docs/ASSINATURA.md](docs/ASSINATURA.md) e [docs/INSTALACAO-MANUAL.md](docs/INSTALACAO-MANUAL.md).
 
 ## Novidades da 2.3
 
@@ -151,6 +158,9 @@ Também pode usar `node .\dist\cli.js`, `npm.cmd run prumo --` ou o script compa
 | `src/vinculos.ts` | Lista local de projetos vinculados; diagnóstico sem escrever na pasta do projeto |
 | `src/painel.ts` | Adaptador da janela: valida, exige projeto vinculado e delega ao núcleo (sem regra própria) |
 | `src/contratos.ts` | Fonte única dos esquemas IPC e do catálogo técnico (IPC + MCP) |
+| `src/contextos.ts` | Contextos persistentes por projeto: estados, aprovação, conflito, histórico encadeado por hash, leitura controlada pelo MCP |
+| `src/frameworks.ts`, `skills/playwright`, `skills/api-rest` | Detecção de framework por evidência e análise de testes Playwright (`PW_*`) com fontes oficiais |
+| `src/contextoCompleto.ts` | Resposta de `contexto_projeto`: contexto autorizado + frameworks + contextos habilitados |
 | `src/versoes.ts`, `app/versoes.json` | Histórico de versões validado, comparação semântica e notas de release |
 | `src/atualizacao.ts` | Verificação manual de atualização: destino fixo, timeout, resposta validada, sem download |
 | `src/dados.ts`, `src/diagnostico.ts` | Resumo dos dados locais e diagnóstico IPC (só metadados, fora das métricas) |

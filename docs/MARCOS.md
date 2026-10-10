@@ -19,7 +19,7 @@ Cada marco é publicado separadamente (tag própria, nunca reutilizada) e só qu
 
 ## 2.4.0 — Contextos e conhecimento de QA
 
-Critérios definidos antes da implementação (status ao final do marco no relatório de entrega):
+Critérios definidos antes da implementação. Evidências: `testes/contextos.test.mjs`, `testes/frameworks.test.mjs`, `testes/desktop-contextos.test.mjs`, casos 9 a 14 do laboratório e o relatório de entrega.
 
 - Contextos por projeto: cadastro, edição, aprovação humana explícita, conflito, desatualização, substituição, histórico verificável (hash encadeado), exclusão com confirmação, isolamento entre projetos, limites e proteção contra conteúdo malicioso.
 - Disponibilização ao MCP **somente** se a pessoa habilitar, com referências estruturadas (fonte, versão, hash, estado); `revisar_cobertura` considera o contexto e acusa rascunho, desatualizado, conflito e origem ausente.

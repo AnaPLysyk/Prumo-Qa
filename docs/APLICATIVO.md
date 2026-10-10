@@ -1,4 +1,4 @@
-# Aplicativo desktop (Windows) — Prumo QA 2.3
+# Aplicativo desktop (Windows) — Prumo QA 2.4
 
 A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama `src/painel.ts`, que delega a `projeto`, `atividades`, `evidencias` e `conexoes`.
 
@@ -6,7 +6,7 @@ A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não
 
 ```text
 Janela (app/renderer: HTML+CSS+JS, sandbox, CSP, sem rede)
-   │  window.prumo.*  (app/preload.cjs — 20 funções, objeto congelado)
+   │  window.prumo.*  (app/preload.cjs — 28 funções, objeto congelado)
    ▼
 Processo principal Electron (src/desktop/main.ts)
    │  canais IPC `prumo:*`: confere remetente, valida com zod, devolve {ok,data|error}
@@ -33,6 +33,14 @@ Cada `tools/call` MCP (e cada comando do CLI) grava um registro de início e out
 ### Contratos técnicos (IPC e MCP)
 
 `src/contratos.ts` é a fonte única: os mesmos esquemas Zod que validam cada chamada IPC em `main.ts` alimentam o catálogo mostrado em **Ajuda › Integrações técnicas** e o arquivo gerado [docs/CONTRATOS.md](CONTRATOS.md) (`npm run contratos`). Testes comparam o catálogo com `main.ts`, `preload.cjs` e o servidor MCP real; uma operação nova sem documentação, ou um catálogo desatualizado, quebra a suíte. Não existe API HTTP.
+
+### Contextos persistentes e conhecimento de QA (2.4)
+
+`src/contextos.ts` guarda, por projeto, requisitos, regras de negócio, critérios de aceite, restrições técnicas e decisões em `%LOCALAPPDATA%\PrumoQA\contextos\<projeto>\<id>.json` (fora do projeto, sem banco, sem alterar o `qa.project.json`). Cada arquivo traz um histórico encadeado por hash (quem, quando, ação, hash do conteúdo): se for alterado fora do Prumo o contexto vira **ADULTERADO**, deixa de ser editável e **nunca** é enviado ao agente.
+
+- **Estados:** RASCUNHO, APROVADO, CONFLITANTE, DESATUALIZADO. Aprovar é um ato humano (confirmação nativa; o aprovador é o usuário do Windows lido no processo principal) que vale só para o texto exato; editar volta a RASCUNHO; aprovar exige origem e ausência de conflito. Conflito é **derivado** (mesma chave com contextos vivos diferentes) ou marcado pela pessoa; o Prumo nunca escolhe um lado.
+- **MCP:** por padrão **nada** é entregue ao agente. Com "Disponibilizar ao agente" habilitado (confirmação nativa), `contexto_projeto` devolve referências estruturadas (id, chave, versão, hash, estado, origem, texto mascarado e limitado a 4000 caracteres, alerta de texto que parece instrução) e `revisar_cobertura` aceita `contextoId`, registrando o contexto usado como fato e apontando `CONTEXT_NOT_APPROVED`, `CONTEXT_OUTDATED`, `CONTEXT_CONFLICT`, `CONTEXT_SOURCE_MISSING`, `CONTEXT_MISMATCH`, `CONTEXT_TAMPERED`, `CONTEXT_UNAVAILABLE` ou `CONTEXT_SUSPICIOUS_INSTRUCTION`. Nenhuma ferramenta MCP cria, edita, aprova ou exclui contextos (teste verifica).
+- **Frameworks e Playwright:** `src/frameworks.ts` detecta Playwright por evidência (dependência `@playwright/test` em package.json mais configuração ou teste que importa o pacote → CONFIRMADO; evidência parcial → PROVAVEL; só nome de pasta → INCERTO) e analisa arquivos de teste com 12 regras `PW_*`, cada uma com linha, trecho e a fonte oficial da documentação. A análise é textual e determinística: pode errar e não sabe se há validação de persistência. As Skills `skills/playwright` e `skills/api-rest` orientam a IA; `contextoCompleto.ts` compõe a resposta de `contexto_projeto` (MCP e CLI).
 
 ### Versões e atualização
 

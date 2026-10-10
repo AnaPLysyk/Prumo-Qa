@@ -2,6 +2,58 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.4.0",
+      "status": "planejada",
+      "date": null,
+      "title": "Contextos e conhecimento de QA",
+      "objective": "Permitir que cada projeto registre requisitos e regras com estado de confiança e histórico verificável, entregá-los à IA somente com a permissão da pessoa e especializar a análise de testes em Playwright e fundamentos de API.",
+      "features": [
+        "Aba Contextos: requisitos, regras de negócio, critérios de aceite, restrições técnicas e decisões por projeto, com cadastro, edição, pesquisa, origem, versão, aprovação, conflito, desatualização, substituição, histórico e exclusão.",
+        "Estados de confiança RASCUNHO, APROVADO, CONFLITANTE e DESATUALIZADO: só uma pessoa aprova (confirmação nativa); conflito nunca é resolvido em silêncio.",
+        "Histórico de cada contexto encadeado por hash: alteração fora do Prumo marca o contexto como ADULTERADO e ele nunca vai ao agente de IA.",
+        "contexto_projeto devolve, se a pessoa habilitar, referências estruturadas aos contextos (fonte, versão, hash, estado, origem) e os frameworks detectados por evidência; revisar_cobertura aceita contextoId e avisa rascunho, desatualizado, conflito, origem ausente e divergência.",
+        "Especialização em Playwright (TypeScript/JavaScript): detecção por evidência real e análise estática com 12 regras (espera fixa, seletor frágil, sem assertion, assertion fraca, teste ignorado, duplicado, API só com status e outras), cada uma com a fonte oficial.",
+        "Skills especializadas playwright e api-rest, e Skill qa atualizada para contextos e frameworks.",
+        "Laboratório com 14 situações, incluindo contexto aprovado, conflitante, desatualizado, sem origem, isolamento entre projetos e testes Playwright com antipadrões."
+      ],
+      "improvements": [
+        "Excluir todos os contextos do projeto em Ajuda › Privacidade e dados, com confirmação.",
+        "Catálogo técnico e docs/CONTRATOS.md com as 8 novas operações de contextos."
+      ],
+      "fixes": [
+        "Trocar de aba rapidamente podia misturar o conteúdo de várias abas na mesma tela (presente desde a 2.2): cada renderização agora tem um token e só a mais recente é exibida. Comprovado por teste que falha na versão anterior.",
+        "Ao substituir um contexto, o novo contexto passa a ser devolvido já com o estado efetivo correto.",
+        "A leitura única expect(await x.isVisible()).toBe(true) passou a ser reconhecida pelo analisador de testes Playwright.",
+        "Excluir todos os contextos informa falhas parciais (arquivo em uso, permissão) em vez de escondê-las."
+      ],
+      "differential": "Da 2.3 para a 2.4 a análise deixa de depender só do código e dos documentos do projeto: passa a considerar requisitos que a pessoa cadastrou e aprovou, e a conhecer as práticas do Playwright.",
+      "howItWorks": [
+        "Os contextos ficam em %LOCALAPPDATA%\\PrumoQA\\contextos, por projeto; o servidor MCP lê esses arquivos somente se a pessoa habilitar a opção \"Disponibilizar ao agente de IA\".",
+        "Aprovar, desatualizar, excluir e habilitar o MCP passam por confirmação nativa do Windows no processo principal; não existem como ferramenta MCP.",
+        "A análise Playwright é textual e determinística sobre arquivos de teste realmente lidos; a IA confere no código e fundamenta cada recomendação no requisito aprovado."
+      ],
+      "security": [
+        "Contextos só vão ao agente com habilitação explícita por projeto (padrão desabilitado).",
+        "Texto de contexto é tratado como dado; trechos que parecem instrução são sinalizados; segredos são mascarados e o texto é limitado.",
+        "Isolamento por projeto, proteção de caminhos e recusa de links simbólicos."
+      ],
+      "compatibility": [
+        "Contrato qa.project.json v2 inalterado; as quatro ferramentas MCP mantêm os campos anteriores (apenas acrescentam).",
+        "Projetos sem contextos continuam funcionando sem alteração."
+      ],
+      "limitations": [
+        "O conhecimento especializado cobre Playwright e fundamentos de API; Postman/Newman, Cypress e testes de contrato ainda não.",
+        "A análise de testes é textual e pode errar: não sabe se há validação de persistência nem se a cobertura negativa basta.",
+        "O instalador continua não assinado.",
+        "A autenticação humana ponta a ponta depende de teste manual da titular."
+      ],
+      "migration": "Nenhuma migração: os contextos são um armazenamento novo e vazio.",
+      "afterUpdate": [
+        "Para usar contextos com uma IA, habilite \"Disponibilizar ao agente\" na aba Contextos do projeto."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.3.1",
       "status": "publicada",
       "date": "2026-10-10",
