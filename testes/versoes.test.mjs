@@ -19,7 +19,7 @@ test('comparação semântica usa números, não texto', () => {
 
 test('fonte de versões é válida, ordenada e coerente com package.json, tag e instalador', () => {
   const versoes = carregarVersoes('app/versoes.json');
-  assert.deepEqual(versoes.map((v) => v.version), ['2.3.0', '2.2.0', '2.1.0', '2.0.0']);
+  assert.deepEqual(versoes.map((v) => v.version).slice(-4), ['2.3.0', '2.2.0', '2.1.0', '2.0.0'], 'as versões históricas permanecem');
   conferirInstalada(versoes, pkg.version);
   assert.equal(versoes[0].version, pkg.version, 'a versão mais nova do histórico é a do package.json');
   assert.match(fs.readFileSync('electron-builder.yml', 'utf8'), /artifactName: Prumo-QA-Setup-\$\{version\}\.exe/);
@@ -55,13 +55,14 @@ test('2.0 a 2.2 não inventam datas nem releases; 2.3 não é publicada sem rele
 
 test('validação rejeita inconsistências', () => {
   const faz = (f) => { const b = bruto(); f(b); return () => validarVersoes(b); };
+  const v = (b, n) => b.versions.find((x) => x.version === n);
   assert.throws(faz((b) => b.versions.reverse()), /VERSIONS_ORDER/);
   assert.throws(faz((b) => b.versions.push({ ...b.versions[0] })), /VERSIONS_ORDER/);
-  assert.throws(faz((b) => { b.versions[1].releaseUrl = 'https://github.com/outro/repo/releases/tag/v2.2.0'; }), /VERSIONS_INCONSISTENT/);
-  assert.throws(faz((b) => { b.versions[1].date = null; }), /VERSIONS_INCONSISTENT/);
-  assert.throws(faz((b) => { b.versions[0].status = 'planejada'; }), /VERSIONS_INCONSISTENT/, 'planejada não pode ter data nem release');
-  assert.throws(faz((b) => { b.versions[0].releaseUrl = null; }), /VERSIONS_INCONSISTENT/, 'publicada exige o link oficial');
-  assert.throws(faz((b) => { b.versions[2].releaseUrl = urlRelease('2.1.0'); }), /VERSIONS_INCONSISTENT/);
+  assert.throws(faz((b) => { v(b, '2.2.0').releaseUrl = 'https://github.com/outro/repo/releases/tag/v2.2.0'; }), /VERSIONS_INCONSISTENT/);
+  assert.throws(faz((b) => { v(b, '2.2.0').date = null; }), /VERSIONS_INCONSISTENT/);
+  assert.throws(faz((b) => { v(b, '2.3.0').status = 'planejada'; }), /VERSIONS_INCONSISTENT/, 'planejada não pode ter data nem release');
+  assert.throws(faz((b) => { v(b, '2.3.0').releaseUrl = null; }), /VERSIONS_INCONSISTENT/, 'publicada exige o link oficial');
+  assert.throws(faz((b) => { v(b, '2.1.0').releaseUrl = urlRelease('2.1.0'); }), /VERSIONS_INCONSISTENT/);
   assert.throws(faz((b) => { b.versions[0].extra = 1; }));
   assert.throws(faz((b) => { b.versions[0].version = '2.3'; }));
   assert.throws(faz((b) => { b.schemaVersion = 2; }));
@@ -85,4 +86,15 @@ test('notas de release saem da mesma fonte, sem copiar texto à mão', () => {
   const gerado = execFileSync(process.execPath, ['scripts/notas-versao.mjs', v.version], { encoding: 'utf8' });
   assert.ok(gerado.includes(notas.trim().split('\n')[0]) && gerado.includes('NÃO ASSINADO') && gerado.includes('SHA-256'));
   assert.throws(() => execFileSync(process.execPath, ['scripts/notas-versao.mjs', '9.9.9'], { stdio: 'pipe' }));
+});
+
+test('notas de release só afirmam "assinado" quando o pipeline confirmou (PRUMO_ASSINADO=true); por padrão dizem NÃO ASSINADO', () => {
+  const rodar = (extra) => execFileSync(process.execPath, ['scripts/notas-versao.mjs', '2.3.1'], { encoding: 'utf8', env: { ...process.env, PRUMO_ASSINADO: '', ...extra } });
+  const padrao = rodar({});
+  assert.match(padrao, /Instalador NÃO ASSINADO/); assert.doesNotMatch(padrao, /assinado digitalmente \(Authenticode/);
+  assert.match(rodar({ PRUMO_ASSINADO: 'false' }), /NÃO ASSINADO/);
+  assert.match(rodar({ PRUMO_ASSINADO: 'sim' }), /NÃO ASSINADO/, 'só o texto exato "true" vale');
+  const assinado = rodar({ PRUMO_ASSINADO: 'true' });
+  assert.match(assinado, /assinado digitalmente \(Authenticode/); assert.doesNotMatch(assinado, /Instalador NÃO ASSINADO/);
+  assert.match(assinado, /não\*\* substitui uma assinatura digital/, 'o checksum continua sem ser tratado como assinatura');
 });

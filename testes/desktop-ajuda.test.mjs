@@ -41,14 +41,14 @@ test('Versões: histórico offline com detalhes expansíveis e versão instalada
   const dados = novoDados(t);
   const { page } = await abrir(t, dados, ['--proxy-server=127.0.0.1:9']);
   await abrirAjuda(page, 'Versões');
-  const todas = page.locator('details.versao'); assert.equal(await todas.count(), 4);
+  const todas = page.locator('details.versao'); assert.ok((await todas.count()) >= 5, 'histórico de 2.0.0 até a versão instalada');
   const aberta = page.locator('details.versao[open]'); assert.equal(await aberta.count(), 1);
-  assert.match(await aberta.locator('summary').textContent(), new RegExp(versao.replaceAll('.', '\\.') + ' — Consolidação de engenharia[\\s\\S]*(instalada)'));
-  const antiga = todas.nth(3); assert.match(await antiga.locator('summary').textContent(), /2\.0\.0 — Núcleo de engenharia de qualidade/);
+  assert.match(await aberta.locator('summary').textContent(), new RegExp(versao.replaceAll('.', '\\.') + ' — [\\s\\S]*instalada'));
+  const antiga = todas.filter({ hasText: '2.0.0 — Núcleo de engenharia de qualidade' }).first(); assert.match(await antiga.locator('summary').textContent(), /2\.0\.0 — Núcleo de engenharia de qualidade/);
   await antiga.locator('summary').click();
   const texto = await antiga.textContent();
   for (const t of ['Diferencial:', 'Funcionalidades', 'Segurança', 'Compatibilidade', 'Limitações conhecidas', 'Migração de dados:', 'Sem release oficial publicada']) assert.ok(texto.includes(t), t);
-  const v22 = await todas.nth(1).textContent();
+  const v22 = await todas.filter({ hasText: '2.2.0 — Aplicativo Windows' }).first().textContent();
   assert.match(v22, /publicada/); assert.match(v22, /2026-10-10/); assert.match(v22, /releases\/tag\/v2\.2\.0/);
   assert.match(await page.textContent('article'), /sem data de publicação|planejada|publicada/);
 });

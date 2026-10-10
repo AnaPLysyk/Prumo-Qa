@@ -17,7 +17,7 @@ test('migração: versão nova, vínculo, histórico, métricas e evidências da
   const antes = lerInstantaneo();
   assert.equal(antes.versao, '2.2.0');
   const { page, erros } = await abrirPadrao(t);
-  assert.equal((await page.textContent('#versao')).trim(), 'v' + versao); assert.equal(versao, '2.3.0');
+  assert.equal((await page.textContent('#versao')).trim(), 'v' + versao); assert.match(versao, /^\d+\.\d+\.\d+$/);
   assert.equal(fs.readFileSync(path.join(dados, 'marca-migracao.txt'), 'utf8'), 'dados criados pela versão 2.2.0', 'dados do usuário intactos');
   const projetos = (await page.evaluate(() => window.prumo.projetos())).data;
   assert.equal(projetos.length, 1); assert.equal(projetos[0].state, 'INTEGRADO'); assert.equal(projetos[0].id, 'prumo-demo'); assert.equal(projetos[0].root.toLowerCase(), fs.realpathSync(antes.raizDemonstracao).toLowerCase());
@@ -27,7 +27,7 @@ test('migração: versão nova, vínculo, histórico, métricas e evidências da
   const ev = (await page.evaluate((r) => window.prumo.evidencias(r), projetos[0].root)).data;
   assert.equal(ev.results.length, 1); assert.equal(ev.results[0].status, 'BLOCKED');
   await ir(page, 'ajuda'); await page.click('.indice button:has-text("Versões")'); await page.waitForTimeout(300);
-  assert.match(await page.textContent('details.versao[open] summary'), /2\.3\.0[\s\S]*instalada/);
+  assert.match(await page.textContent('details.versao[open] summary'), new RegExp(versao.replaceAll('.', '\\.') + '[\\s\\S]*instalada'));
   assert.deepEqual(erros, []);
 });
 

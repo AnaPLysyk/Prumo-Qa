@@ -2,6 +2,45 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.3.1",
+      "status": "planejada",
+      "date": null,
+      "title": "Estabilização e instalação segura",
+      "objective": "Corrigir imprecisões encontradas na validação final da 2.3 e preparar o build para assinatura digital legítima, sem fingir assinatura enquanto não houver credencial.",
+      "features": [
+        "Gancho de assinatura do build: assina com certificado legítimo quando a credencial existe e interrompe o build se a assinatura falhar.",
+        "Roteiro de instalação e teste manual, inclusive da autenticação humana, e script que confere o SHA-256 de uma release sem executá-la.",
+        "Investigação documentada das opções de assinatura para uma pessoa física no Brasil (docs/ASSINATURA.md)."
+      ],
+      "improvements": [
+        "As notas de release só afirmam \"assinado\" depois de o pipeline verificar uma assinatura Authenticode válida; caso contrário dizem \"NÃO ASSINADO\"."
+      ],
+      "fixes": [
+        "A classificação WEAK_TEST agora distingue o cenário associado a um teste ignorado (skip/fixme/todo) de um teste válido que apenas está no mesmo arquivo; ambos continuam sem cobertura comprovada."
+      ],
+      "differential": "Sem funcionalidades novas para o usuário final: corrige a atribuição de testes ignorados e deixa o caminho de assinatura pronto.",
+      "howItWorks": [
+        "O build chama scripts/assinar-windows.cjs para cada executável; sem PRUMO_ASSINATURA_THUMBPRINT nada é assinado e o log registra isso."
+      ],
+      "security": [
+        "Credenciais e certificados nunca entram no Git (teste verifica).",
+        "Com credencial presente, falha de assinatura interrompe o build em vez de publicar arquivo supostamente assinado."
+      ],
+      "compatibility": [
+        "Contrato qa.project.json v2, quatro ferramentas MCP, CLI e dados da 2.3 permanecem compatíveis."
+      ],
+      "limitations": [
+        "O instalador continua NÃO assinado: não há certificado; a pessoa física no Brasil não é elegível ao Artifact Signing.",
+        "Smart App Control pode bloquear o instalador e o aprovar.exe.",
+        "A autenticação humana ponta a ponta ainda depende de teste manual da titular."
+      ],
+      "migration": "Nenhuma migração.",
+      "afterUpdate": [
+        "Nada a fazer; configurações MCP e dados continuam válidos."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.3.0",
       "status": "publicada",
       "date": "2026-10-10",
