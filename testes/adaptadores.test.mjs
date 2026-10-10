@@ -28,7 +28,7 @@ test('produção não aceita booleano forjado nem env de aprovação',async t=>{
   assert.equal(JSON.parse(r.stdout).executed,false);
 });
 test('MCP real stdio: handshake, tools/list e quatro tools/call, sem stdout extra',async t=>{
-  const f=await fixture(t);const transport=new StdioClientTransport({command:process.execPath,args:[path.resolve('dist/mcp.js'),f.root],stderr:'pipe'});
+  const f=await fixture(t);const transport=new StdioClientTransport({command:process.execPath,args:[path.resolve('dist/mcp.js'),f.root],env:{PRUMO_DATA_DIR:process.env.PRUMO_DATA_DIR},stderr:'pipe'});
   const client=new Client({name:'prumo-acceptance-client',version:'1.0.0'});await client.connect(transport);t.after(()=>client.close());
   const lista=await client.listTools();assert.deepEqual(lista.tools.map(t=>t.name).sort(),['consultar_evidencias','contexto_projeto','executar_validacao','revisar_cobertura']);
   const call=async(name,args={})=>{const r=await client.callTool({name,arguments:args});assert.ok(!r.isError,JSON.stringify(r));return JSON.parse(r.content[0].text);};

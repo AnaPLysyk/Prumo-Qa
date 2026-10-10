@@ -1,6 +1,11 @@
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { after } from 'node:test';
+// Histórico de testes sempre isolado do perfil real e das raízes dos produtos.
+const dados=await mkdtemp(path.join(os.tmpdir(),'prumo dados testes '));
+process.env.PRUMO_DATA_DIR=dados;
+after(()=>rm(dados,{recursive:true,force:true}));
 export async function fixture(t,overrides={}) {
   const root=await mkdtemp(path.join(os.tmpdir(),'prumo espaço '));
   t.after(()=>rm(root,{recursive:true,force:true}));

@@ -16,7 +16,7 @@ for(const [label,args] of [['doctor',['doctor']],['context',['context']],['revie
 const tests=spawnSync(process.execPath,['--test','testes/publicacao.test.mjs'],{cwd:root,encoding:'utf8',env:{SystemRoot:process.env.SystemRoot}});
 await fs.writeFile(path.join(destination,'node-test.txt'),tests.stdout+'\n'+tests.stderr);
 if(tests.status!==0)throw new Error('Demo falhou: '+tests.stderr);
-const transport=new StdioClientTransport({command:process.execPath,args:[path.resolve('dist/mcp.js'),root],stderr:'pipe'});
+const transport=new StdioClientTransport({command:process.execPath,args:[path.resolve('dist/mcp.js'),root],env:process.env.PRUMO_DATA_DIR?{PRUMO_DATA_DIR:process.env.PRUMO_DATA_DIR}:undefined,stderr:'pipe'});
 const client=new Client({name:'prumo-demo-real-client',version:'1.0.0'});await client.connect(transport);
 try{
   const tools=await client.listTools();results.push({label:'tools/list',data:tools});
