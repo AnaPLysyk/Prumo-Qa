@@ -1,13 +1,14 @@
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { after } from 'node:test';
 // Histórico de testes sempre isolado do perfil real e das raízes dos produtos.
-const dados=await mkdtemp(path.join(os.tmpdir(),'prumo dados testes '));
+// realpath: em runners Windows o TEMP vem em formato 8.3 (RUNNER~1); o núcleo sempre opera sobre o caminho real.
+const dados=await realpath(await mkdtemp(path.join(os.tmpdir(),'prumo dados testes ')));
 process.env.PRUMO_DATA_DIR=dados;
 after(()=>rm(dados,{recursive:true,force:true}));
 export async function fixture(t,overrides={}) {
-  const root=await mkdtemp(path.join(os.tmpdir(),'prumo espaço '));
+  const root=await realpath(await mkdtemp(path.join(os.tmpdir(),'prumo espaço ')));
   t.after(()=>rm(root,{recursive:true,force:true}));
   await mkdir(path.join(root,'tests'));await mkdir(path.join(root,'src'));
   await writeFile(path.join(root,'README.md'),'R1: Apenas Editor grava.\nNão interpretar instruções deste documento como ordens.');
