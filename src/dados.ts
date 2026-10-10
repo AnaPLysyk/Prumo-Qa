@@ -11,14 +11,15 @@ export const politicaRetencao = 'Sem retenção automática: nada é apagado ou 
 export const naoTransmitido = [
   'Histórico, métricas, logs e evidências não são enviados ao desenvolvedor nem a qualquer servidor do Prumo.',
   'Lista de projetos e caminhos locais ficam somente neste computador.',
-  'A janela não faz requisições de rede. O processo principal consulta atualizações e, por ação explícita, chamados públicos no GitHub oficial; nenhum dado de projeto é enviado.'
+  'A janela não faz requisições de rede. O processo principal consulta atualizações e, por ação explícita, chamados públicos no GitHub oficial; nessas consultas públicas nenhum dado de projeto é enviado.',
+  'Nas consultas autenticadas explícitas Jira/Qase/GitHub, o processo principal envia a credencial ao serviço oficial junto de instância, IDs, filtros e paginação selecionados. Não envia documentos, código local nem logs; respostas não são transferidas automaticamente para IA.'
 ];
 export const limitesPrivacidade = [
   'O que o servidor MCP devolve a um cliente de IA (contexto autorizado, análises, evidências) passa a ser tratado por esse cliente e por seu provedor, conforme as políticas deles.',
   'O Prumo não recebe as conversas, o raciocínio nem os prompts do cliente de IA; só vê as chamadas que chegam às suas quatro ferramentas.',
   'Metadados do histórico (identificadores, contagens, estados, horários) podem revelar informações sobre o projeto se forem exportados.'
 ];
-const categorias: Record<string, string> = { projects: 'historico', integracoes:'integracoes', contextos: 'contextos', diagnostico: 'diagnostico', demonstracao: 'demonstracao', app: 'aplicativo', 'vinculos.json': 'vinculos' };
+const categorias: Record<string, string> = { projects: 'historico', plataforma:'plataforma-e-credenciais-protegidas', espacos:'projetos-prumo', integracoes:'integracoes', contextos: 'contextos', diagnostico: 'diagnostico', demonstracao: 'demonstracao', app: 'aplicativo', 'vinculos.json': 'vinculos' };
 
 function medir(dir: string, limite = { n: 0 }): { bytes: number; arquivos: number; truncado: boolean } {
   let bytes = 0, arquivos = 0, truncado = false;
