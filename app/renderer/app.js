@@ -238,7 +238,7 @@ const abas = {
     const saida = h('div', { id: 'sup-saida', 'aria-live': 'polite' });
     const relato = () => ({ categoria: categoria.value, titulo: titulo.value, descricao: descricao.value, passos: passos.value || undefined, esperado: esperado.value || undefined,
       incluirVersao: incVersao.checked, incluirSistema: incSistema.checked, incluirDiagnostico: incDiag.checked, consentimento: consente.checked });
-   
+
     const revisar = async () => {
       if (!consente.checked) { avisar('Marque o entendimento sobre issues públicas para revisar.', true); return; }
       const p = await chamar(() => api.suportePreparar(relato())); if (!p) return;
