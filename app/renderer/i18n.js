@@ -5,6 +5,8 @@
 // tradução parcial inventada.
 const PrumoI18n = (() => {
   let idioma = 'pt-BR'; let observador = null;
+  // Originais em português, para restaurar a página ao voltar do inglês sem recarregar (nós estáticos do HTML, como o menu).
+  const originaisTexto = new Map(); const originaisAttr = new Map();
   const dic = () => window.PRUMO_EN || {}; const regras = () => window.PRUMO_EN_REGRAS || [];
   const norm = (s) => s.replace(/\s+/g, ' ').trim();
   function traduzir(s) {
@@ -16,18 +18,20 @@ const PrumoI18n = (() => {
   }
   const ATRIBUTOS = ['aria-label', 'title', 'placeholder', 'alt'];
   const ignorar = (el) => el && el.closest && el.closest('script, style, pre, code, textarea, [data-i18n-ignore]');
-  function traduzirAtributos(el) { for (const a of ATRIBUTOS) { const v = el.getAttribute && el.getAttribute(a); if (v) { const t = traduzir(v); if (t !== v) el.setAttribute(a, t); } } }
+  function traduzirAtributos(el) { for (const a of ATRIBUTOS) { const v = el.getAttribute && el.getAttribute(a); if (v) { const t = traduzir(v); if (t !== v) { if (!originaisAttr.has(el)) originaisAttr.set(el, {}); originaisAttr.get(el)[a] ??= v; el.setAttribute(a, t); } } } }
+  const trocarTexto = (no) => { const t = traduzir(no.nodeValue); if (t !== no.nodeValue) { if (originaisTexto.size > 2000) for (const n of originaisTexto.keys()) if (!n.isConnected) originaisTexto.delete(n); if (!originaisTexto.has(no)) originaisTexto.set(no, no.nodeValue); no.nodeValue = t; } };
   function traduzirArvore(raiz) {
     if (idioma !== 'en' || !raiz) return;
-    if (raiz.nodeType === 3) { if (!ignorar(raiz.parentElement)) { const t = traduzir(raiz.nodeValue); if (t !== raiz.nodeValue) raiz.nodeValue = t; } return; }
+    if (raiz.nodeType === 3) { if (!ignorar(raiz.parentElement)) trocarTexto(raiz); return; }
     if (raiz.nodeType !== 1 || ignorar(raiz)) return; traduzirAtributos(raiz);
     const alvo = document.createTreeWalker(raiz, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
     for (let n = alvo.nextNode(); n; n = alvo.nextNode()) {
-      if (n.nodeType === 3) { if (!ignorar(n.parentElement)) { const t = traduzir(n.nodeValue); if (t !== n.nodeValue) n.nodeValue = t; } } else if (!ignorar(n)) traduzirAtributos(n);
+      if (n.nodeType === 3) { if (!ignorar(n.parentElement)) trocarTexto(n); } else if (!ignorar(n)) traduzirAtributos(n);
     }
   }
   function definir(i) {
-    idioma = i === 'en' ? 'en' : 'pt-BR';
+    const anterior = idioma; idioma = i === 'en' ? 'en' : 'pt-BR';
+    if (anterior === 'en' && idioma !== 'en') { for (const [no, original] of originaisTexto) if (no.isConnected) no.nodeValue = original; for (const [el, attrs] of originaisAttr) if (el.isConnected) for (const [a, v] of Object.entries(attrs)) el.setAttribute(a, v); originaisTexto.clear(); originaisAttr.clear(); }
     if (observador) { observador.disconnect(); observador = null; }
     if (idioma === 'en') {
       observador = new MutationObserver((muts) => { for (const m of muts) { if (m.type === 'attributes') { if (!ignorar(m.target)) traduzirAtributos(m.target); } else for (const n of m.addedNodes) traduzirArvore(n); } });

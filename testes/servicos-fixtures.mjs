@@ -39,15 +39,25 @@ export function respostaFixture(host,caminho){
   }
 }
 export async function servidorFixture(t){
-  const pedidos=[];const controle={status:200,corpo:null,espera:0,contentType:'application/json'};
+  const pedidos=[];const comentarios=[];const controle={status:200,corpo:null,espera:0,contentType:'application/json',postStatus:201,perderResposta:false};
   const server=http.createServer((req,res)=>{
+    // 2.8: único POST aceito é o comentário de resultado em um ticket (fixture do Jira); o resto segue somente leitura.
+    if(req.method==='POST'){let corpo='';req.on('data',b=>{corpo+=b;});req.on('end',()=>{
+      const ok=/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/comment$/.test(req.url??'');pedidos.push({metodo:'POST',caminho:req.url,host:req.headers['x-fixture-host'],corpo});
+      if(!ok){res.writeHead(405,{'content-type':'application/json'});res.end('{}');return;}
+      if(controle.postStatus!==201){res.writeHead(controle.postStatus,{'content-type':'application/json'});res.end('{}');return;}
+      const id=String(700+comentarios.length);comentarios.push({id,body:JSON.parse(corpo).body,ticket:req.url.split('/')[5]});
+      if(controle.perderResposta){controle.perderResposta=false;req.socket.destroy();return;}
+      res.writeHead(201,{'content-type':'application/json'});res.end(JSON.stringify({id}));});return;}
     pedidos.push({metodo:req.method,caminho:req.url,host:req.headers['x-fixture-host']});
+    if(req.method==='GET'&&/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/comment$/.test(String(req.url).split('?')[0])&&!controle.corpo){
+      const t=String(req.url).split('/')[5];const todos=[{id:'501',body:'Comentário fictício'},...comentarios.filter(c=>c.ticket===t)];res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({comments:todos,total:todos.length}));return;}
     const enviar=()=>{res.writeHead(controle.status,{'content-type':controle.contentType,...(controle.status===302?{location:'http://127.0.0.1/nao-seguir'}:{})});
       const r=controle.corpo??respostaFixture(String(req.headers['x-fixture-host']),req.url);res.end(typeof r==='string'?r:JSON.stringify(r??{fixture:'não encontrado'}));};
     if(controle.espera)setTimeout(enviar,controle.espera);else enviar();
   });await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const fechar=()=>new Promise(resolve=>{server.close(resolve);server.closeAllConnections();});if(t)t.after(fechar);
-  return {port:server.address().port,pedidos,controle,fechar};
+  return {port:server.address().port,pedidos,comentarios,controle,fechar};
 }
 /** Instrumentação do runner; nunca importada pelo app ou distribuída. */
 export async function instalarTransporteControlado(port){

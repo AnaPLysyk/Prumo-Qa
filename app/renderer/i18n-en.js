@@ -137,5 +137,20 @@ window.PRUMO_EN_REGRAS = [
   [/^Revogar (.+)$/, 'Revoke $1'], [/^Validar vínculo (.+)$/, 'Validate link $1'], [/^Remover vínculo (.+)$/, 'Remove link $1'], [/^Detalhar caso (.+)$/, 'Detail case $1'], [/^Resultados do run (.+)$/, 'Run results $1'], [/^Verificações (.+)$/, 'Checks $1'], [/^Detalhar PR (.+)$/, 'Detail PR $1'],
   [/^Versão (\S+) disponível$/, 'Version $1 available'], [/^Atualizações do Prumo QA: versão (\S+) disponível$/, 'Prumo QA updates: version $1 available'], [/^Testar integração (.+)$/, 'Test integration $1'], [/^Excluir (.+)…$/, 'Delete $1…'],
   [/^Não há (\d+) arquivo/, 'There are $1 file'], [/^Projeto: (.+)$/, 'Project: $1'], [/^Comentários de (.+)$/, 'Comments of $1'], [/^Usar (.+) como critérios de aceite$/, 'Use $1 as acceptance criteria'], [/^Importar (.+)$/, 'Import $1'], [/^Detalhar (.+)$/, 'Detail $1'],
-  [/^Recursos de (.+)$/, 'Resources of $1'], [/^Critérios de aceite \((.+)\)$/, 'Acceptance criteria ($1)'], [/^v(\d+\.\d+\.\d+)$/, 'v$1'], [/^Selecionar (.+)$/, 'Select $1'], [/^Listar (.+)$/, 'List $1']
+  [/^Recursos de (.+)$/, 'Resources of $1'], [/^Critérios de aceite \((.+)\)$/, 'Acceptance criteria ($1)'], [/^v(\d+\.\d+\.\d+)$/, 'v$1'], [/^Selecionar (.+)$/, 'Select $1'], [/^Listar (.+)$/, 'List $1'],
+  [/^ID Prumo: (\S+) · Sem pasta local$/, 'Prumo ID: $1 · No local folder'], [/^ID Prumo: (\S+) · Pasta: (.+)$/, 'Prumo ID: $1 · Folder: $2'],
+  [/^Serviço (\w+) não vinculado a (.+)\. Configure e selecione o recurso em Conexões\.$/, 'Service $1 is not linked to $2. Set up and select the resource in Connections.'],
+  [/^Executa localmente (.+), comando já declarado no contrato do projeto\. Nenhum comando novo pode ser criado pela agenda\.$/, 'Runs locally $1, a command already declared in the project contract. No new command can be created by the schedule.'],
+  [/^Ticket associado: (\S+)\. Comentário no Jira só com política de publicação aprovada\.$/, 'Associated ticket: $1. Jira comment only with an approved publishing policy.'],
+  [/^Executa o k6 oficial contra (\S+) \((\d+) usuário\(s\) virtual\(is\), (\d+)s\) com o script (.+)\.$/, 'Runs the official k6 against $1 ($2 virtual user(s), $3s) with the script $4.'],
+  [/^Última chamada MCP de: nenhum cliente \(identidade declarada pelo cliente\)\. (.+)$/, 'Last MCP call from: no client (identity declared by the client). Last observed call; Prumo does not prove an active session or the client\'s real identity.'],
+  [/^Última chamada MCP de: (.+) \(identidade declarada pelo cliente\)\. (.+)$/, 'Last MCP call from: $1 (identity declared by the client). Last observed call; Prumo does not prove an active session or the client\'s real identity.']
 ];
+Object.assign(window.PRUMO_EN, {
+  'Todos': 'All', 'Todas': 'All', 'Nenhuma evidência disponível.': 'No evidence available.', 'Ferramentas utilizadas pelo cliente:': 'Tools used by the client:',
+  'Lê tickets do Jira vinculado ao projeto (somente leitura).': 'Reads tickets from the Jira linked to the project (read-only).', 'Lê commits do repositório GitHub vinculado (somente leitura). Não dispara execuções.': 'Reads commits from the linked GitHub repository (read-only). Does not trigger runs.',
+  'Não há automação associada: nada será executado.': 'There is no associated automation: nothing will be run.',
+  'Tokens e custos: indisponíveis: cliente/provedor não forneceu dados verificáveis. Alterações aplicadas pela IA: não observadas pelo Prumo.': 'Tokens and costs: unavailable: the client/provider did not supply verifiable data. Changes applied by the AI: not observed by Prumo.',
+  'Recomendações são orientações do Prumo. Ele não observa se a IA as aplicou.': 'Recommendations are Prumo guidance. It does not observe whether the AI applied them.',
+  'Configuração proposta; não comprova sessão ativa. Nenhum arquivo foi alterado. O teste SDK comprova o servidor local. Uso observado é a chamada de um cliente com identidade declarada, não autenticada; não comprova sessão ativa nem obediência às referências.': 'Proposed configuration; it does not prove an active session. No file was changed. The SDK test proves the local server. Observed use is a call from a client with a declared, unauthenticated identity; it does not prove an active session or obedience to the references.'
+});

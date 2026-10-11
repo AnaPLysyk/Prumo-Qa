@@ -281,10 +281,13 @@ const abas = {
   },
 
   async ajuda(el) {
-    const docs = await chamar(api.ajuda); if (!docs) return;
+    const todos = await chamar(api.ajuda); if (!todos) return;
+    // Documentos com versão em inglês (.en) substituem o texto em português quando o idioma é inglês; os demais ficam em português, com aviso.
+    const en = PrumoI18n.idioma === 'en';
+    const docs = todos.filter((d) => !d.id.endsWith('.en')).map((d) => { const alt = en ? todos.find((x) => x.id === d.id + '.en') : null; return alt ? { ...alt, id: d.id } : { ...d, soPt: en }; });
     const corpo = h('article', {}); const indice = h('ul', { class: 'indice' });
     const itens = [
-      ...docs.map((d) => ({ id: d.id, title: d.title, render: () => markdown(d.body, d.id === '10-perguntas') })),
+      ...docs.map((d) => ({ id: d.id, title: d.title, soPt: d.soPt, render: () => markdown(d.body, d.id === '10-perguntas') })),
       { id: 'versoes', title: 'Versões', grupo: 'Detalhes técnicos', render: painelVersoes },
       { id: 'atualizacoes', title: 'Atualizações', render: painelAtualizacoes },
       { id: 'integracoes', title: 'Integrações técnicas', render: painelIntegracoes },
@@ -292,6 +295,7 @@ const abas = {
     const abrir = async (it) => {
       for (const b of indice.querySelectorAll('button')) b.setAttribute('aria-current', String(b.dataset.id === it.id));
       corpo.replaceChildren(h('p', { class: 'suave' }, 'Carregando…')); const nos = await it.render(); corpo.replaceChildren(...[].concat(nos).filter(Boolean));
+      if (en && (it.soPt || ['versoes', 'integracoes'].includes(it.id))) corpo.prepend(h('div', { class: 'nota', 'data-i18n-ignore': '' }, 'This help content is available in Portuguese only; the interface around it is in English.'));
     };
     for (const it of itens) {
       if (it.grupo) indice.append(h('li', { class: 'grupo' }, it.grupo));
