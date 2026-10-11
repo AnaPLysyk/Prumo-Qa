@@ -1,0 +1,69 @@
+name: Site e documentação
+
+# Publica o site (prumo-qa-docs no Render) sempre que o que ele mostra muda: documentação, ajuda, catálogo de versões
+# (a release marcada como publicada), capturas e o gerador. Fluxo da release: a tag gera o instalador; o commit que marca a
+# versão como "publicada" altera app/versoes.json e dispara esta publicação com o link e o SHA-256 verificados.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'scripts/gerar-site.mjs'
+      - 'app/ajuda/**'
+      - 'app/versoes.json'
+      - 'app/suporte-status.json'
+      - 'assets/**'
+      - 'docs/**'
+      - 'README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site
+  cancel-in-progress: true
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Gerar o site (mesmo comando do Render)
+        run: node scripts/gerar-site.mjs
+      - name: Conferir que o site gerado cita a versão publicada do catálogo
+        run: |
+          node -e "
+          const fs=require('fs');
+          const v=JSON.parse(fs.readFileSync('app/versoes.json','utf8')).versions.find(x=>x.status==='publicada');
+          const html=fs.readFileSync('site/public/versoes.html','utf8');
+          if(!html.includes('<strong>'+v.version+'</strong>')) throw new Error('site não cita '+v.version);
+          if(v.installer && !html.includes(v.installer.sha256)) throw new Error('site sem o SHA-256 de '+v.version);
+          console.log('site cita '+v.version);
+          "
+      - name: Publicar no Render (deploy hook do serviço prumo-qa-docs)
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::warning::Segredo RENDER_DEPLOY_HOOK_URL não configurado: o site foi gerado e conferido, mas NÃO foi publicado no Render."
+            exit 0
+          fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$RENDER_DEPLOY_HOOK_URL")
+          echo "Render respondeu HTTP $code"
+          [ "$code" -ge 200 ] && [ "$code" -lt 300 ]
+      - name: Conferir o site publicado
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          [ -z "$RENDER_DEPLOY_HOOK_URL" ] && exit 0
+          esperado=$(node -e "const v=JSON.parse(require('fs').readFileSync('app/versoes.json','utf8')).versions.find(x=>x.status==='publicada');console.log(v.version)")
+          for i in $(seq 1 30); do
+            if curl -s https://prumo-qa-docs.onrender.com/versoes.html | grep -q "<strong>$esperado</strong>"; then echo "site no ar com a $esperado"; exit 0; fi
+            sleep 20
+          done
+          echo "::error::O site no ar não passou a mostrar a versão $esperado em 10 minutos."
+          exit 1
