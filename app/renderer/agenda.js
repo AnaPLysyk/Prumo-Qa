@@ -199,7 +199,7 @@ abas.execucoes = async (el) => {
         return h('tr', { 'data-exec': x.id },
           h('td', {}, hora(x.inicio || x.criadoEm), x.estado === 'PERDIDO' ? h('div', { class: 'suave' }, tr('horário planejado: {q}', { q: hora(x.slot) })) : null), h('td', {}, x.projeto), h('td', {}, x.rotina), h('td', {}, rotuloTipo(x.tipo), x.capability ? h('div', { class: 'suave' }, x.capability) : null),
           h('td', {}, x.ticket || '—'), h('td', {}, x.executor), h('td', {}, selo(r?.status || x.estado), r?.motivo ? h('div', { class: 'suave' }, r.motivo) : x.erro ? h('div', { class: 'suave' }, x.erro) : null),
-          h('td', {}, c ? `${c.pass} PASS · ${c.fail} FAIL · ${c.blocked} BLOCKED · ${c.notRun} NOT_RUN` : '—'), h('td', {}, duracao(x.duracaoMs)),
+          h('td', {}, c && c.pass + c.fail + c.blocked + c.notRun ? `${c.pass} PASS · ${c.fail} FAIL · ${c.blocked} BLOCKED · ${c.notRun} NOT_RUN` : r && ['PASS', 'FAIL'].includes(r.status) ? tr('sem cenários individuais') : '—'), h('td', {}, duracao(x.duracaoMs)),
           h('td', {}, x.jira.estado === 'NAO_APLICAVEL' ? '—' : selo(x.jira.estado), x.jira.comentarioId ? h('div', { class: 'suave' }, '#' + x.jira.comentarioId) : null),
           h('td', {}, h('details', {}, h('summary', {}, tr('Detalhes')), r?.detalhes ? h('pre', {}, r.detalhes) : null, h('ul', {}, x.tentativas.map((t) => h('li', {}, tr('tentativa {n}: ', { n: t.n }), selo(t.estado), t.codigo ? ' ' + t.codigo : ''))),
             x.evidenciaId && x.pastaLocal ? botao('Ver evidência', () => { estado.root = x.pastaLocal; salvarRaiz(); estado.jobId = x.evidenciaId; mostrar('evidencias'); }) : null,

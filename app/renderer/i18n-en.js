@@ -148,6 +148,7 @@ window.PRUMO_EN_REGRAS = [
 ];
 Object.assign(window.PRUMO_EN, {
   'k6 encontrado neste computador.': 'k6 found on this computer.', 'k6 não encontrado no PATH: a rotina ficará NOT_RUN até instalar o k6 oficial.': 'k6 not found on PATH: the routine will stay NOT_RUN until the official k6 is installed.',
+  'sem cenários individuais': 'no individual scenarios',
   'Todos': 'All', 'Todas': 'All', 'Nenhuma evidência disponível.': 'No evidence available.', 'Ferramentas utilizadas pelo cliente:': 'Tools used by the client:',
   'Lê tickets do Jira vinculado ao projeto (somente leitura).': 'Reads tickets from the Jira linked to the project (read-only).', 'Lê commits do repositório GitHub vinculado (somente leitura). Não dispara execuções.': 'Reads commits from the linked GitHub repository (read-only). Does not trigger runs.',
   'Não há automação associada: nada será executado.': 'There is no associated automation: nothing will be run.',

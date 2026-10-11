@@ -11,6 +11,8 @@ Rascunho técnico consistente com o funcionamento atual. Requer revisão humana 
 - **Projetos vinculados**: %LOCALAPPDATA%\PrumoQA\vinculos.json (caminhos locais que você escolheu).
 - **Evidências de execução**: pasta .prumo/evidencias dentro de cada projeto, com logs mascarados.
 - **Dados internos da janela**: %LOCALAPPDATA%\PrumoQA\app.
+- **Agenda e execuções (2.8)**: %LOCALAPPDATA%\PrumoQA\plataforma (agenda.json, fila.json, autorizacoes.json, publicacoes-jira.json e worker-trava.json). Rotinas, resultados, autorizações (com validade e hash do escopo, nunca senha) e o texto dos comentários preparados para o Jira. Não guardam credenciais nem respostas remotas.
+- **Preferências**: %LOCALAPPDATA%\PrumoQA\preferencias.json, por usuário do Windows: tema, idioma, avisos e se o Prumo inicia com o Windows (desligado por padrão).
 
 ## Retenção
 
@@ -19,6 +21,8 @@ Sem retenção automática: nada é apagado sozinho. Você exclui quando quiser,
 ## O que é enviado a terceiros
 
 Nas consultas explícitas Jira/Qase/GitHub, o processo principal envia a credencial ao host oficial do serviço, junto dos IDs, filtros e parâmetros de paginação escolhidos. Nenhum documento, código ou log local é anexado. Respostas não são persistidas como cache nem transferidas automaticamente para IA. Tokens ficam protegidos pelo Windows em plataforma/credenciais.json; metadados de conexões/vínculos ficam em plataforma, com contextos de projetos manuais na estrutura própria espacos. Remover conexão elimina a credencial; remover vínculo preserva histórico.
+
+Ao publicar um comentário de resultado no Jira (manual, depois da sua confirmação, ou agendado com uma política aprovada por você), o processo principal envia ao Jira Cloud do projeto vinculado, com a sua credencial, o texto do comentário: ticket, tipo, ambiente, contagem de cenários, resumo das falhas e a referência local da evidência. Nenhum arquivo, log completo ou caminho é anexado. As rotinas de k6 enviam tráfego de teste somente ao destino que você declarou.
 
 O servidor MCP responde ao cliente de IA que o iniciou. O que ele devolve (contexto autorizado, análises, evidências) passa a ser tratado por esse cliente e por seu provedor. O Prumo não recebe as conversas da IA.
 
