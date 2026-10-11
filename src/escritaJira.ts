@@ -31,12 +31,12 @@ export async function camposDoTipo(ctx: ContextoServico, rec: Recurso, tipoId: s
   return z.array(z.object({ fieldId: z.string().optional(), key: z.string().optional(), name: z.string(), required: z.boolean().optional() }).passthrough()).parse(r.fields ?? r.values ?? []).map(c => ({ id: c.fieldId ?? c.key ?? '', nome: c.name, obrigatorio: c.required === true }));
 }
 export async function transicoes(ctx: ContextoServico, rec: Recurso, t: string) {
-  await doProjeto(ctx, rec, t);
+  await projetoDoTicket(ctx, rec, t);
   const r = z.object({ transitions: z.array(z.object({ id: z.string(), name: z.string(), to: z.object({ name: z.string() }).passthrough().optional() }).passthrough()) }).parse(await ctx.ler(`/rest/api/3/issue/${enc(t)}/transitions`));
   return r.transitions.map(x => ({ id: x.id, nome: x.name, para: x.to?.name ?? null }));
 }
 /** Confirma que o ticket pertence ao projeto Jira vinculado (nunca escreve em ticket de outro projeto). */
-async function doProjeto(ctx: ContextoServico, rec: Recurso, t: string) {
+export async function projetoDoTicket(ctx: ContextoServico, rec: Recurso, t: string) {
   const r = z.object({ fields: z.object({ project: z.object({ id: z.union([z.string(), z.number()]).transform(String) }).passthrough(), status: z.object({ name: z.string() }).passthrough().optional() }).passthrough() }).passthrough().parse(await ctx.ler(`/rest/api/3/issue/${enc(t)}?fields=project,status`));
   if (r.fields.project.id !== rec.id) throw new ErroServico('SERVICE_SCOPE_CHANGED');
   return { status: r.fields.status?.name ?? null };
@@ -55,7 +55,7 @@ export const criarTicket: DefOperacao<z.infer<typeof criar>> = {
   async executar(ctx, rec, p, k) {
     const tipos = await tiposDeCriacao(ctx, rec); const t = tipos.find(x => x.id === p.tipoId);
     if (!t) throw new ErroServico('SERVICE_SCOPE_CHANGED'); if (t.subtarefa) throw new ErroServico('SERVICE_WRITE_BLOCKED');
-    if (p.origem) await doProjeto(ctx, rec, p.origem);
+    if (p.origem) await projetoDoTicket(ctx, rec, p.origem);
     const fields = { project: { id: rec.id }, issuetype: { id: p.tipoId }, summary: mascarar(p.resumo), description: textoParaAdf(mascarar(p.descricao)), labels: [...new Set([...p.rotulos, marcador(k)])] };
     const nova = z.object({ id: z.string(), key: z.string() }).passthrough().parse(await ctx.enviar('POST', '/rest/api/3/issue', JSON.stringify({ fields })));
     const r: Remoto = { id: nova.id, chave: nova.key, url: urlTicket(ctx, nova.key), detalhes: { tipo: t.nome } };
@@ -63,7 +63,7 @@ export const criarTicket: DefOperacao<z.infer<typeof criar>> = {
     return r;
   },
   reconciliar: (ctx, rec, _p, k) => achar(ctx, rec, marcador(k)),
-  async confirmar(ctx, rec, _p, r) { await doProjeto(ctx, rec, r.chave!); return true; }
+  async confirmar(ctx, rec, _p, r) { await projetoDoTicket(ctx, rec, r.chave!); return true; }
 };
 
 const anexar = z.object({ ticket, arquivo: z.string().min(1).max(500), nome: z.string().max(150).optional() }).strict();
@@ -82,7 +82,7 @@ export const anexarArquivo: DefOperacao<z.infer<typeof anexar>> = {
   id: 'jira.anexar', servico: 'jira', rotulo: 'Anexar arquivo a ticket do Jira', efeito: 'Envia um arquivo (log, imagem, vídeo ou evidência) como anexo do ticket. Textos têm segredos mascarados; imagens e vídeos são enviados como estão.', exigeConfirmacao: true, schema: anexar,
   resumo: p => `Anexar "${path.basename(p.arquivo)}" a ${p.ticket}`,
   async executar(ctx, rec, p, _k, aux) {
-    await doProjeto(ctx, rec, p.ticket); const a = lerAnexo(p.arquivo, aux); const nome = p.nome ?? a.nome;
+    await projetoDoTicket(ctx, rec, p.ticket); const a = lerAnexo(p.arquivo, aux); const nome = p.nome ?? a.nome;
     const m = multipart('file', { nome, tipo: a.tipo, dados: a.dados });
     const r = z.array(z.object({ id: z.string(), filename: z.string(), size: z.number() }).passthrough()).parse(await ctx.enviar('POST', `/rest/api/3/issue/${enc(p.ticket)}/attachments`, m.corpo, m.tipoConteudo, { 'X-Atlassian-Token': 'no-check' }));
     return { id: r[0]?.id, chave: p.ticket, url: urlTicket(ctx, p.ticket), detalhes: { arquivo: r[0]?.filename ?? nome, bytes: r[0]?.size ?? a.tamanho } };
@@ -99,7 +99,7 @@ export const editarTicket: DefOperacao<z.infer<typeof editar>> = {
   id: 'jira.editar', servico: 'jira', rotulo: 'Atualizar campos de ticket do Jira', efeito: 'Altera resumo, descrição ou adiciona rótulos de um ticket do projeto vinculado. Não remove nada.', exigeConfirmacao: true, schema: editar,
   resumo: p => `Atualizar ${p.ticket}: ${[p.resumo !== undefined && 'resumo', p.descricao !== undefined && 'descrição', p.adicionarRotulos?.length && 'rótulos'].filter(Boolean).join(', ')}`,
   async executar(ctx, rec, p) {
-    await doProjeto(ctx, rec, p.ticket); const corpo: Record<string, unknown> = {};
+    await projetoDoTicket(ctx, rec, p.ticket); const corpo: Record<string, unknown> = {};
     const fields: Record<string, unknown> = {}; if (p.resumo !== undefined) fields.summary = mascarar(p.resumo); if (p.descricao !== undefined) fields.description = textoParaAdf(mascarar(p.descricao)); if (Object.keys(fields).length) corpo.fields = fields;
     if (p.adicionarRotulos?.length) corpo.update = { labels: p.adicionarRotulos.map(add => ({ add })) };
     await ctx.enviar('PUT', `/rest/api/3/issue/${enc(p.ticket)}`, JSON.stringify(corpo)); return { chave: p.ticket, url: urlTicket(ctx, p.ticket) };
@@ -116,7 +116,7 @@ export const transicionarTicket: DefOperacao<z.infer<typeof transicionar>> = {
     await ctx.enviar('POST', `/rest/api/3/issue/${enc(p.ticket)}/transitions`, JSON.stringify({ transition: { id: p.transicaoId } }));
     return { chave: p.ticket, url: urlTicket(ctx, p.ticket), detalhes: { transicao: t.nome, para: t.para } };
   },
-  async confirmar(ctx, rec, p, r) { const s = await doProjeto(ctx, rec, p.ticket); return r.detalhes?.para == null || s.status === r.detalhes.para; }
+  async confirmar(ctx, rec, p, r) { const s = await projetoDoTicket(ctx, rec, p.ticket); return r.detalhes?.para == null || s.status === r.detalhes.para; }
 };
 
 const vincular = z.object({ ticket, comTicket: ticket, tipoVinculo: z.string().regex(/^[A-Za-z ]{2,40}$/).default('Relates') }).strict().refine(p => p.ticket !== p.comTicket, 'mesmo ticket');
@@ -124,7 +124,7 @@ export const vincularTickets: DefOperacao<z.infer<typeof vincular>> = {
   id: 'jira.vincular', servico: 'jira', rotulo: 'Vincular tickets do Jira', efeito: 'Cria um vínculo entre dois tickets do projeto vinculado (por exemplo, defeito e história).', exigeConfirmacao: true, schema: vincular,
   resumo: p => `Vincular ${p.ticket} a ${p.comTicket} (${p.tipoVinculo})`,
   async executar(ctx, rec, p) {
-    await doProjeto(ctx, rec, p.ticket); await doProjeto(ctx, rec, p.comTicket);
+    await projetoDoTicket(ctx, rec, p.ticket); await projetoDoTicket(ctx, rec, p.comTicket);
     await ctx.enviar('POST', '/rest/api/3/issueLink', JSON.stringify({ type: { name: p.tipoVinculo }, inwardIssue: { key: p.ticket }, outwardIssue: { key: p.comTicket } })); return { chave: p.ticket, url: urlTicket(ctx, p.ticket) };
   },
   async reconciliar(ctx, _rec, p) {

@@ -4,6 +4,7 @@ import {lerLocal,gravarLocal} from './armazenamentoLocal.js';
 import {servicoSchema,obterEspaco,listarEspacos,gravarVinculo,estadoVinculo,registrarConsulta,configurarAceite,type Servico,type Recurso} from './espacos.js';
 import {cofreCredenciais,type Protetor} from './credenciais.js';
 import {AdaptadorServico,type OperacaoServico,type ContextoServico} from './adaptadoresServicos.js';
+import type {Filtros} from './leiturasServicos.js';
 import {ErroServico,instanciaServico,paginaSchema,transporteHttps,transporteEscritaGeral,type TransporteServico,type TransporteEscrita} from './httpServicos.js';
 import {mascarar} from './projeto.js';
 
@@ -46,8 +47,8 @@ export function nucleoServicos(protetor:Protetor,transporte:TransporteServico=tr
     async vincular(espacoId:string,conexaoId:string,recurso:Recurso){obterEspaco(espacoId,base);const c=conta(conexaoId);const a=adaptador(c);const atual=await a.obterRecurso(recurso.id);
       if(JSON.stringify(atual)!==JSON.stringify(recurso))throw new ErroServico('SERVICE_SCOPE_CHANGED');return gravarVinculo(espacoId,c.servico,c.id,atual,base);},
     async validarVinculo(espacoId:string,servico:Servico){await verificar(espacoId,servico,true);return obterEspaco(espacoId,base);},
-    async consultar(espacoId:string,servico:Servico,operacao:OperacaoServico,pagina:z.input<typeof paginaSchema>={},id?:string){
-      try{const v=await verificar(espacoId,servico);const r=await v.adaptador.consultar(v.recurso,operacao,pagina,id,v.campoAceite);registrarConsulta(espacoId,servico,'OK',base);return r;}
+    async consultar(espacoId:string,servico:Servico,operacao:OperacaoServico,pagina:z.input<typeof paginaSchema>={},id?:string,filtros?:Filtros){
+      try{const v=await verificar(espacoId,servico);const r=await v.adaptador.consultar(v.recurso,operacao,pagina,id,v.campoAceite,filtros);registrarConsulta(espacoId,servico,'OK',base);return r;}
       catch(e){registrarConsulta(espacoId,servico,codigoErro(e),base);throw e;}
     },
     /** Executa `fn` com o adaptador JÁ revalidado (conta, vínculo e projeto). A credencial não sai do adaptador (2.9). */

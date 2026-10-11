@@ -2,9 +2,10 @@ import {z} from 'zod';
 import {mascarar} from './projeto.js';
 import {ErroServico,instanciaServico,paginaSchema,transporteHttps,transporteEscritaGeral,type TransporteServico,type TransporteEscrita} from './httpServicos.js';
 import type {MetodoEscrita} from './rotasEscrita.js';
+import {operacoesExtras,lerExtra,jqlDeTickets,type Filtros,type OperacaoExtra} from './leiturasServicos.js';
 import {identidadeRecurso,type Recurso,type Servico} from './espacos.js';
 
-export const operacoesServico=['tickets','ticket','campos','comentarios','suites','casos','caso','planos','runs','run','resultados','repositorio','branches','commits','prs','pr','verificacoes'] as const;
+export const operacoesServico=['tickets','ticket','campos','comentarios','suites','casos','caso','planos','runs','run','resultados','repositorio','branches','commits','prs','pr','verificacoes',...operacoesExtras] as const;
 export type OperacaoServico=typeof operacoesServico[number];
 export type ConfigServico={id:string;servico:Servico;instancia:string;usuario?:string;contaId:string;token:string};
 const obj=z.record(z.unknown());
@@ -101,15 +102,16 @@ export class AdaptadorServico {
       const r=await this.get(caminho);return this.recurso(this.c.servico==='qase'?itemQase.parse(r).result:r);
     }catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_RESPONSE_INVALID');}
   }
-  async consultar(r:Recurso,operacao:OperacaoServico,pagina:z.input<typeof paginaSchema>={},id?:string,campoAceite?:string){
+  async consultar(r:Recurso,operacao:OperacaoServico,pagina:z.input<typeof paginaSchema>={},id?:string,campoAceite?:string,filtros?:Filtros){
     if(r.instancia!==this.c.instancia||r.contaId!==this.c.contaId)throw new ErroServico('SERVICE_SCOPE_CHANGED');const p=paginaSchema.parse(pagina);
+    if((operacoesExtras as readonly string[]).includes(operacao)){try{const x=await lerExtra(this.contexto(),r,operacao as OperacaoExtra,{offset:p.offset,limite:p.limite},id,filtros);return this.saida(x.dados,x.proxima,r,x.endpoint);}catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_RESPONSE_INVALID');}}
     if(this.c.servico!=='qase'&&!/^\d{1,20}$/.test(r.id))throw new ErroServico('SERVICE_RESPONSE_INVALID');
     if(campoAceite&&!/^customfield_\d+$/.test(campoAceite))throw new ErroServico('SERVICE_RESPONSE_INVALID');
     let endpoint:string;let colecao:string|undefined;let envelope='';
     const numerico=()=>{if(!id||!/^\d{1,15}$/.test(id))throw new ErroServico('SERVICE_RESPONSE_INVALID');return enc(id);};
     if(this.c.servico==='jira'){
-      const fields='id,key,summary,description,issuetype,status,priority,assignee,updated,issuelinks,project'+(campoAceite?','+campoAceite:'');
-      if(operacao==='tickets'){endpoint='/rest/api/3/search/jql?'+query({jql:'project = '+r.id+' ORDER BY updated DESC',fields,maxResults:p.limite,nextPageToken:p.cursor});colecao='issues';envelope='jira-cursor';}
+      const fields='id,key,summary,description,issuetype,status,priority,assignee,reporter,labels,created,parent,subtasks,updated,issuelinks,project'+(campoAceite?','+campoAceite:'');
+      if(operacao==='tickets'){endpoint='/rest/api/3/search/jql?'+query({jql:jqlDeTickets(r.id,filtros),fields,maxResults:p.limite,nextPageToken:p.cursor});colecao='issues';envelope='jira-cursor';}
       else if(operacao==='campos'){endpoint='/rest/api/3/field';envelope='array';}
       else if(operacao==='ticket'||operacao==='comentarios'){
         if(!id||!/^[A-Z][A-Z0-9_]*-\d+$/.test(id))throw new ErroServico('SERVICE_RESPONSE_INVALID');

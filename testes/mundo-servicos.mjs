@@ -19,6 +19,7 @@ export function criarMundo() {
       m.chamadas.push(['GET', c]); const u = url(c), p = u.pathname;
       if (/\/issue\/createmeta\/[A-Z]+\/issuetypes$/.test(p)) return { issueTypes: j.tipos };
       if (p === '/rest/api/3/search/jql') { const rot = /labels = "([^"]+)"/.exec(u.searchParams.get('jql'))?.[1]; return { issues: [...j.issues.values()].filter((i) => i.fields.labels.includes(rot)).map((i) => ({ id: i.id, key: i.key })) }; }
+      if (/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/changelog$/.test(p)) return { isLast: true, values: [{ id: '1', created: '2026-10-10T10:00:00.000Z', author: { displayName: 'Pessoa fictícia' }, items: [{ field: 'status', fromString: 'Aberto', toString: 'Em andamento' }] }] };
       const k = /^\/rest\/api\/3\/issue\/([A-Z][A-Z0-9_]*-\d+)(\/transitions)?$/.exec(p); if (!k) throw falta();
       const i = j.issues.get(k[1]); if (!i) throw falta(); return k[2] ? { transitions: j.transicoes } : i;
     },
@@ -43,6 +44,7 @@ export function criarMundo() {
       if (p === '/v1/system_field') return { status: true, result: [{ title: 'Priority', slug: 'priority', options: [{ id: 1, title: 'High' }] }] };
       if ((k = /^\/v1\/(case|suite|plan|run)\/SFQ$/.exec(p))) return entidades(q[{ case: 'casos', suite: 'suites', plan: 'planos', run: 'runs' }[k[1]]], u);
       if ((k = /^\/v1\/result\/SFQ$/.exec(p))) return entidades(q.resultados, u);
+      if ((k = /^\/v1\/plan\/SFQ\/(\d+)$/.exec(p))) { const e = q.planos.find((x) => String(x.id) === k[1]); if (!e) throw falta(); return { status: true, result: e }; }
       if ((k = /^\/v1\/(case|run)\/SFQ\/(\d+)$/.exec(p))) { const e = q[k[1] === 'case' ? 'casos' : 'runs'].find((x) => String(x.id) === k[2]); if (!e) throw falta(); return { status: true, result: e }; }
       throw new Error('rota Qase não simulada: GET ' + p);
     },
@@ -65,7 +67,13 @@ export function criarMundo() {
       m.chamadas.push(['GET', c]); const u = url(c), p = u.pathname; let k;
       if (p === '/repos/empresa/automacao-smart') return { id: 111, full_name: 'empresa/automacao-smart', default_branch: g.padrao };
       if ((k = /^\/repos\/empresa\/automacao-smart\/git\/ref\/heads\/(.+)$/.exec(p))) { const s = g.refs.get(decodeURIComponent(k[1])); if (!s) throw falta(); return { ref: 'refs/heads/' + k[1], object: { sha: s } }; }
-      if ((k = /^\/repos\/empresa\/automacao-smart\/contents\/(.+)$/.exec(p))) { const a = g.arquivos.get(u.searchParams.get('ref') + ':' + decodeURIComponent(k[1])); if (!a) throw falta(); return { sha: a.sha, encoding: 'base64', content: Buffer.from(a.conteudo).toString('base64') }; }
+      if ((k = /^\/repos\/empresa\/automacao-smart\/contents\/(.+)$/.exec(p))) { const a = g.arquivos.get(u.searchParams.get('ref') + ':' + decodeURIComponent(k[1])); if (!a && k[1] === 'tests') return [{ name: 'a.spec.ts', path: 'tests/a.spec.ts', type: 'file', size: 10, sha: 'd'.repeat(40), html_url: 'https://github.com/x' }]; if (!a) throw falta(); return { sha: a.sha, encoding: 'base64', content: Buffer.from(a.conteudo).toString('base64') }; }
+      if (p === '/repos/empresa/automacao-smart/contents' || p === '/repos/empresa/automacao-smart/contents/tests') return [{ name: 'a.spec.ts', path: 'tests/a.spec.ts', type: 'file', size: 10, sha: 'd'.repeat(40), html_url: 'https://github.com/x' }];
+      if (p === '/repos/empresa/automacao-smart/actions/runs') return { total_count: 1, workflow_runs: [{ id: 77, name: 'CI', status: 'completed', conclusion: 'failure', head_branch: 'main', head_sha: 'a'.repeat(40), event: 'push', run_number: 5, html_url: 'https://github.com/empresa/automacao-smart/actions/runs/77', created_at: '2026-10-10T10:00:00Z' }] };
+      if (p === '/repos/empresa/automacao-smart/actions/runs/77/jobs') return { jobs: [{ id: 1, name: 'windows', status: 'completed', conclusion: 'failure', steps: [{ name: 'npm test', status: 'completed', conclusion: 'failure', number: 3 }] }] };
+      if (p === '/repos/empresa/automacao-smart/actions/runs/77/artifacts') return { artifacts: [{ id: 5, name: 'relatorio', size_in_bytes: 1234, expired: false }] };
+      if (p === '/repos/empresa/automacao-smart/pulls/1/reviews') return [{ id: 9, state: 'APPROVED', user: { login: 'revisora' }, submitted_at: '2026-10-10T11:00:00Z' }];
+      if (p === '/repos/empresa/automacao-smart/commits/' + 'a'.repeat(40)) return { sha: 'a'.repeat(40), commit: { message: 'msg token=SEGREDO1234567890abcdef', author: { name: 'Ana', date: '2026-10-10T09:00:00Z' } }, files: [{ filename: 'tests/a.spec.ts', status: 'modified', additions: 3, deletions: 1 }] };
       if (p === '/repos/empresa/automacao-smart/pulls') return g.prs.filter((x) => x.state === 'open' && u.searchParams.get('head') === 'empresa:' + x.head);
       throw new Error('rota GitHub não simulada: GET ' + p);
     },
