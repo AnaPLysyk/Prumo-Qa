@@ -32,7 +32,7 @@ const qc = (() => {
   }
   function ciclo(t) {
     quadro = 0; let animar = false;
-    for (const c of [...campos]) { if (!c.canvas.isConnected) { campos.delete(c); continue; } desenhar(c, c.el.dataset.estado === 'executando' && !reduzido() ? t : 0); if (c.el.dataset.estado === 'executando' && !reduzido()) animar = true; }
+    for (const c of [...campos]) { if (!c.canvas.isConnected) { campos.delete(c); continue; } const vivo = !reduzido(); desenhar(c, vivo ? t * (c.el.dataset.estado === 'executando' ? 1 : 0.35) : 0); if (vivo) animar = true; }
     if (animar) quadro = requestAnimationFrame(ciclo);
   }
   const iniciar = () => { if (!quadro) quadro = requestAnimationFrame(ciclo); };

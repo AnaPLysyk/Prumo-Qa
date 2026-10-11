@@ -47,8 +47,36 @@ function montarControles() {
   const idioma = h('select', { id: 'idioma', 'aria-label': tr('Idioma') }, [['pt-BR', 'Português (Brasil)'], ['en', 'English']].map(([v, t]) => h('option', { value: v, selected: v === (estado.prefs?.idioma || 'pt-BR') }, t)));
   tema.addEventListener('change', async () => { aplicarTema(tema.value); estado.prefs = { ...(estado.prefs || {}), tema: tema.value }; await chamar(() => api.salvarPreferencias({ tema: tema.value })); });
   idioma.addEventListener('change', async () => { await chamar(() => api.salvarPreferencias({ idioma: idioma.value })); await definirIdioma(idioma.value); });
-  caixa.replaceChildren(tema, idioma);
+  const cores = [['azul', 'Azul', '#6ea8ff'], ['violeta', 'Violeta', '#a78bfa'], ['verde', 'Verde-água', '#34d3b0'], ['ambar', 'Âmbar', '#f0b84a'], ['rosa', 'Rosa', '#f472b6']]; let atual = 'azul'; try { atual = localStorage.getItem('acento') || 'azul'; } catch { /* sem armazenamento */ }
+  const paleta = h('div', { class: 'paleta', role: 'radiogroup', 'aria-label': tr('Cor de destaque') }, cores.map(([id, nome, cor]) => { const b = h('button', { type: 'button', class: 'cor', role: 'radio', 'data-cor': id, 'aria-checked': String(id === atual), 'aria-label': tr(nome), title: tr(nome), onclick: () => { aplicarAcento(id); for (const x of paleta.children) x.setAttribute('aria-checked', String(x.dataset.cor === id)); } }); b.style.background = cor; return b; }));
+  const linha = (rotulo, no) => h('label', { class: 'ajuste' }, h('span', {}, tr(rotulo)), no);
+  caixa.replaceChildren(linha('Tema', tema), linha('Idioma', idioma), h('div', { class: 'ajuste' }, h('span', {}, tr('Cor de destaque')), paleta));
 }
+function aplicarAcento(a) { document.documentElement.dataset.acento = a; try { localStorage.setItem('acento', a); } catch { /* sem armazenamento */ } qc.definirEstado(estadoOrb(estado.worker)); }
+function aplicarMenu(fechado, salvar = true) { document.body.dataset.menu = fechado ? 'fechado' : 'aberto'; const b = $('#menu-alternar'); if (b) { b.setAttribute('aria-expanded', String(!fechado)); const t = tr(fechado ? 'Expandir menu' : 'Recolher menu'); b.setAttribute('aria-label', t); b.title = t; } if (salvar) { try { localStorage.setItem('menu', fechado ? 'fechado' : 'aberto'); } catch { /* sem armazenamento */ } } }
+/** Seletor de projeto na lateral: lista os projetos, troca o atual e leva para Projetos para criar ou gerenciar. */
+async function montarSeletorProjeto() {
+  const btn = $('#projeto-botao'); const lista = $('#projeto-lista'); if (!btn || !lista) return;
+  const espacos = (await chamar(api.espacos)) || [];
+  const item = (txt, ativo, fn, extra = {}) => h('button', { type: 'button', role: 'option', class: 'projeto-item', 'aria-selected': String(!!ativo), onclick: fn, ...extra }, txt);
+  lista.replaceChildren(...espacos.map((e) => item(e.nome, estado.espaco?.id === e.id, () => { estado.espaco = e; estado.root = e.raizContextos; salvarRaiz(); fechar(); mostrar(estado.aba === 'projetos' ? 'projetos' : estado.aba); }, { 'data-projeto': e.id })),
+    item(tr(espacos.length ? 'Gerenciar projetos…' : 'Criar o primeiro projeto…'), false, () => { fechar(); mostrar('projetos'); }, { class: 'projeto-item gerenciar' }));
+  PrumoI18n.traduzirDocumento();
+  function fechar() { lista.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+  btn.onclick = (ev) => { ev.stopPropagation(); const abrir = lista.hidden; lista.hidden = !abrir; btn.setAttribute('aria-expanded', String(abrir)); };
+  if (!montarSeletorProjeto.ligado) { montarSeletorProjeto.ligado = true; document.addEventListener('click', (ev) => { if (!lista.hidden && !lista.contains(ev.target)) { lista.hidden = true; btn.setAttribute('aria-expanded', 'false'); } }); }
+}
+function iniciarAjustes() {
+  const bt = $('#ajustes'); const pop = $('#controles'); if (!bt || !pop) return;
+  const abrir = (v) => { pop.hidden = !v; bt.setAttribute('aria-expanded', String(v)); };
+  bt.addEventListener('click', (ev) => { ev.stopPropagation(); abrir(pop.hidden); });
+  document.addEventListener('click', (ev) => { if (!pop.hidden && !pop.contains(ev.target)) abrir(false); });
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !pop.hidden) { abrir(false); bt.focus(); } });
+  // F5 / Ctrl+R: atualiza a tela atual com os dados mais recentes (sem recarregar a janela nem importar arquivo).
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'F5' || (ev.ctrlKey && ev.key.toLowerCase() === 'r')) { ev.preventDefault(); atualizarWorker().then(() => mostrar(estado.aba)); } });
+  $('#site-institucional')?.addEventListener('click', () => chamar(() => api.abrirSite()));
+}
+function iniciarMenu() { iniciarAjustes(); let f = false; try { f = localStorage.getItem('menu') === 'fechado'; document.documentElement.dataset.acento = localStorage.getItem('acento') || 'azul'; } catch { /* sem armazenamento */ } aplicarMenu(f, false); $('#menu-alternar')?.addEventListener('click', () => aplicarMenu(document.body.dataset.menu !== 'fechado')); }
 function aplicarTema(t) { document.documentElement.dataset.tema = t || 'sistema'; qc.definirEstado(estadoOrb(estado.worker)); }
 async function definirIdioma(i) {
   PrumoI18n.definir(i); estado.prefs = { ...(estado.prefs || {}), idioma: i }; document.documentElement.lang = i;
@@ -58,16 +86,27 @@ async function definirIdioma(i) {
 // ---- Início ----
 abas.inicio = async (el) => {
   const w = estado.worker || (await atualizarWorker()); const m = await chamar(() => api.metricasExecucoes(estado.espaco?.id));
-  el.append(h('div', { class: 'qc-hero' }, qc.campo(112, estadoOrb(w), tr('Esfera do Prumo QA')),
-    h('div', {}, h('h1', {}, 'Prumo QA'), h('p', {}, tr('Plataforma de engenharia de qualidade: projetos, contextos, tickets, testes, agendamentos, execuções e evidências em um só lugar. Funciona manualmente, sem IA; agentes são assistentes opcionais.')),
-      h('p', { class: 'qc-legenda' }, estadoOrb(w) === 'executando' ? tr('A esfera gira porque há uma rotina em execução agora.') : tr('A esfera fica parada quando nada está em execução.')))));
-  el.append(h('h2', {}, tr('Agora')), h('div', { class: 'grade', id: 'inicio-estado' },
+  const msgs = h('div', { class: 'chat-msgs', id: 'chat-msgs', 'aria-live': 'polite', 'data-i18n-ignore': '' });
+  const entrada = h('input', { id: 'chat-input', type: 'text', maxlength: 300, placeholder: tr('Pergunte sobre este projeto…'), 'aria-label': tr('Pergunta ao Prumo') });
+  const form = h('form', { class: 'chat-form', id: 'chat-form' }, entrada, h('button', { class: 'acao primaria', type: 'submit' }, tr('Enviar')));
+  const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches; let fila = Promise.resolve();
+  // Digita como um chat. Pára sozinho se a pessoa sair da tela; movimento reduzido mostra o texto de uma vez.
+  const digitar = (texto, classe = 'prumo') => { const b = h('div', { class: 'msg ' + classe }); msgs.append(b); const ativo = () => b.isConnected;
+    if (reduzido || classe === 'voce') { b.textContent = texto; msgs.scrollTop = msgs.scrollHeight; return Promise.resolve(); }
+    return new Promise((ok) => { b.classList.add('digitando'); let n = 0; const t = setInterval(() => { if (!ativo()) { clearInterval(t); ok(); return; } n += 2; b.textContent = texto.slice(0, n); msgs.scrollTop = msgs.scrollHeight; if (n >= texto.length) { clearInterval(t); b.classList.remove('digitando'); ok(); } }, 18); }); };
+  const falar = (linhas, fontes) => { fila = fila.then(async () => { for (const l of linhas) await digitar(l); if (fontes?.length) { msgs.append(h('div', { class: 'fontes' }, fontes.map((f) => h('button', { type: 'button', onclick: () => mostrar(f.aba) }, f.rotulo)))); msgs.scrollTop = msgs.scrollHeight; } }); return fila; };
+  form.addEventListener('submit', async (ev) => { ev.preventDefault(); const q = entrada.value.trim(); if (q.length < 2) return; entrada.value = ''; await digitar(q, 'voce');
+    const r = await chamar(() => api.assistentePerguntar(estado.espaco?.id ?? null, q)); if (r) await falar(r.linhas, r.fontes); });
+  el.append(h('section', { class: 'home' },
+    h('div', { class: 'home-orb' }, qc.campo(260, estadoOrb(w), tr('Esfera do Prumo QA')), h('h1', {}, 'Prumo QA'), h('p', { class: 'qc-legenda' }, estadoOrb(w) === 'executando' ? tr('Rodando agora.') : tr('Em espera.'))),
+    h('div', { class: 'chat', id: 'chat' }, h('div', { class: 'chat-topo' }, h('strong', {}, 'Prumo'), h('span', { class: 'chip' }, h('i'), tr('Dados locais'))), msgs, form, h('div', { class: 'chat-dica suave' }, tr('Responde com os dados deste computador, sem modelo de IA.')))));
+  el.append(h('div', { class: 'kpis', id: 'inicio-estado' },
     h('div', {}, h('b', {}, textoWorker(w)), h('span', {}, tr('estado do worker'))),
     h('div', {}, h('b', {}, m?.proximaExecucao ? hora(m.proximaExecucao) : '—'), h('span', {}, tr('próxima execução'))),
     h('div', {}, h('b', {}, String(m?.rotinasAtivas ?? 0)), h('span', {}, tr('rotinas ativas'))),
     h('div', {}, h('b', {}, String(m?.execucoes ?? 0)), h('span', {}, tr('execuções registradas')))));
-  el.append(h('h2', {}, tr('Atalhos')), h('div', { class: 'barra' }, [['projetos', 'Projetos'], ['agenda', 'Agendamentos'], ['execucoes', 'Execuções'], ['conexoes', 'Conexões'], ['ajuda', 'Ajuda']].map(([a, t]) => h('button', { class: 'acao', onclick: () => mostrar(a) }, tr(t)))));
-  el.append(h('p', { class: 'suave' }, tr('Fechar a janela mantém o Prumo na bandeja do Windows para que as rotinas continuem. Use o ícone da bandeja para abrir ou sair. Se o computador estiver desligado ou suspenso, nada é executado nesse período.')));
+  const sit = await chamar(() => api.assistenteSituacao(estado.espaco?.id ?? null));
+  falar([tr('Olá! Eu sou o Prumo.'), ...(sit || [])]);
 };
 
 // ---- Agendamentos ----
@@ -147,7 +186,7 @@ function blocoPoliticas(espacos, permissoes, recarregar) {
   const tickets = h('input', { id: 'pol-tickets', placeholder: 'SMART-1, SMART-2' }); const dias = h('input', { id: 'pol-dias', type: 'number', min: 1, max: 30, value: 7 }); const max = h('input', { id: 'pol-max', type: 'number', min: 1, max: 1000, value: 20 });
   const tipos = h('div', { class: 'dias-semana', id: 'pol-tipos' }, ['smoke', 'regressao', 'validacao-ticket', 'k6'].map((t) => h('label', { class: 'linha' }, h('input', { type: 'checkbox', value: t, checked: t !== 'k6' }), rotuloTipo(t))));
   return h('div', { id: 'politicas' }, h('h2', {}, tr('Política de publicação de comentários no Jira')),
-    h('p', { class: 'suave' }, tr('Rotinas agendadas só comentam no Jira se existir uma política aprovada por você, restrita a tickets, tipos de rotina, validade e quantidade. O comentário mostra o resultado e nunca altera o status do ticket. Para publicar manualmente, use Execuções.')),
+    h('p', { class: 'suave' }, tr('Só comenta no Jira com uma política aprovada por você.')),
     h('div', { class: 'formulario' }, campoA('Projeto Prumo', proj, 'pol-projeto'), campoA('Tickets autorizados (separados por vírgula)', tickets, 'pol-tickets'), h('div', { class: 'campo' }, h('span', {}, tr('Tipos de rotina')), tipos), campoA('Validade (dias)', dias, 'pol-dias'), campoA('Máximo de comentários', max, 'pol-max'),
       botao('Aprovar política…', async () => {
         const dados = { espacoId: proj.value, tickets: tickets.value.split(/[,\s]+/).map((x) => x.trim().toUpperCase()).filter(Boolean), tipos: [...tipos.querySelectorAll('input:checked')].map((i) => i.value), dias: Number(dias.value), maxPublicacoes: Number(max.value) };
@@ -157,12 +196,12 @@ function blocoPoliticas(espacos, permissoes, recarregar) {
       p.estado === 'VIGENTE' ? botao('Revogar política', async () => { if (await chamar(() => api.agendaRevogarPolitica(p.id))) recarregar(); }) : null))) : h('p', { class: 'suave' }, tr('Nenhuma política criada: nenhuma rotina agendada comenta no Jira.')));
 }
 abas.agenda = async (el) => {
-  el.append(h('h1', {}, tr('Agendamentos')), h('p', {}, tr('Crie rotinas de QA (consulta Jira, smoke, regressão, validação por ticket, análise de mudanças e k6) que o Prumo executa sozinho enquanto estiver aberto ou na bandeja do Windows.')));
+  el.append(h('h1', {}, tr('Agendamentos')));
   const espacos = await chamar(api.espacos); if (!espacos) return; if (!espacos.length) return el.append(h('div', { class: 'vazio' }, tr('Crie um projeto Prumo em Projetos para agendar rotinas.')));
   const w = await atualizarWorker(); const recarregar = () => mostrar('agenda');
   el.append(h('div', { class: 'nota', id: 'agenda-worker' }, h('strong', {}, textoWorker(w)), ' · ', tr('Próxima execução: {quando}', { quando: w?.proximaExecucao ? hora(w.proximaExecucao) : tr('nenhuma agendada') }), ' · ', tr('pendentes: {n}', { n: w?.pendentes ?? 0 }),
     h('div', { class: 'barra' }, botao(w?.pausado ? 'Retomar todos os agendamentos' : 'Pausar todos os agendamentos', async () => { if (await chamar(() => api.workerPausa(!w?.pausado))) recarregar(); }, 'agenda-pausa')),
-    h('p', { class: 'suave' }, tr('Pausar impede novas execuções; o que já está rodando termina sem ser corrompido. Se o computador estiver desligado ou suspenso, nada é executado e o horário é registrado como perdido, nunca como executado.'))));
+    h('p', { class: 'suave' }, tr('Computador desligado ou suspenso: o horário vira “perdido”, nunca “executado”.'))));
   const slot = h('div', { id: 'rotina-slot' }); el.append(botao('Nova rotina', () => { slot.replaceChildren(formularioRotina(espacos, null, () => { slot.replaceChildren(); recarregar(); })); }, 'rotina-nova'), slot);
   const lista = await chamar(() => api.agendaListar(estado.espaco?.id)); if (!lista) return;
   el.append(h('h2', {}, tr('Rotinas')));
@@ -180,7 +219,7 @@ async function detalheJira(x, caixa) {
   caixa.replaceChildren(h('p', { class: 'suave' }, tr('Prévia do comentário para {t} (nada foi enviado):', { t: p.ticket })), h('pre', {}, p.texto), botao('Publicar no Jira…', async () => { const r = await chamar(() => api.jiraPublicar(x.id)); if (r && !r.canceled) { avisar(r.estado === 'PUBLICADO' ? tr('Comentário publicado.') : tr('Publicação não concluída: {e}', { e: r.erro || r.estado }), r.estado !== 'PUBLICADO'); mostrar('execucoes'); } }, 'jira-publicar'));
 }
 abas.execucoes = async (el) => {
-  el.append(h('h1', {}, tr('Execuções')), h('p', {}, tr('Histórico centralizado do Prumo: rotinas agendadas e manuais, com resultado, evidência e comentário Jira. Consultar esta tela não conta como execução de QA.')));
+  el.append(h('h1', {}, tr('Execuções')));
   const espacos = await chamar(api.espacos) || []; const f = estado.filtroExec || (estado.filtroExec = {});
   // Trocar de projeto descarta o filtro anterior: a tela sempre corresponde ao projeto selecionado.
   if (f.selecionadoQuando !== (estado.espaco?.id ?? null)) { for (const k of Object.keys(f)) delete f[k]; f.selecionadoQuando = estado.espaco?.id ?? null; }

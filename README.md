@@ -1,6 +1,10 @@
-# Prumo QA 2.8 — Plataforma desktop de engenharia de qualidade
+# Prumo QA 2.9 — Plataforma desktop de engenharia de qualidade
 
-Versão atual 2.8.1; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+Versão atual 2.9.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+
+## Evolução 2.9
+
+Integrações completas e uma interface nova. **Testes**: catálogo que lê os testes do repositório, agrupa por feature e classifica cada teste (unitário, integração, funcional, regressão, smoke, desempenho, acessibilidade) com motivo e confiança; casos e propostas do Qase; planos e execuções; automação e GitHub. **Jira**: busca com filtros, detalhe com histórico, comentar, anexar, mudar status e criar ticket. **Qase**: suites, casos, planos, runs, resultados publicados e conferidos. **GitHub**: branches `prumo/...`, commits e Pull Request em rascunho, nunca na branch principal. A escrita externa nasce **desligada**; cada operação mostra a prévia, pede confirmação nativa, não duplica e confirma relendo o serviço. **Agentes**: oito especializações e políticas por capacidade aplicadas no servidor MCP (a IA só propõe). **Início** com esfera e assistente local (responde com os dados do computador, sem modelo de IA). Menu lateral recolhível, cor de destaque, F5 atualiza a tela, Métricas modulares, ícone novo (a esfera) e site institucional renovado. Limites: escritas validadas contra serviços simulados (sem contas reais), classificação de testes é inferência, instalador sem assinatura. Guia: `app/ajuda/19-testes-e-integracoes.md`.
 
 ## Correção 2.8.1
 

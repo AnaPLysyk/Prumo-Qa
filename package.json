@@ -31,7 +31,7 @@
     "prumo": "node dist/cli.js",
     "prepack": "npm run build",
     "app": "npm run build && electron .",
-    "icone": "node scripts/gerar-icone.mjs",
+    "icone": "electron scripts/gerar-icone-orb.cjs",
     "dist": "npm run build && electron-builder --win nsis --publish never",
     "contratos": "npm run build && node scripts/gerar-contratos.mjs",
     "site": "node scripts/gerar-site.mjs"

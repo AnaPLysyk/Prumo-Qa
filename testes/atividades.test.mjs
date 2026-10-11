@@ -111,9 +111,9 @@ test('falha de observabilidade no início ou término avisa sem alterar FAIL do 
   assert.deepEqual(avisos,['start','end']);
   const cliResult=executar(f.root,['run','unit'],{PRUMO_DATA_DIR:f.root});assert.equal(cliResult.status,2);assert.equal(JSON.parse(cliResult.stdout).status,'BLOCKED');assert.match(cliResult.stderr,/PRUMO_OBSERVABILITY_ERROR/);
 });
-test('MCP real registra as quatro tools, erros de schema e ferramenta desconhecida',async t=>{
+test('MCP real registra as sete tools, erros de schema e ferramenta desconhecida',async t=>{
   const f=await fixture(t);const p=await carregarProjeto(f.root);const {c,stderr}=await cliente(t,f.root);
-  assert.equal((await c.listTools()).tools.length,4);
+  assert.equal((await c.listTools()).tools.length,7);
   for(const [name,args] of [['contexto_projeto',{}],['revisar_cobertura',plano],['executar_validacao',{capability:'unit'}],['consultar_evidencias',{}],['contexto_projeto',{root:'../'}],['executar_validacao',{capability:'unit',approved:true}],['nao_existe',{}]])await c.callTool({name,arguments:args});
   const h=consultarAtividades(p);assert.equal(h.complete,true);assert.equal(h.events.length,14);assert.equal(calcularMetricas(h).mcpCalls,7);assert.equal(calcularMetricas(h).errors,3);assert.equal(calcularMetricas(h).executions.BLOCKED,1);assert.equal(calcularMetricas(h).executions.PASS,0);
   assert.equal(h.activities.filter(e=>e.tool==='revisar_cobertura')[0].state,'NOT_VERIFIED');assert.equal(stderr(),'');
@@ -121,7 +121,7 @@ test('MCP real registra as quatro tools, erros de schema e ferramenta desconheci
 test('falha dos logs MCP é visível em stderr e preserva resposta e protocolo',async t=>{
   const f=await fixture(t);const {c,stderr}=await cliente(t,f.root,f.root);
   const r=await c.callTool({name:'executar_validacao',arguments:{capability:'unit'}});assert.ok(!r.isError);assert.equal(JSON.parse(r.content[0].text).status,'BLOCKED');
-  await esperar(50);assert.match(stderr(),/PRUMO_OBSERVABILITY_ERROR/);assert.equal((await c.listTools()).tools.length,4);
+  await esperar(50);assert.match(stderr(),/PRUMO_OBSERVABILITY_ERROR/);assert.equal((await c.listTools()).tools.length,7);
 });
 test('mudança de identidade exige reiniciar MCP e não mistura projetos no diário',async t=>{
   const f=await fixture(t);const p=await carregarProjeto(f.root);const {c}=await cliente(t,f.root);

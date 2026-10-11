@@ -33,7 +33,7 @@ test('demonstração 2.7: vinte verificações na janela real, dois projetos e A
   }
   passo(2,'Credenciais fictícias nos três adaptadores, safeStorage real do Electron');passo(3,'Seleção por recursos reais do servidor controlado e confirmação nativa simulada');
   const vinculados=(await a.page.evaluate(()=>window.prumo.espacos())).data;assert.ok(vinculados.every(e=>e.vinculos.length===3));assert.notEqual(vinculados[0].vinculos[1].recurso.id,vinculados[0].vinculos[0].recurso.id);passo(4,'Vínculos persistidos com IDs distintos');
-  const consultar=async(aba,op,falha=false)=>{await ir(a.page,aba);if(op)await a.page.selectOption('#operacao-remota',op);await a.page.click('#consultar-remoto');await a.page.waitForFunction(f=>document.querySelector('#fonte-remota')?.textContent.startsWith(f?'Consulta falhou':'Consulta atual'),falha);};
+  const consultar=async(aba,op,falha=false)=>{await ir(a.page,aba);if(aba==='testes')await a.page.click('[data-sub=casos]');if(op)await a.page.selectOption('#operacao-remota',op);await a.page.click('#consultar-remoto');await a.page.waitForFunction(f=>document.querySelector('#fonte-remota')?.textContent.startsWith(f?'Consulta falhou':'Consulta atual'),falha);};
   await consultar('tickets');assert.match(await a.page.textContent('#lista-remota'),/SMART-1/);assert.doesNotMatch(await a.page.textContent('#lista-remota'),/CID-1/);passo(5,'Tickets SMART lidos com origem');
   await consultar('testes','casos');assert.match(await a.page.textContent('#lista-remota'),/SFQ[\s\S]*MANUAL/);passo(6,'Casos SFQ, passos e associação externa sem cobertura inventada');
   await consultar('automacoes');assert.match(await a.page.textContent('#lista-remota'),/automacao-smart/);passo(7,'Repositório empresa/automacao-smart visualizado sem clone');

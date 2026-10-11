@@ -2,6 +2,33 @@
 // Inglês das telas de integração da 2.9 (Tickets avançados, propostas, Planos e Runs, Vínculos, GitHub, Agentes, escrita).
 // Mesma regra de i18n-en.js: chave = português normalizado; termos técnicos e conteúdo do usuário não são traduzidos.
 Object.assign(window.PRUMO_EN, {
+  'Contrato local': 'Local contract', 'Pasta vinculada': 'Folder linked', 'Sem pasta local': 'No local folder', 'k6 disponível': 'k6 available', 'k6 não encontrado': 'k6 not found', 'Nenhuma automação declarada.': 'No automation declared.',
+  'Mais ações': 'More actions', 'Só comenta no Jira com uma política aprovada por você.': 'Only comments on Jira with a policy you approved.', 'Computador desligado ou suspenso: o horário vira “perdido”, nunca “executado”.': 'Computer off or asleep: the time becomes “missed”, never “executed”.',
+  'Catálogo': 'Catalog', 'Casos e propostas': 'Cases and proposals', 'Planos e execuções': 'Plans and executions', 'Automação': 'Automation', 'Mapa': 'Map', 'Seção': 'Section', 'Vincule a pasta do repositório para ler os testes.': 'Link the repository folder to read its tests.', 'Vincular pasta…': 'Link folder…', 'Nenhum arquivo de teste encontrado na pasta vinculada.': 'No test files found in the linked folder.', 'Leitura limitada: o repositório tem mais arquivos de teste do que o Prumo lê de uma vez.': 'Limited reading: the repository has more test files than Prumo reads at once.', 'Buscar feature ou teste': 'Search feature or test', 'Nenhum teste para este filtro.': 'No tests for this filter.', 'testes': 'tests', 'features': 'features', 'mostrando': 'showing', 'Unitário': 'Unit', 'Integração': 'Integration', 'Funcional': 'Functional', 'Smoke': 'Smoke', 'Desempenho': 'Performance', 'Indefinido': 'Undefined', 'Tipo': 'Type',
+  'Classificação inferida por tag, caminho e conteúdo; confira a confiança de cada teste. Nada foi executado: isto é a leitura estática do repositório.': 'Classification is inferred from tags, path and content; check each test\'s confidence. Nothing was run: this is a static reading of the repository.',
+  'Atividade': 'Activity', 'Resultados': 'Results', 'Agenda': 'Schedule', 'Operações externas': 'External operations', 'Números': 'Numbers', 'Barras': 'Bars', 'Rosca': 'Donut', 'Módulos': 'Modules', 'Visual': 'View', 'Detalhes': 'Details', 'Sem dados para mostrar.': 'No data to show.', 'Selecione um projeto para ver estes dados.': 'Select a project to see this data.', 'confirmadas': 'confirmed', 'com falha': 'failed', 'bloqueadas': 'blocked', 'sem confirmação': 'unconfirmed', 'Agentes': 'Agents',
+  'Trocar de projeto': 'Switch project', 'Gerenciar projetos…': 'Manage projects…', 'Criar o primeiro projeto…': 'Create the first project…',
+  'Site institucional': 'Institutional site', 'Ajustes': 'Settings', 'Cenário → automação (capability ou capability#cenário).': 'Scenario → automation (capability or capability#scenario).', 'Escrita desligada por padrão. Cada operação pede confirmação.': 'Writes are off by default. Each operation asks for confirmation.',
+  'Recolher menu': 'Collapse menu', 'Expandir menu': 'Expand menu', 'Cor de destaque': 'Accent color', 'Azul': 'Blue', 'Violeta': 'Violet', 'Verde-água': 'Teal', 'Âmbar': 'Amber', 'Rosa': 'Pink',
+  'Pergunte sobre este projeto…': 'Ask about this project…', 'Pergunta ao Prumo': 'Question for Prumo', 'Enviar': 'Send', 'Dados locais': 'Local data', 'Responde com os dados deste computador, sem modelo de IA.': 'Answers from this computer\'s data, no AI model.', 'Olá! Eu sou o Prumo.': 'Hi! I\'m Prumo.',
+  'Quem se liga a quem e de onde veio cada ligação.': 'Who links to whom, and where each link came from.', 'O que a IA pode pedir ao Prumo neste projeto. Vale a cada chamada MCP. A IA só propõe.': 'What the AI may ask Prumo in this project. Enforced on every MCP call. The AI only proposes.', 'Selecione um projeto para configurar permissões.': 'Select a project to configure permissions.', 'Vincule o Qase em Conexões.': 'Link Qase in Connections.',
+  'Atualizar': 'Refresh', 'Atualizar a tela com os dados mais recentes': 'Refresh the screen with the latest data', 'Do ticket à evidência, num só lugar.': 'From ticket to evidence, in one place.', 'Rodando agora.': 'Running now.', 'Em espera.': 'Idle.', 'A janela fechada mantém o Prumo na bandeja.': 'Closing the window keeps Prumo in the tray.',
+  "h('p', { class: 'suave' }, 'Rascunhos: nada sai sem a sua revisão.')": "Drafts: nothing leaves without your review.",
+  "Features": "Features",
+  "Feature = plano · Cenário = caso · Execução = relatório.": "Feature = plan · Scenario = case · Execution = report.",
+  "h('h2', {}, 'Nova execução')": "New execution",
+  "'Título da execução'": "Execution title",
+  "'Cenários ('": "Scenarios (",
+  "h('h2', {}, 'Execuções do projeto')": "Project executions",
+  "'Nenhuma execução preparada.'": "No execution prepared.",
+  "'Vincule o Qase em Conexões.'": "Link Qase in Connections.",
+  "h('p', { class: 'suave' }, 'Quem se liga a quem e de onde veio cada ligação.')": "Who links to whom, and where each link came from.",
+  "h('p', { class: 'suave' }, 'Cenário → automação (capability ou capability#cenário).')": "Scenario → automation (capability or capability#scenario).",
+  "'Logs e artefatos: use o link da execução no GitHub.'": "Logs and artifacts: use the run link on GitHub.",
+  "'Escreve só em prumo/…, nunca na principal. PR nasce como rascunho.'": "Writes only to prumo/…, never the default branch. PRs start as drafts.",
+  "'O que a IA pode pedir ao Prumo neste projeto. Vale a cada chamada MCP. A IA só propõe.'": "What the AI may ask Prumo in this project. Enforced on every MCP call. The AI only proposes.",
+  "'Selecione um projeto para configurar permissões.'": "Select a project to configure permissions.",
+  "'Escrita desligada por padrão. Cada operação pede confirmação.'": "Writes are off by default. Each operation asks for confirmation.",
   'Planos e Runs': 'Plans and Runs', 'Trabalho': 'Work', 'Qualidade': 'Quality', 'Resultados': 'Results', 'Integrações': 'Integrations', 'Apoio': 'Support', 'Vínculos': 'Links',
   'Buscar tickets do Jira': 'Search Jira tickets', 'Filtros aplicados na própria consulta ao Jira (JQL montado pelo Prumo, sempre restrito ao projeto vinculado).': 'Filters are applied in the Jira query itself (JQL built by Prumo, always restricted to the linked project).',
   'Chave ou texto': 'Key or text', 'Tipo': 'Type', 'Status': 'Status', 'Atualizado desde': 'Updated since', 'Até': 'Until', 'Buscar': 'Search', 'Detalhar': 'Details',
@@ -65,7 +92,7 @@ Object.assign(window.PRUMO_EN, {
   'Nenhuma execução registrada para este filtro.': 'No runs recorded for this filter.', 'Run do Qase': 'Qase run', 'Run do Qase (já criada)': 'Qase run (already created)', '(nenhuma run criada no Qase)': '(no run created in Qase)'
 });
 window.PRUMO_EN_REGRAS.push(
-  [/^A escrita no (Jira|Qase|GitHub) está desligada neste projeto\. Habilite em Conexões \(cada operação ainda pedirá confirmação\)\. Consultas continuam funcionando\.$/, (m) => `Writes to ${m[1]} are turned off in this project. Enable them in Connections (each operation will still ask for confirmation). Queries keep working.`],
+  [/^Escrita no (Jira|Qase|GitHub) desligada\. Habilite em Conexões\.$/, 'Writes to $1 are off. Enable them in Connections.'],
   [/^Operação bloqueada: (.*)$/, (m) => 'Operation blocked: ' + m[1]],
   [/^Operação não confirmada \((.*?)(?: · (.*))?\)\. Pode tentar de novo sem duplicar\.$/, (m) => `Operation not confirmed (${m[1]}${m[2] ? ' · ' + m[2] : ''}). You can retry without duplicating.`],
   [/^Consulta atual · (.*) · (\d+) ticket\(s\) nesta página · sem cache$/, (m) => `Current query · ${m[1]} · ${m[2]} ticket(s) on this page · no cache`],

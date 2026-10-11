@@ -61,7 +61,7 @@ test('Tickets: filtro, detalhe e comentário idempotente pela interface (única 
 
 test('Testes: proposta é rascunho, revisão exige os quatro itens e confirmação nativa, e nada sai sem escrita habilitada', async (t) => {
   const { a, s } = await preparar(t);
-  await ir(a.page, 'testes'); await a.page.click('#pr-nova'); await a.page.fill('#pr-titulo', 'Login rejeita senha incorreta'); await a.page.fill('#pr-descricao', 'Valida a mensagem de erro.');
+  await ir(a.page, 'testes'); await a.page.click('[data-sub=casos]'); await a.page.click('#pr-nova'); await a.page.fill('#pr-titulo', 'Login rejeita senha incorreta'); await a.page.fill('#pr-descricao', 'Valida a mensagem de erro.');
   await a.page.fill('.passo-acao', 'Informar usuário válido e senha errada'); await a.page.fill('.passo-esperado', 'Mensagem de credenciais inválidas'); await a.page.fill('#pr-requisito', 'RQ-12'); await a.page.fill('#pr-risco', 'Acesso indevido');
   await a.page.click('#pr-salvar'); await a.page.waitForSelector('[data-proposta]');
   assert.match(await a.page.textContent('[data-proposta]'), /RASCUNHO/);
@@ -79,5 +79,28 @@ test('Agentes: matriz real, política salva com confirmação e vínculos mostra
   await a.page.selectOption('[data-pol=propor_bugs]', 'BLOQUEADO'); await a.page.click('#ag-salvar'); await a.page.waitForFunction(() => /Permissões salvas|Permissions saved/.test(document.querySelector('#aviso')?.textContent || ''));
   const estado = (await a.page.evaluate((id) => window.prumo.agentesEstado(id), e.id)).data; assert.equal(estado.matriz.find((c) => c.id === 'propor_bugs').estado, 'BLOQUEADO');
   await ir(a.page, 'vinculos'); await a.page.waitForSelector('#vinc-aviso'); assert.ok(await a.page.locator('#vinc-lacunas, #vinc-tabela').count());
+  assert.deepEqual(a.erros, []);
+});
+
+test('Testes: sem integração aparecem só os testes do repositório, agrupados por feature e classificados; filtro por tipo funciona', async (t) => {
+  const { fixture } = await import('./fixtures.mjs'); const { escolherPasta } = await import('./janela.mjs');
+  const fs = await import('node:fs/promises'); const path = await import('node:path');
+  const f = await fixture(t);
+  await fs.mkdir(path.join(f.root, 'tests/e2e'), { recursive: true });
+  await fs.writeFile(path.join(f.root, 'tests/e2e/login.spec.ts'), "import { test } from '@playwright/test';\ntest.describe('Login', () => {\n  test('entra com senha válida @smoke', async ({ page }) => { await page.goto('/'); });\n  test('rejeita senha incorreta', async ({ page }) => { await page.goto('/'); });\n});\n");
+  await fs.writeFile(path.join(f.root, 'src/soma.test.ts'), "describe('Soma', () => { it('soma dois números', () => {}); });\n");
+  const dados = novoDados(t); const a = await abrir(t, dados);
+  const e = (await a.page.evaluate(() => window.prumo.espacoCriar({ nome: 'REPO-LAB', descricao: 'sintético' }))).data;
+  await escolherPasta(a.app, f.root); assert.ok((await a.page.evaluate((id) => window.prumo.espacoPasta(id), e.id)).ok);
+  await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: 'Selecionar projeto' }).click();
+  await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'REPO-LAB');
+  await ir(a.page, 'testes'); await a.page.waitForSelector('#cat-lista [data-feature]');
+  assert.equal(await a.page.locator('[data-sub=casos]').count(), 0, 'sem Qase vinculado não há "Casos"');
+  assert.deepEqual((await a.page.locator('#cat-lista [data-feature]').evaluateAll((n) => n.map((x) => x.dataset.feature))).sort(), ['Login', 'Soma']);
+  assert.match(await a.page.textContent('#cat-resumo'), /3\s*testes/); assert.match(await a.page.textContent('#cat-aviso'), /inferida/);
+  await a.page.locator('#cat-tipos label', { hasText: 'Smoke' }).click(); await a.page.waitForFunction(() => document.querySelectorAll('#cat-lista li').length === 1);
+  assert.match(await a.page.textContent('#cat-lista li'), /senha válida/);
+  await a.page.locator('#cat-tipos label', { hasText: 'Smoke' }).click(); await a.page.locator('#cat-tipos label', { hasText: 'Unitário' }).click();
+  await a.page.waitForFunction(() => document.querySelectorAll('#cat-lista li').length === 1); assert.match(await a.page.textContent('#cat-lista li'), /soma dois/);
   assert.deepEqual(a.erros, []);
 });

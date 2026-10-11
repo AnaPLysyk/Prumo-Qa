@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import electronPath from 'electron';
-import { repo, exe, abrir, novoDados, ir } from './janela.mjs';
+import { repo, exe, abrir, novoDados, ir, ajustes } from './janela.mjs';
 import { modeloMenuBandeja, resumoEstado, dicaBandeja, tm } from '../dist/textosDesktop.js';
 
 const token = (page, nome) => page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), nome);
@@ -16,20 +16,20 @@ test('Início com esfera Quality Control: parada quando nada roda; tema e idioma
   assert.equal(await a.page.getAttribute('#conteudo .qc-campo', 'data-estado'), 'ocioso', 'sem trabalho real a esfera não pode parecer ocupada');
   assert.match(await a.page.textContent('#worker-estado'), /Worker ativo/); assert.equal(await a.page.getAttribute('#worker-estado', 'data-nivel'), 'ok');
   // Os três temas
-  await a.page.selectOption('#tema', 'claro'); assert.equal(await a.page.evaluate(() => document.documentElement.dataset.tema), 'claro'); assert.equal(await token(a.page, '--fundo'), '#f5f8fc');
-  await a.page.selectOption('#tema', 'escuro'); assert.equal(await token(a.page, '--fundo'), '#040712');
-  await a.page.selectOption('#tema', 'sistema');
+  await ajustes(a.page); await a.page.selectOption('#tema', 'claro'); assert.equal(await a.page.evaluate(() => document.documentElement.dataset.tema), 'claro'); assert.equal(await token(a.page, '--fundo'), '#f5f8fc');
+  await ajustes(a.page); await a.page.selectOption('#tema', 'escuro'); assert.equal(await token(a.page, '--fundo'), '#040712');
+  await ajustes(a.page); await a.page.selectOption('#tema', 'sistema');
   await a.page.emulateMedia({ colorScheme: 'light' }); assert.equal(await token(a.page, '--fundo'), '#f5f8fc', 'sistema claro');
   await a.page.emulateMedia({ colorScheme: 'dark' }); assert.equal(await token(a.page, '--fundo'), '#040712', 'sistema escuro');
   // Persistência por usuário (preferencias.json), inclusive após reiniciar
-  await a.page.selectOption('#tema', 'claro'); await a.page.selectOption('#idioma', 'en');
+  await ajustes(a.page); await a.page.selectOption('#tema', 'claro'); await ajustes(a.page); await a.page.selectOption('#idioma', 'en');
   await a.page.waitForFunction(() => document.querySelector('[data-aba=inicio]').textContent.trim() === 'Home');
   const salvo = JSON.parse(fs.readFileSync(path.join(dados, 'preferencias.json'), 'utf8')); assert.equal(salvo.tema, 'claro'); assert.equal(salvo.idioma, 'en'); assert.equal(salvo.iniciarComWindows, false, 'iniciar com o Windows nunca é ligado por padrão');
   assert.deepEqual(a.erros, []); await a.fechar();
   a = await abrir(t, dados, [], {}, { inicio: true });
   await a.page.waitForFunction(() => document.documentElement.dataset.tema === 'claro' && document.querySelector('[data-aba=agenda]').textContent.trim() === 'Schedules');
   assert.equal(await a.page.evaluate(() => document.documentElement.lang), 'en'); assert.equal(await a.page.inputValue('#idioma'), 'en'); assert.equal(await a.page.inputValue('#tema'), 'claro');
-  await a.page.selectOption('#idioma', 'pt-BR'); await a.page.waitForFunction(() => document.querySelector('[data-aba=agenda]').textContent.trim() === 'Agendamentos'); assert.deepEqual(a.erros, []);
+  await ajustes(a.page); await a.page.selectOption('#idioma', 'pt-BR'); await a.page.waitForFunction(() => document.querySelector('[data-aba=agenda]').textContent.trim() === 'Agendamentos'); assert.deepEqual(a.erros, []);
 });
 
 test('esfera só anima com trabalho real e respeita redução de movimento; foco de teclado visível; reflow a 200% e 400%', async (t) => {

@@ -100,3 +100,7 @@ Avisos nativos e som opcional para: rotina iniciada (só aviso interno), conclu�
 ## Limitações
 
 Veja [VALIDACAO.md](VALIDACAO.md) e a entrega 2.8: autenticação humana real do Windows em execução agendada, Jira/Qase/GitHub reais, k6 real, Playwright real, leitor de tela e assinatura digital não foram verificados.
+
+## Run do Qase (2.9)
+
+Nova rotina que executa as automações dos casos de uma run já criada no Qase (cada capability usa a autorização delegada vigente) e tenta publicar os resultados. Sem política de escrita aprovada para a run, a publicação fica BLOQUEADA e os resultados permanecem locais. Casos manuais nunca ganham resultado automático.

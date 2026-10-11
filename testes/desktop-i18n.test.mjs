@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados, ir, abas } from './janela.mjs';
+import { abrir, novoDados, ir, abas, ajustes } from './janela.mjs';
 import { fixture } from './fixtures.mjs';
 import { criarRotina } from '../dist/agenda.js';
 import { enfileirar, reivindicar, concluir } from '../dist/fila.js';
@@ -25,7 +25,7 @@ test('inglês: nenhuma tela traz texto de interface em português (dados do usu�
   for (const [i, res] of [{ status: 'PASS', motivo: 'ok', contagem: { pass: 2, fail: 0, blocked: 0, notRun: 0 }, evidenciaId: '33333333-3333-4333-8333-333333333333' }, { status: 'FAIL', motivo: 'process failure', contagem: { pass: 1, fail: 1, blocked: 0, notRun: 0 }, detalhes: 'C2: expected value' }, { status: 'BLOCKED', motivo: 'HUMAN_APPROVAL_REQUIRED: none' }].entries()) {
     const { trabalho } = enfileirar({ chave: 'i' + i, rotinaId: r.id, espacoId: e.id, tipo: 'smoke', capability: 'unit', ambiente: 'local', ticket: 'ENG-1', origem: i % 2 ? 'MANUAL' : 'AGENDA', slot: null }, dados); reivindicar(dados); concluir(trabalho.id, res, dados);
   }
-  await a.page.selectOption('#idioma', 'en'); await a.page.waitForFunction(() => document.querySelector('[data-aba=agenda]').textContent.trim() === 'Schedules');
+  await ajustes(a.page); await a.page.selectOption('#idioma', 'en'); await a.page.waitForFunction(() => document.querySelector('[data-aba=agenda]').textContent.trim() === 'Schedules');
   const achados = [];
   for (const selecionado of [false, true]) {
     if (selecionado) { await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: /Select project/ }).click(); await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'ENG-LAB'); }

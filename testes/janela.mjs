@@ -33,10 +33,12 @@ export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   const erros = []; page.on('pageerror', (e) => erros.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
   await page.waitForSelector('#nav button');
   // A janela abre em Início (2.8). Os testes anteriores partem de Projetos; Início tem teste próprio (desktop-agenda.test.mjs).
-  if (!opcoes.inicio) await ir(page, 'projetos');
+  if (!opcoes.inicio) await ir(page, 'projetos'); else await page.waitForSelector('[data-aba=inicio][aria-current=page]');
   return { app, page, erros, fechar };
 }
-export const ir = async (page, aba) => { await page.click(`[data-aba=${aba}]`); await page.waitForFunction((a) => document.querySelector(`[data-aba=${a}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(150); };
+const virtuais = { runs: ['testes', 'runs'], automacoes: ['testes', 'automacao'], vinculos: ['rastreabilidade', 'vinculos'] };
+export const ir = async (page, aba) => {
+  if (virtuais[aba]) { const [pai, sub] = virtuais[aba]; await ir(page, pai); await page.click(`[data-sub=${sub}]`); await page.waitForFunction((s) => document.querySelector(`[data-sub=${s}]`)?.getAttribute('aria-pressed') === 'true', sub); await page.waitForTimeout(150); return; } await page.click(`[data-aba=${aba}]`); await page.waitForFunction((a) => document.querySelector(`[data-aba=${a}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(150); };
 export const escolherPasta = (app, pasta) => app.evaluate(({ dialog }, p) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [p] }); }, pasta);
 export async function mcp(root, dados, chamadas) {
   const client = new Client({ name: 'codex-desktop-test', version: '1.0.0' });
@@ -53,3 +55,6 @@ export async function abrirPadrao(t) {
   t.after(() => r.fechar());
   return r;
 }
+
+/** Abre o popover de ajustes (tema, idioma, cor) se ainda não estiver aberto. */
+export const ajustes = async (page) => { if (!(await page.isVisible('#tema'))) await page.click('#ajustes'); await page.waitForSelector('#tema', { state: 'visible' }); };

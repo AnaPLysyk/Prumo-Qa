@@ -65,6 +65,9 @@ export const esquemasIpc = {
   'runs:politica': z.object({espacoId:z.string().uuid(),runId:z.number().int().positive(),dias:z.number().int().min(1).max(30),maxUsos:z.number().int().min(1).max(1000)}).strict(),
   'runs:revogar': z.object({id:z.string().uuid()}).strict(),
   'vinculos:mapa': z.object({espacoId:z.string().uuid()}).strict(),
+  'testes:catalogo': z.object({espacoId:z.string().uuid()}).strict(),
+  'assistente:perguntar': z.object({espacoId:z.string().uuid().nullable(),pergunta:z.string().trim().min(2).max(300)}).strict(),
+  'assistente:situacao': z.object({espacoId:z.string().uuid().nullable()}).strict(),
   'agentes:estado': z.object({espacoId:z.string().uuid()}).strict(),
   'agentes:salvar': z.object({espacoId:z.string().uuid(),especializacoes:z.array(z.string().max(40)).max(16),politicas:z.record(z.string().max(30))}).strict(),
   'agenda:listar': z.object({espacoId:z.string().uuid().optional()}).strict(),
@@ -102,6 +105,7 @@ export const esquemasIpc = {
   'ajuda:integracoes': vazio,
   'atualizacao:verificar': vazio,
   'atualizacao:abrir': vazio,
+  'site:abrir': vazio,
   'dados:resumo': vazio,
   'dados:excluir': z.discriminatedUnion('escopo', [
     z.object({ escopo: z.literal('historico'), root: raiz }).strict(),
@@ -207,6 +211,10 @@ Object.assign(ipc, {
   'propostas:revisar': extDesc('Registrar a revisão (duplicidade, requisito, risco e cobertura) de uma proposta.', 'Id e as quatro confirmações', 'Proposta REVISADA', 'Grava propostas.json com quem revisou e quando. Proposta de IA exige revisão completa e requisito informado.', 'Confirmação da pessoa'),
   'propostas:descartar': extDesc('Descartar uma proposta.', 'Id da proposta', 'Proposta DESCARTADA', 'Grava propostas.json.', 'Ação explícita da pessoa'),
   'propostas:publicar': extDesc('Publicar uma proposta (caso no Qase ou bug no Jira).', 'Id e, para bug, o tipo de ticket', 'Registro da operação externa e proposta PUBLICADA', 'Cria o caso ou o ticket depois da confirmação nativa e registra o vínculo como REGISTRADO_PELO_PRUMO.', 'Escrita habilitada + revisão (IA) + confirmação nativa'),
+  'site:abrir': extDesc('Abrir o site institucional oficial no navegador, depois de confirmar.', 'Nenhuma: a URL é fixa', 'Se abriu ou não', 'Abre o navegador padrão; nada é enviado pelo aplicativo.', 'Confirmação nativa'),
+  'testes:catalogo': extDesc('Ler os arquivos de teste da pasta do projeto, agrupar por feature e classificar cada teste (unitário, integração, funcional, regressão, smoke, desempenho, acessibilidade).', 'Projeto', 'Features, cenários, passos, tipo, confiança e motivo', 'Leitura estática da pasta vinculada; nada é executado nem alterado.', 'Nenhuma'),
+  'assistente:perguntar': extDesc('Responder uma pergunta com os dados locais do projeto (contextos aprovados, propostas, execuções, agenda). Não usa modelo de IA nem rede.', 'Projeto e pergunta', 'Linhas de resposta e telas de origem', 'Consulta local; nada é gravado nem enviado.', 'Nenhuma'),
+  'assistente:situacao': extDesc('Resumir o que está acontecendo agora no projeto para o painel inicial.', 'Projeto', 'Até cinco linhas de situação', 'Consulta local.', 'Nenhuma'),
   'runs:listar': extDesc('Listar as runs locais do projeto (preparadas, criadas, executadas e publicadas).', 'Projeto', 'Runs com casos, resultados e publicações', 'Consulta local.', 'Nenhuma'),
   'runs:preparar': extDesc('Preparar uma run local com casos do Qase e identificar quais têm automação associada.', 'Projeto, título, ambiente e casos', 'Run local PREPARADA', 'Grava runs-qase.json. Não cria nada no Qase.', 'Ação explícita da pessoa'),
   'runs:criar': extDesc('Criar a run no Qase com os casos escolhidos.', 'Id da run local', 'Operação externa e id remoto da run', 'Cria a run no Qase após confirmação nativa. Criar a run não executa nada.', 'Escrita habilitada + confirmação nativa'),
@@ -243,7 +251,7 @@ Object.assign(ipc, {
   'worker:eventos': agendaDesc('Receber avisos do worker e pedidos de navegação da bandeja desde o último número visto.', 'Último número de evento recebido', 'Eventos (iniciado, concluído, falhou, bloqueado, publicação falhou, worker interrompido, navegar) e último número', 'Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte).', 'Nenhuma', { origem: 'Interface > avisos e navegação pela bandeja', destino: 'main.ts > worker.ts' }),
   'worker:pausa': agendaDesc('Pausar ou retomar todos os agendamentos.', 'pausado (true/false)', 'Estado do worker', 'Grava a pausa global; trabalho em andamento termina sem ser corrompido.', 'Ação explícita da pessoa', { origem: 'Interface > Agendamentos ou menu da bandeja' })
 });
-export const canaisFrequentes: ReadonlySet<string> = new Set(['operacoes:previa','operacoes:listar','escrita:estado','propostas:listar','runs:listar','vinculos:mapa','agentes:estado','worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter']);
+export const canaisFrequentes: ReadonlySet<string> = new Set(['testes:catalogo','assistente:situacao','operacoes:previa','operacoes:listar','escrita:estado','propostas:listar','runs:listar','vinculos:mapa','agentes:estado','worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter']);
 
 const mcpProtecoes = ['Projeto fixado na configuração do servidor, nunca pela ferramenta', 'Leitura limitada à raiz autorizada', 'Registro de início e término'];
 const mcp: { nome: string; campos: string[]; d: Descricao }[] = [

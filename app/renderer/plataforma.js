@@ -7,7 +7,7 @@ const faltaEspaco = () => h('div',{class:'vazio'},'Selecione um projeto Prumo em
 function escolherEspaco(e){estado.espaco=e;estado.root=e.raizContextos;salvarRaiz();mostrar('projetos');}
 const projetosLocais=abas.projetos;
 abas.projetos=async el=>{
-  el.append(h('h1',{},'Projetos'), h('p',{},'Crie um projeto Prumo para trabalhar manualmente, sem IA e sem pasta de automação. Cada projeto mantém seus próprios contextos e vínculos.'));
+  el.append(h('h1',{},'Projetos'));
   const formulario=h('div',{id:'espaco-form'});
   const editar=e=>{
     const nome=campoPlataforma('Nome',{id:'espaco-nome',maxlength:200,value:e?.nome||''});
@@ -17,20 +17,18 @@ abas.projetos=async el=>{
   };
   el.append(botao('Novo projeto Prumo',()=>editar(), 'espaco-novo'),formulario);
   const lista=await chamar(api.espacos);if(!lista)return;
-  for(const e of lista){const card=h('section',{class:'nota','data-espaco':e.id},h('h2',{},e.nome),h('p',{},e.descricao),h('p',{class:'suave'},'ID Prumo: '+e.id+' · '+(e.pastaLocal?'Pasta: '+e.pastaLocal:'Sem pasta local')),
-    botao(estado.espaco?.id===e.id?'Projeto selecionado':'Selecionar projeto',()=>escolherEspaco(e)),botao('Editar projeto',()=>editar(e)),botao('Vincular pasta de automação…',async()=>{const r=await chamar(()=>api.espacoPasta(e.id));if(r&&!r.canceled)mostrar('projetos');}));
-    for(const v of e.vinculos)card.append(h('p',{},v.servico+' · '+v.recurso.chave+' · ID '+v.recurso.id+' · '+v.recurso.instancia+' · ',selo(v.estado), ' · validado: '+hora(v.validadoEm)),
-      botao('Validar vínculo '+v.servico,async()=>{if(await chamar(()=>api.servicoConferir(e.id,v.servico)))mostrar('projetos');}),
-      botao('Remover vínculo '+v.servico,async()=>{const r=await chamar(()=>api.servicoDesvincular(e.id,v.servico));if(r&&!r.canceled)mostrar('projetos');}));
-    card.append(h('p',{class:'suave'},'Selecione recursos disponíveis em Conexões. Nomes e códigos não são usados para deduzir relações.'));el.append(card);
+  for(const e of lista){
+    const acoes=h('div',{class:'barra-acoes'},botao(estado.espaco?.id===e.id?'Projeto selecionado':'Selecionar projeto',()=>escolherEspaco(e)),botao('Editar projeto',()=>editar(e)),botao('Vincular pasta de automação…',async()=>{const r=await chamar(()=>api.espacoPasta(e.id));if(r&&!r.canceled)mostrar('projetos');}));
+    for(const v of e.vinculos)acoes.append(botao('Validar vínculo '+v.servico,async()=>{if(await chamar(()=>api.servicoConferir(e.id,v.servico)))mostrar('projetos');}),botao('Remover vínculo '+v.servico,async()=>{const r=await chamar(()=>api.servicoDesvincular(e.id,v.servico));if(r&&!r.canceled)mostrar('projetos');}));
+    const chips=h('div',{class:'proj-chips'},e.vinculos.map(v=>h('span',{class:'chip-servico',title:v.recurso.instancia+' · ID '+v.recurso.id+' · validado: '+hora(v.validadoEm)},v.servico+' · '+v.recurso.chave+' ',selo(v.estado))),h('span',{class:'chip-servico'},e.pastaLocal?'Pasta vinculada':'Sem pasta local'));
+    el.append(h('section',{class:'nota','data-espaco':e.id},h('h2',{},e.nome),e.descricao?h('p',{class:'suave'},e.descricao):null,chips,acoes,h('p',{class:'suave'},'ID Prumo: '+e.id+(e.pastaLocal?' · Pasta: '+e.pastaLocal:''))));
   }
   await projetosLocais(el);
 };
 const agentesLegados=abas.conexoes;
 abas.agentes=agentesLegados;
 abas.conexoes=async el=>{
-  el.append(h('h1',{},'Conexões'),h('p',{},'Configure suas credenciais no desktop. Conexões do ChatGPT não são compartilhadas com o Prumo. Apenas consultas de leitura estão disponíveis.'),
-    h('p',{class:'suave'},'Jira Cloud: e-mail e token de API sem escopos, no domínio da sua instância. GitHub: token com leitura dos repositórios necessários. Qase: token de API v1. Use permissões mínimas no serviço.'));
+  el.append(h('h1',{},'Conexões'));
   const form=h('div',{class:'formulario',id:'conexao-form'}),recursos=h('div',{id:'recursos-remotos'});
   el.append(botao('Configurar conexão',()=>{
     const tipo=h('select',{id:'conexao-servico'},['jira','qase','github'].map(s=>h('option',{value:s},s)));
@@ -98,10 +96,10 @@ async function consultaManual(el,servico,operacoes){
 }
 abas.tickets=async el=>{el.append(h('h1',{},'Tickets'));await consultaManual(el,'jira',{tickets:'Tickets do projeto',ticket:'Detalhe de ticket',campos:'Descobrir campos de critérios de aceite',comentarios:'Comentários de ticket'});};
 abas.testes=async el=>{el.append(h('h1',{},'Testes'));await consultaManual(el,'qase',{suites:'Suites',casos:'Casos manuais e automatizados',caso:'Detalhe e passos do caso',planos:'Planos'});};
-const execucoesExternas=async el=>{el.append(h('h2',{},'Execuções externas do Qase'),h('p',{},'Execuções externas do Qase. Evidências locais permanecem na seção Evidências.'));await consultaManual(el,'qase',{runs:'Runs',run:'Detalhe do run',resultados:'Resultados (informe o ID do run para filtrar)'});};
+const execucoesExternas=async el=>{el.append(h('h2',{},'Execuções externas do Qase'));await consultaManual(el,'qase',{runs:'Runs',run:'Detalhe do run',resultados:'Resultados (informe o ID do run para filtrar)'});};
 abas.automacoes=async el=>{
   el.append(h('h1',{},'Automações'));const e=estado.espaco;if(!e)return el.append(faltaEspaco());
-  const a=await chamar(()=>api.espacoAutomacoes(e.id));if(a)el.append(h('h2',{},'Contrato local opcional'),h('p',{},a.pastaLocal||'Sem pasta local de automação.'),dadosVisiveis(a),h('p',{},'A pasta mantém seu contrato e sua própria identidade. Nenhum arquivo é clonado ou modificado automaticamente.'));
+  const a=await chamar(()=>api.espacoAutomacoes(e.id));if(a)el.append(h('h2',{},'Contrato local'),h('div',{class:'proj-chips'},h('span',{class:'chip-servico'},a.pastaLocal?'Pasta vinculada':'Sem pasta local'),h('span',{class:'chip-servico'},'k6 '+(a.k6Disponivel?'disponível':'não encontrado')),(a.frameworks||[]).map(f=>h('span',{class:'chip-servico'},f))),a.pastaLocal?h('p',{class:'suave'},a.pastaLocal):null,(a.capacidades||[]).length?h('ul',{},a.capacidades.map(c=>h('li',{},h('code',{},c)))):h('p',{class:'suave'},'Nenhuma automação declarada.'));
   await consultaManual(el,'github',{repositorio:'Repositório',branches:'Branches',commits:'Commits',prs:'Pull requests',pr:'Detalhe do PR',verificacoes:'Check runs de um commit (SHA completo)'});
 };
 abas.rastreabilidade=async el=>{

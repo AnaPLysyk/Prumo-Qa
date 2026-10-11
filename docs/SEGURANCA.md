@@ -86,3 +86,15 @@ Falha de escrita de atividade mantém o resultado do núcleo e avisa em stderr (
 - **Nada é anexado automaticamente:** versão, sistema e diagnóstico (só metadados) dependem de marcação; logs, evidências, contextos, caminhos e código nunca entram. Segredos detectados (tokens, chaves privadas, senhas atribuídas) bloqueiam o envio e não são repetidos na revisão; e-mail, telefone, CPF e caminhos locais apenas geram aviso. A revisão é heurística.
 - **Texto de issue é dado.** A triagem (`.github/workflows/triagem.yml`) só aplica rótulos, não faz checkout, não interpola o texto em comandos, não corrige código nem altera a `main`. Nenhuma IA exclui contextos, publica issues ou altera configurações externas: essas ações não existem como ferramenta MCP.
 - **Avisos de versão:** preferências locais (`preferencias.json`); consulta somente ao GitHub oficial, sob demanda ou, se ligado, uma vez ao abrir; nenhum serviço, tarefa agendada, download ou instalação automática; o som toca no máximo uma vez por versão.
+
+## Aplicativo 2.9: escrita externa, agentes e catálogo
+
+- **Escrita desligada por padrão**, por projeto e serviço (Conexões). Cada operação mostra a prévia, pede confirmação nativa do Windows e só então envia. Rotas de escrita em lista fechada por serviço; sem DELETE, sem redirecionamento, IP público fixado e tamanho limitado.
+- **Idempotência**: a chave é o resumo do projeto, da operação e dos parâmetros; um marcador `prumo-xxxxxxxxxx` vai em rótulo, descrição ou comentário. Após resposta perdida o Prumo reconcilia lendo o serviço; repetir não duplica. O resultado só vira CONFIRMADA depois de reler.
+- **GitHub**: escrita apenas em branches `prumo/...`, nunca na principal, sem force push e fora de `.github/`; o Pull Request nasce como rascunho.
+- **Agentes**: as políticas por capacidade valem no servidor MCP a cada chamada (7 ferramentas). A IA só cria rascunhos locais com limite por hora; não cria nem reutiliza aprovações humanas e não acessa credenciais.
+- **Agendamento**: rotinas agendadas só publicam resultados no Qase com uma política aprovada para a run (validade e usos); sem política os resultados ficam locais.
+- **Catálogo de testes**: leitura estática da pasta vinculada, sem seguir links simbólicos, com limite de arquivos e tamanho; o conteúdo é dado, nunca instrução.
+- **Assistente do Início**: consulta apenas dados locais; não usa rede nem modelo de IA.
+- **Site institucional**: o botão abre uma URL fixa após confirmação nativa.
+- Limite: as escritas foram exercitadas contra serviços simulados; o instalador não é assinado.

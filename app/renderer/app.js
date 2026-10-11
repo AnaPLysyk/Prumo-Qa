@@ -38,7 +38,7 @@ function diagnostico(s) {
 
 const abas = {
   async projetos(el) {
-    el.append(h('h2', {}, 'Pastas com contrato local'), h('p', { class: 'suave' }, 'Pastas existentes continuam disponíveis. Apenas as pastas que você vincula são lidas.'));
+    el.append(h('h2', {}, 'Pastas com contrato local'));
     const caixa = h('div', { id: 'diagnostico' });
     el.append(h('div', { class: 'barra' },
       h('button', { class: 'acao primaria', onclick: async () => {
@@ -64,7 +64,7 @@ const abas = {
   },
 
   async contextos(el) {
-    el.append(h('h1', {}, 'Contextos'), h('p', { class: 'suave' }, 'Requisitos, regras de negócio, critérios de aceite, restrições e decisões do projeto selecionado. Ficam só neste computador. Um contexto só vale como regra depois de aprovado por uma pessoa.'));
+    el.append(h('h1', {}, 'Contextos'));
     if (!estado.root) return el.append(semProjeto());
     const rotuloTipo = { requisito: 'Requisito', regra_negocio: 'Regra de negócio', criterio_aceite: 'Critério de aceite', restricao_tecnica: 'Restrição técnica', decisao: 'Decisão' };
     const f = estado.filtroCtx || (estado.filtroCtx = {});
@@ -454,7 +454,9 @@ function markdown(texto, sanfona = false) {
 function inline(s) { return s.split(/(`[^`]+`|\*\*[^*]+\*\*)/).map((p) => (p.startsWith('`') ? h('code', {}, p.slice(1, -1)) : p.startsWith('**') ? h('strong', {}, p.slice(2, -2)) : p)); }
 
 function salvarRaiz() { if (estado.espaco && estado.espaco.raizContextos !== estado.root) estado.espaco = null; try { if (estado.root) localStorage.setItem('raiz', estado.root); else localStorage.removeItem('raiz'); if (estado.espaco) localStorage.setItem('espaco', estado.espaco.id); else localStorage.removeItem('espaco'); } catch { /* sem armazenamento: ignora */ } }
+const rotasVirtuais = { runs: ['testes', 'runs'], automacoes: ['testes', 'automacao'], vinculos: ['rastreabilidade', 'vinculos'] };
 async function mostrar(aba) {
+  if (rotasVirtuais[aba]) { const [pai, sub] = rotasVirtuais[aba]; (estado.sub ||= {})[pai] = sub; aba = pai; }
   clearInterval(estado.timer); estado.aba = aba;
   for (const b of document.querySelectorAll('#nav button')) { if (b.dataset.aba === aba) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
   // Corrida de navegação: cada renderização usa um token e constrói num contêiner separado; só a mais recente é anexada.
@@ -469,6 +471,7 @@ async function mostrar(aba) {
   try { await abas[aba](el); } catch (e) { if (token === estado.render) avisar('Falha ao carregar a seção.', true); }
   if (token !== estado.render) return;
   $('#conteudo').replaceChildren(...el.childNodes);
+  if (typeof montarSeletorProjeto === 'function') montarSeletorProjeto();
 }
 
 (async () => {
@@ -477,6 +480,7 @@ async function mostrar(aba) {
   const info = await chamar(api.info); if (info) $('#versao').textContent = 'v' + info.version;
   try { estado.root = localStorage.getItem('raiz'); } catch { /* ignora */ }
   for (const b of document.querySelectorAll('#nav button')) b.addEventListener('click', () => mostrar(b.dataset.aba));
+  iniciarMenu();
   await iniciarAgenda();
   mostrar('inicio');
   iniciarNotificacoes();

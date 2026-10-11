@@ -38,6 +38,8 @@ import * as props from '../propostas.js';
 import * as fluxo from '../fluxoQase.js';
 import { publicarProposta, resolverAnexo } from '../acoesProposta.js';
 import { mapaDeVinculos } from '../rastreabilidade.js';
+import { catalogoDeTestes } from '../catalogoTestes.js';
+import { perguntar as perguntarAoPrumo, situacaoDoProjeto } from '../assistente.js';
 import * as agentes from '../politicasAgentes.js';
 import { listarExecucoes, metricas } from '../historicoCentral.js';
 import { prepararPublicacao, publicar as publicarComentario } from '../jiraComentario.js';
@@ -167,6 +169,12 @@ canal('preferencias:salvar', a => {
   return { preferencias };
 });
 canal('preferencias:visualizada', a => ({ preferencias: marcarVisualizada(a.versao), aviso: avisoPendente(versao) }));
+canal('site:abrir', async (_a, janela) => {
+  const url = 'https://prumo-qa-docs.onrender.com/';
+  const r = await dialog.showMessageBox(janela!, { type: 'question', title: 'Site institucional', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true, message: 'Abrir o site institucional do Prumo QA?', detail: url });
+  if (r.response !== 1) return { opened: false };
+  await shell.openExternal(url); return { opened: true };
+});
 canal('atualizacao:abrir', async (_a, janela) => {
   if (!ultimaRelease || !new RegExp(`^https://github\\.com/${repositorio}/releases/tag/v\\d+\\.\\d+\\.\\d+$`).test(ultimaRelease)) throw new Error('NO_VERIFIED_RELEASE: verifique as atualizações antes.');
   const r = await dialog.showMessageBox(janela!, { type: 'question', title: 'Abrir página oficial', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true,
@@ -318,6 +326,9 @@ canal('runs:politica', async (a, j) => {
 });
 canal('runs:revogar', a => ({ politica: autorizacoesCore.revogarPoliticaEscrita(a.id) }));
 canal('vinculos:mapa', a => mapaDeVinculos(a.espacoId));
+canal('testes:catalogo', a => { const e = espacos.obterEspaco(a.espacoId); return e.pastaLocal ? { semPasta: false, catalogo: catalogoDeTestes(e.pastaLocal) } : { semPasta: true, catalogo: null }; });
+canal('assistente:perguntar', a => perguntarAoPrumo(a.espacoId, a.pergunta));
+canal('assistente:situacao', a => situacaoDoProjeto(a.espacoId));
 canal('agentes:estado', a => ({ configuracao: agentes.configuracaoDoEspaco(a.espacoId), matriz: agentes.matrizDePoliticas(a.espacoId), especializacoes: agentes.especializacoes, propostasIA: props.listarPropostas(a.espacoId).filter(p => p.origem === 'IA').length }));
 canal('agentes:salvar', async (a, j) => {
   const i = idiomaAtual(); const bloq = Object.entries(a.politicas).filter(([, v]) => v === 'BLOQUEADO').map(([k]) => k).join(', ') || '—';

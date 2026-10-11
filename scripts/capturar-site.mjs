@@ -43,16 +43,38 @@ try {
   await page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'Loja Demo');
 
   const tirar = async (nome) => { await page.waitForTimeout(300); await page.screenshot({ path: path.join(saida, nome + '.png') }); console.log('ok', nome); };
-  await page.selectOption('#tema', 'escuro');
-  await ir('inicio'); await tirar('inicio');
+  if (process.argv.includes('--todas')) {
+    const todas = path.join(repo, '.prumo', 'telas'); fs.mkdirSync(todas, { recursive: true });
+    const virt = { runs: ['testes', 'runs'], automacoes: ['testes', 'automacao'], vinculos: ['rastreabilidade', 'vinculos'] };
+    for (const tema of ['escuro', 'claro']) {
+      await page.evaluate((t) => { document.documentElement.dataset.tema = t; }, tema);
+      for (const aba of ['inicio', 'projetos', 'contextos', 'tickets', 'testes', 'runs', 'automacoes', 'agenda', 'execucoes', 'evidencias', 'rastreabilidade', 'vinculos', 'metricas', 'historico', 'logs', 'conexoes', 'agentes', 'suporte', 'ajuda']) {
+        const [pai, sub] = virt[aba] || [aba, null]; await ir(pai); if (sub) { await page.click('[data-sub=' + sub + ']'); await page.waitForTimeout(500); }
+        await page.waitForTimeout(400); await page.screenshot({ path: path.join(todas, tema + '-' + aba + '.png') });
+      }
+    }
+    console.log('telas capturadas'); await app.close(); await s.fechar(); fs.rmSync(dados, { recursive: true, force: true }); process.exit(0);
+  }
+  // Repositório sintético para o catálogo de testes (nada de projeto real)
+  const { fixture } = await import('../testes/fixtures.mjs'); const f = await fixture({ after() {} });
+  const escreve = async (rel, txt) => { const p = path.join(f.root, rel); fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, txt); };
+  await escreve('tests/e2e/checkout.spec.ts', "import { test } from '@playwright/test';\ntest.describe('Checkout', () => {\n  test('paga com cartão @smoke', async ({ page }) => { await page.goto('/'); await test.step('Escolher produto', async () => {}); await test.step('Pagar com cartão', async () => {}); });\n  test('recusa cartão vencido @regression', async ({ page }) => { await page.goto('/'); });\n});\n");
+  await escreve('tests/e2e/login.spec.ts', "import { test } from '@playwright/test';\ntest.describe('Login', () => {\n  test('entra com senha válida', async ({ page }) => { await page.goto('/'); });\n  test('bloqueia após 5 tentativas', async ({ page }) => { await page.goto('/'); });\n});\n");
+  await escreve('tests/api/pedidos.spec.ts', "import request from 'supertest';\ntest('lista pedidos do usuário', async () => { await request(app).get('/pedidos'); });\ntest('rejeita pedido sem itens', async () => { await request(app).post('/pedidos'); });\n");
+  await escreve('src/preco.test.ts', "describe('Preço', () => { it('aplica desconto progressivo', () => {}); it('arredonda para centavos', () => {}); });\n");
+  await escreve('features/carrinho.feature', '@regression\nFeature: Carrinho\n  Scenario: Remover item\n    Given um carrinho com dois itens\n    When removo um item\n    Then o total é recalculado\n');
+  await page.evaluate(() => 0);
+  await app.evaluate(({ dialog }, p) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [p] }); }, f.root);
+  await api('espacoPasta', e.id);
+  const tema = (t) => page.evaluate((x) => { document.documentElement.dataset.tema = x; }, t);
+  await tema('escuro');
+  await ir('inicio'); await page.waitForTimeout(6500); await tirar('inicio');
+  await ir('testes'); await page.waitForSelector('#cat-lista [data-feature]'); await page.locator('#cat-lista details').first().evaluate((d) => { d.open = true; }); await tirar('catalogo');
   await ir('tickets'); await page.fill('#tk-q', 'SMART'); await page.click('#tk-buscar'); await page.waitForSelector('#tk-tabela'); await tirar('tickets');
-  await ir('testes'); await tirar('testes');
-  await ir('runs'); await tirar('runs');
-  await ir('vinculos'); await tirar('vinculos');
+  await ir('testes'); await page.click('[data-sub=runs]'); await page.waitForTimeout(500); await tirar('execucoes-plano');
+  await ir('metricas'); await tirar('metricas');
   await ir('agentes'); await tirar('agentes');
-  await ir('agenda'); await tirar('agendamentos');
-  await ir('conexoes'); await tirar('conexoes');
-  await page.selectOption('#tema', 'claro'); await ir('runs'); await tirar('runs-claro');
+  await tema('claro'); await ir('inicio'); await page.waitForTimeout(6500); await tirar('inicio-claro');
 } finally {
   await app.close().catch(() => {});
   await s.fechar();

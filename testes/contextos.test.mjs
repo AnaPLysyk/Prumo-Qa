@@ -180,11 +180,11 @@ test('projetos antigos sem contextos continuam compatíveis: contexto_projeto ma
   assert.equal(JSON.parse(fs.readFileSync(path.join(f.root, 'qa.project.json'), 'utf8')).schemaVersion, 2, 'o contrato v2 não foi alterado');
 });
 
-test('protocolo MCP real: quatro ferramentas, contexto_projeto traz contextos autorizados e revisar_cobertura aceita contextoId', async (t) => {
+test('protocolo MCP real: sete ferramentas, contexto_projeto traz contextos autorizados e revisar_cobertura aceita contextoId', async (t) => {
   const { f, p } = await proj(t); const r = c.criarContexto(p, base, 'ana'); c.aprovarContexto(p, r.id, 'ana'); c.gravarConfig(p, true);
   const servidor = await criarServidor(f.root); const [a, b] = InMemoryTransport.createLinkedPair(); await servidor.connect(b);
   const cli = new Client({ name: 'teste-contextos', version: '1.0.0' }); await cli.connect(a); t.after(() => cli.close());
-  assert.deepEqual((await cli.listTools()).tools.map((x) => x.name).sort(), ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'revisar_cobertura']);
+  assert.deepEqual((await cli.listTools()).tools.map((x) => x.name).sort(), ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
   const ctx = JSON.parse((await cli.callTool({ name: 'contexto_projeto', arguments: {} })).content[0].text);
   assert.equal(ctx.contextos.disponivel, true); assert.equal(ctx.contextos.referencias[0].estado, 'APROVADO'); assert.equal(ctx.contextos.referencias[0].id, r.id);
   const rev = JSON.parse((await cli.callTool({ name: 'revisar_cobertura', arguments: plano(base.texto, { contextoId: r.id }) })).content[0].text);

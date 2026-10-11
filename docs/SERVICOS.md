@@ -75,3 +75,7 @@ Para 2.8: modelo de referências preserva origem, contexto, automação, execuç
 - [Qase especificações oficiais](https://github.com/qase-tms/specs)
 - [GitHub REST repositories](https://docs.github.com/en/rest/repos/repos)
 - [GitHub REST checks](https://docs.github.com/en/rest/checks/runs)
+
+## Escritas (2.9)
+
+Jira (v3): criar ticket (tipo vindo do createmeta), comentar, anexar (`X-Atlassian-Token: no-check`), vincular, editar campos e transicionar. Qase (v1): criar suite, caso, plano e run; editar caso; concluir run; resultados em lote (até 200); anexos; associação a ticket. GitHub (REST): criar ref `prumo/...`, gravar arquivo, abrir Pull Request em rascunho. Cada rota está em `src/rotasEscrita.ts`; tudo fora da lista é recusado. Leitura avançada: filtros de tickets (JQL montado e escapado, sempre restrito ao projeto), histórico, anexos, transições, planos, resultados, execuções do Actions e arquivos.

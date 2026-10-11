@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (95 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (99 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (7 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -50,6 +50,9 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:runs:politica` | `dias`, `espacoId`, `maxUsos`, `runId` | Grava autorizacoes.json. Sem política, rotina agendada não escreve no Qase. |
 | `prumo:runs:revogar` | `id` | Grava autorizacoes.json. |
 | `prumo:vinculos:mapa` | `espacoId` | Consulta local; não prova cobertura. |
+| `prumo:testes:catalogo` | `espacoId` | Leitura estática da pasta vinculada; nada é executado nem alterado. |
+| `prumo:assistente:perguntar` | `espacoId`, `pergunta` | Consulta local; nada é gravado nem enviado. |
+| `prumo:assistente:situacao` | `espacoId` | Consulta local. |
 | `prumo:agentes:estado` | `espacoId` | Consulta local. |
 | `prumo:agentes:salvar` | `espacoId`, `especializacoes`, `politicas` | Grava agentes.json. O bloqueio vale no servidor MCP a cada chamada. |
 | `prumo:agenda:listar` | `espacoId` | Consulta local. |
@@ -87,6 +90,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:ajuda:integracoes` | — | Consulta local; não altera o projeto. |
 | `prumo:atualizacao:verificar` | — | Uma requisição HTTPS GET ao GitHub; não baixa nem instala nada. Grava só a versão disponível e as decisões de aviso em preferencias.json. |
 | `prumo:atualizacao:abrir` | — | Abre o navegador padrão na página da release; não baixa nem executa instalador. |
+| `prumo:site:abrir` | — | Abre o navegador padrão; nada é enviado pelo aplicativo. |
 | `prumo:dados:resumo` | — | Consulta local; não altera o projeto. |
 | `prumo:dados:excluir` | `escopo`, `root` | Apaga somente arquivos do escopo, validados por nome, tipo e caminho canônico. Nunca apaga código-fonte; não é exposto ao MCP. |
 | `prumo:diagnostico:listar` | — | Consulta local; não altera o projeto. |
@@ -706,6 +710,51 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Livro-razão local de operações externas e histórico do projeto
 
+### `prumo:testes:catalogo`
+
+- **Tipo:** IPC
+- **Finalidade:** Ler os arquivos de teste da pasta do projeto, agrupar por feature e classificar cada teste (unitário, integração, funcional, regressão, smoke, desempenho, acessibilidade).
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Projeto
+- **Saída:** Features, cenários, passos, tipo, confiança e motivo
+- **Permissões:** Nenhuma
+- **Efeito:** Leitura estática da pasta vinculada; nada é executado nem alterado.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:assistente:perguntar`
+
+- **Tipo:** IPC
+- **Finalidade:** Responder uma pergunta com os dados locais do projeto (contextos aprovados, propostas, execuções, agenda). Não usa modelo de IA nem rede.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Projeto e pergunta
+- **Saída:** Linhas de resposta e telas de origem
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local; nada é gravado nem enviado.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:assistente:situacao`
+
+- **Tipo:** IPC
+- **Finalidade:** Resumir o que está acontecendo agora no projeto para o painel inicial.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Projeto
+- **Saída:** Até cinco linhas de situação
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
 ### `prumo:agentes:estado`
 
 - **Tipo:** IPC
@@ -1260,6 +1309,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, NO_VERIFIED_RELEASE
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; URL reconstruída a partir de tag validada; Somente github.com/AnaPLysyk/Prumo-Qa
 - **Registro:** Diagnóstico IPC
+
+### `prumo:site:abrir`
+
+- **Tipo:** IPC
+- **Finalidade:** Abrir o site institucional oficial no navegador, depois de confirmar.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Nenhuma: a URL é fixa
+- **Saída:** Se abriu ou não
+- **Permissões:** Confirmação nativa
+- **Efeito:** Abre o navegador padrão; nada é enviado pelo aplicativo.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
 
 ### `prumo:dados:resumo`
 
