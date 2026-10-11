@@ -3,8 +3,9 @@ import {lookup} from 'node:dns/promises';
 import {isIP} from 'node:net';
 import {z} from 'zod';
 import type {Servico} from './espacos.js';
+import {rotaEscritaPermitida,type MetodoEscrita} from './rotasEscrita.js';
 
-export const codigosServico=['CREDENTIAL_UNAVAILABLE','CREDENTIAL_INVALID_OR_EXPIRED','SERVICE_PERMISSION','SERVICE_NOT_FOUND','SERVICE_RATE_LIMIT','SERVICE_TIMEOUT','SERVICE_UNAVAILABLE','SERVICE_RESPONSE_INVALID','SERVICE_REDIRECT_BLOCKED','SERVICE_RESPONSE_LIMIT','SERVICE_DESTINATION_BLOCKED','SERVICE_WRITE_BLOCKED','SERVICE_SCOPE_CHANGED'] as const;
+export const codigosServico=['CREDENTIAL_UNAVAILABLE','CREDENTIAL_INVALID_OR_EXPIRED','SERVICE_PERMISSION','SERVICE_NOT_FOUND','SERVICE_RATE_LIMIT','SERVICE_TIMEOUT','SERVICE_UNAVAILABLE','SERVICE_RESPONSE_INVALID','SERVICE_REDIRECT_BLOCKED','SERVICE_RESPONSE_LIMIT','SERVICE_DESTINATION_BLOCKED','SERVICE_WRITE_BLOCKED','SERVICE_SCOPE_CHANGED','SERVICE_DUPLICATE'] as const;
 export class ErroServico extends Error{constructor(public codigo:typeof codigosServico[number],public retryAfter?:string){super(codigo);}}
 export function instanciaServico(servico:Servico,valor?:string){
   if(servico==='github')return 'https://api.github.com';if(servico==='qase')return 'https://api.qase.io';
@@ -20,19 +21,20 @@ export function enderecoPublico(ip:string){
 }
 export type PedidoServico={servico:Servico;instancia:string;caminho:string;headers:Record<string,string>;timeoutMs?:number};
 export type TransporteServico=(pedido:PedidoServico)=>Promise<unknown>;
-async function requisitar(p:PedidoServico,metodo:'GET'|'POST',corpo?:string):Promise<unknown>{
+async function requisitar(p:PedidoServico,metodo:'GET'|MetodoEscrita,corpo?:string|Buffer,tipoConteudo='application/json'):Promise<unknown>{
   const origem=instanciaServico(p.servico,p.instancia);if(origem!==p.instancia||!p.caminho.startsWith('/')||p.caminho.startsWith('//'))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   const u=new URL(p.caminho,origem);if(u.origin!==origem)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   const base=p.servico==='jira'?'/rest/api/3/':p.servico==='qase'?'/v1/':'/';if(!u.pathname.startsWith(base))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
-  if(metodo==='POST'&&(p.servico!=='jira'||!/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/comment$/.test(u.pathname)||u.search))throw new ErroServico('SERVICE_WRITE_BLOCKED');
+  if(metodo!=='GET'&&(u.search||!rotaEscritaPermitida(p.servico,metodo,u.pathname)))throw new ErroServico('SERVICE_WRITE_BLOCKED');
   // Resolve UMA vez e fixa o IP no socket TLS. Não segue redirects. Corpo só existe no POST de comentário (2.8).
   let ip:string;let dnsTimer:ReturnType<typeof setTimeout>|undefined;try{const r=await Promise.race([lookup(u.hostname,{family:4}),new Promise<never>((_,reject)=>{dnsTimer=setTimeout(()=>reject(new ErroServico('SERVICE_TIMEOUT')),3000);dnsTimer.unref();})]);ip=r.address;}catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_UNAVAILABLE');}finally{clearTimeout(dnsTimer);}
   if(!enderecoPublico(ip))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   return new Promise((resolve,reject)=>{
     let encerrado=false;const fim=(e?:Error,v?:unknown)=>{if(encerrado)return;encerrado=true;clearTimeout(timer);e?reject(e):resolve(v);};
-    const req=https.request(u,{method:metodo,agent:false,headers:{Accept:'application/json','User-Agent':'Prumo-QA-desktop',...(corpo!==undefined?{'Content-Type':'application/json','Content-Length':String(Buffer.byteLength(corpo))}:{}),...p.headers},lookup:(_h,_o,cb)=>cb(null,ip,4)},res=>{
+    const req=https.request(u,{method:metodo,agent:false,headers:{Accept:'application/json','User-Agent':'Prumo-QA-desktop',...(corpo!==undefined?{'Content-Type':tipoConteudo,'Content-Length':String(Buffer.byteLength(corpo))}:{}),...p.headers},lookup:(_h,_o,cb)=>cb(null,ip,4)},res=>{
       const status=res.statusCode??0;
-      if(status!==(metodo==='POST'?201:200)){res.resume();const code=status===401?'CREDENTIAL_INVALID_OR_EXPIRED':status===403?(res.headers['x-ratelimit-remaining']==='0'?'SERVICE_RATE_LIMIT':'SERVICE_PERMISSION'):status===404?'SERVICE_NOT_FOUND':status===429?'SERVICE_RATE_LIMIT':status>=300&&status<400?'SERVICE_REDIRECT_BLOCKED':status>=500?'SERVICE_UNAVAILABLE':'SERVICE_RESPONSE_INVALID';fim(new ErroServico(code));return;}
+      if(!(metodo==='GET'?status===200:status===200||status===201||status===204)){res.resume();const code=status===401?'CREDENTIAL_INVALID_OR_EXPIRED':status===403?(res.headers['x-ratelimit-remaining']==='0'?'SERVICE_RATE_LIMIT':'SERVICE_PERMISSION'):status===404?'SERVICE_NOT_FOUND':status===429?'SERVICE_RATE_LIMIT':status>=300&&status<400?'SERVICE_REDIRECT_BLOCKED':status>=500?'SERVICE_UNAVAILABLE':'SERVICE_RESPONSE_INVALID';fim(new ErroServico(code));return;}
+      if(status===204){res.resume();fim(undefined,{});return;}
       if(!/\bapplication\/(?:[a-z.+-]*\+)?json\b/i.test(String(res.headers['content-type']??''))){res.destroy();fim(new ErroServico('SERVICE_RESPONSE_INVALID'));return;}
       let size=0;const chunks:Buffer[]=[];res.on('data',b=>{size+=b.length;if(size>2*1024*1024){res.destroy();fim(new ErroServico('SERVICE_RESPONSE_LIMIT'));}else chunks.push(b);});
       res.on('end',()=>{try{fim(undefined,JSON.parse(Buffer.concat(chunks).toString('utf8')));}catch{fim(new ErroServico('SERVICE_RESPONSE_INVALID'));}});res.on('error',()=>fim(new ErroServico('SERVICE_UNAVAILABLE')));
@@ -43,7 +45,9 @@ async function requisitar(p:PedidoServico,metodo:'GET'|'POST',corpo?:string):Pro
 }
 export const transporteHttps:TransporteServico=p=>requisitar(p,'GET');
 /** Única escrita remota do produto (2.8): um comentário em um ticket Jira. Qualquer outro caminho é recusado. */
-export type PedidoEscrita=PedidoServico&{corpo:string};
+export type PedidoEscrita=PedidoServico&{corpo:string|Buffer;metodo?:MetodoEscrita;tipoConteudo?:string};
 export type TransporteEscrita=(pedido:PedidoEscrita)=>Promise<unknown>;
-export const transporteEscritaJira:TransporteEscrita=p=>{if(p.corpo.length>40000)throw new ErroServico('SERVICE_WRITE_BLOCKED');return requisitar(p,'POST',p.corpo);};
+export const transporteEscritaJira:TransporteEscrita=p=>{if(p.corpo.length>40000||p.servico!=='jira'||!/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/comment$/.test(p.caminho))throw new ErroServico('SERVICE_WRITE_BLOCKED');return requisitar(p,'POST',p.corpo);};
+/** Escritas da 2.9 (Jira, Qase, GitHub): só as rotas da lista fechada em rotasEscrita.ts, corpo limitado a 12 MB, sem redirecionamento. */
+export const transporteEscritaGeral:TransporteEscrita=p=>{if(p.corpo.length>12*1024*1024)throw new ErroServico('SERVICE_WRITE_BLOCKED');return requisitar({...p,timeoutMs:p.timeoutMs??30000},p.metodo??'POST',p.corpo,p.tipoConteudo??'application/json');};
 export const paginaSchema=z.object({offset:z.number().int().min(0).max(100000).default(0),cursor:z.string().max(2000).optional(),limite:z.number().int().min(1).max(100).default(50)}).strict();

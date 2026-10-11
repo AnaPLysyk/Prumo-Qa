@@ -1,6 +1,7 @@
 import {z} from 'zod';
 import {mascarar} from './projeto.js';
-import {ErroServico,instanciaServico,paginaSchema,transporteHttps,transporteEscritaJira,type TransporteServico,type TransporteEscrita} from './httpServicos.js';
+import {ErroServico,instanciaServico,paginaSchema,transporteHttps,transporteEscritaGeral,type TransporteServico,type TransporteEscrita} from './httpServicos.js';
+import type {MetodoEscrita} from './rotasEscrita.js';
 import {identidadeRecurso,type Recurso,type Servico} from './espacos.js';
 
 export const operacoesServico=['tickets','ticket','campos','comentarios','suites','casos','caso','planos','runs','run','resultados','repositorio','branches','commits','prs','pr','verificacoes'] as const;
@@ -22,14 +23,31 @@ export function textoRemoto(v:unknown,limite=20000):string {
   if(Array.isArray(o.content))return o.content.map(x=>textoRemoto(x,limite)).join(o.type==='doc'?'\n':' ').slice(0,limite);
   return JSON.stringify(v).slice(0,limite);
 }
+export type ContextoServico={servico:Servico;instancia:string;ler:(caminho:string)=>Promise<unknown>;enviar:(metodo:MetodoEscrita,caminho:string,corpo:string|Buffer,tipoConteudo?:string,extraHeaders?:Record<string,string>)=>Promise<unknown>;limpar:(v:unknown)=>unknown};
 export class AdaptadorServico {
-  constructor(readonly c:ConfigServico,readonly transporte:TransporteServico=transporteHttps,readonly escrita:TransporteEscrita=transporteEscritaJira){if(instanciaServico(c.servico,c.instancia)!==c.instancia)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');}
+  constructor(readonly c:ConfigServico,readonly transporte:TransporteServico=transporteHttps,readonly escrita:TransporteEscrita=transporteEscritaGeral){if(instanciaServico(c.servico,c.instancia)!==c.instancia)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');}
   private async get(caminho:string):Promise<unknown>{
     if(!this.c.token)throw new ErroServico('CREDENTIAL_UNAVAILABLE');
-    const headers:Record<string,string>=this.c.servico==='jira'?{Authorization:'Basic '+Buffer.from(this.c.usuario+':'+this.c.token).toString('base64')}:this.c.servico==='github'?{Authorization:'Bearer '+this.c.token,'X-GitHub-Api-Version':'2022-11-28'}:{Token:this.c.token};
+    const headers=this.cabecalhos();
     try{return await this.transporte({servico:this.c.servico,instancia:this.c.instancia,caminho,headers});}catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_UNAVAILABLE');}
   }
-  private cabecalhos():Record<string,string>{return {Authorization:'Basic '+Buffer.from(this.c.usuario+':'+this.c.token).toString('base64')};}
+  private cabecalhos():Record<string,string>{
+    return this.c.servico==='jira'?{Authorization:'Basic '+Buffer.from(this.c.usuario+':'+this.c.token).toString('base64')}:this.c.servico==='github'?{Authorization:'Bearer '+this.c.token,'X-GitHub-Api-Version':'2022-11-28'}:{Token:this.c.token};
+  }
+  /** Contexto mínimo dos módulos de escrita (escritaJira/Qase/Github): a credencial nunca sai desta classe. Erros viram ErroServico. */
+  contexto():ContextoServico{
+    const c=this.c;
+    return {
+      servico:c.servico,instancia:c.instancia,
+      ler:p=>this.get(p),
+      enviar:async(metodo,caminho,corpo,tipoConteudo,extraHeaders)=>{
+        if(!c.token)throw new ErroServico('CREDENTIAL_UNAVAILABLE');
+        try{return await this.escrita({servico:c.servico,instancia:c.instancia,caminho,headers:{...this.cabecalhos(),...(extraHeaders??{})},corpo,metodo,tipoConteudo});}
+        catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_UNAVAILABLE');}
+      },
+      limpar:v=>this.limpar(v)
+    };
+  }
   /** Única escrita do produto: um comentário em ticket do projeto vinculado. Confirma o projeto antes de enviar. */
   async publicarComentario(r:Recurso,ticket:string,adf:unknown):Promise<{id:string}>{
     if(this.c.servico!=='jira'||!this.c.token)throw new ErroServico('SERVICE_WRITE_BLOCKED');

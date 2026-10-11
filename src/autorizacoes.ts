@@ -30,11 +30,18 @@ const pubSchema = z.object({
   criadaEm: z.string().datetime(), validaAte: z.string().datetime(), maxPublicacoes: z.number().int().min(1).max(MAX_USOS), usadas: z.number().int().min(0),
   aprovadoPor: z.string().max(200), revogadaEm: z.string().datetime().nullable()
 }).strict();
+// 2.9: política de escrita agendada para operações externas explicitamente permitidas (hoje: publicar resultados no Qase).
+export const OPERACOES_AGENDAVEIS = ['qase.publicar_resultados'] as const;
+const escritaSchema = z.object({
+  id: z.string().uuid(), espacoId: z.string().uuid(), operacao: z.enum(OPERACOES_AGENDAVEIS), runs: z.array(z.number().int().positive()).min(1).max(20),
+  criadaEm: z.string().datetime(), validaAte: z.string().datetime(), maxUsos: z.number().int().min(1).max(MAX_USOS), usos: z.number().int().min(0), aprovadoPor: z.string().max(200), revogadaEm: z.string().datetime().nullable()
+}).strict();
+export type PoliticaEscrita = z.infer<typeof escritaSchema>;
 export type AutorizacaoExecucao = z.infer<typeof execSchema>;
 export type PoliticaPublicacao = z.infer<typeof pubSchema>;
-const registro = z.object({ version: z.literal(1), execucoes: z.array(execSchema).max(300), publicacoes: z.array(pubSchema).max(300) }).strict();
+const registro = z.object({ version: z.literal(1), execucoes: z.array(execSchema).max(300), publicacoes: z.array(pubSchema).max(300), escritas: z.array(escritaSchema).max(300).default([]) }).strict();
 type Registro = z.infer<typeof registro>;
-const ler = (base?: string): Registro => lerLocal<Registro>('autorizacoes.json', registro as unknown as z.ZodType<Registro>, { version: 1, execucoes: [], publicacoes: [] }, base);
+const ler = (base?: string): Registro => lerLocal<Registro>('autorizacoes.json', registro as unknown as z.ZodType<Registro>, { version: 1, execucoes: [], publicacoes: [], escritas: [] }, base);
 const gravar = (r: Registro, base?: string) => gravarLocal('autorizacoes.json', registro.parse(r), base);
 export const listarAutorizacoes = (base?: string) => ler(base);
 const validade = (dias: number, agora: Date) => { if (!Number.isFinite(dias) || dias <= 0 || dias > MAX_VALIDADE_DIAS) throw new Error('AUTH_VALIDITY_INVALID'); return new Date(agora.getTime() + dias * 86400000).toISOString(); };
@@ -91,3 +98,16 @@ export function consumirPublicacao(espacoId: string, ticket: string, tipo: strin
 }
 /** Devolve o uso quando a publicação falhou antes de chegar ao Jira (não houve efeito remoto). */
 export function devolverPublicacao(id: string, base?: string) { const r = ler(base); const p = r.publicacoes.find(x => x.id === id); if (p && p.usadas > 0) { p.usadas -= 1; gravar(r, base); } }
+
+export const estadoEscrita = (p: PoliticaEscrita, agora = new Date()) => p.revogadaEm ? 'REVOGADA' : Date.parse(p.validaAte) <= agora.getTime() ? 'EXPIRADA' : p.usos >= p.maxUsos ? 'ESGOTADA' : 'VIGENTE';
+export function criarPoliticaEscrita(espacoId: string, d: { operacao: PoliticaEscrita['operacao']; runs: number[]; dias: number; maxUsos: number }, aprovadoPor: string, base?: string, agora = new Date()): PoliticaEscrita {
+  const p = escritaSchema.parse({ id: randomUUID(), espacoId, operacao: d.operacao, runs: [...new Set(d.runs)], criadaEm: agora.toISOString(), validaAte: validade(d.dias, agora), maxUsos: d.maxUsos, usos: 0, aprovadoPor, revogadaEm: null });
+  const r = ler(base); if (r.escritas.length >= 300) throw new Error('AUTH_LIMIT');
+  for (const x of r.escritas) if (x.espacoId === espacoId && x.operacao === p.operacao && !x.revogadaEm) x.revogadaEm = agora.toISOString();
+  r.escritas.push(p); gravar(r, base); return p;
+}
+export function revogarPoliticaEscrita(id: string, base?: string, agora = new Date()) { const r = ler(base); const a = r.escritas.find(x => x.id === id); if (!a) throw new Error('AUTH_NOT_FOUND'); a.revogadaEm ??= agora.toISOString(); gravar(r, base); return a; }
+/** Consome um uso se existir política vigente que cubra a operação e a run. Sem política: null (a operação agendada fica BLOQUEADA). */
+export function consumirPoliticaEscrita(espacoId: string, operacao: string, run: number, base?: string, agora = new Date()) {
+  const r = ler(base); const p = r.escritas.find(x => x.espacoId === espacoId && x.operacao === operacao && estadoEscrita(x, agora) === 'VIGENTE' && x.runs.includes(run)); if (!p) return null; p.usos += 1; gravar(r, base); return p;
+}
