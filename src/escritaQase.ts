@@ -44,12 +44,12 @@ export const suiteCriar: DefOperacao<z.infer<typeof criarSuite>> = {
   async reconciliar(ctx, rec, p) { const s = (await listar(ctx, rec, 'suite', { search: p.titulo })).find(x => norm(String(x.title)) === norm(p.titulo)); return s ? { id: String(s.id), detalhes: { titulo: p.titulo } } : null; }
 };
 
-const criarCaso = z.object({
+export const esquemaCaso = z.object({
   titulo: z.string().trim().min(3).max(255), descricao: z.string().max(8000).default(''), preCondicoes: z.string().max(4000).default(''), posCondicoes: z.string().max(4000).default(''),
   passos: z.array(passo).max(50).default([]), suiteId: id.optional(), prioridade: campoInt.optional(), severidade: campoInt.optional(), tipo: campoInt.optional(),
   automacao: z.enum(['manual', 'a-automatizar', 'automatizado']).default('manual'), tags: z.array(z.string().regex(/^[A-Za-z0-9_.-]{1,40}$/)).max(10).default([]), ticket: ticket.optional()
 }).strict();
-const corpoCaso = (p: z.infer<typeof criarCaso>) => ({
+const corpoCaso = (p: z.infer<typeof esquemaCaso>) => ({
   title: mascarar(p.titulo), description: mascarar(p.descricao), preconditions: mascarar(p.preCondicoes), postconditions: mascarar(p.posCondicoes),
   steps: p.passos.map(s => ({ action: mascarar(s.acao), expected_result: mascarar(s.esperado), data: mascarar(s.dados) })), steps_type: 'classic',
   isManual: p.automacao !== 'automatizado', isToBeAutomated: p.automacao === 'a-automatizar', tags: p.tags,
@@ -59,8 +59,8 @@ const acharCaso = async (ctx: ContextoServico, rec: Recurso, p: { titulo: string
   (await listar(ctx, rec, 'case', { search: p.titulo, ...(p.suiteId ? { suite_id: p.suiteId } : {}) })).find(c => norm(String(c.title)) === norm(p.titulo) && (p.suiteId === undefined || Number(c.suite_id) === p.suiteId));
 const associar = (ctx: ContextoServico, rec: Recurso, casoId: string, t: string) =>
   ctx.enviar('POST', `/v1/case/${enc(rec.chave)}/external-issue/attach`, JSON.stringify({ type: 'jira-cloud', links: [{ case_id: Number(casoId), external_issues: [t] }] }));
-export const casoCriar: DefOperacao<z.infer<typeof criarCaso>> = {
-  id: 'qase.criar_caso', servico: 'qase', rotulo: 'Criar caso de teste no Qase', efeito: 'Cria um caso (com passos e resultado esperado) no projeto Qase vinculado e, se informado, o associa ao ticket Jira de origem. Casos com o mesmo título na mesma suite não são duplicados.', exigeConfirmacao: true, schema: criarCaso,
+export const casoCriar: DefOperacao<z.infer<typeof esquemaCaso>> = {
+  id: 'qase.criar_caso', servico: 'qase', rotulo: 'Criar caso de teste no Qase', efeito: 'Cria um caso (com passos e resultado esperado) no projeto Qase vinculado e, se informado, o associa ao ticket Jira de origem. Casos com o mesmo título na mesma suite não são duplicados.', exigeConfirmacao: true, schema: esquemaCaso,
   resumo: p => `Criar caso "${p.titulo}" (${p.passos.length} passo(s), ${p.automacao})${p.ticket ? ` para ${p.ticket}` : ''}`,
   async executar(ctx, rec, p) {
     if (await acharCaso(ctx, rec, p)) throw new ErroServico('SERVICE_DUPLICATE'); // o mesmo título já existe na suite
