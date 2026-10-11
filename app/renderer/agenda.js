@@ -129,7 +129,7 @@ function cartaoRotina(r, espacos, recarregar) {
       r.estado === 'ATIVA' ? botao('Pausar', async () => { if (await chamar(() => api.agendaEstado(r.id, 'pausar'))) recarregar(); }) : r.estado !== 'CONCLUIDA' ? botao('Retomar', async () => { if (await chamar(() => api.agendaEstado(r.id, 'retomar'))) recarregar(); }) : null,
       r.estado !== 'DESATIVADA' && r.estado !== 'CONCLUIDA' ? botao('Desativar', async () => { if (await chamar(() => api.agendaEstado(r.id, 'desativar'))) recarregar(); }) : null,
       botao('Executar agora', async () => { const x = await chamar(() => api.agendaExecutar(r.id)); if (x) { avisar(tr('Rotina enfileirada. Testes pedem a sua autenticação do Windows.')); setTimeout(recarregar, 1500); } }),
-      botao('Histórico desta rotina', () => { estado.filtroExec = { rotinaId: r.id }; mostrar('execucoes'); }),
+      botao('Histórico desta rotina', () => { estado.filtroExec = { rotinaId: r.id, selecionadoQuando: estado.espaco?.id ?? null }; mostrar('execucoes'); }),
       botao('Excluir', async () => { const x = await chamar(() => api.agendaExcluir(r.id)); if (x && !x.canceled) recarregar(); })),
     precisaAut ? h('div', { class: 'agenda-acoes' }, campoA('Validade (dias, 1–30)', dias, 'aut-dias-' + r.id), campoA('Máximo de execuções', usos, 'aut-usos-' + r.id),
       botao('Autorizar execuções agendadas…', async () => { const x = await chamar(() => api.agendaAutorizar(r.id, Number(dias.value), Number(usos.value))); if (x && !x.canceled) { avisar(tr('Autorização registrada.')); recarregar(); } }),
@@ -175,11 +175,13 @@ async function detalheJira(x, caixa) {
 abas.execucoes = async (el) => {
   el.append(h('h1', {}, tr('Execuções')), h('p', {}, tr('Histórico centralizado do Prumo: rotinas agendadas e manuais, com resultado, evidência e comentário Jira. Consultar esta tela não conta como execução de QA.')));
   const espacos = await chamar(api.espacos) || []; const f = estado.filtroExec || (estado.filtroExec = {});
+  // Trocar de projeto descarta o filtro anterior: a tela sempre corresponde ao projeto selecionado.
+  if (f.selecionadoQuando !== (estado.espaco?.id ?? null)) { for (const k of Object.keys(f)) delete f[k]; f.selecionadoQuando = estado.espaco?.id ?? null; }
   if (!f.espacoId && estado.espaco && f.todos !== true) f.espacoId = estado.espaco.id;
   const proj = h('select', { id: 'f-projeto' }, h('option', { value: '' }, tr('Todos os projetos')), espacos.map((e) => h('option', { value: e.id, selected: e.id === f.espacoId }, e.nome)));
   const tk = h('input', { id: 'f-ticket', placeholder: 'SMART-1', value: f.ticket || '' }); const res = h('select', { id: 'f-resultado' }, h('option', { value: '' }, tr('Qualquer resultado')), ['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'ERRO_INFRA', 'INFO'].map((v) => h('option', { value: v, selected: v === f.resultado }, v)));
   el.append(h('div', { class: 'barra' }, campoA('Projeto', proj, 'f-projeto'), campoA('Ticket', tk, 'f-ticket'), campoA('Resultado', res, 'f-resultado'),
-    botao('Filtrar', () => { estado.filtroExec = { espacoId: proj.value || undefined, todos: !proj.value, ticket: tk.value.trim().toUpperCase() || undefined, resultado: res.value || undefined, rotinaId: f.rotinaId }; mostrar('execucoes'); }, 'f-aplicar'),
+    botao('Filtrar', () => { estado.filtroExec = { espacoId: proj.value || undefined, todos: !proj.value, ticket: tk.value.trim().toUpperCase() || undefined, resultado: res.value || undefined, rotinaId: f.rotinaId, selecionadoQuando: f.selecionadoQuando }; mostrar('execucoes'); }, 'f-aplicar'),
     f.rotinaId ? botao('Limpar filtro de rotina', () => { delete estado.filtroExec.rotinaId; mostrar('execucoes'); }) : null));
   const m = await chamar(() => api.metricasExecucoes(f.espacoId)); const cel = (n, t) => h('div', {}, h('b', {}, String(n)), h('span', {}, tr(t)));
   if (m) el.append(h('div', { class: 'grade', id: 'metricas-exec' }, cel(m.execucoes, 'execuções'), cel(m.pass, 'PASS'), cel(m.fail, 'FAIL'), cel(m.blocked, 'BLOCKED'), cel(m.notRun, 'NOT_RUN'), cel(m.consultas, 'consultas (INFO)'), cel(m.rotinasAtivas, 'rotinas ativas'), cel(m.rotinasPausadas, 'rotinas pausadas'),
