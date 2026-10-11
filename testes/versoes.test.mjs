@@ -98,3 +98,16 @@ test('notas de release só afirmam "assinado" quando o pipeline confirmou (PRUMO
   assert.match(assinado, /assinado digitalmente \(Authenticode/); assert.doesNotMatch(assinado, /Instalador NÃO ASSINADO/);
   assert.match(assinado, /não\*\* substitui uma assinatura digital/, 'o checksum continua sem ser tratado como assinatura');
 });
+
+test('catálogo: toda versão com tag publicada no Git está marcada como publicada, com o link oficial (exceto a versão em preparação)', async () => {
+  const { execFileSync } = await import('node:child_process'); const fs = await import('node:fs');
+  let tags = []; try { tags = execFileSync('git', ['tag', '--list', 'v[0-9]*.[0-9]*.[0-9]*'], { encoding: 'utf8' }).split(/\r?\n/).filter(Boolean); } catch { /* sem Git: nada a conferir */ }
+  const pacote = JSON.parse(fs.readFileSync('package.json', 'utf8')).version; const catalogo = JSON.parse(fs.readFileSync('app/versoes.json', 'utf8')).versions;
+  for (const tag of tags) {
+    const versao = tag.slice(1); if (versao === pacote) continue; const v = catalogo.find((x) => x.version === versao); if (!v) continue;
+    assert.equal(v.status, 'publicada', `${versao} tem tag ${tag} e não pode ficar como "${v.status}": o site e o aplicativo anunciariam a versão errada`);
+    assert.equal(v.releaseUrl, `https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/${tag}`);
+  }
+  // A versão anunciada pelo site é a primeira marcada como publicada
+  assert.ok(catalogo.find((x) => x.status === 'publicada'));
+});

@@ -12,7 +12,7 @@ const PrumoI18n = (() => {
   function traduzir(s) {
     if (idioma !== 'en' || typeof s !== 'string') return s; const n = norm(s); if (!n) return s;
     let t = dic()[n];
-    if (t === undefined) for (const [re, r] of regras()) if (re.test(n)) { t = n.replace(re, r); break; }
+    if (t === undefined) for (const [re, r] of regras()) if (re.test(n)) { t = typeof r === 'function' ? r(re.exec(n)) : n.replace(re, r); break; }
     if (t === undefined) return s;
     return (/^\s*/.exec(s) || [''])[0] + t + (/\s*$/.exec(s) || [''])[0];
   }

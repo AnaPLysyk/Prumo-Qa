@@ -21,3 +21,12 @@ test('documentos são escapados e nunca viram HTML ou URL executável',()=>{
   const html=markdown('# Teste\n<script>alert(1)</script>\n[texto](javascript:alert)\n```js\n<img onerror=alert(1)>\n```');
   assert.doesNotMatch(html,/<script|<img|href="javascript:/);assert.match(html,/&lt;script&gt;/);
 });
+test('site anuncia como disponível a última versão marcada como publicada no catálogo (não uma anterior)',t=>{
+  const out=fs.mkdtempSync(path.join(os.tmpdir(),'prumo-site-'));t.after(()=>fs.rmSync(out,{recursive:true,force:true}));gerarSite(out);
+  const versoes=JSON.parse(fs.readFileSync('app/versoes.json','utf8')).versions;const publicada=versoes.find(v=>v.status==='publicada');
+  for(const pagina of ['versoes.html','index.html']){const html=fs.readFileSync(path.join(out,pagina),'utf8');
+    assert.ok(html.includes(`<strong>${publicada.version}</strong>`)||html.includes(`v${publicada.version}`)||html.includes(publicada.version),`${pagina} deve citar ${publicada.version}`);
+    for(const velha of versoes.filter(v=>v.status==='publicada'&&v.version!==publicada.version))assert.ok(!html.includes(`Última versão publicada registrada: <strong>${velha.version}</strong>`),`${pagina} não pode anunciar ${velha.version}`);}
+  const html=fs.readFileSync(path.join(out,'versoes.html'),'utf8');assert.match(html,new RegExp(`Última versão publicada registrada: <strong>${publicada.version.replaceAll('.','\.')}</strong>`));
+  assert.ok(html.includes(`/releases/tag/v${publicada.version}`));
+});

@@ -21,11 +21,11 @@ test('versão igual, instalada mais nova e comparação numérica (2.10 > 2.9)',
 
 test('ausência de release (404), indisponibilidade, falha de rede e timeout mantêm o uso local', async () => {
   assert.equal((await verificarAtualizacao('2.2.0', { buscar: async () => new Response('{}', { status: 404 }) })).status, 'SEM_RELEASE');
-  for (const status of [403, 500, 503]) { const r = await verificarAtualizacao('2.2.0', { buscar: async () => new Response('x', { status }) }); assert.equal(r.status, 'INDISPONIVEL'); assert.equal(r.message, mensagemOffline); }
+  for (const status of [500, 503]) { const r = await verificarAtualizacao('2.2.0', { buscar: async () => new Response('x', { status }) }); assert.equal(r.status, 'INDISPONIVEL'); assert.equal(r.conclusivo, false); assert.equal(r.motivo, 'SERVIDOR'); assert.ok(r.message.endsWith(mensagemOffline)); }
   const rede = await verificarAtualizacao('2.2.0', { buscar: async () => { throw new TypeError('fetch failed'); } });
-  assert.equal(rede.status, 'INDISPONIVEL'); assert.equal(rede.message, 'Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.');
+  assert.equal(rede.status, 'INDISPONIVEL'); assert.equal(rede.motivo, 'REDE'); assert.match(rede.message, /O aplicativo continua disponível para uso local\./);
   const lento = await verificarAtualizacao('2.2.0', { timeoutMs: 80, buscar: (_u, init) => new Promise((_ok, ruim) => init.signal.addEventListener('abort', () => ruim(init.signal.reason))) });
-  assert.equal(lento.status, 'INDISPONIVEL');
+  assert.equal(lento.status, 'INDISPONIVEL'); assert.equal(lento.motivo, 'TEMPO_ESGOTADO');
 });
 
 test('respostas inválidas são ignoradas: JSON quebrado, tag estranha, rascunho, pré-release e resposta enorme', async () => {
@@ -83,4 +83,31 @@ test('HTTP real em loopback: lê release, não faz download e recusa redireciona
 test('o módulo nunca baixa nem executa instalador', async () => {
   const fonte = (await import('node:fs')).readFileSync('src/atualizacao.ts', 'utf8');
   assert.doesNotMatch(fonte, /child_process|spawn|exec\(|writeFile|createWriteStream|\.exe\b|shell\./);
+});
+
+test('2.8.1: "não foi possível consultar" nunca se confunde com "não existe atualização"', async () => {
+  let chamadas = 0; const resposta = (init) => async () => { chamadas += 1; return new Response('{}', init); };
+  const estado = async (init) => verificarAtualizacao('2.7.0', { buscar: resposta(init) });
+  // limite de consultas da API pública (429 e 403 com cota esgotada), com o horário informado pelo GitHub
+  const r429 = await estado({ status: 429, headers: { 'retry-after': '90' } });
+  assert.equal(r429.status, 'LIMITE_DE_TAXA'); assert.equal(r429.conclusivo, false); assert.equal(r429.motivo, 'LIMITE_DE_TAXA'); assert.ok(Date.parse(r429.tentarApos) > Date.now() + 60000); assert.match(r429.message, /Isto não significa que não exista uma atualização/);
+  const reset = Math.floor(Date.now() / 1000) + 1800;
+  const r403 = await estado({ status: 403, headers: { 'x-ratelimit-remaining': '0', 'x-ratelimit-reset': String(reset) } });
+  assert.equal(r403.status, 'LIMITE_DE_TAXA'); assert.equal(r403.tentarApos, new Date(reset * 1000).toISOString());
+  const semHorario = await estado({ status: 429 }); assert.equal(semHorario.status, 'LIMITE_DE_TAXA'); assert.equal(semHorario.tentarApos, undefined); assert.match(semHorario.message, /mais tarde/);
+  // 403 sem cota esgotada é recusa; 5xx é problema do servidor; nenhum diz que está atualizado
+  const recusa = await estado({ status: 403 }); assert.equal(recusa.status, 'INDISPONIVEL'); assert.equal(recusa.motivo, 'RECUSADO');
+  const servidor = await estado({ status: 502 }); assert.equal(servidor.motivo, 'SERVIDOR');
+  const semResposta = await verificarAtualizacao('2.7.0', { timeoutMs: 60, buscar: (_u, init) => new Promise((_ok, ruim) => init.signal.addEventListener('abort', () => ruim(init.signal.reason))) }); assert.equal(semResposta.motivo, 'TEMPO_ESGOTADO');
+  const rede = await verificarAtualizacao('2.7.0', { buscar: async () => { throw new TypeError('fetch failed'); } }); assert.equal(rede.motivo, 'REDE');
+  const invalida = await estado({ status: 200 }); assert.equal(invalida.status, 'RESPOSTA_INVALIDA'); assert.equal(invalida.conclusivo, false);
+  for (const r of [r429, r403, semHorario, recusa, servidor, semResposta, rede, invalida]) {
+    assert.equal(r.conclusivo, false); assert.equal(r.latest, undefined); assert.equal(r.url, undefined); assert.doesNotMatch(r.message, /já usa a versão mais recente|ATUALIZADO/);
+  }
+  // Somente respostas válidas são conclusivas; uma verificação = uma requisição, sem nova tentativa automática
+  chamadas = 0; const nova = await verificarAtualizacao('2.7.0', { buscar: async () => { chamadas += 1; return new Response(JSON.stringify(release('v2.8.1')), { status: 200 }); } });
+  assert.equal(nova.status, 'ATUALIZACAO_DISPONIVEL'); assert.equal(nova.conclusivo, true); assert.equal(chamadas, 1);
+  const igual = await verificarAtualizacao('2.8.1', { buscar: async () => new Response(JSON.stringify(release('v2.8.1')), { status: 200 }) }); assert.equal(igual.status, 'ATUALIZADO'); assert.equal(igual.conclusivo, true);
+  assert.equal((await estado({ status: 404 })).conclusivo, true);
+  chamadas = 0; await estado({ status: 429 }); await estado({ status: 503 }); assert.equal(chamadas, 2, 'cada verificação faz exatamente uma requisição');
 });

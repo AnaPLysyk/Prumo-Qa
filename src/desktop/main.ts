@@ -145,7 +145,7 @@ canal('atualizacao:verificar', async () => {
   const teste = !app.isPackaged ? process.env.PRUMO_UPDATE_TEST_URL : undefined;
   let r;
   try { r = await verificarAtualizacao(versao, teste ? { url: teste, permitirLocal: true } : { url: urlConsulta }); }
-  catch { r = { status: 'INDISPONIVEL' as const, installed: versao, message: mensagemOffline }; }
+  catch { r = { status: 'INDISPONIVEL' as const, installed: versao, conclusivo: false, motivo: 'REDE' as const, message: mensagemOffline }; }
   ultimaRelease = r.status === 'ATUALIZACAO_DISPONIVEL' ? r.url : undefined;
   // Só respostas válidas alteram o aviso persistente; falha de rede mantém o que já se sabia (o sino continua offline).
   const valido = r.status === 'ATUALIZACAO_DISPONIVEL' || r.status === 'ATUALIZADO' || r.status === 'INSTALADA_MAIS_NOVA';

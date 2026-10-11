@@ -1,6 +1,10 @@
 # Prumo QA 2.8 — Plataforma desktop de engenharia de qualidade
 
-Versão 2.8.0 em validação; a última release publicada é [2.7.0](https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.7.0). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+Versão atual 2.8.1; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+
+## Correção 2.8.1
+
+A verificação de atualização agora diz o que aconteceu quando não conclui: sem conexão, tempo esgotado, recusa do GitHub (HTTP 403), erro do servidor (5xx) ou **limite de consultas** (HTTP 429 ou 403 com cota esgotada, com o horário de nova tentativa quando o GitHub o informa). Consulta que não conclui nunca é mostrada como "você já usa a versão mais recente" nem apaga o aviso já conhecido; a tela mostra a data da última consulta concluída. Continua uma requisição manual, sem token, sem nova tentativa automática e sem consulta em segundo plano. O catálogo de versões passou a marcar a 2.8.0 como publicada (o site anunciava uma versão antiga porque versões já lançadas ficavam como "no repositório"); um teste impede que isso se repita e o CI confere a release publicada. Publicar o site no Render continua sendo um passo manual (o serviço `prumo-qa-docs` está com deploy automático desligado).
 
 ## Evolução 2.8
 

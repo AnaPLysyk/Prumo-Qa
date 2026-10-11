@@ -13,7 +13,7 @@ function h(tag, attrs, ...filhos) {
   for (const f of filhos.flat()) if (f != null && f !== false) el.append(f.nodeType ? f : document.createTextNode(String(f)));
   return el;
 }
-const rotulosSelo = { NAO_CONFIGURADO: 'NÃO CONFIGURADO', NAO_APLICAVEL: 'NÃO APLICÁVEL', ERRO_INFRA: 'ERRO DE INFRAESTRUTURA', EXECUTANDO: 'EXECUTANDO' };
+const rotulosSelo = { NAO_CONFIGURADO: 'NÃO CONFIGURADO', NAO_APLICAVEL: 'NÃO APLICÁVEL', ERRO_INFRA: 'ERRO DE INFRAESTRUTURA', EXECUTANDO: 'EXECUTANDO', INDISPONIVEL: 'CONSULTA NÃO CONCLUÍDA', LIMITE_DE_TAXA: 'LIMITE DE CONSULTAS', RESPOSTA_INVALIDA: 'RESPOSTA INVÁLIDA', SEM_RELEASE: 'SEM RELEASE', ATUALIZADO: 'ATUALIZADO', ATUALIZACAO_DISPONIVEL: 'ATUALIZAÇÃO DISPONÍVEL' };
 const selo = (s) => h('span', { class: 'estado ' + s }, rotulosSelo[s] || s.replaceAll('_', ' '));
 const hora = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR') : '—');
 const ms = (n) => (n === null || n === undefined ? 'indisponível' : Math.round(n * 10) / 10 + ' ms');
@@ -335,6 +335,7 @@ async function painelAtualizacoes() {
     const r = await chamar(api.verificarAtualizacao); botao.disabled = false; if (!r) return saida.replaceChildren();
     await aplicarNotificacao(r);
     const nos = [h('p', {}, selo(r.status), ' ', r.message)];
+    if (r.conclusivo === false) { const pr = await chamar(api.preferencias); const ult = pr && pr.preferencias.ultimaConsulta; nos.push(h('p', { class: 'nota', id: 'consulta-nao-concluida' }, 'A consulta não foi concluída: ainda não sabemos se há atualização.' + (ult ? ' Última consulta concluída em ' + hora(ult) + '.' : ' Nenhuma consulta foi concluída até agora.'))); }
     if (r.latest) nos.push(h('p', {}, 'Instalada: ', h('strong', {}, r.installed), ' · Mais recente publicada: ', h('strong', {}, r.latest)));
     if (r.status === 'ATUALIZACAO_DISPONIVEL') nos.push(...detalhes(r.latest, r.notes));
     saida.replaceChildren(...nos);

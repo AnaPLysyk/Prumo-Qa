@@ -39,3 +39,4 @@
 /* Cabeçalho: marca, projeto, estado e controles em cima; navegação em linha própria. */
 header .marca { order: 1; } header .projeto { order: 2; } header #worker-estado { order: 3; } header #controles { order: 4; } header .sino-caixa { order: 5; margin-left: 0; } header nav { order: 6; flex-basis: 100%; }
 #tabela-exec { min-width: 1020px; } #tabela-exec th, #tabela-exec td { vertical-align: top; } #tabela-exec td:nth-child(4) { min-width: 90px; }
+.INDISPONIVEL, .LIMITE_DE_TAXA, .RESPOSTA_INVALIDA, .SEM_RELEASE { color: var(--aviso); } .ATUALIZADO { color: var(--ok); } .ATUALIZACAO_DISPONIVEL { color: var(--acento); }

@@ -146,6 +146,29 @@ window.PRUMO_EN_REGRAS = [
   [/^Última chamada MCP de: nenhum cliente \(identidade declarada pelo cliente\)\. (.+)$/, 'Last MCP call from: no client (identity declared by the client). Last observed call; Prumo does not prove an active session or the client\'s real identity.'],
   [/^Última chamada MCP de: (.+) \(identidade declarada pelo cliente\)\. (.+)$/, 'Last MCP call from: $1 (identity declared by the client). Last observed call; Prumo does not prove an active session or the client\'s real identity.']
 ];
+(() => {
+  const fim = 'Não foi possível verificar atualizações: a consulta não foi concluída. Isto não significa que não exista uma atualização. O aplicativo continua disponível para uso local.';
+  const fimEn = 'Could not check for updates: the query did not complete. This does not mean there is no update. The app remains available for local use.';
+  const semUso = ' Isto não significa que não exista uma atualização. O aplicativo continua disponível para uso local.';
+  const semUsoEn = ' This does not mean there is no update. The app remains available for local use.';
+  Object.assign(window.PRUMO_EN, {
+    [fim]: fimEn, ['Não foi possível falar com o GitHub (sem conexão ou resposta bloqueada). ' + fim]: 'Could not reach GitHub (no connection or blocked response). ' + fimEn, ['O GitHub não respondeu a tempo. ' + fim]: 'GitHub did not respond in time. ' + fimEn,
+    'A resposta recebida não é uma release oficial válida e foi ignorada. Isto não significa que não exista uma atualização.': 'The response received is not a valid official release and was ignored. This does not mean there is no update.',
+    'A consulta não foi concluída: ainda não sabemos se há atualização. Nenhuma consulta foi concluída até agora.': 'The query did not complete: we still do not know whether there is an update. No query has completed so far.',
+    'A consulta não foi concluída: ainda não sabemos se há atualização.': 'The query did not complete: we still do not know whether there is an update.',
+    'CONSULTA NÃO CONCLUÍDA': 'QUERY NOT COMPLETED', 'LIMITE DE CONSULTAS': 'QUERY LIMIT', 'RESPOSTA INVÁLIDA': 'INVALID RESPONSE', 'SEM RELEASE': 'NO RELEASE', 'ATUALIZADO': 'UP TO DATE', 'ATUALIZAÇÃO DISPONÍVEL': 'UPDATE AVAILABLE',
+    'O repositório oficial ainda não publicou nenhuma release.': 'The official repository has not published any release yet.', 'Você já usa a versão mais recente publicada.': 'You already use the latest published version.',
+    'A versão instalada é mais nova que a última release publicada.': 'The installed version is newer than the latest published release.'
+  });
+  window.PRUMO_EN_REGRAS.push(
+    [/^O GitHub recusou a consulta \(HTTP (\d+)\)\. Não foi possível verificar atualizações: a consulta não foi concluída\..*$/, (m) => 'GitHub refused the query (HTTP ' + m[1] + '). ' + fimEn],
+    [/^O GitHub está com problemas \(HTTP (\d+)\)\. Não foi possível verificar atualizações: a consulta não foi concluída\..*$/, (m) => 'GitHub is having problems (HTTP ' + m[1] + '). ' + fimEn],
+    [/^O GitHub limitou o número de consultas \(HTTP (\d+)\)\. Tente de novo depois de (\S+)\. Isto não significa.*$/, (m) => 'GitHub limited the number of queries (HTTP ' + m[1] + '). Try again after ' + m[2] + '.' + semUsoEn],
+    [/^O GitHub limitou o número de consultas \(HTTP (\d+)\)\. Tente de novo mais tarde\. Isto não significa.*$/, (m) => 'GitHub limited the number of queries (HTTP ' + m[1] + '). Try again later.' + semUsoEn],
+    [/^Última consulta concluída em (.+)\.$/, (m) => 'Last completed query on ' + m[1] + '.'], [/^A consulta não foi concluída: ainda não sabemos se há atualização\. Última consulta concluída em (.+)\.$/, (m) => 'The query did not complete: we still do not know whether there is an update. Last completed query on ' + m[1] + '.']
+  );
+  void semUso;
+})();
 Object.assign(window.PRUMO_EN, {
   'k6 encontrado neste computador.': 'k6 found on this computer.', 'k6 não encontrado no PATH: a rotina ficará NOT_RUN até instalar o k6 oficial.': 'k6 not found on PATH: the routine will stay NOT_RUN until the official k6 is installed.',
   'sem cenários individuais': 'no individual scenarios',

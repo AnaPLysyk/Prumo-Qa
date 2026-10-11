@@ -90,7 +90,7 @@ test('Atualizações: release mais nova, igual, inexistente e indisponível; abr
   await page.click('text=Verificar atualizações');
   await page.waitForSelector('text=Abrir página oficial…');
   let txt = await page.textContent('article');
-  assert.match(txt, /ATUALIZACAO DISPONIVEL/); assert.match(txt, /99\.0\.0/); assert.match(txt, /Item novo importante/); assert.match(txt, /instalador não é assinado/);
+  assert.match(txt, /ATUALIZAÇÃO DISPONÍVEL/); assert.match(txt, /99\.0\.0/); assert.match(txt, /Item novo importante/); assert.match(txt, /instalador não é assinado/);
   assert.equal(pedidos.length, 1); assert.equal(pedidos[0].m, 'GET'); assert.equal(pedidos[0].c, undefined); assert.equal(pedidos[0].a, undefined); assert.equal(pedidos[0].ua, 'PrumoQA/' + versao);
   assert.doesNotMatch(JSON.stringify(pedidos), /Users|AppData|prumo dados|projects/i);
   // abrir: cancelar não abre; confirmar abre somente a URL oficial reconstruída da tag
@@ -104,7 +104,7 @@ test('Atualizações: release mais nova, igual, inexistente e indisponível; abr
   assert.match((await chamar(page, 'abrirRelease')).error, /NO_VERIFIED_RELEASE/, 'sem atualização disponível não há o que abrir');
   modo = '404'; await page.click('text=Verificar atualizações'); await page.waitForSelector('text=ainda não publicou nenhuma release');
   srv.close(); await page.click('text=Verificar atualizações');
-  await page.waitForSelector('text=Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.');
+  await page.waitForSelector('text=Isto não significa que não exista uma atualização'); assert.match(await page.textContent('#consulta-nao-concluida'), /ainda não sabemos se há atualização/); assert.equal(await page.locator('text=já usa a versão mais recente').count(), 0, 'falha de consulta nunca vira "atualizado"');
   await ir(page, 'projetos'); assert.match(await page.textContent('#conteudo'), /Projetos/, 'aplicativo segue utilizável');
 });
 
@@ -117,9 +117,9 @@ test('Atualizações com o destino oficial real: qualquer resposta válida é ap
   await page.click('text=Verificar atualizações');
   await page.waitForSelector('article .estado', { timeout: 20000 });
   const estado = (await page.textContent('article .estado')).trim();
-  assert.match(estado, /^(ATUALIZACAO DISPONIVEL|ATUALIZADO|INSTALADA MAIS NOVA|SEM RELEASE|INDISPONIVEL)$/);
-  if (estado === 'INDISPONIVEL') assert.match(await page.textContent('article'), /O aplicativo continua disponível para uso local/);
-  if (estado !== 'ATUALIZACAO DISPONIVEL') assert.equal(await page.locator('text=Abrir página oficial…').count(), 0);
+  assert.match(estado, /^(ATUALIZAÇÃO DISPONÍVEL|ATUALIZADO|INSTALADA MAIS NOVA|SEM RELEASE|CONSULTA NÃO CONCLUÍDA|LIMITE DE CONSULTAS)$/);
+  if (estado === 'CONSULTA NÃO CONCLUÍDA') assert.match(await page.textContent('article'), /O aplicativo continua disponível para uso local/);
+  if (estado !== 'ATUALIZAÇÃO DISPONÍVEL') assert.equal(await page.locator('text=Abrir página oficial…').count(), 0);
   await ir(page, 'projetos'); assert.match(await page.textContent('#conteudo'), /Projetos/);
 });
 

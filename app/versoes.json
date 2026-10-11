@@ -2,8 +2,44 @@
   "schemaVersion": 1,
   "versions": [
     {
-      "version": "2.8.0",
+      "version": "2.8.1",
       "status": "repositorio",
+      "date": "2026-10-10",
+      "title": "Verificação de atualização que diz o que aconteceu",
+      "objective": "Corrigir o catálogo de versões publicadas e distinguir, na verificação de atualização, \"não foi possível consultar\" de \"não existe atualização\".",
+      "features": [
+        "A consulta de atualização informa o motivo quando não conclui: sem conexão, tempo esgotado, recusa do GitHub, erro do servidor ou limite de consultas, com o horário em que tentar de novo quando o GitHub o informa."
+      ],
+      "improvements": [
+        "Consulta que não concluiu nunca é apresentada como \"você já usa a versão mais recente\" e não altera o aviso já conhecido; a tela mostra a data da última consulta concluída.",
+        "Catálogo de versões: o site e a ajuda passam a tratar a 2.8.0 e a 2.7.0 como publicadas, com o link oficial; um teste impede que uma versão com tag fique marcada como sem release."
+      ],
+      "fixes": [
+        "HTTP 403 com limite esgotado e HTTP 429 deixam de aparecer como falha genérica de rede.",
+        "O site de documentação anunciava uma versão antiga porque o catálogo marcava versões já publicadas como \"no repositório\"."
+      ],
+      "differential": "A pessoa sabe se o Prumo está atualizado ou se a verificação simplesmente não pôde ser feita.",
+      "howItWorks": [
+        "Continua uma única requisição GET manual (ou ao abrir, se você ligar a opção) à release oficial; sem nova tentativa automática nem consulta em segundo plano."
+      ],
+      "security": [
+        "Nenhuma credencial, token ou cabeçalho de autenticação foi adicionado; o destino continua fixo e redirecionamentos continuam bloqueados."
+      ],
+      "compatibility": [
+        "Nenhuma mudança em dados, contrato qa.project.json, MCP, agendamentos ou integrações. Os instaladores já publicados não foram alterados."
+      ],
+      "limitations": [
+        "A API pública do GitHub limita consultas sem autenticação; o Prumo não usa token para isso. Instalador sem assinatura."
+      ],
+      "migration": "A instalação preserva os dados existentes; nenhuma conversão.",
+      "afterUpdate": [
+        "Em Ajuda > Atualizações, use Verificar atualizações; se o GitHub limitar as consultas, o aviso informa quando tentar de novo."
+      ],
+      "releaseUrl": null
+    },
+    {
+      "version": "2.8.0",
+      "status": "publicada",
       "date": "2026-10-10",
       "title": "Agendamentos, bandeja do Windows e identidade Quality Control",
       "objective": "Organizar e executar uma rotina de QA sem IA: agendamentos persistentes, worker residente na bandeja, execuções autorizadas (testes e k6), histórico centralizado e comentário de resultado no Jira, com a identidade visual Quality Control, temas e dois idiomas.",
@@ -48,7 +84,7 @@
         "Em Agendamentos, crie uma rotina e use Autorizar execuções agendadas para os testes.",
         "Opcional: ligue iniciar com o Windows; crie uma política de publicação para comentários no Jira."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.8.0"
     },
     {
       "version": "2.7.0",

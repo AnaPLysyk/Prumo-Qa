@@ -186,3 +186,19 @@ jobs:
             release/Prumo-QA-Setup-*.exe
             release/Prumo-QA-Setup-*.exe.sha256
           body_path: release-notes.md
+      - name: Conferir a release publicada (instalador idêntico ao gerado)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $pagina = Invoke-WebRequest "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v$v" -UseBasicParsing
+          if ($pagina.StatusCode -ne 200) { throw "Release v$v não encontrada" }
+          $baixado = Join-Path $env:RUNNER_TEMP "publicado-$v.exe"
+          Invoke-WebRequest "https://github.com/AnaPLysyk/Prumo-Qa/releases/download/v$v/Prumo-QA-Setup-$v.exe" -OutFile $baixado
+          $hash = (Get-FileHash $baixado -Algorithm SHA256).Hash.ToLower()
+          $local = (Get-FileHash (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $local) { throw "O instalador publicado difere do gerado: $hash <> $local" }
+          "Release v$v conferida; SHA-256 $hash"
+          # O catálogo (app/versoes.json) só pode marcar a versão como publicada depois da tag; o commit seguinte faz isso e o site é publicado a partir dele.
+          $estado = ((Get-Content app/versoes.json -Raw | ConvertFrom-Json).versions | Where-Object { $_.version -eq $v }).status
+          "::notice::Catálogo marca $v como '$estado'. Se não for 'publicada', faça o commit de publicação do catálogo e o deploy do site."
