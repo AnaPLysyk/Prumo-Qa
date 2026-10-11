@@ -58,8 +58,8 @@ test('Integrações técnicas: catálogo de IPC e MCP corresponde ao código e f
   const { page } = await abrir(t, dados);
   await abrirAjuda(page, 'Integrações técnicas');
   const total = Object.keys(esquemasIpc).length;
-  assert.equal(await page.locator('details.operacao').count(), total + 4);
-  await page.selectOption('#filtro-tipo', 'MCP'); assert.equal(await page.locator('details.operacao').count(), 4);
+  assert.equal(await page.locator('details.operacao').count(), total + 7);
+  await page.selectOption('#filtro-tipo', 'MCP'); assert.equal(await page.locator('details.operacao').count(), 7);
   await page.selectOption('#filtro-tipo', 'IPC'); assert.equal(await page.locator('details.operacao').count(), total);
   const logs = page.locator('details.operacao', { hasText: 'prumo:projeto:logs' }).first(); await logs.locator('summary').click();
   const t1 = await logs.textContent();

@@ -16,23 +16,11 @@
     <span id="worker-estado" class="chip" data-nivel="aviso" role="status"><i></i>Worker</span>
     <div id="controles" class="controles"></div>
     <nav id="nav" aria-label="Seções">
-      <button data-aba="inicio">Início</button>
-      <button data-aba="projetos">Projetos</button>
-      <button data-aba="contextos">Contextos</button>
-      <button data-aba="tickets">Tickets</button>
-      <button data-aba="testes">Testes</button>
-      <button data-aba="automacoes">Automações</button>
-      <button data-aba="agenda">Agendamentos</button>
-      <button data-aba="execucoes">Execuções</button>
-      <button data-aba="rastreabilidade">Rastreabilidade</button>
-      <button data-aba="metricas">Métricas</button>
-      <button data-aba="logs">Logs</button>
-      <button data-aba="historico">Histórico</button>
-      <button data-aba="evidencias">Evidências</button>
-      <button data-aba="conexoes">Conexões</button>
-      <button data-aba="agentes">Agentes</button>
-      <button data-aba="suporte">Suporte</button>
-      <button data-aba="ajuda">Ajuda</button>
+      <div class="grupo-nav" role="group" aria-label="Trabalho"><span class="grupo-rotulo" aria-hidden="true">Trabalho</span><button data-aba="inicio">Início</button><button data-aba="projetos">Projetos</button><button data-aba="contextos">Contextos</button></div>
+      <div class="grupo-nav" role="group" aria-label="Qualidade"><span class="grupo-rotulo" aria-hidden="true">Qualidade</span><button data-aba="tickets">Tickets</button><button data-aba="testes">Testes</button><button data-aba="runs">Planos e Runs</button><button data-aba="vinculos">Vínculos</button><button data-aba="automacoes">Automações</button><button data-aba="agenda">Agendamentos</button></div>
+      <div class="grupo-nav" role="group" aria-label="Resultados"><span class="grupo-rotulo" aria-hidden="true">Resultados</span><button data-aba="execucoes">Execuções</button><button data-aba="evidencias">Evidências</button><button data-aba="rastreabilidade">Rastreabilidade</button><button data-aba="metricas">Métricas</button><button data-aba="historico">Histórico</button><button data-aba="logs">Logs</button></div>
+      <div class="grupo-nav" role="group" aria-label="Integrações"><span class="grupo-rotulo" aria-hidden="true">Integrações</span><button data-aba="conexoes">Conexões</button><button data-aba="agentes">Agentes</button></div>
+      <div class="grupo-nav" role="group" aria-label="Apoio"><span class="grupo-rotulo" aria-hidden="true">Apoio</span><button data-aba="suporte">Suporte</button><button data-aba="ajuda">Ajuda</button></div>
     </nav>
     <div class="sino-caixa">
       <button id="sino" class="sino" type="button" aria-label="Atualizações do Prumo QA: nenhuma novidade" aria-describedby="sino-dica">
@@ -45,10 +33,12 @@
   <main id="conteudo" tabindex="-1"></main>
   <div id="aviso" role="status" aria-live="polite" hidden></div>
   <script src="i18n-en.js"></script>
+  <script src="i18n-en-29.js"></script>
   <script src="i18n.js"></script>
   <script src="qc.js"></script>
   <script src="app.js"></script>
   <script src="plataforma.js"></script>
   <script src="agenda.js"></script>
+  <script src="integracoes.js"></script>
 </body>
 </html>

@@ -12,13 +12,13 @@ import { consultarAtividades, pastaAtividades, semLinks } from './atividades.js'
 export const clientes = ['codex', 'claude'] as const;
 type Cliente = typeof clientes[number];
 type Plano = ReturnType<typeof prepararConexao>;
-const tools = ['contexto_projeto', 'revisar_cobertura', 'executar_validacao', 'consultar_evidencias'];
+const tools = ['contexto_projeto', 'revisar_cobertura', 'executar_validacao', 'consultar_evidencias', 'listar_politicas', 'propor_caso', 'propor_bug'];
 const digest = z.string().regex(/^[a-f0-9]{64}$/);
 const registroSchema = z.object({
   id: z.string().uuid(), client: z.enum(clientes), rootHash: digest, projectHash: digest, manifestHash: digest,
   configurationHash: digest, at: z.string().datetime(), durationMs: z.number().finite().nonnegative(),
   state: z.enum(['VALIDADO', 'ERRO']), code: z.enum(['PROTOCOL_OK', 'PROTOCOL_FAILED']),
-  handshake: z.boolean(), tools: z.array(z.enum(tools as [string, ...string[]])).max(4), read: z.boolean(),
+  handshake: z.boolean(), tools: z.array(z.enum(tools as [string, ...string[]])).max(7), read: z.boolean(),
   origin: z.literal('sdk-protocolo')
 }).strict();
 type Registro = z.infer<typeof registroSchema>;
@@ -129,7 +129,7 @@ export async function testarProtocolo(p: Projeto, client: Cliente) {
     await Promise.race([(async () => {
       await sdk.connect(transporte); r.handshake = true;
       const lista = await sdk.listTools({}, { timeout: 5000 });
-      if (lista.tools.length !== 4 || !tools.every(n => lista.tools.some(t => t.name === n))) throw new Error('tools');
+      if (lista.tools.length !== tools.length || !tools.every(n => lista.tools.some(t => t.name === n))) throw new Error('tools');
       r.tools = tools.slice();
       const chamada = await sdk.callTool({ name: 'consultar_evidencias', arguments: {} }, undefined, { timeout: 5000 });
       if (chamada.isError) throw new Error('read');

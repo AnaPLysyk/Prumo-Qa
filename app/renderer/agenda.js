@@ -2,7 +2,7 @@
 // Agendamentos, Execuções (histórico centralizado), Início e preferências do Prumo residente (2.8).
 // Apresentação apenas: nenhuma regra de agenda, autorização ou resultado é calculada aqui; tudo vem do processo principal.
 const DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
-const TIPOS = { 'consulta-jira': 'Consulta Jira', smoke: 'Smoke', regressao: 'Regressão', 'validacao-ticket': 'Validação por ticket', 'analise-mudancas': 'Análise de mudanças', k6: 'Desempenho (k6)' };
+const TIPOS = { 'consulta-jira': 'Consulta Jira', smoke: 'Smoke', regressao: 'Regressão', 'validacao-ticket': 'Validação por ticket', 'analise-mudancas': 'Análise de mudanças', k6: 'Desempenho (k6)', 'run-qase': 'Run do Qase' };
 const AMBIENTES = { local: 'Local', teste: 'Teste', homologacao: 'Homologação', producao: 'Produção' };
 const rotuloTipo = (t) => tr(TIPOS[t] || t);
 
@@ -90,14 +90,17 @@ function formularioRotina(espacos, existente, aoSalvar) {
   const gCap = campoA('Automação declarada (capability)', cap, 'rotina-capability'); const gTicket = campoA('Ticket Jira (opcional)', ticket, 'rotina-ticket');
   const gEm = campoA('Data e hora (no fuso informado)', em, 'rotina-em'); const gMin = campoA('Intervalo (minutos)', min, 'rotina-minutos'); const gHr = campoA('Horário', hr, 'rotina-hora'); const gDias = h('div', { class: 'campo' }, h('span', {}, tr('Dias da semana')), dias);
   const gK6 = h('div', { id: 'bloco-k6' }, h('p', { class: 'suave' }, tr('k6 usa o executável oficial instalado. Limites obrigatórios: até 50 usuários virtuais e 600 s. Produção é bloqueada.')), campoA('Script k6 (dentro do projeto)', k6s, 'k6-script'), campoA('Destino (em ambiente local: localhost)', k6a, 'k6-alvo'), campoA('Usuários virtuais (1–50)', k6u, 'k6-usuarios'), campoA('Duração em segundos (1–600)', k6d, 'k6-duracao'));
+  const runSel = h('select', { id: 'rotina-run' }); const gRun = campoA('Run do Qase (já criada)', runSel, 'rotina-run');
   const msg = h('div', { id: 'rotina-erro', role: 'alert' });
   const k6aviso = h('p', { class: 'suave', id: 'k6-disponibilidade' });
   gK6.prepend(k6aviso);
   const atualizar = async () => {
     const t = tipo.value; const exec = ['smoke', 'regressao'].includes(t);
-    gCap.hidden = !exec; gK6.hidden = t !== 'k6'; gTicket.hidden = !['validacao-ticket', 'consulta-jira', 'smoke', 'regressao', 'k6'].includes(t);
+    gCap.hidden = !exec; gK6.hidden = t !== 'k6'; gRun.hidden = t !== 'run-qase'; gTicket.hidden = !['validacao-ticket', 'consulta-jira', 'smoke', 'regressao', 'k6'].includes(t);
     gEm.hidden = freq.value !== 'unico'; gMin.hidden = freq.value !== 'intervalo'; gHr.hidden = !['diario', 'semanal'].includes(freq.value); gDias.hidden = freq.value !== 'semanal';
     const a = await chamar(() => api.espacoAutomacoes(proj.value)); const caps = a?.capacidades || [];
+    const runs = ((await chamar(() => api.runs(proj.value))) || []).filter((x) => x.runIdRemoto);
+    runSel.replaceChildren(...(runs.length ? runs : [null]).map((x) => (x ? h('option', { value: x.id, selected: x.id === r?.runLocalId }, `${x.titulo} (Qase #${x.runIdRemoto})`) : h('option', { value: '' }, tr('(nenhuma run criada no Qase)')))));
     k6aviso.textContent = a?.k6Disponivel ? tr('k6 encontrado neste computador.') : tr('k6 não encontrado no PATH: a rotina ficará NOT_RUN até instalar o k6 oficial.');
     cap.replaceChildren(...(caps.length ? caps : ['']).map((c) => h('option', { value: c, selected: c === r?.capability }, c || tr('(nenhuma capability declarada)'))));
   };
@@ -106,18 +109,19 @@ function formularioRotina(espacos, existente, aoSalvar) {
     const t = tipo.value; const dados = { nome: nome.value, espacoId: proj.value, tipo: t, ambiente: amb.value, fuso: fuso.value, politicaPerdido: perd.value, toleranciaMinutos: Number(tol.value) };
     if (['smoke', 'regressao'].includes(t)) dados.capability = cap.value; if (ticket.value.trim() && !gTicket.hidden) dados.ticket = ticket.value.trim().toUpperCase();
     if (t === 'k6') dados.k6 = { script: k6s.value, alvo: k6a.value, usuarios: Number(k6u.value), duracaoSegundos: Number(k6d.value) };
+    if (t === 'run-qase') dados.runLocalId = runSel.value;
     if (t === 'consulta-jira') dados.operacaoJira = dados.ticket ? 'ticket' : 'tickets';
     dados.frequencia = freq.value === 'unico' ? { tipo: 'unico', em: em.value ? paredeParaISO(em.value, fuso.value) : '' } : freq.value === 'intervalo' ? { tipo: 'intervalo', minutos: Number(min.value) } : freq.value === 'diario' ? { tipo: 'diario', hora: hr.value } : { tipo: 'semanal', dias: [...dias.querySelectorAll('input:checked')].map((i) => Number(i.value)), hora: hr.value };
     const rr = await api.agendaSalvar(r?.id, dados);
     if (!rr.ok) { msg.replaceChildren(h('div', { class: 'nota erro' }, rr.error)); return; } avisar(tr('Rotina salva.')); aoSalvar();
   }, 'rotina-salvar');
-  return h('div', { class: 'formulario', id: 'rotina-form' }, h('h2', {}, tr(r ? 'Editar rotina' : 'Nova rotina')), campoA('Nome', nome, 'rotina-nome'), campoA('Projeto Prumo', proj, 'rotina-projeto'), campoA('Tipo de rotina', tipo, 'rotina-tipo'), gCap, gTicket, gK6, campoA('Ambiente', amb, 'rotina-ambiente'),
+  return h('div', { class: 'formulario', id: 'rotina-form' }, h('h2', {}, tr(r ? 'Editar rotina' : 'Nova rotina')), campoA('Nome', nome, 'rotina-nome'), campoA('Projeto Prumo', proj, 'rotina-projeto'), campoA('Tipo de rotina', tipo, 'rotina-tipo'), gCap, gRun, gTicket, gK6, campoA('Ambiente', amb, 'rotina-ambiente'),
     campoA('Frequência', freq, 'rotina-freq'), gEm, gMin, gHr, gDias, campoA('Fuso horário (nome IANA, ex.: America/Sao_Paulo)', fuso, 'rotina-fuso'), campoA('Se o Prumo estiver fechado no horário', perd, 'rotina-perdido'), campoA('Tolerância de atraso (min)', tol, 'rotina-tolerancia'), msg, salvar, ' ', botao('Cancelar', aoSalvar, 'rotina-cancelar'));
 }
 const seloAut = (a) => h('li', {}, h('code', {}, a.capability), ' ', selo(a.estado), a.validaAte ? ' · ' + tr('até {quando}', { quando: hora(a.validaAte) }) : '', a.usos ? ' · ' + tr('usos {n}', { n: a.usos }) : '');
 function cartaoRotina(r, espacos, recarregar) {
   const proj = espacos.find((e) => e.id === r.espacoId); const dias = h('input', { type: 'number', min: 1, max: 30, value: 7, id: 'aut-dias-' + r.id }); const usos = h('input', { type: 'number', min: 1, max: 1000, value: 20, id: 'aut-usos-' + r.id });
-  const precisaAut = ['smoke', 'regressao', 'validacao-ticket', 'k6'].includes(r.tipo);
+  const precisaAut = ['smoke', 'regressao', 'validacao-ticket', 'k6', 'run-qase'].includes(r.tipo);
   const ult = r.ultimaExecucao;
   return h('section', { class: 'agenda-rotina', 'data-rotina': r.id },
     h('h2', {}, r.nome, ' ', selo(r.estado)),
