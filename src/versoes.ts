@@ -16,7 +16,9 @@ export const versaoSchema = z.object({
   title: z.string().min(1).max(120), objective: z.string().min(1).max(800),
   features: lista, improvements: lista, fixes: lista, differential: z.string().max(800), howItWorks: lista,
   security: lista, compatibility: lista, limitations: lista, migration: z.string().max(600), afterUpdate: lista,
-  releaseUrl: z.string().url().nullable()
+  releaseUrl: z.string().url().nullable(),
+  // Instalador oficial: o SHA-256 vem do arquivo .sha256 anexado à release (conferido no CI); só existe para versão publicada.
+  installer: z.object({ file: z.string().regex(/^Prumo-QA-Setup-\d+\.\d+\.\d+\.exe$/), sha256: z.string().regex(/^[0-9a-f]{64}$/) }).strict().optional()
 }).strict();
 export const versoesSchema = z.object({ schemaVersion: z.literal(1), versions: z.array(versaoSchema).min(1).max(100) }).strict();
 export type Versao = z.infer<typeof versaoSchema>;
@@ -45,6 +47,7 @@ export function validarVersoes(bruto: unknown): Versao[] {
     const v = versions[i]!;
     if (i > 0 && compararVersoes(versions[i - 1]!.version, v.version) <= 0) throw new Error(`VERSIONS_ORDER: ${v.version} fora de ordem ou repetida.`);
     if (v.status === 'publicada' && (!v.date || v.releaseUrl !== urlRelease(v.version))) throw new Error(`VERSIONS_INCONSISTENT: ${v.version} publicada exige data e o link oficial da release.`);
+    if (v.installer && (v.status !== 'publicada' || v.installer.file !== `Prumo-QA-Setup-${v.version}.exe`)) throw new Error(`VERSIONS_INCONSISTENT: ${v.version} só pode ter instalador se publicada e com o nome oficial.`);
     if (v.status === 'planejada' && (v.date || v.releaseUrl)) throw new Error(`VERSIONS_INCONSISTENT: ${v.version} planejada não pode ter data nem release.`);
     if (v.status === 'repositorio' && v.releaseUrl) throw new Error(`VERSIONS_INCONSISTENT: ${v.version} sem release não pode ter link de release.`);
   }

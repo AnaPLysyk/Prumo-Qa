@@ -2,6 +2,49 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.9.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "Integrações completas, agentes com políticas e site novo",
+      "objective": "Ler e, com a sua confirmação, escrever em Jira, Qase e GitHub; rastrear projeto, ticket, caso, run, execução e evidência; controlar o que a IA pode pedir; e apresentar tudo no site renovado.",
+      "features": [
+        "Jira: busca de tickets com filtros, detalhe com histórico, anexos e transições, criação de bug ou melhoria, comentário, anexo, vínculo, alteração de campos e mudança de status, sempre com prévia e confirmação nativa.",
+        "Qase: suites, casos (criar e editar), planos, runs, execução das automações associadas, resultados publicados em lote e conferidos relendo a run, anexos e associação de caso a ticket.",
+        "GitHub: seleção de repositório, branches, commits, Pull Requests e execuções do Actions; escrita somente em branch prumo/..., nunca na principal, sem force push.",
+        "Mapa de vínculos Projeto ↔ Jira ↔ Qase ↔ Repositório ↔ Ticket ↔ Caso ↔ Plano ↔ Run ↔ Execução ↔ Evidência, com origem de cada relação e lacunas de cadastro.",
+        "Agentes: oito especializações por projeto e políticas por capacidade aplicadas no servidor MCP (7 ferramentas); a IA só propõe rascunhos de casos e bugs.",
+        "Agendamentos: nova rotina \"Run do Qase\" que executa as automações da run e só publica com uma política aprovada para ela.",
+        "Site institucional renovado, com capturas reais de um projeto de demonstração isolado, demonstração interativa sem JavaScript, página de download com SHA-256 verificável e tutoriais."
+      ],
+      "improvements": [
+        "Navegação agrupada (Trabalho, Qualidade, Resultados, Integrações, Apoio) na identidade Quality Control, em português e inglês.",
+        "Catálogo de versões passa a registrar o instalador oficial e o SHA-256 conferido de cada release publicada."
+      ],
+      "fixes": [],
+      "differential": "Da leitura do ticket à evidência publicada no Qase, cada passo é rastreável e nada é escrito fora do que você confirmou.",
+      "howItWorks": [
+        "Escrita externa nasce desligada por projeto e serviço. Cada operação mostra a prévia, pede confirmação nativa do Windows, usa uma chave de idempotência e confirma relendo o serviço.",
+        "Rotinas agendadas só publicam resultados no Qase com uma política aprovada por run (validade e número de usos)."
+      ],
+      "security": [
+        "Rotas de escrita fechadas por serviço, sem DELETE, sem redirecionamento e com IP público fixado. Credenciais continuam protegidas pelo Windows e não são acessíveis ao agente de IA.",
+        "A IA não cria nem reutiliza aprovações humanas; o bloqueio das capacidades vale no servidor MCP a cada chamada."
+      ],
+      "compatibility": [
+        "Dados e contrato qa.project.json da 2.8 são preservados; a configuração de agentes parte do padrão (tudo habilitado, escrita externa desligada)."
+      ],
+      "limitations": [
+        "Instalador sem assinatura de código. Escritas em Jira, Qase e GitHub reais não foram exercitadas em contas reais nesta versão: os testes usam serviços simulados.",
+        "Logs e artefatos do GitHub Actions exigem redirecionamento, bloqueado por segurança; o Prumo mostra o resultado e o link oficial."
+      ],
+      "migration": "A instalação preserva os dados existentes; novos arquivos locais são criados no primeiro uso.",
+      "afterUpdate": [
+        "Em Conexões, habilite a escrita só nos serviços em que quiser que o Prumo crie ou atualize recursos.",
+        "Em Agentes, revise as especializações e as capacidades permitidas ao seu cliente de IA."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.8.1",
       "status": "publicada",
       "date": "2026-10-10",
@@ -35,7 +78,11 @@
       "afterUpdate": [
         "Em Ajuda > Atualizações, use Verificar atualizações; se o GitHub limitar as consultas, o aviso informa quando tentar de novo."
       ],
-      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.8.1"
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.8.1",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.8.1.exe",
+        "sha256": "6bdac8eaee4dcb040c1d23b67061d9e6a91bceadff9302d67f63542cbfb6db6a"
+      }
     },
     {
       "version": "2.8.0",
@@ -84,7 +131,11 @@
         "Em Agendamentos, crie uma rotina e use Autorizar execuções agendadas para os testes.",
         "Opcional: ligue iniciar com o Windows; crie uma política de publicação para comentários no Jira."
       ],
-      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.8.0"
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.8.0",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.8.0.exe",
+        "sha256": "e9794ac5d01dce1d46200a0250eb6bf4f2742cfbf8c2b6a47e06bf565ca3297c"
+      }
     },
     {
       "version": "2.7.0",
@@ -130,7 +181,11 @@
         "Crie um projeto Prumo em Projetos; pasta de automação é opcional.",
         "Configure leitura em Conexões, liste recursos e confirme os vínculos. Agentes mantém o MCP."
       ],
-      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.7.0"
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.7.0",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.7.0.exe",
+        "sha256": "3febfd139ced5d201c934dbb8674294677645301999a432e0cfd82b78a5cdbf5"
+      }
     },
     {
       "version": "2.6.0",
@@ -174,7 +229,11 @@
         "Abra Conexões, revise a configuração e use Testar integração.",
         "Para comprovar uso de cliente, faça uma chamada nesse cliente e consulte o registro; SDK de teste permanece separado."
       ],
-      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.6.0"
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.6.0",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.6.0.exe",
+        "sha256": "53c1de612536f13afe817b0dd4f9ff09343991d5ac4bb3c60eabc68486fec183"
+      }
     },
     {
       "version": "2.5.0",
