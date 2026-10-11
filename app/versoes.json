@@ -3,7 +3,7 @@
   "versions": [
     {
       "version": "2.8.1",
-      "status": "repositorio",
+      "status": "publicada",
       "date": "2026-10-10",
       "title": "Verificação de atualização que diz o que aconteceu",
       "objective": "Corrigir o catálogo de versões publicadas e distinguir, na verificação de atualização, \"não foi possível consultar\" de \"não existe atualização\".",
@@ -35,7 +35,7 @@
       "afterUpdate": [
         "Em Ajuda > Atualizações, use Verificar atualizações; se o GitHub limitar as consultas, o aviso informa quando tentar de novo."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.8.1"
     },
     {
       "version": "2.8.0",
