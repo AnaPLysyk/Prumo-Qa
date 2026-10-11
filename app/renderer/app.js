@@ -344,7 +344,7 @@ async function painelAtualizacoes() {
   } }), ' ' + rotulo);
   const pendente = p && p.disponivel && info ? p.disponivel : null;
   return [h('h1', {}, 'Atualizações'), h('p', {}, 'Versão instalada: ', h('strong', {}, info ? info.version : '?')),
-    h('p', { class: 'suave' }, 'O Prumo só consulta o GitHub quando você clica em verificar ou, se você ligar a opção abaixo, uma vez ao abrir o aplicativo. Nunca em segundo plano: não há serviço nem tarefa agendada. É enviada apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.'),
+    h('p', { class: 'suave' }, 'O Prumo só consulta o GitHub quando você clica em verificar ou, se você ligar a opção abaixo, uma vez ao abrir o aplicativo. A verificação de atualização nunca roda em segundo plano nem por tarefa agendada (as rotinas de QA que você agenda são outra coisa e não consultam o GitHub de releases). É enviada apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.'),
     botao, saida,
     pendente ? h('div', { id: 'ultima-conhecida' }, h('p', { class: 'nota' }, 'Última consulta' + (p.ultimaConsulta ? ' (' + hora(p.ultimaConsulta) + ')' : '') + ': a versão ' + pendente.versao + ' estava disponível.'), ...detalhes(pendente.versao, pendente.notas)) : null,
     h('h2', {}, 'Preferências de aviso'),

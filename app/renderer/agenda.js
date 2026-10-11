@@ -91,11 +91,14 @@ function formularioRotina(espacos, existente, aoSalvar) {
   const gEm = campoA('Data e hora (no fuso informado)', em, 'rotina-em'); const gMin = campoA('Intervalo (minutos)', min, 'rotina-minutos'); const gHr = campoA('Horário', hr, 'rotina-hora'); const gDias = h('div', { class: 'campo' }, h('span', {}, tr('Dias da semana')), dias);
   const gK6 = h('div', { id: 'bloco-k6' }, h('p', { class: 'suave' }, tr('k6 usa o executável oficial instalado. Limites obrigatórios: até 50 usuários virtuais e 600 s. Produção é bloqueada.')), campoA('Script k6 (dentro do projeto)', k6s, 'k6-script'), campoA('Destino (em ambiente local: localhost)', k6a, 'k6-alvo'), campoA('Usuários virtuais (1–50)', k6u, 'k6-usuarios'), campoA('Duração em segundos (1–600)', k6d, 'k6-duracao'));
   const msg = h('div', { id: 'rotina-erro', role: 'alert' });
+  const k6aviso = h('p', { class: 'suave', id: 'k6-disponibilidade' });
+  gK6.prepend(k6aviso);
   const atualizar = async () => {
     const t = tipo.value; const exec = ['smoke', 'regressao'].includes(t);
     gCap.hidden = !exec; gK6.hidden = t !== 'k6'; gTicket.hidden = !['validacao-ticket', 'consulta-jira', 'smoke', 'regressao', 'k6'].includes(t);
     gEm.hidden = freq.value !== 'unico'; gMin.hidden = freq.value !== 'intervalo'; gHr.hidden = !['diario', 'semanal'].includes(freq.value); gDias.hidden = freq.value !== 'semanal';
     const a = await chamar(() => api.espacoAutomacoes(proj.value)); const caps = a?.capacidades || [];
+    k6aviso.textContent = a?.k6Disponivel ? tr('k6 encontrado neste computador.') : tr('k6 não encontrado no PATH: a rotina ficará NOT_RUN até instalar o k6 oficial.');
     cap.replaceChildren(...(caps.length ? caps : ['']).map((c) => h('option', { value: c, selected: c === r?.capability }, c || tr('(nenhuma capability declarada)'))));
   };
   for (const c of [tipo, freq, proj]) c.addEventListener('change', atualizar); atualizar();

@@ -20,7 +20,7 @@ Respostas externas não são persistidas como cache. Cada tela indica origem, en
 - Qase: cabeçalho `Token` no host fixo `https://api.qase.io`. Leitura dos projetos/casos/runs disponíveis à conta. `GET /v1/project?limit=1&offset=0` valida o acesso, sem inventar identidade de conta.
 - GitHub: Bearer token no host fixo `https://api.github.com`, versão REST `2022-11-28`. Repositórios selecionados; leitura de Metadata, Contents, Pull requests e Checks conforme a operação, ou permissões equivalentes do token clássico. `GET /user` valida o principal. Permissões restritas podem permitir listar o repositório e recusar uma operação: a falha é exibida.
 
-O Prumo não oferece criar/editar tickets, comentários, casos, runs, resultados, PRs nem transições. Nenhum corpo de escrita é enviado. Não requer token de IA. Não clona repositórios privados nem baixa o código integral.
+As integrações de leitura não criam nem editam tickets, casos, runs, resultados, PRs nem transições. **Exceção única, desde a 2.8:** o comentário de resultado de QA em um ticket Jira do projeto vinculado (um POST a `/rest/api/3/issue/{key}/comment`), sempre com prévia e confirmação nativa ou política aprovada, sem mudar o status do ticket; veja [AGENDAMENTOS.md](AGENDAMENTOS.md). Nenhum outro corpo de escrita é enviado. Não requer token de IA. Não clona repositórios privados nem baixa o código integral.
 
 ## Catálogo REST implementado
 

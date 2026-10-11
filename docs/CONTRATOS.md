@@ -76,7 +76,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:contextos:excluir` | `id`, `root` | Apaga o arquivo do contexto e o seu histórico; mantém só um registro mínimo (id, data e hash) de que existiu. Nunca toca no projeto. |
 | `prumo:contextos:mcp` | `habilitar`, `root` | Quando habilitado, contexto_projeto e revisar_cobertura passam a ler os contextos deste projeto; o texto pode ser processado pelo provedor da IA conectada. |
 | `prumo:preferencias:obter` | — | Consulta local; não altera o projeto. |
-| `prumo:preferencias:salvar` | `idioma`, `iniciarComWindows`, `notificarAgenda`, `silenciar`, `som`, `tema`, `verificarAoIniciar` | Grava preferencias.json. Não cria serviço, tarefa agendada nem consulta em segundo plano. |
+| `prumo:preferencias:salvar` | `idioma`, `iniciarComWindows`, `notificarAgenda`, `silenciar`, `som`, `tema`, `verificarAoIniciar` | Grava preferencias.json. Iniciar com o Windows só registra o item de inicialização do usuário se a pessoa ligar a opção; não cria serviço do Windows, tarefa agendada nem consulta de atualização em segundo plano. |
 | `prumo:preferencias:visualizada` | `versao` | Grava preferencias.json. |
 | `prumo:suporte:preparar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Sem rede e sem gravação: só calcula o relato. |
 | `prumo:suporte:abrir` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Abre o navegador no formulário; nada é publicado até a pessoa enviar lá. Issues em repositório público são públicas. |
@@ -1073,13 +1073,13 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 ### `prumo:preferencias:salvar`
 
 - **Tipo:** IPC
-- **Finalidade:** Alterar verificar ao iniciar, som e silenciar.
+- **Finalidade:** Alterar verificar ao iniciar, som, silenciar, tema, idioma, iniciar com o Windows e avisos de agenda.
 - **Origem:** Interface > Ajuda > Atualizações > Preferências
 - **Destino:** main.ts > preferencias.alterarPreferencias
 - **Entrada:** Campos booleanos opcionais
 - **Saída:** preferencias
 - **Permissões:** Ação explícita da pessoa
-- **Efeito:** Grava preferencias.json. Não cria serviço, tarefa agendada nem consulta em segundo plano.
+- **Efeito:** Grava preferencias.json. Iniciar com o Windows só registra o item de inicialização do usuário se a pessoa ligar a opção; não cria serviço do Windows, tarefa agendada nem consulta de atualização em segundo plano.
 - **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\preferencias.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Somente campos booleanos conhecidos

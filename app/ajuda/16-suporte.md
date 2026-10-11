@@ -23,4 +23,4 @@ Em **Ajuda › Atualizações › Preferências de aviso** você escolhe:
 - **Som**: um som curto (dois tons) quando há versão nova. Toca **uma única vez por versão**, não repete ao reabrir.
 - **Silenciar**: nunca toca som.
 
-Não existe serviço, tarefa agendada nem consulta em segundo plano: o aviso só funciona com o aplicativo aberto. A consulta vai somente ao GitHub oficial, sem enviar logs, projetos, caminhos ou identificadores (o GitHub vê o seu endereço IP, como em qualquer conexão). **Nada é baixado nem instalado automaticamente.** Confira sempre o SHA-256 informado na página oficial.
+A consulta de atualização não existe em segundo plano nem como tarefa agendada: o aviso só funciona com o aplicativo aberto (janela ou bandeja) e quando você clica em verificar ou ligou a verificação ao abrir. A consulta vai somente ao GitHub oficial, sem enviar logs, projetos, caminhos ou identificadores (o GitHub vê o seu endereço IP, como em qualquer conexão). **Nada é baixado nem instalado automaticamente.** Confira sempre o SHA-256 informado na página oficial.

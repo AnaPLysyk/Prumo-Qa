@@ -1,4 +1,4 @@
-name: Windows — testes, instalador, atualização 2.2→atual e release
+name: Windows — testes, instalador, atualização 2.2/2.6/2.7→atual e release
 
 # Numa máquina Windows limpa: roda a suíte, gera o instalador NSIS, instala a 2.2.0 PUBLICADA (hash fixado),
 # cria dados reais com ela, instala a versão atual SOBRE a 2.2.0 em pasta com espaços e acentos, confere que os dados
@@ -21,8 +21,16 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: write
+    env:
+      # Prumo QA Lab público, fixado por commit: a demonstração 2.8 usa uma CÓPIA dele; o laboratório não é alterado nem entra no instalador.
+      PRUMO_LAB_DIR: ${{ github.workspace }}\.lab
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: AnaPLysyk/Prumo-QA-Lab
+          ref: 8808e57c5c997975f6588af00d4bb52fe642861a
+          path: .lab
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -83,7 +91,7 @@ jobs:
           if ($codigo -ne 0) { exit $codigo }
           if ((Select-String -Path migracao.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Testes de migração foram ignorados: etapa inválida' }
       - name: Janela e MCP do programa instalado (sem Node.js dedicado ao app)
-        run: node --test --test-concurrency=1 testes/desktop.test.mjs testes/desktop-ajuda.test.mjs testes/desktop-integracoes.test.mjs testes/desktop-contextos.test.mjs testes/desktop-plataforma.test.mjs
+        run: node --test --test-concurrency=1 testes/desktop.test.mjs testes/desktop-ajuda.test.mjs testes/desktop-integracoes.test.mjs testes/desktop-contextos.test.mjs testes/desktop-plataforma.test.mjs testes/desktop-agenda.test.mjs testes/desktop-jira.test.mjs testes/desktop-i18n.test.mjs testes/demonstracao-28.test.mjs
       - name: Instalar a 2.6 publicada, criar dados com ela e atualizar para a atual
         shell: pwsh
         run: |
@@ -108,6 +116,30 @@ jobs:
           Get-Content migracao-26.txt
           if ($codigo -ne 0) { exit $codigo }
           if ((Select-String -Path migracao-26.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Migração 2.6 não executada' }
+      - name: Instalar a 2.7 publicada, criar dados com ela e atualizar para a atual
+        shell: pwsh
+        run: |
+          $anterior27 = Join-Path $env:RUNNER_TEMP 'Prumo-QA-Setup-2.7.0.exe'
+          Invoke-WebRequest 'https://github.com/AnaPLysyk/Prumo-Qa/releases/download/v2.7.0/Prumo-QA-Setup-2.7.0.exe' -OutFile $anterior27
+          if ((Get-FileHash $anterior27 -Algorithm SHA256).Hash.ToLower() -ne '3febfd139ced5d201c934dbb8674294677645301999a432e0cfd82b78a5cdbf5') { throw 'Hash da 2.7 publicada não confere' }
+          $dir = 'C:\Prumo QA instalação'
+          Start-Process -FilePath $anterior27 -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
+          node scripts/preparar-dados-27.mjs $dir
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
+          Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
+          $esperada = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ((Get-Content "$dir\resources\app\package.json" -Raw | ConvertFrom-Json).version -ne $esperada) { throw 'Atualização 2.7 → atual falhou' }
+      - name: Verificar preservação dos dados criados pela 2.7 instalada
+        shell: pwsh
+        env:
+          PRUMO_MIGRACAO_27: '1'
+        run: |
+          node --test --test-concurrency=1 testes/migracao-27.test.mjs *> migracao-27.txt
+          $codigo = $LASTEXITCODE
+          Get-Content migracao-27.txt
+          if ($codigo -ne 0) { exit $codigo }
+          if ((Select-String -Path migracao-27.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Migração 2.7 não executada' }
       - name: Desinstalar e conferir que dados do usuário permanecem
         shell: pwsh
         run: |
@@ -116,7 +148,7 @@ jobs:
           Start-Process -FilePath "$dir\Uninstall Prumo QA.exe" -ArgumentList '/S' -WindowStyle Hidden -Wait
           for ($i = 0; $i -lt 60 -and (Test-Path "$dir\Prumo QA.exe"); $i++) { Start-Sleep 1 }
           if (Test-Path "$dir\Prumo QA.exe") { throw 'Programa não foi removido' }
-          foreach ($item in 'marca-migracao.txt', 'instantaneo-2.6.0.json', 'vinculos.json', 'projects', 'contextos') { if (-not (Test-Path (Join-Path $dados $item))) { throw "Desinstalação apagou dados do usuário: $item" } }
+          foreach ($item in 'marca-migracao.txt', 'instantaneo-2.6.0.json', 'instantaneo-2.7.0.json', 'vinculos.json', 'projects', 'contextos', 'plataforma') { if (-not (Test-Path (Join-Path $dados $item))) { throw "Desinstalação apagou dados do usuário: $item" } }
       - name: SHA-256 do instalador
         shell: pwsh
         run: |

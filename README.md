@@ -1,6 +1,12 @@
-# Prumo QA 2.7 — Plataforma desktop de engenharia de qualidade
+# Prumo QA 2.8 — Plataforma desktop de engenharia de qualidade
 
-Versão 2.7.0 em validação; a última release publicada é [2.6.0](https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.6.0). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+Versão 2.8.0 em validação; a última release publicada é [2.7.0](https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.7.0). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+
+## Evolução 2.8
+
+O Prumo passa a **organizar e executar uma rotina de QA sozinho**, sem IA: agendamentos único, por intervalo, diário e semanal (fuso e horário de verão), fila persistente por projeto, worker residente na **bandeja do Windows** e rotinas de consulta Jira, smoke, regressão, validação por ticket, análise de mudanças e k6 (executável oficial, limites explícitos, produção bloqueada). Testes agendados exigem autorização prévia restrita (projeto, ambiente, comando por hash, validade, limite de usos, revogável) obtida pelo mesmo broker nativo do Windows, que não foi alterado; sem ela a execução fica BLOCKED. Resultados do Playwright viram cenários individuais (reporter incluído). O histórico é centralizado por projeto, repositório, ticket e rotina, com métricas reais (sem porcentagem de qualidade).
+
+Única escrita remota: **comentário de resultado em ticket Jira**, com prévia e confirmação, ou política aprovada para rotinas agendadas; idempotente, sem alterar status. Interface com a identidade **Quality Control** (esfera e órbitas que só se movem com trabalho real), temas claro, escuro e do sistema, e português e inglês, tudo persistido por usuário. Claude e Codex continuam opcionais e sem poder de executar, agendar ou publicar. Veja [AGENDAMENTOS.md](docs/AGENDAMENTOS.md), a ajuda do aplicativo e [SEGURANCA.md](docs/SEGURANCA.md). Fora do instalador: o laboratório e a demonstração de 26 passos (`testes/demonstracao-28.test.mjs`).
 
 ## Evolução 2.7
 
@@ -42,7 +48,7 @@ O terminal consulta arquivos locais; a IA não precisa permanecer ligada. Uma ch
 ## Novidades da 2.5
 
 - **Suporte**: aba para relatar bug, melhoria ou sugestão. O relato é montado e revisado localmente (segredos bloqueiam, dados pessoais avisam), nada é anexado sem marcação e o formulário oficial de GitHub Issues só é aberto após confirmação nativa. Também exporta para arquivo, sem GitHub. Detalhes e triagem segura em [docs/SUPORTE.md](docs/SUPORTE.md).
-- **Sino de atualização** no cabeçalho (mouse, teclado e clique) e **som opcional** que toca uma vez por versão; preferências persistentes; sem serviço nem tarefa agendada; nada é baixado ou instalado automaticamente.
+- **Sino de atualização** no cabeçalho (mouse, teclado e clique) e **som opcional** que toca uma vez por versão; preferências persistentes; a verificação de atualização não roda em segundo plano e não há serviço do Windows nem tarefa agendada; nada é baixado ou instalado automaticamente.
 
 ## Novidades da 2.4
 

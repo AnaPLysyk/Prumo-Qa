@@ -13,6 +13,8 @@ files:
   - app/**
   - assets/**
   - skills/**
+  - reporters/**
+  - docs/AGENDAMENTOS.md
   - docs/SERVICOS.md
   - package.json
   - "!dist/**/*.map"

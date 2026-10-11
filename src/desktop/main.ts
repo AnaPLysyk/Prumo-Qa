@@ -31,6 +31,7 @@ import * as agendaCore from '../agenda.js';
 import * as agendaOp from '../agendaOperacoes.js';
 import * as autorizacoesCore from '../autorizacoes.js';
 import { solicitarAprovacao } from '../aprovacao.js';
+import { localizarK6 } from '../k6.js';
 import { listarExecucoes, metricas } from '../historicoCentral.js';
 import { prepararPublicacao, publicar as publicarComentario } from '../jiraComentario.js';
 
@@ -204,7 +205,7 @@ canal('espacos:criar',a=>espacos.criarEspaco(a));
 canal('espacos:obter',a=>espacos.obterEspaco(a.id));
 canal('espacos:editar',a=>espacos.editarEspaco(a.id,a.dados));
 canal('espacos:pasta',async(a,j)=>{espacos.obterEspaco(a.id);const r=await dialog.showOpenDialog(j!,{title:'Pasta de automação com contrato v2',properties:['openDirectory']});if(r.canceled||!r.filePaths[0])return {canceled:true};return espacos.pastaEspaco(a.id,r.filePaths[0]);});
-canal('espacos:automacoes',async a=>{const e=espacos.obterEspaco(a.id);if(!e.pastaLocal)return {pastaLocal:null,estado:'SEM_PASTA',frameworks:[],capacidades:[]};const p=await carregarProjeto(e.pastaLocal);const c=await contextoCompleto(p);return {pastaLocal:p.raiz,estado:'INTEGRADO',frameworks:c.frameworks,capacidades:Object.keys(p.manifesto.commands),readOnly:p.manifesto.execution.readOnly};});
+canal('espacos:automacoes',async a=>{const e=espacos.obterEspaco(a.id);const k6=(await localizarK6())!==null;if(!e.pastaLocal)return {pastaLocal:null,estado:'SEM_PASTA',frameworks:[],capacidades:[],k6Disponivel:k6};const p=await carregarProjeto(e.pastaLocal);const c=await contextoCompleto(p);return {pastaLocal:p.raiz,estado:'INTEGRADO',frameworks:c.frameworks,capacidades:Object.keys(p.manifesto.commands),readOnly:p.manifesto.execution.readOnly,k6Disponivel:k6};});
 canal('espacos:associar',a=>espacos.associarEspaco(a.id,a.dados));
 canal('servicos:listar',()=>servicos.contas());
 canal('servicos:adicionar',async(a,j)=>{if(!await confirmar(j,'Adicionar conexão de leitura',`Configurar ${a.servico}?`,'A credencial será protegida no perfil Windows. As consultas são explícitas; o renderer e os agentes não recebem a credencial armazenada. Não há permissão de escrita externa no Prumo.','Configurar'))return {canceled:true};return servicos.adicionar(a);});
@@ -337,11 +338,16 @@ function acaoMenu(id: ItemMenu['id']) {
   }
 }
 const menuBandeja = () => Menu.buildFromTemplate(modeloMenuBandeja(worker.estado(), idiomaAtual()).map(x => (x.id === 'separador' ? { type: 'separator' as const } : { label: x.rotulo, click: () => acaoMenu(x.id) })));
+/** Vigia o worker: se ele parar sem o usuário pedir, tenta reiniciar e avisa; nunca finge que está ativo. */
+function vigiarWorker() {
+  if (saindo || worker.estado().executando) return;
+  try { worker.iniciar(); empilhar({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Worker', detalhe: idiomaAtual() === 'en' ? 'The worker had stopped and was restarted.' : 'O worker tinha parado e foi reiniciado.' }); } catch { /* outra instância detém a trava */ }
+}
 function atualizarBandeja() { if (bandeja) { bandeja.setContextMenu(menuBandeja()); bandeja.setToolTip(dicaBandeja(worker.estado(), idiomaAtual())); } }
 function criarBandeja() {
   const icone = nativeImage.createFromPath(path.join(raizApp, 'assets', 'prumo-icon.png')).resize({ width: 16, height: 16 });
   bandeja = new Tray(icone); bandeja.on('click', () => mostrarJanela()); bandeja.on('double-click', () => mostrarJanela()); atualizarBandeja();
-  setInterval(atualizarBandeja, 15000).unref();
+  setInterval(() => { vigiarWorker(); atualizarBandeja(); }, 15000).unref();
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();

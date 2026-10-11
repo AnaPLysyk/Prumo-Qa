@@ -79,7 +79,6 @@ test('menu da bandeja: itens exigidos, pausar/retomar exclusivos, estado real e 
 });
 
 test('fechar a janela mantém o Prumo e o worker vivos; segunda instância é recusada; sair encerra e libera a trava', async (t) => {
-  if (exe) t.skip('o instalador é exercitado pelo CI com as mesmas verificações de ciclo de vida'); // o executável instalado é testado em outra etapa
   const dados = novoDados(t); const a = await abrir(t, dados, [], {}, { inicio: true });
   const estado = () => a.app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.executeJavaScript('window.prumo.workerEstado()'));
   assert.equal((await estado()).data.executando, true);
@@ -89,7 +88,7 @@ test('fechar a janela mantém o Prumo e o worker vivos; segunda instância é re
   const w = (await estado()).data; assert.equal(w.executando, true, 'worker segue ativo com a janela fechada'); assert.equal(w.trava.vivo, true); assert.equal(w.bandeja, true, 'ícone da bandeja existe');
   // Segunda instância sobre os mesmos dados: encerra sozinha, sem criar outro worker/janela
   const env = { ...process.env, PRUMO_DATA_DIR: dados }; delete env.ELECTRON_RUN_AS_NODE;
-  const segunda = spawn(electronPath, [repo], { env, stdio: 'ignore' }); const codigo = await new Promise((ok) => { const x = setTimeout(() => { segunda.kill(); ok('travou'); }, 20000); segunda.on('exit', (c) => { clearTimeout(x); ok(c); }); });
+  const segunda = spawn(exe ?? electronPath, exe ? [] : [repo], { env, stdio: 'ignore' }); const codigo = await new Promise((ok) => { const x = setTimeout(() => { segunda.kill(); ok('travou'); }, 20000); segunda.on('exit', (c) => { clearTimeout(x); ok(c); }); });
   assert.equal(codigo, 0, 'a segunda instância saiu por conta própria'); assert.equal(await a.app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length), 1);
   // Reabrir pelo "ícone": o mesmo caminho da segunda instância restaura a janela escondida
   await a.app.evaluate(({ app }) => app.emit('second-instance')); await a.page.waitForFunction(() => document.visibilityState === 'visible');

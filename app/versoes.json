@@ -2,8 +2,57 @@
   "schemaVersion": 1,
   "versions": [
     {
-      "version": "2.7.0",
+      "version": "2.8.0",
       "status": "repositorio",
+      "date": "2026-10-10",
+      "title": "Agendamentos, bandeja do Windows e identidade Quality Control",
+      "objective": "Organizar e executar uma rotina de QA sem IA: agendamentos persistentes, worker residente na bandeja, execuções autorizadas (testes e k6), histórico centralizado e comentário de resultado no Jira, com a identidade visual Quality Control, temas e dois idiomas.",
+      "features": [
+        "Agendamentos único, por intervalo, diário e semanal, com fuso e horário de verão, fila persistente por projeto e política explícita para horários perdidos.",
+        "Prumo residente na bandeja do Windows: fechar a janela mantém o worker; menu para abrir, ver agendamentos e execuções, pausar, retomar, ver o estado e sair.",
+        "Rotinas de consulta Jira, smoke, regressão, validação por ticket, análise de mudanças e k6 (executável oficial, com limites e produção bloqueada).",
+        "Autorização prévia restrita (projeto, ambiente, comando por hash, validade, limite de usos e revogação) e política de publicação no Jira; o broker nativo do Windows não foi alterado.",
+        "Comentário de resultado no Jira com prévia, confirmação, rastreabilidade e idempotência; resultados do Playwright com cenários individuais.",
+        "Histórico centralizado por projeto, repositório, ticket, rotina, estado e período, com métricas reais.",
+        "Identidade Quality Control (esfera, órbitas), temas claro, escuro e do sistema, e interface em português e inglês."
+      ],
+      "improvements": [
+        "Avisos e som opcional para rotina iniciada, concluída, falha, bloqueio e publicação Jira com falha, sem repetir o mesmo aviso.",
+        "Execução manual e agendada passam pelo mesmo núcleo de autorização, evidência e histórico."
+      ],
+      "fixes": [
+        "Tela Execuções passa a acompanhar o projeto selecionado: trocar de projeto descarta o filtro anterior.",
+        "Primeira tela montada somente depois de todos os scripts da página carregarem."
+      ],
+      "differential": "O Prumo organiza e executa a rotina de QA sozinho, com permissões limitadas e evidências rastreáveis; IA é uma assistência opcional.",
+      "howItWorks": [
+        "Um worker no processo principal vence horários, enfileira trabalhos idempotentes e executa somente capabilities declaradas.",
+        "Falha de teste é resultado; falha de infraestrutura pode ter nova tentativa limitada; horário perdido nunca é registrado como executado."
+      ],
+      "security": [
+        "Autorização agendada é escopo exato por hash: se projeto, comando ou fontes mudam, a execução fica BLOCKED.",
+        "A única escrita remota é um comentário no ticket do projeto vinculado, com host e caminho fixos, política ou confirmação nativa e idempotência."
+      ],
+      "compatibility": [
+        "Contrato qa.project.json v2, quatro tools MCP, CLI, integrações Jira/Qase/GitHub de leitura, contextos e Claude/Codex preservados.",
+        "Preferências antigas continuam válidas; tema, idioma, início com o Windows (desligado) e avisos de agenda são novos campos com padrão."
+      ],
+      "limitations": [
+        "Leitor de tela e autenticação humana do Windows em execução agendada real não foram verificados; testes usam consentimento simulado pelo runner.",
+        "Jira real com escrita, Qase e GitHub reais não foram exercitados sem credenciais próprias; publicação Qase não existe.",
+        "k6 real depende do executável oficial instalado; Playwright depende do projeto do usuário; português do Brasil e inglês completos, ajuda longa só em português.",
+        "Se o computador estiver desligado ou suspenso nada é executado; o Prumo não é serviço do Windows. Instalador sem assinatura."
+      ],
+      "migration": "A instalação preserva os dados. Agenda, fila e autorizações são arquivos novos; preferências antigas ganham padrões.",
+      "afterUpdate": [
+        "Em Agendamentos, crie uma rotina e use Autorizar execuções agendadas para os testes.",
+        "Opcional: ligue iniciar com o Windows; crie uma política de publicação para comentários no Jira."
+      ],
+      "releaseUrl": null
+    },
+    {
+      "version": "2.7.0",
+      "status": "publicada",
       "date": "2026-10-10",
       "title": "Plataforma desktop de engenharia de qualidade",
       "objective": "Trabalho manual sem IA, projetos com identidade própria e consultas autenticadas de leitura ao Jira Cloud, Qase v1 e GitHub, sem mudar o núcleo MCP/CLI.",
@@ -45,7 +94,7 @@
         "Crie um projeto Prumo em Projetos; pasta de automação é opcional.",
         "Configure leitura em Conexões, liste recursos e confirme os vínculos. Agentes mantém o MCP."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.7.0"
     },
     {
       "version": "2.6.0",

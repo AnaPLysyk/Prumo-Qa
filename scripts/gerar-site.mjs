@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
-const fontes=[...fs.readdirSync(path.join(repo,'app/ajuda')).filter(n=>n.endsWith('.md')).map(n=>'app/ajuda/'+n),'docs/SEGURANCA.md','docs/SUPORTE.md','docs/ASSINATURA.md','docs/CONTRATOS.md','docs/SERVICOS.md'];
+const fontes=[...fs.readdirSync(path.join(repo,'app/ajuda')).filter(n=>n.endsWith('.md')).map(n=>'app/ajuda/'+n),'docs/SEGURANCA.md','docs/SUPORTE.md','docs/ASSINATURA.md','docs/CONTRATOS.md','docs/SERVICOS.md','docs/AGENDAMENTOS.md'];
 const nome=f=>'documentacao-'+path.basename(f,'.md').toLowerCase()+'.html';
 const repoUrl='https://github.com/AnaPLysyk/Prumo-Qa';
 function destino(href,origem) {
