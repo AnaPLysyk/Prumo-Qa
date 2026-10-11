@@ -9,6 +9,10 @@ import {paginaSchema,codigosServico} from './httpServicos.js';
 import {operacoesServico} from './adaptadoresServicos.js';
 import {dadosRotinaSchema} from './agenda.js';
 import {filtroExecucoes} from './historicoCentral.js';
+import {idsDeOperacao} from './operacoesExternas.js';
+import {filtrosSchema} from './leiturasServicos.js';
+import {ambientes} from './agenda.js';
+import {esquemaCaso} from './escritaQase.js';
 import { conteudoSchema, tipos as tiposContexto, estados as estadosContexto } from './contextos.js';
 
 /**
@@ -37,9 +41,32 @@ export const esquemasIpc = {
   'servicos:vincular': z.object({espacoId:z.string().uuid(),conexaoId:z.string().uuid(),recurso:identidadeRecurso}).strict(),
   'servicos:desvincular': z.object({espacoId:z.string().uuid(),servico:servicoSchema}).strict(),
   'servicos:conferir': z.object({espacoId:z.string().uuid(),servico:servicoSchema}).strict(),
-  'servicos:consultar': z.object({espacoId:z.string().uuid(),servico:servicoSchema,operacao:z.enum(operacoesServico),pagina:paginaSchema.optional(),id:z.string().max(200).optional()}).strict(),
+  'servicos:consultar': z.object({espacoId:z.string().uuid(),servico:servicoSchema,operacao:z.enum(operacoesServico),pagina:paginaSchema.optional(),id:z.string().max(200).optional(),filtros:filtrosSchema.optional()}).strict(),
   'servicos:aceite': z.object({espacoId:z.string().uuid(),campo:z.string().regex(/^customfield_\d+$/)}).strict(),
   'servicos:importar': z.object({espacoId:z.string().uuid(),ticket:z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/)}).strict(),
+  'operacoes:previa': z.object({espacoId:z.string().uuid(),operacao:z.enum(idsDeOperacao),parametros:z.record(z.unknown())}).strict(),
+  'operacoes:executar': z.object({espacoId:z.string().uuid(),operacao:z.enum(idsDeOperacao),parametros:z.record(z.unknown()),anexo:z.discriminatedUnion('tipo',[z.object({tipo:z.literal('evidencia'),jobId:z.string().uuid()}).strict(),z.object({tipo:z.literal('arquivo')}).strict()]).optional()}).strict(),
+  'operacoes:listar': z.object({espacoId:z.string().uuid().optional(),limite:z.number().int().min(1).max(500).optional()}).strict(),
+  'escrita:estado': z.object({espacoId:z.string().uuid()}).strict(),
+  'escrita:habilitar': z.object({espacoId:z.string().uuid(),servico:servicoSchema,habilitada:z.boolean()}).strict(),
+  'propostas:listar': z.object({espacoId:z.string().uuid()}).strict(),
+  'propostas:criar': z.object({espacoId:z.string().uuid(),tipo:z.enum(['caso','bug']),dados:z.record(z.unknown()),requisito:z.string().max(500).optional(),risco:z.string().max(300).optional()}).strict(),
+  'propostas:editar': z.object({id:z.string().uuid(),dados:z.record(z.unknown()),requisito:z.string().max(500).optional(),risco:z.string().max(300).optional()}).strict(),
+  'propostas:revisar': z.object({id:z.string().uuid(),duplicidade:z.boolean(),requisito:z.boolean(),risco:z.boolean(),cobertura:z.boolean()}).strict(),
+  'propostas:descartar': z.object({id:z.string().uuid()}).strict(),
+  'propostas:publicar': z.object({id:z.string().uuid(),tipoId:z.string().regex(/^\d{1,12}$/).optional()}).strict(),
+  'runs:listar': z.object({espacoId:z.string().uuid()}).strict(),
+  'runs:preparar': z.object({espacoId:z.string().uuid(),titulo:z.string().trim().min(3).max(255),ambiente:z.enum(ambientes),casos:z.array(z.object({casoId:z.number().int().positive(),titulo:z.string().max(255)}).strict()).min(1).max(500),planoId:z.number().int().positive().optional()}).strict(),
+  'runs:criar': z.object({id:z.string().uuid()}).strict(),
+  'runs:executar': z.object({id:z.string().uuid()}).strict(),
+  'runs:resultado': z.object({id:z.string().uuid(),casoId:z.number().int().positive(),status:z.enum(['PASS','FAIL','BLOCKED']),comentario:z.string().trim().min(3).max(2000)}).strict(),
+  'runs:publicar': z.object({id:z.string().uuid(),anexarEvidencia:z.boolean().optional()}).strict(),
+  'runs:bugs': z.object({id:z.string().uuid()}).strict(),
+  'runs:politica': z.object({espacoId:z.string().uuid(),runId:z.number().int().positive(),dias:z.number().int().min(1).max(30),maxUsos:z.number().int().min(1).max(1000)}).strict(),
+  'runs:revogar': z.object({id:z.string().uuid()}).strict(),
+  'vinculos:mapa': z.object({espacoId:z.string().uuid()}).strict(),
+  'agentes:estado': z.object({espacoId:z.string().uuid()}).strict(),
+  'agentes:salvar': z.object({espacoId:z.string().uuid(),especializacoes:z.array(z.string().max(40)).max(16),politicas:z.record(z.string().max(30))}).strict(),
   'agenda:listar': z.object({espacoId:z.string().uuid().optional()}).strict(),
   'agenda:salvar': z.object({id:z.string().uuid().optional(),dados:dadosRotinaSchema}).strict(),
   'agenda:estado': z.object({id:z.string().uuid(),acao:z.enum(['pausar','retomar','desativar'])}).strict(),
@@ -164,6 +191,35 @@ for(const nome of Object.keys(esquemasIpc).filter(n=>n.startsWith('espacos:')||n
   const leitura=/:listar$|:obter$|:automacoes$|:recursos$|:consultar$|:conferir$|:validar$/.test(nome);
   ipc[nome]={finalidade:`${nome}: gestão explícita do projeto Prumo e integrações de leitura.`,origem:'Interface > Projetos, Tickets, Testes ou Conexões',destino:nome.startsWith('espacos:')?'main.ts > espacos.ts':'main.ts > servicos.ts > adaptadoresServicos.ts',entrada:'Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário',saida:leitura?'Metadados ou dados da consulta com origem, data e cache:false':'Registro local ou confirmação de cancelamento',permissoes:'Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.',efeito:leitura?'Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.':'Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.',arquivos:'Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional',erros:[...ipcErros,...codigosServico,'WORKSPACE_NOT_FOUND','CREDENTIAL_PROTECTION_UNAVAILABLE'],protecoes:[...ipcProtecoes,'Isolamento por identificador de projeto, conexão e instância','Sem conteúdo remoto ou token nos logs','Não exposto ao MCP'],registro:'Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido'};
 }
+// ---- 2.9: escritas externas, propostas, runs Qase, vínculos e agentes ----
+const extProt = [...ipcProtecoes, 'Isolamento por projeto Prumo, conexão e instância', 'Rotas de escrita em lista fechada (rotasEscrita.ts)', 'Escrita desligada por padrão por projeto e serviço', 'Confirmação nativa que a página não consegue simular', 'Idempotência e reconciliação; sem token nos logs'];
+const extErros = [...ipcErros, ...codigosServico, 'WRITE_NOT_ENABLED', 'HUMAN_CONFIRMATION_REQUIRED', 'WRITE_POLICY_MISSING', 'OPERATION_UNKNOWN', 'OPERATION_RETRY_LIMIT', 'WORKSPACE_NOT_FOUND'];
+const extDesc = (finalidade: string, entrada: string, saida: string, efeito: string, permissoes: string, extra: Partial<Descricao> = {}): Descricao => ({ finalidade, origem: 'Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões', destino: 'main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json', erros: extErros, protecoes: extProt, registro: 'Livro-razão local de operações externas e histórico do projeto', ...extra });
+Object.assign(ipc, {
+  'operacoes:previa': extDesc('Mostrar o resumo, o efeito e a chave de idempotência de uma operação externa antes de executá-la.', 'Projeto, operação do catálogo e parâmetros', 'Resumo mascarado, efeito, chave e se a escrita está habilitada', 'Sem rede e sem gravação.', 'Nenhuma'),
+  'operacoes:executar': extDesc('Executar uma operação externa do catálogo (criar ticket/caso/plano/run, anexar, editar, mudar status, vincular, branch, commit de teste, PR).', 'Projeto, operação, parâmetros e, para anexos, evidência do projeto ou arquivo escolhido no diálogo nativo', 'Registro da operação com estado (CONFIRMADA, ENVIADA, FALHA, BLOQUEADA) e identificador/link remoto', 'Escreve no Jira, Qase ou GitHub vinculados somente depois de confirmação nativa; relê o serviço para confirmar; repetir não duplica.', 'Escrita habilitada no projeto + confirmação nativa com o resumo exato', { protecoes: [...extProt, 'Caminho de arquivo nunca vem da página'] }),
+  'operacoes:listar': extDesc('Livro-razão das operações externas por projeto.', 'Projeto opcional e limite', 'Operações com estado, resumo, identificador remoto e tentativas', 'Consulta local.', 'Nenhuma'),
+  'escrita:estado': extDesc('Ver em quais serviços a escrita está habilitada no projeto.', 'Projeto', 'Habilitação por serviço', 'Consulta local.', 'Nenhuma'),
+  'escrita:habilitar': extDesc('Habilitar ou desabilitar a escrita externa de um serviço no projeto.', 'Projeto, serviço e habilitada', 'Estado da habilitação', 'Grava permissoes-servicos.json. Habilitar não executa nada; cada operação ainda pede confirmação.', 'Confirmação nativa ao habilitar'),
+  'propostas:listar': extDesc('Listar propostas de casos e bugs (da pessoa, do Prumo ou de uma IA).', 'Projeto', 'Propostas com estado, origem, revisão e semelhantes', 'Consulta local.', 'Nenhuma'),
+  'propostas:criar': extDesc('Criar uma proposta de caso de teste ou de bug em rascunho.', 'Projeto, tipo e dados (esquema estrito)', 'Proposta', 'Grava propostas.json. Não envia nada ao Qase ou Jira.', 'Ação explícita da pessoa'),
+  'propostas:editar': extDesc('Editar uma proposta; invalida a revisão anterior.', 'Id e dados', 'Proposta', 'Grava propostas.json.', 'Ação explícita da pessoa'),
+  'propostas:revisar': extDesc('Registrar a revisão (duplicidade, requisito, risco e cobertura) de uma proposta.', 'Id e as quatro confirmações', 'Proposta REVISADA', 'Grava propostas.json com quem revisou e quando. Proposta de IA exige revisão completa e requisito informado.', 'Confirmação da pessoa'),
+  'propostas:descartar': extDesc('Descartar uma proposta.', 'Id da proposta', 'Proposta DESCARTADA', 'Grava propostas.json.', 'Ação explícita da pessoa'),
+  'propostas:publicar': extDesc('Publicar uma proposta (caso no Qase ou bug no Jira).', 'Id e, para bug, o tipo de ticket', 'Registro da operação externa e proposta PUBLICADA', 'Cria o caso ou o ticket depois da confirmação nativa e registra o vínculo como REGISTRADO_PELO_PRUMO.', 'Escrita habilitada + revisão (IA) + confirmação nativa'),
+  'runs:listar': extDesc('Listar as runs locais do projeto (preparadas, criadas, executadas e publicadas).', 'Projeto', 'Runs com casos, resultados e publicações', 'Consulta local.', 'Nenhuma'),
+  'runs:preparar': extDesc('Preparar uma run local com casos do Qase e identificar quais têm automação associada.', 'Projeto, título, ambiente e casos', 'Run local PREPARADA', 'Grava runs-qase.json. Não cria nada no Qase.', 'Ação explícita da pessoa'),
+  'runs:criar': extDesc('Criar a run no Qase com os casos escolhidos.', 'Id da run local', 'Operação externa e id remoto da run', 'Cria a run no Qase após confirmação nativa. Criar a run não executa nada.', 'Escrita habilitada + confirmação nativa'),
+  'runs:executar': extDesc('Executar as automações associadas aos casos da run (somente capabilities declaradas).', 'Id da run local', 'Resultados por caso e evidências', 'Executa processos locais; cada automação pede a autenticação nativa do Windows. Casos manuais ficam sem resultado.', 'Autenticação humana nativa por capability', { protecoes: [...extProt, 'Broker nativo do Windows'] }),
+  'runs:resultado': extDesc('Declarar o resultado de um caso manual.', 'Run, caso, status e comentário', 'Run atualizada', 'Grava runs-qase.json marcando MANUAL e quem declarou. Nunca sobrescreve resultado de execução.', 'Ação explícita da pessoa'),
+  'runs:publicar': extDesc('Publicar no Qase os resultados ainda não publicados e reler a run.', 'Id da run local e se anexa evidências', 'Resultados enviados e confirmação', 'Envia resultados (passed, failed, blocked) após confirmação nativa; NOT_RUN nunca é enviado; repetir não duplica.', 'Escrita habilitada + confirmação nativa'),
+  'runs:bugs': extDesc('Preparar rascunhos de bug para as falhas da run.', 'Id da run local', 'Propostas de bug', 'Grava propostas.json. Não cria tickets.', 'Ação explícita da pessoa'),
+  'runs:politica': extDesc('Aprovar uma política para publicar resultados de uma run em rotinas agendadas.', 'Projeto, run remota, validade e usos', 'Política de escrita', 'Grava autorizacoes.json. Sem política, rotina agendada não escreve no Qase.', 'Confirmação nativa'),
+  'runs:revogar': extDesc('Revogar uma política de escrita agendada.', 'Id da política', 'Política revogada', 'Grava autorizacoes.json.', 'Ação explícita da pessoa'),
+  'vinculos:mapa': extDesc('Mapa de vínculos entre projeto, Jira, Qase, repositório, tickets, casos, runs, execuções e evidências, com lacunas de cadastro.', 'Projeto', 'Nós, arestas com origem (declarado, registrado ou observado), lacunas e operações recentes', 'Consulta local; não prova cobertura.', 'Nenhuma'),
+  'agentes:estado': extDesc('Especializações, políticas e propostas de IA do projeto.', 'Projeto', 'Configuração, matriz de capacidades com motivo, contagem de propostas de IA', 'Consulta local.', 'Nenhuma'),
+  'agentes:salvar': extDesc('Habilitar especializações e bloquear capacidades da IA conectada neste projeto.', 'Projeto, especializações e políticas', 'Configuração salva', 'Grava agentes.json. O bloqueio vale no servidor MCP a cada chamada.', 'Confirmação nativa')
+});
 // ---- 2.8: agenda, execuções, comentário Jira e worker ----
 const agendaProt = [...ipcProtecoes, 'Isolamento por projeto Prumo', 'Sem comando livre: só capabilities declaradas', 'Não exposto ao MCP'];
 const agendaErros = [...ipcErros, 'SCHEDULE_NOT_FOUND', 'SCHEDULE_LIMIT', 'SCHEDULE_IN_THE_PAST', 'SCHEDULE_PROJECT_IMMUTABLE', 'WORKSPACE_NOT_FOUND'];
@@ -187,7 +243,7 @@ Object.assign(ipc, {
   'worker:eventos': agendaDesc('Receber avisos do worker e pedidos de navegação da bandeja desde o último número visto.', 'Último número de evento recebido', 'Eventos (iniciado, concluído, falhou, bloqueado, publicação falhou, worker interrompido, navegar) e último número', 'Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte).', 'Nenhuma', { origem: 'Interface > avisos e navegação pela bandeja', destino: 'main.ts > worker.ts' }),
   'worker:pausa': agendaDesc('Pausar ou retomar todos os agendamentos.', 'pausado (true/false)', 'Estado do worker', 'Grava a pausa global; trabalho em andamento termina sem ser corrompido.', 'Ação explícita da pessoa', { origem: 'Interface > Agendamentos ou menu da bandeja' })
 });
-export const canaisFrequentes: ReadonlySet<string> = new Set(['worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter']);
+export const canaisFrequentes: ReadonlySet<string> = new Set(['operacoes:previa','operacoes:listar','escrita:estado','propostas:listar','runs:listar','vinculos:mapa','agentes:estado','worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter']);
 
 const mcpProtecoes = ['Projeto fixado na configuração do servidor, nunca pela ferramenta', 'Leitura limitada à raiz autorizada', 'Registro de início e término'];
 const mcp: { nome: string; campos: string[]; d: Descricao }[] = [
@@ -197,6 +253,12 @@ const mcp: { nome: string; campos: string[]; d: Descricao }[] = [
   { nome: 'consultar_evidencias', campos: ['criterio', 'jobId'], d: { finalidade: 'Consultar resultados, logs e artefatos reais preservando o estado de cada um.', origem: 'Agente de IA por MCP (stdio)', destino: 'mcp.ts > evidencias.consultarEvidencias', entrada: 'jobId e critério opcionais', saida: 'Evidências ou NOT_RUN', permissoes: 'Servidor iniciado pelo cliente para um projeto', efeito: 'Somente leitura.', arquivos: '<projeto>/.prumo/evidencias/*.json', erros: ['INVALID_JOB', 'EVIDENCE_TAMPERED', 'PROJECT_MISMATCH'], protecoes: [...mcpProtecoes, 'Integridade por hash', 'Isolamento por projeto'], registro: 'Histórico de atividades (origem MCP)' } }
 ];
 
+const mcpExtra: { nome: string; campos: string[]; d: Descricao }[] = [
+  { nome: 'listar_politicas', campos: [], d: { finalidade: 'Informar à IA o que ela pode e não pode pedir neste projeto (especializações e capacidades).', origem: 'Agente de IA por MCP (stdio)', destino: 'mcp.ts > politicasAgentes.ts', entrada: 'Nenhuma', saida: 'Especializações habilitadas e capacidades com estado e motivo', permissoes: 'Servidor iniciado pelo cliente para um projeto', efeito: 'Somente leitura.', arquivos: 'plataforma/agentes.json', erros: ['POLICY_BLOCKED'], protecoes: [...mcpProtecoes, 'Política conferida no backend a cada chamada'], registro: 'Histórico de atividades (origem MCP)' } },
+  { nome: 'propor_caso', campos: [...camposDe(esquemaCaso), 'requisito', 'risco'].sort(), d: { finalidade: 'Propor um caso de teste como rascunho local.', origem: 'Agente de IA por MCP (stdio)', destino: 'mcp.ts > propostas.criarProposta', entrada: 'Caso (título, passos, suite, prioridade...), requisito e risco', saida: 'Id, estado RASCUNHO, semelhantes e aviso', permissoes: 'Capacidade propor_casos permitida pela política do projeto', efeito: 'Grava propostas.json. Não envia nada ao Qase; duplicata e excesso por hora são recusados.', arquivos: 'plataforma/propostas.json', erros: ['POLICY_BLOCKED', 'NO_WORKSPACE', 'DUPLICATE_PROPOSAL', 'PROPOSAL_RATE_LIMIT', 'PROPOSAL_LIMIT'], protecoes: [...mcpProtecoes, 'Só rascunho; a pessoa revisa e publica'], registro: 'Histórico de atividades (origem MCP)' } },
+  { nome: 'propor_bug', campos: ['descricao', 'origem', 'resumo', 'risco', 'rotulos'], d: { finalidade: 'Propor um bug como rascunho local.', origem: 'Agente de IA por MCP (stdio)', destino: 'mcp.ts > propostas.criarProposta', entrada: 'Resumo, descrição, ticket de origem e rótulos', saida: 'Id, estado RASCUNHO, semelhantes e aviso', permissoes: 'Capacidade propor_bugs permitida pela política do projeto', efeito: 'Grava propostas.json. Não cria ticket no Jira.', arquivos: 'plataforma/propostas.json', erros: ['POLICY_BLOCKED', 'NO_WORKSPACE', 'DUPLICATE_PROPOSAL', 'PROPOSAL_RATE_LIMIT'], protecoes: [...mcpProtecoes, 'Só rascunho; a pessoa abre o bug'], registro: 'Histórico de atividades (origem MCP)' } }
+];
+mcp.push(...mcpExtra);
 export function catalogo(): Operacao[] {
   return [
     ...(Object.keys(esquemasIpc) as CanalIpc[]).map(c => ({ tipo: 'IPC' as const, nome: 'prumo:' + c, campos: camposDe(esquemasIpc[c]), ...ipc[c]! })),

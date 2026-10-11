@@ -32,6 +32,13 @@ import * as agendaOp from '../agendaOperacoes.js';
 import * as autorizacoesCore from '../autorizacoes.js';
 import { solicitarAprovacao } from '../aprovacao.js';
 import { localizarK6 } from '../k6.js';
+import { executarValidacao } from '../execucao.js';
+import * as ext from '../operacoesExternas.js';
+import * as props from '../propostas.js';
+import * as fluxo from '../fluxoQase.js';
+import { publicarProposta, resolverAnexo } from '../acoesProposta.js';
+import { mapaDeVinculos } from '../rastreabilidade.js';
+import * as agentes from '../politicasAgentes.js';
 import { listarExecucoes, metricas } from '../historicoCentral.js';
 import { prepararPublicacao, publicar as publicarComentario } from '../jiraComentario.js';
 
@@ -215,7 +222,7 @@ canal('servicos:recursos',a=>servicos.listar(a.id,a.pagina));
 canal('servicos:vincular',async(a,j)=>{espacos.obterEspaco(a.espacoId);if(!await confirmar(j,'Confirmar vínculo',`Vincular ${a.recurso.nome}?`,`${a.recurso.instancia}\nID: ${a.recurso.id}\nConta: ${a.recurso.contaId}\nSomente este projeto Prumo. O recurso será revalidado. Nenhuma relação com outro serviço é deduzida.`,'Vincular'))return {canceled:true};return servicos.vincular(a.espacoId,a.conexaoId,a.recurso);});
 canal('servicos:desvincular',async(a,j)=>{espacos.obterEspaco(a.espacoId);if(!await confirmar(j,'Remover vínculo',`Remover o vínculo ${a.servico}?`,'Relações anteriores e histórico serão preservados. Nenhum dado externo será excluído.','Remover'))return {canceled:true};return espacos.removerVinculoServico(a.espacoId,a.servico);});
 canal('servicos:conferir',a=>servicos.validarVinculo(a.espacoId,a.servico));
-canal('servicos:consultar',a=>servicos.consultar(a.espacoId,a.servico,a.operacao,a.pagina,a.id));
+canal('servicos:consultar',a=>servicos.consultar(a.espacoId,a.servico,a.operacao,a.pagina,a.id,a.filtros));
 canal('servicos:aceite',a=>servicos.campoAceite(a.espacoId,a.campo));
 canal('servicos:importar',async(a,j)=>{const e=espacos.obterEspaco(a.espacoId);const consulta=await servicos.consultar(e.id,'jira','ticket',{},a.ticket);const item=consulta.dados as {fields?:{summary?:unknown;description?:unknown}};const titulo=textoRemoto(item.fields?.summary,200);const texto=textoRemoto(item.fields?.description);
   if(!texto.trim())throw new Error('JIRA_DESCRIPTION_MISSING');
@@ -243,6 +250,79 @@ canal('contextos:excluir', async (a, janela) => {
 canal('contextos:mcp', async (a, janela) => {
   if (a.habilitar && !(await confirmar(janela, 'Disponibilizar ao agente de IA', 'Disponibilizar os contextos deste projeto ao agente de IA conectado?', 'O texto dos contextos (até 4000 caracteres cada, com segredos mascarados) passará a ser retornado pelas ferramentas MCP e poderá ser processado pelo provedor da IA conectada. Contextos adulterados nunca são enviados. Você pode desabilitar a qualquer momento.', 'Disponibilizar'))) return { canceled: true };
   return { canceled: false, ...(await painel.contextosMcp(a.root, a.habilitar)) };
+});
+
+// ---- 2.9: operações externas, propostas, runs Qase, vínculos e agentes. Toda escrita remota passa por operacoesExternas.ts e por confirmação NATIVA. ----
+const nomeServico = { jira: 'Jira', qase: 'Qase', github: 'GitHub' } as const;
+canal('operacoes:previa', a => ext.prepararOperacao(a.espacoId, a.operacao, a.parametros));
+canal('operacoes:listar', a => ext.listarOperacoes(a.espacoId, a.limite ?? 100));
+canal('escrita:estado', a => ({ servicos: ext.permissoesDoEspaco(a.espacoId), operacoes: ext.catalogoOperacoes.map(o => ({ id: o.id, servico: o.servico, rotulo: o.rotulo, efeito: o.efeito })) }));
+canal('escrita:habilitar', async (a, j) => {
+  const i = idiomaAtual();
+  if (a.habilitada && !(await confirmar(j, tm('habTitulo', i), tm('habMsg', i, { s: nomeServico[a.servico] }), tm('habDet', i), tm('habBtn', i)))) return { canceled: true };
+  return { canceled: false, ...ext.habilitarEscrita(a.espacoId, a.servico, a.habilitada, usuarioWindows()) };
+});
+canal('operacoes:executar', async (a, j) => {
+  const i = idiomaAtual(); const parametros = { ...a.parametros } as Record<string, unknown>; delete parametros.arquivo; let aux; // o caminho nunca vem da página
+  if (a.anexo && (a.operacao === 'jira.anexar' || a.operacao === 'qase.anexar')) {
+    let escolhido: string | null = null;
+    if (a.anexo.tipo === 'arquivo') { const r = await dialog.showOpenDialog(j!, { title: tm('arquivoTitulo', i), properties: ['openFile'] }); if (r.canceled || !r.filePaths[0]) return { canceled: true }; escolhido = r.filePaths[0]; }
+    const res = resolverAnexo(a.espacoId, a.anexo, escolhido); parametros.arquivo = res.arquivo; aux = res.aux;
+  }
+  const prev = ext.prepararOperacao(a.espacoId, a.operacao, parametros); const e = espacos.obterEspaco(a.espacoId);
+  if (!(await confirmar(j, tm('opTitulo', i), tm('opMsg', i, { s: nomeServico[prev.servico], r: prev.rotulo }), tm('opDet', i, { x: prev.resumo + '\n\n' + prev.efeito, p: e.nome }), tm('opBtn', i)))) return { canceled: true };
+  return { canceled: false, ...(await ext.executarOperacao(servicos, a.espacoId, a.operacao, parametros, { confirmado: true, aux })) };
+});
+canal('propostas:listar', a => props.listarPropostas(a.espacoId));
+canal('propostas:criar', a => props.criarProposta({ espacoId: a.espacoId, tipo: a.tipo, origem: 'PESSOA', dados: a.dados, requisito: a.requisito, risco: a.risco }));
+canal('propostas:editar', a => props.editarProposta(a.id, a.dados, { requisito: a.requisito, risco: a.risco }));
+canal('propostas:revisar', async (a, j) => {
+  const i = idiomaAtual(); if (!(await confirmar(j, tm('revTitulo', i), tm('revMsg', i), tm('revDet', i), tm('revBtn', i)))) return { canceled: true };
+  return { canceled: false, proposta: props.revisarProposta(a.id, { duplicidade: a.duplicidade, requisito: a.requisito, risco: a.risco, cobertura: a.cobertura }, usuarioWindows()) };
+});
+canal('propostas:descartar', a => props.descartarProposta(a.id));
+canal('propostas:publicar', async (a, j) => {
+  const i = idiomaAtual(); const p = props.obterProposta(a.id); props.podePublicar(p); const e = espacos.obterEspaco(p.espacoId); const op = p.tipo === 'caso' ? 'qase.criar_caso' : 'jira.criar_ticket';
+  const prev = ext.prepararOperacao(p.espacoId, op, p.tipo === 'caso' ? p.dados : { tipoId: a.tipoId ?? p.dados.tipoId ?? '1', resumo: p.dados.resumo, descricao: p.dados.descricao ?? '', rotulos: p.dados.rotulos ?? [] });
+  if (!(await confirmar(j, tm('opTitulo', i), tm('opMsg', i, { s: nomeServico[prev.servico], r: prev.rotulo }), tm('opDet', i, { x: prev.resumo + '\n\n' + prev.efeito, p: e.nome }), tm('opBtn', i)))) return { canceled: true };
+  return { canceled: false, ...(await publicarProposta(servicos, a.id, { confirmado: true, tipoId: a.tipoId })) };
+});
+canal('runs:listar', a => fluxo.listarRunsLocais(a.espacoId));
+canal('runs:preparar', a => fluxo.prepararRunLocal(a.espacoId, { titulo: a.titulo, ambiente: a.ambiente, casos: a.casos, planoId: a.planoId }));
+canal('runs:criar', async (a, j) => {
+  const i = idiomaAtual(); const run = fluxo.obterRunLocal(a.id); const prev = ext.prepararOperacao(run.espacoId, 'qase.criar_run', { titulo: run.titulo, casos: run.casos.map(c => c.casoId), ...(run.planoId ? { planoId: run.planoId } : {}) });
+  if (!(await confirmar(j, tm('opTitulo', i), tm('opMsg', i, { s: 'Qase', r: prev.rotulo }), tm('opDet', i, { x: prev.resumo + '\n\n' + prev.efeito, p: espacos.obterEspaco(run.espacoId).nome }), tm('opBtn', i)))) return { canceled: true };
+  return { canceled: false, ...(await fluxo.criarRunNoQase({ executor: servicos }, a.id, { confirmado: true })) };
+});
+canal('runs:executar', async (a, j) => {
+  const i = idiomaAtual(); const run = fluxo.obterRunLocal(a.id); const n = new Set(run.casos.filter(c => c.capability).map(c => c.capability)).size;
+  if (!(await confirmar(j, tm('execRunTitulo', i), tm('execRunMsg', i, { n }), tm('execRunDet', i), tm('execRunBtn', i)))) return { canceled: true };
+  return { canceled: false, ...(await fluxo.executarRunLocal({ executor: servicos }, a.id, { executar: executarValidacao, modo: 'MANUAL' })), run: fluxo.obterRunLocal(a.id) };
+});
+canal('runs:resultado', async (a, j) => {
+  const i = idiomaAtual(); if (!(await confirmar(j, tm('manTitulo', i), tm('manMsg', i, { s: a.status, c: a.casoId }), tm('manDet', i), tm('manBtn', i)))) return { canceled: true };
+  return { canceled: false, run: fluxo.declararResultadoManual(a.id, a.casoId, { status: a.status, comentario: a.comentario }, usuarioWindows()) };
+});
+canal('runs:publicar', async (a, j) => {
+  const i = idiomaAtual(); const run = fluxo.obterRunLocal(a.id); const pend = run.casos.filter(c => c.resultado && c.resultado.status !== 'NOT_RUN' && !c.publicado);
+  if (!run.runIdRemoto) throw new Error('RUN_NOT_CREATED: crie a run no Qase antes de publicar.'); if (!pend.length) return { canceled: false, publicados: 0, operacao: null };
+  const resumo = pend.slice(0, 12).map(c => `${c.casoId} · ${c.resultado!.status}${c.resultado!.origem === 'MANUAL' ? ' (manual)' : ''} · ${c.titulo}`).join('\n') + (pend.length > 12 ? `\n… +${pend.length - 12}` : '');
+  if (!(await confirmar(j, tm('pubRunTitulo', i), tm('pubRunMsg', i, { n: pend.length, r: run.runIdRemoto }), tm('pubRunDet', i, { x: resumo }), tm('opBtn', i)))) return { canceled: true };
+  return { canceled: false, ...(await fluxo.publicarRunLocal({ executor: servicos }, a.id, { confirmado: true, anexarEvidencia: a.anexarEvidencia })), run: fluxo.obterRunLocal(a.id) };
+});
+canal('runs:bugs', a => fluxo.propostasDeBugs(a.id));
+canal('runs:politica', async (a, j) => {
+  const i = idiomaAtual(); const e = espacos.obterEspaco(a.espacoId);
+  if (!(await confirmar(j, tm('polQaseTitulo', i), tm('polQaseMsg', i, { r: a.runId }), tm('polQaseDet', i, { p: e.nome, d: a.dias, m: a.maxUsos }), tm('polQaseBtn', i)))) return { canceled: true };
+  return { canceled: false, politica: autorizacoesCore.criarPoliticaEscrita(a.espacoId, { operacao: 'qase.publicar_resultados', runs: [a.runId], dias: a.dias, maxUsos: a.maxUsos }, usuarioWindows()) };
+});
+canal('runs:revogar', a => ({ politica: autorizacoesCore.revogarPoliticaEscrita(a.id) }));
+canal('vinculos:mapa', a => mapaDeVinculos(a.espacoId));
+canal('agentes:estado', a => ({ configuracao: agentes.configuracaoDoEspaco(a.espacoId), matriz: agentes.matrizDePoliticas(a.espacoId), especializacoes: agentes.especializacoes, propostasIA: props.listarPropostas(a.espacoId).filter(p => p.origem === 'IA').length }));
+canal('agentes:salvar', async (a, j) => {
+  const i = idiomaAtual(); const bloq = Object.entries(a.politicas).filter(([, v]) => v === 'BLOQUEADO').map(([k]) => k).join(', ') || '—';
+  if (!(await confirmar(j, tm('agTitulo', i), tm('agMsg', i), tm('agDet', i, { e: a.especializacoes.join(', ') || '—', b: bloq }), tm('agBtn', i)))) return { canceled: true };
+  return { canceled: false, configuracao: agentes.salvarConfiguracao(a.espacoId, { especializacoes: a.especializacoes, politicas: a.politicas }, usuarioWindows()) };
 });
 
 // ---- 2.8: agenda, worker residente, execuções e comentário Jira. A página nunca informa comando, caminho nem aprovação. ----

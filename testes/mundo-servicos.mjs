@@ -19,6 +19,7 @@ export function criarMundo() {
       m.chamadas.push(['GET', c]); const u = url(c), p = u.pathname;
       if (/\/issue\/createmeta\/[A-Z]+\/issuetypes$/.test(p)) return { issueTypes: j.tipos };
       if (p === '/rest/api/3/search/jql') { const rot = /labels = "([^"]+)"/.exec(u.searchParams.get('jql'))?.[1]; return { issues: [...j.issues.values()].filter((i) => i.fields.labels.includes(rot)).map((i) => ({ id: i.id, key: i.key })) }; }
+      if (/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/comment$/.test(p)) { const k = p.split('/')[5]; if (!j.issues.get(k)) throw falta(); return { comments: (j.issues.get(k).comentarios ?? []).map((c) => ({ id: c.id, body: c.body })) }; }
       if (/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/changelog$/.test(p)) return { isLast: true, values: [{ id: '1', created: '2026-10-10T10:00:00.000Z', author: { displayName: 'Pessoa fictícia' }, items: [{ field: 'status', fromString: 'Aberto', toString: 'Em andamento' }] }] };
       const k = /^\/rest\/api\/3\/issue\/([A-Z][A-Z0-9_]*-\d+)(\/transitions)?$/.exec(p); if (!k) throw falta();
       const i = j.issues.get(k[1]); if (!i) throw falta(); return k[2] ? { transitions: j.transicoes } : i;
@@ -29,6 +30,7 @@ export function criarMundo() {
       if (metodo === 'POST' && p === '/rest/api/3/issueLink') { const l = JSON.parse(corpo); j.issues.get(l.inwardIssue.key).fields.issuelinks.push({ inwardIssue: { key: l.outwardIssue.key } }); return {}; }
       let k = /^\/rest\/api\/3\/issue\/([A-Z][A-Z0-9_]*-\d+)\/attachments$/.exec(p);
       if (k) { if (hdr?.['X-Atlassian-Token'] !== 'no-check' || !/^multipart\/form-data; boundary=/.test(tipo)) throw new Error('anexo sem cabeçalho/multipart corretos'); const nome = /filename="([^"]+)"/.exec(corpo.toString('latin1'))[1]; const a = { id: String(900 + j.anexos.length), filename: nome, size: corpo.length }; j.anexos.push({ ...a, corpo }); j.issues.get(k[1]).fields.attachment.push(a); perder(); return [a]; }
+      k = /^\/rest\/api\/3\/issue\/([A-Z][A-Z0-9_]*-\d+)\/comment$/.exec(p); if (k) { const i = j.issues.get(k[1]); i.comentarios ??= []; const cm = { id: String(500 + i.comentarios.length), body: JSON.parse(corpo).body }; i.comentarios.push(cm); perder(); return { id: cm.id }; }
       k = /^\/rest\/api\/3\/issue\/([A-Z][A-Z0-9_]*-\d+)\/transitions$/.exec(p); if (k) { const t = j.transicoes.find((x) => x.id === JSON.parse(corpo).transition.id); j.issues.get(k[1]).fields.status = { name: t.to.name }; return {}; }
       k = /^\/rest\/api\/3\/issue\/([A-Z][A-Z0-9_]*-\d+)$/.exec(p); if (k && metodo === 'PUT') { const b = JSON.parse(corpo); const i = j.issues.get(k[1]); if (b.fields?.summary) i.fields.summary = b.fields.summary; for (const l of b.update?.labels ?? []) i.fields.labels.push(l.add); return {}; }
       throw new Error('rota Jira não simulada: ' + metodo + ' ' + p);

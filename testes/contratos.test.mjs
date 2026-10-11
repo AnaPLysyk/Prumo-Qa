@@ -66,7 +66,7 @@ test('IPC: exclusão exige confirmação nativa e nunca é alcançável por MCP;
   assert.doesNotMatch(mcpFonte, /excluir|dados\.js|diagnostico\.js|vinculos\.js/i, 'mcp.ts não importa exclusão nem vínculos');
 });
 
-test('MCP: servidor real lista exatamente as quatro ferramentas e o catálogo descreve os mesmos argumentos', async (t) => {
+test('MCP: servidor real lista exatamente as sete ferramentas (quatro originais e três da 2.9) e o catálogo descreve os mesmos argumentos', async (t) => {
   const f = await fixture(t);
   const servidor = await criarServidor(f.root);
   const [a, b] = InMemoryTransport.createLinkedPair();
@@ -75,7 +75,7 @@ test('MCP: servidor real lista exatamente as quatro ferramentas e o catálogo de
   t.after(() => cliente.close());
   assert.equal(cliente.getServerVersion().version, JSON.parse(ler('package.json')).version, 'o MCP informa a versão do package.json');
   const ferramentas = (await cliente.listTools()).tools;
-  assert.deepEqual(ferramentas.map((x) => x.name).sort(), ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'revisar_cobertura']);
+  assert.deepEqual(ferramentas.map((x) => x.name).sort(), ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
   assert.deepEqual(mcpCatalogo.map((o) => o.nome).sort(), ferramentas.map((x) => x.name).sort());
   for (const tool of ferramentas) {
     const doc = mcpCatalogo.find((o) => o.nome === tool.name);

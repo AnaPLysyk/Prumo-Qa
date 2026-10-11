@@ -93,3 +93,30 @@ test('propostas da IA: sem duplicata, limite por hora, revisão completa obrigat
   assert.throws(() => criarProposta({ espacoId: c.e.id, tipo: 'caso', origem: 'IA', dados: caso('Mais um cenário que passa do limite') }, c.b), /PROPOSAL_RATE_LIMIT/); assert.ok(criarProposta({ espacoId: c.e.id, tipo: 'caso', origem: 'PESSOA', dados: caso('A pessoa não é limitada pelo teto da IA') }, c.b));
   assert.equal(c.mundo.qase.casos.length, 0, 'nenhuma proposta chegou ao Qase por conta própria'); assert.throws(() => criarProposta({ espacoId: c.e.id, tipo: 'caso', origem: 'IA', dados: { titulo: 'x' } }, c.b));
 });
+
+test('mapa de vínculos: mostra o cadastrado, o registrado pelo Prumo e o observado; lacunas só de ausência de cadastro; não deduz por nome', async (t) => {
+  const { mapaDeVinculos } = await import('../dist/rastreabilidade.js');
+  const c = await cenario(t); c.mundo.semear('SMART-100'); const [a, bb] = [await c.caso('Editor grava'), await c.caso('Caso sem automação nem ticket')];
+  c.ligar(a, 'unit#C1'); associarEspaco(c.e.id, { de: { tipo: 'jira', id: 'SMART-100', vinculoId: c.jv.id, origem: 'Jira' }, para: { tipo: 'qase', id: String(a), vinculoId: c.qv.id, origem: 'Qase SFQ' }, justificativa: 'Declarado' }, c.b);
+  const run = prepararRunLocal(c.e.id, { titulo: 'Mapa', ambiente: 'teste', casos: [{ casoId: a, titulo: 'Editor grava' }, { casoId: bb, titulo: 'Caso sem automação nem ticket' }] }, c.b); await criarRunNoQase(c.dep, run.id, { confirmado: true }); await executarRunLocal(c.dep, run.id, c.execucao);
+  const m = mapaDeVinculos(c.e.id, c.b); const tipos = new Set(m.nos.map((n) => n.tipo));
+  for (const x of ['projeto', 'pasta', 'servico', 'jira', 'qase', 'automacao', 'run', 'evidencia']) assert.ok(tipos.has(x), 'nó ' + x);
+  assert.ok(m.arestas.some((x) => x.de === 'jira:SMART-100' && x.para === `qase:${a}` && x.origem === 'DECLARADO_PELO_USUARIO')); assert.ok(m.arestas.some((x) => x.tipo === 'resultado de' && x.origem === 'OBSERVADO'));
+  assert.ok(m.lacunas.some((l) => l.tipo === 'CASO_SEM_AUTOMACAO' && l.id === `qase:${bb}`)); assert.ok(m.lacunas.some((l) => l.tipo === 'CASO_SEM_TICKET' && l.id === `qase:${bb}`)); assert.ok(!m.lacunas.some((l) => l.id === `qase:${a}`), 'caso com ticket e automação não aparece como lacuna');
+  assert.match(m.aviso, /não prova cobertura/); assert.ok(m.operacoesRecentes.length >= 3);
+});
+
+test('rotina "run do Qase" no worker: executa as automações autorizadas e só publica com política vigente para a run', async (t) => {
+  const { Worker } = await import('../dist/worker.js'); const { criarRotina } = await import('../dist/agenda.js'); const { listarTrabalhos } = await import('../dist/fila.js'); const { criarPoliticaEscrita } = await import('../dist/autorizacoes.js');
+  const c = await cenario(t); const [a, bb] = [await c.caso('Editor grava'), await c.caso('Leitor é recusado')]; c.ligar(a, 'unit#C1'); c.ligar(bb, 'unit#C2');
+  const run = prepararRunLocal(c.e.id, { titulo: 'Agendada no worker', ambiente: 'teste', casos: [{ casoId: a, titulo: 'Editor grava' }, { casoId: bb, titulo: 'Leitor é recusado' }] }, c.b);
+  assert.throws(() => criarRotina({ nome: 'Sem run', espacoId: c.e.id, tipo: 'run-qase', ambiente: 'teste', frequencia: { tipo: 'intervalo', minutos: 10 }, fuso: 'UTC' }, c.b), /run obrigatória/);
+  let relogio = Date.parse('2026-10-10T12:00:00Z'); const agora = () => new Date(relogio);
+  criarRotina({ nome: 'Run no worker', espacoId: c.e.id, tipo: 'run-qase', runLocalId: run.id, ambiente: 'teste', frequencia: { tipo: 'intervalo', minutos: 10 }, fuso: 'UTC' }, c.b, agora());
+  const w = new Worker({ base: c.b, agora, semTemporizador: true, servicos: { comContexto: c.mundo.executor.comContexto } }); w.iniciar(); t.after(() => w.parar());
+  relogio += 10 * 60000; await w.tick(); await w.tick(); let j = listarTrabalhos(c.b).at(-1); assert.equal(j.resultado.status, 'BLOCKED', 'a run ainda não foi criada no Qase'); assert.match(j.resultado.motivo, /RUN_NOT_CREATED/); assert.equal(c.ran(), 0);
+  await criarRunNoQase(c.dep, run.id, { confirmado: true }); relogio += 10 * 60000; await w.tick(); await w.tick(); j = listarTrabalhos(c.b).at(-1);
+  assert.equal(j.resultado.status, 'FAIL'); assert.deepEqual(j.resultado.contagem, { pass: 1, fail: 1, blocked: 0, notRun: 0 }); assert.match(j.resultado.motivo, /BLOQUEADA \(sem política vigente para esta run\)/); assert.equal(c.mundo.qase.resultados.length, 0, 'sem política nada vai ao Qase'); assert.equal(c.ran(), 1);
+  criarPoliticaEscrita(c.e.id, { operacao: 'qase.publicar_resultados', runs: [obterRunLocal(run.id, c.b).runIdRemoto], dias: 1, maxUsos: 3 }, 'pessoa', c.b);
+  relogio += 10 * 60000; await w.tick(); await w.tick(); j = listarTrabalhos(c.b).at(-1); assert.match(j.resultado.motivo, /2 resultado\(s\) publicado\(s\) no Qase/); assert.deepEqual(c.mundo.qase.resultados.map((r) => r.status), ['passed', 'failed']); assert.equal(obterRunLocal(run.id, c.b).estado, 'PUBLICADA');
+});

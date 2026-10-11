@@ -4,6 +4,7 @@ import { obterEspaco } from './espacos.js';
 import { carregarProjeto, ErroQa } from './projeto.js';
 import { escopoDeCapability } from './execucao.js';
 import { escopoK6, localizarK6, capabilityK6, type ExecutavelK6 } from './k6.js';
+import { obterRunLocal } from './fluxoQase.js';
 import { autorizarEscopo, listarAutorizacoes, estadoExecucao, estadoPublicacao, type Solicitador } from './autorizacoes.js';
 
 /**
@@ -13,6 +14,7 @@ import { autorizarEscopo, listarAutorizacoes, estadoExecucao, estadoPublicacao, 
 export function capacidadesDaRotina(r: Rotina, base?: string): string[] {
   if (r.tipo === 'smoke' || r.tipo === 'regressao') return r.capability ? [r.capability] : [];
   if (r.tipo === 'k6') return r.k6 ? [capabilityK6(r.k6)] : [];
+  if (r.tipo === 'run-qase') { try { return [...new Set(obterRunLocal(r.runLocalId!, base).casos.map(c => c.capability).filter((c): c is string => !!c))]; } catch { return []; } }
   if (r.tipo === 'validacao-ticket') { const e = obterEspaco(r.espacoId, base); return [...new Set(e.relacoes.filter(x => x.de.tipo === 'jira' && x.de.id === r.ticket && x.para.tipo === 'automacao').map(x => x.para.id))].slice(0, 5); }
   return [];
 }
@@ -21,6 +23,7 @@ export function permissoesDaRotina(r: Rotina, base?: string) {
   const caps = capacidadesDaRotina(r, base); const p: string[] = [];
   if (r.tipo === 'consulta-jira') p.push('Lê tickets do Jira vinculado ao projeto (somente leitura).');
   else if (r.tipo === 'analise-mudancas') p.push('Lê commits do repositório GitHub vinculado (somente leitura). Não dispara execuções.');
+  else if (r.tipo === 'run-qase') p.push(caps.length ? `Executa localmente ${caps.map(c => `"${c}"`).join(', ')} (automações dos casos da run) e tenta publicar os resultados na run do Qase. Só publica com uma política de publicação aprovada para essa run; sem ela, os resultados ficam locais.` : 'A run não tem automação associada: nada será executado.');
   else if (r.tipo === 'k6') p.push(`Executa o k6 oficial contra ${r.k6?.alvo} (${r.k6?.usuarios} usuário(s) virtual(is), ${r.k6?.duracaoSegundos}s) com o script ${r.k6?.script}.`);
   else if (caps.length) p.push(`Executa localmente ${caps.map(c => `"${c}"`).join(', ')}, comando já declarado no contrato do projeto. Nenhum comando novo pode ser criado pela agenda.`);
   else p.push('Não há automação associada: nada será executado.');
@@ -47,7 +50,7 @@ export function listarPermissoes(espacoId?: string, base?: string, agora = new D
 /** Pede ao broker nativo o consentimento para cada automação da rotina (escopo exato) e grava as autorizações. */
 export async function autorizarRotina(rotinaId: string, opcoes: { dias: number; maxUsos: number }, solicitar: Solicitador, base?: string, exe?: ExecutavelK6 | null) {
   const r = obterRotina(rotinaId, base); const e = obterEspaco(r.espacoId, base);
-  if (!['smoke', 'regressao', 'validacao-ticket', 'k6'].includes(r.tipo)) throw new ErroQa('AUTH_NOT_REQUIRED', 'Este tipo de rotina só lê dados e não precisa de autorização de execução.');
+  if (!['smoke', 'regressao', 'validacao-ticket', 'k6', 'run-qase'].includes(r.tipo)) throw new ErroQa('AUTH_NOT_REQUIRED', 'Este tipo de rotina só lê dados e não precisa de autorização de execução.');
   if (!e.pastaLocal) throw new ErroQa('PROJECT_FOLDER_REQUIRED', 'Vincule uma pasta de automação ao projeto antes de autorizar execuções.');
   const p = await carregarProjeto(e.pastaLocal); const criadas = [];
   if (r.tipo === 'k6') {
@@ -63,7 +66,8 @@ export async function autorizarRotina(rotinaId: string, opcoes: { dias: number; 
 /** Valida o que o esquema sozinho não vê: projeto existe, pasta de automação, capability declarada e vínculos exigidos. */
 export async function validarRotina(dados: DadosRotina, base?: string) {
   const d = dadosRotinaSchema.parse(dados); const e = obterEspaco(d.espacoId, base);
-  if (['smoke', 'regressao', 'validacao-ticket', 'k6'].includes(d.tipo) && !e.pastaLocal) throw new ErroQa('PROJECT_FOLDER_REQUIRED', 'Este tipo de rotina executa testes e precisa de uma pasta de automação vinculada ao projeto.');
+  if (d.tipo === 'run-qase') { const run = obterRunLocal(d.runLocalId!, base); if (run.espacoId !== d.espacoId) throw new ErroQa('RUN_PROJECT_MISMATCH', 'A run pertence a outro projeto.'); if (!run.runIdRemoto) throw new ErroQa('RUN_NOT_CREATED', 'Crie a run no Qase antes de agendá-la.'); }
+  if (['smoke', 'regressao', 'validacao-ticket', 'k6', 'run-qase'].includes(d.tipo) && !e.pastaLocal) throw new ErroQa('PROJECT_FOLDER_REQUIRED', 'Este tipo de rotina executa testes e precisa de uma pasta de automação vinculada ao projeto.');
   if (d.capability && e.pastaLocal) { const p = await carregarProjeto(e.pastaLocal); if (!Object.hasOwn(p.manifesto.commands, d.capability)) throw new ErroQa('CAPABILITY_NOT_ALLOWED', `A capability "${d.capability}" não está declarada no contrato do projeto.`); }
   if (d.tipo === 'consulta-jira' && !e.vinculos.some(v => v.servico === 'jira')) throw new ErroQa('JIRA_LINK_REQUIRED', 'Vincule um projeto Jira antes de agendar consultas.');
   if (d.tipo === 'analise-mudancas' && !e.vinculos.some(v => v.servico === 'github')) throw new ErroQa('GITHUB_LINK_REQUIRED', 'Vincule um repositório GitHub antes de agendar a análise de mudanças.');

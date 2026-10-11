@@ -132,4 +132,18 @@ export const vincularTickets: DefOperacao<z.infer<typeof vincular>> = {
     return r.fields.issuelinks.some(l => l.inwardIssue?.key === p.comTicket || l.outwardIssue?.key === p.comTicket) ? { chave: p.ticket, url: urlTicket(ctx, p.ticket) } : null;
   }
 };
-export const operacoesJira = [criarTicket, anexarArquivo, editarTicket, transicionarTicket, vincularTickets] as unknown as DefOperacao<unknown>[];
+const comentar = z.object({ ticket, texto: z.string().trim().min(3).max(4000) }).strict();
+const marcaDe = (k: string) => `[${marcador(k)}]`;
+const comentariosDe = async (ctx: ContextoServico, t: string) => z.object({ comments: z.array(z.object({ id: z.string(), body: z.unknown() }).passthrough()).default([]) }).passthrough().parse(await ctx.ler(`/rest/api/3/issue/${enc(t)}/comment?maxResults=100&orderBy=-created`)).comments;
+const achaComentario = async (ctx: ContextoServico, t: string, k: string): Promise<Remoto | null> => { const c = (await comentariosDe(ctx, t)).find(x => JSON.stringify(x.body).includes(marcaDe(k))); return c ? { id: c.id, chave: t, url: urlTicket(ctx, t) } : null; };
+export const comentarTicket: DefOperacao<z.infer<typeof comentar>> = {
+  id: 'jira.comentar', servico: 'jira', rotulo: 'Comentar em ticket do Jira', efeito: 'Adiciona um comentário de texto ao ticket do projeto vinculado. Não altera status, campos nem anexos.', exigeConfirmacao: true, schema: comentar,
+  resumo: p => `Comentar em ${p.ticket}: "${p.texto.slice(0, 80)}${p.texto.length > 80 ? '…' : ''}"`,
+  async executar(ctx, rec, p, k) {
+    await projetoDoTicket(ctx, rec, p.ticket); const r = z.object({ id: z.string() }).passthrough().parse(await ctx.enviar('POST', `/rest/api/3/issue/${enc(p.ticket)}/comment`, JSON.stringify({ body: textoParaAdf(`${mascarar(p.texto)}\n\n${marcaDe(k)}`) })));
+    return { id: r.id, chave: p.ticket, url: urlTicket(ctx, p.ticket) };
+  },
+  reconciliar: (ctx, _rec, p, k) => achaComentario(ctx, p.ticket, k),
+  async confirmar(ctx, _rec, p, _r, k) { return (await achaComentario(ctx, p.ticket, k)) !== null; }
+};
+export const operacoesJira = [criarTicket, comentarTicket, anexarArquivo, editarTicket, transicionarTicket, vincularTickets] as unknown as DefOperacao<unknown>[];

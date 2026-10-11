@@ -7,7 +7,7 @@ import { lerLocal, gravarLocal } from './armazenamentoLocal.js';
  * idempotência por "slot"), reescritos para o núcleo atual. Não executa nada: só diz QUANDO uma rotina vence.
  * Um "slot" é o instante UTC exato em que a rotina deveria rodar; ele é a chave de idempotência da fila.
  */
-export const tiposRotina = ['consulta-jira', 'smoke', 'regressao', 'validacao-ticket', 'analise-mudancas', 'k6'] as const;
+export const tiposRotina = ['consulta-jira', 'smoke', 'regressao', 'validacao-ticket', 'analise-mudancas', 'k6', 'run-qase'] as const;
 export type TipoRotina = typeof tiposRotina[number];
 export const ambientes = ['local', 'teste', 'homologacao', 'producao'] as const;
 
@@ -42,8 +42,10 @@ export const dadosRotinaSchema = z.object({
   toleranciaMinutos: z.number().int().min(0).max(1440).default(10),
   ticket: ticket.optional(),
   k6: k6Schema.optional(),
-  operacaoJira: z.enum(['tickets', 'ticket']).default('tickets')
+  operacaoJira: z.enum(['tickets', 'ticket']).default('tickets'),
+  runLocalId: z.string().uuid().optional()
 }).strict().superRefine((d, ctx) => {
+  if (d.tipo === 'run-qase' && !d.runLocalId) ctx.addIssue({ code: 'custom', message: 'run obrigatória', path: ['runLocalId'] });
   const precisaCapability = ['smoke', 'regressao', 'validacao-ticket'].includes(d.tipo);
   if (precisaCapability && d.tipo !== 'validacao-ticket' && !d.capability) ctx.addIssue({ code: 'custom', message: 'capability obrigatória', path: ['capability'] });
   if (d.tipo === 'validacao-ticket' && !d.ticket) ctx.addIssue({ code: 'custom', message: 'ticket obrigatório', path: ['ticket'] });

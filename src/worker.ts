@@ -11,6 +11,8 @@ import { delegadaPara } from './autorizacoes.js';
 import { ErroServico } from './httpServicos.js';
 import { publicar, elegivelParaPublicar, retentavel, type PublicadorJira } from './jiraComentario.js';
 import { definirJira } from './fila.js';
+import { executarRunLocal, publicarRunLocal, obterRunLocal } from './fluxoQase.js';
+import type { Executor } from './operacoesExternas.js';
 import type { OperacaoServico } from './adaptadoresServicos.js';
 import type { Evidencia } from './evidencias.js';
 
@@ -22,7 +24,7 @@ import type { Evidencia } from './evidencias.js';
  */
 export type TipoEvento = 'AGENDAMENTO_INICIADO' | 'EXECUCAO_CONCLUIDA' | 'EXECUCAO_FALHOU' | 'EXECUCAO_BLOQUEADA' | 'PUBLICACAO_JIRA_FALHOU' | 'WORKER_INTERROMPIDO';
 export type EventoWorker = { tipo: TipoEvento; rotinaId: string; trabalhoId: string; titulo: string; detalhe: string; at: string };
-export interface ServicosLeitura { consultar(espacoId: string, servico: 'jira' | 'github', operacao: OperacaoServico, pagina?: { limite?: number }, id?: string): Promise<{ dados: unknown }> }
+export interface ServicosLeitura extends Partial<Executor> { consultar(espacoId: string, servico: 'jira' | 'github', operacao: OperacaoServico, pagina?: { limite?: number }, id?: string): Promise<{ dados: unknown }> }
 export type DepsWorker = {
   base?: string; agora?: () => Date; servicos?: (ServicosLeitura & PublicadorJira) | null; intervaloMs?: number;
   aoEvento?: (e: EventoWorker) => void; localizarK6?: () => Promise<ExecutavelK6 | null>; heartbeatMs?: number;
@@ -165,9 +167,23 @@ export class Worker {
         const e = await (this.d.executarK6 ?? executarK6)(p, r.k6!, r.ambiente, exe, manual, manual ? undefined : delegadaPara(r.espacoId, r.ambiente, this.base, this.agora), undefined, this.abort.signal);
         return this.resultadoDe(e);
       }
+      case 'run-qase': return this.runQase(t, r);
       case 'consulta-jira': return this.consultaJira(r);
       case 'analise-mudancas': return this.analiseMudancas(r);
     }
+  }
+  /** Executa as automações dos casos da run e tenta publicar. Publicar só ocorre com política de escrita vigente para a run; senão os resultados ficam locais. */
+  private async runQase(t: Trabalho, r: Rotina): Promise<ResultadoTrabalho> {
+    const runLocal = obterRunLocal(r.runLocalId!, this.base); if (!runLocal.runIdRemoto) return { status: 'BLOCKED', motivo: 'RUN_NOT_CREATED: a run ainda não foi criada no Qase.' };
+    const manual = t.origem === 'MANUAL'; const executor = this.d.servicos as unknown as Executor | null | undefined;
+    const dep = { executor: executor ?? { comContexto: async () => { throw new ErroServico('SERVICE_UNAVAILABLE'); } }, base: this.base, agora: this.agora };
+    await executarRunLocal(dep, runLocal.id, { executar: this.d.executar ?? executarValidacao, modo: manual ? 'MANUAL' : 'AGENDADO', delegada: (e, a) => delegadaPara(e, a, this.base, this.agora), signal: this.abort.signal });
+    let pub = 'não houve resultado para publicar'; if (executor) { const p = await publicarRunLocal(dep, runLocal.id, { confirmado: false, origem: 'AGENDADO' }); pub = p.operacao?.estado === 'BLOQUEADA' ? 'publicação no Qase BLOQUEADA (sem política vigente para esta run); resultados mantidos localmente' : p.publicados ? `${p.publicados} resultado(s) publicado(s) no Qase` : pub; }
+    const f = obterRunLocal(runLocal.id, this.base); const rs = f.casos.map(c => c.resultado?.status ?? 'NOT_RUN');
+    const conta = { pass: rs.filter(x => x === 'PASS').length, fail: rs.filter(x => x === 'FAIL').length, blocked: rs.filter(x => x === 'BLOCKED').length, notRun: rs.filter(x => x === 'NOT_RUN').length };
+    const status = conta.fail ? 'FAIL' : conta.blocked ? 'BLOCKED' : conta.pass ? 'PASS' : 'NOT_RUN';
+    const detalhes = f.casos.filter(c => c.resultado?.status === 'FAIL').slice(0, 5).map(c => `${c.casoId}: ${c.resultado!.comentario}`.slice(0, 300)).join('\n');
+    return { status, motivo: `Run "${f.titulo}" (Qase #${f.runIdRemoto}): ${conta.pass} PASS, ${conta.fail} FAIL, ${conta.blocked} BLOCKED, ${conta.notRun} NOT_RUN; ${pub}.`.slice(0, 600), contagem: conta, ...(detalhes ? { detalhes } : {}) };
   }
   private async consultaJira(r: Rotina): Promise<ResultadoTrabalho> {
     if (!this.d.servicos) return { status: 'BLOCKED', motivo: 'SERVICES_UNAVAILABLE: conexões de serviço indisponíveis neste processo.' };
