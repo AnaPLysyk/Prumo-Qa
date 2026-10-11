@@ -19,6 +19,7 @@ files:
   - package.json
   - "!dist/**/*.map"
   - "!dist/**/*.d.ts"
+  - "!dist/**/*.fonte.sha256"
 extraResources:
   # Projeto de demonstração (somente leitura na instalação; o app o copia para LOCALAPPDATA ao vincular).
   - from: exemplos/projeto-demo

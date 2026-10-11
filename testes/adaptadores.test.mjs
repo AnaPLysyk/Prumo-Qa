@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -50,4 +51,11 @@ test('broker compilado no Windows recusa JSON sem escopo e data expirada sem ped
   for(const input of [JSON.stringify({approved:true}),JSON.stringify({expiresAt:'2000-01-01T00:00:00Z'})]){
     const r=spawnSync(path.resolve('dist/aprovar.exe'),[],{input,encoding:'utf8'});assert.equal(r.status,1,JSON.stringify({error:r.error,stderr:r.stderr}));assert.equal(r.stdout,'');
   }
+});
+test('build do broker é incremental e só termina depois de confirmar que o Windows executa o broker',async()=>{
+  if(process.platform!=='win32')return;
+  const exe=path.resolve('dist/aprovar.exe'),antes=fs.statSync(exe);
+  const r=spawnSync(process.execPath,['scripts/build-broker.mjs'],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);
+  assert.match(r.stdout,/já compilado \(fonte inalterada\)/);assert.match(r.stdout,/executável e recusando entrada sem escopo \(verificado\)/);
+  const depois=fs.statSync(exe);assert.equal(depois.mtimeMs,antes.mtimeMs,'o executável não foi recriado sem necessidade');assert.equal(depois.ino,antes.ino);
 });
