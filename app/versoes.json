@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.9.0",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-11",
       "title": "Integrações completas, agentes com políticas e site novo",
       "objective": "Ler e, com a sua confirmação, escrever em Jira, Qase e GitHub; rastrear projeto, ticket, caso, run, execução e evidência; controlar o que a IA pode pedir; e apresentar tudo no site renovado.",
       "features": [
@@ -42,7 +42,11 @@
         "Em Conexões, habilite a escrita só nos serviços em que quiser que o Prumo crie ou atualize recursos.",
         "Em Agentes, revise as especializações e as capacidades permitidas ao seu cliente de IA."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.9.0",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.9.0.exe",
+        "sha256": "a69150b2fb972beee787372d36dfa47abc67bb267a9b1ac68fcae64b3f955b51"
+      }
     },
     {
       "version": "2.8.1",
