@@ -70,3 +70,13 @@ A primeira linha explica o que faz, com uma frase curta em português. Um arquiv
 As funções `backend/conexoes/integracoes/lerDetalheDoServico.ts`, `backend/agentes/chat/conversar.ts` e `backend/execucoes/regras/executarValidacao.ts` ainda concentram etapas longas. A outra sessão descreveu divisões dessas funções em arquivos temporários, **mas essas divisões não aparecem nos commits publicados** e não são tratadas aqui como código implementado.
 
 **Documentação Viva:** `npm.cmd run arquitetura` gera as visões Atual (`origin/main`) e Proposta (cópia da branch), com referências ao código. Publicação de uma nova revisão só muda a Atual quando houver merge na `main`.
+
+## Conexões — detalhes de Jira, Qase e GitHub
+
+A função `backend/conexoes/integracoes/lerDetalheDoServico.ts` encaminha cada consulta para um arquivo com nome explícito. Foram separadas 13 operações sem alterar os limites de resposta e sem permitir operações em serviços diferentes.
+
+- **Jira:** `consultarMetadadosJira.ts`, `consultarCamposTipoJira.ts`, `consultarTransicoesJira.ts`, `consultarAnexosJira.ts` e `consultarHistoricoJira.ts`.
+- **Qase:** `consultarPlanoQase.ts` e `consultarCamposSistemaQase.ts`.
+- **GitHub:** `consultarArquivosGithub.ts`, `consultarWorkflowsGithub.ts`, `consultarJobsGithub.ts`, `consultarArtefatosGithub.ts`, `consultarRevisoesGithub.ts` e `consultarCommitGithub.ts`.
+
+As definições comuns estão em `backend/conexoes/tipos/ParametrosConsulta.ts` e `ResultadoConsulta.ts`. A mudança precisa passar no CI Windows antes de ser considerada validada.

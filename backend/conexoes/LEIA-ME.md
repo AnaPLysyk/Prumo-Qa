@@ -122,7 +122,20 @@ Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereç
 | `autenticarNoServico.ts` | Confere quem é a conta no serviço (Jira e GitHub devolvem a identidade; o Qase v1 não devolve, então a conta é a desta conexão). |
 | `cabecalhosDoServico.ts` | Monta o cabeçalho de autenticação do serviço: Basic no Jira, Bearer no GitHub e Token no Qase. |
 | `conferirEscopoDaConsulta.ts` | Confere que o que voltou pertence ao recurso vinculado (tickets, caso, defeito, repositório) e valida o formato dos defeitos do Qase. |
+| `consultarAnexosJira.ts` | Consulta anexos no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarArquivosGithub.ts` | Consulta arquivos no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarArtefatosGithub.ts` | Consulta artefatos no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarCamposSistemaQase.ts` | Consulta campos-sistema no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarCamposTipoJira.ts` | Consulta campos-tipo no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarCommitGithub.ts` | Consulta commit no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarHistoricoJira.ts` | Consulta historico no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarJobsGithub.ts` | Consulta jobs no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarMetadadosJira.ts` | Consulta metadados no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `consultarNoServico.ts` | Faz uma consulta de leitura da tela no recurso vinculado: monta o endereço do serviço, lê a resposta, confere o escopo e devolve só o seguro. |
+| `consultarPlanoQase.ts` | Consulta plano no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarRevisoesGithub.ts` | Consulta revisoes no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarTransicoesJira.ts` | Consulta transicoes no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarWorkflowsGithub.ts` | Consulta workflows no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `contextoDoAdaptador.ts` | Dá às operações de escrita só o necessário (ler, enviar e limpar), sem nunca entregar a credencial; erros viram ErroServico. |
 | `enderecoPublico.ts` | Diz se um IP é público (recusa rede interna, localhost e faixas especiais). |
 | `enviarAoServico.ts` | Envia uma escrita (POST/PUT/PATCH) ao serviço, com corpo limitado a 12 MB. |
@@ -189,5 +202,8 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | `leituras.ts` | Consultas de detalhe extras e os filtros aceitos na busca de tickets. |
 | `operacao.ts` | Formato de uma operação de escrita (prévia, envio, reconciliação) e dos dados auxiliares de anexos. |
 | `operacoesExternas.ts` | Formato do registro das operações externas, das permissões de escrita por projeto e das opções de execução. |
+| `ParametrosConsulta.ts` | Reúne os dados já validados e os limites necessários para consultar um recurso externo. |
+| `ResultadoConsulta.ts` | Descreve os dados, a próxima página e o endereço de uma consulta externa. |
 | `rotasDeEscrita.ts` | Lista fechada de métodos e caminhos de escrita permitidos por serviço. |
 | `transporte.ts` | Códigos de erro dos serviços, formato dos pedidos de leitura e escrita e da paginação. |
+
