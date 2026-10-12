@@ -88,6 +88,6 @@ export async function executarValidacao(p:Projeto,capability:string,solicitar=fa
   e.status=classificarResultado(e.exitCode,bloqueio,e.cases);
   e.reason=bloqueio ?? (e.exitCode===0?'Rodada terminou com exit code 0; casos só conforme relatório individual.':'Falha do processo; causa de produto/automação requer diagnóstico.');
   e.logSha256=hash(e.stdout+'\n'+e.stderr);e.endedAt=new Date().toISOString();
-  await gravarRelatorioRedigido(p,e,jobId,resultadoRel,resultadoPath);
+  await gravarRelatorioRedigido(p,e,jobId,resultadoRel);
   return await salvarEvidencia(p,e);
 }

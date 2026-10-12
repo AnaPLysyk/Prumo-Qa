@@ -31,7 +31,7 @@ test('relatório aprovado substitui o conteúdo bruto por casos já redigidos', 
   await mkdir(path.dirname(destino), { recursive: true });
   await writeFile(destino, 'conteúdo bruto com segredo-de-teste');
   const e = { cases: [{ id: 'caso-1', status: 'PASS', evidence: '[REDACTED]' }], resultArtifact: { path: rel } };
-  await gravarRelatorioRedigido({ raiz: f.root }, e, 'job-fixture', rel, destino);
+  await gravarRelatorioRedigido({ raiz: f.root }, e, 'job-fixture', rel);
   const gravado = await readFile(destino, 'utf8');
   assert.equal(gravado, JSON.stringify({ jobId: 'job-fixture', cases: e.cases }, null, 2));
   assert.ok(!gravado.includes('segredo-de-teste'));
@@ -46,7 +46,13 @@ test('artefato que não foi validado é apagado, sem resultado inventado', async
   await mkdir(path.dirname(destino), { recursive: true });
   await writeFile(destino, 'conteúdo bruto não validado');
   const e = { cases: [], resultArtifact: null };
-  await gravarRelatorioRedigido({ raiz: f.root }, e, 'job-invalido', rel, destino);
+  await gravarRelatorioRedigido({ raiz: f.root }, e, 'job-invalido', rel);
   await assert.rejects(stat(destino), { code: 'ENOENT' });
   assert.equal(e.resultArtifact, null);
+});
+
+test('caminho relativo fora do projeto é rejeitado antes de qualquer gravação', async t => {
+  const f = await fixture(t);
+  const e = { cases: [], resultArtifact: { path: '../../fora.json' } };
+  await assert.rejects(gravarRelatorioRedigido({ raiz: f.root }, e, 'job-fixture', '../../fora.json'));
 });
