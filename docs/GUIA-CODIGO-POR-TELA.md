@@ -89,3 +89,29 @@ npm run app
 ```
 
 Não fazer merge desta PR antes de conferir o comportamento das telas, o contrato IPC, o MCP e o instalador do Windows.
+
+## Suporte — como um relato chega ao GitHub
+
+```text
+app/renderer/telas/suporte/mostrarSuporte.js      mostra campos e revisão
+  ↓ api.suportePreparar
+app/preload.cjs → src/contratos.ts → src/desktop/main.ts
+  ↓ src/suporte.ts (entrada de compatibilidade)
+src/modulos/suporte/
+  definirSolicitacao.ts                           valida os campos
+  revisarPrivacidadeRelato.ts                    verifica segredos e privacidade
+  montarTextoRelato.ts                           monta a prévia em Markdown
+  gerarLinkGithubRelato.ts                       gera o link oficial
+  prepararRelato.ts                              devolve prévia sem enviar
+```
+
+## Configurações, Agentes e Ajuda
+
+```text
+src/preferencias.ts                                entrada de compatibilidade
+  ↓ src/modulos/configuracoes/                     tipo, tema, idioma e armazenamento
+  ↓ src/modulos/agentes/autorizarDelegacaoIa.ts    permissão de delegar à IA
+  ↓ src/modulos/ajuda/                             aviso e reconhecimento de versão
+```
+
+A delegação à IA só é autorizada depois de confirmação no processo principal. A gravação continua local; ainda não existe cadastro, login ou banco de usuários nesta branch.

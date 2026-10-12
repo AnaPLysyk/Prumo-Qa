@@ -36,6 +36,24 @@ for (const p of [...caminhosProjetos,...contratosProjeto]) {
  if (!existe(p)) {falhas.push('Falta arquivo: '+p);continue;}
  if (!ler(p).startsWith('/** ')) falhas.push('Falta primeira frase: '+p);
 }
+const modulosRecentes = [
+ 'src/modulos/suporte/definirSolicitacao.ts',
+ 'src/modulos/suporte/revisarPrivacidadeRelato.ts',
+ 'src/modulos/suporte/montarTextoRelato.ts',
+ 'src/modulos/suporte/gerarLinkGithubRelato.ts',
+ 'src/modulos/suporte/prepararRelato.ts',
+ 'src/modulos/configuracoes/definirPreferencias.ts',
+ 'src/modulos/configuracoes/armazenarPreferencias.ts',
+ 'src/modulos/configuracoes/alterarPreferencias.ts',
+ 'src/modulos/agentes/autorizarDelegacaoIa.ts',
+ 'src/modulos/ajuda/marcarVersaoVisualizada.ts',
+ 'src/modulos/ajuda/mostrarAvisoVersao.ts',
+ 'src/modulos/ajuda/registrarConsultaVersao.ts',
+];
+for (const p of modulosRecentes) {
+ if (!existe(p)) falhas.push('Falta módulo novo: '+p);
+ else if (!ler(p).startsWith('/** ')) falhas.push('Falta primeira frase: '+p);
+}
 const frontDir='app/renderer/';
 const html=ler(frontDir+'index.html');
 const scripts=[...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m=>m[1]);
@@ -60,7 +78,7 @@ const anteriores=[
  ['telas/ajuda/mostrarAjuda.js','telas/agentes/abrirModalContextos.js']
 ];
 for (const [primeiro,segundo] of anteriores) if (idx(primeiro)<0 || idx(segundo)<0 || idx(primeiro)>=idx(segundo)) falhas.push('Ordem de carregamento: '+primeiro+' deve vir antes de '+segundo);
-for (const p of [...caminhosProjetos,...contratosProjeto,'src/espacos.ts','src/contratoDetectado.ts']) {
+for (const p of [...caminhosProjetos,...contratosProjeto,...modulosRecentes,'src/espacos.ts','src/contratoDetectado.ts','src/preferencias.ts','src/suporte.ts']) {
  if (!existe(p)) continue;
  for (const [,imp] of ler(p).matchAll(/\bfrom\s*['"](\.{1,2}\/[^'"]+)['"]/g)) {
   const raw=path.resolve(path.dirname(path.join(raiz,p)),imp);
@@ -72,6 +90,6 @@ if (falhas.length) {
  for (const erro of falhas) console.error('ERRO: '+erro);
  process.exitCode=1;
 } else {
- console.log('OK: '+localScripts.length+' scripts de telas, '+caminhosProjetos.length+' arquivos de gestão de projetos, '+contratosProjeto.length+' arquivos de contratos.');
+ console.log('OK: '+localScripts.length+' scripts de telas, '+caminhosProjetos.length+' arquivos de gestão de projetos, '+contratosProjeto.length+' arquivos de contratos, '+modulosRecentes.length+' módulos de Suporte, Ajuda, Agentes e Configurações.');
  console.log('Verificação estrutural apenas; execute npm run check e testes do Electron/MCP.');
 }
