@@ -161,6 +161,7 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | --- | --- |
 | `chat.ts` | Formato da conversa do chat (turnos, estilos, provedores, resposta) e o guia de respostas do orquestrador. |
 | `conhecimento.ts` | Formato de um conhecimento, perfil e atendimento, os limites e o conhecimento inicial do Prumo. |
+| `ContextoDelegacao.ts` | Descreve os dados já verificados usados somente na delegação do chat para IA externa. |
 | `conversas.ts` | Formato das conversas antigas do chat (até a 2.9) e seus limites. |
 | `mcp.ts` | O que cada ferramenta do servidor MCP recebe (servidor, projeto, projeto do Prumo, respostas padronizadas) e as marcas de leitura e rascunho. |
 | `persona.ts` | Os agentes do chat, os papéis da pessoa e a personalidade de cada agente. |
