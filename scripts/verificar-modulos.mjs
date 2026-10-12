@@ -54,6 +54,15 @@ for (const p of modulosRecentes) {
  if (!existe(p)) falhas.push('Falta módulo novo: '+p);
  else if (!ler(p).startsWith('/** ')) falhas.push('Falta primeira frase: '+p);
 }
+const modulosChamados = [
+ 'src/modulos/suporte/definirFormatoChamado.ts',
+ 'src/modulos/suporte/buscarDadosDoChamado.ts',
+ 'src/modulos/suporte/consultarChamadoGithub.ts',
+];
+for (const p of modulosChamados) {
+ if (!existe(p)) falhas.push('Falta módulo de chamados: '+p);
+ else if (!ler(p).startsWith('/** ')) falhas.push('Falta primeira frase: '+p);
+}
 const frontDir='app/renderer/';
 const html=ler(frontDir+'index.html');
 const scripts=[...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m=>m[1]);
@@ -78,7 +87,7 @@ const anteriores=[
  ['telas/ajuda/mostrarAjuda.js','telas/agentes/abrirModalContextos.js']
 ];
 for (const [primeiro,segundo] of anteriores) if (idx(primeiro)<0 || idx(segundo)<0 || idx(primeiro)>=idx(segundo)) falhas.push('Ordem de carregamento: '+primeiro+' deve vir antes de '+segundo);
-for (const p of [...caminhosProjetos,...contratosProjeto,...modulosRecentes,'src/espacos.ts','src/contratoDetectado.ts','src/preferencias.ts','src/suporte.ts']) {
+for (const p of [...caminhosProjetos,...contratosProjeto,...modulosRecentes,...modulosChamados,'src/espacos.ts','src/contratoDetectado.ts','src/preferencias.ts','src/suporte.ts']) {
  if (!existe(p)) continue;
  for (const [,imp] of ler(p).matchAll(/\bfrom\s*['"](\.{1,2}\/[^'"]+)['"]/g)) {
   const raw=path.resolve(path.dirname(path.join(raiz,p)),imp);

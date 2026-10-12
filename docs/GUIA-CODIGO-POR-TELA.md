@@ -115,3 +115,7 @@ src/preferencias.ts                                entrada de compatibilidade
 ```
 
 A delegação à IA só é autorizada depois de confirmação no processo principal. A gravação continua local; ainda não existe cadastro, login ou banco de usuários nesta branch.
+
+## Acompanhar um chamado de Suporte
+
+O botão Consultar chamado da tela Suporte percorre a ponte `src/chamados.ts` e os três módulos `src/modulos/suporte/definirFormatoChamado.ts`, `buscarDadosDoChamado.ts` e `consultarChamadoGithub.ts`. Nenhuma credencial é enviada à consulta pública do GitHub. O arquivo de definição de status continua sendo `app/suporte-status.json`.
