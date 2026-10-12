@@ -110,6 +110,17 @@ O servidor MCP que as IAs usam: ferramentas, roteiros e o registro de cada chama
 | `aprendizadosParaMcp.ts` | Junta os conhecimentos aprovados dos agentes para a IA, só se a pessoa permitiu enviar contextos. |
 | `contextoCompleto.ts` | Monta a resposta da ferramenta MCP contexto_projeto: contexto autorizado, frameworks detectados, contextos e aprendizados permitidos. |
 | `criarServidor.ts` | Cria o servidor MCP do Prumo ligado a um projeto: as oito ferramentas, os roteiros e a política conferida a cada chamada. |
+| `projetoAindaVinculado.ts` | Reabre o contrato da pasta a cada chamada da IA e recusa (PROJECT_BINDING_CHANGED) se o projeto passou a ter outra identidade. |
+| `registrarConsultarEvidencias.ts` | Ferramenta MCP consultar_evidencias: devolve à IA as evidências reais do projeto com integridade conferida; sem evidência, NOT_RUN. |
+| `registrarContextoProjeto.ts` | Ferramenta MCP contexto_projeto: entrega à IA o contexto autorizado, os frameworks e, se permitido, os contextos e aprendizados; nada executa. |
+| `registrarExecutarValidacao.ts` | Ferramenta MCP executar_validacao: executa uma capacidade do contrato só com aprovação humana nativa do Windows; sem ela, BLOCKED. |
+| `registrarListarPoliticas.ts` | Ferramenta MCP listar_politicas: mostra à IA o que ela pode e não pode pedir neste projeto (especializações e capacidades, com o motivo). |
+| `registrarProporAprendizado.ts` | Ferramenta MCP propor_aprendizado: a IA sugere um conhecimento para os agentes do projeto, que entra como RASCUNHO até a pessoa decidir. |
+| `registrarProporBug.ts` | Ferramenta MCP propor_bug: a IA propõe um bug que fica como RASCUNHO local; não cria ticket no Jira. |
+| `registrarProporCaso.ts` | Ferramenta MCP propor_caso: a IA propõe um caso de teste que fica como RASCUNHO local; não publica no Qase. |
+| `registrarRevisarCobertura.ts` | Ferramenta MCP revisar_cobertura: revisão estrutural do plano de testes da IA (requisito, riscos, oráculos, repetições); sempre NOT_VERIFIED. |
+| `registrarRoteirosMcp.ts` | Registra os roteiros (prompts MCP) do Prumo; eles só montam texto, não executam nada, e as políticas continuam valendo nas ferramentas. |
+| `respostaDaFerramentaMcp.ts` | Executa uma ferramenta MCP e devolve o resultado em JSON; se der erro, devolve a mensagem com segredos mascarados. |
 | `textoDoPrompt.ts` | Monta o texto de um roteiro MCP do Prumo com os valores informados. |
 | `transporteObservado.ts` | Envolve a conversa MCP para registrar no diário o início e o término de cada chamada de ferramenta. |
 | `valorOuPadrao.ts` | Usa o valor informado (limpo e curto) ou o padrão. |
@@ -147,6 +158,7 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | `chat.ts` | Formato da conversa do chat (turnos, estilos, provedores, resposta) e o guia de respostas do orquestrador. |
 | `conhecimento.ts` | Formato de um conhecimento, perfil e atendimento, os limites e o conhecimento inicial do Prumo. |
 | `conversas.ts` | Formato das conversas antigas do chat (até a 2.9) e seus limites. |
+| `mcp.ts` | O que cada ferramenta do servidor MCP recebe (servidor, projeto, projeto do Prumo, respostas padronizadas) e as marcas de leitura e rascunho. |
 | `persona.ts` | Os agentes do chat, os papéis da pessoa e a personalidade de cada agente. |
 | `politicas.ts` | Capacidades da IA, especializações e o formato da configuração de agentes por projeto. |
 | `roteiros.ts` | Os roteiros (prompts MCP) do Prumo e suas regras comuns. |

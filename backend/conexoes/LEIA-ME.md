@@ -36,15 +36,20 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | Arquivo | O que faz |
 | --- | --- |
 | `cofreCredenciais.ts` | Guarda, lê e apaga as credenciais do Jira, Qase e GitHub protegidas pelo Windows (DPAPI); nunca em texto aberto. |
+| `exigirProtecaoDoWindows.ts` | Recusa guardar ou ler credenciais quando a proteção do Windows (DPAPI) não está disponível. |
 | `gravarRegistroDaOperacao.ts` | Cria ou atualiza o registro de uma operação externa. |
 | `gravarRegistroDeOperacoes.ts` | Grava o registro das operações externas, guardando as 1.500 últimas. |
+| `lerArquivoDeCredenciais.ts` | Lê o arquivo credenciais.json (só valores cifrados); se ainda não existe, começa vazio. |
 | `lerContasDeServico.ts` | Lê as contas de serviço configuradas (contas.json), sem as credenciais. |
+| `lerCredencial.ts` | Decifra a credencial de uma conta com a proteção do Windows; se não existe ou não abre, avisa CREDENTIAL_UNAVAILABLE. |
 | `lerPermissoesDeEscrita.ts` | Lê em quais serviços a escrita foi habilitada por projeto (permissoes-servicos.json). |
 | `lerRegistroDeOperacoes.ts` | Lê o registro de todas as operações externas (operacoes-externas.json). |
 | `listarContas.ts` | Lista as contas de serviço configuradas. |
 | `listarOperacoes.ts` | Lista as operações externas de um projeto, da mais nova para a mais antiga. |
 | `pastaDosTestesDeIntegracao.ts` | Pasta dos registros do teste de integração deste projeto. |
 | `registrosIntegracao.ts` | Lê os registros dos testes de integração já feitos. |
+| `removerCredencial.ts` | Apaga a credencial cifrada de uma conta de credenciais.json. |
+| `salvarCredencial.ts` | Cifra a credencial com a proteção do Windows e a guarda em credenciais.json; recusa valor vazio, grande demais ou com caracteres de controle. |
 | `validarIdDaCredencial.ts` | Confere se o identificador de uma credencial é um UUID válido. |
 
 ## escrita/
@@ -114,15 +119,33 @@ Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereç
 | Arquivo | O que faz |
 | --- | --- |
 | `AdaptadorServico.ts` | Conversa com um serviço (Jira, Qase ou GitHub): valida a conta, lista recursos e faz cada consulta da tela com o endereço certo. |
+| `autenticarNoServico.ts` | Confere quem é a conta no serviço (Jira e GitHub devolvem a identidade; o Qase v1 não devolve, então a conta é a desta conexão). |
+| `cabecalhosDoServico.ts` | Monta o cabeçalho de autenticação do serviço: Basic no Jira, Bearer no GitHub e Token no Qase. |
+| `conferirEscopoDaConsulta.ts` | Confere que o que voltou pertence ao recurso vinculado (tickets, caso, defeito, repositório) e valida o formato dos defeitos do Qase. |
+| `consultarNoServico.ts` | Faz uma consulta de leitura da tela no recurso vinculado: monta o endereço do serviço, lê a resposta, confere o escopo e devolve só o seguro. |
+| `contextoDoAdaptador.ts` | Dá às operações de escrita só o necessário (ler, enviar e limpar), sem nunca entregar a credencial; erros viram ErroServico. |
 | `enderecoPublico.ts` | Diz se um IP é público (recusa rede interna, localhost e faixas especiais). |
 | `enviarAoServico.ts` | Envia uma escrita (POST/PUT/PATCH) ao serviço, com corpo limitado a 12 MB. |
 | `enviarComentarioAoJira.ts` | Envia só o comentário de resultado ao Jira (único caminho aceito). |
 | `ErroServico.ts` | Erro de serviço externo com código fixo (sem permissão, limite de consultas, tempo esgotado...). |
+| `idNumericoDaConsulta.ts` | Confere que o id pedido é um número (até 15 dígitos) e o prepara para ir no endereço; senão recusa. |
 | `instanciaServico.ts` | Devolve o endereço oficial do serviço (Qase e GitHub fixos; Jira só *.atlassian.net). |
+| `lerComCredencial.ts` | Faz uma leitura (GET) no serviço com a credencial da conta; sem credencial recusa, e qualquer falha que não seja do serviço vira SERVICE_UNAVAILABLE. |
 | `lerDetalheDoServico.ts` | Faz as consultas de detalhe (metadados, transições, histórico, anexos, workflows, commits...) de Jira, Qase e GitHub. |
 | `lerDoServico.ts` | Faz uma leitura (GET) num serviço externo. |
+| `lerEnvelopeDaConsulta.ts` | Tira os dados de dentro da resposta do serviço conforme o formato dela e calcula onde começa a próxima página. |
+| `limparRespostaDoServico.ts` | Limpa uma resposta do serviço antes de mostrar: mascara a credencial, tira campos de senha/token e limita textos, listas e objetos. |
+| `listarRecursosDoServico.ts` | Lista, página por página, os projetos (Jira, Qase) ou repositórios (GitHub) que a conta enxerga. |
 | `montarEnvioDeArquivo.ts` | Monta o corpo de envio de um arquivo anexo (multipart), com nome do arquivo limpo. |
+| `obterRecursoDoServico.ts` | Lê de novo um projeto ou repositório pelo id, para conferir que o vínculo continua apontando para o mesmo recurso. |
+| `planoDaConsultaGithub.ts` | Monta a consulta no GitHub (repositório, branches, commits, PRs, um PR e verificações de um commit) só no repositório vinculado. |
+| `planoDaConsultaJira.ts` | Monta a consulta no Jira (tickets com filtros, campos, um ticket ou seus comentários); ticket de outro projeto é recusado. |
+| `planoDaConsultaQase.ts` | Monta a consulta no Qase (defeitos, suites, casos, planos, runs e resultados) só no projeto vinculado. |
+| `procurarComentarioNoTicket.ts` | Procura um marcador nos comentários do ticket (até 500), para não duplicar o comentário depois de uma falha de rede. |
+| `publicarComentarioNoTicket.ts` | Publica um comentário num ticket do projeto Jira vinculado, depois de confirmar que o ticket é desse projeto. |
+| `recursoDaResposta.ts` | Lê um projeto ou repositório devolvido pelo serviço e confere id e chave no formato esperado (e sem a credencial dentro). |
 | `requisitarServico.ts` | Faz a chamada HTTPS ao serviço: IP público fixado, sem redirecionamento, com tempo e tamanho limitados. |
+| `saidaDaConsulta.ts` | Monta o que a tela recebe de uma consulta: dados limpos, próxima página, origem, data, endpoint e o aviso de que é informação externa. |
 | `textoEntreAspasJql.ts` | Coloca um texto entre aspas para uma busca JQL, escapando caracteres. |
 | `textoRemoto.ts` | Extrai o texto puro de um campo vindo do Jira/Qase/GitHub (inclusive do formato ADF), com limite, sem interpretar HTML. |
 

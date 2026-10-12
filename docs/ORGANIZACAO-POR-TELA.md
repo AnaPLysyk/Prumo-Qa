@@ -83,7 +83,7 @@ Regras verificadas por `testes/estrutura-backend.test.mjs` (roda no `npm run che
 
 Duplicatas idênticas viraram uma só função (ex.: `codificarParaUrl`, `semAcentos`, `versaoDoPacote`, `raizDoAplicativo`). As variáveis que mudam com o aplicativo aberto ficam juntas em `backend/aplicativo/estadoDoAplicativo.ts`. O destino de cada canal no catálogo técnico (Ajuda › Integrações técnicas e `docs/CONTRATOS.md`) é gerado do código: o arquivo `api/` e as funções que ele chama.
 
-Exceção registrada: `backend/aplicativo/api/catalogoDeContratos.ts` continua uma tabela única com os 119 canais e as 8 ferramentas MCP. Alguns arquivos ainda concentram muita lógica numa só função (`agendamentos/worker/Worker.ts`, `agentes/mcp/criarServidor.ts`, `agentes/chat/conversar.ts`, `conexoes/integracoes/AdaptadorServico.ts`, `conexoes/regras/nucleoServicos.ts`, `credenciais`); dividi-los em funções menores é a próxima etapa, sem mudar comportamento.
+Exceção registrada: `backend/aplicativo/api/catalogoDeContratos.ts` continua uma tabela única com os 119 canais e as 8 ferramentas MCP. As antigas "fábricas" com várias funções dentro já foram divididas, uma ação por arquivo, mantendo a mesma API: `Worker` (agendamentos/worker), `nucleoServicos` e `cofreCredenciais` (conexoes), `AdaptadorServico` (conexoes/integracoes) e `criarServidor` (uma ferramenta MCP por arquivo em agentes/mcp). Ainda há funções únicas longas, que podem ganhar passos menores sem mudar comportamento: `lerDetalheDoServico`, `responderComDadosLocais`, `revisarCobertura`, `executarValidacao`, `conversar`, `mapaDeVinculos`, `executarK6` e `executarComandoPrumo`.
 
 ## Segunda etapa: arquivos existentes na branch, separados por tela
 

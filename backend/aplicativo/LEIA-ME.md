@@ -17,7 +17,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | Arquivo | O que faz |
 | --- | --- |
 | `appInfo.ts` | Canal app:info: Informar versão, pasta de dados e se o app está empacotado. |
-| `arquivosDosCanais.ts` | Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado do código pela reorganização. |
+| `arquivosDosCanais.ts` | Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado por npm run leia-me; não edite à mão. |
 | `catalogoDeContratos.ts` | Lista oficial do que a janela (IPC) e os agentes de IA (MCP) podem pedir ao Prumo, com o formato de cada pedido e sua explicação. |
 | `mensagemComCodigo.ts` | Prepara a mensagem de erro para a janela: segredos mascarados e o código do erro na frente. |
 | `registrarCanaisIpc.ts` | Liga cada canal da janela (IPC) à função da tela que o atende. |
