@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.10.1",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-12",
       "title": "Primeira release da linha 2.10, com aviso automático de versão nova",
       "objective": "Publicar tudo o que a 2.10.0 trouxe (interfaces novas, testes ligados ao código, assistente com conhecimento aprovado) junto com o aviso automático de versão nova e uma rotina de release que termina com instalador, catálogo, site e ajuda disponíveis para todos.",
       "features": [
@@ -39,7 +39,11 @@
       "afterUpdate": [
         "Se não quiser o aviso automático, desligue em Ajuda › Atualizações."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.10.1",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.10.1.exe",
+        "sha256": "68951c94d6277d305fbde624f3425fab56644d1b975c1fb370c5b0eb70094475"
+      }
     },
     {
       "version": "2.10.0",
