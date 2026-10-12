@@ -236,3 +236,13 @@ test('notificações: só quando algo realmente começou/terminou, sem repetir o
   rel.avancar(10); await w.tick(); await w.tick(); assert.deepEqual(eventos, ['AGENDAMENTO_INICIADO', 'EXECUCAO_BLOQUEADA']);
   rel.avancar(10); await w.tick(); await w.tick(); assert.equal(eventos.filter((x) => x === 'EXECUCAO_BLOQUEADA').length, 1, 'mesmo bloqueio não repete em 30 minutos');
 });
+
+test('trava corrompida (arquivo zerado por queda de energia) não impede o worker nem o aplicativo: é posta de lado e recriada (2.10.2)', async (t) => {
+  const b = base(t); const rel = relogio(); const pasta = path.join(b, 'plataforma'); fs.mkdirSync(pasta, { recursive: true });
+  fs.writeFileSync(path.join(pasta, 'worker-trava.json'), Buffer.alloc(152, 0));
+  assert.deepEqual(estadoTrava(b, rel.agora()), { vivo: false, pid: null, ultimoBatimento: null }, 'trava ilegível conta como ausente');
+  assert.ok(fs.readdirSync(pasta).some((n) => /^worker-trava\.json\.ilegivel-\d+$/.test(n)), 'o arquivo ilegível é guardado para diagnóstico');
+  const w = worker(b, rel); w.iniciar(); t.after(() => w.parar());
+  const nova = JSON.parse(fs.readFileSync(path.join(pasta, 'worker-trava.json'), 'utf8')); assert.equal(nova.ativo, true); assert.equal(nova.instancia, w.instancia);
+  assert.equal(w.estado().trava.vivo, true);
+});

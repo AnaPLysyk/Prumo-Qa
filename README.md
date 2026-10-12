@@ -1,6 +1,6 @@
 # Prumo QA 2.10 — Plataforma desktop de engenharia de qualidade
 
-Versão atual 2.10.1; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+Versão atual 2.10.2; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
 
 ## Ciclo de qualidade e IA
 
@@ -204,6 +204,8 @@ Também pode usar `node .\dist\cli.js`, `npm.cmd run prumo --` ou o script compa
 | `src/contextoCompleto.ts` | Resposta de `contexto_projeto`: contexto autorizado + frameworks + contextos habilitados |
 | `src/versoes.ts`, `app/versoes.json` | Histórico de versões validado, comparação semântica e notas de release |
 | `src/atualizacao.ts` | Verificação de atualização (manual e aviso automático da 2.10.1): destino fixo, timeout, resposta validada, sem download |
+| `src/atualizacaoInstalar.ts` | Atualizar com um clique (2.10.2): baixa instalador e .sha256 da release oficial, confere o SHA-256; só executa no aplicativo instalado |
+| `src/contratoDetectado.ts` | Pasta sem qa.project.json (2.10.2): detecta a stack pela raiz e propõe o contrato; cria só após confirmação nativa, sem sobrescrever |
 | `src/dados.ts`, `src/diagnostico.ts` | Resumo dos dados locais e diagnóstico IPC (só metadados, fora das métricas) |
 | `src/desktop/main.ts` | Processo Electron: janela, IPC validado, diálogos nativos |
 | `app/preload.cjs`, `app/renderer/` | Ponte mínima (`window.prumo`) e interface HTML/CSS/JS sem frameworks |

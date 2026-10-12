@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (118 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (119 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -16,7 +16,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:espacos:criar` | `descricao`, `nome` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
 | `prumo:espacos:obter` | `id` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
 | `prumo:espacos:editar` | `dados`, `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
-| `prumo:espacos:pasta` | `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
+| `prumo:espacos:pasta` | `id` | Grava a pasta no projeto Prumo. Sem qa.project.json, detecta a stack pela raiz e propõe o contrato; só cria o arquivo após confirmação nativa (gravação exclusiva, nunca sobrescreve). Contrato inválido não é vinculado. |
 | `prumo:espacos:automacoes` | `id` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
 | `prumo:espacos:associar` | `dados`, `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
 | `prumo:servicos:listar` | — | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
@@ -93,7 +93,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:worker:eventos` | `desde` | Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte). |
 | `prumo:app:info` | — | Consulta local; não altera o projeto. |
 | `prumo:projetos:listar` | — | Consulta local; não altera o projeto. |
-| `prumo:projetos:escolher` | — | Grava vinculos.json somente se o contrato for válido; nunca escreve na pasta do projeto. |
+| `prumo:projetos:escolher` | — | Grava vinculos.json somente se o contrato for válido. Sem qa.project.json, propõe o contrato detectado e só cria esse arquivo após confirmação nativa (2.10.2); nenhuma outra escrita na pasta do projeto. |
 | `prumo:projetos:demo` | — | Copia a demonstração (sem .prumo) para %LOCALAPPDATA%\PrumoQA\demonstracao, sem sobrescrever; grava vinculos.json. |
 | `prumo:projetos:desvincular` | `root` | Altera só vinculos.json. Histórico, evidências e arquivos do projeto permanecem. |
 | `prumo:projeto:visao` | `root` | Consulta local; não altera o projeto. |
@@ -109,6 +109,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:ajuda:integracoes` | — | Consulta local; não altera o projeto. |
 | `prumo:atualizacao:verificar` | — | Uma requisição HTTPS GET ao GitHub; não baixa nem instala nada. Grava só a versão disponível e as decisões de aviso em preferencias.json. |
 | `prumo:atualizacao:abrir` | — | Abre o navegador padrão na página da release; não baixa nem executa instalador. |
+| `prumo:atualizacao:instalar` | — | Baixa o instalador oficial e o .sha256 da release no GitHub, confere o resumo, executa o instalador (/S --updated --force-run) e fecha o Prumo, que reabre na versão nova. Fora do pacote nunca executa instalador. |
 | `prumo:site:abrir` | — | Abre o navegador padrão; nada é enviado pelo aplicativo. |
 | `prumo:dados:resumo` | — | Consulta local; não altera o projeto. |
 | `prumo:dados:excluir` | `escopo`, `root` | Apaga somente arquivos do escopo, validados por nome, tipo e caminho canônico. Nunca apaga código-fonte; não é exposto ao MCP. |
@@ -223,15 +224,15 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 ### `prumo:espacos:pasta`
 
 - **Tipo:** IPC
-- **Finalidade:** espacos:pasta: gestão explícita do projeto Prumo e integrações de leitura.
+- **Finalidade:** Vincular a pasta de um repositório de código ao projeto Prumo, de qualquer stack.
 - **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
 - **Destino:** main.ts > espacos.ts
-- **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
+- **Entrada:** Id do projeto; a pasta vem do diálogo nativo, nunca da página
 - **Saída:** Registro local ou confirmação de cancelamento
 - **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
-- **Efeito:** Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.
-- **Arquivos consultados:** Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional
-- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Efeito:** Grava a pasta no projeto Prumo. Sem qa.project.json, detecta a stack pela raiz e propõe o contrato; só cria o arquivo após confirmação nativa (gravação exclusiva, nunca sobrescreve). Contrato inválido não é vinculado.
+- **Arquivos consultados:** qa.project.json da pasta escolhida (criado só com aprovação); dados locais plataforma
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE, WORKSPACE_LOCAL_CONTRACT_INVALID, WORKSPACE_LOCAL_FOLDER_MISSING, WORKSPACE_LOCAL_DUPLICATE, CONTRACT_EXISTS
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
 - **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
 
@@ -1384,8 +1385,8 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Entrada:** Nenhuma: a pasta vem do diálogo nativo, nunca da página
 - **Saída:** canceled, linked, situation
 - **Permissões:** Escolha explícita da pessoa no diálogo
-- **Efeito:** Grava vinculos.json somente se o contrato for válido; nunca escreve na pasta do projeto.
-- **Arquivos consultados:** qa.project.json do projeto escolhido; vinculos.json
+- **Efeito:** Grava vinculos.json somente se o contrato for válido. Sem qa.project.json, propõe o contrato detectado e só cria esse arquivo após confirmação nativa (2.10.2); nenhuma outra escrita na pasta do projeto.
+- **Arquivos consultados:** qa.project.json do projeto escolhido (criado só com aprovação); vinculos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; A página não informa caminhos
 - **Registro:** Diagnóstico IPC
@@ -1613,6 +1614,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Arquivos consultados:** Nenhum
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, NO_VERIFIED_RELEASE
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; URL reconstruída a partir de tag validada; Somente github.com/AnaPLysyk/Prumo-Qa
+- **Registro:** Diagnóstico IPC
+
+### `prumo:atualizacao:instalar`
+
+- **Tipo:** IPC
+- **Finalidade:** Atualizar com um clique para a versão encontrada pela consulta (2.10.2).
+- **Origem:** Interface > Ajuda > Atualizações > Atualizar agora
+- **Destino:** main.ts > atualizacaoInstalar.baixarAtualizacao + instalador NSIS silencioso
+- **Entrada:** Nenhuma: versão e URLs vêm da consulta validada no processo principal
+- **Saída:** canceled, verificado, instalando, versao, sha256
+- **Permissões:** Confirmação nativa; recusa com execução em andamento
+- **Efeito:** Baixa o instalador oficial e o .sha256 da release no GitHub, confere o resumo, executa o instalador (/S --updated --force-run) e fecha o Prumo, que reabre na versão nova. Fora do pacote nunca executa instalador.
+- **Arquivos consultados:** Instalador temporário na pasta TEMP do usuário (prumo-atualizacao-*)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, NO_VERIFIED_RELEASE, UPDATE_BUSY, UPDATE_DOWNLOAD_FAILED, UPDATE_HASH_MISSING, UPDATE_HASH_MISMATCH, UPDATE_DESTINATION_FORBIDDEN, UPDATE_DEV_MODE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; URL montada da versão validada; Redirecionamentos só para hosts de download do GitHub, HTTPS; SHA-256 publicado na release conferido antes de executar; Gravação exclusiva e limite de tamanho
 - **Registro:** Diagnóstico IPC
 
 ### `prumo:site:abrir`

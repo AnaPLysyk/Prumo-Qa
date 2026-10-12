@@ -103,6 +103,7 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   verificarAtualizacao: () => chamar('atualizacao:verificar'),
   abrirSite: () => chamar('site:abrir'),
   abrirRelease: () => chamar('atualizacao:abrir'),
+  instalarAtualizacao: () => chamar('atualizacao:instalar'),
   resumoDados: () => chamar('dados:resumo'),
   excluirDados: (escopo, root) => chamar('dados:excluir', escopo === 'diagnostico' ? { escopo } : { escopo, root }),
   diagnostico: () => chamar('diagnostico:listar'),

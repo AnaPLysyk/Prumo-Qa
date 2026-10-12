@@ -83,17 +83,17 @@
     const prefs = [['iniciarComWindows', 'Iniciar o Prumo com o Windows (desligado por padrão; só você pode ligar)'], ['notificarAgenda', 'Avisar quando uma rotina falhar, for bloqueada ou concluir']].map(([k, t]) => h('label', {}, h('input', { type: 'checkbox', id: 'pref-' + k, checked: !!estado.prefs?.[k], onchange: async (e) => { const r = await chamar(() => api.salvarPreferencias({ [k]: e.target.checked })); if (r) estado.prefs = r.preferencias; } }), tr(t)));
     const [nav, painel] = DS.abasModal([
       ['jira', tr('Comentários no Jira'), perm.publicacoes.length || null, () => [blocoPoliticas(espacos, perm, () => { DS.fecharModal(); recarregar(); })]],
-      ['qase', tr('Resultados no Qase'), (perm.escritas || []).length || null, () => [politicasQase(perm.escritas || [], () => { DS.fecharModal(); recarregar(); })]],
+      ['qase', tr('Resultados no Qase'), (perm.escritas || []).length || null, () => [politicasQase(perm.escritas || [], espacos, () => { DS.fecharModal(); recarregar(); })]],
       ['residente', tr('Prumo residente'), null, () => [h('p', { id: 'residente' }, tr('Ao fechar a janela, o Prumo continua na bandeja do Windows para executar as rotinas. Para parar tudo, use "Sair do Prumo" no menu do ícone da bandeja: isso encerra o worker e os processos filhos.')), h('div', { class: 'ds-opcoes coluna' }, prefs)]]
     ]);
     DS.modal('Políticas e preferências', [nav, painel], { tamanho: 'md' });
   }
 
   // Políticas que deixam rotinas run-qase publicarem resultados no Qase: listar e revogar (a criação é feita na run local, em Testes › Runs).
-  function politicasQase(itens, recarregar) {
+  function politicasQase(itens, espacos, recarregar) {
     if (!itens.length) return DS.estadoTela('vazio', 'Nenhuma política de publicação no Qase', 'Sem política, as rotinas de run do Qase guardam os resultados só neste computador.', [], { compacto: true, id: 'politicas-qase-vazia' });
     return DS.tabela({ id: 'politicas-qase', colunas: ['Projeto', 'Runs', 'Validade', 'Usos', 'Estado', ''], linhas: itens.map((p) => ({ attrs: { 'data-politica-qase': p.id }, celulas: [
-      (estado.espacos || []).find((e) => e.id === p.espacoId)?.nome || p.espacoId.slice(0, 8), p.runs.map((n) => '#' + n).join(', '), hora(p.validaAte), p.usos + '/' + p.maxUsos, selo(p.estado),
+      espacos.find((e) => e.id === p.espacoId)?.nome || p.espacoId.slice(0, 8), p.runs.map((n) => '#' + n).join(', '), hora(p.validaAte), p.usos + '/' + p.maxUsos, selo(p.estado),
       p.estado === 'VIGENTE' ? { no: DS.acao('Revogar', async () => { if (await chamar(() => api.runRevogarPolitica(p.id))) { avisar(tr('Política revogada.')); recarregar(); } }, { compacto: true }), classe: 'ds-acao' } : ''] })) });
   }
 

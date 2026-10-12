@@ -22,10 +22,10 @@ Não. O Prumo só mostra o que mede de verdade: operações, achados, lacunas, r
 Não. Ele só vê as chamadas que chegam às suas quatro ferramentas. O que ele devolve à IA passa a ser tratado pelo provedor dela.
 
 ## Como sei se há uma nova versão?
-O Prumo avisa sozinho quando sai uma versão nova: o sino acende e chega uma notificação do Windows, uma vez por versão. Você também pode clicar em Verificar atualizações em Ajuda › Atualizações. Nada é baixado nem instalado sem a sua ação, e seus dados são preservados.
+O Prumo avisa sozinho quando sai uma versão nova: o sino acende e chega uma notificação do Windows, uma vez por versão. Você também pode clicar em Verificar atualizações em Ajuda › Atualizações. Para instalar, clique em Atualizar agora (desde a 2.10.2): o Prumo baixa, confere o SHA-256, instala e reabre. Nada é baixado nem instalado sem a sua ação, e seus dados são preservados.
 
 ## Como apago meus dados?
 Em Privacidade e dados. Cada exclusão (histórico, evidências, diagnóstico) é separada, pede confirmação e nunca toca no código do projeto.
 
 ## O instalador é seguro?
-Ele não é assinado digitalmente. Confira o SHA-256 da release e baixe somente do repositório oficial. O checksum prova que o arquivo é o publicado, não quem o publicou.
+Ele não é assinado digitalmente. Ao atualizar pelo aplicativo, o Prumo confere o SHA-256 publicado na release antes de instalar; ao baixar à mão, confira o SHA-256 e baixe somente do repositório oficial. O checksum prova que o arquivo é o publicado, não quem o publicou.

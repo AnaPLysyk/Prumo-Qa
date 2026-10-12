@@ -2,6 +2,56 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.10.2",
+      "status": "repositorio",
+      "date": null,
+      "title": "Qualquer pasta de código, atualizar com um clique e correções do teste em produção",
+      "objective": "Corrigir o que o teste do Prumo pelo próprio Prumo, na máquina da usuária, encontrou na 2.10.1: o aplicativo que não abria com um arquivo do worker corrompido, repositórios sem qa.project.json que não podiam ser usados, atualização que exigia baixar à mão, busca da Ajuda literal demais e problemas de experiência nas telas.",
+      "features": [
+        "Vincular qualquer pasta de código: sem qa.project.json, o Prumo detecta a stack pela raiz (Node/npm, Python, Go, Maven, Gradle, .NET, Rust, PHP, Ruby), mostra o contrato proposto e só cria o arquivo depois da confirmação nativa. Projetos npm ganham comandos para os scripts reais de teste, build, lint e typecheck; os de e2e, integração, deploy, migração ou banco ficam bloqueados até revisão.",
+        "Atualizar com um clique em Ajuda › Atualizações: o Prumo confere a release oficial, baixa o instalador e o .sha256 publicados, confere o SHA-256, fecha, instala e abre de novo na versão nova."
+      ],
+      "improvements": [
+        "Busca da Ajuda por palavras e radicais, com sinônimos do vocabulário do Prumo: \"atualizar\" encontra Atualizações, \"conectar repositório\" encontra Como vincular, e a página mais relevante vem no topo.",
+        "Mensagens de erro com a explicação primeiro e o código técnico só no fim.",
+        "O balão do assistente só aparece onde não cobre botões, campos ou links, e some quando a tela rola.",
+        "Barras de rolagem seguem o tema claro e escuro; \"Sem pasta local\" usa indicador neutro em vez de verde.",
+        "Testes automatizados de experiência percorrem todas as telas nos dois temas: contraste dos botões no hover, alinhamento das caixas de seleção, balão do assistente e barras de rolagem."
+      ],
+      "fixes": [
+        "O aplicativo não abria quando o arquivo de trava do worker ficava ilegível (por exemplo, zerado por queda de energia): o arquivo agora é guardado para diagnóstico e recriado, e nenhum erro de bandeja ou worker impede a janela de abrir.",
+        "Vincular pasta sem qa.project.json mostrava só WORKSPACE_LOCAL_CONTRACT_INVALID; contrato inválido agora explica o problema e o que fazer.",
+        "Caixas de seleção de Ajuda › Atualizações ficavam soltas acima do texto.",
+        "O projeto de demonstração aparecia na lateral, mas o Suporte dizia \"nenhum selecionado\": lateral, Suporte e Projetos usam o mesmo projeto, e Projetos aponta para a pasta com contrato local selecionada.",
+        "Nome, estilo e voz do assistente salvos em Ajustes voltavam ao valor antigo ao reabrir.",
+        "A confirmação de nova conexão dizia que não havia escrita externa; agora explica que a escrita fica desligada até ser habilitada por projeto.",
+        "A prévia de publicar proposta no Jira mostrava um tipo de ticket padrão que o envio real não usava; agora mostra o mesmo envio e pede o tipo antes de confirmar.",
+        "Em Agendamentos › Políticas › Resultados no Qase, a coluna Projeto mostrava o começo do identificador em vez do nome do projeto."
+      ],
+      "differential": "Qualquer repositório passa a ser utilizável pelo Prumo em poucos cliques, sempre com a aprovação da pessoa, e as próximas versões chegam com um clique.",
+      "howItWorks": [
+        "A detecção lê só a lista de arquivos da raiz, sem recursão, sem seguir links e sem itens sensíveis; nada é executado ao vincular.",
+        "A atualização usa URLs montadas a partir da versão validada pela consulta oficial; redirecionamentos só para os hosts de download do GitHub, sempre HTTPS."
+      ],
+      "security": [
+        "Criar o qa.project.json aprovado é a única escrita do Prumo na pasta do projeto; contrato existente nunca é sobrescrito e o arquivo que não passa no validador é apagado.",
+        "O instalador só é executado depois da confirmação e da conferência do SHA-256 publicado na release; fora do aplicativo instalado (desenvolvimento e testes) o instalador nunca é executado."
+      ],
+      "compatibility": [
+        "Dados, projetos e preferências da 2.10.1 são preservados. Contratos existentes continuam valendo sem mudança."
+      ],
+      "limitations": [
+        "Python, Go, Java, .NET, Rust, PHP e Ruby ficam somente leitura: o executor continua aceitando só node e npm; executar pytest, go test, mvn, dotnet test ou cargo pelo Prumo está planejado para a 2.11.",
+        "O SHA-256 vem da mesma release do instalador: garante que o arquivo é o publicado, não protege contra a conta do repositório comprometida. O instalador continua sem assinatura de código.",
+        "Atualizar com um clique vale a partir da 2.10.2: quem está na 2.10.1 recebe o aviso desta versão e instala esta pelo instalador baixado."
+      ],
+      "migration": "A instalação preserva os dados existentes; nenhuma migração de formato.",
+      "afterUpdate": [
+        "Para usar um repositório sem qa.project.json, vincule a pasta em Projetos e revise o contrato proposto antes de aprovar."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.10.1",
       "status": "publicada",
       "date": "2026-10-12",

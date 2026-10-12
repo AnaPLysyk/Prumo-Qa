@@ -1,5 +1,12 @@
 # Segurança e limites de confiança
 
+## Evolução 2.10.2
+
+- **Contrato proposto para qualquer pasta de código.** Ao vincular uma pasta sem `qa.project.json`, o aplicativo lê só a lista de arquivos da raiz (sem recursão, sem seguir links, sem itens sensíveis nem pastas geradas), detecta a stack e propõe um contrato v2. O arquivo só é criado depois da confirmação nativa do Windows, que mostra pastas, comandos e observações; é a **única** escrita do Prumo na pasta do projeto. Nunca sobrescreve um contrato existente (gravação exclusiva) e, se o arquivo não passar no validador do núcleo, é apagado. O caminho vem do seletor do sistema, nunca da janela.
+- **Comandos conservadores.** Só `npm run <script>` para scripts que existem no `package.json` e parecem de teste, build, lint ou typecheck (no máximo 10). Scripts com e2e, integração, deploy, publicação, migração, seed ou banco entram em `blockedByDefault`. Outras stacks (Python, Go, Java, .NET, Rust, PHP, Ruby) ficam somente leitura: o executor continua aceitando apenas node e npm. Executar continua exigindo aprovação humana a cada rodada ou escopo aprovado.
+- **Arquivo do worker ilegível** (por exemplo, zerado por queda de energia) é renomeado para diagnóstico e recriado; nenhum erro de bandeja ou worker impede a janela de abrir.
+- O CLI continua sem criar manifesto.
+
 ## Evolução 2.8
 
 - **Residente na bandeja.** Fechar a janela só a esconde; o worker de agendamentos continua no mesmo processo do aplicativo. Não há serviço do Windows, tarefa agendada nem instalação de driver. Iniciar com o Windows é opcional e vem desligado. "Sair do Prumo" encerra o worker e a árvore de processos filhos (`taskkill /T /F`), registra a interrupção e libera a trava. Computador desligado ou suspenso: nada executa e o horário fica registrado como perdido.

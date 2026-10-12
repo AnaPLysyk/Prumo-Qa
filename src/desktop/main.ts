@@ -15,10 +15,12 @@ import { diretorioDados, excluirAtividades } from '../atividades.js';
 import { excluirEvidencias } from '../evidencias.js';
 import { excluirTodosContextos } from '../contextos.js';
 import { prepararConexao, aplicarConexao } from '../conexoes.js';
-import { adicionarVinculo, copiarDemonstracao, projetoVinculado } from '../vinculos.js';
+import { adicionarVinculo, copiarDemonstracao, projetoVinculado, situacaoProjeto } from '../vinculos.js';
+import { proporContrato, resumoProposta, gravarContratoProposto } from '../contratoDetectado.js';
 import { esquemasIpc, canaisFrequentes, catalogo, type CanalIpc } from '../contratos.js';
 import { carregarVersoes, apresentarVersoes, conferirInstalada, repositorio } from '../versoes.js';
 import { verificarAtualizacao, mensagemOffline, urlConsulta } from '../atualizacao.js';
+import { baixarAtualizacao, argumentosInstalador } from '../atualizacaoInstalar.js';
 import { registrarDiagnostico, lerDiagnostico, excluirDiagnostico } from '../diagnostico.js';
 import { resumirDados } from '../dados.js';
 import { lerPreferencias, alterarPreferencias, marcarVisualizada, avisoPendente, registrarConsulta } from '../preferencias.js';
@@ -44,7 +46,7 @@ import { conversar, rosterDoChat, saudacao, type Executor } from '../orquestrado
 import { conversasDoAgente, apagarConversas } from '../conversas.js';
 import * as conhecimento from '../conhecimento.js';
 import { localizar as localizarCliente } from '../conexoes.js';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { autorizarDelegacao } from '../preferencias.js';
 import * as agentes from '../politicasAgentes.js';
 import { listarExecucoes, metricas } from '../historicoCentral.js';
@@ -116,7 +118,14 @@ canal('projetos:listar', () => painel.projetos());
 canal('projetos:escolher', async (_a, janela) => {
   const r = await dialog.showOpenDialog(janela!, { title: 'Selecionar a pasta do projeto', properties: ['openDirectory'] });
   if (r.canceled || !r.filePaths[0]) return { canceled: true };
-  return { canceled: false, ...(await adicionarVinculo(r.filePaths[0]!)) };
+  // 2.10.2: mesma proposta de contrato do vínculo de projeto Prumo, com aprovação nativa antes de gravar.
+  const s = await situacaoProjeto(r.filePaths[0]);
+  if (s.state === 'SEM_MANIFESTO') {
+    const p = proporContrato(s.root);
+    if (!await confirmar(janela, 'Criar contrato do projeto', 'Esta pasta ainda não tem qa.project.json. Criar o contrato proposto e vincular?', resumoProposta(p), 'Criar contrato e vincular')) return { canceled: true };
+    await gravarContratoProposto(p);
+  }
+  return { canceled: false, ...(await adicionarVinculo(s.root)) };
 });
 canal('projetos:demo', async () => {
   const origem = app.isPackaged ? path.join(process.resourcesPath, 'demo') : path.join(raizApp, 'exemplos', 'projeto-demo');
@@ -173,8 +182,8 @@ canal('dados:excluir', async (a, janela) => {
   return { canceled: false, ...(a.escopo === 'historico' ? excluirAtividades(p) : a.escopo === 'contextos' ? excluirTodosContextos(p) : await excluirEvidencias(p)) };
 });
 
-// Atualização: consulta no processo principal (a janela segue sem rede). Nada é baixado nem instalado.
-let ultimaRelease: string | undefined;
+// Atualização: consulta no processo principal (a janela segue sem rede). Baixar e instalar só pelo clique em "Atualizar agora".
+let ultimaRelease: string | undefined; let ultimaVersao: string | undefined;
 canal('atualizacao:verificar', () => consultarAtualizacao());
 async function consultarAtualizacao() {
   // Servidor de teste em 127.0.0.1 só é aceito fora do pacote (desenvolvimento e testes automatizados).
@@ -182,7 +191,7 @@ async function consultarAtualizacao() {
   let r;
   try { r = await verificarAtualizacao(versao, teste ? { url: teste, permitirLocal: true } : { url: urlConsulta }); }
   catch { r = { status: 'INDISPONIVEL' as const, installed: versao, conclusivo: false, motivo: 'REDE' as const, message: mensagemOffline }; }
-  ultimaRelease = r.status === 'ATUALIZACAO_DISPONIVEL' ? r.url : undefined;
+  ultimaRelease = r.status === 'ATUALIZACAO_DISPONIVEL' ? r.url : undefined; ultimaVersao = r.status === 'ATUALIZACAO_DISPONIVEL' ? r.latest : undefined;
   // Só respostas válidas alteram o aviso persistente; falha de rede mantém o que já se sabia (o sino continua offline).
   const valido = r.status === 'ATUALIZACAO_DISPONIVEL' || r.status === 'ATUALIZADO' || r.status === 'INSTALADA_MAIS_NOVA';
   const notificacao = valido ? registrarConsulta(r.status === 'ATUALIZACAO_DISPONIVEL' ? { versao: r.latest!, notas: r.notes ?? '' } : null) : { indicador: avisoPendente(versao).indicador, tocarSom: false, notificar: false, versao: null, notas: '' };
@@ -202,10 +211,10 @@ async function avisoAutomatico() {
   // A janela (se aberta) acende o sino e toca o som quando for o caso; a notificação do Windows chega mesmo só na bandeja.
   const en = idiomaAtual() === 'en';
   const titulo = en ? `Prumo QA ${n.versao} available` : `Prumo QA ${n.versao} disponível`;
-  const detalhe = en ? 'See what is new and download it from the official page in Help › Updates.' : 'Veja as novidades e baixe pela página oficial em Ajuda › Atualizações.';
+  const detalhe = en ? 'See what is new and update with one click in Help › Updates.' : 'Veja as novidades e atualize com um clique em Ajuda › Atualizações.';
   empilhar({ tipo: 'ATUALIZACAO_DISPONIVEL', titulo, detalhe, destino: 'atualizacoes', tocarSom: n.tocarSom });
   if (Notification.isSupported()) {
-    const aviso = new Notification({ title: titulo, body: detalhe + (en ? ' Nothing is downloaded or installed on its own.' : ' Nada é baixado nem instalado sozinho.'), silent: true });
+    const aviso = new Notification({ title: titulo, body: detalhe + (en ? ' Nothing is downloaded or installed without your click.' : ' Nada é baixado nem instalado sem o seu clique.'), silent: true });
     aviso.on('click', () => navegar('atualizacoes')); aviso.show();
   }
 }
@@ -229,6 +238,24 @@ canal('atualizacao:abrir', async (_a, janela) => {
     message: 'Abrir a página oficial da nova versão?', detail: `${ultimaRelease}\n\nO Prumo não baixa nem instala nada. Confira o SHA-256 informado na página antes de executar o instalador.` });
   if (r.response !== 1) return { opened: false };
   await shell.openExternal(ultimaRelease); return { opened: true };
+});
+// 2.10.2: atualizar com um clique. Versão só a que a consulta validou; confirmação nativa; download e SHA-256 conferidos
+// no processo principal; o instalador roda em modo silencioso e reabre o Prumo. Fora do pacote (desenvolvimento e testes)
+// baixa e confere de um servidor 127.0.0.1, mas nunca executa instalador.
+canal('atualizacao:instalar', async (_a, janela) => {
+  const v = ultimaVersao;
+  if (!v || !ultimaRelease) throw new Error('NO_VERIFIED_RELEASE: verifique as atualizações antes de atualizar.');
+  if (worker.estado().emExecucao) throw new Error('UPDATE_BUSY: há uma execução em andamento. Espere terminar e atualize de novo.');
+  const r = await dialog.showMessageBox(janela!, { type: 'question', title: 'Atualizar o Prumo QA', buttons: ['Cancelar', 'Atualizar agora'], defaultId: 1, cancelId: 0, noLink: true,
+    message: `Atualizar para a versão ${v} agora?`, detail: `O Prumo baixa o instalador oficial da release v${v} no GitHub, confere o SHA-256 publicado, fecha, instala e abre de novo. Projetos, histórico e evidências são mantidos.\n\nO instalador não é assinado digitalmente; a conferência do SHA-256 garante que o arquivo é o publicado na release.` });
+  if (r.response !== 1) return { canceled: true };
+  const teste = !app.isPackaged ? process.env.PRUMO_UPDATE_TEST_DOWNLOAD : undefined;
+  if (!app.isPackaged && !teste) throw new Error('UPDATE_DEV_MODE: fora do aplicativo instalado não há atualização automática.');
+  const baixado = await baixarAtualizacao(v, teste ? { base: teste, permitirLocal: true } : {});
+  if (!app.isPackaged) { fs.rmSync(path.dirname(baixado.arquivo), { recursive: true, force: true }); return { canceled: false, verificado: true, instalando: false, versao: v, sha256: baixado.sha256 }; }
+  spawn(baixado.arquivo, [...argumentosInstalador], { detached: true, stdio: 'ignore', windowsHide: false }).unref();
+  setTimeout(() => app.quit(), 600).unref();
+  return { canceled: false, verificado: true, instalando: true, versao: v, sha256: baixado.sha256 };
 });
 
 
@@ -267,11 +294,24 @@ canal('espacos:listar',()=>espacos.listarEspacos());
 canal('espacos:criar',a=>espacos.criarEspaco(a));
 canal('espacos:obter',a=>espacos.obterEspaco(a.id));
 canal('espacos:editar',a=>espacos.editarEspaco(a.id,a.dados));
-canal('espacos:pasta',async(a,j)=>{espacos.obterEspaco(a.id);const r=await dialog.showOpenDialog(j!,{title:'Pasta de automação com contrato v2',properties:['openDirectory']});if(r.canceled||!r.filePaths[0])return {canceled:true};return espacos.pastaEspaco(a.id,r.filePaths[0]);});
+// 2.10.2: qualquer pasta de código. Sem qa.project.json, o Prumo detecta a stack e propõe o contrato; só grava depois da
+// confirmação nativa. A pasta vem do diálogo do sistema, nunca do renderer. Contrato existente nunca é sobrescrito.
+canal('espacos:pasta',async(a,j)=>{
+  espacos.obterEspaco(a.id);const r=await dialog.showOpenDialog(j!,{title:'Pasta do repositório ou projeto de código',properties:['openDirectory']});if(r.canceled||!r.filePaths[0])return {canceled:true};
+  const s=await situacaoProjeto(r.filePaths[0]);
+  if(s.state==='PASTA_AUSENTE')throw new Error('WORKSPACE_LOCAL_FOLDER_MISSING: a pasta escolhida não existe ou não pode ser lida.');
+  if(s.state==='MANIFESTO_INVALIDO')throw new Error(`WORKSPACE_LOCAL_CONTRACT_INVALID: o qa.project.json desta pasta não é válido (${s.message}). Corrija o arquivo, ou apague-o para o Prumo propor um contrato novo, e vincule de novo. Veja Ajuda › Como vincular.`);
+  if(s.state==='SEM_MANIFESTO'){
+    const p=proporContrato(s.root);
+    if(!await confirmar(j,'Criar contrato do projeto','Esta pasta ainda não tem qa.project.json. Criar o contrato proposto e vincular?',resumoProposta(p),'Criar contrato e vincular'))return {canceled:true};
+    await gravarContratoProposto(p);
+  }
+  return espacos.pastaEspaco(a.id,s.root);
+});
 canal('espacos:automacoes',async a=>{const e=espacos.obterEspaco(a.id);const k6=(await localizarK6())!==null;if(!e.pastaLocal)return {pastaLocal:null,estado:'SEM_PASTA',frameworks:[],capacidades:[],k6Disponivel:k6};const p=await carregarProjeto(e.pastaLocal);const c=await contextoCompleto(p);return {pastaLocal:p.raiz,estado:'INTEGRADO',frameworks:c.frameworks,capacidades:Object.keys(p.manifesto.commands),readOnly:p.manifesto.execution.readOnly,k6Disponivel:k6};});
 canal('espacos:associar',a=>espacos.associarEspaco(a.id,a.dados));
 canal('servicos:listar',()=>servicos.contas());
-canal('servicos:adicionar',async(a,j)=>{if(!await confirmar(j,'Adicionar conexão de leitura',`Configurar ${a.servico}?`,'A credencial será protegida no perfil Windows. As consultas são explícitas; o renderer e os agentes não recebem a credencial armazenada. Não há permissão de escrita externa no Prumo.','Configurar'))return {canceled:true};return servicos.adicionar(a);});
+canal('servicos:adicionar',async(a,j)=>{if(!await confirmar(j,'Adicionar conexão de leitura',`Configurar ${a.servico}?`,'A credencial será protegida no perfil Windows. As consultas são explícitas; o renderer e os agentes não recebem a credencial armazenada. A escrita no serviço fica desligada até você habilitá-la por projeto em Conexões, e cada envio mostra a prévia e pede confirmação.','Configurar'))return {canceled:true};return servicos.adicionar(a);});
 canal('servicos:validar',a=>servicos.validarConta(a.id));
 canal('servicos:remover',async(a,j)=>{if(!await confirmar(j,'Remover conexão','Remover esta credencial e desativar a conexão?','Vínculos e histórico permanecem identificados; nenhum recurso externo será apagado.','Remover'))return {canceled:true};return servicos.removerConta(a.id);});
 canal('servicos:recursos',a=>servicos.listar(a.id,a.pagina));
@@ -339,7 +379,10 @@ canal('propostas:revisar', async (a, j) => {
 canal('propostas:descartar', a => props.descartarProposta(a.id));
 canal('propostas:publicar', async (a, j) => {
   const i = idiomaAtual(); const p = props.obterProposta(a.id); props.podePublicar(p); const e = espacos.obterEspaco(p.espacoId); const op = p.tipo === 'caso' ? 'qase.criar_caso' : 'jira.criar_ticket';
-  const prev = ext.prepararOperacao(p.espacoId, op, p.tipo === 'caso' ? p.dados : { tipoId: a.tipoId ?? p.dados.tipoId ?? '1', resumo: p.dados.resumo, descricao: p.dados.descricao ?? '', rotulos: p.dados.rotulos ?? [] });
+  // 2.10.2: a prévia confirmada usa o mesmo tipo do envio real; sem tipo, recusa antes de pedir confirmação (antes mostrava '1').
+  const tipoId = a.tipoId ?? (typeof p.dados.tipoId === 'string' ? p.dados.tipoId : undefined);
+  if (p.tipo !== 'caso' && !tipoId) throw new Error('ISSUE_TYPE_REQUIRED: escolha o tipo do ticket (ex.: Bug) antes de publicar.');
+  const prev = ext.prepararOperacao(p.espacoId, op, p.tipo === 'caso' ? p.dados : { tipoId, resumo: p.dados.resumo, descricao: p.dados.descricao ?? '', rotulos: p.dados.rotulos ?? [], ...(p.dados.origem ? { origem: p.dados.origem } : {}) });
   if (!(await confirmar(j, tm('opTitulo', i), tm('opMsg', i, { s: nomeServico[prev.servico], r: prev.rotulo }), tm('opDet', i, { x: prev.resumo + '\n\n' + prev.efeito, p: e.nome }), tm('opBtn', i)))) return { canceled: true };
   return { canceled: false, ...(await publicarProposta(servicos, a.id, { confirmado: true, tipoId: a.tipoId })) };
 });
@@ -532,7 +575,7 @@ function atualizarBandeja() { if (bandeja) { bandeja.setContextMenu(menuBandeja(
 function criarBandeja() {
   const icone = nativeImage.createFromPath(path.join(raizApp, 'assets', 'prumo-icon.png')).resize({ width: 16, height: 16 });
   bandeja = new Tray(icone); bandeja.on('click', () => mostrarJanela()); bandeja.on('double-click', () => mostrarJanela()); atualizarBandeja();
-  setInterval(() => { vigiarWorker(); atualizarBandeja(); }, 15000).unref();
+  setInterval(() => { try { vigiarWorker(); atualizarBandeja(); } catch { /* um ciclo com erro não derruba o processo */ } }, 15000).unref();
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -549,10 +592,11 @@ else {
     // Nada de rede na janela: só file:// (a própria página) e devtools em desenvolvimento.
     session.defaultSession.webRequest.onBeforeRequest((d, cb) => cb({ cancel: !(d.url.startsWith('file:') || d.url.startsWith('devtools:')) }));
     session.defaultSession.setPermissionRequestHandler((_w, _p, cb) => cb(false));
-    criarBandeja();
+    // 2.10.2: nenhum erro de bandeja ou worker impede a janela de abrir; o problema aparece como aviso.
+    try { criarBandeja(); } catch (err) { empilhar({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Bandeja', detalhe: (err as Error).message }); }
     try { worker.iniciar(); } catch (err) { empilhar({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Worker', detalhe: (err as Error).message }); }
-    atualizarBandeja();
-    if (!iniciouOculto) mostrarJanela();
+    try { atualizarBandeja(); } catch { /* o aviso do worker já foi registrado acima */ }
+    if (!iniciouOculto || !bandeja) mostrarJanela();
     // 2.10.1: aviso de versão nova ao abrir (depois que a janela carrega) e a cada 6 horas, mesmo só na bandeja.
     setTimeout(() => { void avisoAutomatico().catch(() => undefined); }, 4000).unref();
     setInterval(() => { void avisoAutomatico().catch(() => undefined); }, SEIS_HORAS).unref();

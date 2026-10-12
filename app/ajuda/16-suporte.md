@@ -19,8 +19,12 @@ O **sino** no cabeçalho mostra um ponto quando existe uma versão publicada que
 
 Em **Ajuda › Atualizações › Preferências de aviso** você escolhe:
 
-- **Verificar ao abrir o aplicativo** (desligado por padrão): faz uma consulta ao abrir. Sem isso, só consulta quando você clica em verificar.
+- **Avisar quando houver versão nova** (ligado por padrão desde a 2.10.1): consulta ao abrir e a cada 6 horas, mesmo com o aplicativo só na bandeja, e avisa uma vez por versão no sino e com uma notificação do Windows.
 - **Som**: um som curto (dois tons) quando há versão nova. Toca **uma única vez por versão**, não repete ao reabrir.
 - **Silenciar**: nunca toca som.
 
-A consulta de atualização não existe em segundo plano nem como tarefa agendada: o aviso só funciona com o aplicativo aberto (janela ou bandeja) e quando você clica em verificar ou ligou a verificação ao abrir. A consulta vai somente ao GitHub oficial, sem enviar logs, projetos, caminhos ou identificadores (o GitHub vê o seu endereço IP, como em qualquer conexão). **Nada é baixado nem instalado automaticamente.** Confira sempre o SHA-256 informado na página oficial.
+A consulta só acontece com o aplicativo aberto (janela ou bandeja); não há serviço nem tarefa agendada do Windows. Ela vai somente ao GitHub oficial, sem enviar logs, projetos, caminhos ou identificadores (o GitHub vê o seu endereço IP, como em qualquer conexão).
+
+## Atualizar com um clique (2.10.2)
+
+Em **Ajuda › Atualizações**, quando há versão nova, clique em **Atualizar agora** e confirme. O Prumo baixa o instalador oficial e o arquivo .sha256 da release no GitHub, confere o SHA-256, fecha, instala e abre de novo na versão nova. Projetos, histórico e evidências são mantidos. Se houver uma execução em andamento, ele pede para esperar terminar. **Nada é baixado nem instalado sem o seu clique.** Quem está numa versão anterior à 2.10.2 instala a nova pelo instalador baixado da página oficial.

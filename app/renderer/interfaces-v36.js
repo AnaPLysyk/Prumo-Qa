@@ -314,8 +314,20 @@
     function mostrarDica() {
       const aba = estado.aba; if (aba === 'inicio' || !painel.hidden || document.hidden) return;
       const op = DICAS[aba] || ['Quer ajuda para explorar esta tela?', 'Posso te orientar nesta tela.'];
-      dica.textContent = tr(op[n++ % op.length]); dica.dataset.visible = 'true'; clearTimeout(tEsconder); tEsconder = setTimeout(esconderDica, 6400);
+      dica.textContent = tr(op[n++ % op.length]);
+      // 2.10.2: o balão só aparece onde não cobre nenhum controle da tela (ele já ocupa o lugar mesmo invisível).
+      if (cobreControle()) return;
+      dica.dataset.visible = 'true'; clearTimeout(tEsconder); tEsconder = setTimeout(esconderDica, 6400);
     }
+    function cobreControle() {
+      const d = dica.getBoundingClientRect(), m = 8;
+      return [...document.querySelectorAll('#conteudo button, #conteudo a, #conteudo input, #conteudo select, #conteudo textarea, #conteudo summary, #conteudo [role=tab]')].some((el) => {
+        const q = el.getBoundingClientRect(); if (!q.width || !q.height) return false;
+        return q.left < d.right + m && q.right > d.left - m && q.top < d.bottom + m && q.bottom > d.top - m - 7;
+      });
+    }
+    // Se a tela rolar com o balão aberto, um controle pode passar por baixo dele: esconde.
+    document.addEventListener('scroll', () => { if (dica.dataset.visible === 'true') esconderDica(); }, { capture: true, passive: true });
     dica.addEventListener('click', () => { const texto = dica.textContent; esconderDica(); abrir(); conversa.contexto(estado.aba, texto); });
     document.addEventListener('visibilitychange', () => { if (document.hidden) esconderDica(); });
     setInterval(() => { if (dica.dataset.visible !== 'true') mostrarDica(); }, 15500);
@@ -973,7 +985,7 @@
     const caixa = $('#controles'); if (!caixa || caixa.querySelector('.v36-ajustes-ia')) return;
     caixa.prepend(h('div', { class: 'v36-ajustes-titulo' }, tr('Sistema')));
     const ia = () => estado.prefs?.ia || { nome: 'Prumo', estilo: 'amigavel', voz: null, lerRespostas: false, delegacao: { claude: false, codex: false } };
-    async function salvar(parcial) { const r = await chamar(() => api.salvarPreferencias({ ia: parcial })); if (r) { estado.prefs = { ...(estado.prefs || {}), ...r }; conversa.recarregar(); } return r; }
+    async function salvar(parcial) { const r = await chamar(() => api.salvarPreferencias({ ia: parcial })); if (r) { estado.prefs = { ...(estado.prefs || {}), ...(r.preferencias || {}) }; conversa.recarregar(); } return r; }
     const nome = h('input', { id: 'ia-nome', maxlength: 40, value: ia().nome, 'aria-label': tr('Nome do assistente'), autocomplete: 'off' });
     const pessoa = h('input', { id: 'ia-pessoa', maxlength: 30, 'aria-label': 'Como chamar você', autocomplete: 'off' });
     const papel = h('select', { id: 'ia-papel', 'aria-label': 'Seu papel no time' }, [['', 'Não informado'], ['qa', 'QA'], ['dev', 'Desenvolvimento'], ['po', 'Produto (PO)'], ['analista', 'Análise'], ['outro', 'Outro']].map(([value, rotulo]) => h('option', { value }, rotulo)));

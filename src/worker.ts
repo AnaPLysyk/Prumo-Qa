@@ -1,6 +1,7 @@
+import fs from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { lerLocal, gravarLocal } from './armazenamentoLocal.js';
+import { lerLocal, gravarLocal, arquivoLocal } from './armazenamentoLocal.js';
 import { listarRotinas, obterRotina, slotsVencidos, marcarSlot, pausaGlobal, proximoSlot, type Rotina } from './agenda.js';
 import { enfileirar, registrarPerdido, reivindicar, concluir, falharInfra, batimento, recuperarInterrompidos, listarTrabalhos, obterTrabalho, type Trabalho, type ResultadoTrabalho } from './fila.js';
 import { obterEspaco } from './espacos.js';
@@ -33,7 +34,15 @@ export type DepsWorker = {
 
 // ---- Trava de instância única + batimento ----
 const travaSchema = z.object({ instancia: z.string(), pid: z.number().int(), inicio: z.string().datetime(), batimento: z.string().datetime(), ativo: z.boolean() }).strict();
-const lerTrava = (b?: string) => lerLocal('worker-trava.json', travaSchema.nullable(), null, b);
+// 2.10.2: uma trava ilegível (ex.: arquivo zerado por queda de energia) não pode impedir o aplicativo de abrir. Ela é
+// posta de lado (renomeada, para diagnóstico) e tratada como ausente; o worker grava uma nova ao assumir.
+const lerTrava = (b?: string) => {
+  try { return lerLocal('worker-trava.json', travaSchema.nullable(), null, b); }
+  catch {
+    try { const alvo = arquivoLocal('worker-trava.json', b); fs.renameSync(alvo, `${alvo}.ilegivel-${Date.now()}`); } catch { /* sem permissão: segue como ausente */ }
+    return null;
+  }
+};
 const vivo = (pid: number) => { try { process.kill(pid, 0); return true; } catch (e) { return (e as NodeJS.ErrnoException).code === 'EPERM'; } };
 export function estadoTrava(b?: string, agora = new Date()) {
   const t = lerTrava(b); if (!t || !t.ativo) return { vivo: false, pid: null as number | null, ultimoBatimento: t?.batimento ?? null };

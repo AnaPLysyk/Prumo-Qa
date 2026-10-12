@@ -14,7 +14,7 @@ export type Situacao = {
   root: string; state: 'INTEGRADO' | 'SEM_MANIFESTO' | 'MANIFESTO_INVALIDO' | 'PASTA_AUSENTE';
   id?: string; name?: string; capabilities?: string[]; readOnly?: boolean; message: string; instructions?: string;
 };
-export const instrucoesManifesto = 'Crie um arquivo qa.project.json (schemaVersion 2) na raiz do projeto, declarando context (documentation, tests, code), commands e execution.requireApproval=true. O Prumo não cria nem altera arquivos do projeto; veja a seção Ajuda › Integrar um projeto.';
+export const instrucoesManifesto = 'Vincule a pasta pelo aplicativo: o Prumo detecta a stack, mostra o qa.project.json proposto e só cria o arquivo se você aprovar. Para escrever à mão: schemaVersion 2, context (documentation, tests, code), commands e execution.requireApproval=true. Contrato existente nunca é sobrescrito; veja Ajuda › Como vincular.';
 
 /** Forma canônica para comparar: resolve links, 8.3 (RUNNER~1) e caixa, como o núcleo faz ao carregar o projeto. */
 const canonica = (raiz: string) => { try { return fs.realpathSync.native(raiz).toLowerCase(); } catch { return String(raiz).toLowerCase(); } };

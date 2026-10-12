@@ -25,8 +25,14 @@ function avisar(msg, erro) {
 /** Chamada ao núcleo; erros viram aviso, nunca exceção solta. */
 async function chamar(fn) {
   const r = await fn();
-  if (!r.ok) { avisar(r.error, true); return null; }
+  if (!r.ok) { avisar(textoErro(r.error), true); return null; }
   return r.data;
+}
+/** 2.10.2: explicação primeiro, código técnico só como detalhe no fim ("CODIGO: texto" → "Texto (código CODIGO)"). */
+function textoErro(erro) {
+  const m = /^([A-Z][A-Z0-9_]{2,63}):\s*([\s\S]+)$/.exec(String(erro || ''));
+  if (!m) return String(erro || 'Falha sem detalhe.');
+  const texto = m[2].trim(); return texto.charAt(0).toUpperCase() + texto.slice(1) + ' (código ' + m[1] + ')';
 }
 function semProjeto() {
   return h('div', { class: 'vazio' }, 'Nenhum projeto selecionado. Em ', h('strong', {}, 'Projetos'), ', vincule uma pasta com qa.project.json ou adicione o projeto de demonstração.');
@@ -38,7 +44,7 @@ function diagnostico(s) {
 
 const abas = {
   async projetos(el) {
-    el.append(h('h2', {}, 'Pastas com contrato local'));
+    el.append(h('h2', { id: 'pastas-contrato-local' }, 'Pastas com contrato local'));
     const caixa = h('div', { id: 'diagnostico' });
     el.append(h('div', { class: 'barra' },
       h('button', { class: 'acao primaria', onclick: async () => {
@@ -328,8 +334,21 @@ async function painelAtualizacoes() {
   const info = await chamar(api.info); const saida = h('div', { 'aria-live': 'polite', id: 'saida-atualizacao' });
   const pref = await chamar(api.preferencias); const p = pref ? pref.preferencias : null;
   const detalhes = (versao, notas) => [h('h2', {}, 'O que mudou na ' + versao), ...markdown(notas || 'A release não traz notas.'),
-    h('p', { class: 'suave' }, 'Compatibilidade e limitações estão nas notas acima e em Versões. Seus projetos, histórico e evidências são preservados; se o executável mudar de pasta, reconfigure a conexão MCP. O instalador não é assinado: confira o SHA-256 na página oficial antes de executar.'),
-    h('button', { class: 'acao', id: 'abrir-release', onclick: async () => { const x = await chamar(api.abrirRelease); if (x && x.opened) avisar('Página oficial aberta no navegador.'); } }, 'Abrir página oficial…')];
+    h('p', { class: 'suave' }, 'Compatibilidade e limitações estão nas notas acima e em Versões. Seus projetos, histórico e evidências são preservados; se o executável mudar de pasta, reconfigure a conexão MCP. O instalador não é assinado: ao atualizar, o Prumo confere o SHA-256 publicado na release antes de instalar.'),
+    h('div', { class: 'barra-acoes' }, botaoAtualizar(), h('button', { class: 'acao', id: 'abrir-release', onclick: async () => { const x = await chamar(api.abrirRelease); if (x && x.opened) avisar('Página oficial aberta no navegador.'); } }, 'Abrir página oficial…')), h('div', { id: 'progresso-atualizacao', 'aria-live': 'polite' })];
+  // 2.10.2: um clique. Confere de novo a release (a versão vem do processo principal), baixa, confere o SHA-256 e instala.
+  function botaoAtualizar() {
+    const b = h('button', { class: 'acao primaria', id: 'atualizar-agora', onclick: async () => {
+      const prog = document.getElementById('progresso-atualizacao'); b.disabled = true;
+      const passo = (t) => prog?.replaceChildren(h('p', { class: 'suave' }, t));
+      passo('Conferindo a release oficial…'); const c = await chamar(api.verificarAtualizacao);
+      if (!c || c.status !== 'ATUALIZACAO_DISPONIVEL') { b.disabled = false; return passo(c ? c.message : 'A consulta não foi concluída; tente de novo.'); }
+      passo('Baixando o instalador e conferindo o SHA-256…'); const x = await chamar(api.instalarAtualizacao); b.disabled = false;
+      if (!x || x.canceled) return prog?.replaceChildren();
+      prog?.replaceChildren(h('p', { class: 'nota', id: 'atualizacao-conferida' }, x.instalando ? 'Instalador da versão ' + x.versao + ' conferido (SHA-256 ' + x.sha256.slice(0, 12) + '…). O Prumo vai fechar, instalar e abrir de novo.' : 'Instalador da versão ' + x.versao + ' baixado e conferido (SHA-256 ' + x.sha256.slice(0, 12) + '…). Modo de desenvolvimento: nada foi instalado.'));
+    } }, 'Atualizar agora');
+    return b;
+  }
   const botao = h('button', { class: 'acao primaria', id: 'verificar-atualizacao', onclick: async () => {
     botao.disabled = true; saida.replaceChildren(h('p', { class: 'suave' }, 'Consultando a release oficial…'));
     const r = await chamar(api.verificarAtualizacao); botao.disabled = false; if (!r) return saida.replaceChildren();
@@ -470,7 +489,8 @@ async function mostrar(aba) {
   const nome = estado.espaco || locais?.find((p) => p.root === estado.root);
   if (token !== estado.render) return;
   if (estado.root && !nome && consultou) estado.root = null;
-  if (nome || consultou) $('#projeto-atual').textContent = nome ? (nome.nome || nome.name || nome.id) : 'nenhum selecionado';
+  // 2.10.2: um só nome de projeto atual para lateral, Suporte e Projetos (inclusive pasta com contrato local, como a demonstração).
+  if (nome || consultou) { estado.projetoNome = nome ? (nome.nome || nome.name || nome.id) : null; estado.projetoLegado = !!nome && !estado.espaco; $('#projeto-atual').textContent = estado.projetoNome || 'nenhum selecionado'; }
   try { await abas[aba](el); } catch (e) { if (token === estado.render) avisar('Falha ao carregar a seção.', true); }
   if (token !== estado.render) return;
   $('#conteudo').replaceChildren(...el.childNodes);
