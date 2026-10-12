@@ -1,5 +1,7 @@
 # Prumo QA 2.10 — Plataforma desktop de engenharia de qualidade
 
+**Refatoração em desenvolvimento:** [Arquitetura modular por tela](docs/ARQUITETURA-MODULAR-ATUAL.md). No código da branch, procure `frontend/<tela>` e `backend/<tela>`; a `main` ainda utiliza o formato anterior.
+
 Versão atual 2.10.2; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
 
 ## Ciclo de qualidade e IA

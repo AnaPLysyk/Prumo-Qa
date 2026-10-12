@@ -2,7 +2,7 @@
 // cópia de trabalho, inclusive alterações ainda não commitadas). Para cada arquivo: descrição da primeira linha,
 // funções, quem ele importa, quem o importa, hash e código. Também monta os fluxos do usuário (tela -> canal -> backend).
 // Uso: npm run arquitetura [-- --atual origin/main] [-- --saida tmp/arquitetura]
-// Lê só fontes do próprio Prumo (backend/src, app, scripts, testes). Nada de projetos vinculados nem dados do usuário.
+// Lê só fontes do próprio Prumo (frontend, backend, app, scripts, testes). Nada de projetos vinculados nem dados do usuário.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -80,7 +80,7 @@ function fluxosDeUso(arquivos) {
   const preload = arquivos.get('app/preload.cjs') ?? '';
   const ponte = new Map();
   for (const m of preload.matchAll(/([A-Za-z_$][\w$]*)\s*:\s*\([^)]*\)\s*=>\s*chamar\('([a-z]+:[a-z]+)'/g)) ponte.set(m[2], m[1]);
-  const telasQueChamam = (fn) => [...arquivos].filter(([n, t]) => (n.startsWith('frontend/') || n.startsWith('app/renderer/')) && n.endsWith('.js') && new RegExp(`\\b(?:api|prumo)\\.${fn}\\(`).test(t)).map(([n]) => n);
+  const telasQueChamam = (fn) => [...arquivos].filter(([n, t]) => (n.startsWith('frontend/') || (n.startsWith('app/renderer/') && !n.startsWith('app/renderer/telas/'))) && n.endsWith('.js') && new RegExp(`\\b(?:api|prumo)\\.${fn}\\(`).test(t)).map(([n]) => n);
   const fluxos = [];
   const mapa = arquivos.get('backend/aplicativo/api/arquivosDosCanais.ts');
   if (mapa) {
@@ -99,7 +99,7 @@ function fluxosDeUso(arquivos) {
 function montarInstantaneo(arquivos) {
   const existe = (c) => arquivos.has(c);
   const lista = [...arquivos].sort((a, b) => a[0].localeCompare(b[0])).map(([caminho, texto]) => ({
-    caminho, descricao: descricaoDoArquivo(texto, caminho), linhas: texto.split(/\r?\n/).length,
+    caminho, descricao: caminho.startsWith('app/renderer/telas/') && arquivos.has(caminho.replace('app/renderer/telas/', 'frontend/')) ? 'Cópia gerada da interface; para editar, abra ' + caminho.replace('app/renderer/telas/', 'frontend/') : descricaoDoArquivo(texto, caminho), linhas: texto.split(/\r?\n/).length,
     sha256: createHash('sha256').update(texto).digest('hex'), funcoes: /\.(ts|mjs|cjs|js)$/.test(caminho) ? funcoesDoArquivo(texto) : [],
     importa: /\.(ts|mjs|cjs|js|html)$/.test(caminho) ? importsDoArquivo(texto, caminho, existe) : [], codigo: texto
   }));
@@ -109,6 +109,7 @@ function montarInstantaneo(arquivos) {
   const pastas = {};
   for (const [tela, frase] of Object.entries(telas)) { pastas['backend/' + tela] = frase; pastas['frontend/' + tela] = frase; }
   for (const a of lista) { const m = /^backend\/[^/]+\/([^/]+)\/[^/]+$/.exec(a.caminho); if (m && papeis[m[1]]) pastas[path.posix.dirname(a.caminho)] = papeis[m[1]]; }
+  if (arquivos.has('frontend/LEIA-ME.md')) pastas['app/renderer/telas'] = 'Cópia gerada a partir de frontend/; não editar manualmente.';
   Object.assign(pastas, { frontend: 'O que a pessoa vê: telas e funções da interface, a fonte oficial para o Electron.', backend: 'Tudo o que roda fora da tela: canais da janela, regras, dados deste computador e integrações.', src: 'Código do backend antes da organização por tela.', app: 'A janela: ponte segura (preload), telas, estilos e ajuda.', 'app/renderer': 'O que a pessoa vê: telas, componentes e estilos.', scripts: 'Ferramentas de build, geração de documentos e release.', testes: 'Testes automáticos (unidade, integração, janela real e MCP).' });
   return { arquivos: lista, pastas, fluxos: fluxosDeUso(arquivos) };
 }

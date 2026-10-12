@@ -69,7 +69,7 @@ export function gerarLeiaMe() {
   const saida = new Map();
   const pastasTela = fs.readdirSync(raiz, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
   const indice = ['# Backend do Prumo QA', '', 'Arquivo gerado por `npm run leia-me` a partir da primeira linha de cada arquivo. Não edite à mão.', '',
-    'Cada pasta tem o nome de uma tela do aplicativo (a mesma pasta existe em `frontend/`). Dentro dela: `api/` recebe os pedidos da janela, `regras/` decide, `banco/` lê e grava os dados deste computador, `integracoes/` fala com serviços de fora e `tipos/` descreve o formato dos dados.', '',
+    'As pastas correspondentes a telas visíveis também existem em `frontend/`; módulos internos, como aplicativo e terminal, não precisam ter uma tela própria. Dentro das pastas: `api/` recebe os pedidos da janela, `regras/` decide, `banco/` lê e grava os dados deste computador, `integracoes/` fala com serviços de fora e `tipos/` descreve o formato dos dados.', '',
     '## Portas de entrada', '', '| Arquivo | O que faz |', '| --- | --- |',
     ...['aplicativo.ts', 'cli.ts', 'mcp.ts'].map((n) => `| \`${n}\` | ${primeiraLinha(path.join(raiz, n))} |`), '',
     '## Telas', '', '| Pasta | Para que serve |', '| --- | --- |', ...pastasTela.map((t) => `| [\`${t}/\`](${t}/LEIA-ME.md) | ${telas[t] ?? '(sem explicação)'} |`), ''];

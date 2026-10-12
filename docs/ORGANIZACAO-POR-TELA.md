@@ -1,6 +1,6 @@
 # Organização didática por tela — migração em andamento
 
-> **Situação:** `main` permanece intacta. O **backend** já está na organização final `backend/<tela>/` (branch `refatoracao-backend-por-tela`); o frontend segue em migração. Não declarar equivalência funcional sem executar `npm run check` e validação do Electron.
+> **Situação:** esta branch já contém `backend/<tela>/` e `frontend/<tela>/`. O Electron ainda usa uma cópia gerada em `app/renderer/telas/` e arquivos legados em `app/renderer/`. Consulte [o guia atual](ARQUITETURA-MODULAR-ATUAL.md) antes das notas históricas abaixo. A `main` não mudou.
 
 ## Objetivo
 
@@ -125,4 +125,4 @@ Os arquivos `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-
 
 **Total nesta etapa:** 35 partes de Fluxos, 17 de Testes v40, 77 do visual v36 JavaScript e 27 de estilos v36 CSS. As fontes não devem ser carregadas isoladamente porque mantêm relações de escopo e ordem de execução. O CSS preserva a ordem da cascata.
 
-**Ainda não realizado:** reorganização física final em `frontend/` e `backend/`; divisão do núcleo desktop de `src/desktop/main.ts`; implementação das novas telas de autenticação e administração; PostgreSQL e API HTTPS. A Documentação Viva Proposta não equivale a código já implementado.
+**Ainda não realizado:** eliminação das cópias de compatibilidade do Electron, migração total dos scripts legados e adaptação completa do empacotamento; divisão restante do núcleo desktop; implementação das novas telas de autenticação e administração; PostgreSQL e API HTTPS. A Documentação Viva Proposta não equivale a código já implementado.

@@ -2,7 +2,7 @@
 
 Arquivo gerado por `npm run leia-me` a partir da primeira linha de cada arquivo. Não edite à mão.
 
-Cada pasta tem o nome de uma tela do aplicativo (a mesma pasta existe em `frontend/`). Dentro dela: `api/` recebe os pedidos da janela, `regras/` decide, `banco/` lê e grava os dados deste computador, `integracoes/` fala com serviços de fora e `tipos/` descreve o formato dos dados.
+As pastas correspondentes a telas visíveis também existem em `frontend/`; módulos internos, como aplicativo e terminal, não precisam ter uma tela própria. Dentro das pastas: `api/` recebe os pedidos da janela, `regras/` decide, `banco/` lê e grava os dados deste computador, `integracoes/` fala com serviços de fora e `tipos/` descreve o formato dos dados.
 
 ## Portas de entrada
 
