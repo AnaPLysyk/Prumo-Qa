@@ -58,7 +58,9 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `escopoDaExecucao.ts` | Calcula o escopo que a pessoa aprova: hashes do contrato, do comando, do ambiente e dos arquivos envolvidos. |
 | `escopoDeCapability.ts` | Confere se a capacidade pode rodar (declarada, não bloqueada, projeto não somente leitura) e calcula seu escopo. |
 | `executarValidacao.ts` | Executa uma capacidade do projeto depois da aprovação humana, com tempo e saída limitados, e grava a evidência (PASS, FAIL, BLOCKED ou NOT_RUN). |
+| `gravarRelatorioRedigido.ts` | Grava somente o relatório de testes redigido e remove artefatos não validados. |
 | `listarExecucoes.ts` | Lista o histórico de execuções por projeto, repositório, ticket, rotina, estado e período. |
+| `mascararLogsDaExecucao.ts` | Mascara segredos declarados e do ambiente antes de mostrar ou gravar a saída de uma execução. |
 | `montarComentario.ts` | Escreve o comentário de resultado (PASS/FAIL, contagens, duração, evidência) a partir de uma execução concluída. |
 | `prepararPublicacao.ts` | Mostra a prévia do comentário de resultado que seria publicado no Jira. |
 | `publicacaoPodeRepetir.ts` | Diz se vale tentar publicar de novo (tempo esgotado, serviço fora ou limite de consultas). |
