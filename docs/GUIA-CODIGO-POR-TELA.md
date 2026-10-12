@@ -159,3 +159,13 @@ Abra a pasta da tela, escolha o arquivo pelo nome da função e leia a frase ini
 Os testes em `testes/arquitetura-telas.test.mjs` comprovam que a união das partes reproduz integralmente os arquivos executados e que o `index.html` carrega apenas os bundles na ordem correta. Use `node scripts/gerar-telas-v40.mjs --check` para conferir a igualdade sem escrever arquivos.
 
 **Atenção:** `frontend/` e `backend/` continuam como organização futura. As novas telas de login e administração permanecem na documentação Proposta; não aparecem na árvore atual de código.
+
+## Visual v36: onde estão as funções do robô, chat e cérebro
+
+O visual aprovado continua funcionando por `app/renderer/interfaces-v36.js` e `app/renderer/interfaces-v36.css`. Para facilitar a manutenção, suas fontes estão divididas em pastas `app/renderer/telas/<tela>/visual-v36-fonte/` e `visual-v36-estilos/`. O código gerado continua idêntico ao original na revisão da migração.
+
+Procure **Agentes** para `montarAssistenteFlutuante`, `montarPainelChat`, `enviarPerguntaChat`, `mostrarCerebroAgente`, `listarAgentesDisponiveis` e `abrirDetalhesAgente`. Procure **Logs** para `montarLinhaLog`, `desenharLogsFiltrados` e `carregarRegistrosLog`. Procure **Histórico** para `filtrarAtividadesHistorico` e `montarTabelaHistorico`. Procure **Métricas** para `filtrarRegistrosMetricas`, `prepararDadosGrafico` e `pintarGrafico`. Em **Configurações**, `editarPreferenciasAssistente` concentra a exibição dos campos de IA, voz e estilo.
+
+O gerador atualizado é `node scripts/gerar-telas-modulares.mjs`; com `--check` ele compara as fontes sem escrever. O comando anterior `node scripts/gerar-telas-v40.mjs` continua funcionando como ponte, mas use o novo nome. `testes/arquitetura-telas.test.mjs` confere os bundles JavaScript, o CSS gerado e o carregamento das páginas.
+
+**Limite da comprovação:** arquivos gerados idênticos comprovam que a refatoração das fontes não alterou esses bytes na migração; não comprovam isoladamente o funcionamento de todas as telas, nem substituem os testes do Electron e a validação visual.
