@@ -8,7 +8,7 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const falhas = [];
 // Garantir que os bundles distribuídos continuam idênticos às partes das telas.
 import { execFileSync } from 'node:child_process';
-try { execFileSync(process.execPath, ['scripts/gerar-telas-v40.mjs','--check'], {cwd:raiz,stdio:'pipe'}); }
+try { execFileSync(process.execPath, ['scripts/gerar-telas-modulares.mjs','--check'], {cwd:raiz,stdio:'pipe'}); }
 catch (e) { falhas.push('Bundle de telas diferente das fontes: ' + String(e.stderr || e.message).slice(0,450)); }
 const ler = (p) => fs.readFileSync(path.join(raiz, p), 'utf8');
 const existe = (p) => fs.existsSync(path.join(raiz, p));
