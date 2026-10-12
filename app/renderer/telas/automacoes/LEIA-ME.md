@@ -1,11 +1,9 @@
-# Automações — onde encontrar cada ação
+# Automações
 
-**O que essa tela faz:** Lista automações vinculadas e consulta o repositório GitHub.
+**Para que serve esta tela/pasta:** Apresenta automações locais e repositórios GitHub vinculados.
 
-**Arquivos desta pasta:** mostrarAutomacoes.js.
+**Onde encontrar os arquivos:** mostrarAutomacoes.js; mostrarAutomacoesGithub.js.
 
-**Como conversa com o sistema:** api.espacoAutomacoes e api.servicoConsultar → `app/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
+**Atenção:** A execução protegida e os registros reais ficam no backend.
 
-**Quem executa a lógica:** `src/espacos.ts e src/servicos.ts`.
-
-**Estado:** esta é a parte da tela já separada. Outros arquivos do renderer (como `integracoes.js`, `fluxos-v40.js` e `interfaces-v36.js`) ainda podem complementar ou substituir ações. Não considerar esta pasta a implementação completa até concluir a migração.
+**Como funciona:** a interface chama operações permitidas de `app/preload.cjs`; `src/contratos.ts` valida entradas e `src/desktop/main.ts` encaminha ao backend. Ainda são canais IPC, não endpoints HTTP.

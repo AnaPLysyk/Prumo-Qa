@@ -91,8 +91,18 @@ for (const f of localScripts) {
  if (!conteudo.startsWith("'use strict';\n/** ")) falhas.push('Falta primeira frase: '+p);
  try { new vm.Script(conteudo,{filename:p}); } catch(e) { falhas.push('Sintaxe JS: '+p+' '+e.message); }
 }
-for (const nome of ['plataforma.js','apoio-v40.js']) if (scripts.includes(nome)) falhas.push('Tela legada carregada novamente: '+nome);
+for (const nome of ['plataforma.js','apoio-v40.js','agenda.js','integracoes.js']) if (scripts.includes(nome)) falhas.push('Tela legada carregada novamente: '+nome);
 const idx=(p)=>scripts.indexOf(p);
+const carregamentoPorTela=[
+ ['telas/agendamentos/formularios/montarFormularioRotina.js','telas/agendamentos/mostrarAgendamentos.js'],
+ ['telas/compartilhado/mostrarEstadoWorker.js','telas/inicio/mostrarInicio.js'],
+ ['telas/runs/mostrarRunsQase.js','telas/testes/mostrarTestesComSubabas.js'],
+ ['telas/metricas/componentes/montarVisuaisMetricas.js','telas/metricas/mostrarMetricas.js'],
+ ['telas/testes/formularios/montarFormularioProposta.js','telas/testes/mostrarPropostasTeste.js']
+];
+for (const [a,b] of carregamentoPorTela) {
+ if (scripts.indexOf(a)<0 || scripts.indexOf(b)<0 || scripts.indexOf(a)>=scripts.indexOf(b)) falhas.push('Ordem de tela inválida: '+a+' / '+b);
+}
 const anteriores=[
  ['telas/compartilhado/criarBotaoAcao.js','telas/projetos/mostrarProjetos.js'],
  ['telas/projetos/modais/criarEditarProjeto/abrirFormularioProjeto.js','telas/projetos/mostrarProjetos.js'],

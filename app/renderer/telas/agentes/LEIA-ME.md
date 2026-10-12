@@ -1,11 +1,9 @@
-# Agentes — onde encontrar cada ação
+# Agentes
 
-**O que essa tela faz:** Insere o modal Contextos e preserva a tela existente de Agentes.
+**Para que serve esta tela/pasta:** Exibe agentes e abre os Contextos aprováveis em modal.
 
-**Arquivos desta pasta:** usarTelaAgentes.js e abrirModalContextos.js.
+**Onde encontrar os arquivos:** usarTelaAgentes.js; mostrarAgentesIntegrados.js; abrirModalContextos.js.
 
-**Como conversa com o sistema:** api.contextosListar e abas.contextos → `app/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
+**Atenção:** Outras telas e o núcleo de agentes ainda estão em interfaces-v36.js e src; agentes personalizados podem ser apenas prévias.
 
-**Quem executa a lógica:** `src/contextos.ts e src/orquestrador.ts (ainda não migrados)`.
-
-**Estado:** esta é a parte da tela já separada. Outros arquivos do renderer (como `integracoes.js`, `fluxos-v40.js` e `interfaces-v36.js`) ainda podem complementar ou substituir ações. Não considerar esta pasta a implementação completa até concluir a migração.
+**Como funciona:** a interface chama operações permitidas de `app/preload.cjs`; `src/contratos.ts` valida entradas e `src/desktop/main.ts` encaminha ao backend. Ainda são canais IPC, não endpoints HTTP.

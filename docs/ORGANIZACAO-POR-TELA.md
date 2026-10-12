@@ -85,6 +85,13 @@ No backend, `src/espacos.ts` passou a reexportar funções de `src/modulos/proje
 
 Há etapas posteriores obrigatórias: migrar arquivos grandes `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js`, `integracoes.js`; só depois reorganizar `rootDir`, `dist`, Electron, CLI, MCP e instalador para o layout final `frontend/` e `backend/`. Login, banco multiusuário e API HTTPS continuam como proposta.
 
+
+## Atualização: telas separadas nesta branch
+
+Também foram decompostos `app/renderer/agenda.js` (Início, Agendamentos, Execuções, controles da janela e worker) e `app/renderer/integracoes.js` (Tickets, Testes, Runs, Conexões, Automações, Agentes, Rastreabilidade e Métricas). `app/renderer/index.html` passou a listar os novos scripts por tela na ordem de execução original. Os dois arquivos antigos são apenas marcadores de transição. Documentação em `docs/GUIA-CODIGO-POR-TELA.md`.
+
+**Atenção:** ainda há código de interface concentrado em `app/renderer/fluxos-v40.js`, `app/renderer/testes-v40.js`, `app/renderer/interfaces-v36.js` e outros. A interface modularizada ainda não é a arquitetura final `frontend/`.
+
 ## O que **não** foi migrado
 
 Os arquivos restantes em `src/` e `app/renderer/` (fora dos módulos listados), os 119 canais IPC, o servidor MCP, o worker e o instalador continuam em seus caminhos originais. Login, cadastro, permissões por usuário, API HTTPS e PostgreSQL pertencem à **proposta**, não são funcionalidades já implementadas. Não copiar o HTML da documentação viva como se fosse uma aplicação operacional.

@@ -1,17 +1,9 @@
-# Peças compartilhadas da interface — não é uma tela
+# Funções compartilhadas
 
-`criarBotaoAcao.js`: botão que executa uma ação e evita clique repetido durante a operação.
+**Para que serve esta tela/pasta:** Reúne funções realmente usadas por mais de uma tela.
 
-`criarCampoFormulario.js`: rótulo e campo para digitar.
+**Onde encontrar os arquivos:** criarBotaoAcao.js; criarCampoFormulario.js; mostrarDadosRetornados.js; consultarServicoRemoto.js; lerTextoRemoto.js; identificarTituloRemoto.js; criarCamposAgenda.js; mostrarEstadoWorker.js; acessarServicosExternos.js; acompanharEventosWorker.js.
 
-`mostrarDadosRetornados.js`: apresenta dados recebidos da integração.
+**Atenção:** Não é tela navegável: qualquer função de uma única tela deverá ser movida à pasta dessa tela.
 
-`avisarProjetoNaoSelecionado.js`: mensagem quando falta projeto selecionado.
-
-`lerTextoRemoto.js`: converte o conteúdo externo em texto legível.
-
-`identificarTituloRemoto.js`: escolhe um título para o registro remoto.
-
-`consultarServicoRemoto.js`: faz a consulta e mostra páginas de Jira, Qase ou GitHub.
-
-Os arquivos `componentesPlataforma.js` e `consultasRemotas.js` estão inativos nesta etapa: seus conteúdos foram divididos por função.
+**Como funciona:** a interface chama operações permitidas de `app/preload.cjs`; `src/contratos.ts` valida entradas e `src/desktop/main.ts` encaminha ao backend. Ainda são canais IPC, não endpoints HTTP.

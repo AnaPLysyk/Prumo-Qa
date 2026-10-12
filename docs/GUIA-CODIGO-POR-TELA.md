@@ -119,3 +119,33 @@ A delegação à IA só é autorizada depois de confirmação no processo princi
 ## Acompanhar um chamado de Suporte
 
 O botão Consultar chamado da tela Suporte percorre a ponte `src/chamados.ts` e os três módulos `src/modulos/suporte/definirFormatoChamado.ts`, `buscarDadosDoChamado.ts` e `consultarChamadoGithub.ts`. Nenhuma credencial é enviada à consulta pública do GitHub. O arquivo de definição de status continua sendo `app/suporte-status.json`.
+
+## Organização por tela: Início, Agendamentos, Execuções e integrações
+
+Agora `app/renderer/index.html` carrega os arquivos de interface na mesma ordem funcional em que os scripts grandes eram executados. Cada pasta tem um `LEIA-ME.md` curto. A divisão não altera os contratos IPC nem cria HTTP novo.
+
+```text
+app/renderer/telas/
+├── inicio/mostrarInicio.js                    inicia o painel
+├── agendamentos/
+│   ├── mostrarAgendamentos.js                  mostra rotinas
+│   ├── formularios/montarFormularioRotina.js   campos de criar/editar
+│   ├── cartoes/montarCartaoRotina.js           cada rotina em cartão
+│   ├── permissoes/mostrarPermissoesRotina.js  permissões de execução
+│   └── datas/interpretarHorarios.js            datas e fusos
+├── execucoes/mostrarExecucoes.js               histórico e detalhes
+├── metricas/mostrarMetricas.js                 indicadores
+├── tickets/mostrarOperacoesJira.js            ações de ticket
+├── testes/
+│   ├── formularios/montarFormularioProposta.js
+│   ├── cartoes/montarCartaoProposta.js
+│   ├── mostrarCatalogoCodigo.js
+│   └── mostrarTestesComSubabas.js
+├── runs/mostrarRunsQase.js                     runs Qase
+├── rastreabilidade/mostrarVinculos.js          vínculos declarados
+├── conexoes/mostrarEscritaExterna.js           autorizações por serviço
+├── agentes/mostrarAgentesIntegrados.js         recursos do painel Agentes
+└── configuracoes/controlesDaJanela.js         menu, tema e idioma
+```
+
+Os arquivos `app/renderer/agenda.js` e `app/renderer/integracoes.js` agora são marcadores de transição e **não são carregados** pelo `index.html`. As implementações de apresentação permanecem em JavaScript clássico, com a ordem dos scripts explícita e funções globais acessíveis entre eles. A futura consolidação definitiva de `frontend/` e `backend/` ainda depende de adaptar build, empacotamento e demais arquivos.
