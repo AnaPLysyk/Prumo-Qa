@@ -51,6 +51,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | --- | --- |
 | `ambienteMinimo.ts` | Monta o ambiente mínimo do processo de teste: só variáveis permitidas, sem PATH herdado nem segredos. |
 | `codigoDoErroDePublicacao.ts` | Extrai o código do erro de uma falha de publicação (ou JIRA_PUBLISH_FAILED). |
+| `criarEvidenciaInicial.ts` | Cria a evidência BLOCKED inicial antes de validar contrato, escopo e autorização humana. |
 | `duracaoDoTrabalho.ts` | Calcula quanto tempo um trabalho levou (ou nada se não terminou). |
 | `elegivelParaPublicar.ts` | Diz se uma execução agendada pode publicar o comentário: concluída, com ticket e coberta por política aprovada. |
 | `encerrarArvoreDeProcessos.ts` | Encerra o processo de teste e todos os processos filhos (taskkill /T no Windows). |

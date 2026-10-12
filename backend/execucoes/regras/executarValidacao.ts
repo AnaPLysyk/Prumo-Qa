@@ -12,6 +12,7 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { Comando, Projeto } from '../../compartilhado/tipos/projeto.js';
 import { salvarEvidencia } from '../../evidencias/banco/salvarEvidencia.js';
 import { classificarResultado } from '../../evidencias/regras/classificarResultado.js';
+import { criarEvidenciaInicial } from './criarEvidenciaInicial.js';
 import { Evidencia, resultadoRunnerSchema } from '../../evidencias/tipos/evidencia.js';
 import { solicitarAprovacao } from '../aprovacao/solicitarAprovacao.js';
 import { ambienteMinimo } from './ambienteMinimo.js';
@@ -22,7 +23,7 @@ import { Delegada } from '../tipos/execucao.js';
 
 export async function executarValidacao(p:Projeto,capability:string,solicitar=false,delegada?:Delegada,signal?:AbortSignal) {
   const jobId=randomUUID(); const inicio=new Date().toISOString();
-  const e:Evidencia={kind:'execution_evidence',jobId,projectId:p.manifesto.id,rootHash:hash(p.raiz),manifestHash:p.manifestoHash,scopeHash:null,capability,status:'BLOCKED',reason:'',startedAt:inicio,endedAt:inicio,executed:false,exitCode:null,command:null,approval:null,cases:[],stdout:'',stderr:'',logSha256:hash('\n'),resultArtifact:null,evidenceScope:'round',provenance:'local-process'};
+  const e:Evidencia=criarEvidenciaInicial(p,capability,jobId,inicio);
   let c:Comando;
   let work:string;
   let env:NodeJS.ProcessEnv;
