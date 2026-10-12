@@ -6,12 +6,7 @@ abas.projetos=async el=>{
   // 2.10.2: projeto selecionado que é pasta com contrato local (ex.: demonstração) fica no fim da página; o topo aponta para ela.
   if(estado.projetoLegado&&estado.projetoNome)el.append(h('p',{class:'nota',id:'projeto-legado'},tr('Projeto selecionado: {n}. É uma pasta com contrato local, listada no fim desta página.',{n:estado.projetoNome}),' ',DS.link('Ver pasta',()=>document.getElementById('pastas-contrato-local')?.scrollIntoView({behavior:'smooth',block:'start'}),{seta:false})));
   const formulario=h('div',{id:'espaco-form'});
-  const editar=e=>{
-    const nome=campoPlataforma('Nome',{id:'espaco-nome',maxlength:200,value:e?.nome||''});
-    const descricao=campoPlataforma('Descrição',{id:'espaco-descricao',maxlength:1000,value:e?.descricao||''});
-    formulario.replaceChildren(h('h2',{},e?'Editar projeto':'Novo projeto Prumo'),nome.no,descricao.no,
-      botao('Salvar projeto',async()=>{const dados={nome:nome.input.value,descricao:descricao.input.value};const r=await chamar(()=>e?api.espacoEditar(e.id,dados):api.espacoCriar(dados));if(r)escolherEspaco(r);},'espaco-salvar'),botao('Cancelar',()=>formulario.replaceChildren()));nome.input.focus();
-  };
+  const editar=e=>abrirFormularioProjeto(formulario,e);
   el.append(botao('Novo projeto Prumo',()=>editar(), 'espaco-novo'),formulario);
   const lista=await chamar(api.espacos);if(!lista)return;
   for(const e of lista){
