@@ -11,3 +11,13 @@
 **Passo 5:** `prepararRelato.ts` reúne as verificações e devolve a prévia, sem publicar nada automaticamente.
 
 **Entrada existente:** `src/suporte.ts` encaminha essas ações ao módulo correto. **Tela:** `app/renderer/telas/suporte/mostrarSuporte.js`.
+
+## Acompanhar um chamado já enviado
+
+`definirFormatoChamado.ts` valida o número e os estados publicados no GitHub.
+
+`buscarDadosDoChamado.ts` consulta a API pública com limite de tamanho e sem tokens.
+
+`consultarChamadoGithub.ts` organiza o estado atual e os últimos eventos do chamado.
+
+A tela `mostrarSuporte.js` chama a ponte `src/chamados.ts`, que encaminha para essas funções.
