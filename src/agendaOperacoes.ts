@@ -5,7 +5,7 @@ import { carregarProjeto, ErroQa } from './projeto.js';
 import { escopoDeCapability } from './execucao.js';
 import { escopoK6, localizarK6, capabilityK6, type ExecutavelK6 } from './k6.js';
 import { obterRunLocal } from './fluxoQase.js';
-import { autorizarEscopo, listarAutorizacoes, estadoExecucao, estadoPublicacao, type Solicitador } from './autorizacoes.js';
+import { autorizarEscopo, listarAutorizacoes, estadoExecucao, estadoPublicacao, estadoEscrita, type Solicitador } from './autorizacoes.js';
 
 /**
  * Operações de aplicação sobre rotinas (2.8): o que a janela e a bandeja pedem, sem Electron, para ser testável.
@@ -44,7 +44,9 @@ export function listarAgenda(espacoId?: string, base?: string, agora = new Date(
 }
 export function listarPermissoes(espacoId?: string, base?: string, agora = new Date()) {
   const a = listarAutorizacoes(base);
-  return { execucoes: a.execucoes.filter(x => !espacoId || x.espacoId === espacoId).map(x => ({ ...x, estado: estadoExecucao(x, agora) })), publicacoes: a.publicacoes.filter(x => !espacoId || x.espacoId === espacoId).map(x => ({ ...x, estado: estadoPublicacao(x, agora) })) };
+  return { execucoes: a.execucoes.filter(x => !espacoId || x.espacoId === espacoId).map(x => ({ ...x, estado: estadoExecucao(x, agora) })), publicacoes: a.publicacoes.filter(x => !espacoId || x.espacoId === espacoId).map(x => ({ ...x, estado: estadoPublicacao(x, agora) })),
+    // Políticas de escrita agendada (2.9, resultados no Qase): visíveis para poderem ser revogadas, não só expirar.
+    escritas: a.escritas.filter(x => !espacoId || x.espacoId === espacoId).map(x => ({ ...x, estado: estadoEscrita(x, agora) })) };
 }
 
 /** Pede ao broker nativo o consentimento para cada automação da rotina (escopo exato) e grava as autorizações. */

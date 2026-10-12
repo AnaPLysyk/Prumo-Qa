@@ -17,6 +17,7 @@ export const capacidades: DefCap[] = [
   { id: 'consultar_evidencias', rotulo: 'Consultar evidências', ferramenta: 'consultar_evidencias', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Resultados e logs reais, com integridade.' },
   { id: 'propor_casos', rotulo: 'Propor casos de teste (rascunho)', ferramenta: 'propor_caso', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Cria só um rascunho local com checagem de duplicidade e limite por hora. Publicar no Qase é decisão da pessoa.' },
   { id: 'propor_bugs', rotulo: 'Propor bugs (rascunho)', ferramenta: 'propor_bug', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Cria só um rascunho local. Abrir o bug no Jira é decisão da pessoa.' },
+  { id: 'propor_aprendizado', rotulo: 'Propor aprendizado (rascunho)', ferramenta: 'propor_aprendizado', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Sugere um conhecimento para o banco do agente como RASCUNHO, com limite por hora. Só a pessoa aprova no Cérebro.' },
   { id: 'executar_testes', rotulo: 'Executar testes autorizados', ferramenta: 'executar_validacao', editavel: ['EXIGE_AUTORIZACAO', 'BLOQUEADO'], padrao: 'EXIGE_AUTORIZACAO', explicacao: 'Capability declarada e autenticação humana nativa do Windows em cada execução. Bloquear desliga a ferramenta.' },
   { id: 'consultar_jira', rotulo: 'Consultar tickets do Jira', ferramenta: null, editavel: [], padrao: 'SOMENTE_PESSOA', explicacao: 'As credenciais ficam protegidas no aplicativo e não são acessíveis ao agente. A pessoa consulta na janela e pode importar o ticket como contexto em rascunho.' },
   { id: 'consultar_qase', rotulo: 'Consultar casos, planos e runs do Qase', ferramenta: null, editavel: [], padrao: 'SOMENTE_PESSOA', explicacao: 'Mesma regra do Jira: leitura na janela; o agente recebe apenas o que a pessoa disponibilizar como contexto.' },
@@ -26,14 +27,14 @@ export const capacidades: DefCap[] = [
   { id: 'github_escrita', rotulo: 'Criar branch, commit e Pull Request', ferramenta: null, editavel: [], padrao: 'SOMENTE_PESSOA', explicacao: 'Somente em branch prumo/..., com revisão e confirmação da pessoa. Nunca na main.' }
 ];
 export const especializacoes = [
-  { id: 'qa-geral', rotulo: 'QA Geral', skill: 'skills/qa', capacidades: ['consultar_contexto', 'revisar_cobertura', 'consultar_evidencias', 'propor_casos'] },
-  { id: 'requisitos', rotulo: 'Análise de Requisitos e Cobertura', skill: 'skills/requisitos', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos'] },
-  { id: 'playwright', rotulo: 'Automação Playwright', skill: 'skills/playwright', capacidades: ['consultar_contexto', 'propor_casos', 'executar_testes', 'consultar_evidencias'] },
-  { id: 'api-rest', rotulo: 'Testes de API REST', skill: 'skills/api-rest', capacidades: ['consultar_contexto', 'propor_casos', 'executar_testes', 'consultar_evidencias'] },
-  { id: 'acessibilidade', rotulo: 'Acessibilidade', skill: 'skills/acessibilidade', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos'] },
-  { id: 'investigacao-bugs', rotulo: 'Investigação de Bugs', skill: 'skills/investigacao-bugs', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_bugs'] },
-  { id: 'regressao', rotulo: 'Regressão', skill: 'skills/regressao', capacidades: ['executar_testes', 'consultar_evidencias', 'propor_bugs'] },
-  { id: 'monitoramento', rotulo: 'Monitoramento de Alterações', skill: 'skills/monitoramento', capacidades: ['consultar_contexto', 'consultar_evidencias'] }
+  { id: 'qa-geral', rotulo: 'QA Geral', skill: 'skills/qa', capacidades: ['consultar_contexto', 'revisar_cobertura', 'consultar_evidencias', 'propor_casos', 'propor_aprendizado'] },
+  { id: 'requisitos', rotulo: 'Análise de Requisitos e Cobertura', skill: 'skills/requisitos', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos', 'propor_aprendizado'] },
+  { id: 'playwright', rotulo: 'Automação Playwright', skill: 'skills/playwright', capacidades: ['consultar_contexto', 'propor_casos', 'executar_testes', 'consultar_evidencias', 'propor_aprendizado'] },
+  { id: 'api-rest', rotulo: 'Testes de API REST', skill: 'skills/api-rest', capacidades: ['consultar_contexto', 'propor_casos', 'executar_testes', 'consultar_evidencias', 'propor_aprendizado'] },
+  { id: 'acessibilidade', rotulo: 'Acessibilidade', skill: 'skills/acessibilidade', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos', 'propor_aprendizado'] },
+  { id: 'investigacao-bugs', rotulo: 'Investigação de Bugs', skill: 'skills/investigacao-bugs', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_bugs', 'propor_aprendizado'] },
+  { id: 'regressao', rotulo: 'Regressão', skill: 'skills/regressao', capacidades: ['executar_testes', 'consultar_evidencias', 'propor_bugs', 'propor_aprendizado'] },
+  { id: 'monitoramento', rotulo: 'Monitoramento de Alterações', skill: 'skills/monitoramento', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_aprendizado'] }
 ] as const;
 const idsCap = capacidades.map(c => c.id); const idsEsp = especializacoes.map(e => e.id);
 const itemSchema = z.object({ espacoId: z.string().uuid(), especializacoes: z.array(z.string()).max(16), politicas: z.record(z.enum(['PERMITIDO', 'EXIGE_AUTORIZACAO', 'BLOQUEADO'])), alteradoEm: z.string().datetime(), por: z.string().max(200) }).strict();

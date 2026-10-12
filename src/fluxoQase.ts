@@ -39,7 +39,7 @@ function alterar(id: string, fn: (r: RunLocal) => void, b?: string, agora = new 
 
 /** Automação declarada para um caso do Qase: relação (qase:<id>) -> (automacao:<capability>[#cenário]) feita pela pessoa. */
 export function automacaoDoCaso(espacoId: string, casoId: number, b?: string): { capability: string; casoRunner: string | null } | null {
-  const e = obterEspaco(espacoId, b); const rel = e.relacoes.find(r => r.de.tipo === 'qase' && r.de.id === String(casoId) && r.para.tipo === 'automacao'); if (!rel) return null;
+  const e = obterEspaco(espacoId, b); const vinculo = e.vinculos.find(v => v.servico === 'qase'); const rel = e.relacoes.find(r => r.de.tipo === 'qase' && r.de.id === String(casoId) && r.de.vinculoId === vinculo?.id && r.para.tipo === 'automacao'); if (!rel || !vinculo) return null;
   const [capability, cenario] = rel.para.id.split('#'); return capability ? { capability, casoRunner: cenario || null } : null;
 }
 export function prepararRunLocal(espacoId: string, d: { titulo: string; ambiente: string; casos: { casoId: number; titulo: string }[]; planoId?: number }, b?: string, agora = new Date()): RunLocal {

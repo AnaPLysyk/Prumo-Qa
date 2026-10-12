@@ -6,7 +6,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fixture } from './fixtures.mjs';
 import { criarMundo } from './mundo-servicos.mjs';
-import { criarEspaco, pastaEspaco, gravarVinculo, associarEspaco, obterEspaco } from '../dist/espacos.js';
+import { criarEspaco, pastaEspaco, gravarVinculo, associarEspaco, obterEspaco, removerVinculoServico } from '../dist/espacos.js';
 import { habilitarEscrita, executarOperacao } from '../dist/operacoesExternas.js';
 import { autorizarExecucao, delegadaPara } from '../dist/autorizacoes.js';
 import { executarValidacao } from '../dist/execucao.js';
@@ -31,6 +31,22 @@ async function cenario(t, { teste, capabilities = { unit: 'node tests/test.mjs' 
   const execucao = { executar: executarValidacao, modo: 'AGENDADO', delegada: (esp, amb) => delegadaPara(esp, amb, b) };
   return { b, mundo, fx, e, jv, qv, dep, rodar, caso, ligar, execucao, ran: () => (fs.existsSync(path.join(fx.root, 'ran.txt')) ? fs.readFileSync(path.join(fx.root, 'ran.txt'), 'utf8').length : 0) };
 }
+
+test('v39: trocar vínculo Qase não reutiliza automação declarada nem funde nós históricos', async t => {
+  const c = await cenario(t, { autorizar: false });
+  c.ligar(31, 'unit#C1');
+  assert.equal(automacaoDoCaso(c.e.id, 31, c.b).capability, 'unit');
+  removerVinculoServico(c.e.id, 'qase', c.b);
+  const novo = gravarVinculo(c.e.id, 'qase', randomUUID(), { ...c.mundo.recursos.qase }, c.b).vinculos.find(v => v.servico === 'qase');
+  assert.notEqual(novo.id, c.qv.id);
+  assert.equal(automacaoDoCaso(c.e.id, 31, c.b), null);
+  associarEspaco(c.e.id, { de: { tipo: 'qase', id: '31', vinculoId: novo.id, origem: 'Qase atual' }, para: { tipo: 'automacao', id: 'unit#C2', origem: 'qa.project.json' }, justificativa: 'Associação nova explícita' }, c.b);
+  assert.equal(automacaoDoCaso(c.e.id, 31, c.b).casoRunner, 'C2');
+  const { mapaDeVinculos } = await import('../dist/rastreabilidade.js');
+  const mapa = mapaDeVinculos(c.e.id, c.b);
+  assert.equal(mapa.nos.filter(n => n.tipo === 'qase').length, 2);
+  assert.equal(mapa.nos.find(n => n.id === 'qase:31:vinculo:' + c.qv.id).estado, 'DESATUALIZADO');
+});
 
 test('fluxo completo: casos -> run -> execução autorizada -> resultados por cenário e manual -> publicação -> releitura; sem PASS inventado', async (t) => {
   const c = await cenario(t); const [a, bb, cm] = [await c.caso('Editor grava'), await c.caso('Leitor é recusado'), await c.caso('Revisão visual manual')];

@@ -13,6 +13,8 @@ import { iniciarAtividade } from './atividades.js';
 import { readFileSync } from 'node:fs';
 import { esquemaCaso } from './escritaQase.js';
 import { esquemaDadosBug, criarProposta } from './propostas.js';
+import { registrarConhecimento, tiposConhecimento } from './conhecimento.js';
+import { promptsPrumo, textoDoPrompt } from './promptsMcp.js';
 import { exigirCapacidade, espacoDaRaiz, matrizDePoliticas, configuracaoDoEspaco, especializacoes } from './politicasAgentes.js';
 
 /** Versão do pacote (package.json), para o MCP informar sempre a versão realmente instalada. */
@@ -96,6 +98,16 @@ export async function criarServidor(raiz:string, contratoLeitura?:string) {
     const p=criarProposta({espacoId:e.id,tipo:'bug',origem:'IA',cliente:servidor.server.getClientVersion()?.name,dados,risco});
     return {id:p.id,estado:p.estado,titulo:p.titulo,similares:p.similares,aviso};
   }));
+  servidor.registerTool('propor_aprendizado',{description:'Sugere um aprendizado (fato, glossário, preferência, procedimento ou risco) para o banco de conhecimento dos agentes deste projeto. Entra como RASCUNHO, com limite por hora; só a pessoa aprova no Cérebro do agente. Não use para opinião nem para dado pessoal sensível.',inputSchema:z.object({tipo:z.enum(tiposConhecimento),titulo:z.string().min(2).max(120),texto:z.string().min(2).max(2000),agente:z.string().regex(/^[a-z0-9-]{1,40}$/).optional()}).strict(),annotations:rascunho},args=>guarda('propor_aprendizado',async()=>{
+    const e=espaco();if(!e)throw new Error('NO_WORKSPACE: aprendizados exigem um projeto Prumo com esta raiz.');
+    const {item,duplicado}=registrarConhecimento({espacoId:e.id,agente:args.agente??null,tipo:args.tipo,titulo:args.titulo,texto:args.texto,origem:'IA',cliente:servidor.server.getClientVersion()?.name??'mcp'});
+    return {id:item.id,estado:item.estado,duplicado,aviso:'Rascunho: a pessoa decide no Cérebro do agente se aprova ou descarta.'};
+  }));
+  // 2.10: roteiros (prompts MCP) com a personalidade do Prumo. Não executam nada; as políticas continuam valendo nas ferramentas.
+  for(const p of promptsPrumo) {
+    const forma=Object.fromEntries(p.argumentos.map(a=>[a.nome,a.obrigatorio?z.string().min(1).max(300).describe(a.descricao):z.string().max(300).optional().describe(a.descricao)])) as Record<string,z.ZodString|z.ZodOptional<z.ZodString>>;
+    servidor.registerPrompt(p.nome,{title:p.titulo,description:p.descricao,argsSchema:forma},(args)=>({messages:[{role:'user' as const,content:{type:'text' as const,text:textoDoPrompt(p.nome,args as Record<string,string|undefined>)}}]}));
+  }
   return servidor;
 }
 if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href) {

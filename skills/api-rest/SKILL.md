@@ -33,3 +33,5 @@ A fixture `request` do Playwright permite testar a API, preparar estado antes de
 ## Fonte
 
 Documentação oficial do Playwright para testes de API e as técnicas de teste do ISTQB CTFL já aplicadas na Skill `qa`. Outras ferramentas (Postman/Newman, Cypress, testes de contrato) ainda **não** têm conhecimento especializado neste produto.
+
+Para o checklist por resposta (esquema, 401/403, idempotência, paginação, limites) e dados de teste, consulte [práticas abertas](references/praticas-abertas.md).

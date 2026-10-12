@@ -42,6 +42,15 @@ test('todos os endpoints de leitura do fixture são consultáveis; escrita e IDs
     if(servico==='jira')await assert.rejects(a.consultar({...r,id:'11 OR project = 22'},'tickets'),/SERVICE_RESPONSE_INVALID/);
   }
 });
+test('defeitos Qase: lista/detalhe GET, filtro validado, isolamento e projeção sem campos desconhecidos',async()=>{
+  const c={id:randomUUID(),servico:'qase',instancia:'https://api.qase.io',contaId:'fixture',token:'fixture-token'};
+  const pedidos=[];const a=new AdaptadorServico(c,async p=>{pedidos.push(p);return transporte(p);});const r=(await a.listar()).recursos[0];
+  const lista=await a.consultar(r,'defeitos',{limite:1},undefined,undefined,{status:'open'});assert.equal(lista.dados[0].id,91);assert.equal(lista.endpoint,'/v1/defect/SFQ');assert.equal(lista.cache,false);assert.match(pedidos.at(-1).caminho,/status=open/);
+  const detalhe=await a.consultar(r,'defeito',{},'91');assert.equal(detalhe.dados.actual_result,'Falha observada apenas na fixture');assert.deepEqual(detalhe.dados.runs,[71]);
+  await assert.rejects(a.consultar(r,'defeito',{},'92'),/SERVICE_NOT_FOUND/);await assert.rejects(a.consultar(r,'defeito',{},'../91'),/SERVICE_RESPONSE_INVALID/);await assert.rejects(a.consultar({...r,instancia:'https://outra.test'},'defeitos'),/SERVICE_SCOPE_CHANGED/);await assert.rejects(a.consultar(r,'defeitos',{},undefined,undefined,{status:'qualquer'}),/SERVICE_RESPONSE_INVALID/);
+  const ruim=new AdaptadorServico(c,async()=>({status:true,result:{id:92,title:'Escopo errado'}}));await assert.rejects(ruim.consultar(r,'defeito',{},'91'),/SERVICE_SCOPE_CHANGED/);
+  const seguro=new AdaptadorServico(c,async()=>({status:true,result:{id:91,title:c.token,actual_result:'Texto '+c.token,unknown:'não exportar',secret:c.token}}));const x=await seguro.consultar(r,'defeito',{},'91');assert.doesNotMatch(JSON.stringify(x),/fixture-token|unknown|secret/);
+});
 test('transporte real contra servidor controlado: códigos HTTP, JSON inválido, limite, redirect e timeout',async t=>{
   const s=await servidorFixture(t),restaurar=await instalarTransporteControlado(s.port);t.after(restaurar);const p={servico:'github',instancia:'https://api.github.com',caminho:'/user',headers:{Authorization:'Bearer fixture-token'}};
   assert.equal((await transporteHttps(p)).id,900);

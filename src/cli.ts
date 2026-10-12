@@ -9,12 +9,16 @@ import { consultarEvidencias } from './evidencias.js';
 import { revisarCobertura } from './qualidade.js';
 import { consultarAtividades, calcularMetricas, observar, acompanharLogs, descreverAchados, type Evento } from './atividades.js';
 import { prepararConexao, aplicarConexao } from './conexoes.js';
+import { promptsPrumo, textoDoPrompt } from './promptsMcp.js';
+import { readFileSync } from 'node:fs';
 
 const imprimir=(v:unknown)=>console.log(JSON.stringify(v,null,2));
 const texto=(s:string)=>mascarar(s).replace(/[\x00-\x1f\x7f-\x9f]/g,' ');
-const ajuda={usage:'prumo [--root <raiz-absoluta>] | atividade | logs [--follow] | metricas | evidencias | conectar codex | doctor',
+const versaoPacote:string=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).version;
+const ajuda={usage:'prumo [--root <raiz-absoluta>] | atividade | logs [--follow] | metricas | evidencias | conectar codex | doctor | prompts [nome]',
   automation:'--json em consultas. Mantidos context, review <plano.json>, run <capability>, approve <capability>, evidence [jobId].',
-  approval:'approve exige autenticação humana Windows; conectar exige confirmação no terminal antes de alterar a configuração do cliente.'};
+  approval:'approve exige autenticação humana Windows; conectar exige confirmação no terminal antes de alterar a configuração do cliente.',
+  prompts:'prompts lista os roteiros do Prumo (os mesmos prompts do servidor MCP); prompts <nome> imprime o texto, sem executar nada.'};
 const problemas=(p:unknown[])=>{if(p.length){console.error('HISTORY_INCOMPLETE: registros inválidos/truncados excluídos; métricas são parciais.');process.exitCode=3;}};
 function linha(e:Evento) {
   return `${e.at} · ${e.tool} · ${e.origin}/${e.client} (identidade declarada) · ${e.phase==='start'?'SEM TÉRMINO OBSERVADO':e.state} · ${e.durationMs} ms\n  ${e.summary.findings} achados · ${e.summary.recommendations} recomendações · ${e.summary.gaps} lacunas · ${e.summary.candidateRedundancies} redundâncias candidatas\n  operação ${e.operationId}${e.summary.code?' · '+e.summary.code:''}${e.summary.evidenceJobId?' · evidência '+e.summary.evidenceJobId+(e.summary.evidencePersisted===false?' (não persistida)':''):''}${e.summary.types.length?'\n  '+descreverAchados(e):''}`;
@@ -57,7 +61,7 @@ async function menu(p:Projeto,contrato?:string,json=false) {
     const h=consultarAtividades(p);const m=calcularMetricas(h);problemas(h.problems);
     const ultima=h.activities.filter(e=>e.origin==='MCP').at(-1);
     if(json){imprimir({project:p.manifesto.name,metrics:m,lastObservedClient:ultima?.client??null,connection:'Sessão ativa não verificada'});return;}
-    console.log(`\nPRUMO QA · v2.2\nEngenharia de Qualidade\n\nProjeto: ${texto(p.manifesto.name)}\nConexão: ${ultima?'última chamada observada de '+ultima.client+' (identidade declarada)':'nenhuma chamada MCP observada'}; sessão ativa não verificada\nÚltima atividade: ${m.lastActivity??'nenhuma'}\n\nATIVIDADES\n  ${m.totalOperations} operações registradas · ${m.mcpCalls} via MCP\n  ${m.coverageReviews} revisões de cobertura\n  ${m.gaps} lacunas identificadas\n\nOPÇÕES\n  1. Atividades recentes\n  2. Logs\n  3. Métricas\n  4. Evidências\n  5. Conexões\n  0. Sair\n`);
+    console.log(`\nPRUMO QA · v${versaoPacote}\nEngenharia de Qualidade\n\nProjeto: ${texto(p.manifesto.name)}\nConexão: ${ultima?'última chamada observada de '+ultima.client+' (identidade declarada)':'nenhuma chamada MCP observada'}; sessão ativa não verificada\nÚltima atividade: ${m.lastActivity??'nenhuma'}\n\nATIVIDADES\n  ${m.totalOperations} operações registradas · ${m.mcpCalls} via MCP\n  ${m.coverageReviews} revisões de cobertura\n  ${m.gaps} lacunas identificadas\n\nOPÇÕES\n  1. Atividades recentes\n  2. Logs\n  3. Métricas\n  4. Evidências\n  5. Conexões\n  0. Sair\n`);
   };
   painel();if(json||!process.stdin.isTTY||!process.stdout.isTTY)return;
   const rl=createInterface({input:process.stdin,output:process.stdout});rl.setPrompt('Opção: ');rl.prompt();
@@ -80,6 +84,11 @@ async function main() {
   const json=args.includes('--json');if(json)args.splice(args.indexOf('--json'),1);
   const [cmd,...resto]=args;
   if(cmd==='help'||cmd==='--help'){imprimir(ajuda);return;}
+  // Roteiros (prompts MCP): só texto, sem projeto, sem execução. Argumentos de prompt não são aceitos aqui (a IA os preenche).
+  if(cmd==='prompts'){if(resto.length>1)throw new Error('Use prompts [nome].');
+    if(!resto[0]){if(json)imprimir(promptsPrumo.map(p=>({nome:p.nome,titulo:p.titulo,descricao:p.descricao,argumentos:p.argumentos})));else console.log(promptsPrumo.map(p=>`${p.nome} — ${p.descricao}`).join('\n'));return;}
+    const p=promptsPrumo.find(x=>x.nome===resto[0]);if(!p)throw new Error('Prompt desconhecido. Use prumo prompts.');
+    const args=Object.fromEntries(p.argumentos.map(a=>[a.nome,a.obrigatorio?`<${a.nome}>`:undefined]));const texto=textoDoPrompt(p.nome,args);if(json)imprimir({nome:p.nome,texto});else console.log(texto);return;}
   if(!cmd) {
     let p:Projeto;
     try{p=await carregarProjeto(raiz,contrato);}catch(e){

@@ -12,3 +12,5 @@ Reproduza a pergunta, não a conclusão: o que era esperado, o que foi observado
 Se houver um defeito confirmado, use `propor_bug` com resumo objetivo, descrição reproduzível, ticket de origem (se conhecido) e referência à evidência local. Isso cria apenas um rascunho. Abrir o bug no Jira, anexar evidências e relacionar tickets são ações da pessoa na janela do Prumo, com prévia e confirmação.
 
 Entregue: passos de reprodução, esperado, observado, evidência, hipóteses separadas de fatos e o que ficou sem verificar.
+
+Para o método completo (reproduzir antes de classificar, hipótese que pode ser derrubada, prevenção), consulte [práticas abertas](references/praticas-abertas.md).

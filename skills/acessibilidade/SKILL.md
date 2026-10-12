@@ -16,3 +16,5 @@ Teste resoluções pequenas e amplas, conteúdo longo e mensagens de erro. Verif
 Com Playwright confirmado, use locators por papel/rótulo e assertions do estado acessível. Ferramentas como axe ajudam a encontrar parte dos problemas; combine com teclado, zoom, contraste e avaliação manual conforme [documentação oficial](https://playwright.dev/docs/accessibility-testing). Não instale ferramenta ou altere a aplicação só para produzir uma pontuação.
 
 Entregue passos de reprodução, resultado esperado, observado, evidência e limitações. Separe achado confirmado, suspeita e verificação não executada. Preserve as permissões e a distinção entre análise e execução da Skill qa.
+
+Para varredura com axe-core, exclusões pontuais documentadas e checagens de teclado, diálogo e foco, consulte [práticas abertas](references/praticas-abertas.md).

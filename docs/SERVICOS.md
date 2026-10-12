@@ -1,6 +1,6 @@
-# Serviços externos de leitura — Prumo QA 2.7
+# Serviços externos — Prumo QA 2.9
 
-O desktop consulta APIs oficiais pelo processo principal. Não abre servidor HTTP local. A ponte IPC estrita está no [catálogo gerado](CONTRATOS.md); os quatro tools MCP não expõem tokens nem consultas aos serviços. IA é opcional. Credenciais de conectores do ChatGPT não são herdadas.
+O desktop consulta APIs oficiais pelo processo principal. Não abre servidor HTTP local. A ponte IPC estrita está no [catálogo gerado](CONTRATOS.md); as sete ferramentas MCP não expõem tokens nem consultas diretas aos serviços. IA é opcional. Credenciais de conectores do ChatGPT não são herdadas.
 
 ## Identidade e armazenamento
 
@@ -20,7 +20,7 @@ Respostas externas não são persistidas como cache. Cada tela indica origem, en
 - Qase: cabeçalho `Token` no host fixo `https://api.qase.io`. Leitura dos projetos/casos/runs disponíveis à conta. `GET /v1/project?limit=1&offset=0` valida o acesso, sem inventar identidade de conta.
 - GitHub: Bearer token no host fixo `https://api.github.com`, versão REST `2022-11-28`. Repositórios selecionados; leitura de Metadata, Contents, Pull requests e Checks conforme a operação, ou permissões equivalentes do token clássico. `GET /user` valida o principal. Permissões restritas podem permitir listar o repositório e recusar uma operação: a falha é exibida.
 
-As integrações de leitura não criam nem editam tickets, casos, runs, resultados, PRs nem transições. **Exceção única, desde a 2.8:** o comentário de resultado de QA em um ticket Jira do projeto vinculado (um POST a `/rest/api/3/issue/{key}/comment`), sempre com prévia e confirmação nativa ou política aprovada, sem mudar o status do ticket; veja [AGENDAMENTOS.md](AGENDAMENTOS.md). Nenhum outro corpo de escrita é enviado. Não requer token de IA. Não clona repositórios privados nem baixa o código integral.
+As operações de leitura não criam nem editam registros. Escritas da versão 2.9 usam o catálogo fechado descrito abaixo, habilitação por projeto/serviço e confirmação nativa ou política específica aprovada. O comentário agendado de resultado mantém seu fluxo restrito, sem alterar status do ticket; veja [AGENDAMENTOS.md](AGENDAMENTOS.md). Não requer token de IA. Não clona repositórios privados nem baixa o código integral.
 
 ## Catálogo REST implementado
 
@@ -44,6 +44,8 @@ Todos os endpoints abaixo usam **GET**. Parâmetros são construídos pelo adapt
 | Qase runs | `/v1/run/{code}` | offset, limit | runs |
 | Qase detalhe de run | `/v1/run/{code}/{id}` | ID numérico | run |
 | Qase resultados | `/v1/result/{code}` | offset, limit, run opcional | hash, run/case IDs, status, tempos, anexos retornados |
+| Qase defeitos (`defeitos`) | `/v1/defect/{code}` | offset, limit; status opcional open/resolved/in_progress/invalid | ID, título, resultado observado, severidade, status, datas, runs/results e anexos retornados |
+| Qase detalhe de defeito (`defeito`) | `/v1/defect/{code}/{id}` | ID numérico, conferido na resposta | mesmos campos da listagem e detalhes disponíveis |
 | GitHub recursos | `/user/repos` | per_page, page, sort=full_name | ID, full_name, name |
 | GitHub revalidar ID | `/repositories/{id}` | ID numérico | identidade, full_name atual |
 | GitHub repositório | `/repos/{owner}/{repo}` | namespace revalidado | dados do repositório |
@@ -65,7 +67,7 @@ HTTPS apenas, hosts fixos ou subdomínio Jira único permitido; sem usuário/sen
 
 Testes de contrato e servidor controlado estão em `testes/servicos.test.mjs`; demonstração Electron em `testes/desktop-plataforma.test.mjs`. O runner injeta instrumentação somente no teste; ela não é importada pelo app, incluída no instalador nem ativada por configuração de produção. SMART-LAB/CID-LAB são fictícios. Uma confirmação de diálogo simulada pelo runner não é aprovação humana de execução. Autenticação real dos três serviços **não verificada sem credenciais próprias disponíveis**. Fixtures demonstram implementação e isolamento, não acesso em produção.
 
-Para 2.8: modelo de referências preserva origem, contexto, automação, execução e evidência. Cadastro próprio de casos e publicação no Qase não estão implementados. Não existe orquestrador nem IA própria.
+O modelo de referências preserva origem, contexto, automação, execução e evidência. A versão 2.9 possui propostas locais de casos, publicação controlada no Qase e Orchestrator local; não contém modelo de IA próprio. Leitura de defeitos é implementada sem criação/edição/resolução de defeitos: nenhuma rota de escrita de defeito está autorizada. Relações runs/results são informações retornadas pelo Qase, sem associação deduzida com Jira. Comentários e histórico de defeitos não são inventados quando a API não os fornece.
 
 ## Fontes oficiais consultadas
 
@@ -73,9 +75,12 @@ Para 2.8: modelo de referências preserva origem, contexto, automação, execuç
 - [Jira Basic API token](https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/)
 - [Jira enhanced issue search](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/)
 - [Qase especificações oficiais](https://github.com/qase-tms/specs)
+- [Qase listar defeitos](https://developers.qase.io/reference/get-defects) e [detalhar defeito](https://developers.qase.io/reference/get-defect); contrato [Defect.yaml](https://github.com/qase-tms/specs/blob/master/testops-api/v1/schemas/Defect.yaml), conferidos em 11/10/2026.
 - [GitHub REST repositories](https://docs.github.com/en/rest/repos/repos)
 - [GitHub REST checks](https://docs.github.com/en/rest/checks/runs)
 
 ## Escritas (2.9)
 
 Jira (v3): criar ticket (tipo vindo do createmeta), comentar, anexar (`X-Atlassian-Token: no-check`), vincular, editar campos e transicionar. Qase (v1): criar suite, caso, plano e run; editar caso; concluir run; resultados em lote (até 200); anexos; associação a ticket. GitHub (REST): criar ref `prumo/...`, gravar arquivo, abrir Pull Request em rascunho. Cada rota está em `src/rotasEscrita.ts`; tudo fora da lista é recusado. Leitura avançada: filtros de tickets (JQL montado e escapado, sempre restrito ao projeto), histórico, anexos, transições, planos, resultados, execuções do Actions e arquivos.
+
+A reutilização e a reconciliação de uma escrita revalidam conexão e vínculo. Se a mesma chave de operação pertence a vínculo/conexão anteriores, ou a um registro legado sem escopo conhecido, `OPERATION_SCOPE_CHANGED` bloqueia a repetição sem reenviar nem alterar o registro anterior. Novas tentativas gravam o escopo antes do envio, incluindo situações de resposta perdida. Não há migração automática do livro-razão.

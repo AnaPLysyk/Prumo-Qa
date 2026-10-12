@@ -19,9 +19,9 @@ abas.projetos=async el=>{
   const lista=await chamar(api.espacos);if(!lista)return;
   for(const e of lista){
     const acoes=h('div',{class:'barra-acoes'},botao(estado.espaco?.id===e.id?'Projeto selecionado':'Selecionar projeto',()=>escolherEspaco(e)),botao('Editar projeto',()=>editar(e)),botao('Vincular pasta de automação…',async()=>{const r=await chamar(()=>api.espacoPasta(e.id));if(r&&!r.canceled)mostrar('projetos');}));
-    for(const v of e.vinculos)acoes.append(botao('Validar vínculo '+v.servico,async()=>{if(await chamar(()=>api.servicoConferir(e.id,v.servico)))mostrar('projetos');}),botao('Remover vínculo '+v.servico,async()=>{const r=await chamar(()=>api.servicoDesvincular(e.id,v.servico));if(r&&!r.canceled)mostrar('projetos');}));
-    const chips=h('div',{class:'proj-chips'},e.vinculos.map(v=>h('span',{class:'chip-servico',title:v.recurso.instancia+' · ID '+v.recurso.id+' · validado: '+hora(v.validadoEm)},v.servico+' · '+v.recurso.chave+' ',selo(v.estado))),h('span',{class:'chip-servico'},e.pastaLocal?'Pasta vinculada':'Sem pasta local'));
-    el.append(h('section',{class:'nota','data-espaco':e.id},h('h2',{},e.nome),e.descricao?h('p',{class:'suave'},e.descricao):null,chips,acoes,h('p',{class:'suave'},'ID Prumo: '+e.id+(e.pastaLocal?' · Pasta: '+e.pastaLocal:''))));
+    // v40: cada vínculo mantém a identidade própria (serviço, chave, ID e instância) e as ações dele na mesma linha.
+    const chips=h('ul',{class:'ds-lista proj-vinculos'},e.vinculos.map(v=>h('li',{class:'proj-vinculo','data-servico':v.servico},DS.origem(v.servico,DS.nomesServico[v.servico]+' · '+v.recurso.chave),h('span',{class:'ds-sub'},'ID '+v.recurso.id+' · '+v.recurso.instancia+' · '+tr('validado {q}',{q:hora(v.validadoEm)})),selo(v.estado),h('span',{class:'proj-vinculo-acoes'},DS.link('Validar',async()=>{if(await chamar(()=>api.servicoConferir(e.id,v.servico)))mostrar('projetos');},{rotulo:'Validar vínculo '+v.servico,seta:false}),DS.link('Remover',async()=>{const r=await chamar(()=>api.servicoDesvincular(e.id,v.servico));if(r&&!r.canceled)mostrar('projetos');},{rotulo:'Remover vínculo '+v.servico,seta:false})))),h('li',{class:'proj-vinculo','data-servico':'local'},DS.origem('local',e.pastaLocal?tr('Pasta vinculada'):tr('Sem pasta local')),h('span',{class:'ds-sub'},e.pastaLocal||tr('Opcional: necessária para catálogo, automações e evidências locais.'))));
+    el.append(h('section',{class:'nota','data-espaco':e.id},h('h2',{},e.nome),e.descricao?h('p',{class:'suave'},e.descricao):null,chips,acoes,h('p',{class:'suave'},'ID Prumo: '+e.id)));
   }
   await projetosLocais(el);
 };
@@ -65,7 +65,7 @@ async function consultaManual(el,servico,operacoes){
   el.append(h('div',{class:'barra'},h('label',{},'Consulta',operacao),ident.no,botao('Consultar API',()=>consultar(operacao.value,{},ident.input.value||undefined),'consultar-remoto')),fonte,lista,detalhe);
   let consultaAtual=0;
   async function consultar(op,pagina={},id){
-    const tentativa=++consultaAtual;lista.replaceChildren();detalhe.replaceChildren();fonte.textContent='Consultando…';
+    const tentativa=++consultaAtual;if(!(servico==='qase'&&op==='caso'&&window.PrumoQualidadeV39))lista.replaceChildren();detalhe.replaceChildren();fonte.textContent='Consultando…';
     const raw=await api.servicoConsultar(e.id,servico,op,pagina,id);if(tentativa!==consultaAtual)return;
     if(!raw.ok){fonte.textContent='Consulta falhou: '+raw.error+'. Nenhum resultado foi substituído por lista vazia.';avisar(raw.error,true);return;}
     const r=raw.data;fonte.textContent='Consulta atual · '+r.origem+' · '+r.endpoint+' · '+hora(r.consultadoEm)+' · sem cache. '+r.interpretacao+' '+r.limitesExibicao;
@@ -89,7 +89,8 @@ async function consultaManual(el,servico,operacoes){
         if(op==='commits'&&x.sha)card.append(botao('Verificações '+x.sha.slice(0,7),()=>consultar('verificacoes',{},x.sha)));
         if(op==='prs'&&x.number)card.append(botao('Detalhar PR '+x.number,()=>consultar('pr',{},String(x.number))));
       }
-      card.append(h('details',{},h('summary',{},'Dados retornados: IDs, passos, relações e origem'),dadosVisiveis(x)));lista.append(card);
+      card.append(h('details',{},h('summary',{},'Dados retornados: IDs, passos, relações e origem'),dadosVisiveis(x)));
+      if(servico==='qase'&&op==='caso'&&window.PrumoQualidadeV39)window.PrumoQualidadeV39.abrirModal('Detalhes do caso',card);else lista.append(card);
     }
     if(r.proxima!==null)lista.append(botao('Próxima página',()=>consultar(op,typeof r.proxima==='string'?{cursor:r.proxima}:{offset:r.proxima},id)));
   }

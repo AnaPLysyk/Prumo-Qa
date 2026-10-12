@@ -29,7 +29,7 @@ function textoFrequencia(r) {
   if (f.tipo === 'diario') return tr('Todo dia às {hora} ({fuso})', { hora: f.hora, fuso: r.fuso });
   return tr('Semanal: {dias} às {hora} ({fuso})', { dias: f.dias.map((d) => tr(DIAS[d])).join(', '), hora: f.hora, fuso: r.fuso });
 }
-const campoA = (rotulo, el, id) => h('label', { class: 'campo', for: id }, tr(rotulo), el);
+const campoA = (rotulo, el, id) => h('label', { class: 'ds-campo', for: id }, h('span', {}, tr(rotulo)), el);
 const selecao = (id, opcoes, atual) => h('select', { id }, Object.entries(opcoes).map(([v, t]) => h('option', { value: v, selected: v === atual }, tr(t))));
 const estadoOrb = (w) => (!w || !w.executando ? 'parado' : w.emExecucao ? 'executando' : 'ocioso');
 const nivelWorker = (w) => (!w || !w.executando || !w.trava?.vivo ? 'falha' : w.pausado ? 'aviso' : 'ok');
@@ -120,18 +120,18 @@ function formularioRotina(espacos, existente, aoSalvar) {
   const freq = selecao('rotina-freq', { unico: 'Uma vez', intervalo: 'A cada N minutos', diario: 'Todos os dias', semanal: 'Semanal' }, f.tipo);
   const em = h('input', { id: 'rotina-em', type: 'datetime-local', value: f.tipo === 'unico' ? instanteParaParede(f.em, fuso0) : '' });
   const min = h('input', { id: 'rotina-minutos', type: 'number', min: 1, max: 44640, value: f.minutos ?? 60 }); const hr = h('input', { id: 'rotina-hora', type: 'time', value: f.hora || '09:00' });
-  const dias = h('div', { class: 'dias-semana', id: 'rotina-dias' }, DIAS.map((d, i) => h('label', { class: 'linha' }, h('input', { type: 'checkbox', value: i, checked: (f.dias || [1, 2, 3, 4, 5]).includes(i) }), tr(d))));
+  const dias = h('div', { class: 'ds-opcoes', id: 'rotina-dias' }, DIAS.map((d, i) => h('label', { class: 'linha' }, h('input', { type: 'checkbox', value: i, checked: (f.dias || [1, 2, 3, 4, 5]).includes(i) }), tr(d))));
   const fuso = h('input', { id: 'rotina-fuso', value: fuso0, maxlength: 64 });
   const perd = selecao('rotina-perdido', { PULAR: 'Pular o que perdi (registra como perdido)', EXECUTAR_UMA_VEZ: 'Executar uma vez ao voltar' }, r?.politicaPerdido || 'PULAR');
   const tol = h('input', { id: 'rotina-tolerancia', type: 'number', min: 0, max: 1440, value: r?.toleranciaMinutos ?? 10 });
   const k6s = h('input', { id: 'k6-script', value: r?.k6?.script || '', placeholder: 'carga/script.js' }); const k6a = h('input', { id: 'k6-alvo', value: r?.k6?.alvo || 'http://127.0.0.1:8080' });
   const k6u = h('input', { id: 'k6-usuarios', type: 'number', min: 1, max: 50, value: r?.k6?.usuarios ?? 5 }); const k6d = h('input', { id: 'k6-duracao', type: 'number', min: 1, max: 600, value: r?.k6?.duracaoSegundos ?? 30 });
   const gCap = campoA('Automação declarada (capability)', cap, 'rotina-capability'); const gTicket = campoA('Ticket Jira (opcional)', ticket, 'rotina-ticket');
-  const gEm = campoA('Data e hora (no fuso informado)', em, 'rotina-em'); const gMin = campoA('Intervalo (minutos)', min, 'rotina-minutos'); const gHr = campoA('Horário', hr, 'rotina-hora'); const gDias = h('div', { class: 'campo' }, h('span', {}, tr('Dias da semana')), dias);
-  const gK6 = h('div', { id: 'bloco-k6' }, h('p', { class: 'suave' }, tr('k6 usa o executável oficial instalado. Limites obrigatórios: até 50 usuários virtuais e 600 s. Produção é bloqueada.')), campoA('Script k6 (dentro do projeto)', k6s, 'k6-script'), campoA('Destino (em ambiente local: localhost)', k6a, 'k6-alvo'), campoA('Usuários virtuais (1–50)', k6u, 'k6-usuarios'), campoA('Duração em segundos (1–600)', k6d, 'k6-duracao'));
+  const gEm = campoA('Data e hora (no fuso informado)', em, 'rotina-em'); const gMin = campoA('Intervalo (minutos)', min, 'rotina-minutos'); const gHr = campoA('Horário', hr, 'rotina-hora'); const gDias = h('div', { class: 'ds-campo inteiro' }, h('span', {}, tr('Dias da semana')), dias);
+  const gK6 = h('div', { id: 'bloco-k6', class: 'ds-form inteiro' }, h('p', { class: 'suave inteiro' }, tr('k6 usa o executável oficial instalado. Limites obrigatórios: até 50 usuários virtuais e 600 s. Produção é bloqueada.')), campoA('Script k6 (dentro do projeto)', k6s, 'k6-script'), campoA('Destino (em ambiente local: localhost)', k6a, 'k6-alvo'), campoA('Usuários virtuais (1–50)', k6u, 'k6-usuarios'), campoA('Duração em segundos (1–600)', k6d, 'k6-duracao'));
   const runSel = h('select', { id: 'rotina-run' }); const gRun = campoA('Run do Qase (já criada)', runSel, 'rotina-run');
   const msg = h('div', { id: 'rotina-erro', role: 'alert' });
-  const k6aviso = h('p', { class: 'suave', id: 'k6-disponibilidade' });
+  const k6aviso = h('p', { class: 'suave inteiro', id: 'k6-disponibilidade' });
   gK6.prepend(k6aviso);
   const atualizar = async () => {
     const t = tipo.value; const exec = ['smoke', 'regressao'].includes(t);
@@ -153,9 +153,14 @@ function formularioRotina(espacos, existente, aoSalvar) {
     dados.frequencia = freq.value === 'unico' ? { tipo: 'unico', em: em.value ? paredeParaISO(em.value, fuso.value) : '' } : freq.value === 'intervalo' ? { tipo: 'intervalo', minutos: Number(min.value) } : freq.value === 'diario' ? { tipo: 'diario', hora: hr.value } : { tipo: 'semanal', dias: [...dias.querySelectorAll('input:checked')].map((i) => Number(i.value)), hora: hr.value };
     const rr = await api.agendaSalvar(r?.id, dados);
     if (!rr.ok) { msg.replaceChildren(h('div', { class: 'nota erro' }, rr.error)); return; } avisar(tr('Rotina salva.')); aoSalvar();
-  }, 'rotina-salvar');
-  return h('div', { class: 'formulario', id: 'rotina-form' }, h('h2', {}, tr(r ? 'Editar rotina' : 'Nova rotina')), campoA('Nome', nome, 'rotina-nome'), campoA('Projeto Prumo', proj, 'rotina-projeto'), campoA('Tipo de rotina', tipo, 'rotina-tipo'), gCap, gRun, gTicket, gK6, campoA('Ambiente', amb, 'rotina-ambiente'),
-    campoA('Frequência', freq, 'rotina-freq'), gEm, gMin, gHr, gDias, campoA('Fuso horário (nome IANA, ex.: America/Sao_Paulo)', fuso, 'rotina-fuso'), campoA('Se o Prumo estiver fechado no horário', perd, 'rotina-perdido'), campoA('Tolerância de atraso (min)', tol, 'rotina-tolerancia'), msg, salvar, ' ', botao('Cancelar', aoSalvar, 'rotina-cancelar'));
+  }, 'rotina-salvar'); salvar.classList.add('primaria');
+  // v40: mesmo formulário e mesmos campos, agrupados por fluxo, horário e execução perdida (Design System).
+  const nomeC = campoA('Nome', nome, 'rotina-nome'); nomeC.classList.add('inteiro');
+  return h('form', { class: 'ds-form', id: 'rotina-form', onsubmit: (ev) => ev.preventDefault() },
+    DS.grupo('Fluxo', nomeC, campoA('Projeto Prumo', proj, 'rotina-projeto'), campoA('Tipo de rotina', tipo, 'rotina-tipo'), gCap, gRun, gTicket, campoA('Ambiente', amb, 'rotina-ambiente'), gK6),
+    DS.grupo('Quando', campoA('Frequência', freq, 'rotina-freq'), gEm, gMin, gHr, campoA('Fuso horário (nome IANA, ex.: America/Sao_Paulo)', fuso, 'rotina-fuso'), gDias),
+    DS.grupo('Se o horário for perdido', campoA('Se o Prumo estiver fechado no horário', perd, 'rotina-perdido'), campoA('Tolerância de atraso (min)', tol, 'rotina-tolerancia'), h('p', { class: 'suave inteiro' }, tr('Computador desligado ou suspenso: o horário vira “perdido”, nunca “executado”.'))),
+    msg, h('div', { class: 'ds-form-acoes' }, h('span', { class: 'ds-form-msg suave' }, tr('Testes agendados só executam com autorização vigente.')), botao('Cancelar', aoSalvar, 'rotina-cancelar'), salvar));
 }
 const seloAut = (a) => h('li', {}, h('code', {}, a.capability), ' ', selo(a.estado), a.validaAte ? ' · ' + tr('até {quando}', { quando: hora(a.validaAte) }) : '', a.usos ? ' · ' + tr('usos {n}', { n: a.usos }) : '');
 function cartaoRotina(r, espacos, recarregar) {
@@ -217,6 +222,11 @@ const duracao = (n) => (n === null || n === undefined ? '—' : n < 1000 ? n + '
 async function detalheJira(x, caixa) {
   const p = await chamar(() => api.jiraPrevia(x.id)); if (!p) return;
   caixa.replaceChildren(h('p', { class: 'suave' }, tr('Prévia do comentário para {t} (nada foi enviado):', { t: p.ticket })), h('pre', {}, p.texto), botao('Publicar no Jira…', async () => { const r = await chamar(() => api.jiraPublicar(x.id)); if (r && !r.canceled) { avisar(r.estado === 'PUBLICADO' ? tr('Comentário publicado.') : tr('Publicação não concluída: {e}', { e: r.erro || r.estado }), r.estado !== 'PUBLICADO'); mostrar('execucoes'); } }, 'jira-publicar'));
+  if (window.PrumoQualidadeV39) {
+    const marcador = document.createComment('posição da prévia Jira');
+    caixa.before(marcador);
+    window.PrumoQualidadeV39.abrirModal('Prévia do comentário Jira', caixa, () => { if (marcador.isConnected) marcador.replaceWith(caixa); });
+  }
 }
 abas.execucoes = async (el) => {
   el.append(h('h1', {}, tr('Execuções')));
@@ -226,14 +236,21 @@ abas.execucoes = async (el) => {
   if (!f.espacoId && estado.espaco && f.todos !== true) f.espacoId = estado.espaco.id;
   const proj = h('select', { id: 'f-projeto' }, h('option', { value: '' }, tr('Todos os projetos')), espacos.map((e) => h('option', { value: e.id, selected: e.id === f.espacoId }, e.nome)));
   const tk = h('input', { id: 'f-ticket', placeholder: 'SMART-1', value: f.ticket || '' }); const res = h('select', { id: 'f-resultado' }, h('option', { value: '' }, tr('Qualquer resultado')), ['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'ERRO_INFRA', 'INFO'].map((v) => h('option', { value: v, selected: v === f.resultado }, v)));
+  const desde = h('input', { id: 'f-desde', type: 'date', value: f.desde || '' }); const ate = h('input', { id: 'f-ate', type: 'date', value: f.ate || '' });
+  const filtroTipo = selecao('f-tipo', { '': 'Qualquer tipo', ...TIPOS }, f.tipo || ''); const filtroOrigem = selecao('f-origem', { '': 'Qualquer origem', MANUAL: 'Manual', AGENDA: 'Agenda' }, f.origem || '');
   el.append(h('div', { class: 'barra' }, campoA('Projeto', proj, 'f-projeto'), campoA('Ticket', tk, 'f-ticket'), campoA('Resultado', res, 'f-resultado'),
-    botao('Filtrar', () => { estado.filtroExec = { espacoId: proj.value || undefined, todos: !proj.value, ticket: tk.value.trim().toUpperCase() || undefined, resultado: res.value || undefined, rotinaId: f.rotinaId, selecionadoQuando: f.selecionadoQuando }; mostrar('execucoes'); }, 'f-aplicar'),
+    campoA('Desde', desde, 'f-desde'), campoA('Até', ate, 'f-ate'),
+    campoA('Tipo', filtroTipo, 'f-tipo'), campoA('Origem', filtroOrigem, 'f-origem'),
+    botao('Filtrar', () => { if (!desde.reportValidity() || !ate.reportValidity()) return; if (desde.value && ate.value && desde.value > ate.value) { avisar(tr('A data inicial deve ser anterior à data final.'), true); return; } estado.filtroExec = { espacoId: proj.value || undefined, todos: !proj.value, ticket: tk.value.trim().toUpperCase() || undefined, resultado: res.value || undefined, desde: desde.value, ate: ate.value, tipo: filtroTipo.value, origem: filtroOrigem.value, rotinaId: f.rotinaId, selecionadoQuando: f.selecionadoQuando }; mostrar('execucoes'); }, 'f-aplicar'),
     f.rotinaId ? botao('Limpar filtro de rotina', () => { delete estado.filtroExec.rotinaId; mostrar('execucoes'); }) : null));
   const m = await chamar(() => api.metricasExecucoes(f.espacoId)); const cel = (n, t) => h('div', {}, h('b', {}, String(n)), h('span', {}, tr(t)));
   if (m) el.append(h('div', { class: 'grade', id: 'metricas-exec' }, cel(m.execucoes, 'execuções'), cel(m.pass, 'PASS'), cel(m.fail, 'FAIL'), cel(m.blocked, 'BLOCKED'), cel(m.notRun, 'NOT_RUN'), cel(m.consultas, 'consultas (INFO)'), cel(m.rotinasAtivas, 'rotinas ativas'), cel(m.rotinasPausadas, 'rotinas pausadas'),
     cel(m.falhasDeAgendamento, 'falhas de agendamento'), cel(m.comentariosPendentes, 'comentários pendentes'), cel(m.publicacoesConcluidas, 'publicações concluídas')),
     h('p', { class: 'suave' }, tr('Última execução: {a} · Próxima: {b}. Sem porcentagem de qualidade: quantidade de testes não mede qualidade.', { a: m.ultimaExecucao ? hora(m.ultimaExecucao.em) + ' (' + m.ultimaExecucao.resultado + ')' : '—', b: m.proximaExecucao ? hora(m.proximaExecucao) : '—' })));
-  const lista = await chamar(() => api.execucoes({ espacoId: f.espacoId, rotinaId: f.rotinaId, ticket: f.ticket, resultado: f.resultado, limite: 100 })); if (!lista) return;
+  const periodo = {}; if (f.desde) periodo.since = new Date(f.desde + 'T00:00:00').toISOString(); if (f.ate) periodo.until = new Date(f.ate + 'T23:59:59.999').toISOString();
+  const lista = await chamar(() => api.execucoes({ espacoId: f.espacoId, rotinaId: f.rotinaId, ticket: f.ticket, resultado: f.resultado, ...periodo, limite: 100 })); if (!lista) return;
+  lista.execucoes = lista.execucoes.filter(x => (!f.tipo || x.tipo === f.tipo) && (!f.origem || x.origem === f.origem));
+  el.append(h('p', { class: 'suave' }, tr('Até 100 registros por consulta. Tipo e origem filtram os registros carregados. O período usa o horário deste computador; os totais acima abrangem todo o projeto.')), botao('Consultar evidências locais', () => { estado.jobId = undefined; mostrar('evidencias'); }, 'exec-evidencias'));
   if (!lista.execucoes.length) el.append(h('div', { class: 'vazio', id: 'exec-vazia' }, tr('Nenhuma execução registrada para este filtro.')));
   else {
     const jiraCx = h('div', { id: 'jira-caixa' });
@@ -244,7 +261,7 @@ abas.execucoes = async (el) => {
           h('td', {}, x.ticket || '—'), h('td', {}, x.executor), h('td', {}, selo(r?.status || x.estado), r?.motivo ? h('div', { class: 'suave' }, r.motivo) : x.erro ? h('div', { class: 'suave' }, x.erro) : null),
           h('td', {}, c && c.pass + c.fail + c.blocked + c.notRun ? `${c.pass} PASS · ${c.fail} FAIL · ${c.blocked} BLOCKED · ${c.notRun} NOT_RUN` : r && ['PASS', 'FAIL'].includes(r.status) ? tr('sem cenários individuais') : '—'), h('td', {}, duracao(x.duracaoMs)),
           h('td', {}, x.jira.estado === 'NAO_APLICAVEL' ? '—' : selo(x.jira.estado), x.jira.comentarioId ? h('div', { class: 'suave' }, '#' + x.jira.comentarioId) : null),
-          h('td', {}, h('details', {}, h('summary', {}, tr('Detalhes')), r?.detalhes ? h('pre', {}, r.detalhes) : null, h('ul', {}, x.tentativas.map((t) => h('li', {}, tr('tentativa {n}: ', { n: t.n }), selo(t.estado), t.codigo ? ' ' + t.codigo : ''))),
+          h('td', {}, h('details', {}, h('summary', {}, tr('Detalhes')), h('h3', {}, tr('Resumo da execução')), h('p', {}, 'ID: ' + x.id), h('p', {}, tr('Início: ') + hora(x.inicio || x.criadoEm) + ' · ' + tr('Término: ') + hora(x.termino)), h('p', {}, tr('Ambiente: ') + (x.ambiente || '—') + ' · ' + tr('Origem: ') + (x.origem || '—') + ' · ' + tr('Executor: ') + x.executor), h('p', {}, tr('Ticket: ') + (x.ticket || '—') + ' · ' + tr('Rotina: ') + x.rotina), r?.detalhes ? h('pre', {}, r.detalhes) : null, h('h3', {}, tr('Tentativas')), h('ul', {}, x.tentativas.map((t) => h('li', {}, tr('tentativa {n}: ', { n: t.n }), selo(t.estado), t.codigo ? ' ' + t.codigo : ''))),
             x.evidenciaId && x.pastaLocal ? botao('Ver evidência', () => { estado.root = x.pastaLocal; salvarRaiz(); estado.jobId = x.evidenciaId; mostrar('evidencias'); }) : null,
             x.ticket && r && ['PASS', 'FAIL'].includes(r.status) ? botao('Comentário Jira', () => detalheJira(x, jiraCx)) : null)));
       })))), jiraCx);
@@ -253,6 +270,14 @@ abas.execucoes = async (el) => {
 };
 
 // ---- Aviso de eventos do worker (consulta periódica: a ponte não expõe canais de evento livres) ----
+// Redesenhar a tela fecha o modal (mostrar → encerrar); com um modal aberto (formulário, detalhe) a lista só é
+// atualizada quando ele fechar, para não descartar o que a pessoa está editando ou lendo.
+function recarregarSemFecharModal() {
+  const aba = estado.aba; const aberto = document.querySelector('dialog[open]');
+  if (!aberto) { mostrar(aba); return; }
+  if (aberto.dataset.recarregarAoFechar) return; aberto.dataset.recarregarAoFechar = '1';
+  aberto.addEventListener('close', () => { delete aberto.dataset.recarregarAoFechar; if (estado.aba === aba) mostrar(aba); }, { once: true });
+}
 async function consultarEventos() {
   try {
     const r = await api.workerEventos(estado.ultimoEvento || 0); if (!r.ok) return; estado.ultimoEvento = r.data.ultimo;
@@ -261,7 +286,7 @@ async function consultarEventos() {
       const erro = ['EXECUCAO_FALHOU', 'EXECUCAO_BLOQUEADA', 'PUBLICACAO_JIRA_FALHOU', 'WORKER_INTERROMPIDO'].includes(e.tipo);
       avisar(`${e.titulo}: ${e.detalhe}`, erro);
       if (e.tipo !== 'AGENDAMENTO_INICIADO' && estado.prefs && estado.prefs.notificarAgenda !== false && estado.prefs.som && !estado.prefs.silenciar) tocarSom();
-      if (['agenda', 'execucoes', 'inicio'].includes(estado.aba)) setTimeout(() => mostrar(estado.aba), 300);
+      if (['agenda', 'execucoes', 'inicio'].includes(estado.aba)) setTimeout(recarregarSemFecharModal, 300);
     }
     await atualizarWorker();
   } catch { /* a janela pode estar fechando */ }

@@ -39,7 +39,8 @@ test('central de ajuda: guia completo, perguntas frequentes expansíveis e tudo 
 
 test('Versões: histórico offline com detalhes expansíveis e versão instalada correta', async (t) => {
   const dados = novoDados(t);
-  const { page } = await abrir(t, dados, ['--proxy-server=127.0.0.1:9']);
+  const { app, page } = await abrir(t, dados, ['--proxy-server=127.0.0.1:9']);
+  await app.evaluate(() => { globalThis.fetch = async () => { throw new Error('Rede simulada indisponível'); }; });
   await abrirAjuda(page, 'Versões');
   const todas = page.locator('details.versao'); assert.ok((await todas.count()) >= 5, 'histórico de 2.0.0 até a versão instalada');
   const aberta = page.locator('details.versao[open]'); assert.equal(await aberta.count(), 1);
@@ -58,8 +59,8 @@ test('Integrações técnicas: catálogo de IPC e MCP corresponde ao código e f
   const { page } = await abrir(t, dados);
   await abrirAjuda(page, 'Integrações técnicas');
   const total = Object.keys(esquemasIpc).length;
-  assert.equal(await page.locator('details.operacao').count(), total + 7);
-  await page.selectOption('#filtro-tipo', 'MCP'); assert.equal(await page.locator('details.operacao').count(), 7);
+  assert.equal(await page.locator('details.operacao').count(), total + 8);
+  await page.selectOption('#filtro-tipo', 'MCP'); assert.equal(await page.locator('details.operacao').count(), 8);
   await page.selectOption('#filtro-tipo', 'IPC'); assert.equal(await page.locator('details.operacao').count(), total);
   const logs = page.locator('details.operacao', { hasText: 'prumo:projeto:logs' }).first(); await logs.locator('summary').click();
   const t1 = await logs.textContent();
@@ -108,16 +109,17 @@ test('Atualizações: release mais nova, igual, inexistente e indisponível; abr
   await ir(page, 'projetos'); assert.match(await page.textContent('#conteudo'), /Projetos/, 'aplicativo segue utilizável');
 });
 
-test('Atualizações com o destino oficial real: qualquer resposta válida é apresentada sem quebrar o app (depende de rede, aceita offline)', async (t) => {
+test('Atualizações com falha simulada de rede: aplicativo continua utilizável sem consultar serviço externo', async (t) => {
   const dados = novoDados(t);
-  const { page } = await abrir(t, dados, ['--proxy-server=127.0.0.1:9']);
+  const { app, page } = await abrir(t, dados, ['--proxy-server=127.0.0.1:9']);
+  await app.evaluate(() => { globalThis.fetch = async () => { throw new Error('Rede simulada indisponível'); }; });
   await abrirAjuda(page, 'Atualizações');
   assert.match(await page.textContent('article'), /v?\d+\.\d+\.\d+/);
   assert.match(await page.textContent('article'), /endereço IP\. Isto não é anonimato/);
   await page.click('text=Verificar atualizações');
   await page.waitForSelector('article .estado', { timeout: 20000 });
   const estado = (await page.textContent('article .estado')).trim();
-  assert.match(estado, /^(ATUALIZAÇÃO DISPONÍVEL|ATUALIZADO|INSTALADA MAIS NOVA|SEM RELEASE|CONSULTA NÃO CONCLUÍDA|LIMITE DE CONSULTAS)$/);
+  assert.equal(estado, 'CONSULTA NÃO CONCLUÍDA');
   if (estado === 'CONSULTA NÃO CONCLUÍDA') assert.match(await page.textContent('article'), /O aplicativo continua disponível para uso local/);
   if (estado !== 'ATUALIZAÇÃO DISPONÍVEL') assert.equal(await page.locator('text=Abrir página oficial…').count(), 0);
   await ir(page, 'projetos'); assert.match(await page.textContent('#conteudo'), /Projetos/);

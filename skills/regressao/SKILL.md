@@ -14,3 +14,5 @@ Leia depois o resultado com `consultar_evidencias`: preserve PASS, FAIL, BLOCKED
 Se houver FAIL, `propor_bug` cria um rascunho; a publicação de resultados no Qase e a abertura de bug no Jira são ações da pessoa (ou de uma política de publicação por run aprovada por ela).
 
 Entregue: o que foi executado, o que não foi, resultados reais, bloqueios e riscos restantes.
+
+Para camadas de execução, seleção por mudança e risco, quarentena de instáveis e saúde da suíte, consulte [práticas abertas](references/praticas-abertas.md).

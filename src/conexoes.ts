@@ -7,7 +7,7 @@ import { hash, type Projeto } from './projeto.js';
 import { pastaAtividades } from './atividades.js';
 
 const quote=(s:string)=>"'"+s.replaceAll("'","''")+"'";
-function localizar(cliente:'codex'|'claude') {
+export function localizar(cliente:'codex'|'claude') {
   const pastas=(process.env.PATH??'').split(path.delimiter).filter(d=>path.isAbsolute(d));
   // Instalação oficial do Codex Desktop também oferece CLI fora do PATH.
   if(cliente==='codex'&&process.platform==='win32'&&process.env.LOCALAPPDATA) {

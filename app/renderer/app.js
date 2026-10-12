@@ -463,11 +463,13 @@ async function mostrar(aba) {
   // Sem isso, duas trocas rápidas de aba escreviam no mesmo elemento e misturavam conteúdos ou duplicavam ids.
   const token = (estado.render = (estado.render || 0) + 1); const el = document.createElement('div');
   const locais = await chamar(api.projetos); const espacos = await chamar(api.espacos);
-  estado.espaco = espacos?.find(e => e.raizContextos === estado.root) || null;
+  // Consulta que falhou não prova que o projeto sumiu: só descarta a seleção quando as duas listas vieram.
+  const consultou = !!locais && !!espacos;
+  if (espacos) estado.espaco = espacos.find(e => e.raizContextos === estado.root) || null;
   const nome = estado.espaco || locais?.find((p) => p.root === estado.root);
   if (token !== estado.render) return;
-  if (estado.root && !nome) estado.root = null;
-  $('#projeto-atual').textContent = nome ? (nome.nome || nome.name || nome.id) : 'nenhum selecionado';
+  if (estado.root && !nome && consultou) estado.root = null;
+  if (nome || consultou) $('#projeto-atual').textContent = nome ? (nome.nome || nome.name || nome.id) : 'nenhum selecionado';
   try { await abas[aba](el); } catch (e) { if (token === estado.render) avisar('Falha ao carregar a seção.', true); }
   if (token !== estado.render) return;
   $('#conteudo').replaceChildren(...el.childNodes);

@@ -2,6 +2,55 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.10.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "Interface nova, testes ligados ao código e assistente que aprende com aprovação",
+      "objective": "Reorganizar as telas de trabalho num Design System único, mostrar casos do Qase e testes do repositório lado a lado, acompanhar os agentes num painel ao vivo e dar ao assistente perfil e conhecimento locais que só valem depois de aprovados por você.",
+      "features": [
+        "Tickets: Jira e defeitos do Qase numa tabela única, com filtros, detalhe em modal (descrição, critérios, relações, comentários, histórico, anexos, transição e edição) e \"Abrir ticket no Jira…\" a partir de um defeito, registrando o vínculo defeito → ticket.",
+        "Testes: visão geral com casos do Qase e testes do repositório juntos só por anotação explícita no código (qase(31, …), @qase-31, Qase: SFQ-31…), visão de código somente leitura com árvore, numeração e marcadores por teste, e abas de suites, planos, runs e automação.",
+        "Agendamentos, Execuções e Rastreabilidade: tabelas com ações na linha e detalhes em modal (etapas, logs, evidências, exportação JSON); trilha ticket → caso → automação → execução → defeito com a origem de cada vínculo e as lacunas.",
+        "Agentes: listagem por especialização, Cérebro com as conexões configuradas e Painel de atividades em canvas infinito ao vivo, em que cada linha corresponde a um registro gravado (clientes MCP/CLI, Orchestrator, worker e delegações ao Claude Code ou ao Codex).",
+        "Assistente: Início e chat flutuante ou lateral usam o mesmo orquestrador e as mesmas especializações; perfil local (como chamar, papel) e conhecimento por agente em conhecimento.db, com aprendizados que nascem como rascunho e só valem depois de aprovados.",
+        "MCP: prompts de especialização e a ferramenta propor_aprendizado, que cria apenas rascunho; o contexto passa a levar o perfil e o conhecimento aprovado sob a mesma permissão de compartilhamento dos contextos.",
+        "Métricas, Histórico e Logs com filtros, gráficos por operação e estado, exportação JSON/CSV pelo diálogo nativo e impressão."
+      ],
+      "improvements": [
+        "Design System (tokens, componentes e modal padrão) aplicado às telas, nos temas claro e escuro, com movimento reduzido e versão em inglês das telas novas.",
+        "Suporte em etapas (descrever, revisar, enviar) e Ajuda com índice agrupado, busca com trecho destacado e trilha de navegação.",
+        "Projetos mostram uma linha por vínculo; Conexões sinalizam a escrita desligada; Contextos abre em modal a partir de Agentes."
+      ],
+      "fixes": [
+        "Operações externas revalidam a conexão e o vínculo antes de reutilizar uma operação confirmada ou reconciliar uma resposta perdida; escopo divergente retorna OPERATION_SCOPE_CHANGED sem reenviar.",
+        "Associações do Qase de vínculos removidos deixam de ser usadas para escolher a automação de um caso no vínculo atual."
+      ],
+      "differential": "Do ticket ao código do teste e à evidência, cada ligação mostrada tem origem registrada; nome parecido não liga nada, e o que o assistente aprende só vale depois da sua aprovação.",
+      "howItWorks": [
+        "Um caso do Qase e um teste do código só ficam juntos por anotação explícita lida no trecho do próprio teste. O código é lido somente na pasta vinculada, sem link simbólico, até 300 KB e com segredos mascarados.",
+        "O chat não grava perguntas nem respostas: fica só o atendimento (agente, modo e fontes). A memória da sessão some quando a janela fecha."
+      ],
+      "security": [
+        "Nenhuma nova permissão para a IA: propor_aprendizado só cria rascunho, não aprova, e conhecimento só é enviado ao contexto externo com a permissão de compartilhamento do projeto. Documentos e conhecimentos são dados, nunca ordens.",
+        "Exportação de telas e evidências apenas pelo diálogo nativo, com tipos fechados e sem caminho vindo da janela; o bloqueio de rede da janela é mantido. Credenciais continuam protegidas pelo Windows e fora do alcance dos agentes."
+      ],
+      "compatibility": [
+        "Dados e contrato qa.project.json da 2.9 são preservados, sem migração. Conversas gravadas até a 2.9 continuam legíveis; desde a 2.10 só os atendimentos são registrados."
+      ],
+      "limitations": [
+        "Instalador sem assinatura de código. Jira, Qase e GitHub foram verificados com serviços simulados e perfil temporário, sem contas reais nem autenticação humana do Windows.",
+        "Defeitos do Qase são somente leitura. Execuções não têm armazenamento para anexo manual nem comentário, e não há dependência entre rotinas.",
+        "Agentes personalizados são prévias locais da janela: não criam especialização, conexão nem processo no núcleo. Os retratos dos agentes são imagens com movimento CSS, sem rosto 3D.",
+        "O Painel de atividades consulta até 1000 operações, 200 execuções e 40 atendimentos por agente; início sem término não comprova processo ativo."
+      ],
+      "migration": "A instalação preserva os dados existentes; conhecimento.db e as preferências novas são criados no primeiro uso.",
+      "afterUpdate": [
+        "Em Agentes, revise o Cérebro de cada especialização e aprove ou descarte os aprendizados em rascunho.",
+        "Para ligar casos do Qase ao código, anote o identificador do caso no próprio teste (por exemplo qase(31, …))."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.9.0",
       "status": "publicada",
       "date": "2026-10-11",

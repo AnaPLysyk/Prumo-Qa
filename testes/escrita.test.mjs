@@ -60,6 +60,16 @@ test('Jira: criar bug relacionado ao ticket de origem, idempotência, resposta p
   const hist = listarOperacoes(e.id, 50, b); assert.ok(hist.length >= 5); assert.doesNotMatch(JSON.stringify(hist), /SEGREDO1234567890abcdef|token=/); assert.ok(hist.every((h) => h.chave.length === 64));
 });
 
+test('idempotência recusa outro vínculo/conexão e livro legado sem escopo, sem reenviar', async t => {
+  const {mundo,e,rodar,b}=await montar(t);const p={titulo:'Suite com escopo'};const reg=await rodar('qase.criar_suite',p);assert.equal(reg.estado,'CONFIRMADA');const antes=escritas(mundo).length;
+  const original=mundo.executor.comContexto.bind(mundo.executor);
+  mundo.executor.comContexto=(id,s,fn)=>original(id,s,(ctx,rec,info)=>fn(ctx,rec,{...info,vinculoId:'00000000-0000-4000-8000-000000000009'}));
+  await assert.rejects(rodar('qase.criar_suite',p),/OPERATION_SCOPE_CHANGED/);assert.equal(escritas(mundo).length,antes);
+  mundo.executor.comContexto=(id,s,fn)=>original(id,s,(ctx,rec,info)=>fn(ctx,rec,{...info,conexaoId:'00000000-0000-4000-8000-000000000009'}));
+  await assert.rejects(rodar('qase.criar_suite',p),/OPERATION_SCOPE_CHANGED/);assert.equal(escritas(mundo).length,antes);
+  mundo.executor.comContexto=original;const arquivo=path.join(b,'plataforma','operacoes-externas.json');const livro=JSON.parse(fs.readFileSync(arquivo,'utf8'));delete livro.itens[0].vinculoId;delete livro.itens[0].conexaoId;fs.writeFileSync(arquivo,JSON.stringify(livro));
+  await assert.rejects(rodar('qase.criar_suite',p),/OPERATION_SCOPE_CHANGED/);assert.equal(escritas(mundo).length,antes);assert.equal(listarOperacoes(e.id,10,b)[0].estado,'CONFIRMADA');
+});
 test('Jira: anexar só de pastas autorizadas, sem duplicar; editar, mudar status e vincular conferem o projeto e o resultado', async (t) => {
   const { mundo, e, rodar, b } = await montar(t);
   const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo evid ')); t.after(() => fs.rmSync(raiz, { recursive: true, force: true })); fs.writeFileSync(path.join(raiz, 'log.txt'), 'saida\nPASSWORD=hunter2hunter2hunter2\n'); fs.writeFileSync(path.join(raiz, 'tela.png'), Buffer.from([137, 80, 78, 71, 1, 2, 3]));

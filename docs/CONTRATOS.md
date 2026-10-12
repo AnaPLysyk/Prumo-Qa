@@ -4,13 +4,14 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (99 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
-- **MCP** (7 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
+- **IPC** (118 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
 
 | Operação | Argumentos | Efeito |
 |---|---|---|
+| `prumo:interface:exportar` | `texto`, `tipo` | Grava somente JSON ou CSV no arquivo escolhido; sem rede. |
 | `prumo:espacos:listar` | — | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
 | `prumo:espacos:criar` | `descricao`, `nome` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
 | `prumo:espacos:obter` | `id` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
@@ -51,8 +52,26 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:runs:revogar` | `id` | Grava autorizacoes.json. |
 | `prumo:vinculos:mapa` | `espacoId` | Consulta local; não prova cobertura. |
 | `prumo:testes:catalogo` | `espacoId` | Leitura estática da pasta vinculada; nada é executado nem alterado. |
+| `prumo:testes:arquivo` | `arquivo`, `espacoId` | Somente leitura dentro da pasta vinculada; recusa caminho fora dela, link simbólico, arquivo que não é de teste ou maior que 300 KB. |
 | `prumo:assistente:perguntar` | `espacoId`, `pergunta` | Consulta local; nada é gravado nem enviado. |
 | `prumo:assistente:situacao` | `espacoId` | Consulta local. |
+| `prumo:assistente:conversar` | `agente`, `contexto`, `espacoId`, `historico`, `pergunta`, `primeira`, `provedor` | Não grava a conversa: registra só o atendimento (agente, modo e fontes) em conhecimento.db. A memória da sessão (até 6 turnos) e o contexto do teste aberto vêm da janela. Pedidos como "me chama de…" e "lembra que…" gravam o perfil ou um rascunho de conhecimento. Com provedor externo autorizado, executa o CLI local sem shell, com tempo limite; linhas APRENDIZADO da IA viram rascunho. |
+| `prumo:assistente:agentes` | `espacoId` | Consulta local. |
+| `prumo:conversas:listar` | `agente`, `espacoId` | Consulta local. |
+| `prumo:conversas:apagar` | `espacoId` | Remove conversas/<projeto>.jsonl após confirmação nativa. |
+| `prumo:assistente:abertura` | `espacoId` | Consulta local. |
+| `prumo:assistente:avaliar` | `agenteCorreto`, `avaliacao`, `id`, `pergunta` | Grava a avaliação e o vocabulário em conhecimento.db; a pergunta não é gravada. |
+| `prumo:conhecimento:estado` | `espacoId` | Consulta local (cria o banco e o conhecimento inicial se ainda não existirem). |
+| `prumo:conhecimento:listar` | `agente`, `busca`, `espacoId`, `estados`, `somenteDoAgente` | Consulta local. |
+| `prumo:conhecimento:criar` | `agente`, `espacoId`, `texto`, `tipo`, `titulo` | Grava em conhecimento.db com segredos mascarados e sem duplicar. |
+| `prumo:conhecimento:decidir` | `estado`, `id` | Grava o estado e a data da decisão. |
+| `prumo:conhecimento:apagar` | `id` | Remove a linha de conhecimento.db após confirmação nativa. |
+| `prumo:conhecimento:vocabulario` | `agente` | Consulta local. |
+| `prumo:conhecimento:esquecer` | `agente`, `termo` | Remove o termo do vocabulário. |
+| `prumo:conhecimento:mostrar` | — | Abre o Explorer com o arquivo selecionado; nada é enviado. |
+| `prumo:perfil:obter` | — | Consulta local. |
+| `prumo:perfil:salvar` | `comoChamar`, `papel` | Grava a única linha da tabela perfil. |
+| `prumo:ia:delegacao` | `provedor`, `valor` | Grava preferencias.json. Autorizar exige confirmação nativa; revogar não. |
 | `prumo:agentes:estado` | `espacoId` | Consulta local. |
 | `prumo:agentes:salvar` | `espacoId`, `especializacoes`, `politicas` | Grava agentes.json. O bloqueio vale no servidor MCP a cada chamada. |
 | `prumo:agenda:listar` | `espacoId` | Consulta local. |
@@ -103,7 +122,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:contextos:excluir` | `id`, `root` | Apaga o arquivo do contexto e o seu histórico; mantém só um registro mínimo (id, data e hash) de que existiu. Nunca toca no projeto. |
 | `prumo:contextos:mcp` | `habilitar`, `root` | Quando habilitado, contexto_projeto e revisar_cobertura passam a ler os contextos deste projeto; o texto pode ser processado pelo provedor da IA conectada. |
 | `prumo:preferencias:obter` | — | Consulta local; não altera o projeto. |
-| `prumo:preferencias:salvar` | `idioma`, `iniciarComWindows`, `notificarAgenda`, `silenciar`, `som`, `tema`, `verificarAoIniciar` | Grava preferencias.json. Iniciar com o Windows só registra o item de inicialização do usuário se a pessoa ligar a opção; não cria serviço do Windows, tarefa agendada nem consulta de atualização em segundo plano. |
+| `prumo:preferencias:salvar` | `ia`, `idioma`, `iniciarComWindows`, `notificarAgenda`, `silenciar`, `som`, `tema`, `verificarAoIniciar` | Grava preferencias.json. Iniciar com o Windows só registra o item de inicialização do usuário se a pessoa ligar a opção; não cria serviço do Windows, tarefa agendada nem consulta de atualização em segundo plano. |
 | `prumo:preferencias:visualizada` | `versao` | Grava preferencias.json. |
 | `prumo:suporte:preparar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Sem rede e sem gravação: só calcula o relato. |
 | `prumo:suporte:abrir` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Abre o navegador no formulário; nada é publicado até a pessoa enviar lá. Issues em repositório público são públicas. |
@@ -122,8 +141,24 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `listar_politicas` | — | Somente leitura. |
 | `propor_caso` | `automacao`, `descricao`, `passos`, `posCondicoes`, `preCondicoes`, `prioridade`, `requisito`, `risco`, `severidade`, `suiteId`, `tags`, `ticket`, `tipo`, `titulo` | Grava propostas.json. Não envia nada ao Qase; duplicata e excesso por hora são recusados. |
 | `propor_bug` | `descricao`, `origem`, `resumo`, `risco`, `rotulos` | Grava propostas.json. Não cria ticket no Jira. |
+| `propor_aprendizado` | `agente`, `texto`, `tipo`, `titulo` | Grava RASCUNHO em conhecimento.db; não aprova nem publica. |
 
 ## Detalhes
+
+### `prumo:interface:exportar`
+
+- **Tipo:** IPC
+- **Finalidade:** Exportar uma prévia de agente, métricas ou evidências consultadas, sem executar o conteúdo.
+- **Origem:** Interface > Agentes, Métricas ou Execuções > Exportar
+- **Destino:** main.ts > diálogo nativo de salvar arquivo
+- **Entrada:** Tipo fechado e texto limitado a 2 MiB
+- **Saída:** exported, path
+- **Permissões:** Destino escolhido pela pessoa no diálogo nativo.
+- **Efeito:** Grava somente JSON ou CSV no arquivo escolhido; sem rede.
+- **Arquivos consultados:** Arquivo escolhido no diálogo; nunca caminho recebido do renderer
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, EXPORT_FORMAT_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Extensões fixas JSON/CSV; Não exposto ao MCP; Conteúdo nunca executado
+- **Registro:** Diagnóstico IPC somente de metadados
 
 ### `prumo:espacos:listar`
 
@@ -725,6 +760,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Livro-razão local de operações externas e histórico do projeto
 
+### `prumo:testes:arquivo`
+
+- **Tipo:** IPC
+- **Finalidade:** Ler o conteúdo de um arquivo de teste listado pelo catálogo, para a visão de código.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Projeto e caminho relativo do arquivo de teste
+- **Saída:** Caminho, número de linhas e conteúdo com segredos mascarados
+- **Permissões:** Nenhuma
+- **Efeito:** Somente leitura dentro da pasta vinculada; recusa caminho fora dela, link simbólico, arquivo que não é de teste ou maior que 300 KB.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
 ### `prumo:assistente:perguntar`
 
 - **Tipo:** IPC
@@ -750,6 +800,261 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Até cinco linhas de situação
 - **Permissões:** Nenhuma
 - **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:assistente:conversar`
+
+- **Tipo:** IPC
+- **Finalidade:** Rotear a pergunta do chat para um agente local e responder com dados deste computador; opcionalmente delegar ao Claude Code/Codex já autorizado.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Projeto, pergunta, agente opcional e provedor
+- **Saída:** Agente, linhas, fontes, modo (LOCAL/CLAUDE/CODEX), estilo, rota, próximos passos, ações (aprovar/descartar aprendizado), pendência de perfil e atendimentoId
+- **Permissões:** Delegação externa exige autorização prévia com confirmação nativa
+- **Efeito:** Não grava a conversa: registra só o atendimento (agente, modo e fontes) em conhecimento.db. A memória da sessão (até 6 turnos) e o contexto do teste aberto vêm da janela. Pedidos como "me chama de…" e "lembra que…" gravam o perfil ou um rascunho de conhecimento. Com provedor externo autorizado, executa o CLI local sem shell, com tempo limite; linhas APRENDIZADO da IA viram rascunho.
+- **Arquivos consultados:** conhecimento.db; skills/<especialização>/SKILL.md
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:assistente:agentes`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar os agentes do chat, suas especializações, capacidades e a disponibilidade de Claude Code/Codex.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Projeto
+- **Saída:** Agentes e provedores (encontrado, autorizado)
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:conversas:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar os atendimentos de um agente (sem texto, desde a 2.10) e as conversas gravadas até a 2.9, para o Cérebro e o Painel de atividades.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Projeto e agente
+- **Saída:** Até 40 itens (data, modo, fontes; pergunta e resposta só nos registros antigos)
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:conversas:apagar`
+
+- **Tipo:** IPC
+- **Finalidade:** Apagar as conversas gravadas deste projeto neste computador.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Projeto
+- **Saída:** apagado
+- **Permissões:** Confirmação nativa da pessoa
+- **Efeito:** Remove conversas/<projeto>.jsonl após confirmação nativa.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:assistente:abertura`
+
+- **Tipo:** IPC
+- **Finalidade:** Abrir a conversa: cumprimentar pelo nome, resumir a situação do projeto e, se ainda não souber, perguntar como chamar a pessoa e o papel dela.
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Projeto
+- **Saída:** Linhas, pendência (nome/papel), próximos passos e nome da pessoa
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:assistente:avaliar`
+
+- **Tipo:** IPC
+- **Finalidade:** Avaliar um atendimento (útil ou não). Ao indicar o agente certo, ensina a ele só os termos da pergunta.
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Id do atendimento, avaliação, agente certo e pergunta (opcionais)
+- **Saída:** avaliado e termos aprendidos
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava a avaliação e o vocabulário em conhecimento.db; a pergunta não é gravada.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:conhecimento:estado`
+
+- **Tipo:** IPC
+- **Finalidade:** Resumo do banco de conhecimento: arquivo, tabelas, vistas por agente, contagens e perfil.
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Projeto
+- **Saída:** Arquivo, tamanho, tabelas, vistas, contagens por agente e perfil
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local (cria o banco e o conhecimento inicial se ainda não existirem).
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:conhecimento:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar conhecimentos gerais e do projeto, por agente e estado.
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Projeto, agente, estados, busca
+- **Saída:** Conhecimentos (até 200)
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:conhecimento:criar`
+
+- **Tipo:** IPC
+- **Finalidade:** Ensinar um conhecimento a um agente (ou a todos), geral ou do projeto.
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Projeto ou geral, agente, tipo, título e texto
+- **Saída:** Conhecimento APROVADO (ou o igual já existente)
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava em conhecimento.db com segredos mascarados e sem duplicar.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:conhecimento:decidir`
+
+- **Tipo:** IPC
+- **Finalidade:** Aprovar ou descartar um conhecimento (rascunho vindo do chat ou de IA, ou um item existente).
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Identificador e estado
+- **Saída:** Conhecimento atualizado
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava o estado e a data da decisão.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:conhecimento:apagar`
+
+- **Tipo:** IPC
+- **Finalidade:** Apagar de vez um conhecimento ensinado (o inicial do Prumo só pode ser descartado).
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Identificador do conhecimento
+- **Saída:** Confirmação de exclusão
+- **Permissões:** Confirmação nativa da pessoa
+- **Efeito:** Remove a linha de conhecimento.db após confirmação nativa.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:conhecimento:vocabulario`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar os termos que um agente aprendeu com as correções da pessoa.
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Agente
+- **Saída:** Termos, peso e data
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:conhecimento:esquecer`
+
+- **Tipo:** IPC
+- **Finalidade:** Fazer um agente esquecer um termo aprendido.
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Agente e termo
+- **Saída:** apagado
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Remove o termo do vocabulário.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:conhecimento:mostrar`
+
+- **Tipo:** IPC
+- **Finalidade:** Mostrar o arquivo conhecimento.db no Explorer (para abrir no Beekeeper Studio ou outro gerenciador SQLite).
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Nenhuma
+- **Saída:** Caminho do arquivo
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Abre o Explorer com o arquivo selecionado; nada é enviado.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:perfil:obter`
+
+- **Tipo:** IPC
+- **Finalidade:** Ler como a pessoa quer ser chamada e o papel dela.
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** Nenhuma
+- **Saída:** comoChamar, papel e data
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:perfil:salvar`
+
+- **Tipo:** IPC
+- **Finalidade:** Salvar como a pessoa quer ser chamada e o papel dela (QA, dev, PO, analista ou outro).
+- **Origem:** Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes
+- **Destino:** main.ts > orquestrador.ts / conhecimento.ts
+- **Entrada:** comoChamar e/ou papel (null limpa)
+- **Saída:** Perfil
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava a única linha da tabela perfil.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\conhecimento.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:ia:delegacao`
+
+- **Tipo:** IPC
+- **Finalidade:** Autorizar ou revogar a delegação do chat ao Claude Code ou Codex.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts
+- **Entrada:** Provedor e valor
+- **Saída:** Preferências atualizadas
+- **Permissões:** Confirmação nativa para autorizar
+- **Efeito:** Grava preferencias.json. Autorizar exige confirmação nativa; revogar não.
 - **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (rotasEscrita.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
@@ -1714,3 +2019,18 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Erros possíveis:** POLICY_BLOCKED, NO_WORKSPACE, DUPLICATE_PROPOSAL, PROPOSAL_RATE_LIMIT
 - **Proteções:** Projeto fixado na configuração do servidor, nunca pela ferramenta; Leitura limitada à raiz autorizada; Registro de início e término; Só rascunho; a pessoa abre o bug
 - **Registro:** Histórico de atividades (origem MCP)
+
+### `propor_aprendizado`
+
+- **Tipo:** MCP
+- **Finalidade:** Sugerir conhecimento para os agentes deste projeto como rascunho local.
+- **Origem:** Agente de IA por MCP (stdio)
+- **Destino:** mcp.ts > conhecimento.registrarConhecimento
+- **Entrada:** Tipo (fato, glossario, preferencia, procedimento ou risco), título de 2 a 120 caracteres, texto de 2 a 2000 caracteres e agente opcional
+- **Saída:** Identificador, estado, duplicado e aviso de aprovação pendente
+- **Permissões:** Projeto Prumo vinculado à raiz do servidor MCP
+- **Efeito:** Grava RASCUNHO em conhecimento.db; não aprova nem publica.
+- **Arquivos consultados:** conhecimento.db
+- **Erros possíveis:** NO_WORKSPACE, KNOWLEDGE_AGENT_UNKNOWN, KNOWLEDGE_RATE_LIMIT, KNOWLEDGE_LIMIT
+- **Proteções:** Projeto fixado na configuração do servidor, nunca pela ferramenta; Leitura limitada à raiz autorizada; Registro de início e término; Isolamento por projeto; Limite de 20 sugestões de IA por hora; Só a pessoa aprova
+- **Registro:** Banco de conhecimento local e histórico de atividades MCP

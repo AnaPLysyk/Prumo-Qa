@@ -44,3 +44,5 @@ Diagnostique falha distinguindo bug provável, erro de automação, pré-condiç
 Exemplo fictício: “Só Editor salva”. Cenários relevantes verificam Editor com persistência e Leitor recusado sem mutação. Cinco cliques no mesmo botão não acrescentam cobertura se condição, risco e oráculo são iguais. Essa regra não pertence automaticamente ao G3.
 
 Devolva à IA desenvolvedora requisito/fonte, achados, riscos, seleção justificada, redundâncias potenciais, bloqueios e evidências reais. Skill orienta; não garante invocação automática em todos os clientes e não substitui as permissões do núcleo.
+
+Para revisar um plano ou estratégia de teste antes de implementar, conduza a [entrevista de estratégia](references/estrategia.md).

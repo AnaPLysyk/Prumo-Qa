@@ -1,4 +1,4 @@
-import test from 'node:test';
+﻿import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,7 +25,7 @@ test('segurança da janela: isolamento, sem Node na página, ponte mínima e sem
   assert.deepEqual(prefs, { contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true });
   const visivel = await page.evaluate(() => ({ require: typeof require, process: typeof process, ipc: typeof window.ipcRenderer, chaves: Object.keys(window.prumo).sort(), congelado: Object.isFrozen(window.prumo) }));
   assert.equal(visivel.require, 'undefined'); assert.equal(visivel.process, 'undefined'); assert.equal(visivel.ipc, 'undefined'); assert.ok(visivel.congelado);
-  assert.deepEqual(visivel.chaves, ["abrirRelease","abrirSite","adicionarDemo","agendaAutorizar","agendaEstado","agendaExcluir","agendaExecutar","agendaListar","agendaPermissoes","agendaPolitica","agendaRevogar","agendaRevogarPolitica","agendaSalvar","agentesEstado","agentesSalvar","ajuda","assistentePerguntar","assistenteSituacao","conectar","conexoes","contextosAprovar","contextosConflito","contextosDesatualizar","contextosExcluir","contextosListar","contextosMcp","contextosObter","contextosSalvar","desvincular","diagnostico","escolherProjeto","escritaEstado","escritaHabilitar","espacoAssociar","espacoAutomacoes","espacoCriar","espacoEditar","espacoObter","espacoPasta","espacos","evidencias","excluirDados","execucoes","exportarLogs","historico","info","integracoes","jiraPrevia","jiraPublicar","logs","marcarVisualizada","metricasExecucoes","operacaoExecutar","operacaoPrevia","operacoes","preferencias","projetos","propostaCriar","propostaDescartar","propostaEditar","propostaPublicar","propostaRevisar","propostas","resumoDados","runBugs","runCriar","runExecutar","runPolitica","runPreparar","runPublicar","runResultado","runRevogarPolitica","runs","salvarPreferencias","servicoAceite","servicoAdicionar","servicoConferir","servicoConsultar","servicoDesvincular","servicoImportar","servicoRecursos","servicoRemover","servicoValidar","servicoVincular","servicos","suporteAbrir","suporteChamado","suporteConsultar","suporteExportar","suportePreparar","testarIntegracao","testesCatalogo","verificarAtualizacao","versoes","vinculosMapa","visao","workerEstado","workerEventos","workerPausa"]);
+  assert.deepEqual(visivel.chaves, ["abrirRelease","abrirSite","adicionarDemo","agendaAutorizar","agendaEstado","agendaExcluir","agendaExecutar","agendaListar","agendaPermissoes","agendaPolitica","agendaRevogar","agendaRevogarPolitica","agendaSalvar","agentesEstado","agentesSalvar","ajuda","assistenteAbertura","assistenteAgentes","assistenteAvaliar","assistenteConversar","assistentePerguntar","assistenteSituacao","conectar","conexoes","conhecimentoApagar","conhecimentoCriar","conhecimentoDecidir","conhecimentoEsquecer","conhecimentoEstado","conhecimentoListar","conhecimentoMostrar","conhecimentoVocabulario","contextosAprovar","contextosConflito","contextosDesatualizar","contextosExcluir","contextosListar","contextosMcp","contextosObter","contextosSalvar","conversasApagar","conversasListar","desvincular","diagnostico","escolherProjeto","escritaEstado","escritaHabilitar","espacoAssociar","espacoAutomacoes","espacoCriar","espacoEditar","espacoObter","espacoPasta","espacos","evidencias","excluirDados","execucoes","exportarLogs","exportarTela","historico","iaDelegacao","info","integracoes","jiraPrevia","jiraPublicar","logs","marcarVisualizada","metricasExecucoes","operacaoExecutar","operacaoPrevia","operacoes","perfilObter","perfilSalvar","preferencias","projetos","propostaCriar","propostaDescartar","propostaEditar","propostaPublicar","propostaRevisar","propostas","resumoDados","runBugs","runCriar","runExecutar","runPolitica","runPreparar","runPublicar","runResultado","runRevogarPolitica","runs","salvarPreferencias","servicoAceite","servicoAdicionar","servicoConferir","servicoConsultar","servicoDesvincular","servicoImportar","servicoRecursos","servicoRemover","servicoValidar","servicoVincular","servicos","suporteAbrir","suporteChamado","suporteConsultar","suporteExportar","suportePreparar","testarIntegracao","testesArquivo","testesCatalogo","verificarAtualizacao","versoes","vinculosMapa","visao","workerEstado","workerEventos","workerPausa"]);
   // Rede: CSP e filtro de requisições impedem qualquer saída; a navegação para fora também é bloqueada.
   assert.equal(await page.evaluate(() => fetch('https://example.com/').then(() => 'saiu', () => 'bloqueado')), 'bloqueado');
   await page.evaluate(() => { location.href = 'https://example.com/'; }); await page.waitForTimeout(500);
@@ -88,20 +88,20 @@ test('fluxo ponta a ponta: MCP real aparece em logs ao vivo, métricas e histór
   const respostas = await mcp(f.root, dados, [['contexto_projeto', {}], ['revisar_cobertura', plano], ['executar_validacao', { capability: 'unit' }]]);
   assert.ok(respostas.every((r) => !r.isError));
   assert.equal(JSON.parse(respostas[2].content[0].text).status, 'BLOCKED');
-  await primeira.page.waitForFunction(() => document.querySelectorAll('#conteudo tbody tr').length >= 6, null, { timeout: 8000 });
-  const logs = await primeira.page.textContent('#conteudo tbody');
+  await primeira.page.waitForFunction(() => document.querySelectorAll('#v36-terminal .v36-log-line').length >= 6, null, { timeout: 8000 });
+  const logs = await primeira.page.textContent('#v36-terminal');
   assert.match(logs, /contexto_projeto/); assert.match(logs, /revisar_cobertura/); assert.match(logs, /BLOCKED/);
-  await primeira.page.selectOption('#f-state', 'BLOCKED'); await primeira.page.waitForTimeout(300);
-  assert.equal(await primeira.page.locator('#conteudo tbody tr').count(), 1);
+  await primeira.page.fill('#v36-logs-busca', 'BLOCKED'); await primeira.page.waitForTimeout(300);
+  assert.equal(await primeira.page.locator('#v36-terminal .v36-log-line').count(), 1);
   await ir(primeira.page, 'metricas');
   const m = await primeira.page.textContent('.grade');
   assert.match(m, /3interações registradas/); assert.match(m, /3chamadas via MCP/); assert.match(m, /1revisões de cobertura/); assert.match(m, /1BLOCKED/); assert.match(m, /0PASS/);
   await ir(primeira.page, 'historico');
-  assert.equal(await primeira.page.locator('#conteudo tbody tr').count(), 3);
+  assert.equal(await primeira.page.locator('#conteudo [data-operation]').count(), 3);
   assert.match(await primeira.page.textContent('#conteudo'), /não observa se a IA as aplicou/);
   // A tentativa bloqueada gerou evidência real BLOCKED (não executada), sem qualquer PASS.
   await ir(primeira.page, 'evidencias');
-  const ev = await primeira.page.textContent('#conteudo');
+  const ev = await primeira.page.textContent('#qualidade-dialog');
   assert.match(ev, /unit\s*BLOCKED/); assert.match(ev, /HUMAN_APPROVAL_REQUIRED/); assert.match(ev, /não executado/); assert.doesNotMatch(ev, /PASS|null/);
   await primeira.fechar();
 

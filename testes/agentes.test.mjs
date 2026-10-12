@@ -35,9 +35,9 @@ test('especializações por projeto: capacidade só existe se houver especializa
   assert.equal(configuracaoDoEspaco(e.id).padrao, false);
 });
 
-test('MCP real: sete ferramentas; propostas só em rascunho; política bloqueia no backend, inclusive executar; sem projeto Prumo não há proposta', async (t) => {
+test('MCP real: oito ferramentas; propostas só em rascunho; política bloqueia no backend, inclusive executar; sem projeto Prumo não há proposta', async (t) => {
   const e = await criarEspaco({ nome: 'AG-MCP' }); const c = await cliente(t, e.raizContextos);
-  const nomes = (await c.listTools()).tools.map((x) => x.name).sort(); assert.deepEqual(nomes, ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
+  const nomes = (await c.listTools()).tools.map((x) => x.name).sort(); assert.deepEqual(nomes, ['consultar_evidencias', 'contexto_projeto', 'executar_validacao', 'listar_politicas', 'propor_aprendizado', 'propor_bug', 'propor_caso', 'revisar_cobertura']);
   const pol = await chamar(c, 'listar_politicas'); assert.equal(pol.erro, false); assert.equal(pol.dados.projetoPrumo, 'AG-MCP'); assert.equal(pol.dados.capacidades.find((x) => x.id === 'criar_casos_qase').estado, 'SOMENTE_PESSOA'); assert.match(pol.dados.aviso, /só a pessoa/);
   const p1 = await chamar(c, 'propor_caso', { ...caso('Editor persiste valor após recarregar'), requisito: 'RQ-01', risco: 'alto' }); assert.equal(p1.erro, false); assert.equal(p1.dados.estado, 'RASCUNHO'); assert.match(p1.dados.aviso, /Nada foi enviado ao Jira, Qase ou GitHub/);
   const lista = listarPropostas(e.id); assert.equal(lista.length, 1); assert.equal(lista[0].origem, 'IA'); assert.equal(lista[0].cliente, 'claude-teste'); assert.equal(lista[0].estado, 'RASCUNHO');

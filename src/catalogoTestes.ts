@@ -10,7 +10,7 @@ import path from 'node:path';
 export type TipoTeste = 'unitario' | 'integracao' | 'funcional' | 'regressao' | 'smoke' | 'desempenho' | 'acessibilidade' | 'indefinido';
 export const tiposDeTeste: readonly TipoTeste[] = ['unitario', 'integracao', 'funcional', 'regressao', 'smoke', 'desempenho', 'acessibilidade', 'indefinido'];
 export type Confianca = 'ALTA' | 'MEDIA' | 'BAIXA';
-export type CasoTeste = { titulo: string; tipo: TipoTeste; confianca: Confianca; motivo: string; linha: number; passos: string[]; tags: string[] };
+export type CasoTeste = { titulo: string; tipo: TipoTeste; confianca: Confianca; motivo: string; linha: number; passos: string[]; tags: string[]; fim?: number; qase?: string[] };
 export type FeatureTestes = { nome: string; arquivo: string; tipos: TipoTeste[]; testes: CasoTeste[] };
 export type Catalogo = { raiz: string; arquivos: number; testes: number; porTipo: Record<TipoTeste, number>; features: FeatureTestes[]; truncado: boolean; aviso: string };
 
@@ -60,7 +60,7 @@ function analisarJs(rel: string, texto: string): { feature: string | null; casos
   const arquivoTags = tagsDe(linhas.slice(0, 12).filter(l => /^\s*(\/\/|\/\*|\*)/.test(l) || /\bdescribe\b/.test(l)).join('\n'));
   linhas.forEach((l, i) => {
     const d = /\b(?:test\.)?describe(?:\.(?:serial|parallel|only|skip))?\s*\(\s*(['"`])((?:\\.|(?!\1).)+)\1/.exec(l); if (d && !feature) feature = d[2]!.slice(0, 120);
-    const t = /\b(?:it|test)(?:\.(?:only|skip|fixme))?\s*\(\s*(['"`])((?:\\.|(?!\1).)+)\1/.exec(l);
+    const t = /\b(?:it|test)(?:\.(?:only|skip|fixme))?\s*\(\s*(?:qase(?:\.id)?\(\s*\[?[\d\s,'"]+\]?\s*,\s*)?(['"`])((?:\\.|(?!\1).)+)\1/.exec(l);
     if (t && casos.length < limites.testesPorArquivo) { const titulo = t[2]!.slice(0, 200); const tags = [...new Set([...tagsDe(titulo), ...arquivoTags])]; const c = classificar(rel, texto, tags); atual = { titulo, ...c, linha: i + 1, passos: [], tags }; casos.push(atual); }
     for (const s of l.matchAll(/\btest\.step\s*\(\s*(['"`])((?:\\.|(?!\1).)+)\1/g)) if (atual && atual.passos.length < 30) atual.passos.push(s[2]!.slice(0, 160));
   });
@@ -85,6 +85,48 @@ function analisarPython(rel: string, texto: string): { feature: string | null; c
 
 const nomeDeFeature = (rel: string) => { const p = rel.replaceAll('\\', '/').split('/'); const arq = p.at(-1)!.replace(/\.(spec|test)\.[cm]?[jt]sx?$|\.feature$|\.py$/i, '').replace(/^test_|_test$/g, ''); const pai = p.length > 1 ? p.at(-2)! : ''; return (['tests', 'test', 'e2e', 'spec', 'specs', '__tests__'].includes(pai.toLowerCase()) || !pai ? arq : pai + ' / ' + arq).replace(/[-_.]+/g, ' ').slice(0, 120); };
 
+/**
+ * Ligação explícita código → caso do Qase, como gravada pelos reporters do Qase e por comentários: qase(31, ...),
+ * qase.id(31), @qase(31), @qase-31 e "Qase: SFQ-31". Só vale o que está escrito no trecho do próprio teste (do título
+ * até o próximo teste; em Gherkin inclui a linha de tags acima do cenário). Nenhuma ligação é deduzida por nome.
+ */
+const QASE_PADROES: RegExp[] = [
+  /\bqase(?:\.id)?\(\s*(?<ids>\[?[\s'"\d,]+\]?)/gi,
+  /@qase[-_(]\s*['"]?(?<ids>\d{1,9})/gi,
+  /\bqase(?:[ _-]?id)?\s*[:=#]\s*(?:(?<projeto>[A-Z][A-Z0-9]*)-)?(?<ids>\d{1,9})/gi
+];
+export function idsQase(trecho: string): string[] {
+  const ids = new Set<string>();
+  for (const re of QASE_PADROES) for (const m of trecho.matchAll(re)) {
+    const projeto = m.groups?.projeto; const lista = m.groups?.ids ?? '';
+    for (const bruto of lista.split(/[\s,]+/)) { const n = bruto.replace(/['"[\]]/g, ''); if (/^\d{1,9}$/.test(n)) ids.add(projeto ? projeto + '-' + n : n); }
+  }
+  return [...ids].slice(0, 20);
+}
+function anotarQase(texto: string, casos: CasoTeste[]) {
+  const linhas = texto.split(/\r?\n/); const ordem = [...casos].sort((a, b) => a.linha - b.linha);
+  ordem.forEach((c, i) => {
+    const fim = i + 1 < ordem.length ? ordem[i + 1]!.linha - 1 : linhas.length; c.fim = Math.max(c.linha, fim);
+    // A closing line of the preceding test may contain qase.id(). Never inherit it.
+    let inicio = c.linha - 1;
+    while (inicio > 0 && /^\s*(?:@|\/\/|#|\/\*|\*)/.test(linhas[inicio - 1]!)) inicio--;
+    let final = c.fim;
+    if (i + 1 < ordem.length) while (final > c.linha && /^\s*(?:@|\/\/|#|\/\*|\*)/.test(linhas[final - 1]!)) final--;
+    const ids = idsQase(linhas.slice(inicio, final).join('\n')); if (ids.length) c.qase = ids;
+    c.tags = c.tags.filter((t) => !/^qase/.test(t));
+  });
+}
+
+/** Conteúdo de um arquivo de teste listado pelo catálogo (somente leitura, dentro da pasta vinculada, até 300 KB). */
+export function arquivoDeTeste(raiz: string, relativo: string): { arquivo: string; linhas: number; conteudo: string } {
+  const rel = String(relativo).replaceAll('\\', '/');
+  if (!rel || rel.length > 400 || rel.startsWith('/') || /^[a-z]:/i.test(rel) || rel.split('/').some((x) => x === '..' || x === '.' || IGNORAR.has(x)) || /[\x00-\x1f]/.test(rel) || !ehTeste(rel.split('/').at(-1)!)) throw new Error('TEST_FILE_INVALID');
+  const base = fs.realpathSync(raiz); const alvo = fs.realpathSync(path.join(base, rel));
+  if (alvo !== path.join(base, rel) && !alvo.startsWith(base + path.sep)) throw new Error('TEST_FILE_INVALID');
+  const st = fs.lstatSync(path.join(base, rel)); if (st.isSymbolicLink() || !st.isFile() || st.size > limites.bytes) throw new Error('TEST_FILE_INVALID');
+  const conteudo = fs.readFileSync(alvo, 'utf8'); return { arquivo: rel, linhas: conteudo.split(/\r?\n/).length, conteudo };
+}
+
 export function catalogoDeTestes(raiz: string): Catalogo {
   const { arquivos, truncado } = coletar(raiz); const features: FeatureTestes[] = []; const porTipo = Object.fromEntries(tiposDeTeste.map(t => [t, 0])) as Record<TipoTeste, number>;
   for (const abs of arquivos) {
@@ -92,6 +134,7 @@ export function catalogoDeTestes(raiz: string): Catalogo {
     try { const st = fs.statSync(abs); if (st.size > limites.bytes) continue; texto = fs.readFileSync(abs, 'utf8'); } catch { continue; }
     const r = /\.feature$/i.test(rel) ? analisarFeature(rel, texto) : /\.py$/i.test(rel) ? analisarPython(rel, texto) : analisarJs(rel, texto);
     if (!r.casos.length) continue;
+    anotarQase(texto, r.casos);
     for (const c of r.casos) porTipo[c.tipo]++;
     features.push({ nome: r.feature ?? nomeDeFeature(rel), arquivo: rel, tipos: [...new Set(r.casos.map(c => c.tipo))], testes: r.casos });
   }

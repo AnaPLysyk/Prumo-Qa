@@ -22,7 +22,8 @@ export function respostaFixture(host,caminho){
     if(tipo==='project')return {status:true,result:projeto};
     const caso={id:code==='SFQ'?31:41,title:'Caso fictício '+code,automation:0,isManual:true,isToBeAutomated:false,steps:[{position:1,action:'Entrar como Editor fictício',expected_result:'Gravação persistida no ambiente isolado',data:'Fixture'}],external_issues:code==='SFQ'?[{type:'jira',issues:[{id:'SMART-1',link:'https://lab.atlassian.net/browse/SMART-1'}]}]:[]};
     const run={id:71,title:'Run fictício '+code,status:2};
-    const entidades={suite:[{id:1,title:'Suite '+code}],case:[caso],plan:[{id:61,title:'Plano '+code}],run:[run],result:[{hash:'resultado-lab-'+code,run_id:71,case_id:caso.id,status:'passed',is_api_result:false,time_spent_ms:100,end_time:'2026-10-10T12:00:00Z',attachments:[]}]};
+    const defeito={id:code==='SFQ'?91:92,title:'Defeito fictício '+code,actual_result:'Falha observada apenas na fixture',severity:'major',status:'open',updated_at:'2026-10-10T12:00:00Z',runs:[71],results:['resultado-lab-'+code],attachments:[],tags:[]};
+    const entidades={defect:[defeito],suite:[{id:1,title:'Suite '+code}],case:[caso],plan:[{id:61,title:'Plano '+code}],run:[run],result:[{hash:'resultado-lab-'+code,run_id:71,case_id:caso.id,status:'passed',is_api_result:false,time_spent_ms:100,end_time:'2026-10-10T12:00:00Z',attachments:[]}]};
     const itens=entidades[tipo];if(!itens)return undefined;if(id){const item=itens.find(x=>String(x.id)===id);return item?{status:true,result:item}:undefined;}return pagina(itens);
   }
   if(host==='api.github.com'){
@@ -39,17 +40,20 @@ export function respostaFixture(host,caminho){
   }
 }
 export async function servidorFixture(t){
-  const pedidos=[];const comentarios=[];const controle={status:200,corpo:null,espera:0,contentType:'application/json',postStatus:201,perderResposta:false};
+  const pedidos=[];const comentarios=[];const controle={status:200,corpo:null,espera:0,contentType:'application/json',postStatus:201,perderResposta:false,aceitarCriacao:false};const criados=[];
   const server=http.createServer((req,res)=>{
     // 2.8: único POST aceito é o comentário de resultado em um ticket (fixture do Jira); o resto segue somente leitura.
     if(req.method==='POST'){let corpo='';req.on('data',b=>{corpo+=b;});req.on('end',()=>{
       const ok=/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/comment$/.test(req.url??'');pedidos.push({metodo:'POST',caminho:req.url,host:req.headers['x-fixture-host'],corpo});
+      // v40: criação de ticket só quando o teste liga aceitarCriacao (fluxo defeito Qase → ticket Jira).
+      if(controle.aceitarCriacao&&req.url==='/rest/api/3/issue'){const key='SMART-'+(99+criados.length);criados.push({key,corpo:JSON.parse(corpo)});res.writeHead(201,{'content-type':'application/json'});res.end(JSON.stringify({id:String(1099+criados.length),key}));return;}
       if(!ok){res.writeHead(405,{'content-type':'application/json'});res.end('{}');return;}
       if(controle.postStatus!==201){res.writeHead(controle.postStatus,{'content-type':'application/json'});res.end('{}');return;}
       const id=String(700+comentarios.length);comentarios.push({id,body:JSON.parse(corpo).body,ticket:req.url.split('/')[5]});
       if(controle.perderResposta){controle.perderResposta=false;req.socket.destroy();return;}
       res.writeHead(201,{'content-type':'application/json'});res.end(JSON.stringify({id}));});return;}
     pedidos.push({metodo:req.method,caminho:req.url,host:req.headers['x-fixture-host']});
+    if(controle.aceitarCriacao&&/^\/rest\/api\/3\/issue\/createmeta\//.test(String(req.url))){res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({issueTypes:[{id:'10001',name:'Bug',subtask:false},{id:'10002',name:'Story',subtask:false}]}));return;}
     if(req.method==='GET'&&/^\/rest\/api\/3\/issue\/[A-Z][A-Z0-9_]*-\d+\/comment$/.test(String(req.url).split('?')[0])&&!controle.corpo){
       const t=String(req.url).split('/')[5];const todos=[{id:'501',body:'Comentário fictício'},...comentarios.filter(c=>c.ticket===t)];res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({comments:todos,total:todos.length}));return;}
     const enviar=()=>{res.writeHead(controle.status,{'content-type':controle.contentType,...(controle.status===302?{location:'http://127.0.0.1/nao-seguir'}:{})});
@@ -57,7 +61,7 @@ export async function servidorFixture(t){
     if(controle.espera)setTimeout(enviar,controle.espera);else enviar();
   });await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const fechar=()=>new Promise(resolve=>{server.close(resolve);server.closeAllConnections();});if(t)t.after(fechar);
-  return {port:server.address().port,pedidos,comentarios,controle,fechar};
+  return {port:server.address().port,pedidos,comentarios,controle,criados,fechar};
 }
 /** Instrumentação do runner; nunca importada pelo app ou distribuída. */
 export async function instalarTransporteControlado(port){

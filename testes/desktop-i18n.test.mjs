@@ -32,7 +32,7 @@ test('inglês: nenhuma tela traz texto de interface em português (dados do usu�
     for (const aba of abas) {
       await ir(a.page, aba); await a.page.waitForTimeout(250);
       if (aba === 'agenda') { await a.page.click('#rotina-nova'); await a.page.selectOption('#rotina-tipo', 'k6'); await a.page.selectOption('#rotina-freq', 'semanal'); }
-      if (aba === 'execucoes') { const d = a.page.locator('#tabela-exec details summary').first(); if (await d.count()) await d.click(); }
+      if (aba === 'execucoes') { const d = a.page.locator('#tabela-exec td.ds-acao button').first(); if (await d.count()) await d.click(); }
       for (const texto of await visiveis(a.page)) if (PORTUGUES.test(texto)) achados.push(`[${aba}${selecionado ? ' +projeto' : ''}] ${texto.slice(0, 700)}`);
     }
   }

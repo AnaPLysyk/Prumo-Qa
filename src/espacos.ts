@@ -13,7 +13,7 @@ export const identidadeRecurso=z.object({id:z.string().min(1).max(100),chave:z.s
 export type Recurso=z.infer<typeof identidadeRecurso>;
 const vinculoSchema=z.object({id:z.string().uuid(),servico:servicoSchema,conexaoId:z.string().uuid(),recurso:identidadeRecurso,validadoEm:z.string().datetime(),estado:z.enum(['VALIDO','INDISPONIVEL','SEM_PERMISSAO','DESATUALIZADO','SEM_CREDENCIAL']),campoAceite:z.string().regex(/^customfield_\d+$/).optional()}).strict();
 export const dadosEspaco=z.object({nome:z.string().trim().min(1).max(200),descricao:z.string().max(1000).default('')}).strict();
-const referencia=z.object({tipo:z.enum(['jira','qase','contexto','automacao','execucao','evidencia','jira-bug','qase-run','github','github-pr','github-commit']),id:z.string().min(1).max(200),vinculoId:z.string().uuid().optional(),origem:z.string().min(1).max(500)}).strict();
+const referencia=z.object({tipo:z.enum(['jira','qase','contexto','automacao','execucao','evidencia','jira-bug','qase-run','qase-defeito','github','github-pr','github-commit']),id:z.string().min(1).max(200),vinculoId:z.string().uuid().optional(),origem:z.string().min(1).max(500)}).strict();
 export const associacaoSchema=z.object({de:referencia,para:referencia,justificativa:z.string().trim().min(1).max(1000)}).strict();
 const evento=z.object({at:z.string().datetime(),acao:z.enum(['CRIADO','EDITADO','PASTA','VINCULADO','REMOVIDO','VALIDACAO','ASSOCIADO','CONSULTA','ESCRITA']),servico:servicoSchema.optional(),vinculoId:z.string().uuid().optional(),codigo:z.string().regex(/^[A-Z_]+$/).optional()}).strict();
 const espacoSchema=z.object({id:z.string().uuid(),nome:z.string().max(200),descricao:z.string().max(1000),criadoEm:z.string().datetime(),pastaLocal:z.string().max(1000).optional(),raizContextos:z.string().max(1000),vinculos:z.array(vinculoSchema).max(3),relacoes:z.array(associacaoSchema.extend({id:z.string().uuid(),at:z.string().datetime(),estado:z.literal('VINCULADO'),origemRegistro:z.enum(['DECLARADO_PELO_USUARIO','REGISTRADO_PELO_PRUMO'])})).max(500),historico:z.array(evento).max(1000)}).strict();
@@ -51,7 +51,7 @@ export function configurarAceite(id:string,campo:string,base?:string){return atu
 export function registrarEscrita(id:string,servico:Servico,codigo:string,base?:string){return atualizar(id,e=>eventoEspaco(e,'ESCRITA',{servico,codigo}),base);}
 export function registrarConsulta(id:string,servico:Servico,codigo:string,base?:string){return atualizar(id,e=>eventoEspaco(e,'CONSULTA',{servico,codigo}),base);}
 /** Serviço exigido (pelo vínculo do projeto) para cada tipo de referência remota. */
-export const servicoDaReferencia:Partial<Record<z.infer<typeof referencia>['tipo'],Servico>>={jira:'jira','jira-bug':'jira',qase:'qase','qase-run':'qase',github:'github','github-pr':'github','github-commit':'github'};
+export const servicoDaReferencia:Partial<Record<z.infer<typeof referencia>['tipo'],Servico>>={jira:'jira','jira-bug':'jira',qase:'qase','qase-run':'qase','qase-defeito':'qase',github:'github','github-pr':'github','github-commit':'github'};
 /** `registradoPeloPrumo`: vínculo criado por um fluxo do Prumo (ex.: bug aberto a partir de uma falha), nunca deduzido por nome. */
 export function associarEspaco(id:string,dados:z.input<typeof associacaoSchema>,base?:string,registradoPeloPrumo=false){const d=associacaoSchema.parse(dados);return atualizar(id,e=>{
   for(const ref of[d.de,d.para]){const s=servicoDaReferencia[ref.tipo];if(s&&(!ref.vinculoId||!e.vinculos.some(v=>v.id===ref.vinculoId&&v.servico===s)))throw new Error('TRACE_LINK_SCOPE');}

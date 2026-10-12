@@ -68,7 +68,10 @@ test('sem autorização, expirada, revogada, esgotada ou com o comando alterado:
 test('autorização expira e não vale para outro ambiente nem outro projeto', async (t) => {
   const b = base(t); const rel = relogio(); const A = await projetoComEspaco(t, b, 'LAB-A'); const B = await projetoComEspaco(t, b, 'LAB-B');
   criarRotina(rotinaSmoke(A.e), b, rel.agora()); criarRotina(rotinaSmoke(B.e), b, rel.agora());
-  await autorizarExecucao(await carregarProjeto(A.fx.root), A.e.id, 'unit', 'local', { dias: 1, maxUsos: 9 }, b, solicitador());
+  // Criação e consumo usam o mesmo relógio. A data real do host não define
+  // a validade de uma autorização cuja expiração será simulada neste teste.
+  const autorizacao = await autorizarExecucao(await carregarProjeto(A.fx.root), A.e.id, 'unit', 'local', { dias: 1, maxUsos: 9 }, b, solicitador(), rel.agora());
+  assert.equal(Date.parse(autorizacao.validaAte) - rel.ms(), 86400000, 'validade exata de um dia no relógio do cenário');
   const w = worker(b, rel); w.iniciar(); t.after(() => w.parar());
   rel.avancar(10); await w.tick(); await w.tick();
   const js = trabalhos(b); const ja = js.find((x) => x.espacoId === A.e.id), jb = js.find((x) => x.espacoId === B.e.id);

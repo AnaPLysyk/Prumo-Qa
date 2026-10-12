@@ -26,7 +26,10 @@ const semProjetoServico = (el, servico) => { const e = estado.espaco; if (!e) { 
 // ---------------- Tickets ----------------
 const ticketsBase = abas.tickets;
 abas.tickets = async (el) => {
-  await ticketsBase(el); const e = semProjetoServico(el, 'jira'); if (!e) return; const perm = await escritaDoProjeto(e); const on = !!perm.jira;
+  await ticketsBase(el); const e = semProjetoServico(el, 'jira'); if (!e) return;
+  const avancados = [...el.childNodes].filter(n => n.nodeName !== 'H1');
+  el.append(h('details', { class: 'qualidade-consulta-avancada' }, h('summary', {}, 'Consulta avançada e campos de critérios'), ...avancados));
+  const perm = await escritaDoProjeto(e); const on = !!perm.jira;
   const q = campoPlataforma('Chave ou texto', { id: 'tk-q', maxlength: 100 }); const tipo = campoPlataforma('Tipo', { id: 'tk-tipo', maxlength: 60 }); const status = campoPlataforma('Status', { id: 'tk-status', maxlength: 60 });
   const desde = campoPlataforma('Atualizado desde', { id: 'tk-desde', type: 'date' }); const ate = campoPlataforma('Até', { id: 'tk-ate', type: 'date' }); const lista = h('div', { id: 'tk-lista' }); const detalhe = h('div', { id: 'tk-detalhe' }); const criarCx = h('div', { id: 'tk-criar' });
   el.append(h('h2', {}, 'Buscar tickets do Jira'), 
@@ -199,7 +202,7 @@ const conexoesBase = abas.conexoes;
 abas.conexoes = async (el) => {
   await conexoesBase(el); const e = estado.espaco; if (!e) return; const perm = await escritaDoProjeto(e);
   el.append(h('h2', {}, 'Escrita externa neste projeto'), h('p', { class: 'suave' }, 'Escrita desligada por padrão. Cada operação pede confirmação.'),
-    h('div', { id: 'escrita-servicos' }, ['jira', 'qase', 'github'].map(sv => h('div', { class: 'nota', 'data-escrita': sv }, h('strong', {}, nomeServ[sv]), ' ', perm[sv] ? selo('VALIDO') : selo('NAO_CONFIGURADO'), ' ', perm[sv] ? 'escrita habilitada' : 'somente leitura', ' ', botao(perm[sv] ? 'Desabilitar escrita' : 'Habilitar escrita…', async () => { const r = await chamar(() => api.escritaHabilitar(e.id, sv, !perm[sv])); if (r && !r.canceled) mostrar('conexoes'); }, 'escrita-' + sv)))));
+    h('div', { id: 'escrita-servicos' }, ['jira', 'qase', 'github'].map(sv => h('div', { class: 'nota', 'data-escrita': sv }, h('strong', {}, nomeServ[sv]), ' ', perm[sv] ? selo('VALIDO') : null, ' ', perm[sv] ? 'escrita habilitada' : 'somente leitura', ' ', botao(perm[sv] ? 'Desabilitar escrita' : 'Habilitar escrita…', async () => { const r = await chamar(() => api.escritaHabilitar(e.id, sv, !perm[sv])); if (r && !r.canceled) mostrar('conexoes'); }, 'escrita-' + sv)))));
   const ops = await chamar(() => api.operacoes(e.id, 15)); if (ops?.length) el.append(h('h2', {}, 'Operações externas recentes'), h('ul', { id: 'conexoes-operacoes' }, ops.map(o => h('li', {}, seloOp(o.estado), ' ', o.resumo, ' · ', hora(o.atualizadoEm)))));
 };
 

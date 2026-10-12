@@ -73,3 +73,5 @@ Em UI/E2E, valide resultado funcional e, quando exigido, persistência após rec
 Para teclado, nomes acessíveis, foco, contraste, zoom e reflow, aplique a Skill acessibilidade e a [orientação oficial](https://playwright.dev/docs/accessibility-testing). Não declare auditoria manual completa só com verificação automática.
 
 O laboratório (`Prumo-QA-Lab`) mantém casos com testes Playwright estáticos (locator frágil, espera fixa, sem assertion, ignorado, duplicado, falso positivo) e critérios objetivos. Resultados reais, não suposições, indicam se estas orientações melhoram a análise de uma IA.
+
+Para o fluxo "reconhecer antes de agir" e leituras de apoio, consulte [práticas abertas](references/praticas-abertas.md).

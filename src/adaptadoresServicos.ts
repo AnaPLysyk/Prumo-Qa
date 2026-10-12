@@ -5,7 +5,7 @@ import type {MetodoEscrita} from './rotasEscrita.js';
 import {operacoesExtras,lerExtra,jqlDeTickets,type Filtros,type OperacaoExtra} from './leiturasServicos.js';
 import {identidadeRecurso,type Recurso,type Servico} from './espacos.js';
 
-export const operacoesServico=['tickets','ticket','campos','comentarios','suites','casos','caso','planos','runs','run','resultados','repositorio','branches','commits','prs','pr','verificacoes',...operacoesExtras] as const;
+export const operacoesServico=['tickets','ticket','campos','comentarios','defeitos','defeito','suites','casos','caso','planos','runs','run','resultados','repositorio','branches','commits','prs','pr','verificacoes',...operacoesExtras] as const;
 export type OperacaoServico=typeof operacoesServico[number];
 export type ConfigServico={id:string;servico:Servico;instancia:string;usuario?:string;contaId:string;token:string};
 const obj=z.record(z.unknown());
@@ -121,9 +121,13 @@ export class AdaptadorServico {
         endpoint='/rest/api/3/issue/'+enc(id)+'/comment?'+query({startAt:p.offset,maxResults:p.limite});colecao='comments';envelope='jira-offset';
       }else throw new ErroServico('SERVICE_WRITE_BLOCKED');
     }else if(this.c.servico==='qase'){
-      const mapa:Partial<Record<OperacaoServico,string>>={suites:'suite',casos:'case',caso:'case',planos:'plan',runs:'run',run:'run',resultados:'result'};
+      if(!/^[A-Z][A-Z0-9]{1,9}$/.test(r.chave)||r.id!==r.chave)throw new ErroServico('SERVICE_SCOPE_CHANGED');
+      const mapa:Partial<Record<OperacaoServico,string>>={defeitos:'defect',defeito:'defect',suites:'suite',casos:'case',caso:'case',planos:'plan',runs:'run',run:'run',resultados:'result'};
       const tipo=mapa[operacao];if(!tipo)throw new ErroServico('SERVICE_WRITE_BLOCKED');
-      endpoint='/v1/'+tipo+'/'+enc(r.chave)+(operacao==='caso'||operacao==='run'?'/'+numerico():'')+'?'+query({offset:p.offset,limit:p.limite,include:operacao==='casos'||operacao==='caso'?'external_issues':undefined,run:operacao==='resultados'&&id?numerico():undefined});envelope=operacao==='caso'||operacao==='run'?'qase-item':'qase-page';
+      const detalhe=operacao==='caso'||operacao==='run'||operacao==='defeito';
+      const statusDefeito=operacao==='defeitos'&&filtros?.status?z.enum(['open','resolved','in_progress','invalid']).safeParse(filtros.status):null;
+      if(statusDefeito&&!statusDefeito.success)throw new ErroServico('SERVICE_RESPONSE_INVALID');
+      endpoint='/v1/'+tipo+'/'+enc(r.chave)+(detalhe?'/'+numerico():'')+'?'+query({offset:detalhe?undefined:p.offset,limit:detalhe?undefined:p.limite,status:statusDefeito?.success?statusDefeito.data:undefined,include:operacao==='casos'||operacao==='caso'?'external_issues':undefined,run:operacao==='resultados'&&id?numerico():undefined});envelope=detalhe?'qase-item':'qase-page';
     }else{
       const repo='/repos/'+r.chave.split('/').map(enc).join('/');const mapa:Partial<Record<OperacaoServico,string>>={repositorio:'',branches:'/branches',commits:'/commits',prs:'/pulls',pr:'/pulls/'+(id??'')};
       if(operacao==='verificacoes'){if(!id||!/^[a-f0-9]{40}$/.test(id))throw new ErroServico('SERVICE_RESPONSE_INVALID');endpoint=repo+'/commits/'+id+'/check-runs?'+query({per_page:p.limite,page:Math.floor(p.offset/p.limite)+1});colecao='check_runs';envelope='github-checks';}
@@ -137,7 +141,11 @@ export class AdaptadorServico {
       else if(envelope==='object')dados=obj.parse(bruto);
       else {const b=obj.parse(bruto);dados=objetos.parse(b[colecao!]);if(envelope==='jira-cursor'){if(b.isLast!==true){if(typeof b.nextPageToken!=='string')throw new Error();proxima=b.nextPageToken;}}else {const total=z.number().int().nonnegative().parse(b.total??b.total_count);proxima=p.offset+(dados as unknown[]).length<total?p.offset+(dados as unknown[]).length:null;}}
       if(operacao==='tickets')for(const issue of dados as Record<string,unknown>[]){const f=obj.parse(issue.fields);if(String(obj.parse(f.project).id)!==r.id)throw new ErroServico('SERVICE_SCOPE_CHANGED');}
-      if(operacao==='caso'&&String(obj.parse(dados).id)!==id)throw new ErroServico('SERVICE_SCOPE_CHANGED');
+      if((operacao==='caso'||operacao==='defeito')&&String(obj.parse(dados).id)!==id)throw new ErroServico('SERVICE_SCOPE_CHANGED');
+      if(operacao==='defeitos'||operacao==='defeito'){
+        const defect=z.object({id:z.number().int().positive().safe(),title:nome,actual_result:z.string().optional(),severity:z.string().optional(),status:z.string().optional(),milestone_id:z.number().int().nullable().optional(),author_id:z.number().int().optional(),created_at:z.string().optional(),updated_at:z.string().optional(),created:z.string().optional(),updated:z.string().optional(),resolved_at:z.string().nullable().optional(),runs:z.array(z.number().int().positive()).max(100).optional(),results:z.array(z.string()).max(100).optional(),attachments:z.array(obj).max(100).optional(),tags:z.array(obj).max(100).optional(),external_data:z.string().optional()});
+        dados=Array.isArray(dados)?dados.map(d=>defect.parse(d)):defect.parse(dados);
+      }
       if(operacao==='repositorio'&&String(obj.parse(dados).id)!==r.id)throw new ErroServico('SERVICE_SCOPE_CHANGED');
       return this.saida(dados,proxima,r,endpoint);
     }catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_RESPONSE_INVALID');}

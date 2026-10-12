@@ -12,13 +12,13 @@ import { consultarAtividades, pastaAtividades, semLinks } from './atividades.js'
 export const clientes = ['codex', 'claude'] as const;
 type Cliente = typeof clientes[number];
 type Plano = ReturnType<typeof prepararConexao>;
-const tools = ['contexto_projeto', 'revisar_cobertura', 'executar_validacao', 'consultar_evidencias', 'listar_politicas', 'propor_caso', 'propor_bug'];
+const tools = ['contexto_projeto', 'revisar_cobertura', 'executar_validacao', 'consultar_evidencias', 'listar_politicas', 'propor_caso', 'propor_bug', 'propor_aprendizado'];
 const digest = z.string().regex(/^[a-f0-9]{64}$/);
 const registroSchema = z.object({
   id: z.string().uuid(), client: z.enum(clientes), rootHash: digest, projectHash: digest, manifestHash: digest,
   configurationHash: digest, at: z.string().datetime(), durationMs: z.number().finite().nonnegative(),
   state: z.enum(['VALIDADO', 'ERRO']), code: z.enum(['PROTOCOL_OK', 'PROTOCOL_FAILED']),
-  handshake: z.boolean(), tools: z.array(z.enum(tools as [string, ...string[]])).max(7), read: z.boolean(),
+  handshake: z.boolean(), tools: z.array(z.enum(tools as [string, ...string[]])).max(tools.length), read: z.boolean(),
   origin: z.literal('sdk-protocolo')
 }).strict();
 type Registro = z.infer<typeof registroSchema>;

@@ -31,7 +31,7 @@ test('comentário Jira pela interface: prévia, confirmação nativa, publicaç�
   const id = execucao('x1', { status: 'FAIL', motivo: 'Falha do processo', contagem: { pass: 2, fail: 1, blocked: 0, notRun: 0 }, evidenciaId: '11111111-1111-4111-8111-111111111111', detalhes: 'C3: valor não persistiu após recarregar' });
   await ir(a.page, 'execucoes'); await a.page.getByRole('row').filter({ hasText: 'Regressão SMART-1' }).waitFor();
   assert.match(await a.page.textContent('#metricas-exec'), /1\s*execuções/); assert.match(await a.page.textContent('#metricas-exec'), /1\s*FAIL/);
-  await a.page.locator(`tr[data-exec="${id}"] summary`).click(); await a.page.locator(`tr[data-exec="${id}"]`).getByRole('button', { name: 'Comentário Jira' }).click();
+  await a.page.locator(`tr[data-exec="${id}"] td.ds-acao button`).click(); await a.page.locator('#qualidade-dialog[open]').getByRole('button', { name: 'Comentário Jira' }).click();
   await a.page.waitForSelector('#jira-caixa pre'); const previa = await a.page.textContent('#jira-caixa pre');
   for (const x of ['Ticket: SMART-1', '3 cenário(s) executado(s): 2 PASS, 1 FAIL', 'C3: valor não persistiu', 'não altera o status do ticket', 'Prumo-Execução: ' + id]) assert.ok(previa.includes(x), x);
   assert.equal(s.comentarios.length, 0, 'prévia não envia nada'); assert.ok(s.pedidos.every((p) => p.metodo === 'GET'));

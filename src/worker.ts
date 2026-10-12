@@ -52,7 +52,7 @@ const falhasTexto = (cases: Evidencia['cases']) => cases.filter(c => c.status ==
 
 export class Worker {
   readonly instancia = randomUUID(); private temporizador: ReturnType<typeof setTimeout> | null = null; private ativo = false; private emTick = false;
-  private abort = new AbortController(); private atual: Promise<void> | null = null; private ultimoErro: string | null = null; private emitidos = new Map<string, number>();
+  private abort = new AbortController(); private atual: Promise<void> | null = null; private ultimoErro: string | null = null; private emitidos = new Map<string, number>(); private processando = false;
   private readonly agora: () => Date; private readonly base?: string; private readonly intervalo: number;
   constructor(private readonly d: DepsWorker = {}) { this.base = d.base; this.agora = d.agora ?? (() => new Date()); this.intervalo = d.intervaloMs ?? 5000; }
 
@@ -62,7 +62,10 @@ export class Worker {
     if (t?.ativo && t.instancia !== this.instancia && agora.getTime() - Date.parse(t.batimento) < 60000 && vivo(t.pid) && t.pid !== process.pid) throw new Error('WORKER_ALREADY_RUNNING');
     if (this.ativo) return;
     this.abort = new AbortController(); this.ativo = true; this.gravarTrava(true);
-    const recuperados = recuperarInterrompidos(this.base, agora, 120000);
+    // Com a trava assumida, nenhum outro worker está vivo: todo EXECUTANDO que não é desta instância foi interrompido,
+    // mesmo com batimento recente (queda e reabertura em menos de 2 min travariam a fila inteira). Só um trabalho ainda
+    // em curso NESTE processo (parar() que esgotou a espera) mantém a tolerância por batimento.
+    const recuperados = recuperarInterrompidos(this.base, agora, this.processando ? 120000 : 0);
     if (recuperados) this.emitir('WORKER_INTERROMPIDO', '', '', 'Execuções interrompidas recuperadas', `${recuperados} trabalho(s) estavam em andamento quando o Prumo foi encerrado; o histórico foi preservado.`);
     this.agendarProximo(0);
   }
@@ -123,7 +126,7 @@ export class Worker {
   private async processar(t: Trabalho) {
     const rotina = (() => { try { return obterRotina(t.rotinaId, this.base); } catch { return null; } })();
     const bat = setInterval(() => { try { batimento(t.id, this.base, this.agora()); } catch { /* trabalho removido */ } }, this.d.heartbeatMs ?? 30000); bat.unref?.();
-    const nome = rotina?.nome ?? 'Rotina removida';
+    const nome = rotina?.nome ?? 'Rotina removida'; this.processando = true;
     this.emitir('AGENDAMENTO_INICIADO', t.rotinaId, t.id, nome, `Execução ${t.tipo} iniciada${t.origem === 'MANUAL' ? ' (manual)' : ''}.`);
     try {
       if (!rotina) { concluir(t.id, { status: 'NOT_RUN', motivo: 'A rotina foi excluída antes da execução.' }, this.base, this.agora()); return; }
@@ -134,13 +137,19 @@ export class Worker {
       const fim = concluir(t.id, resultado, this.base, this.agora());
       const evento: TipoEvento = resultado.status === 'FAIL' ? 'EXECUCAO_FALHOU' : resultado.status === 'BLOCKED' ? 'EXECUCAO_BLOQUEADA' : 'EXECUCAO_CONCLUIDA';
       this.emitir(evento, rotina.id, t.id, nome, `${resultado.status}: ${resultado.motivo}`.slice(0, 200));
-      await this.publicarSeAutorizado(fim, rotina);
+      // O resultado já está gravado: uma falha ao publicar nunca pode reescrevê-lo como BLOCKED.
+      try { await this.publicarSeAutorizado(fim, rotina); }
+      catch (e) {
+        const cod = e instanceof ErroServico ? e.codigo : e instanceof ErroQa ? e.codigo : /^([A-Z][A-Z0-9_]{2,63})\b/.exec((e as Error).message)?.[1] ?? 'PUBLICATION_ERROR';
+        try { definirJira(t.id, { estado: retentavel(cod) ? 'PENDENTE' : 'FALHA', codigo: cod.slice(0, 80) }, this.base); } catch { /* registro do trabalho indisponível */ }
+        this.emitir('PUBLICACAO_JIRA_FALHOU', rotina.id, t.id, nome, `Resultado preservado; comentário no Jira não publicado (${cod}).`);
+      }
     } catch (e) {
       const cod = e instanceof ErroServico ? e.codigo : e instanceof ErroQa ? e.codigo : 'WORKER_ERROR';
       const infra = ['SERVICE_TIMEOUT', 'SERVICE_UNAVAILABLE', 'SERVICE_RATE_LIMIT'].includes(cod);
       if (infra) { falharInfra(t.id, cod, `Falha de infraestrutura: ${cod}`, true, this.base, this.agora()); this.emitir('EXECUCAO_FALHOU', t.rotinaId, t.id, nome, `Falha de infraestrutura (${cod}); nova tentativa automática se restar alguma.`); }
       else { concluir(t.id, { status: 'BLOCKED', motivo: `${cod}: ${(e as Error).message}`.slice(0, 600) }, this.base, this.agora()); this.emitir('EXECUCAO_BLOQUEADA', t.rotinaId, t.id, nome, `${cod}`); }
-    } finally { clearInterval(bat); }
+    } finally { clearInterval(bat); this.processando = false; }
   }
 
   private async executarTrabalho(t: Trabalho, r: Rotina): Promise<ResultadoTrabalho> {

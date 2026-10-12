@@ -50,7 +50,7 @@ test('Tickets: filtro, detalhe e comentário idempotente pela interface (única 
   await ir(a.page, 'tickets'); await a.page.fill('#tk-q', 'SMART'); await a.page.click('#tk-buscar'); await a.page.waitForSelector('#tk-tabela [data-ticket="SMART-1"]');
   const jql = decodeURIComponent(s.pedidos.filter((p) => p.caminho.includes('/search/jql')).at(-1).caminho);
   assert.match(jql, /project[+ ]=[+ ]11[+ ]AND/, 'o JQL é sempre restrito ao projeto vinculado'); assert.match(jql, /SMART/);
-  await a.page.locator('#tk-tabela [data-ticket="SMART-1"]').getByRole('button', { name: 'Detalhar' }).click(); await a.page.waitForSelector('#tk-painel');
+  await a.page.locator('#tk-tabela [data-ticket="SMART-1"]').getByRole('button', { name: 'Abrir' }).click(); await a.page.waitForSelector('#tk-painel');
   await a.page.fill('#tk-comentario', 'Falha reproduzida no ambiente de teste.'); await a.page.click('#tk-comentar');
   await a.page.waitForSelector('[data-resultado-operacao="CONFIRMADA"]'); assert.equal(s.comentarios.length, 1);
   assert.match(JSON.stringify(s.comentarios[0].body), /prumo-[0-9a-f]{10}/, 'marcador de idempotência no comentário');
@@ -94,13 +94,16 @@ test('Testes: sem integração aparecem só os testes do repositório, agrupados
   await escolherPasta(a.app, f.root); assert.ok((await a.page.evaluate((id) => window.prumo.espacoPasta(id), e.id)).ok);
   await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: 'Selecionar projeto' }).click();
   await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'REPO-LAB');
-  await ir(a.page, 'testes'); await a.page.waitForSelector('#cat-lista [data-feature]');
-  assert.equal(await a.page.locator('[data-sub=casos]').count(), 0, 'sem Qase vinculado não há "Casos"');
+  // v40: Visão geral agrupa por tag/feature/nível; filtro por tag e por nível sobre a leitura estática do repositório.
+  await ir(a.page, 'testes'); await a.page.waitForSelector('#cat-resumo');
+  assert.equal(await a.page.locator('[data-sub=casos]').count(), 0, 'sem Qase vinculado não há "Casos Qase"');
+  await a.page.selectOption('#cat-agrupar', 'feature'); await a.page.waitForSelector('#cat-lista [data-feature="Login"]');
   assert.deepEqual((await a.page.locator('#cat-lista [data-feature]').evaluateAll((n) => n.map((x) => x.dataset.feature))).sort(), ['Login', 'Soma']);
-  assert.match(await a.page.textContent('#cat-resumo'), /3\s*testes/); assert.match(await a.page.textContent('#cat-aviso'), /inferida/);
-  await a.page.locator('#cat-tipos label', { hasText: 'Smoke' }).click(); await a.page.waitForFunction(() => document.querySelectorAll('#cat-lista li').length === 1);
-  assert.match(await a.page.textContent('#cat-lista li'), /senha válida/);
-  await a.page.locator('#cat-tipos label', { hasText: 'Smoke' }).click(); await a.page.locator('#cat-tipos label', { hasText: 'Unitário' }).click();
-  await a.page.waitForFunction(() => document.querySelectorAll('#cat-lista li').length === 1); assert.match(await a.page.textContent('#cat-lista li'), /soma dois/);
+  assert.match(await a.page.textContent('#cat-resumo'), /3\s*testes no código/); assert.match(await a.page.textContent('#cat-aviso'), /leitura estática/);
+  const linhas = () => a.page.evaluate(() => [...document.querySelectorAll('#cat-lista tbody tr')].map((r) => r.textContent));
+  await a.page.locator('#cat-tipos label', { hasText: '@smoke' }).click(); await a.page.waitForFunction(() => document.querySelectorAll('#cat-lista tbody tr').length === 1);
+  assert.match((await linhas())[0], /senha válida/);
+  await a.page.locator('#cat-tipos label', { hasText: '@smoke' }).click(); await a.page.selectOption('#cat-nivel', 'unitario');
+  await a.page.waitForFunction(() => document.querySelectorAll('#cat-lista tbody tr').length === 1); assert.match((await linhas())[0], /soma dois/);
   assert.deepEqual(a.erros, []);
 });

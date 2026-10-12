@@ -25,19 +25,26 @@ export const novoDados = (t) => {
 export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   // VS Code/Claude definem ELECTRON_RUN_AS_NODE; com ele o Electron viraria Node puro e não abriria janela.
   const env = { ...process.env, ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ...envExtra }; delete env.ELECTRON_RUN_AS_NODE; if (!dados) delete env.PRUMO_DATA_DIR; // sem dados: diretório padrão do usuário
-  const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [repo, ...extra], env });
+  const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [path.join(repo, 'testes/desktop-entry.cjs'), ...extra], env });
   let fechado = false;
   const fechar = async () => { if (!fechado) { fechado = true; await app.close(); } };
   if (dados) abertos.get(dados).push(fechar);
   const page = await app.firstWindow();
   const erros = []; page.on('pageerror', (e) => erros.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
   await page.waitForSelector('#nav button');
+  // Espera a primeira tela: antes disso os listeners do menu ainda não existem e um clique se perde (corrida da 2.9/v39).
+  await page.waitForSelector('[data-aba=inicio][aria-current=page]');
   // A janela abre em Início (2.8). Os testes anteriores partem de Projetos; Início tem teste próprio (desktop-agenda.test.mjs).
-  if (!opcoes.inicio) await ir(page, 'projetos'); else await page.waitForSelector('[data-aba=inicio][aria-current=page]');
+  if (!opcoes.inicio) await ir(page, 'projetos');
   return { app, page, erros, fechar };
 }
 const virtuais = { runs: ['testes', 'runs'], automacoes: ['testes', 'automacao'], vinculos: ['rastreabilidade', 'vinculos'] };
 export const ir = async (page, aba) => {
+  // Detalhes abrem em modal (v39/v40): fecha-o como a pessoa faria antes de usar o menu.
+  if (await page.locator('#qualidade-dialog[open]').count()) { await page.keyboard.press('Escape'); await page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' }); }
+  // v40: Contextos fica dentro de Agentes (modal), como Evidências fica dentro de Execuções.
+  if (aba === 'contextos') { await ir(page, 'agentes'); await page.click('#agentes-contextos'); await page.waitForSelector('#qualidade-dialog[open] .ds-contextos > :not(.ds-estado)'); return; }
+  if (aba === 'evidencias') { await ir(page, 'execucoes'); await page.click('#exec-evidencias'); await page.waitForSelector('#qualidade-dialog[open]'); return; }
   if (virtuais[aba]) { const [pai, sub] = virtuais[aba]; await ir(page, pai); await page.click(`[data-sub=${sub}]`); await page.waitForFunction((s) => document.querySelector(`[data-sub=${s}]`)?.getAttribute('aria-pressed') === 'true', sub); await page.waitForTimeout(150); return; } await page.click(`[data-aba=${aba}]`); await page.waitForFunction((a) => document.querySelector(`[data-aba=${a}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(150); };
 export const escolherPasta = (app, pasta) => app.evaluate(({ dialog }, p) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [p] }); }, pasta);
 export async function mcp(root, dados, chamadas) {
@@ -45,7 +52,7 @@ export async function mcp(root, dados, chamadas) {
   // Instalado: o servidor roda no runtime embutido do aplicativo (sem Node.js na máquina), como configura src/conexoes.ts.
   const transport = exe
     ? new StdioClientTransport({ command: exe, args: [path.join(path.dirname(exe), 'resources', 'app', 'dist', 'mcp.js'), root], env: { ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ELECTRON_RUN_AS_NODE: '1' } })
-    : new StdioClientTransport({ command: process.execPath, args: [path.join(repo, 'dist/mcp.js'), root], env: dados ? { PRUMO_DATA_DIR: dados } : {} });
+    : new StdioClientTransport({ command: process.execPath, args: ['--require', path.join(repo, 'testes/conhecimento-hook.cjs'), path.join(repo, 'dist/mcp.js'), root], env: dados ? { PRUMO_DATA_DIR: dados } : {} });
   await client.connect(transport);
   try { const out = []; for (const [name, args] of chamadas) out.push(await client.callTool({ name, arguments: args })); return out; } finally { await client.close(); }
 }

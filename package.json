@@ -1,6 +1,6 @@
 {
   "name": "prumo-qa",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "Engenharia de qualidade local: contexto, contratos, MCP, evidências e aplicativo desktop Windows",
   "private": true,
   "license": "UNLICENSED",
@@ -23,7 +23,7 @@
   "scripts": {
     "build": "tsc && node scripts/gerar-status.mjs && node scripts/build-broker.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --experimental-test-module-mocks --test --test-concurrency=1 testes/*.test.mjs",
+    "test": "npm run build && node --require ./testes/conhecimento-hook.cjs --experimental-test-module-mocks --test --test-concurrency=1 testes/*.test.mjs",
     "qa": "node dist/cli.js",
     "mcp": "node dist/mcp.js",
     "demo": "node scripts/demonstrar.mjs",
@@ -46,6 +46,7 @@
     "electron": "44.7.0",
     "electron-builder": "26.15.3",
     "playwright-core": "1.64.0",
+    "three": "0.159.0",
     "typescript": "^5.9.3"
   },
   "author": {

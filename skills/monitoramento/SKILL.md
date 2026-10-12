@@ -12,3 +12,5 @@ Leia `consultar_evidencias` e o contexto autorizado. Distinga com precisão: con
 Uma alteração detectada em ticket, caso ou commit é um sinal para a pessoa decidir. Você não dispara regressão sozinho, não agenda rotinas e não publica resultados. Pode recomendar o que rodar e por quê, com as limitações.
 
 Entregue: o que mudou, desde quando, fonte, o que o Prumo executou (se algo), o que falhou e por quê, e o que ainda não foi observado.
+
+Para interpretar tendência de duração e de instabilidade da suíte, use a seção "Saúde da suíte" das [práticas de regressão](../regressao/references/praticas-abertas.md).

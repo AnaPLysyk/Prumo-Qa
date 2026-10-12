@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { abrir, novoDados, ir, escolherPasta, exe } from './janela.mjs';
 import { servidorFixture } from './servicos-fixtures.mjs';
@@ -11,12 +10,11 @@ import { carregarProjeto } from '../dist/projeto.js';
 import { criarRotina } from '../dist/agenda.js';
 
 /**
- * Demonstração ponta a ponta da 2.8 (26 passos), com o Prumo QA Lab como projeto-alvo e um Jira simulado.
+ * Demonstração ponta a ponta da 2.8 (26 passos), com projeto sintético temporário e um Jira simulado.
  * Honestidade: o consentimento humano de execução (Windows CredUI) não existe em teste automatizado; a AUTORIZAÇÃO usada aqui é gravada
  * pelo runner com um solicitador simulado, exatamente como o broker devolveria. O restante (agenda, worker, processo, evidência,
- * histórico, comentário, bandeja e encerramento) é real. O laboratório é copiado para uma pasta temporária; o original não é tocado.
+ * histórico, comentário, bandeja e encerramento) é real. O projeto é criado pelo teste; nenhum projeto externo é lido ou executado.
  */
-const LAB = process.env.PRUMO_LAB_DIR || path.resolve('..', 'Prumo-QA-Lab');
 const confirmar = (app) => app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1 }); });
 const instrumentar = (app, port) => app.evaluate((_, p) => {
   const https = process.getBuiltinModule('node:https'), http = process.getBuiltinModule('node:http'), dns = process.getBuiltinModule('node:dns');
@@ -27,19 +25,32 @@ const instrumentar = (app, port) => app.evaluate((_, p) => {
 const solicitador = async (esc) => ({ subject: 'pessoa-simulada-pelo-runner', method: 'Windows-CredUI-LogonUser', scopeHash: esc.scopeHash, at: new Date().toISOString() });
 const esperar = async (fn, ms, msg) => { const fim = Date.now() + ms; for (;;) { const v = await fn(); if (v) return v; if (Date.now() > fim) throw new Error('tempo esgotado: ' + msg); await new Promise((r) => setTimeout(r, 500)); } };
 
-test('demonstração 2.8: agenda real no laboratório, bandeja, evidência, Jira simulado, isolamento, pausa e saída', { skip: !fs.existsSync(path.join(LAB, 'qa.project.json')) ? 'Prumo QA Lab não encontrado (defina PRUMO_LAB_DIR): NOT_RUN' : false, timeout: 240000 }, async (t) => {
+test('demonstração 2.8: agenda real no laboratório, bandeja, evidência, Jira simulado, isolamento, pausa e saída', { timeout: 240000 }, async (t) => {
   const passos = []; const passo = (n, d, extra = {}) => passos.push({ numero: n, descricao: d, estado: 'PASS', ...extra });
   const dados = novoDados(t); const s = await servidorFixture(t);
-  const labCopia = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo lab copia ')); t.after(() => fs.rmSync(labCopia, { recursive: true, force: true }));
-  for (const item of ['aplicacao', 'requisitos', 'qa.project.json']) fs.cpSync(path.join(LAB, item), path.join(labCopia, item), { recursive: true });
-  const lab = fs.realpathSync(labCopia); const outro = await fixture(t);
+  const laboratorio = await fixture(t, { id: 'laboratorio-sintetico', name: 'Laboratório sintético' });
+  await laboratorio.write('src/app.mjs', `export const podeGravar = papel => papel === 'Editor';
+export const total = valores => valores.reduce((s, valor) => s + valor, 0);
+export const validarNome = nome => typeof nome === 'string' && nome.trim().length > 0;
+`);
+  await laboratorio.write('tests/test.mjs', `import test from 'node:test';
+import assert from 'node:assert/strict';
+import { podeGravar, total, validarNome } from '../src/app.mjs';
+for (const [papel, esperado] of [['Editor', true], ['Leitor', false], ['Administrador', false], ['', false]])
+  test('permissão ' + (papel || 'vazia'), () => assert.equal(podeGravar(papel), esperado));
+for (const [valores, esperado] of [[[], 0], [[1, 2], 3], [[-1, 1], 0]])
+  test('total ' + JSON.stringify(valores), () => assert.equal(total(valores), esperado));
+for (const [nome, esperado] of [['QA', true], ['', false], ['  ', false], [null, false]])
+  test('nome ' + JSON.stringify(nome), () => assert.equal(validarNome(nome), esperado));
+`);
+  const lab = laboratorio.root; const outro = await fixture(t);
   const a = await abrir(t, dados, [], {}, { inicio: true }); await instrumentar(a.app, s.port); await confirmar(a.app);
   assert.equal(await a.page.getAttribute('[data-aba=inicio]', 'aria-current'), 'page'); passo(1, 'Prumo aberto na tela Início');
   // 2. Projetos do laboratório e outro projeto independente
   const criar = async (nome, pasta) => { const e = (await a.page.evaluate((n) => window.prumo.espacoCriar({ nome: n, descricao: 'demonstração 2.8' }), nome)).data; await escolherPasta(a.app, pasta); const r = await a.page.evaluate((id) => window.prumo.espacoPasta(id), e.id); assert.equal(r.ok, true, JSON.stringify(r)); return e; };
   const eLab = await criar('PRUMO-LAB', lab); const eOutro = await criar('OUTRO-PROJETO', outro.root);
   await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${eLab.id}"]`).getByRole('button', { name: 'Selecionar projeto', exact: true }).click(); await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'PRUMO-LAB');
-  passo(2, 'Projeto Prumo PRUMO-LAB selecionado (pasta do laboratório copiada para temporário)');
+  passo(2, 'Projeto Prumo PRUMO-LAB selecionado (projeto sintético criado em temporário)');
   // 3. Jira simulado vinculado
   const conta = (await a.page.evaluate(() => window.prumo.servicoAdicionar({ servico: 'jira', nome: 'Jira simulado', instancia: 'https://lab.atlassian.net', usuario: 'fixture@example.test', token: 'fixture-secret-28' }))).data;
   const recursos = (await a.page.evaluate((id) => window.prumo.servicoRecursos(id), conta.id)).data.recursos; assert.ok((await a.page.evaluate(([x, y, z]) => window.prumo.servicoVincular(x, y, z), [eLab.id, conta.id, recursos[0]])).ok);
@@ -58,7 +69,7 @@ test('demonstração 2.8: agenda real no laboratório, bandeja, evidência, Jira
   await a.page.click('#rotina-salvar'); const card = a.page.locator('[data-rotina]'); await card.first().waitFor();
   // 6. Próxima execução
   const lista = (await a.page.evaluate(() => window.prumo.agendaListar())).data; assert.equal(lista.length, 1); const rotina = lista[0]; assert.ok(rotina.proximaExecucao); assert.ok(Date.parse(rotina.proximaExecucao) > Date.now() - 1000);
-  assert.match(await card.first().textContent(), /Próxima execução:/); assert.ok(rotina.autorizacoes.some((x) => x.estado === 'VIGENTE')); passo(5, 'Rotina criada pela interface'); passo(6, 'Próxima execução calculada', { proxima: rotina.proximaExecucao });
+  assert.equal(await a.page.locator('#rotinas-tabela th').filter({ hasText: 'Próxima execução' }).count(), 1); assert.equal(await card.first().locator('td').nth(4).textContent(), await a.page.evaluate((em) => hora(em), rotina.proximaExecucao)); assert.ok(rotina.autorizacoes.some((x) => x.estado === 'VIGENTE')); passo(5, 'Rotina criada pela interface'); passo(6, 'Próxima execução calculada', { proxima: rotina.proximaExecucao });
   // 7-8. Fechar a janela; Prumo e worker seguem na bandeja
   await a.app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());
   assert.equal(await a.app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isVisible()), false); passo(7, 'Janela fechada');
@@ -70,14 +81,14 @@ test('demonstração 2.8: agenda real no laboratório, bandeja, evidência, Jira
   assert.equal(feita.origem, 'AGENDA'); assert.equal(feita.resultado.status, 'PASS', JSON.stringify(feita.resultado)); assert.equal(feita.executor, 'Prumo (agenda)'); passo(9, 'Worker disparou a rotina sem a janela aberta', { slot: feita.slot, inicio: feita.inicio });
   passo(10, 'Teste autorizado executado de verdade (11 testes do laboratório)', { duracaoMs: feita.duracaoMs });
   const evArq = path.join(lab, '.prumo', 'evidencias', feita.evidenciaId + '.json'); assert.ok(fs.existsSync(evArq)); const ev = JSON.parse(JSON.parse(fs.readFileSync(evArq, 'utf8')).payload);
-  assert.equal(ev.executed, true); assert.equal(ev.exitCode, 0); assert.match(ev.stdout, /pass/i); assert.equal(ev.approval.method, 'delegada:Windows-CredUI-LogonUser'); assert.equal(ev.evidenceScope, 'round');
+  assert.equal(ev.executed, true); assert.equal(ev.exitCode, 0); assert.match(ev.stdout, /pass/i); assert.match(ev.stdout, /tests\s+11/i); assert.match(ev.stdout, /fail\s+0/i); assert.equal(ev.approval.method, 'delegada:Windows-CredUI-LogonUser'); assert.equal(ev.evidenceScope, 'round');
   passo(11, 'Resultado real e evidência íntegra (hash) gravados no projeto', { evidenciaId: feita.evidenciaId, escopo: 'rodada (o runner não reporta cenários individuais)' });
   passo(12, 'Histórico registrado: tentativas e duração', { tentativas: feita.tentativas.length });
   // 13-16. Reabrir a janela e consultar execução, evidência e logs
   await a.app.evaluate(({ app }) => app.emit('second-instance')); await a.page.waitForFunction(() => document.visibilityState === 'visible'); passo(13, 'Janela reaberta pelo caminho da bandeja');
   await ir(a.page, 'execucoes'); await a.page.locator(`tr[data-exec="${feita.id}"]`).waitFor(); assert.match(await a.page.locator(`tr[data-exec="${feita.id}"]`).textContent(), /PASS/); passo(14, 'Execução visível em Execuções, no projeto selecionado');
-  await a.page.locator(`tr[data-exec="${feita.id}"] summary`).click(); await a.page.locator(`tr[data-exec="${feita.id}"]`).getByRole('button', { name: 'Ver evidência' }).click(); await a.page.waitForFunction(() => document.querySelector('[data-aba=evidencias]').getAttribute('aria-current') === 'page');
-  await a.page.waitForFunction((id) => document.querySelector('#conteudo').textContent.includes(id.slice(0, 8)), feita.evidenciaId); passo(15, 'Evidência consultada na interface (Evidências)'); passo(16, 'Log da execução (stdout redigido) disponível na evidência');
+  await a.page.locator(`tr[data-exec="${feita.id}"] td.ds-acao button`).click(); await a.page.locator('#qualidade-dialog[open] [role=tab]', { hasText: 'Evidências' }).click();
+  await a.page.waitForFunction((id) => document.querySelector('#qualidade-dialog').textContent.includes(id.slice(0, 8)), feita.evidenciaId); passo(15, 'Evidência consultada na interface (dentro da execução)'); passo(16, 'Log da execução (stdout redigido) disponível na evidência');
   // 17-19. Comentário Jira: publicado pela política aprovada; repetir não duplica
   await esperar(async () => s.comentarios.length === 1, 20000, 'comentário Jira'); assert.match(JSON.stringify(s.comentarios[0].body), /Execução: /); assert.match(JSON.stringify(s.comentarios[0].body), /não altera o status do ticket/);
   const aposRun = (await execs()).find((x) => x.id === feita.id); assert.equal(aposRun.jira.estado, 'PUBLICADO'); passo(17, 'Comentário preparado (política aprovada) com o texto estruturado'); passo(18, 'Publicação no Jira simulado confirmada com id remoto', { comentarioId: aposRun.jira.comentarioId });
@@ -97,5 +108,5 @@ test('demonstração 2.8: agenda real no laboratório, bandeja, evidência, Jira
   const trava = JSON.parse(fs.readFileSync(path.join(dados, 'plataforma', 'worker-trava.json'), 'utf8')); assert.equal(trava.ativo, false); let vivo = true; try { process.kill(w0.trava.pid, 0); } catch { vivo = false; } assert.equal(vivo, false, 'processo principal não existe mais'); passo(26, 'Trava liberada e processo encerrado');
   assert.doesNotMatch(fs.readFileSync(path.join(dados, 'plataforma', 'publicacoes-jira.json'), 'utf8') + fs.readFileSync(path.join(dados, 'plataforma', 'fila.json'), 'utf8'), /fixture-secret-28/);
   assert.deepEqual(a.erros, []);
-  fs.mkdirSync('.prumo/evidencias-2.8', { recursive: true }); fs.writeFileSync('.prumo/evidencias-2.8/demonstracao-' + (exe ? 'instalado' : 'desenvolvimento') + '.json', JSON.stringify({ versao: JSON.parse(fs.readFileSync('package.json', 'utf8')).version, laboratorio: 'Prumo QA Lab (cópia temporária)', observacao: 'Autorização humana de execução simulada pelo runner; demais etapas reais.', passos }, null, 2));
+  const relatorios = path.join(dados, 'evidencias-2.8'); fs.mkdirSync(relatorios, { recursive: true }); fs.writeFileSync(path.join(relatorios, 'demonstracao-' + (exe ? 'instalado' : 'desenvolvimento') + '.json'), JSON.stringify({ versao: JSON.parse(fs.readFileSync('package.json', 'utf8')).version, laboratorio: 'Projeto sintético temporário', observacao: 'Autorização humana de execução simulada pelo runner; demais etapas reais.', passos }, null, 2));
 });

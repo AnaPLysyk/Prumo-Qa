@@ -38,8 +38,14 @@ import * as props from '../propostas.js';
 import * as fluxo from '../fluxoQase.js';
 import { publicarProposta, resolverAnexo } from '../acoesProposta.js';
 import { mapaDeVinculos } from '../rastreabilidade.js';
-import { catalogoDeTestes } from '../catalogoTestes.js';
+import { catalogoDeTestes, arquivoDeTeste } from '../catalogoTestes.js';
 import { perguntar as perguntarAoPrumo, situacaoDoProjeto } from '../assistente.js';
+import { conversar, rosterDoChat, saudacao, type Executor } from '../orquestrador.js';
+import { conversasDoAgente, apagarConversas } from '../conversas.js';
+import * as conhecimento from '../conhecimento.js';
+import { localizar as localizarCliente } from '../conexoes.js';
+import { execFile } from 'node:child_process';
+import { autorizarDelegacao } from '../preferencias.js';
 import * as agentes from '../politicasAgentes.js';
 import { listarExecucoes, metricas } from '../historicoCentral.js';
 import { prepararPublicacao, publicar as publicarComentario } from '../jiraComentario.js';
@@ -59,6 +65,11 @@ const arquivoVersoes = path.join(raizApp, 'app', 'versoes.json');
 app.setPath('userData', path.join(diretorioDados(), 'app'));
 
 type Resposta = { ok: true; data: unknown } | { ok: false; error: string };
+/** Mensagem mascarada com o código do núcleo na frente (ErroQa guarda o código fora da mensagem). */
+function comCodigo(err: unknown): string {
+  const msg = mascarar((err as Error)?.message ?? String(err)); const codigo = (err as { codigo?: unknown })?.codigo;
+  return typeof codigo === 'string' && /^[A-Z][A-Z0-9_]{2,63}$/.test(codigo) && !msg.startsWith(codigo) ? codigo + ': ' + msg : msg;
+}
 /**
  * Registra um canal do catálogo: recusa remetente que não seja a nossa página, valida com o esquema do contrato,
  * grava diagnóstico (só metadados) e nunca vaza stack. Consultas frequentes só deixam rastro quando falham.
@@ -73,12 +84,15 @@ function canal<C extends CanalIpc>(nome: C, fn: (a: z.output<(typeof esquemasIpc
     };
     try {
       if (!e.senderFrame?.url.startsWith(origemPermitida)) throw new Error('IPC_SENDER_REJECTED');
-      const args = esquemasIpc[nome].parse(bruto ?? {}) as z.output<(typeof esquemasIpc)[C]>;
+      const entrada = esquemasIpc[nome].safeParse(bruto ?? {});
+      if (!entrada.success) throw new Error('INVALID_ARGUMENTS: argumentos recusados.');
+      const args = entrada.data as z.output<(typeof esquemasIpc)[C]>;
       apagaDiagnostico = nome === 'dados:excluir' && (args as { escopo?: string }).escopo === 'diagnostico';
       const data = await fn(args, BrowserWindow.fromWebContents(e.sender));
       diag('OK'); return { ok: true, data };
     } catch (err) {
-      const msg = err instanceof z.ZodError ? 'INVALID_ARGUMENTS: argumentos recusados.' : mascarar((err as Error).message);
+      // Entrada inválida já virou INVALID_ARGUMENTS acima; um ZodError aqui é dado local recusado pelo núcleo, não erro de quem chamou.
+      const msg = err instanceof z.ZodError ? 'LOCAL_DATA_INVALID: dados locais recusados pela validação (' + (err.issues[0]?.path.join('.') || 'raiz') + ').' : comCodigo(err);
       diag('ERROR', /^([A-Z][A-Z_]{2,63})\b/.exec(msg)?.[1] ?? 'TOOL_ERROR');
       return { ok: false, error: msg };
     }
@@ -86,6 +100,18 @@ function canal<C extends CanalIpc>(nome: C, fn: (a: z.output<(typeof esquemasIpc
 }
 
 canal('app:info', () => ({ version: versao, dataDir: diretorioDados(), platform: process.platform, packaged: app.isPackaged }));
+// Exportação restrita das telas aprovadas. O renderer não fornece destino ou
+// extensão, e o bloqueio de rede/blob da janela permanece intacto.
+canal('interface:exportar', async (a, janela) => {
+  if (Buffer.byteLength(a.texto, 'utf8') > 2 * 1024 * 1024) throw new Error('EXPORT_FORMAT_INVALID: conteúdo excede 2 MiB');
+  const csv = a.tipo === 'metricas-csv'; const ext = csv ? 'csv' : 'json';
+  if (!csv) { try { JSON.parse(a.texto); } catch { throw new Error('EXPORT_FORMAT_INVALID'); } }
+  const destino = await dialog.showSaveDialog(janela!, { title: 'Exportar ' + (a.tipo === 'agente' ? 'agente' : a.tipo === 'evidencia-json' ? 'evidências' : 'métricas'), defaultPath: 'prumo-' + a.tipo + '.' + ext, filters: [{ name: ext.toUpperCase(), extensions: [ext] }] });
+  if (destino.canceled || !destino.filePath) return { exported: false };
+  if (path.extname(destino.filePath).toLowerCase() !== '.' + ext) throw new Error('EXPORT_FORMAT_INVALID: escolha um arquivo .' + ext);
+  fs.writeFileSync(destino.filePath, a.texto, { flag: 'w', mode: 0o600 });
+  return { exported: true, path: destino.filePath };
+});
 canal('projetos:listar', () => painel.projetos());
 canal('projetos:escolher', async (_a, janela) => {
   const r = await dialog.showOpenDialog(janela!, { title: 'Selecionar a pasta do projeto', properties: ['openDirectory'] });
@@ -326,9 +352,55 @@ canal('runs:politica', async (a, j) => {
 });
 canal('runs:revogar', a => ({ politica: autorizacoesCore.revogarPoliticaEscrita(a.id) }));
 canal('vinculos:mapa', a => mapaDeVinculos(a.espacoId));
+canal('testes:arquivo', a => { const e = espacos.obterEspaco(a.espacoId); if (!e.pastaLocal) throw new Error('PASTA_AUSENTE'); const r = arquivoDeTeste(e.pastaLocal, a.arquivo); return { ...r, conteudo: mascarar(r.conteudo) }; });
 canal('testes:catalogo', a => { const e = espacos.obterEspaco(a.espacoId); return e.pastaLocal ? { semPasta: false, catalogo: catalogoDeTestes(e.pastaLocal) } : { semPasta: true, catalogo: null }; });
 canal('assistente:perguntar', a => perguntarAoPrumo(a.espacoId, a.pergunta));
 canal('assistente:situacao', a => situacaoDoProjeto(a.espacoId));
+// Chat orquestrado. IA externa: só CLI .exe encontrado (atalhos .cmd exigiriam shell), sem shell, ambiente mínimo e tempo limite.
+const exeIa = (p: 'claude' | 'codex') => { const l = localizarCliente(p); return l && !l.shim ? l.executable : null; };
+const ambienteIa = () => Object.fromEntries(['PATH', 'SystemRoot', 'WINDIR', 'USERPROFILE', 'HOME', 'APPDATA', 'LOCALAPPDATA', 'TEMP', 'TMP', 'CODEX_HOME', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY'].filter(k => process.env[k]).map(k => [k, process.env[k] as string]));
+const executorIa: Executor = (comando, args, o) => new Promise(ok => {
+  // Não carrega configuração, hooks ou MCP do repositório conectado.
+  const temporario = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-chat-'));
+  execFile(comando, args, { timeout: o.timeoutMs, maxBuffer: 1024 * 1024, windowsHide: true, shell: false, cwd: temporario, env: ambienteIa() }, (erro, saida, err) => {
+    // Caminho criado pelo próprio processo e conferido antes da remoção recursiva.
+    const relativo = path.relative(os.tmpdir(), temporario);
+    if (!path.isAbsolute(relativo) && !relativo.startsWith('..') && path.basename(temporario).startsWith('prumo-chat-')) {
+      try { fs.rmSync(temporario, { recursive: true, force: true }); } catch { /* limpeza não muda a resposta do provedor */ }
+    }
+    ok({ codigo: erro ? (typeof (erro as NodeJS.ErrnoException & { code?: unknown }).code === 'number' ? (erro as unknown as { code: number }).code : null) : 0, saida: String(saida ?? ''), erro: String(err ?? '') });
+  });
+});
+canal('assistente:conversar', async a => {
+  const ia = lerPreferencias().ia;
+  const r = await conversar({ espacoId: a.espacoId, pergunta: a.pergunta, agente: a.agente ?? null, provedor: a.provedor ?? 'local', primeira: a.primeira, historico: a.historico, contexto: a.contexto ?? null, estilo: ia.estilo, nome: ia.nome, autorizados: ia.delegacao, executavel: exeIa, executor: executorIa });
+  // 2.10: a conversa NÃO é gravada; fica só o atendimento (agente, modo e fontes, sem pergunta nem resposta).
+  let atendimentoId: number | null = null; try { atendimentoId = conhecimento.registrarAtendimento({ espacoId: a.espacoId, agente: r.agente.id, modo: r.modo, fontes: r.fontes.map(f => f.rotulo) }); } catch { atendimentoId = null; r.aviso = [r.aviso, 'Não foi possível registrar o atendimento; a avaliação desta resposta está indisponível.'].filter(Boolean).join(' '); }
+  return { ...r, assistente: ia.nome, atendimentoId };
+});
+canal('assistente:abertura', a => ({ ...saudacao(a.espacoId, lerPreferencias().ia.nome), assistente: lerPreferencias().ia.nome }));
+// Avaliar uma resposta. Corrigir o agente ensina só os TERMOS da pergunta ao agente certo (a pergunta não é gravada).
+canal('assistente:avaliar', a => { const r = conhecimento.avaliarAtendimento(a.id, a.avaliacao); const termos = a.avaliacao === 'NAO_UTIL' && a.agenteCorreto && a.pergunta ? conhecimento.aprenderTermos(a.agenteCorreto, a.pergunta).termos : []; return { ...r, termos }; });
+canal('assistente:agentes', a => { const ia = lerPreferencias().ia; return { agentes: rosterDoChat(a.espacoId), assistente: { nome: ia.nome, estilo: ia.estilo }, provedores: (['claude', 'codex'] as const).map(p => { const l = localizarCliente(p); return { id: p, encontrado: !!l, atalho: !!l?.shim, disponivel: !!exeIa(p), autorizado: ia.delegacao[p] }; }) }; });
+// Conversas gravadas até a 2.9 continuam legíveis; desde a 2.10 entram só os atendimentos (sem texto).
+canal('conversas:listar', a => { let atend: ReturnType<typeof conhecimento.listarAtendimentos> = []; try { atend = conhecimento.listarAtendimentos(a.espacoId, a.agente, 40); } catch { atend = []; }
+  return [...atend.map(x => ({ id: 'atendimento-' + x.id, em: x.em, agente: x.agente, pergunta: '', linhas: [] as string[], fontes: x.fontes.map(f => ({ rotulo: f, aba: '' })), modo: x.modo, estilo: 'amigavel', semTexto: true, avaliacao: x.avaliacao })), ...conversasDoAgente(a.espacoId, a.agente).map(c => ({ ...c, semTexto: false, avaliacao: null }))]
+    .sort((x, y) => y.em.localeCompare(x.em)).slice(0, 40); });
+canal('conhecimento:estado', a => conhecimento.estadoConhecimento(a.espacoId));
+canal('conhecimento:listar', a => conhecimento.listarConhecimentos({ espacoId: a.espacoId, agente: a.agente ?? null, estados: a.estados, busca: a.busca, somenteDoAgente: a.somenteDoAgente }));
+canal('conhecimento:criar', a => conhecimento.registrarConhecimento({ espacoId: a.espacoId, agente: a.agente, tipo: a.tipo, titulo: a.titulo, texto: a.texto, origem: 'PESSOA' }));
+canal('conhecimento:decidir', a => conhecimento.decidirConhecimento(a.id, a.estado));
+canal('conhecimento:apagar', async (a, janela) => { const r = await dialog.showMessageBox(janela!, { type: 'warning', buttons: ['Cancelar', 'Apagar'], defaultId: 0, cancelId: 0, title: 'Apagar conhecimento', message: 'Apagar este conhecimento do banco deste computador?', detail: 'Os agentes deixam de usá-lo. O conhecimento inicial do Prumo não pode ser apagado, só descartado.' }); return r.response === 1 ? conhecimento.apagarConhecimento(a.id) : { apagado: false, canceled: true }; });
+canal('conhecimento:vocabulario', a => conhecimento.vocabularioDoAgente(a.agente));
+canal('conhecimento:esquecer', a => conhecimento.esquecerTermo(a.agente, a.termo));
+canal('conhecimento:mostrar', () => { const alvo = conhecimento.caminhoConhecimento(); conhecimento.lerPerfil(); shell.showItemInFolder(alvo); return { arquivo: alvo }; });
+canal('perfil:obter', () => conhecimento.lerPerfil());
+canal('perfil:salvar', a => conhecimento.salvarPerfil({ ...(a.comoChamar !== undefined ? { comoChamar: a.comoChamar } : {}), ...(a.papel !== undefined ? { papel: a.papel } : {}) }));
+canal('conversas:apagar', async (a, janela) => { const r = await dialog.showMessageBox(janela!, { type: 'warning', buttons: ['Cancelar', 'Apagar conversas'], defaultId: 0, cancelId: 0, title: 'Apagar conversas', message: 'Apagar as conversas do chat gravadas neste computador para este projeto?', detail: 'Os agentes, contextos e históricos do núcleo não são afetados.' }); return r.response === 1 ? apagarConversas(a.espacoId) : { apagado: false, canceled: true }; });
+canal('ia:delegacao', async (a, janela) => {
+  if (a.valor) { const nome = a.provedor === 'claude' ? 'Claude Code' : 'Codex'; const r = await dialog.showMessageBox(janela!, { type: 'question', buttons: ['Cancelar', 'Autorizar ' + nome], defaultId: 0, cancelId: 0, title: 'Autorizar ' + nome + ' no chat', message: 'Permitir que o chat do Prumo envie perguntas ao ' + nome + ' instalado neste computador?', detail: 'Quando você escolher ' + nome + ' no chat, a pergunta, a skill do agente e os fatos locais usados na resposta são enviados ao CLI, que usa a conta e as regras do próprio ' + nome + '. Você pode revogar a qualquer momento.' }); if (r.response !== 1) return { canceled: true, ia: lerPreferencias().ia }; }
+  return { canceled: false, ia: autorizarDelegacao(a.provedor, a.valor).ia };
+});
 canal('agentes:estado', a => ({ configuracao: agentes.configuracaoDoEspaco(a.espacoId), matriz: agentes.matrizDePoliticas(a.espacoId), especializacoes: agentes.especializacoes, propostasIA: props.listarPropostas(a.espacoId).filter(p => p.origem === 'IA').length }));
 canal('agentes:salvar', async (a, j) => {
   const i = idiomaAtual(); const bloq = Object.entries(a.politicas).filter(([, v]) => v === 'BLOQUEADO').map(([k]) => k).join(', ') || '—';
