@@ -13,7 +13,7 @@ Entrada nova no topo com `status: "repositorio"`, `date: null`, `releaseUrl: nul
 
 ## 3. Ajuda e site
 
-- Páginas de ajuda em `app/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `src/painel.ts` (`documentosAjuda`) e no índice de `app/renderer/apoio-v40.js`.
+- Páginas de ajuda em `app/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `src/painel.ts` (`documentosAjuda`) e no índice de `app/renderer/telas/ajuda/mostrarAjuda.js`.
 - Textos novos da interface com tradução em `app/renderer/i18n-en-*.js`.
 - Capturas do site: `node scripts/capturar-site.mjs` (aplicativo real, dados sintéticos). Textos do site: `scripts/gerar-site.mjs`.
 - `npm run site` e conferir `site/public` (escuro, claro e celular). O site e a ajuda do aplicativo leem os mesmos arquivos de `app/ajuda`.

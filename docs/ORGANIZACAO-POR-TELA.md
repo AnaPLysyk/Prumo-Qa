@@ -75,9 +75,19 @@ O compilador ainda usa `src/` como `rootDir`. Para não quebrar `dist/`, CLI, El
 | `src/diagnostico.ts` | `src/modulos/logs/diagnosticoIpc.ts` | Registrar diagnósticos IPC |
 | `src/textosDesktop.ts` | `src/modulos/configuracoes/textosDesktop.ts` | Textos da bandeja do desktop |
 
+## Segunda etapa: arquivos existentes na branch, separados por tela
+
+Agora os scripts de interface estão dentro de `app/renderer/telas/`, carregados explicitamente por `app/renderer/index.html`. Projetos tem seu formulário em `telas/projetos/modais/criarEditarProjeto/`. Suporte e Ajuda já possuem arquivos separados; Contextos é um modal em Agentes. Os scripts genéricos `plataforma.js` e `apoio-v40.js` foram deixados apenas como marcadores de migração, **não executados** na página.
+
+No backend, `src/espacos.ts` passou a reexportar funções de `src/modulos/projetos/espacos/`, cada ação no seu arquivo; `src/contratoDetectado.ts` reexporta detectar, resumir e gravar um contrato autorizado de `src/modulos/projetos/contrato/`. As ações de outras telas ainda usam os caminhos antigos.
+
+**Leia `docs/GUIA-CODIGO-POR-TELA.md`** para acompanhar a lógica da tela Projetos, incluindo os canais IPC, a regra e o armazenamento.
+
+Há etapas posteriores obrigatórias: migrar arquivos grandes `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js`, `integracoes.js`; só depois reorganizar `rootDir`, `dist`, Electron, CLI, MCP e instalador para o layout final `frontend/` e `backend/`. Login, banco multiusuário e API HTTPS continuam como proposta.
+
 ## O que **não** foi migrado
 
-Os demais arquivos de `src/`, os arquivos do renderer em `app/renderer/`, os 119 canais IPC, o servidor MCP, o worker e o instalador continuam em seus caminhos originais. Login, cadastro, permissões por usuário, API HTTPS e PostgreSQL pertencem à **proposta**, não são funcionalidades já implementadas. Não copiar o HTML da documentação viva como se fosse uma aplicação operacional.
+Os arquivos restantes em `src/` e `app/renderer/` (fora dos módulos listados), os 119 canais IPC, o servidor MCP, o worker e o instalador continuam em seus caminhos originais. Login, cadastro, permissões por usuário, API HTTPS e PostgreSQL pertencem à **proposta**, não são funcionalidades já implementadas. Não copiar o HTML da documentação viva como se fosse uma aplicação operacional.
 
 ## Migração seguinte, módulo por módulo
 
