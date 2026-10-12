@@ -16,17 +16,17 @@ import { responderSobreTeste } from './responderSobreTeste.js';
 import { separarAprendizados } from './separarAprendizados.js';
 import { Acao, Coleta, Opcoes, Resposta } from '../tipos/chat.js';
 import { Conhecimento } from '../tipos/conhecimento.js';
+import { montarResposta } from './montarResposta.js';
+import { juntarConhecimentos } from './juntarConhecimentos.js';
 import { AgenteChat, agentesChat } from '../tipos/persona.js';
 import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 
 export async function conversar(o: Opcoes): Promise<Resposta> {
   const pergunta = o.pergunta.trim(); const estilo = o.estilo ?? 'amigavel'; const nome = (o.nome || 'Prumo').slice(0, 40); const historico = (o.historico ?? []).slice(-6);
   const perfil = tentarOuPadrao(() => lerPerfil(o.base), null); const pessoa = perfil?.comoChamar ?? null;
-  const montar = (agente: AgenteChat, c: Coleta, modo: Resposta['modo'], extra: Partial<Resposta> & { rota?: Resposta['rota'] } = {}): Resposta => ({ agente: { id: agente.id, nome: agente.nome, especializacao: agente.especializacao },
-    linhas: c.linhas.map((l) => mascarar(l)), fontes: c.fontes, modo, estilo, rota: extra.rota ?? [], fatos: c.fatos, proximos: extra.proximos ?? [], acoes: extra.acoes ?? [], pendente: extra.pendente ?? null, pessoa: extra.pessoa !== undefined ? extra.pessoa : pessoa, continuou: extra.continuou ?? false, ...(extra.aviso ? { aviso: extra.aviso } : {}) });
+  const montar = (agente: AgenteChat, c: Coleta, modo: Resposta['modo'], extra: Partial<Resposta> & { rota?: Resposta['rota'] } = {}): Resposta => montarResposta(agente, c, modo, estilo, pessoa, extra);
 
   // 1) Conversas sobre a própria relação (como chamar, papel, ensinar, o que sabe): respondidas localmente, sempre.
   const meta = intencaoDePerfil(pergunta, historico, perfil, o.base) ?? intencaoDeAprender(pergunta, o.espacoId, o.agente, o.base) ?? intencaoDeSaber(pergunta, o.espacoId, o.agente, o.base);
@@ -40,15 +40,7 @@ export async function conversar(o: Opcoes): Promise<Resposta> {
   const teste = o.contexto?.tipo === 'teste' ? responderSobreTeste(o.contexto, o.espacoId, o.base) : null;
   const r = teste ? { agente: teste.agente!, rota: [], continuou: false } : escolherAgente(pergunta, o.agente, { historico, aprendidos });
   const agente = r.agente; const local = teste ?? await responderComDadosLocais(agente, pergunta, o.espacoId, o.base);
-  // Seguimento ("e mais?"): busca pela pergunta anterior e mostra o que ainda não foi dito (do 2º item em diante).
-  const anterior = r.continuou ? historico.at(-1)?.pergunta ?? '' : '';
-  const rel = tentarOuPadrao(() => anterior ? conhecimentosRelevantes(o.espacoId, agente.id === 'orquestrador' ? null : agente.id, anterior, 4, o.base).slice(1, 3) : conhecimentosRelevantes(o.espacoId, agente.id === 'orquestrador' ? null : agente.id, pergunta, 2, o.base), [] as Conhecimento[]);
-  if (rel.length) {
-    const sabidas = rel.map((c) => `${c.origem === 'PRUMO' ? 'Do que eu sei' : 'Do que você me ensinou'} — ${semAcentos(c.texto).startsWith(semAcentos(c.titulo)) ? '' : c.titulo + ': '}${c.texto.length > 420 ? c.texto.slice(0, 420) + '…' : c.texto}`);
-    if (local.generico || local.vazio) local.linhas = sabidas; else local.linhas.push(...sabidas);
-    if (!local.fontes.some((f) => f.aba === 'agentes')) local.fontes.push({ rotulo: 'Cérebro', aba: 'agentes' }); local.fatos.push(`conhecimentos=${rel.length}`);
-  }
-  if (r.continuou && !rel.length) local.linhas.push('Sobre isso não tenho mais nada registrado. Posso chamar outro agente, ou você me ensina com "lembra que…".');
+  juntarConhecimentos(o, agente, pergunta, historico, r.continuou, local);
   const proximos = proximosPassosSugeridos(agente.id, local.fatos, perfil?.papel ?? null, pergunta);
   const comum = { rota: r.rota, continuou: r.continuou, proximos };
   const provedor = o.provedor ?? 'local'; const chave = pergunta + '|' + historico.length;
