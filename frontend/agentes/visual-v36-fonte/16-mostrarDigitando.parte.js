@@ -1,4 +1,0 @@
-/** Exibe indicador de mensagem em andamento. Parte visual de interfaces-v36.js; nao carregar separadamente. */
-    function ocupado() { const m = h('div', { class: 'v36c-ocupado', role: 'status', 'aria-label': tr('Prumo está escrevendo') }, h('span'), h('span'), h('span')); msgs.append(m); rolar(); return () => m.remove(); }
-    function chip(id) { const T = TOPICOS[id]; return h('button', { type: 'button', class: 'v36c-chip', 'data-topico': id, onclick: () => perguntar(tr(T.rot), id) }, icone(T.icone, 16), h('span', {}, tr(T.rot)), h('span', { class: 'v36c-seta', 'aria-hidden': 'true' }, '↗')); }
-    function sugerir(ids) { chips.replaceChildren(...ids.map((p) => typeof p === 'string' ? chip(p) : h('button', { type: 'button', class: 'v36c-chip', onclick: () => p.pergunta ? perguntar(p.pergunta) : p.aba && abrirTela(p.aba) }, p.rotulo))); }

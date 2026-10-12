@@ -213,5 +213,3 @@
   }
   window.PrumoTestes = Object.freeze({ blocoCodigoDoCaso, abrirNoCodigo });
 })();
-
-

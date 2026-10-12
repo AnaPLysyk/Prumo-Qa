@@ -1,3 +1,0 @@
-/** Le a resposta em voz alta quando permitido. Parte visual de interfaces-v36.js; nao carregar separadamente. */
-    function falarVoz(texto) { const ia = estado.prefs?.ia; if (!ia?.lerRespostas || !('speechSynthesis' in window) || reduzido()) return; try { const u = new SpeechSynthesisUtterance(texto); const v = speechSynthesis.getVoices().find((x) => x.name === ia.voz); if (v) u.voice = v; u.lang = v?.lang || (PrumoI18n.idioma === 'en' ? 'en-US' : 'pt-BR'); speechSynthesis.speak(u); } catch { /* sem voz disponível */ } }
-    const TOPICO_AGENTE = { tests: 'qa-geral', agents: 'orquestrador', logs: 'investigacao-bugs', metrics: 'monitoramento', history: 'monitoramento' };

@@ -10,7 +10,7 @@ const manifest = JSON.parse(fs.readFileSync('scripts/telas-modulares.json','utf8
 test('bundles da interface são reproduzidos exatamente pelas partes de cada tela', () => {
   assert.equal(manifest.schemaVersion, 1);
   for (const bundle of manifest.bundles) {
-    assert.ok(bundle.origens.length > 5, 'número de partes de '+bundle.destino);
+    assert.ok(bundle.origens.length > 0, 'bundle sem fontes: '+bundle.destino);
     const texto = bundle.origens.map(origem => {
       const fonte = fs.readFileSync(path.join(raiz, origem),'utf8');
       assert.match(fonte, /^\/\*\* [^\n]+\. \*\/\n/, 'descrição na primeira linha: '+origem);

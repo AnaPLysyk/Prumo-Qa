@@ -1,3 +1,0 @@
-/** Preserva as janelas de Perfil e Cerebro no modo claro. Estilo de interfaces-v36.css; nao carregar isoladamente. */
-/* Perfil, Cérebro e mapa continuam como janelas para o espaço profundo, também no claro */
-:root[data-tema=claro] .v36a-perfil,:root[data-tema=claro] .v36-stage.v36a-cerebro,:root[data-tema=claro] .v36a-mapa{--texto:#eef3ff;--suave:#9fb0cf;background:radial-gradient(ellipse 65% 55% at 50% 45%,color-mix(in srgb,var(--face-color,#6ea8ff) 24%,transparent),transparent 72%),linear-gradient(180deg,#0a1429,#040814);color:#eef3ff}
