@@ -18,3 +18,9 @@ As partes `.parte.js` são **trechos-fonte**, não programas independentes. O sc
 Use `node scripts/gerar-telas-modulares.mjs` para regenerar; `node scripts/gerar-telas-modulares.mjs --check` para comparar sem alterar; e `npm.cmd run check` para validar. O comando antigo `scripts/gerar-telas-v40.mjs` continua funcionando como ponte temporária.
 
 **Aviso:** Agentes personalizados seguem como prévias locais; essas telas ainda não representam execução independente, banco multiusuário ou API web. Essas funções permanecem na Proposta.
+
+## Onde encontrar os estilos
+
+Os estilos antigos de `interfaces-v36.css` agora também possuem fontes nomeadas por função em pastas `visual-v36-estilos` dentro de cada tela. Exemplos: `telas/logs/visual-v36-estilos/06-terminal.parte.css`, `telas/historico/visual-v36-estilos/07-historico.parte.css`, `telas/metricas/visual-v36-estilos/08-metricas.parte.css` e `telas/agentes/visual-v36-estilos/14-atividades.parte.css`.
+
+Os arquivos `.parte.css` são trechos que se juntam **sem alterar uma única regra**. O navegador continua carregando `interfaces-v36.css` do mesmo endereço, preservando a ordem da cascata. Não vincular as partes diretamente ao HTML.

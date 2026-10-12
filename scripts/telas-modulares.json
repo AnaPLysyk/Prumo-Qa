@@ -144,6 +144,38 @@
         "app/renderer/telas/compartilhado/visual-v36-fonte/75-inicializarInterfaceV36.parte.js",
         "app/renderer/telas/compartilhado/visual-v36-fonte/76-aguardarInicializacaoV36.parte.js"
       ]
+    },
+    {
+      "destino": "app/renderer/interfaces-v36.css",
+      "origens": [
+        "app/renderer/telas/compartilhado/visual-v36-estilos/00-base-visual.parte.css",
+        "app/renderer/telas/compartilhado/visual-v36-estilos/01-layout-das-telas.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/02-chat-conversa.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/03-assistente-flutuante.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/04-chat-compacto.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/05-assistente-lateral.parte.css",
+        "app/renderer/telas/logs/visual-v36-estilos/06-terminal.parte.css",
+        "app/renderer/telas/historico/visual-v36-estilos/07-historico.parte.css",
+        "app/renderer/telas/metricas/visual-v36-estilos/08-metricas.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/09-painel-agentes.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/10-retratos.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/11-lista-e-abas.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/12-detalhes.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/13-cerebro.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/14-atividades.parte.css",
+        "app/renderer/telas/compartilhado/visual-v36-estilos/15-responsividade.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/16-cenario-espacial.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/17-constelacoes.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/18-janelas-espaciais.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/19-robos-e-neuronios.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/20-neuronios-cerebro.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/21-area-clicavel-assistente.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/22-agentes-tema-claro.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/23-janelas-tema-claro.parte.css",
+        "app/renderer/telas/configuracoes/visual-v36-estilos/24-menu-lateral.parte.css",
+        "app/renderer/telas/agentes/visual-v36-estilos/25-seletor-agente-provedor.parte.css",
+        "app/renderer/telas/configuracoes/visual-v36-estilos/26-ajustes-assistente.parte.css"
+      ]
     }
   ]
 }

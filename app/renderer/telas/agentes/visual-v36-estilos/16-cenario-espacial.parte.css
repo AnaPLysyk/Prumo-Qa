@@ -1,0 +1,10 @@
+/** Define o fundo espacial da tela Agentes. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* ---------- Agentes no espaço profundo (mesmo visual nos temas claro e escuro) ---------- */
+.v36a{--fundo:#040713;--fundo2:#070d1d;--painel:#0b1326;--linha:rgba(130,165,230,.16);--texto:#eef3ff;--suave:#9fb0cf;--acento:#7cb6ff;--acento-texto:#03101f;--ok:#5fe0a6;--falha:#ff8597;--aviso:#efc35b;--neutro:#9fb0cf;--qc-azul:124,182,255;--qc-branco:244,247,255;--qc-vermelho:255,82,108;position:relative;isolation:isolate;color:var(--texto);color-scheme:dark}
+body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
+body[data-tela=agentes] .topo-direita{--fundo:#040713;--painel:#0b1326;--linha:rgba(130,165,230,.22);--texto:#eef3ff;--suave:#9fb0cf;color-scheme:dark}
+.v36a-ceu{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none;display:block}
+.v36a .v36-portrait img,:root[data-tema=claro] .v36a .v36-portrait img{mix-blend-mode:normal}
+.v36a-abas{border-bottom-color:rgba(130,165,230,.14)}
+.v36a-busca{background:rgba(8,14,30,.55);border-color:rgba(130,165,230,.22);backdrop-filter:blur(8px)}
+.v36a-primario{box-shadow:0 0 24px -6px var(--acento)}
