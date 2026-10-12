@@ -1,4 +1,4 @@
-/** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado do código pela reorganização. */
+/** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado por npm run leia-me; não edite à mão. */
 export const arquivosDosCanais: Record<string, string> = {
   'agenda:autorizar': 'backend/agendamentos/api/agendaAutorizar.ts > autorizarRotina, obterRotina, permissoesDaRotina, textoNoIdioma, confirmarNoWindows, idiomaAtual, solicitarAprovacao',
   'agenda:estado': 'backend/agendamentos/api/agendaEstado.ts > desativarRotina, pausarRotina, retomarRotina',

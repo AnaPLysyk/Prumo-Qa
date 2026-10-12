@@ -83,10 +83,24 @@ export function gerarLeiaMe() {
     }
     saida.set(path.join(dir, 'LEIA-ME.md'), linhas.join('\n'));
   }
+  saida.set(path.join(raiz, 'aplicativo', 'api', 'arquivosDosCanais.ts'), arquivosDosCanais());
   return saida;
+}
+
+/** Para cada canal da janela: o arquivo api/ que o atende e as funções do backend que ele chama (lidas dos imports). */
+function arquivosDosCanais() {
+  const linhas = [];
+  for (const rel of fs.readdirSync(raiz, { recursive: true }).map(String).filter((n) => /[\\/]api[\\/][^\\/]+\.ts$/.test(n))) {
+    const arq = path.join(raiz, rel).split(path.sep).join('/'); const texto = fs.readFileSync(arq, 'utf8');
+    const canal = /TratadorDoCanal<'([a-z]+:[a-z]+)'>/.exec(texto)?.[1]; if (!canal) continue;
+    const chamadas = [...texto.matchAll(/^import \{ ([^}]+) \} from '\.[^']*';$/gm)].flatMap((m) => m[1].split(',').map((s) => s.trim())).filter((n) => n && n !== 'TratadorDoCanal' && !/^[A-Z]/.test(n));
+    linhas.push([canal, `  '${canal}': '${arq}${chamadas.length ? ' > ' + chamadas.join(', ') : ''}',`]);
+  }
+  linhas.sort((a, b) => a[0].localeCompare(b[0]));
+  return '/** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado por npm run leia-me; não edite à mão. */\nexport const arquivosDosCanais: Record<string, string> = {\n' + linhas.map((l) => l[1]).join('\n') + '\n};\n';
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   for (const [arq, texto] of gerarLeiaMe()) fs.writeFileSync(arq, texto);
-  console.log('LEIA-ME do backend atualizados.');
+  console.log("LEIA-ME do backend e arquivosDosCanais.ts atualizados.");
 }
