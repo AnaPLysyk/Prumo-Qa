@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 45
     permissions:
       contents: write
+      actions: write   # dispara o fluxo do site depois de marcar a versão como publicada
     env:
       # Prumo QA Lab público, fixado por commit: a demonstração 2.8 usa uma CÓPIA dele; o laboratório não é alterado nem entra no instalador.
       PRUMO_LAB_DIR: ${{ github.workspace }}\.lab
@@ -199,6 +200,31 @@ jobs:
           $local = (Get-FileHash (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName -Algorithm SHA256).Hash.ToLower()
           if ($hash -ne $local) { throw "O instalador publicado difere do gerado: $hash <> $local" }
           "Release v$v conferida; SHA-256 $hash"
-          # O catálogo (app/versoes.json) só pode marcar a versão como publicada depois da tag; o commit seguinte faz isso e o site é publicado a partir dele.
-          $estado = ((Get-Content app/versoes.json -Raw | ConvertFrom-Json).versions | Where-Object { $_.version -eq $v }).status
-          "::notice::Catálogo marca $v como '$estado'. Se não for 'publicada', faça o commit de publicação do catálogo e o deploy do site."
+          "SHA256_PUBLICADO=$hash" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+      # Fim da rotina (2.10.1): com a release conferida, o catálogo passa a "publicada" (data, link e SHA-256) num commit na main
+      # e o site é publicado a partir dele. O aplicativo instalado das pessoas avisa sozinho (sino + notificação do Windows).
+      - name: Marcar a versão como publicada no catálogo e publicar o site
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $data = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'E. South America Standard Time').ToString('yyyy-MM-dd')
+          git fetch --no-tags origin main
+          git checkout -B main origin/main
+          node scripts/publicar-versao.mjs $v $env:SHA256_PUBLICADO $data
+          if ($LASTEXITCODE -ne 0) { throw "Não foi possível marcar $v como publicada no catálogo" }
+          git diff --quiet -- app/versoes.json
+          if ($LASTEXITCODE -ne 0) {
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add app/versoes.json
+            git commit -m "docs($v): catálogo marca a $v como publicada (release, instalador e SHA-256 conferidos pelo CI)"
+            git push origin main
+            if ($LASTEXITCODE -ne 0) { throw "Falha ao enviar o catálogo publicado para a main" }
+          } else { "Catálogo já marcava $v como publicada." }
+          # Push feito com o token do Actions não dispara outros fluxos: o site é disparado explicitamente.
+          Invoke-RestMethod -Method Post -Uri "https://api.github.com/repos/$env:GITHUB_REPOSITORY/actions/workflows/site.yml/dispatches" `
+            -Headers @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' } -ContentType 'application/json' -Body '{"ref":"main"}'
+          "::notice::$v publicada: release, catálogo e site disparado. O aplicativo instalado avisa as pessoas sozinho."

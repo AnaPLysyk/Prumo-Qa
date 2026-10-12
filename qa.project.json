@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 2,
+  "id": "prumo-qa",
+  "name": "Prumo QA — o próprio aplicativo",
+  "context": {
+    "documentation": ["README.md", "AGENTS.md", "docs/", "app/ajuda/"],
+    "tests": ["testes/"],
+    "code": ["src/", "app/renderer/", "scripts/", "package.json"]
+  },
+  "commands": {
+    "build": {
+      "executable": "npm",
+      "args": ["run", "build"],
+      "timeoutMs": 300000
+    },
+    "unidade": {
+      "executable": "node",
+      "args": ["scripts/qa-suite.mjs"],
+      "env": { "PRUMO_QA_GRUPO": "unidade", "PRUMO_MIGRACAO": "0" },
+      "requiredFiles": ["dist/cli.js"]
+    },
+    "janela-1": {
+      "executable": "node",
+      "args": ["scripts/qa-suite.mjs"],
+      "env": { "PRUMO_QA_GRUPO": "janela-1", "PRUMO_MIGRACAO": "0" },
+      "requiredFiles": ["dist/cli.js"]
+    },
+    "janela-2": {
+      "executable": "node",
+      "args": ["scripts/qa-suite.mjs"],
+      "env": { "PRUMO_QA_GRUPO": "janela-2", "PRUMO_MIGRACAO": "0" },
+      "requiredFiles": ["dist/cli.js"]
+    },
+    "janela-3": {
+      "executable": "node",
+      "args": ["scripts/qa-suite.mjs"],
+      "env": { "PRUMO_QA_GRUPO": "janela-3", "PRUMO_MIGRACAO": "0" },
+      "requiredFiles": ["dist/cli.js"]
+    }
+  },
+  "execution": {
+    "requireApproval": true,
+    "blockedByDefault": [],
+    "environment": "host",
+    "envAllowlist": ["PRUMO_QA_GRUPO", "PRUMO_MIGRACAO", "TEMP", "TMP", "USERPROFILE"],
+    "timeoutMs": 300000,
+    "maxOutputBytes": 1048576
+  }
+}

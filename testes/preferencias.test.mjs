@@ -8,10 +8,26 @@ import { lerPreferencias, alterarPreferencias, marcarVisualizada, avisoPendente,
 const base = (t) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-pref-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };
 const nova = { versao: '9.9.0', notas: '- Correção importante\n- Segurança reforçada' };
 
-test('padrão seguro: nada ligado, sem consulta, sem aviso', (t) => {
+test('padrão: aviso automático de versão nova ligado (2.10.1), som desligado, sem aviso pendente', (t) => {
   const b = base(t); assert.deepEqual(lerPreferencias(b), padrao);
-  assert.equal(padrao.verificarAoIniciar, false); assert.equal(padrao.som, false);
+  assert.equal(padrao.avisoAutomatico, true); assert.equal(padrao.verificarAoIniciar, false); assert.equal(padrao.som, false);
   assert.equal(avisoPendente('2.4.0', b).indicador, false);
+});
+
+test('arquivo da 2.9 (verificarAoIniciar=false gravado, sem avisoAutomatico) passa a avisar; desligar é respeitado', (t) => {
+  const b = base(t); fs.mkdirSync(b, { recursive: true });
+  fs.writeFileSync(path.join(b, 'preferencias.json'), JSON.stringify({ version: 1, verificarAoIniciar: false, som: false, silenciar: false, versaoVisualizada: null, versaoNotificada: null, disponivel: null, ultimaConsulta: null }));
+  assert.equal(lerPreferencias(b).avisoAutomatico, true);
+  alterarPreferencias({ avisoAutomatico: false }, b); assert.equal(lerPreferencias(b).avisoAutomatico, false);
+});
+
+test('notificação visual: uma vez por versão, independente do som; silenciar só cala o som', (t) => {
+  const b = base(t); alterarPreferencias({ silenciar: true }, b);
+  const r1 = registrarConsulta(nova, b); assert.equal(r1.notificar, true); assert.equal(r1.tocarSom, false);
+  assert.equal(registrarConsulta(nova, b).notificar, false, 'a mesma versão não notifica de novo');
+  marcarVisualizada('9.9.0', b); assert.equal(registrarConsulta(nova, b).notificar, false, 'versão vista não notifica');
+  assert.equal(registrarConsulta({ versao: '9.10.0', notas: '' }, b).notificar, true, 'versão mais nova notifica');
+  assert.equal(registrarConsulta(null, b).notificar, false);
 });
 
 test('uma consulta com versão nova acende o indicador e ele persiste ao reabrir (offline)', (t) => {

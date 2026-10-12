@@ -22,7 +22,7 @@ Não. O Prumo só mostra o que mede de verdade: operações, achados, lacunas, r
 Não. Ele só vê as chamadas que chegam às suas quatro ferramentas. O que ele devolve à IA passa a ser tratado pelo provedor dela.
 
 ## Como sei se há uma nova versão?
-Em Atualizações, clique em Verificar atualizações. Nada é baixado nem instalado sem a sua ação, e seus dados são preservados.
+O Prumo avisa sozinho quando sai uma versão nova: o sino acende e chega uma notificação do Windows, uma vez por versão. Você também pode clicar em Verificar atualizações em Ajuda › Atualizações. Nada é baixado nem instalado sem a sua ação, e seus dados são preservados.
 
 ## Como apago meus dados?
 Em Privacidade e dados. Cada exclusão (histórico, evidências, diagnóstico) é separada, pede confirmação e nunca toca no código do projeto.

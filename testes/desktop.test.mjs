@@ -101,6 +101,8 @@ test('fluxo ponta a ponta: MCP real aparece em logs ao vivo, métricas e histór
   assert.match(await primeira.page.textContent('#conteudo'), /não observa se a IA as aplicou/);
   // A tentativa bloqueada gerou evidência real BLOCKED (não executada), sem qualquer PASS.
   await ir(primeira.page, 'evidencias');
+  // O modal abre com "Consultando evidência…": espera o conteúdo real (no CI a consulta é mais lenta).
+  await primeira.page.waitForFunction(() => /BLOCKED/.test(document.querySelector('#qualidade-dialog')?.textContent ?? ''), null, { timeout: 15000 });
   const ev = await primeira.page.textContent('#qualidade-dialog');
   assert.match(ev, /unit\s*BLOCKED/); assert.match(ev, /HUMAN_APPROVAL_REQUIRED/); assert.match(ev, /não executado/); assert.doesNotMatch(ev, /PASS|null/);
   await primeira.fechar();

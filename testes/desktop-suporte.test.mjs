@@ -25,7 +25,7 @@ test('sino: sem novidade não acende; versão nova acende, mostra resumo por mou
   const s = await servidor(t); const dados = novoDados(t);
   const { app, page, erros } = await abrir(t, dados, [], s.env);
   assert.equal(await ponto(page), false); assert.match(await page.getAttribute('#sino', 'aria-label'), /nenhuma novidade/);
-  assert.equal(s.pedidos(), 0, 'nada é consultado ao abrir com a preferência desligada');
+  assert.equal(s.pedidos(), 0, 'nada é consultado ao abrir com o aviso automático desligado');
   await abrirVerificacao(page);
   assert.equal(await ponto(page), true); assert.match(await page.getAttribute('#sino', 'aria-label'), /99\.0\.0/);
   // mouse
@@ -56,24 +56,44 @@ test('indicador persiste offline quando a versão ainda não foi vista', async (
 test('som: toca uma única vez por versão (nem na consulta seguinte nem ao reabrir); silenciar e som desligado não tocam', async (t) => {
   if (exe) return t.skip('servidor de teste só é aceito fora do pacote');
   const s = await servidor(t); const dados = novoDados(t);
+  const auto = { ...s.env, PRUMO_SEM_AVISO_AUTOMATICO: '0' };
   let w = await abrir(t, dados, [], s.env);
-  assert.equal((await chamar(w.page, 'salvarPreferencias', { som: true, verificarAoIniciar: true })).ok, true);
+  assert.equal((await chamar(w.page, 'salvarPreferencias', { som: true })).ok, true);
   await w.app.close();
-  // 1ª abertura com verificação ao iniciar: toca uma vez
-  w = await abrir(t, dados, [], s.env); await w.page.waitForFunction(() => window.__prumoSom === 1, null, { timeout: 15000 });
+  // 1ª abertura com o aviso automático (padrão ligado): toca uma vez
+  w = await abrir(t, dados, [], auto); await w.page.waitForFunction(() => window.__prumoSom === 1, null, { timeout: 20000 });
   assert.equal(await ponto(w.page), true);
   // nova consulta manual na mesma sessão: não repete
   await abrirVerificacao(w.page); await w.page.waitForTimeout(500); assert.equal(await sons(w.page), 1);
   // reabrir (a versão ainda não foi vista, o indicador volta, mas o som já foi dado): não repete
-  await w.app.close(); w = await abrir(t, dados, [], s.env); await w.page.waitForSelector('#sino-ponto:not([hidden])'); await w.page.waitForTimeout(800);
+  await w.app.close(); w = await abrir(t, dados, [], auto); await w.page.waitForSelector('#sino-ponto:not([hidden])'); await esperarPedidos(s, 3); await w.page.waitForTimeout(3500);
   assert.equal(await sons(w.page), 0, 'o som não repete ao reabrir');
-  assert.equal(s.pedidos(), 3, 'uma consulta por abertura com a opção ligada + uma manual');
+  assert.equal(s.pedidos(), 3, 'uma consulta automática por abertura + uma manual');
   // silenciar
   const d2 = novoDados(t); let q = await abrir(t, d2, [], s.env);
-  await chamar(q.page, 'salvarPreferencias', { som: true, silenciar: true, verificarAoIniciar: true }); await q.app.close();
-  q = await abrir(t, d2, [], s.env); await q.page.waitForSelector('#sino-ponto:not([hidden])'); await q.page.waitForTimeout(800); assert.equal(await sons(q.page), 0, 'silenciado');
+  await chamar(q.page, 'salvarPreferencias', { som: true, silenciar: true }); await q.app.close();
+  q = await abrir(t, d2, [], auto); await q.page.waitForSelector('#sino-ponto:not([hidden])', { timeout: 20000 }); await q.page.waitForTimeout(3500); assert.equal(await sons(q.page), 0, 'silenciado');
   // som desligado (padrão)
   const d3 = novoDados(t); let z = await abrir(t, d3, [], s.env); await abrirVerificacao(z.page); await z.page.waitForTimeout(500); assert.equal(await sons(z.page), 0, 'som desligado por padrão');
+});
+
+test('aviso automático (2.10.1): ligado por padrão, consulta ao abrir, acende o sino e avisa uma vez por versão; desligado não consulta', async (t) => {
+  if (exe) return t.skip('servidor de teste só é aceito fora do pacote');
+  const s = await servidor(t); const dados = novoDados(t); const auto = { ...s.env, PRUMO_SEM_AVISO_AUTOMATICO: '0' };
+  let w = await abrir(t, dados, [], auto);
+  assert.equal((await chamar(w.page, 'preferencias')).data.preferencias.avisoAutomatico, true, 'ligado por padrão');
+  await w.page.waitForSelector('#sino-ponto:not([hidden])', { timeout: 20000 }); assert.equal(s.pedidos(), 1, 'uma consulta ao abrir');
+  const eventos = async (page) => (await chamar(page, 'workerEventos', 0)).data.eventos.filter((e) => e.tipo === 'ATUALIZACAO_DISPONIVEL');
+  const ev = await eventos(w.page); assert.equal(ev.length, 1); assert.match(ev[0].titulo, /99\.0\.0/); assert.equal(ev[0].destino, 'atualizacoes');
+  await w.page.waitForFunction(() => /99\.0\.0 disponível/.test(document.querySelector('#aviso').textContent));
+  // reabrir: consulta de novo, mas não avisa a mesma versão outra vez
+  await w.app.close(); w = await abrir(t, dados, [], auto); await esperarPedidos(s, 2); await w.page.waitForTimeout(3500);
+  assert.equal((await eventos(w.page)).length, 0, 'a mesma versão não é avisada duas vezes');
+  // desligar pela interface: nenhuma consulta ao abrir
+  await abrirAjudaItem(w.page, 'Atualizações'); assert.equal(await w.page.isChecked('#pref-avisoAutomatico'), true);
+  await w.page.uncheck('#pref-avisoAutomatico'); await w.page.waitForFunction(async () => (await window.prumo.preferencias()).data.preferencias.avisoAutomatico === false);
+  await w.app.close(); w = await abrir(t, dados, [], auto); await w.page.waitForTimeout(6000);
+  assert.equal(s.pedidos(), 2, 'desligado: nada é consultado ao abrir');
 });
 
 test('preferências: padrão seguro, alteração pela interface, persistência e recusa de campos desconhecidos', async (t) => {
@@ -132,5 +152,6 @@ test('Suporte: sistema e diagnóstico só entram quando marcados', async (t) => 
   assert.doesNotMatch(previa, /[A-Z]:\\|projects?\/|\.prumo/i, 'sem caminhos locais');
 });
 
+async function esperarPedidos(s, n) { for (let i = 0; i < 100 && s.pedidos() < n; i++) await new Promise((r) => setTimeout(r, 200)); }
 async function abrirVerificacao(page) { await abrirAjudaItem(page, 'Atualizações'); await page.click('#verificar-atualizacao'); await page.waitForSelector('#saida-atualizacao .estado'); }
 async function abrirAjudaItem(page, titulo) { await ir(page, 'ajuda'); await page.click(`.indice button:has-text("${titulo}")`); await page.waitForSelector('article h1'); }

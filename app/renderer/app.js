@@ -340,16 +340,16 @@ async function painelAtualizacoes() {
     if (r.status === 'ATUALIZACAO_DISPONIVEL') nos.push(...detalhes(r.latest, r.notes));
     saida.replaceChildren(...nos);
   } }, 'Verificar atualizações');
-  const opcao = (campo, rotulo) => h('label', { class: 'opcao' }, h('input', { type: 'checkbox', id: 'pref-' + campo, checked: p ? p[campo] : false, onchange: async (e) => {
+  const opcao = (campo, rotulo) => h('label', { class: 'opcao' }, h('input', { type: 'checkbox', id: 'pref-' + campo, checked: p ? !!p[campo] : campo === 'avisoAutomatico', onchange: async (e) => {
     const x = await chamar(() => api.salvarPreferencias({ [campo]: e.target.checked })); if (!x) { e.target.checked = !e.target.checked; return; } await atualizarSino(); avisar('Preferência salva.');
   } }), ' ' + rotulo);
   const pendente = p && p.disponivel && info ? p.disponivel : null;
   return [h('h1', {}, 'Atualizações'), h('p', {}, 'Versão instalada: ', h('strong', {}, info ? info.version : '?')),
-    h('p', { class: 'suave' }, 'O Prumo só consulta o GitHub quando você clica em verificar ou, se você ligar a opção abaixo, uma vez ao abrir o aplicativo. A verificação de atualização nunca roda em segundo plano nem por tarefa agendada (as rotinas de QA que você agenda são outra coisa e não consultam o GitHub de releases). É enviada apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.'),
+    h('p', { class: 'suave' }, 'Com o aviso automático ligado (padrão), o Prumo consulta só a release mais recente do repositório oficial no GitHub ao abrir e a cada 6 horas, mesmo minimizado na bandeja, e avisa uma vez por versão: no sino e com uma notificação do Windows. Você também pode verificar a qualquer momento pelo botão acima. É enviada apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.'),
     botao, saida,
     pendente ? h('div', { id: 'ultima-conhecida' }, h('p', { class: 'nota' }, 'Última consulta' + (p.ultimaConsulta ? ' (' + hora(p.ultimaConsulta) + ')' : '') + ': a versão ' + pendente.versao + ' estava disponível.'), ...detalhes(pendente.versao, pendente.notas)) : null,
     h('h2', {}, 'Preferências de aviso'),
-    opcao('verificarAoIniciar', 'Verificar atualizações ao abrir o aplicativo'),
+    opcao('avisoAutomatico', 'Avisar quando houver versão nova (consulta o GitHub ao abrir e a cada 6 horas)'),
     opcao('som', 'Tocar um som curto quando houver uma versão nova (uma vez por versão)'),
     opcao('silenciar', 'Silenciar: nunca tocar som, mesmo com o som ligado'),
     h('p', { class: 'suave' }, 'O sino no cabeçalho mostra um ponto enquanto houver uma versão que você ainda não viu. Clicar nele marca a versão como vista.')];
@@ -432,8 +432,9 @@ async function aplicarNotificacao(r) {
   await atualizarSino(); if (n.tocarSom) tocarSom();
 }
 async function iniciarNotificacoes() {
-  const p = await atualizarSino(); ligarSino();
-  if (p && p.preferencias.verificarAoIniciar) { const r = await chamar(api.verificarAtualizacao); await aplicarNotificacao(r); }
+  // 2.10.1: a consulta automática (ao abrir e a cada 6 horas) é feita pelo processo principal e chega como evento;
+  // aqui só se desenha o aviso já conhecido, que funciona offline.
+  await atualizarSino(); ligarSino();
 }
 
 /** Markdown mínimo (títulos, listas, código, parágrafos), sempre via nós de texto. */

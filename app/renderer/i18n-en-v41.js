@@ -19,4 +19,7 @@ Object.assign(window.PRUMO_EN, {
   'Útil': 'Helpful', 'Não ajudou': 'Not helpful',
   // Abas de Testes sem tradução (a heurística do teste de idioma não as detecta)
   'Casos Qase': 'Qase cases', 'CI e GitHub': 'CI and GitHub',
+  // Aviso automático de versão nova (2.10.1)
+  'Com o aviso automático ligado (padrão), o Prumo consulta só a release mais recente do repositório oficial no GitHub ao abrir e a cada 6 horas, mesmo minimizado na bandeja, e avisa uma vez por versão: no sino e com uma notificação do Windows. Você também pode verificar a qualquer momento pelo botão acima. É enviada apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.': 'With automatic notice on (default), Prumo queries only the latest release of the official repository on GitHub when it opens and every 6 hours, even minimized to the tray, and tells you once per version: on the bell and with a Windows notification. You can also check at any time with the button above. Only a plain HTTPS request is sent (no logs, projects, paths or identifiers); the remote server sees your IP address, as in any connection. This is not anonymity. Nothing is downloaded or installed automatically.',
+  'Avisar quando houver versão nova (consulta o GitHub ao abrir e a cada 6 horas)': 'Notify me when a new version is available (checks GitHub on opening and every 6 hours)',
 });

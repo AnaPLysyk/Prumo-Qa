@@ -154,7 +154,9 @@ test('v40: Execução em modal com Resumo, Etapas, Logs e Evidências reais; fal
   assert.equal(naoGet(a.s).length, 0, 'rascunho não envia nada ao Jira');
   await fecharModal(a.page); assert.equal(await a.page.getAttribute('[data-aba=execucoes]', 'aria-current'), 'page');
   // Evidências CLI/MCP continuam acessíveis apenas como modal de Execuções.
-  await a.page.click('#exec-evidencias'); await modal(a.page).waitFor(); assert.match(await modal(a.page).textContent(), /Nenhuma evidência|Resultados reais/); await fecharModal(a.page);
+  // O modal abre com "Consultando…": espera o conteúdo real antes de conferir (no CI a consulta é mais lenta).
+  await a.page.click('#exec-evidencias'); await modal(a.page).waitFor();
+  await a.page.waitForFunction(() => /Nenhuma evidência|Resultados reais/.test(document.querySelector('#qualidade-dialog[open]')?.textContent ?? ''), null, { timeout: 15000 }); await fecharModal(a.page);
   assert.deepEqual(a.erros, []);
 });
 

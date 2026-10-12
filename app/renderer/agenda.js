@@ -282,7 +282,9 @@ async function consultarEventos() {
   try {
     const r = await api.workerEventos(estado.ultimoEvento || 0); if (!r.ok) return; estado.ultimoEvento = r.data.ultimo;
     for (const e of r.data.eventos) {
-      if (e.tipo === 'NAVEGAR') { mostrar(e.destino); continue; }
+      if (e.tipo === 'NAVEGAR') { if (e.destino === 'atualizacoes') { estado.ajudaAlvo = 'atualizacoes'; mostrar('ajuda'); } else mostrar(e.destino); continue; }
+      // 2.10.1: aviso automático de versão nova (o processo principal consultou e decidiu: uma vez por versão).
+      if (e.tipo === 'ATUALIZACAO_DISPONIVEL') { await atualizarSino(); avisar(e.titulo + '. ' + e.detalhe); if (e.tocarSom) tocarSom(); continue; }
       const erro = ['EXECUCAO_FALHOU', 'EXECUCAO_BLOQUEADA', 'PUBLICACAO_JIRA_FALHOU', 'WORKER_INTERROMPIDO'].includes(e.tipo);
       avisar(`${e.titulo}: ${e.detalhe}`, erro);
       if (e.tipo !== 'AGENDAMENTO_INICIADO' && estado.prefs && estado.prefs.notificarAgenda !== false && estado.prefs.som && !estado.prefs.silenciar) tocarSom();

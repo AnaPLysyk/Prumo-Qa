@@ -2,6 +2,46 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.10.1",
+      "status": "repositorio",
+      "date": null,
+      "title": "Primeira release da linha 2.10, com aviso automático de versão nova",
+      "objective": "Publicar tudo o que a 2.10.0 trouxe (interfaces novas, testes ligados ao código, assistente com conhecimento aprovado) junto com o aviso automático de versão nova e uma rotina de release que termina com instalador, catálogo, site e ajuda disponíveis para todos.",
+      "features": [
+        "Aviso automático de versão nova, ligado por padrão: ao abrir e a cada 6 horas, mesmo minimizado na bandeja, o aplicativo consulta a release mais recente do repositório oficial e avisa uma vez por versão, no sino e com uma notificação do Windows que leva a Ajuda › Atualizações.",
+        "Opção \"Avisar quando houver versão nova\" em Ajuda › Atualizações, para desligar o aviso; a verificação pelo botão continua disponível.",
+        "Inclui todas as funcionalidades da 2.10.0, que não chegou a ter release: veja a entrada 2.10.0 abaixo."
+      ],
+      "improvements": [
+        "Rotina de release documentada (docs/RELEASE.md): depois da tag, o CI cria a release, marca a versão como publicada no catálogo e publica o site, esperando o commit certo no ar.",
+        "Ajuda (Privacidade e Perguntas frequentes) e política de segurança descrevem o aviso automático.",
+        "O Prumo testa o próprio Prumo: o repositório tem contrato (qa.project.json) com as capacidades build, unidade e janela-1 a janela-3, executáveis pelo MCP com aprovação humana."
+      ],
+      "fixes": [
+        "A conferência do site no CI passa a esperar o commit publicado (build.txt); antes aceitava o site anterior quando a versão anunciada não mudava.",
+        "Testes de janela que liam o modal de evidências antes de a consulta terminar (falhavam de forma intermitente no CI) passam a esperar o conteúdo real."
+      ],
+      "differential": "A versão nova chega até quem usa o Prumo sem que a pessoa precise lembrar de procurar, e nada é baixado nem instalado sem a ação dela.",
+      "howItWorks": [
+        "A consulta é a mesma da verificação manual: destino fixo no GitHub, resposta validada, sem enviar dados da pessoa. A notificação aparece uma vez por versão; \"Silenciar\" só cala o som."
+      ],
+      "security": [
+        "Nenhum dado de projeto, log ou identificador é enviado; o servidor vê o IP, como em qualquer conexão. A janela continua sem rede e nada é baixado ou executado automaticamente.",
+        "Em desenvolvimento e nos testes a consulta automática só usa o servidor local de teste."
+      ],
+      "compatibility": [
+        "Preferências e dados da 2.9 são preservados; o aviso automático começa ligado também para quem atualiza, e pode ser desligado. Quem vem da 2.9 recebe nesta versão tudo o que foi feito na 2.10.0."
+      ],
+      "limitations": [
+        "Instalador sem assinatura de código. Quem está numa versão anterior à 2.10.1 com a verificação ao abrir desligada (o padrão antigo) só fica sabendo desta versão pelo site ou pelo botão Verificar atualizações."
+      ],
+      "migration": "A instalação preserva os dados existentes; a preferência nova recebe o padrão ligado.",
+      "afterUpdate": [
+        "Se não quiser o aviso automático, desligue em Ajuda › Atualizações."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.10.0",
       "status": "repositorio",
       "date": null,
@@ -42,7 +82,8 @@
         "Instalador sem assinatura de código. Jira, Qase e GitHub foram verificados com serviços simulados e perfil temporário, sem contas reais nem autenticação humana do Windows.",
         "Defeitos do Qase são somente leitura. Execuções não têm armazenamento para anexo manual nem comentário, e não há dependência entre rotinas.",
         "Agentes personalizados são prévias locais da janela: não criam especialização, conexão nem processo no núcleo. Os retratos dos agentes são imagens com movimento CSS, sem rosto 3D.",
-        "O Painel de atividades consulta até 1000 operações, 200 execuções e 40 atendimentos por agente; início sem término não comprova processo ativo."
+        "O Painel de atividades consulta até 1000 operações, 200 execuções e 40 atendimentos por agente; início sem término não comprova processo ativo.",
+        "Sem release própria: o build da tag foi barrado por testes intermitentes do CI; o código foi publicado na 2.10.1."
       ],
       "migration": "A instalação preserva os dados existentes; conhecimento.db e as preferências novas são criados no primeiro uso.",
       "afterUpdate": [

@@ -182,6 +182,8 @@ export function gerarSite(out=path.join(repo,'site/public')) {
   fs.writeFileSync(path.join(out,'estilo.css'),css+'\n'+orb.css);fs.copyFileSync(path.join(repo,'assets/prumo-icon.png'),path.join(out,'prumo.png'));
   // O agente do site é a MESMA imagem usada pelo aplicativo no Início, no chat e em Agentes.
   fs.copyFileSync(path.join(repo,'assets/interfaces-v36/robo-original.png'),path.join(out,'agente.png'));
+  // Commit que gerou este site (Render informa RENDER_GIT_COMMIT): o CI espera ESTE commit no ar, não só a versão anunciada.
+  fs.writeFileSync(path.join(out,'build.txt'),(process.env.RENDER_GIT_COMMIT||process.env.GITHUB_SHA||'local')+'\n');
   return {pages:docs.length+6,output:out,version:pkg.version,published:published.version};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))console.log(JSON.stringify(gerarSite(),null,2));

@@ -61,9 +61,11 @@ jobs:
         run: |
           [ -z "$RENDER_DEPLOY_HOOK_URL" ] && exit 0
           esperado=$(node -e "const v=JSON.parse(require('fs').readFileSync('app/versoes.json','utf8')).versions.find(x=>x.status==='publicada');console.log(v.version)")
-          for i in $(seq 1 30); do
-            if curl -s https://prumo-qa-docs.onrender.com/versoes.html | grep -q "<strong>$esperado</strong>"; then echo "site no ar com a $esperado"; exit 0; fi
+          # 2.10.1: espera o site gerado DESTE commit (build.txt), não só a versão anunciada, que pode não ter mudado.
+          for i in $(seq 1 45); do
+            no_ar=$(curl -s https://prumo-qa-docs.onrender.com/build.txt | tr -d '[:space:]')
+            if [ "$no_ar" = "$GITHUB_SHA" ] && curl -s https://prumo-qa-docs.onrender.com/versoes.html | grep -q "<strong>$esperado</strong>"; then echo "site no ar: commit $GITHUB_SHA, versão $esperado"; exit 0; fi
             sleep 20
           done
-          echo "::error::O site no ar não passou a mostrar a versão $esperado em 10 minutos."
+          echo "::error::O site no ar não passou ao commit $GITHUB_SHA (versão $esperado) em 15 minutos (no ar: ${no_ar:-desconhecido})."
           exit 1

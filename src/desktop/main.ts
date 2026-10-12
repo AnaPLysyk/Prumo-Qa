@@ -173,9 +173,10 @@ canal('dados:excluir', async (a, janela) => {
   return { canceled: false, ...(a.escopo === 'historico' ? excluirAtividades(p) : a.escopo === 'contextos' ? excluirTodosContextos(p) : await excluirEvidencias(p)) };
 });
 
-// Atualização: consulta manual no processo principal (a janela segue sem rede). Nada é baixado nem instalado.
+// Atualização: consulta no processo principal (a janela segue sem rede). Nada é baixado nem instalado.
 let ultimaRelease: string | undefined;
-canal('atualizacao:verificar', async () => {
+canal('atualizacao:verificar', () => consultarAtualizacao());
+async function consultarAtualizacao() {
   // Servidor de teste em 127.0.0.1 só é aceito fora do pacote (desenvolvimento e testes automatizados).
   const teste = !app.isPackaged ? process.env.PRUMO_UPDATE_TEST_URL : undefined;
   let r;
@@ -184,9 +185,30 @@ canal('atualizacao:verificar', async () => {
   ultimaRelease = r.status === 'ATUALIZACAO_DISPONIVEL' ? r.url : undefined;
   // Só respostas válidas alteram o aviso persistente; falha de rede mantém o que já se sabia (o sino continua offline).
   const valido = r.status === 'ATUALIZACAO_DISPONIVEL' || r.status === 'ATUALIZADO' || r.status === 'INSTALADA_MAIS_NOVA';
-  const notificacao = valido ? registrarConsulta(r.status === 'ATUALIZACAO_DISPONIVEL' ? { versao: r.latest!, notas: r.notes ?? '' } : null) : { indicador: avisoPendente(versao).indicador, tocarSom: false, versao: null, notas: '' };
+  const notificacao = valido ? registrarConsulta(r.status === 'ATUALIZACAO_DISPONIVEL' ? { versao: r.latest!, notas: r.notes ?? '' } : null) : { indicador: avisoPendente(versao).indicador, tocarSom: false, notificar: false, versao: null, notas: '' };
   return { ...r, notificacao };
-});
+}
+/**
+ * 2.10.1: aviso automático de versão nova (padrão ligado; desliga em Ajuda › Atualizações). Ao abrir e a cada 6 horas,
+ * inclusive só na bandeja. Mesmo destino fixo da consulta manual; nenhum dado da pessoa é enviado.
+ * Fora do pacote só consulta o servidor de teste: desenvolvimento e testes nunca saem para a rede.
+ */
+const SEIS_HORAS = 6 * 60 * 60 * 1000;
+async function avisoAutomatico() {
+  if (!lerPreferencias().avisoAutomatico || process.env.PRUMO_SEM_AVISO_AUTOMATICO === '1') return;
+  if (!app.isPackaged && !process.env.PRUMO_UPDATE_TEST_URL) return;
+  const r = await consultarAtualizacao(); const n = r.notificacao;
+  if (r.status !== 'ATUALIZACAO_DISPONIVEL' || !n.notificar || !n.versao) return;
+  // A janela (se aberta) acende o sino e toca o som quando for o caso; a notificação do Windows chega mesmo só na bandeja.
+  const en = idiomaAtual() === 'en';
+  const titulo = en ? `Prumo QA ${n.versao} available` : `Prumo QA ${n.versao} disponível`;
+  const detalhe = en ? 'See what is new and download it from the official page in Help › Updates.' : 'Veja as novidades e baixe pela página oficial em Ajuda › Atualizações.';
+  empilhar({ tipo: 'ATUALIZACAO_DISPONIVEL', titulo, detalhe, destino: 'atualizacoes', tocarSom: n.tocarSom });
+  if (Notification.isSupported()) {
+    const aviso = new Notification({ title: titulo, body: detalhe + (en ? ' Nothing is downloaded or installed on its own.' : ' Nada é baixado nem instalado sozinho.'), silent: true });
+    aviso.on('click', () => navegar('atualizacoes')); aviso.show();
+  }
+}
 canal('preferencias:obter', () => ({ preferencias: lerPreferencias(), aviso: avisoPendente(versao), instalada: versao }));
 canal('preferencias:salvar', a => {
   const preferencias = alterarPreferencias(a);
@@ -411,7 +433,7 @@ canal('agentes:salvar', async (a, j) => {
 // ---- 2.8: agenda, worker residente, execuções e comentário Jira. A página nunca informa comando, caminho nem aprovação. ----
 const idiomaAtual = (): Idioma => lerPreferencias().idioma;
 const worker = new Worker({ servicos: servicos as never, aoEvento: e => publicarEvento(e) });
-type Aviso = { n: number; tipo: string; titulo: string; detalhe: string; rotinaId?: string; destino?: string; at: string };
+type Aviso = { n: number; tipo: string; titulo: string; detalhe: string; rotinaId?: string; destino?: string; tocarSom?: boolean; at: string };
 const avisos: Aviso[] = []; let contadorAviso = 0;
 function empilhar(a: Omit<Aviso, 'n' | 'at'>) { avisos.push({ ...a, n: ++contadorAviso, at: new Date().toISOString() }); if (avisos.length > 100) avisos.shift(); }
 function publicarEvento(e: EventoWorker) {
@@ -531,6 +553,9 @@ else {
     try { worker.iniciar(); } catch (err) { empilhar({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Worker', detalhe: (err as Error).message }); }
     atualizarBandeja();
     if (!iniciouOculto) mostrarJanela();
+    // 2.10.1: aviso de versão nova ao abrir (depois que a janela carrega) e a cada 6 horas, mesmo só na bandeja.
+    setTimeout(() => { void avisoAutomatico().catch(() => undefined); }, 4000).unref();
+    setInterval(() => { void avisoAutomatico().catch(() => undefined); }, SEIS_HORAS).unref();
   });
   // Sem `window-all-closed` => app.quit(): o Prumo fica residente até "Sair do Prumo".
   app.on('window-all-closed', () => undefined);

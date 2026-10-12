@@ -24,7 +24,7 @@ export const novoDados = (t) => {
 };
 export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   // VS Code/Claude definem ELECTRON_RUN_AS_NODE; com ele o Electron viraria Node puro e não abriria janela.
-  const env = { ...process.env, ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ...envExtra }; delete env.ELECTRON_RUN_AS_NODE; if (!dados) delete env.PRUMO_DATA_DIR; // sem dados: diretório padrão do usuário
+  const env = { ...process.env, PRUMO_SEM_AVISO_AUTOMATICO: '1', ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ...envExtra }; delete env.ELECTRON_RUN_AS_NODE; if (!dados) delete env.PRUMO_DATA_DIR; // sem dados: diretório padrão do usuário
   const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [path.join(repo, 'testes/desktop-entry.cjs'), ...extra], env });
   let fechado = false;
   const fechar = async () => { if (!fechado) { fechado = true; await app.close(); } };

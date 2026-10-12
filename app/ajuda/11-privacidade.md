@@ -26,7 +26,7 @@ Ao publicar um comentário de resultado no Jira (manual, depois da sua confirma�
 
 O servidor MCP responde ao cliente de IA que o iniciou. O que ele devolve (contexto autorizado, análises, evidências) passa a ser tratado por esse cliente e por seu provedor. O Prumo não recebe as conversas da IA.
 
-Ao verificar atualizações (somente quando você clica), o aplicativo faz uma requisição HTTPS ao GitHub sem enviar logs, projetos, caminhos ou identificadores. Como em qualquer conexão, o servidor remoto vê o seu endereço IP e dados normais de rede; isso não é anonimato.
+Para avisar de versões novas, o aplicativo consulta a release mais recente no GitHub ao abrir e a cada 6 horas (aviso automático, ligado por padrão e desligável em Ajuda › Atualizações) e quando você clica em verificar. É uma requisição HTTPS sem enviar logs, projetos, caminhos ou identificadores. Como em qualquer conexão, o servidor remoto vê o seu endereço IP e dados normais de rede; isso não é anonimato.
 
 A preferência de verificar ao abrir é opcional. Consultar chamado faz GET público ao GitHub oficial usando somente o número informado, sem autenticação, upload ou sincronização de dados. Preparar suporte é local; abrir o formulário ou o chamado usa o navegador após confirmação nativa. Quem publica relatos e comentários é você.
 

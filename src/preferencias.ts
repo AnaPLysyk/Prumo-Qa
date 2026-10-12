@@ -7,7 +7,9 @@ import { analisarVersao, compararVersoes } from './versoes.js';
 
 /**
  * Preferências locais de notificação (marco 2.5). Arquivo próprio em %LOCALAPPDATA%\PrumoQA\preferencias.json.
- * Tudo opcional e transparente: nada é consultado sem a pessoa ligar "verificar ao iniciar" ou clicar em verificar.
+ * 2.10.1: o aviso de versão nova é automático por padrão (avisoAutomatico): o aplicativo instalado consulta só a release
+ * mais recente do repositório oficial ao abrir e a cada 6 horas, e a pessoa pode desligar em Ajuda › Atualizações.
+ * verificarAoIniciar fica no esquema só para ler arquivos antigos; não decide mais nada.
  * Desde a 2.8 o aplicativo pode ficar residente na bandeja (processo do próprio Prumo); continua sem serviço do Windows nem tarefa agendada do sistema.
  */
 const versaoTxt = z.string().regex(/^\d+\.\d+\.\d+$/);
@@ -25,12 +27,14 @@ export const preferenciasSchema = z.object({
   versaoNotificada: versaoTxt.nullable(),   // última versão para a qual o aviso (e o som) já foram emitidos
   disponivel: z.object({ versao: versaoTxt, notas: z.string().max(4000) }).strict().nullable(), // última release mais nova que a instalada (dado público do GitHub)
   ultimaConsulta: z.string().datetime().nullable(),
+  // 2.10.1: arquivos antigos não têm o campo e recebem o padrão ligado (a 2.9 gravava verificarAoIniciar=false sem escolha da pessoa).
+  avisoAutomatico: z.boolean().default(true),
   ia: iaSchema.default(iaPadrao)
 }).strict();
 export type Preferencias = z.infer<typeof preferenciasSchema>;
-export const padrao: Preferencias = { version: 1, verificarAoIniciar: false, som: false, silenciar: false, tema: 'sistema', idioma: 'pt-BR', iniciarComWindows: false, notificarAgenda: true, versaoVisualizada: null, versaoNotificada: null, disponivel: null, ultimaConsulta: null, ia: { ...iaPadrao, delegacao: { ...iaPadrao.delegacao } } };
+export const padrao: Preferencias = { version: 1, verificarAoIniciar: false, som: false, silenciar: false, tema: 'sistema', idioma: 'pt-BR', iniciarComWindows: false, notificarAgenda: true, versaoVisualizada: null, versaoNotificada: null, disponivel: null, ultimaConsulta: null, avisoAutomatico: true, ia: { ...iaPadrao, delegacao: { ...iaPadrao.delegacao } } };
 /** Campos que a interface pode alterar diretamente. As versões só mudam por ações específicas abaixo. */
-export const alteracaoSchema = z.object({ verificarAoIniciar: z.boolean().optional(), som: z.boolean().optional(), silenciar: z.boolean().optional(), tema: z.enum(['claro', 'escuro', 'sistema']).optional(), idioma: z.enum(['pt-BR', 'en']).optional(), iniciarComWindows: z.boolean().optional(), notificarAgenda: z.boolean().optional(), ia: z.object({ nome: nomeIa.optional(), estilo: z.enum(['amigavel', 'direto', 'tecnico']).optional(), voz: z.string().max(120).nullable().optional(), lerRespostas: z.boolean().optional() }).strict().optional() }).strict();
+export const alteracaoSchema = z.object({ verificarAoIniciar: z.boolean().optional(), avisoAutomatico: z.boolean().optional(), som: z.boolean().optional(), silenciar: z.boolean().optional(), tema: z.enum(['claro', 'escuro', 'sistema']).optional(), idioma: z.enum(['pt-BR', 'en']).optional(), iniciarComWindows: z.boolean().optional(), notificarAgenda: z.boolean().optional(), ia: z.object({ nome: nomeIa.optional(), estilo: z.enum(['amigavel', 'direto', 'tecnico']).optional(), voz: z.string().max(120).nullable().optional(), lerRespostas: z.boolean().optional() }).strict().optional() }).strict();
 
 const arquivo = (base?: string) => path.join(diretorioDados(base), 'preferencias.json');
 export function lerPreferencias(base?: string): Preferencias {
@@ -63,14 +67,15 @@ export function avisoPendente(instalada: string, base?: string) {
  * Registra uma consulta concluída. `disponivel` é a release mais nova que a instalada (ou null se já está atualizado).
  * - indicador: há versão a reconhecer (ainda não vista);
  * - tocarSom: som ligado, não silenciado, e a versão ainda não notificada: no máximo UMA vez por versão.
+ * - notificar: versão ainda não vista nem notificada (notificação visual do Windows, uma vez por versão; "silenciar" só cala o som).
  * A decisão é gravada (versaoNotificada) para não repetir o som em consultas seguintes nem ao reabrir.
  */
 export function registrarConsulta(disponivel: { versao: string; notas: string } | null, base?: string) {
   const p = lerPreferencias(base); const agora = new Date().toISOString();
-  if (!disponivel) { gravar({ ...p, disponivel: null, ultimaConsulta: agora }, base); return { indicador: false, tocarSom: false, versao: null as string | null, notas: '' }; }
+  if (!disponivel) { gravar({ ...p, disponivel: null, ultimaConsulta: agora }, base); return { indicador: false, tocarSom: false, notificar: false, versao: null as string | null, notas: '' }; }
   const vista = !!p.versaoVisualizada && compararVersoes(disponivel.versao, p.versaoVisualizada) <= 0;
   const jaNotificada = !!p.versaoNotificada && compararVersoes(disponivel.versao, p.versaoNotificada) <= 0;
-  const indicador = !vista; const tocarSom = indicador && p.som && !p.silenciar && !jaNotificada;
+  const indicador = !vista; const tocarSom = indicador && p.som && !p.silenciar && !jaNotificada; const notificar = indicador && !jaNotificada;
   gravar({ ...p, disponivel: { versao: disponivel.versao, notas: disponivel.notas.slice(0, 4000) }, ultimaConsulta: agora, versaoNotificada: indicador && !jaNotificada ? disponivel.versao : p.versaoNotificada }, base);
-  return { indicador, tocarSom, versao: disponivel.versao, notas: disponivel.notas };
+  return { indicador, tocarSom, notificar, versao: disponivel.versao, notas: disponivel.notas };
 }
