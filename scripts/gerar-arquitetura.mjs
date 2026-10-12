@@ -11,7 +11,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import { telas, papeis } from './gerar-leia-me-backend.mjs';
 
 const raizRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const pastasLidas = /^(backend|src|app|scripts|testes)\//;
+const pastasLidas = /^(frontend|backend|src|app|scripts|testes)\//;
 const extensoes = /\.(ts|mjs|cjs|js|html|css|json|md)$/;
 const ignorar = /^(app\/renderer\/vendor\/|app\/ajuda\/|.*\.min\.js$)/;
 const git = (...args) => execFileSync('git', args, { cwd: raizRepo, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
@@ -64,7 +64,7 @@ function lerRevisao(ref) {
 
 function lerCopiaDeTrabalho() {
   const arquivos = new Map();
-  for (const raiz of ['backend', 'src', 'app', 'scripts', 'testes']) {
+  for (const raiz of ['frontend', 'backend', 'src', 'app', 'scripts', 'testes']) {
     const dir = path.join(raizRepo, raiz); if (!fs.existsSync(dir)) continue;
     for (const rel of fs.readdirSync(dir, { recursive: true }).map(String)) {
       const nome = (raiz + '/' + rel).split(path.sep).join('/');
@@ -80,7 +80,7 @@ function fluxosDeUso(arquivos) {
   const preload = arquivos.get('app/preload.cjs') ?? '';
   const ponte = new Map();
   for (const m of preload.matchAll(/([A-Za-z_$][\w$]*)\s*:\s*\([^)]*\)\s*=>\s*chamar\('([a-z]+:[a-z]+)'/g)) ponte.set(m[2], m[1]);
-  const telasQueChamam = (fn) => [...arquivos].filter(([n, t]) => n.startsWith('app/renderer/') && n.endsWith('.js') && new RegExp(`\\b(?:api|prumo)\\.${fn}\\(`).test(t)).map(([n]) => n);
+  const telasQueChamam = (fn) => [...arquivos].filter(([n, t]) => (n.startsWith('frontend/') || n.startsWith('app/renderer/')) && n.endsWith('.js') && new RegExp(`\\b(?:api|prumo)\\.${fn}\\(`).test(t)).map(([n]) => n);
   const fluxos = [];
   const mapa = arquivos.get('backend/aplicativo/api/arquivosDosCanais.ts');
   if (mapa) {
@@ -107,9 +107,9 @@ function montarInstantaneo(arquivos) {
   for (const a of lista) for (const i of a.importa) { if (!usadoPor.has(i)) usadoPor.set(i, []); usadoPor.get(i).push(a.caminho); }
   for (const a of lista) a.usadoPor = usadoPor.get(a.caminho) ?? [];
   const pastas = {};
-  for (const [tela, frase] of Object.entries(telas)) pastas['backend/' + tela] = frase;
+  for (const [tela, frase] of Object.entries(telas)) { pastas['backend/' + tela] = frase; pastas['frontend/' + tela] = frase; }
   for (const a of lista) { const m = /^backend\/[^/]+\/([^/]+)\/[^/]+$/.exec(a.caminho); if (m && papeis[m[1]]) pastas[path.posix.dirname(a.caminho)] = papeis[m[1]]; }
-  Object.assign(pastas, { backend: 'Tudo o que roda fora da tela: canais da janela, regras, dados deste computador e integrações.', src: 'Código do backend antes da organização por tela.', app: 'A janela: ponte segura (preload), telas, estilos e ajuda.', 'app/renderer': 'O que a pessoa vê: telas, componentes e estilos.', scripts: 'Ferramentas de build, geração de documentos e release.', testes: 'Testes automáticos (unidade, integração, janela real e MCP).' });
+  Object.assign(pastas, { frontend: 'O que a pessoa vê: telas e funções da interface, a fonte oficial para o Electron.', backend: 'Tudo o que roda fora da tela: canais da janela, regras, dados deste computador e integrações.', src: 'Código do backend antes da organização por tela.', app: 'A janela: ponte segura (preload), telas, estilos e ajuda.', 'app/renderer': 'O que a pessoa vê: telas, componentes e estilos.', scripts: 'Ferramentas de build, geração de documentos e release.', testes: 'Testes automáticos (unidade, integração, janela real e MCP).' });
   return { arquivos: lista, pastas, fluxos: fluxosDeUso(arquivos) };
 }
 

@@ -1,0 +1,23 @@
+/** Controla responsividade zoom e movimento reduzido. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* ---------- Reflow, zoom e movimento reduzido ---------- */
+@media(max-width:1250px){.v36l-ferramentas{flex-wrap:wrap}.v36l-ferramentas input{flex:1 1 100%}.v36l-ferramentas select{flex:1 1 125px}.v36l-detalhe dl{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1080px){.v36m-secao{grid-column:span 12}}
+@media(max-width:960px){.v36c-topo{height:200px}.v36c-orbita{left:18px;top:40px;width:260px;height:152px}.v36c-orbita{--v36-orb:178px}.v36-filtros{grid-template-columns:repeat(2,minmax(0,1fr))}.v36h-dgrade{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:830px){.v36l-linha{grid-template-columns:78px 52px 90px minmax(0,1fr) 15px;gap:7px}.v36l-fase{display:none}.v36l-detalhe dl{grid-template-columns:repeat(2,minmax(0,1fr))}.v36h-barra,.v36m-barra{padding-right:0;padding-top:44px}.v36l-topo{padding-right:14px;padding-top:44px;flex-wrap:wrap}}
+@media(max-width:700px),(max-height:560px){
+  body[data-tela=inicio] main#conteudo,body[data-tela=logs] main#conteudo{height:auto;overflow:visible}
+  body[data-tela=inicio] main#conteudo>*,body[data-tela=logs] main#conteudo>*{height:auto}
+  .v36c,.v36l-janela{height:auto;overflow:visible}
+  .v36c-msgs{flex:none;overflow:visible;min-height:120px}
+  .v36l-corpo{flex:none;overflow:visible}
+}
+@media(max-width:670px){.v36c-topo{height:150px}.v36c-orbita{left:4px;top:24px;width:200px;height:117px}.v36c-orbita{--v36-orb:136px}.v36c-msgs{padding:25px 12px 12px}.v36c-interacao,.v36c-compor-caixa{padding-left:12px;padding-right:12px}.v36c-chip{font-size:11px;padding:8px 10px}.v36c-rodape{font-size:9px}.v36f{right:14px;bottom:24px}.v36f-botao{width:120px;height:87px}.v36f-orbita{width:120px;height:70px}.v36f-robo{width:82px;height:82px}.v36f-dica{right:calc(100% + 4px);max-width:min(190px,calc(100vw - 160px));min-width:120px;font-size:11px}}
+@media(max-width:600px){.v36l-linha{grid-template-columns:72px 50px minmax(0,1fr) 13px;font-size:10px}.v36l-op{display:none}.v36l-detalhe dl{grid-template-columns:1fr}.v36l-status{display:none}.v36-filtros{grid-template-columns:1fr}.v36h-dgrade{grid-template-columns:1fr}.v36h-entrada{grid-template-columns:42px 15px minmax(0,1fr);gap:6px}.v36-toolbar{align-items:stretch}.v36-toolbar select{max-width:100%}.v36m-area{height:230px}.v36m-secao.largo .v36m-area{height:250px}}
+@media(prefers-reduced-motion:reduce){.v36c-orbita .qc-orb,.v36f-robo,.v36c .msg,.v36c-ocupado span,.v36c .msg.digitando .v36c-texto::after,.v36f-painel,.v36l-status.vivo i,.v36m-secao,.v36m-area svg,.v36-filtros,.v36h-detalhe,.v36m-editor{animation:none!important}.v36c-chip,.v36f-orbita,.v36f-dica{transition:none!important}}
+@media print{
+  #lateral,.topo-direita,.v36f,.v36h-barra,.v36m-barra,.v36-filtros,.v36m-editor,.v36m-acoes,.v36h-troca .v36h-info{display:none!important}
+  body{display:block!important;padding:0!important;background:#fff!important;color:#14233d!important}
+  main#conteudo{max-width:none!important;padding:0!important;height:auto!important;overflow:visible!important}
+  .v36m-secao,.v36h-grupo{break-inside:avoid}
+}
+

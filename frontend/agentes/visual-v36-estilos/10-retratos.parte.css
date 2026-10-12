@@ -1,0 +1,21 @@
+/** Estiliza retratos e efeitos de movimento dos agentes. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* Retrato vivo */
+.v36-portrait{--face-color:#7abaff;position:relative;flex:none;width:145px;height:170px;animation:v36-face var(--face-duration,6s) ease-in-out infinite;animation-delay:var(--face-delay,0s);transform-origin:50% 60%}
+.v36-portrait[data-motion="1"]{animation-name:v36-face-turn}.v36-portrait[data-motion="2"]{animation-direction:reverse}.v36-portrait[data-motion="3"]{animation-name:v36-face-lean}.v36-portrait[data-motion="4"]{animation-name:v36-face-turn;animation-direction:reverse}.v36-portrait[data-motion="5"]{animation-name:v36-face-lean;animation-direction:reverse}
+.v36-retrato-halo{position:absolute;inset:14% 10% 18%;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--face-color) 60%,transparent),transparent 68%);filter:blur(26px);opacity:.5;animation:v36-halo 5.5s ease-in-out infinite;pointer-events:none}
+.v36-retrato-3d{position:relative;display:block;width:100%;height:100%;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .35s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.v36-portrait img{display:block;width:100%;height:100%;object-fit:contain;border:0;border-radius:0;mix-blend-mode:screen;filter:saturate(1.08) contrast(1.04)}
+:root[data-tema=claro] .v36-portrait img{mix-blend-mode:multiply}
+.v36-retrato-scan{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--face-color) 70%,transparent) 50%,transparent) 0 -40%/100% 26% no-repeat;mix-blend-mode:screen;opacity:.32;-webkit-mask-image:radial-gradient(ellipse 42% 48% at 50% 46%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 42% 48% at 50% 46%,#000 55%,transparent 100%);animation:v36-scan 6.5s cubic-bezier(.45,0,.55,1) infinite}
+.v36-portrait.mini{width:66px;height:66px}
+.v36-portrait.mini .v36-retrato-halo{inset:-4px;filter:blur(10px);opacity:.38}
+.v36-portrait.mini .v36-retrato-3d{border-radius:50%;overflow:hidden;background:#060b18;box-shadow:0 0 0 1px color-mix(in srgb,var(--face-color) 45%,transparent),0 10px 24px -10px var(--face-color)}
+:root .v36-portrait.mini .v36-retrato-3d img{object-fit:cover;object-position:50% 46%;transform:scale(1.55);mix-blend-mode:normal}
+.v36-portrait.mini .v36-retrato-scan{-webkit-mask-image:none;mask-image:none;opacity:.22;background-size:100% 40%}
+@keyframes v36-face{0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}50%{transform:translateY(-6px) rotate(1deg) scale(1.012)}}
+@keyframes v36-face-turn{0%,100%{transform:translateX(-3px) rotate(-1.6deg)}50%{transform:translateX(3px) rotate(1.6deg) scale(1.01)}}
+@keyframes v36-face-lean{0%,100%{transform:translateY(3px) rotate(1.2deg)}50%{transform:translateY(-4px) rotate(-1.2deg) scale(1.012)}}
+@keyframes v36-halo{0%,100%{opacity:.36;transform:scale(.96)}50%{opacity:.62;transform:scale(1.05)}}
+@keyframes v36-scan{0%{background-position:0 -40%}55%,100%{background-position:0 140%}}
+@keyframes v36-brilho{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--face-color) 45%,transparent),0 0 22px -4px var(--face-color)}50%{box-shadow:0 0 0 9px transparent,0 0 30px 0 var(--face-color)}}
+@keyframes v36-gira{to{transform:rotate(360deg)}}

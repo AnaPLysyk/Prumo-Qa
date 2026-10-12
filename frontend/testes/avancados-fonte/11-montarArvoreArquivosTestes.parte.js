@@ -1,0 +1,2 @@
+/** Organiza arquivos por pastas para navegação. Parte de testes-v40.js; nao carregar isoladamente. */
+  function arvore(arquivos) { const raiz = { pastas: new Map(), arquivos: [] }; for (const a of arquivos) { const partes = a.arquivo.split('/'); let n = raiz; for (const p of partes.slice(0, -1)) { if (!n.pastas.has(p)) n.pastas.set(p, { pastas: new Map(), arquivos: [] }); n = n.pastas.get(p); } n.arquivos.push(a); } return raiz; }

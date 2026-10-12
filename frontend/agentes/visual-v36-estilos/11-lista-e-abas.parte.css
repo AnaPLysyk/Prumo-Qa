@@ -1,0 +1,59 @@
+/** Estiliza abas e listagem de agentes. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* Abas e lista */
+.v36a-abas{display:flex;align-items:flex-end;gap:28px;height:58px;margin:0 calc(-1 * var(--v36a-gutter,32px));padding:0 calc(var(--v36-topo,190px) + 8px) 0 var(--v36a-gutter,32px);border-bottom:1px solid var(--linha)}
+.v36a-aba{padding:0 1px 16px;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;color:var(--suave);font:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:color .15s,border-color .15s}
+.v36a-aba:hover{color:var(--texto)}
+.v36a-aba[aria-pressed=true]{color:var(--texto);font-weight:650;border-bottom-color:var(--acento)}
+.v36a-topo{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px 24px;margin:28px 0 22px}
+main .v36a-titulo{margin:0;font:700 26px/1.15 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;letter-spacing:-.02em;text-transform:none;color:var(--texto)}
+.v36a-conta{font-size:13px;font-weight:400;color:var(--suave);vertical-align:3px}
+.v36a-topo p{margin:7px 0 0;font-size:12.5px;color:var(--suave);max-width:60ch}
+.v36a-acoes{display:flex;align-items:center;gap:10px}
+.v36a-busca{display:flex;flex-direction:row;align-items:center;gap:8px;width:min(260px,60vw);height:38px;padding:0 12px;border:1px solid var(--linha);border-radius:10px;background:color-mix(in srgb,var(--painel) 70%,transparent);color:var(--suave);transition:border-color .15s,box-shadow .15s}
+.v36a-busca:focus-within{border-color:rgba(var(--qc-azul),.55);box-shadow:0 0 0 3px rgba(var(--qc-azul),.1)}
+.v36a-busca input{flex:1;min-width:0;height:100%;padding:0;border:0;background:transparent;color:var(--texto);font:inherit;font-size:12.5px;outline:0}
+.v36a-primario{display:inline-flex;align-items:center;gap:4px;height:38px;padding:0 16px;border:0;border-radius:10px;background:var(--acento);color:var(--acento-texto);font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;box-shadow:0 8px 20px -8px var(--acento);transition:filter .15s,transform .15s}
+.v36a-primario:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px)}
+.v36a-primario:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.v36a-quieto{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:6px 12px;border:0;border-radius:9px;background:transparent;color:var(--suave);font:inherit;font-size:12px;cursor:pointer;flex-direction:row}
+.v36a-quieto:hover{color:var(--acento);background:rgba(var(--qc-azul),.07)}
+.v36a-cabecalho,.v36a-linha{display:grid;grid-template-columns:minmax(230px,2.1fr) minmax(150px,1.35fr) minmax(110px,1fr) minmax(150px,1.2fr) 28px;align-items:center;gap:16px}
+.v36a-cabecalho{padding:0 16px 11px;border-bottom:1px solid var(--linha);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--suave)}
+.v36a-linha{position:relative;width:100%;min-height:92px;padding:12px 16px;border:0;border-bottom:1px solid color-mix(in srgb,var(--linha) 78%,transparent);background:transparent;color:var(--texto);font:inherit;text-align:left;cursor:pointer;transition:background .18s}
+.v36a-linha::before{content:"";position:absolute;left:0;top:18%;bottom:18%;width:2px;border-radius:2px;background:var(--acento);transform:scaleY(0);transition:transform .2s}
+.v36a-linha:hover,.v36a-linha:focus-visible{background:linear-gradient(90deg,rgba(var(--qc-azul),.07),transparent 70%)}
+.v36a-linha:hover::before,.v36a-linha:focus-visible::before{transform:scaleY(1)}
+.v36a-agente{display:flex;align-items:center;gap:16px;min-width:0}
+.v36a-nome{display:flex;flex-direction:column;gap:3px;min-width:0}
+.v36a-nome strong{font-size:13.5px;font-weight:650;letter-spacing:-.005em}
+.v36a-nome small,.v36a-caps small{font-size:11px;color:var(--suave);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v36a-caps{display:flex;flex-direction:column;gap:3px;min-width:0}
+.v36a-caps strong{font-size:12.5px;font-weight:500}
+.v36a-caps .v36a-bloq{color:var(--falha)}
+.v36a-tipo{font-size:12px;color:var(--suave)}
+.v36a-disp{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--texto)}
+.v36a-disp i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--aviso)}
+.v36a-disp i.ok{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 18%,transparent)}
+.v36a-disp i.off{background:var(--suave);opacity:.5}
+.v36a-seta{font-size:20px;color:var(--suave);transition:transform .18s,color .18s}
+.v36a-linha:hover .v36a-seta{transform:translateX(3px);color:var(--acento)}
+.v36a-orb{position:relative;display:grid;place-items:center;width:66px;height:66px;flex:none}
+.v36a-orb::before{content:"";position:absolute;inset:3px;border-radius:50%;border:1px dashed rgba(var(--qc-azul),.4);animation:v36-gira 18s linear infinite}
+.v36a-orb img{width:100%;height:100%;object-fit:contain}
+.v36a-vazio{padding:36px 0;text-align:center;font-size:12px;color:var(--suave)}
+.v36a-nota{max-width:none;margin:14px 0 18px;font-size:11px;color:var(--suave)}
+.v36a-secao-extra{border:0;border-top:1px solid var(--linha);padding:14px 0}
+.v36a-secao-extra>summary{font-size:12.5px;font-weight:600;color:var(--texto)}
+.v36a-esps{display:flex;flex-wrap:wrap;gap:10px 20px;margin:12px 0 6px}
+.v36a-check{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:12px;color:var(--texto)}
+.v36a-check input{min-width:0;accent-color:var(--acento)}
+.v36a-salvar{display:flex;justify-content:flex-end;margin-top:14px}
+.v36a-matriz{display:flex;flex-direction:column}
+.v36a-cap{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(150px,190px);align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid color-mix(in srgb,var(--linha) 70%,transparent)}
+.v36a-cap:last-child{border-bottom:0}
+.v36a-cap-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+.v36a-cap-info strong{font-size:12.5px;font-weight:600}
+.v36a-cap-info small{font-size:11px;line-height:1.45;color:var(--suave)}
+.v36a-cap select{width:100%;min-width:0;height:34px;padding:6px 10px;border:1px solid var(--linha);border-radius:9px;background:var(--painel);color:var(--texto);font:inherit;font-size:12px}
+.v36a-pessoa{font-size:11.5px;color:var(--suave)}
+.v36a-campos .v36a-cap{grid-template-columns:auto minmax(140px,1fr);gap:8px 14px}.v36a-campos .v36a-cap-info{grid-column:1/-1}

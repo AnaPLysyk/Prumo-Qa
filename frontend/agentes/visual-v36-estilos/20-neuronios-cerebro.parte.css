@@ -1,0 +1,30 @@
+/** Organiza o robo central e os pontos de conhecimento. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* Cérebro: o robô no centro e cada ponto ao redor é um conhecimento configurado */
+.v36-stage.v36a-cerebro{display:flex;flex-direction:column;grid-template-columns:none;padding:0 26px 18px}
+.v36a-campo-neural{position:relative;flex:1;min-height:min(70vh,640px);margin:8px 0}
+.v36a-campo-neural .v36-brain-face{position:absolute;left:50%;top:50%;width:min(46%,440px);height:86%;transform:translate(-50%,-50%);grid-column:auto;grid-row:auto}
+.v36-neuron{position:absolute;z-index:2;width:auto;max-width:none;min-height:0;padding:0;border:0;border-radius:50%;background:none;box-shadow:none;backdrop-filter:none;transform:translate(-50%,-50%);display:block}
+.v36-neuron:hover,.v36-neuron[aria-pressed=true]{background:none;box-shadow:none;border:0}
+.v36a-campo-neural .v36-neuron:hover{transform:translate(-50%,-50%)}
+.v36-neuron-ponto{position:relative;display:block;width:12px;height:12px;border:0;border-radius:50%;background:var(--cor);box-shadow:0 0 10px var(--cor),0 0 22px color-mix(in srgb,var(--cor) 60%,transparent)}
+.v36-neuron-ponto::after{content:"";position:absolute;inset:-7px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--cor) 45%,transparent),transparent 70%);animation:v36a-pulso 2.6s ease-in-out infinite;animation-delay:var(--atraso,0s)}
+.v36-neuron.mudou .v36-neuron-ponto::after{animation-duration:1.2s;inset:-11px}
+.v36-neuron[aria-pressed=true] .v36-neuron-ponto{transform:scale(1.5)}
+.v36-neuron-rotulo{position:absolute;top:50%;display:flex;flex-direction:column;gap:1px;width:max-content;max-width:210px;padding:5px 10px;border-radius:10px;background:rgba(4,8,20,.72);backdrop-filter:blur(6px);transform:translateY(-50%);opacity:.0;pointer-events:none;transition:opacity .2s}
+.v36-neuron.dir .v36-neuron-rotulo{left:20px;text-align:left}.v36-neuron.esq .v36-neuron-rotulo{right:20px;text-align:right}
+.v36-neuron:hover .v36-neuron-rotulo,.v36-neuron:focus-visible .v36-neuron-rotulo,.v36-neuron[aria-pressed=true] .v36-neuron-rotulo,.v36-neuron.mudou .v36-neuron-rotulo,.v36a-campo-neural:not(:has(.v36-neuron:nth-child(18))) .v36-neuron-rotulo{opacity:1}
+.v36-neuron-rotulo strong{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#eaf2ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v36-neuron-rotulo small{font-size:10.5px;color:#9fb4d6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v36-neuron.mudou .v36-neuron-rotulo strong{color:#ffd27a}
+.v36a-cerebro-rodape{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid rgba(120,160,230,.16);padding-top:12px}
+.v36a-cerebro-rodape .v36-brain-inspect{flex:1 1 360px;border:0;padding:0}
+.v36a-legenda-neural{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:10.5px;color:#9fb4d6}
+.v36a-legenda-neural i,.v36a-insp-grupo i{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;vertical-align:0}
+.v36a-insp-grupo{display:flex;align-items:center;gap:4px;margin-bottom:6px;font-size:10.5px;letter-spacing:.06em;color:#9fb4d6}
+.v36a-insp-mudou{margin-left:10px;color:#ffd27a}
+@keyframes v36a-pulso{0%,100%{transform:scale(.7);opacity:.35}50%{transform:scale(1.25);opacity:.9}}
+@media(max-width:820px){.v36a-campo-neural .v36-brain-face{width:62%}.v36-neuron-rotulo{max-width:130px}}
+@media(prefers-reduced-motion:reduce){.v36a-astro-figura,.v36-neuron-ponto::after{animation:none!important}}
+
+.v36-robo-canvas{-webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 46%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 50% 50% at 50% 46%,#000 62%,transparent 100%)}
+.v36a-perfil .v36-robo-canvas,.v36a-cerebro .v36-robo-canvas{-webkit-mask-image:radial-gradient(ellipse 52% 50% at 50% 45%,#000 66%,transparent 100%);mask-image:radial-gradient(ellipse 52% 50% at 50% 45%,#000 66%,transparent 100%)}
