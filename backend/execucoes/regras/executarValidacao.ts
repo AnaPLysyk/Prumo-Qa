@@ -1,5 +1,7 @@
 /** Executa uma capacidade do projeto depois da aprovação humana, com tempo e saída limitados, e grava a evidência (PASS, FAIL, BLOCKED ou NOT_RUN). */
 import { spawn } from 'node:child_process';
+import { mascararLogsDaExecucao } from './mascararLogsDaExecucao.js';
+import { gravarRelatorioRedigido } from './gravarRelatorioRedigido.js';
 import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
@@ -72,8 +74,9 @@ export async function executarValidacao(p:Projeto,capability:string,solicitar=fa
     filho.on('error',err=>{clearTimeout(timer);resolve({exitCode:null,error:err.message});});
     filho.on('close',(exitCode,signal)=>{clearTimeout(timer);if(signal && !bloqueio) bloqueio='PROCESS_SIGNAL';resolve({exitCode});});
   });
-  const segredos=[...Object.entries(process.env).filter(([n])=>/token|secret|password|api.?key/i.test(n)).map(([,v])=>v!),...p.manifesto.execution.envAllowlist.map(n=>env[n]!)].filter(Boolean);
-  e.stdout=mascarar(Buffer.concat(stdout).toString(),segredos);e.stderr=mascarar(Buffer.concat(stderr).toString(),segredos);
+  const logsRedigidos=mascararLogsDaExecucao(p,env,stdout,stderr);
+  const segredos=logsRedigidos.segredos;
+  e.stdout=logsRedigidos.stdout;e.stderr=logsRedigidos.stderr;
   e.exitCode=processo.exitCode; if(processo.error) bloqueio='SUBPROCESS_ERROR';
   try {
     const raw=await lerSeguro(p.raiz,resultadoRel,true,262144);
@@ -85,13 +88,6 @@ export async function executarValidacao(p:Projeto,capability:string,solicitar=fa
   e.status=classificarResultado(e.exitCode,bloqueio,e.cases);
   e.reason=bloqueio ?? (e.exitCode===0?'Rodada terminou com exit code 0; casos só conforme relatório individual.':'Falha do processo; causa de produto/automação requer diagnóstico.');
   e.logSha256=hash(e.stdout+'\n'+e.stderr);e.endedAt=new Date().toISOString();
-  // Artefato bruto pode conter segredos: só persistir versão redigida.
-  if(e.resultArtifact) {
-    const sanitized=JSON.stringify({jobId,cases:e.cases},null,2);
-    await caminhoSeguro(p.raiz,resultadoRel,true);
-    await fs.writeFile(resultadoPath,sanitized,{mode:0o600});
-    e.resultArtifact={path:resultadoRel,sha256:hash(sanitized),trust:'Relatório do runner autorizado, redigido; sem julgamento independente.'};
-  }
-  else { try { await caminhoSeguro(p.raiz,resultadoRel,true);await fs.unlink(resultadoPath); } catch {} }
+  await gravarRelatorioRedigido(p,e,jobId,resultadoRel,resultadoPath);
   return await salvarEvidencia(p,e);
 }
