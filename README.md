@@ -185,37 +185,28 @@ Também pode usar `node .\dist\cli.js`, `npm.cmd run prumo --` ou o script compa
 
 ## Estrutura
 
-| Arquivo | Responsabilidade |
+O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a tela tem no frontend. Dentro de cada tela, `api/` atende os pedidos da janela (um arquivo por canal IPC, com o nome do canal), `regras/` decide, `banco/` lê e grava os dados deste computador, `integracoes/` fala com Jira, Qase, GitHub ou IA e `tipos/` descreve o formato dos dados. Cada arquivo tem uma única função, com o nome do arquivo, e começa com uma frase dizendo o que faz. O índice completo, gerado do código, está em [backend/LEIA-ME.md](backend/LEIA-ME.md) e em cada `backend/<tela>/LEIA-ME.md`.
+
+| Caminho | Responsabilidade |
 |---|---|
-| `src/projeto.ts` | Schema v2, validação, leitura segura, inventário e contexto com fontes/hashes |
-| `src/qualidade.ts` | Requisito/origem, riscos, oráculos, lacunas, duplicidade candidata e análise NOT_VERIFIED |
-| `src/aprovacao.ts` + `scripts/aprovar.cs` | Broker de autenticação humana Windows compilado em dist/aprovar.exe, escopo/expiração, sem token da IA |
-| `src/execucao.ts` | Capability declarada, preflight, ambiente mínimo, subprocesso, limites e classificação |
-| `src/evidencias.ts` | Resultados da rodada/casos, armazenamento local, integridade e consulta isolada |
-| `src/atividades.ts` | Diário JSONL externo com Pino, privacidade, integridade, contadores e acompanhamento |
-| `src/conexoes.ts` | Proposta revisável e configuração Codex mediante confirmação, sem sobrescrita |
-| `src/vinculos.ts` | Lista local de projetos vinculados; diagnóstico sem escrever na pasta do projeto |
-| `src/painel.ts` | Adaptador da janela: valida, exige projeto vinculado e delega ao núcleo (sem regra própria) |
-| `src/contratos.ts` | Fonte única dos esquemas IPC e do catálogo técnico (IPC + MCP) |
-| `src/contextos.ts` | Contextos persistentes por projeto: estados, aprovação, conflito, histórico encadeado por hash, leitura controlada pelo MCP |
-| `src/suporte.ts` | Central de suporte: esquema do relato, revisão de privacidade, texto, endereço oficial do GitHub Issues e exportação local (sem rede) |
-| `src/preferencias.ts` | Preferências de aviso de versão: decide e grava indicador e som (uma vez por versão) |
-| `src/frameworks.ts`, `skills/playwright`, `skills/api-rest` | Detecção de framework por evidência e análise de testes Playwright (`PW_*`) com fontes oficiais |
-| `src/contextoCompleto.ts` | Resposta de `contexto_projeto`: contexto autorizado + frameworks + contextos habilitados |
-| `src/versoes.ts`, `app/versoes.json` | Histórico de versões validado, comparação semântica e notas de release |
-| `src/atualizacao.ts` | Verificação de atualização (manual e aviso automático da 2.10.1): destino fixo, timeout, resposta validada, sem download |
-| `src/atualizacaoInstalar.ts` | Atualizar com um clique (2.10.2): baixa instalador e .sha256 da release oficial, confere o SHA-256; só executa no aplicativo instalado |
-| `src/contratoDetectado.ts` | Pasta sem qa.project.json (2.10.2): detecta a stack pela raiz e propõe o contrato; cria só após confirmação nativa, sem sobrescrever |
-| `src/dados.ts`, `src/diagnostico.ts` | Resumo dos dados locais e diagnóstico IPC (só metadados, fora das métricas) |
-| `src/desktop/main.ts` | Processo Electron: janela, IPC validado, diálogos nativos |
+| `backend/aplicativo.ts` | Porta de entrada do aplicativo desktop (Electron): pasta de dados, canais da janela, janela, bandeja e worker |
+| `backend/cli.ts` | Porta de entrada do terminal (`prumo`); comandos em `backend/terminal/` |
+| `backend/mcp.ts` | Porta de entrada do servidor MCP (`dist/mcp.js`, mesmo caminho das versões anteriores); ferramentas em `backend/agentes/mcp/` |
+| `backend/aplicativo/api/catalogoDeContratos.ts` | Fonte única dos esquemas IPC e do catálogo técnico (IPC + MCP); `registrarCanaisIpc.ts` liga cada canal ao arquivo `api/` da tela |
+| `backend/compartilhado/` | Só o que várias telas usam: contrato `qa.project.json` (`projeto/`), leitura segura e máscara de segredos (`seguranca/`), erros, textos e pasta de dados |
+| `backend/execucoes/` + `scripts/aprovar.cs` | Executar capacidade com aprovação humana do Windows (`dist/aprovar.exe`), histórico de execuções e comentário de resultado no Jira |
+| `backend/agendamentos/` | Rotinas, fila, worker residente, autorizações prévias e k6 |
+| `backend/testes/` | Catálogo de testes, frameworks e análise Playwright, revisão de cobertura, runs e escrita no Qase |
+| `backend/tickets/` | Propostas de caso/bug e escrita no Jira |
+| `backend/conexoes/` | Contas de serviço com credencial protegida, transporte HTTPS, escrita externa controlada, GitHub e conexão das IAs pelo MCP |
+| `backend/agentes/` | Chat com agentes, banco de conhecimento (SQLite local), políticas da IA e servidor MCP |
+| `backend/contextos/`, `backend/evidencias/`, `backend/logs/`, `backend/projetos/` … | Uma pasta por tela, cada uma com seu `LEIA-ME.md` |
 | `app/preload.cjs`, `app/renderer/` | Ponte mínima (`window.prumo`) e interface HTML/CSS/JS sem frameworks |
 | `app/ajuda/*.md` | Documentos da aba Ajuda (inclui privacidade e termos em rascunho) |
 | `electron-builder.yml`, `assets/` | Instalador NSIS e ícone substituível |
 | `.github/workflows/windows.yml` | Testes, instalador, instalação em pasta com espaços e release por tag |
-| `src/mcp.ts` | Adaptador do SDK oficial, exatamente quatro tools, stdout só para protocolo |
-| `src/cli.ts` | Adaptador terminal, mesmos controles do núcleo |
 | `skills/qa/SKILL.md` | Método de qualidade aplicável do ISTQB, sem meta fixa de cenários |
-| `testes/*.test.mjs` | Contrato, segurança, subprocessos, CLI, MCP real e aceitação sintética |
+| `testes/*.test.mjs` | Contrato, segurança, subprocessos, CLI, MCP real, aceitação sintética e a estrutura do backend (`estrutura-backend.test.mjs`) |
 | `exemplos/projeto-demo` | Produto fictício de publicações, dados em memória e testes reais |
 | `exemplos/plano-demo.json` | Revisão rastreável com cenário duplicado |
 | `exemplos/g3-somente-leitura.json` | Contrato externo restrito, sem comandos, para G3 |
@@ -258,7 +249,7 @@ Na raiz autorizada, crie `qa.project.json`. Não existe cadastro global duplicad
 }
 ```
 
-Paths são relativos; os diretórios/arquivos de contexto, cwd e entrypoints precisam existir. Pré-condições ausentes bloqueiam a execução, mas permitem inspecionar contexto. Campos desconhecidos/tipos incorretos são recusados. v1 não é convertido silenciosamente. Schema runtime é `manifestoSchema` em projeto.ts.
+Paths são relativos; os diretórios/arquivos de contexto, cwd e entrypoints precisam existir. Pré-condições ausentes bloqueiam a execução, mas permitem inspecionar contexto. Campos desconhecidos/tipos incorretos são recusados. v1 não é convertido silenciosamente. Schema runtime é `manifestoSchema` em `backend/compartilhado/tipos/projeto.ts`.
 
 O formato simples do HTML v2 (`"unit": "npm run test:unit"`) funciona pela gramática restrita. Só `node <arquivos locais>` / `node --test <arquivos locais>` e `npm run <script>` são aceitos. Nenhum `&&`, pipe, redirecionamento, eval, loader, glob ou parâmetro de prompt entra no shell. Para caminhos com espaços use objeto com args separados. Script npm precisa existir em package.json do cwd. Revise scripts antes de autorizá-los.
 

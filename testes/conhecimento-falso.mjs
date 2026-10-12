@@ -1,6 +1,11 @@
 // Substitui a persistência por memória: nenhum teste abre SQLite ou dados da pessoa.
 import { randomUUID } from 'node:crypto';
-import * as real from '../dist/conhecimento.js?sem-persistencia';
+import { semAcentos } from '../dist/compartilhado/texto/semAcentos.js';
+import { normalizarNome } from '../dist/agentes/regras/normalizarNome.js';
+import { termosDaFrase } from '../dist/agentes/regras/termosDaFrase.js';
+
+// Funções puras reais (não tocam o banco), usadas pela versão em memória.
+const real = { norm: semAcentos, normalizarNome, termos: termosDaFrase };
 
 const perfis = new Map();
 const itens = [];
@@ -17,7 +22,7 @@ const registrarConhecimento = (n) => {
   itens.push(item); return { item, duplicado: false };
 };
 export const memoria = {
-  ...real, lerPerfil, listarConhecimentos, registrarConhecimento,
+  lerPerfil, listarConhecimentos, registrarConhecimento,
   salvarPerfil: (a, base) => { const p = { ...lerPerfil(base), ...a, atualizadoEm: new Date().toISOString() }; if (a.comoChamar) p.comoChamar = real.normalizarNome(a.comoChamar); perfis.set(base, p); return p; },
   decidirConhecimento: (id, estado) => { const c = itens.find(x => x.id === id); if (!c) throw new Error('KNOWLEDGE_NOT_FOUND'); c.estado = estado; return c; },
   apagarConhecimento: (id) => { const i = itens.findIndex(x => x.id === id); if (i < 0) throw new Error('KNOWLEDGE_NOT_FOUND'); itens.splice(i, 1); return { apagado: true }; },

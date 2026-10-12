@@ -5,24 +5,24 @@ O Prumo organiza e executa uma rotina de QA **sem IA**. Este documento descreve 
 ## Visão geral
 
 ```
-Janela / bandeja  ->  IPC validado  ->  agenda.ts (quando)  ->  fila.ts (o quê, uma vez)  ->  worker.ts (executa)
-                                                                       |                              |
-                                          autorizacoes.ts (pode?) -----+--> execucao.ts / k6.ts  ->  evidência em <projeto>/.prumo
-                                                                                                  ->  jiraComentario.ts (opcional)
+Janela / bandeja  ->  agendamentos/api  ->  agendamentos/regras (quando)  ->  agendamentos/banco (fila: o quê, uma vez)  ->  agendamentos/worker (executa)
+                                                                                  |                                        |
+                                          agendamentos/autorizacoes (pode?) -----+--> execucoes/regras / agendamentos/k6  ->  evidência em <projeto>/.prumo
+                                                                                                                       ->  execucoes/integracoes (comentário Jira, opcional)
 ```
 
-Tudo é Node puro (sem Electron) e testado fora da janela. Só `src/desktop/main.ts` conhece Electron: janela, bandeja, diálogos e ciclo de vida.
+Tudo é Node puro (sem Electron) e testado fora da janela. Só `backend/aplicativo.ts`, `backend/aplicativo/` e os arquivos `api/` que abrem diálogos conhecem Electron: janela, bandeja, diálogos e ciclo de vida. Todas as pastas abaixo ficam em `backend/` e têm `LEIA-ME.md`.
 
 | Módulo | Responsabilidade |
 |---|---|
-| `src/agenda.ts` | Rotinas (único, intervalo, diário, semanal), fuso e horário de verão, slots, política de horários perdidos |
-| `src/fila.ts` | Fila persistente: reivindicação única, batimento, recuperação, retentativa de infraestrutura, idempotência por chave |
-| `src/autorizacoes.ts` | Autorização prévia de execução por escopo exato e política de publicação no Jira |
-| `src/worker.ts` | Laço do worker, trava de instância única, tipos de rotina, parada controlada |
-| `src/k6.ts`, `src/playwright.ts`, `reporters/` | Adaptador do k6 oficial, conversão de relatório Playwright e reporter do Prumo |
-| `src/jiraComentario.ts` | Texto do comentário, publicação idempotente, rastreabilidade |
-| `src/historicoCentral.ts` | Histórico por projeto, repositório, ticket, rotina, estado e período; métricas |
-| `src/agendaOperacoes.ts` | Operações de aplicação (validar rotina, listar com permissões, autorizar) |
+| `agendamentos/regras/` (rotinas e horários) | Rotinas (único, intervalo, diário, semanal), fuso e horário de verão, slots, política de horários perdidos |
+| `agendamentos/banco/` (fila e agenda gravadas) | Fila persistente: reivindicação única, batimento, recuperação, retentativa de infraestrutura, idempotência por chave |
+| `agendamentos/autorizacoes/` | Autorização prévia de execução por escopo exato e política de publicação no Jira |
+| `agendamentos/worker/` (`Worker.ts`) | Laço do worker, trava de instância única, tipos de rotina, parada controlada |
+| `agendamentos/k6/`, `testes/regras/converterRelatorioPlaywright.ts`, `reporters/` | Adaptador do k6 oficial, conversão de relatório Playwright e reporter do Prumo |
+| `execucoes/regras/montarComentario.ts`, `execucoes/integracoes/publicarComentarioDeResultado.ts` | Texto do comentário, publicação idempotente, rastreabilidade |
+| `execucoes/regras/listarExecucoes.ts`, `metricas/regras/metricasDasExecucoes.ts` | Histórico por projeto, repositório, ticket, rotina, estado e período; métricas |
+| `agendamentos/regras/` (`validarRotina`, `listarAgenda`, `permissoesDaRotina`) e `agendamentos/autorizacoes/autorizarRotina.ts` | Operações de aplicação (validar rotina, listar com permissões, autorizar) |
 
 ## Arquivos locais
 
@@ -69,7 +69,7 @@ A rotina nunca recebe comando livre: o esquema é estrito e a capability precisa
 
 ## Playwright
 
-O Prumo não impõe organização ao repositório. Ele executa a capability declarada e lê o resultado estruturado: o reporter incluído (`reporters/prumo-playwright-reporter.cjs`) grava `PRUMO_RESULT_FILE`, ou `src/playwright.ts` converte o JSON nativo (`passed`, `failed`, `timedOut`, `skipped`, `interrupted`, `flaky`). Teste ignorado vira `NOT_RUN`, interrompido vira `NOT_RUN`, falha vira `FAIL`. Sem relatório estruturado a rodada fica sem cenários individuais; o exit code não inventa cenários. A execução real do Playwright depende do projeto do usuário (dependências e navegadores) e não foi exercitada no laboratório.
+O Prumo não impõe organização ao repositório. Ele executa a capability declarada e lê o resultado estruturado: o reporter incluído (`reporters/prumo-playwright-reporter.cjs`) grava `PRUMO_RESULT_FILE`, ou `backend/testes/regras/converterRelatorioPlaywright.ts` converte o JSON nativo (`passed`, `failed`, `timedOut`, `skipped`, `interrupted`, `flaky`). Teste ignorado vira `NOT_RUN`, interrompido vira `NOT_RUN`, falha vira `FAIL`. Sem relatório estruturado a rodada fica sem cenários individuais; o exit code não inventa cenários. A execução real do Playwright depende do projeto do usuário (dependências e navegadores) e não foi exercitada no laboratório.
 
 ## k6
 

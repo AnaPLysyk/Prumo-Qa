@@ -7,8 +7,8 @@ import { readFile } from 'node:fs/promises';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { fixture } from './fixtures.mjs';
-import { carregarProjeto } from '../dist/projeto.js';
-import { executarValidacao } from '../dist/execucao.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { executarValidacao } from '../dist/execucoes/regras/executarValidacao.js';
 
 const cli=path.resolve('dist/cli.js');
 test('CLI doctor/context/review/run/evidence funciona por processo em caminho com espaços',async t=>{

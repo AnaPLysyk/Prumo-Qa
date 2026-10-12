@@ -12,7 +12,7 @@ Finalidade dos dados opcionais: versão identifica o build (package.json); siste
 
 ## Fluxo da central de Suporte
 
-1. **Preparar localmente** (`suporte:preparar`): o núcleo (`src/suporte.ts`) valida o relato com esquema estrito, monta o texto Markdown e revisa a privacidade. Não há rede nem gravação.
+1. **Preparar localmente** (`suporte:preparar`): o backend (`backend/suporte/regras/prepararRelato.ts`) valida o relato com esquema estrito, monta o texto Markdown e revisa a privacidade. Não há rede nem gravação.
 2. **Revisar**: a interface mostra o texto exato, os bloqueios (segredos) e os avisos (e-mail, telefone, CPF, caminhos locais).
 3. **Abrir no GitHub** (`suporte:abrir`) ou **Exportar** (`suporte:exportar`): o processo principal refaz a preparação (não confia no que a página já calculou), recusa se houver bloqueio, valida que o endereço é `https://github.com/AnaPLysyk/Prumo-Qa/issues/new` e pede uma **confirmação nativa** antes de abrir o navegador. A exportação usa o diálogo nativo de salvar.
 
@@ -40,4 +40,4 @@ Correções continuam sendo feitas por uma pessoa (ou por um agente sob supervis
 
 ## Notificações de atualização
 
-Preferências em `%LOCALAPPDATA%\PrumoQA\preferencias.json` (`verificarAoIniciar`, `som`, `silenciar`, versão vista, versão já notificada e a última release conhecida). O núcleo (`src/preferencias.ts`) decide e **grava** quando o som deve tocar: no máximo uma vez por versão, nunca com `silenciar` e nunca com o som desligado. A interface apenas obedece e sintetiza dois tons curtos com Web Audio (sem arquivo de áudio nem biblioteca). Sem serviço, tarefa agendada ou consulta em segundo plano.
+Preferências em `%LOCALAPPDATA%\PrumoQA\preferencias.json` (`verificarAoIniciar`, `som`, `silenciar`, versão vista, versão já notificada e a última release conhecida). O backend (`backend/atualizacoes/regras/registrarConsultaDeVersao.ts`) decide e **grava** quando o som deve tocar: no máximo uma vez por versão, nunca com `silenciar` e nunca com o som desligado. A interface apenas obedece e sintetiza dois tons curtos com Web Audio (sem arquivo de áudio nem biblioteca). Sem serviço, tarefa agendada ou consulta em segundo plano.

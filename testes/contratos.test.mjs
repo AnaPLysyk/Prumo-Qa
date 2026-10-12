@@ -5,21 +5,23 @@ import path from 'node:path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { fixture } from './fixtures.mjs';
-import { criarServidor } from '../dist/mcp.js';
-import { catalogo, esquemasIpc, camposDe, canaisFrequentes } from '../dist/contratos.js';
+import { criarServidor } from '../dist/agentes/mcp/criarServidor.js';
+import { camposDe, canaisFrequentes, catalogo, esquemasIpc } from '../dist/aplicativo/api/catalogoDeContratos.js';
 
 const ler = (f) => fs.readFileSync(f, 'utf8');
-const principal = ler('src/desktop/main.ts');
+const arquivosTs = (dir) => fs.readdirSync(dir, { recursive: true }).map(String).filter((n) => n.endsWith('.ts')).map((n) => path.join(dir, n));
+const registro = ler('backend/aplicativo/api/registrarCanaisIpc.ts');
+const backend = arquivosTs('backend').map(ler).join('\n');
 const preload = ler('app/preload.cjs');
 const ipcCatalogo = catalogo().filter((o) => o.tipo === 'IPC');
 const mcpCatalogo = catalogo().filter((o) => o.tipo === 'MCP');
 
-test('IPC: canais registrados em main.ts, esquemas e catálogo são exatamente os mesmos', () => {
-  const registrados = [...principal.matchAll(/^canal\('([a-z]+:[a-z]+)'/gm)].map((m) => m[1]).sort();
-  assert.deepEqual(registrados, Object.keys(esquemasIpc).sort(), 'main.ts × esquemas');
+test('IPC: canais registrados, esquemas e catálogo são exatamente os mesmos', () => {
+  const registrados = [...registro.matchAll(/registrarCanal\('([a-z]+:[a-z]+)'/g)].map((m) => m[1]).sort();
+  assert.deepEqual(registrados, Object.keys(esquemasIpc).sort(), 'registrarCanaisIpc.ts × esquemas');
   assert.deepEqual(ipcCatalogo.map((o) => o.nome).sort(), Object.keys(esquemasIpc).map((c) => 'prumo:' + c).sort(), 'catálogo × esquemas');
   assert.equal(new Set(registrados).size, registrados.length, 'sem canal duplicado');
-  assert.equal([...principal.matchAll(/ipcMain\.handle\(/g)].length, 1, 'ipcMain.handle só existe dentro do wrapper validado');
+  assert.equal([...backend.matchAll(/ipcMain\.handle\(/g)].length, 1, 'ipcMain.handle só existe dentro do wrapper validado (no backend inteiro)');
 });
 
 test('IPC: preload expõe apenas canais do catálogo, cada um uma vez, sem ipcRenderer livre', () => {
@@ -58,12 +60,12 @@ test('IPC: esquemas recusam argumentos extras, inválidos e escopos desconhecido
 });
 
 test('IPC: exclusão exige confirmação nativa e nunca é alcançável por MCP; consultas frequentes não geram diagnóstico de sucesso', () => {
-  assert.match(principal, /canal\('dados:excluir'[\s\S]*?showMessageBox[\s\S]*?response !== 1/);
-  assert.match(principal, /canal\('atualizacao:abrir'[\s\S]*?showMessageBox/);
+  assert.match(ler('backend/ajuda/api/dadosExcluir.ts'), /showMessageBox[\s\S]*?response !== 1/);
+  assert.match(ler('backend/atualizacoes/api/atualizacaoAbrir.ts'), /showMessageBox/);
   for (const c of ['projeto:logs', 'projeto:visao', 'projeto:historico']) assert.ok(canaisFrequentes.has(c), c);
   assert.ok(!canaisFrequentes.has('dados:excluir'));
-  const mcpFonte = ler('src/mcp.ts');
-  assert.doesNotMatch(mcpFonte, /excluir|dados\.js|diagnostico\.js|vinculos\.js/i, 'mcp.ts não importa exclusão nem vínculos');
+  const importsMcp = ['backend/mcp.ts', ...arquivosTs('backend/agentes/mcp')].map(ler).join('\n').match(/^import .*$/gm).join('\n');
+  assert.doesNotMatch(importsMcp, /excluir|privacidade\/|diagnostico\/|Vinculo/i, 'o servidor MCP não importa exclusão, dados, diagnóstico nem vínculos de pasta');
 });
 
 test('MCP: servidor real lista exatamente as oito ferramentas (quatro originais e três da 2.9 e aprendizado) e o catálogo descreve os mesmos argumentos', async (t) => {
@@ -90,9 +92,12 @@ test('catálogo não inventa HTTP: nenhuma URL, porta ou método REST nas descri
   assert.doesNotMatch(texto, /https?:\/\/|localhost|127\.0\.0\.1|\b(GET|POST|PUT|PATCH)\b\s+\/|:\d{4,5}\b/);
 });
 
-test('cada módulo citado como destino existe em src/', () => {
-  const nomes = new Set(fs.readdirSync('src').map((n) => n.replace(/\.ts$/, '')).concat(fs.readdirSync('src/desktop').map((n) => 'desktop/' + n.replace(/\.ts$/, ''))));
-  for (const o of catalogo()) for (const m of o.destino.matchAll(/\b([a-z]+)\.(?:ts|[a-zA-Z]+)/g)) if (nomes.has(m[1])) assert.ok(fs.existsSync(path.join('src', m[1] + '.ts')), `${o.nome}: ${m[1]}`);
+test('cada arquivo citado como destino existe no backend', () => {
+  for (const o of catalogo()) {
+    const citados = [...o.destino.matchAll(/backend\/[\w/]+\.ts/g)].map((m) => m[0]);
+    assert.ok(citados.length, `${o.nome}: destino sem arquivo`);
+    for (const c of citados) assert.ok(fs.existsSync(c), `${o.nome}: ${c}`);
+  }
 });
 
 test('docs/CONTRATOS.md está sincronizado com o catálogo real (rode npm run contratos)', async () => {

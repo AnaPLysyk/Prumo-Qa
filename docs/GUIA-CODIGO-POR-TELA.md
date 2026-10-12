@@ -5,10 +5,10 @@
 ## Comece por aqui
 
 - Quer alterar o que aparece na tela? Abra `app/renderer/telas/NOME-DA-TELA/`.
-- Quer alterar uma função do projeto? Abra `src/modulos/projetos/espacos/`.
-- Quer entender por que uma pasta local ganhou `qa.project.json`? Abra `src/modulos/projetos/contrato/`.
-- Quer descobrir por onde a tela conversa com as regras? Veja `app/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`. **Hoje não são endpoints HTTP**: são canais IPC seguros do Electron.
-- Quer localizar como os dados locais são guardados? Veja `src/modulos/projetos/espacos/armazenarEspacos.ts` → `src/armazenamentoLocal.ts`.
+- Quer alterar o que acontece depois do clique? Abra `backend/NOME-DA-TELA/` e leia o `LEIA-ME.md` da pasta: `api/` recebe o pedido, `regras/` decide, `banco/` grava.
+- Quer entender por que uma pasta local ganhou `qa.project.json`? Abra `backend/projetos/regras/proporContrato.ts`.
+- Quer descobrir por onde a tela conversa com as regras? Veja `app/preload.cjs` → `backend/aplicativo/api/catalogoDeContratos.ts` (formato do pedido) → `backend/<tela>/api/<canal>.ts`. **Hoje não são endpoints HTTP**: são canais IPC seguros do Electron.
+- Quer localizar como os dados locais são guardados? Veja `backend/projetos/banco/` → `backend/compartilhado/banco/gravarLocal.ts`.
 - **Nada aqui executa uma API HTTP própria no Render.** Isso pertence à proposta futura.
 
 ## Projetos — do botão ao arquivo gravado
@@ -24,38 +24,41 @@ app/renderer/telas/projetos/mostrarProjetos.js
 
 app/preload.cjs                       expõe só operações IPC permitidas
   ↓ canais "espacos:criar" / "espacos:editar"
-src/contratos.ts                      valida formato e limite dos dados
+backend/aplicativo/api/registrarCanal.ts       confere remetente e valida o formato (catalogoDeContratos.ts)
   ↓
-src/desktop/main.ts                   encaminha operação ao núcleo
+backend/projetos/api/
+  ├── espacosCriar.ts                  atende "espacos:criar"
+  └── espacosEditar.ts                 atende "espacos:editar"
   ↓
-src/espacos.ts                        ponte de compatibilidade
-  ↓
-src/modulos/projetos/espacos/
-  ├── criarProjeto.ts                  cria projeto e contrato local
-  ├── editarProjeto.ts                 altera nome e descrição
-  ├── vincularPastaDoProjeto.ts        vincula pasta após validar o contrato
-  ├── vincularServicoAoProjeto.ts      associa uma conexão Jira/Qase/GitHub
-  ├── removerServicoDoProjeto.ts       remove somente o vínculo
-  ├── validarEstadoDoVinculo.ts        guarda se vínculo é válido ou indisponível
-  ├── configurarCampoAceite.ts         escolhe campo de aceite do Jira
+backend/projetos/regras/
+  ├── criarEspaco.ts                   cria projeto e contrato local
+  ├── editarEspaco.ts                  altera nome e descrição
+  ├── vincularPastaAoEspaco.ts         vincula pasta após validar o contrato
+  ├── vincularServicoAoEspaco.ts       associa uma conexão Jira/Qase/GitHub
+  ├── removerVinculoServico.ts         remove somente o vínculo
+  ├── atualizarEstadoDoVinculo.ts      guarda se vínculo é válido ou indisponível
+  ├── configurarAceite.ts              escolhe campo de aceite do Jira
   ├── registrarConsultaExterna.ts      grava evento de consulta no histórico
   ├── registrarEscritaExterna.ts       grava evento de escrita no histórico
-  ├── associarReferencias.ts           registra relações explícitas
-  ├── definicoesEspaco.ts              diz quais dados de projeto são válidos
-  └── armazenarEspacos.ts             lê e grava os registros locais
-      ↓
-src/armazenamentoLocal.ts             controla gravação segura de JSON local
+  └── associarEspaco.ts                registra relações explícitas
+  ↓
+backend/projetos/banco/
+  ├── lerEspacos.ts / gravarEspacos.ts  lê e grava espacos.json
+  └── atualizarEspaco.ts               abre, altera e grava um projeto
+  ↓
+backend/compartilhado/banco/gravarLocal.ts   gravação segura de JSON local
+backend/projetos/tipos/espacos.ts            diz quais dados de projeto são válidos
 ```
 
 ## Quando a pessoa vincula uma pasta sem contrato
 
 ```text
-src/desktop/main.ts
-  ↓ src/contratoDetectado.ts (ponte)
-src/modulos/projetos/contrato/
+backend/projetos/api/espacosPasta.ts (ou projetosEscolher.ts)
+  ↓
+backend/projetos/regras/
   ├── proporContrato.ts                inspeciona a pasta, sem gravar
-  ├── resumirContrato.ts               mostra o que será criado à pessoa
-  └── gravarContratoAprovado.ts         grava somente após consentimento
+  ├── resumirContratoProposto.ts       mostra o que será criado à pessoa
+  └── gravarContratoProposto.ts        grava somente após consentimento
 ```
 
 ## Outras telas extraídas
@@ -78,12 +81,12 @@ Os pequenos componentes comuns ficam em `app/renderer/telas/compartilhado/`: cad
 
 ## Fluxo do backend sem adivinhações
 
-A organização atual preserva interfaces existentes para não quebrar chamadas: `src/espacos.ts` e `src/contratoDetectado.ts` são pontes e não regras novas. O nome e o comentário inicial de cada arquivo mostram o propósito. Não gerar `endpoints/` ou `banco/` vazios: as APIs HTTP e PostgreSQL por módulo serão criadas apenas quando a camada web for implementada.
+O backend não tem mais pontes: cada tela tem `api/` (canal IPC), `regras/`, `banco/` (dados deste computador, arquivos JSON e SQLite), `integracoes/` e `tipos/`. O nome e a primeira linha de cada arquivo mostram o propósito, e o `LEIA-ME.md` de cada pasta lista tudo. Não gerar pastas vazias: a API HTTP e o PostgreSQL só existirão quando a camada web for implementada.
 
 ## Como validar antes de usar como código oficial
 
 ```powershell
-node scripts/verificar-modulos.mjs
+npm run leia-me
 npm run check
 npm run app
 ```

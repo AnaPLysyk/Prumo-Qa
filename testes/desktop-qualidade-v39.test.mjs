@@ -5,8 +5,10 @@ import path from 'node:path';
 import { abrir, novoDados, ir, escolherPasta, mcp } from './janela.mjs';
 import { fixture } from './fixtures.mjs';
 import { servidorFixture } from './servicos-fixtures.mjs';
-import { criarRotina } from '../dist/agenda.js';
-import { enfileirar, reivindicar, concluir } from '../dist/fila.js';
+import { concluirTrabalho as concluir } from '../dist/agendamentos/banco/concluirTrabalho.js';
+import { enfileirar } from '../dist/agendamentos/banco/enfileirar.js';
+import { pegarProximoTrabalho as reivindicar } from '../dist/agendamentos/banco/pegarProximoTrabalho.js';
+import { criarRotina } from '../dist/agendamentos/regras/criarRotina.js';
 
 // Janela/IPC reais; perfil, projeto e serviços sintéticos. Não comprova
 // autenticação humana nem acesso às contas de produção.
@@ -131,6 +133,4 @@ test('v39: rotina configurada no modal, pausa/retomada e execução detalhada se
   }
   assert.deepEqual(a.erros, []);
 });
-
-
 

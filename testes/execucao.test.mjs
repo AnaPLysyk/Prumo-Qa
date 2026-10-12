@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import { readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fixture } from './fixtures.mjs';
-import { carregarProjeto,hash } from '../dist/projeto.js';
-import { consultarEvidencias } from '../dist/evidencias.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { hash } from '../dist/compartilhado/seguranca/hash.js';
+import { consultarEvidencias } from '../dist/evidencias/banco/consultarEvidencias.js';
+
 // Double APENAS neste processo de testes. Nenhum adaptador aceita isso do usuário/IA.
 let autorizar=async scope=>({subject:'FIXTURE-NON-HUMAN',method:'test-double',scopeHash:scope.scopeHash,at:new Date().toISOString()});
-mock.module('../dist/aprovacao.js',{namedExports:{solicitarAprovacao:scope=>autorizar(scope)}});
-const {executarValidacao,ambienteMinimo}=await import('../dist/execucao.js');
+mock.module('../dist/execucoes/aprovacao/solicitarAprovacao.js',{namedExports:{solicitarAprovacao:scope=>autorizar(scope)}});
+const { executarValidacao } = await import('../dist/execucoes/regras/executarValidacao.js'); const { ambienteMinimo } = await import('../dist/execucoes/regras/ambienteMinimo.js');
 
 test('sem consentimento, capability ausente e bloqueio de política não executam',async t=>{
   const f=await fixture(t);let p=await carregarProjeto(f.root);

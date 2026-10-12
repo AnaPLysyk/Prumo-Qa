@@ -3,10 +3,16 @@ import assert from 'node:assert/strict';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { fixture } from './fixtures.mjs';
-import { criarServidor } from '../dist/mcp.js';
-import { criarEspaco, pastaEspaco } from '../dist/espacos.js';
-import { configuracaoDoEspaco, salvarConfiguracao, capacidadeEfetiva, matrizDePoliticas, capacidades, especializacoes, espacoDaRaiz } from '../dist/politicasAgentes.js';
-import { listarPropostas } from '../dist/propostas.js';
+import { criarServidor } from '../dist/agentes/mcp/criarServidor.js';
+import { capacidadeEfetiva } from '../dist/agentes/politicas/capacidadeEfetiva.js';
+import { configuracaoDoEspaco } from '../dist/agentes/politicas/configuracaoDoEspaco.js';
+import { matrizDePoliticas } from '../dist/agentes/politicas/matrizDePoliticas.js';
+import { salvarConfiguracao } from '../dist/agentes/politicas/salvarConfiguracao.js';
+import { capacidades, especializacoes } from '../dist/agentes/tipos/politicas.js';
+import { criarEspaco } from '../dist/projetos/regras/criarEspaco.js';
+import { espacoDaRaiz } from '../dist/projetos/regras/espacoDaRaiz.js';
+import { vincularPastaAoEspaco as pastaEspaco } from '../dist/projetos/regras/vincularPastaAoEspaco.js';
+import { listarPropostas } from '../dist/tickets/banco/listarPropostas.js';
 
 async function cliente(t, raiz) {
   const servidor = await criarServidor(raiz); const [a, b] = InMemoryTransport.createLinkedPair(); const c = new Client({ name: 'claude-teste', version: '1.0.0' });

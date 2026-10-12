@@ -9,10 +9,12 @@ import { _electron as electron } from 'playwright-core';
 import electronPath from 'electron';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { carregarProjeto } from '../dist/projeto.js';
-import { criarContexto,aprovarContexto,gravarConfig } from '../dist/contextos.js';
-import { prepararConexao } from '../dist/conexoes.js';
-import { consultarAtividades } from '../dist/atividades.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { prepararConexao } from '../dist/conexoes/ia/prepararConexao.js';
+import { gravarPermissaoDeContextosNoMcp as gravarConfig } from '../dist/contextos/banco/gravarPermissaoDeContextosNoMcp.js';
+import { aprovarContexto } from '../dist/contextos/regras/aprovarContexto.js';
+import { criarContexto } from '../dist/contextos/regras/criarContexto.js';
+import { consultarAtividades } from '../dist/logs/banco/consultarAtividades.js';
 import { gerarSite } from './gerar-site.mjs';
 
 const repo=path.resolve('.');const out=path.resolve('.prumo/demonstracao-2.6',new Date().toISOString().replace(/[^0-9]/g,''));fs.mkdirSync(out,{recursive:true});

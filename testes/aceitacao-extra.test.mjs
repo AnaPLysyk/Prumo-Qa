@@ -4,9 +4,11 @@ import { spawnSync } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fixture } from './fixtures.mjs';
-import { carregarProjeto,hash } from '../dist/projeto.js';
-import { executarValidacao } from '../dist/execucao.js';
-import { revisarCobertura } from '../dist/qualidade.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { hash } from '../dist/compartilhado/seguranca/hash.js';
+import { executarValidacao } from '../dist/execucoes/regras/executarValidacao.js';
+import { revisarCobertura } from '../dist/testes/regras/revisarCobertura.js';
+
 test('readonly bloqueia execução sem gravar no projeto',async t=>{
   const f=await fixture(t);f.manifest.execution.readOnly=true;await f.save();const antes=(await fs.readdir(f.root)).sort();
   const e=await executarValidacao(await carregarProjeto(f.root),'unit',true);assert.equal(e.status,'BLOCKED');assert.equal(e.persisted,false);assert.deepEqual((await fs.readdir(f.root)).sort(),antes);

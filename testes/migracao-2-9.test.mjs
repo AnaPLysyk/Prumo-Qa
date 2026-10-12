@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { abrir, novoDados, ir } from './janela.mjs';
-import { criarRotina } from '../dist/agenda.js';
-import { enfileirar, reivindicar, concluir, obterTrabalho } from '../dist/fila.js';
+import { concluirTrabalho as concluir } from '../dist/agendamentos/banco/concluirTrabalho.js';
+import { enfileirar } from '../dist/agendamentos/banco/enfileirar.js';
+import { obterTrabalho } from '../dist/agendamentos/banco/obterTrabalho.js';
+import { pegarProximoTrabalho as reivindicar } from '../dist/agendamentos/banco/pegarProximoTrabalho.js';
+import { criarRotina } from '../dist/agendamentos/regras/criarRotina.js';
 
 // Dados no formato da 2.8 (agenda, fila, histórico), sem nenhum dos arquivos novos da 2.9.
 // A 2.9 precisa abrir sobre eles sem perder nada e com a escrita externa desligada.

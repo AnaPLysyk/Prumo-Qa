@@ -5,8 +5,10 @@ import path from 'node:path';
 import { abrir, novoDados, ir, escolherPasta, abas } from './janela.mjs';
 import { fixture } from './fixtures.mjs';
 import { servidorFixture } from './servicos-fixtures.mjs';
-import { criarRotina } from '../dist/agenda.js';
-import { enfileirar, reivindicar, concluir } from '../dist/fila.js';
+import { concluirTrabalho as concluir } from '../dist/agendamentos/banco/concluirTrabalho.js';
+import { enfileirar } from '../dist/agendamentos/banco/enfileirar.js';
+import { pegarProximoTrabalho as reivindicar } from '../dist/agendamentos/banco/pegarProximoTrabalho.js';
+import { criarRotina } from '../dist/agendamentos/regras/criarRotina.js';
 
 // v40 (Design System + Grupo B): janela/IPC reais; perfil, projeto e serviços sintéticos (servidor local).
 // Não comprova contas de produção nem autenticação humana do Windows; confirmações nativas são doubles do runner.

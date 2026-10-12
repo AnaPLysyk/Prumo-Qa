@@ -5,7 +5,7 @@ import path from 'node:path';
 import http from 'node:http';
 import { fixture } from './fixtures.mjs';
 import { versao, exe, novoDados, abrir, ir, escolherPasta, mcp } from './janela.mjs';
-import { esquemasIpc } from '../dist/contratos.js';
+import { esquemasIpc } from '../dist/aplicativo/api/catalogoDeContratos.js';
 
 /** Ajuda 2.3 na janela real: central, versões, integrações técnicas, atualização, privacidade, exportação, exclusão e diagnóstico. */
 const abrirAjuda = async (page, titulo) => { await ir(page, 'ajuda'); await page.click(`.indice button:has-text("${titulo}")`); await page.waitForTimeout(300); };
@@ -64,7 +64,7 @@ test('Integrações técnicas: catálogo de IPC e MCP corresponde ao código e f
   await page.selectOption('#filtro-tipo', 'IPC'); assert.equal(await page.locator('details.operacao').count(), total);
   const logs = page.locator('details.operacao', { hasText: 'prumo:projeto:logs' }).first(); await logs.locator('summary').click();
   const t1 = await logs.textContent();
-  for (const trecho of ['Tipo', 'IPC', 'prumo:projeto:logs', 'Interface > Logs', 'painel.ts > atividades.ts', 'Projeto selecionado + filtros', 'Projeto previamente vinculado', 'Consulta local; não altera o projeto']) assert.ok(t1.includes(trecho), trecho);
+  for (const trecho of ['Tipo', 'IPC', 'prumo:projeto:logs', 'Interface > Logs', 'backend/logs/api/projetoLogs.ts > listarLogsDoProjeto', 'Projeto selecionado + filtros', 'Projeto previamente vinculado', 'Consulta local; não altera o projeto']) assert.ok(t1.includes(trecho), trecho);
   await page.selectOption('#filtro-tipo', 'MCP');
   const exec = page.locator('details.operacao', { hasText: 'executar_validacao' }); await exec.locator('summary').click();
   const t2 = await exec.textContent();

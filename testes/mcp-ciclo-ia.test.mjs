@@ -6,11 +6,12 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import './conhecimento-memoria.mjs';
 import { falhasConhecimento } from './conhecimento-falso.mjs';
-import { criarServidor } from '../dist/mcp.js';
-import { criarEspaco } from '../dist/espacos.js';
-import { salvarConfiguracao } from '../dist/politicasAgentes.js';
-import { promptsPrumo, textoDoPrompt } from '../dist/promptsMcp.js';
-import { listarConhecimentos } from '../dist/conhecimento.js';
+import { listarConhecimentos } from '../dist/agentes/banco/listarConhecimentos.js';
+import { criarServidor } from '../dist/agentes/mcp/criarServidor.js';
+import { textoDoPrompt } from '../dist/agentes/mcp/textoDoPrompt.js';
+import { salvarConfiguracao } from '../dist/agentes/politicas/salvarConfiguracao.js';
+import { promptsPrumo } from '../dist/agentes/tipos/roteiros.js';
+import { criarEspaco } from '../dist/projetos/regras/criarEspaco.js';
 import './fixtures.mjs';
 
 test('MCP: prompts list/get, validação e aprendizado em rascunho obedecem política sem banco', async t => {

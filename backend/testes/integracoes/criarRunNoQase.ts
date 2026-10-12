@@ -1,0 +1,15 @@
+/** Cria no Qase a run correspondente à run local, depois da confirmação. */
+import { numeroDoId } from '../../compartilhado/texto/numeroDoId.js';
+import { executarOperacao } from '../../conexoes/escrita/executarOperacao.js';
+import { RegistroOperacao } from '../../conexoes/tipos/operacoesExternas.js';
+import { alterarRunLocal } from '../banco/alterarRunLocal.js';
+import { obterRunLocal } from '../banco/obterRunLocal.js';
+import { Dep } from '../tipos/runLocal.js';
+
+/** Cria a run no Qase (operação externa com confirmação). Criar não executa nada nem registra resultado. */
+export async function criarRunNoQase(d: Dep, runLocalId: string, o: { confirmado: boolean }): Promise<RegistroOperacao & { reutilizada: boolean }> {
+  const run = obterRunLocal(runLocalId, d.base); if (run.runIdRemoto) throw new Error('RUN_ALREADY_CREATED');
+  const reg = await executarOperacao(d.executor, run.espacoId, 'qase.criar_run', { titulo: run.titulo, casos: run.casos.map(c => c.casoId), ...(run.planoId ? { planoId: run.planoId } : {}) }, { base: d.base, confirmado: o.confirmado, agora: d.agora });
+  const id = reg.estado === 'CONFIRMADA' || reg.estado === 'ENVIADA' ? numeroDoId(reg.remoto?.id) : null; if (id) alterarRunLocal(runLocalId, r => { r.runIdRemoto = id; r.estado = 'CRIADA'; r.confirmadaNoQase = reg.estado === 'CONFIRMADA'; }, d.base);
+  return reg;
+}

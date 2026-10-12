@@ -1,6 +1,6 @@
 # Organização didática por tela — migração em andamento
 
-> **Situação:** migração inicial; `main` permanece intacta. Esta branch **ainda não implementa** a organização final `frontend/` e `backend/`. Não declarar equivalência funcional sem executar `npm run check` e validação do Electron.
+> **Situação:** `main` permanece intacta. O **backend** já está na organização final `backend/<tela>/` (branch `refatoracao-backend-por-tela`); o frontend segue em migração. Não declarar equivalência funcional sem executar `npm run check` e validação do Electron.
 
 ## Objetivo
 
@@ -60,26 +60,35 @@ backend/
 
 > Não criar pastas vazias apenas para preencher o desenho. Cada arquivo deve ter responsabilidade concreta, com seus tipos/contratos e chamadas identificados no código existente. Nos módulos web planejados, **API e banco ficam dentro da função/tela correspondente**. A configuração da conexão com o banco é uma exceção compartilhada.
 
-## Primeira etapa realmente movida nesta branch
+## Backend: migração concluída nesta branch (refatoracao-backend-por-tela)
 
-O compilador ainda usa `src/` como `rootDir`. Para não quebrar `dist/`, CLI, Electron e MCP, estas implementações foram movidas inicialmente para `src/modulos/`. Os caminhos originais continuam como **pontes temporárias de reexportação**, a remover só depois da migração de build/testes.
+Todo o antigo `src/` foi movido para `backend/<tela>/`, sem pontes e sem mudar comportamento. O compilador usa `backend/` como `rootDir`; `dist/` repete a mesma árvore. As três portas de entrada continuam onde a instalação espera:
 
-| Caminho anterior (ponte) | Implementação modular | Responsabilidade |
+| Porta | Arquivo | Observação |
 | --- | --- | --- |
-| `src/rastreabilidade.ts` | `src/modulos/rastreabilidade/mapaDeVinculos.ts` | Montar mapa de vínculos do projeto |
-| `src/rotasEscrita.ts` | `src/modulos/conexoes/rotaEscritaPermitida.ts` | Validar rotas de escrita permitidas |
-| `src/playwright.ts` | `src/modulos/testes/converterRelatorioPlaywright.ts` | Converter JSON do Playwright |
-| `src/adf.ts` | `src/modulos/tickets/textoParaAdf.ts` | Converter texto em ADF para Jira |
-| `src/multipart.ts` | `src/modulos/conexoes/montarMultipart.ts` | Montar anexos multipart |
-| `src/qualidade.ts` | `src/modulos/testes/revisarCobertura.ts` | Revisar cobertura por evidências |
-| `src/diagnostico.ts` | `src/modulos/logs/diagnosticoIpc.ts` | Registrar diagnósticos IPC |
-| `src/textosDesktop.ts` | `src/modulos/configuracoes/textosDesktop.ts` | Textos da bandeja do desktop |
+| Aplicativo desktop | `backend/aplicativo.ts` → `dist/aplicativo.js` | `package.json` aponta para ela |
+| Terminal | `backend/cli.ts` → `dist/cli.js` | mesmo binário `prumo` |
+| Servidor MCP | `backend/mcp.ts` → `dist/mcp.js` | **mesmo caminho das versões anteriores**: configurações MCP já instaladas continuam valendo |
+
+Dentro de cada tela: `api/` (um arquivo por canal IPC, com o nome do canal: `espacos:criar` → `projetos/api/espacosCriar.ts`), `regras/`, `banco/` (dados deste computador), `integracoes/` (Jira, Qase, GitHub, IA) e `tipos/` (formatos e limites). Pastas extras só quando a tela tem um assunto próprio (`agendamentos/worker`, `agentes/mcp`, `conexoes/escrita`...). `compartilhado/` guarda só o que várias telas usam.
+
+Regras verificadas por `testes/estrutura-backend.test.mjs` (roda no `npm run check` e no CI):
+
+- toda primeira linha é `/** descrição em português */`;
+- fora de `tipos/`, cada arquivo tem **uma** declaração exportada, com o nome do arquivo, e nenhuma auxiliar escondida;
+- `tipos/` não tem funções;
+- nomes de função únicos no backend inteiro;
+- todo canal IPC tem seu arquivo em `api/`;
+- `backend/LEIA-ME.md` e `backend/<tela>/LEIA-ME.md` iguais ao código (`npm run leia-me`).
+
+Duplicatas idênticas viraram uma só função (ex.: `codificarParaUrl`, `semAcentos`, `versaoDoPacote`, `raizDoAplicativo`). As variáveis que mudam com o aplicativo aberto ficam juntas em `backend/aplicativo/estadoDoAplicativo.ts`. O destino de cada canal no catálogo técnico (Ajuda › Integrações técnicas e `docs/CONTRATOS.md`) é gerado do código: o arquivo `api/` e as funções que ele chama.
+
+Exceção registrada: `backend/aplicativo/api/catalogoDeContratos.ts` continua uma tabela única com os 119 canais e as 8 ferramentas MCP. Alguns arquivos ainda concentram muita lógica numa só função (`agendamentos/worker/Worker.ts`, `agentes/mcp/criarServidor.ts`, `agentes/chat/conversar.ts`, `conexoes/integracoes/AdaptadorServico.ts`, `conexoes/regras/nucleoServicos.ts`, `credenciais`); dividi-los em funções menores é a próxima etapa, sem mudar comportamento.
 
 ## Segunda etapa: arquivos existentes na branch, separados por tela
 
 Agora os scripts de interface estão dentro de `app/renderer/telas/`, carregados explicitamente por `app/renderer/index.html`. Projetos tem seu formulário em `telas/projetos/modais/criarEditarProjeto/`. Suporte e Ajuda já possuem arquivos separados; Contextos é um modal em Agentes. Os scripts genéricos `plataforma.js` e `apoio-v40.js` foram deixados apenas como marcadores de migração, **não executados** na página.
 
-No backend, `src/espacos.ts` passou a reexportar funções de `src/modulos/projetos/espacos/`, cada ação no seu arquivo; `src/contratoDetectado.ts` reexporta detectar, resumir e gravar um contrato autorizado de `src/modulos/projetos/contrato/`. As ações de outras telas ainda usam os caminhos antigos.
 
 **Leia `docs/GUIA-CODIGO-POR-TELA.md`** para acompanhar a lógica da tela Projetos, incluindo os canais IPC, a regra e o armazenamento.
 
@@ -87,17 +96,17 @@ Há etapas posteriores obrigatórias: migrar arquivos grandes `fluxos-v40.js`, `
 
 ## O que **não** foi migrado
 
-Os arquivos restantes em `src/` e `app/renderer/` (fora dos módulos listados), os 119 canais IPC, o servidor MCP, o worker e o instalador continuam em seus caminhos originais. Login, cadastro, permissões por usuário, API HTTPS e PostgreSQL pertencem à **proposta**, não são funcionalidades já implementadas. Não copiar o HTML da documentação viva como se fosse uma aplicação operacional.
+No frontend, os arquivos de `app/renderer/` fora das telas listadas continuam nos caminhos originais. O backend inteiro já está em `backend/`. Login, cadastro, permissões por usuário, API HTTPS e PostgreSQL pertencem à **proposta**, não são funcionalidades já implementadas. Não copiar o HTML da documentação viva como se fosse uma aplicação operacional.
 
 ## Migração seguinte, módulo por módulo
 
 1. Registrar cada tela, cada modal e cada função real no inventário; identificar componentes duplicados e reuso legítimo.
 2. Para cada tela, separar componentes de interface e ações; em cada backend, separar entrada (endpoint/IPC), regra, serviço externo e consulta de dados por responsabilidade.
 3. Atualizar imports, `tsconfig.json`, scripts, paths de `dist/`, entrada do Electron, preload, distribuição, CLI, MCP, site e referências nos testes **antes** de eliminar as pontes.
-4. Garantir que `src/contratos.ts` continue sendo a fonte real dos 119 contratos IPC, preservando todas as autorizações, limites e revisões humanas.
+4. Garantir que `backend/aplicativo/api/catalogoDeContratos.ts` continue sendo a fonte real dos 119 contratos IPC, preservando todas as autorizações, limites e revisões humanas.
 5. Preservar segurança de credenciais, isolamento local, escrita externa controlada e dados existentes.
 6. Criar os módulos novos (login, cadastro, reset, administração e banco) como **novas funcionalidades**, com autenticação e autorização por recurso e usuário.
-7. Executar `node scripts/verificar-modulos.mjs`, `npm run check`, testes de janela, MCP e empacotamento Windows, corrigindo falhas antes de solicitar merge.
+7. Executar `npm run check` (inclui `testes/estrutura-backend.test.mjs`), testes de janela, MCP e empacotamento Windows, corrigindo falhas antes de solicitar merge.
 
 **Fonte:** estrutura publicada do Prumo QA 2.10.2 (`main` na criação da branch). O canvas da Documentação Viva é ferramenta de planejamento, não substitui código/contratos.
 

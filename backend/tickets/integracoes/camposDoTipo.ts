@@ -1,0 +1,10 @@
+/** Consulta no Jira os campos de um tipo de ticket (quais são obrigatórios). */
+import { z } from 'zod';
+import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
+import { Recurso } from '../../projetos/tipos/espacos.js';
+
+export async function camposDoTipo(ctx: ContextoServico, rec: Recurso, tipoId: string) {
+  const r = (await ctx.ler(`/rest/api/3/issue/createmeta/${codificarParaUrl(rec.chave)}/issuetypes/${codificarParaUrl(tipoId)}?maxResults=100`)) as { fields?: unknown[]; values?: unknown[] };
+  return z.array(z.object({ fieldId: z.string().optional(), key: z.string().optional(), name: z.string(), required: z.boolean().optional() }).passthrough()).parse(r.fields ?? r.values ?? []).map(c => ({ id: c.fieldId ?? c.key ?? '', nome: c.name, obrigatorio: c.required === true }));
+}

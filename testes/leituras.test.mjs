@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { criarMundo } from './mundo-servicos.mjs';
-import { lerExtra, jqlDeTickets, operacoesExtras, filtrosSchema } from '../dist/leiturasServicos.js';
-import { operacoesServico } from '../dist/adaptadoresServicos.js';
+import { lerDetalheDoServico as lerExtra } from '../dist/conexoes/integracoes/lerDetalheDoServico.js';
+import { operacoesServico } from '../dist/conexoes/tipos/adaptador.js';
+import { filtrosSchema, operacoesExtras } from '../dist/conexoes/tipos/leituras.js';
+import { jqlDeTickets } from '../dist/tickets/integracoes/jqlDeTickets.js';
 
 const pg = { offset: 0, limite: 50 };
 const ctxDe = (m, servico) => m.executor.comContexto('x', servico, async (c) => c);

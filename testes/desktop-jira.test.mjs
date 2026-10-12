@@ -4,8 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { abrir, novoDados, ir } from './janela.mjs';
 import { servidorFixture } from './servicos-fixtures.mjs';
-import { enfileirar, reivindicar, concluir, obterTrabalho } from '../dist/fila.js';
-import { criarRotina } from '../dist/agenda.js';
+import { concluirTrabalho as concluir } from '../dist/agendamentos/banco/concluirTrabalho.js';
+import { enfileirar } from '../dist/agendamentos/banco/enfileirar.js';
+import { obterTrabalho } from '../dist/agendamentos/banco/obterTrabalho.js';
+import { pegarProximoTrabalho as reivindicar } from '../dist/agendamentos/banco/pegarProximoTrabalho.js';
+import { criarRotina } from '../dist/agendamentos/regras/criarRotina.js';
 
 const confirmar = (app) => app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1 }); }); // confirmação nativa simulada pelo runner
 const instrumentar = (app, port) => app.evaluate((_, p) => {

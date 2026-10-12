@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fixture } from './fixtures.mjs';
-import { carregarProjeto } from '../dist/projeto.js';
-import { revisarCobertura } from '../dist/qualidade.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { revisarCobertura } from '../dist/testes/regras/revisarCobertura.js';
+
 const candidato={id:'A',behavior:'Editor grava',source:'R1',risk:'Alteração indevida',expected:'200 e persistência',oracle:'nova leitura',technique:'equivalence',partition:'Editor'};
 const plano={requirement:'R1: Apenas Editor grava.',source:'README R1',sourcePath:'README.md',existingTests:[],candidates:[candidato]};
 test('rastreabilidade, fonte real e proposta nunca PASS',async t=>{

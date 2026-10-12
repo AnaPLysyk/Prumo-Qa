@@ -4,11 +4,18 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { criarMundo } from './mundo-servicos.mjs';
-import { criarEspaco } from '../dist/espacos.js';
-import { executarOperacao, prepararOperacao, habilitarEscrita, escritaHabilitada, listarOperacoes, catalogoOperacoes, idsDeOperacao } from '../dist/operacoesExternas.js';
-import { criarPoliticaEscrita, estadoEscrita } from '../dist/autorizacoes.js';
-import { rotaEscritaPermitida } from '../dist/rotasEscrita.js';
-import { caminhoDeTesteValido } from '../dist/escritaGithub.js';
+import { criarPoliticaEscrita } from '../dist/agendamentos/autorizacoes/criarPoliticaEscrita.js';
+import { estadoDaPoliticaDeEscrita as estadoEscrita } from '../dist/agendamentos/autorizacoes/estadoDaPoliticaDeEscrita.js';
+import { listarOperacoes } from '../dist/conexoes/banco/listarOperacoes.js';
+import { catalogoOperacoes } from '../dist/conexoes/escrita/catalogoOperacoes.js';
+import { escritaHabilitada } from '../dist/conexoes/escrita/escritaHabilitada.js';
+import { executarOperacao } from '../dist/conexoes/escrita/executarOperacao.js';
+import { habilitarEscrita } from '../dist/conexoes/escrita/habilitarEscrita.js';
+import { prepararOperacao } from '../dist/conexoes/escrita/prepararOperacao.js';
+import { rotaEscritaPermitida } from '../dist/conexoes/escrita/rotaEscritaPermitida.js';
+import { caminhoDeTesteValido } from '../dist/conexoes/github/caminhoDeTesteValido.js';
+import { idsDeOperacao } from '../dist/conexoes/tipos/operacoesExternas.js';
+import { criarEspaco } from '../dist/projetos/regras/criarEspaco.js';
 
 const base = (t) => { const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo escrita ')); t.after(() => fs.rmSync(b, { recursive: true, force: true })); return b; };
 async function montar(t, { escrita = true } = {}) {

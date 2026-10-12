@@ -2,8 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { abrir, novoDados, ir, abas, ajustes } from './janela.mjs';
 import { fixture } from './fixtures.mjs';
-import { criarRotina } from '../dist/agenda.js';
-import { enfileirar, reivindicar, concluir } from '../dist/fila.js';
+import { concluirTrabalho as concluir } from '../dist/agendamentos/banco/concluirTrabalho.js';
+import { enfileirar } from '../dist/agendamentos/banco/enfileirar.js';
+import { pegarProximoTrabalho as reivindicar } from '../dist/agendamentos/banco/pegarProximoTrabalho.js';
+import { criarRotina } from '../dist/agendamentos/regras/criarRotina.js';
 
 // Heurística de texto em português: acentos próprios do idioma ou palavras funcionais/de domínio muito comuns.
 const PORTUGUES = /[ãõçáéíóúâêôà]|\b(não|para|com|sem|você|projetos?|execuç\w+|nenhum[a]?|selecion\w+|clique|vincul\w+|rotinas?|agendament\w+|pasta|erro|aprova\w+|ainda|todos|todas|desta|deste|nesta|neste|seu|sua|uma?|dos|das|nos|nas|pelo|pela)\b/i;

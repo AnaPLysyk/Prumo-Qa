@@ -5,16 +5,33 @@ import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fixture } from './fixtures.mjs';
-import { criarEspaco, pastaEspaco, gravarVinculo, associarEspaco } from '../dist/espacos.js';
-import { criarRotina, listarRotinas, pausarRotina, definirPausaGlobal } from '../dist/agenda.js';
-import { listarTrabalhos, enfileirar, recuperarInterrompidos, reivindicar, obterTrabalho } from '../dist/fila.js';
-import { autorizarExecucao, autorizarEscopo, revogarExecucao, criarPoliticaPublicacao } from '../dist/autorizacoes.js';
-import { carregarProjeto } from '../dist/projeto.js';
-import { escopoDeCapability } from '../dist/execucao.js';
-import { escopoK6 } from '../dist/k6.js';
-import { Worker, estadoTrava } from '../dist/worker.js';
-import { publicar, prepararPublicacao, publicacaoDoTrabalho, montarComentario } from '../dist/jiraComentario.js';
-import { ErroServico } from '../dist/httpServicos.js';
+import { autorizarEscopo } from '../dist/agendamentos/autorizacoes/autorizarEscopo.js';
+import { autorizarExecucao } from '../dist/agendamentos/autorizacoes/autorizarExecucao.js';
+import { criarPoliticaPublicacao } from '../dist/agendamentos/autorizacoes/criarPoliticaPublicacao.js';
+import { revogarExecucao } from '../dist/agendamentos/autorizacoes/revogarExecucao.js';
+import { enfileirar } from '../dist/agendamentos/banco/enfileirar.js';
+import { listarRotinas } from '../dist/agendamentos/banco/listarRotinas.js';
+import { listarTrabalhos } from '../dist/agendamentos/banco/listarTrabalhos.js';
+import { obterTrabalho } from '../dist/agendamentos/banco/obterTrabalho.js';
+import { pegarProximoTrabalho as reivindicar } from '../dist/agendamentos/banco/pegarProximoTrabalho.js';
+import { recuperarInterrompidos } from '../dist/agendamentos/banco/recuperarInterrompidos.js';
+import { escopoDoK6 as escopoK6 } from '../dist/agendamentos/k6/escopoDoK6.js';
+import { criarRotina } from '../dist/agendamentos/regras/criarRotina.js';
+import { definirPausaGlobal } from '../dist/agendamentos/regras/definirPausaGlobal.js';
+import { pausarRotina } from '../dist/agendamentos/regras/pausarRotina.js';
+import { estadoDaTravaDoWorker as estadoTrava } from '../dist/agendamentos/worker/estadoDaTravaDoWorker.js';
+import { Worker } from '../dist/agendamentos/worker/Worker.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { ErroServico } from '../dist/conexoes/integracoes/ErroServico.js';
+import { publicacaoDoTrabalho } from '../dist/execucoes/banco/publicacaoDoTrabalho.js';
+import { publicarComentarioDeResultado as publicar } from '../dist/execucoes/integracoes/publicarComentarioDeResultado.js';
+import { escopoDeCapability } from '../dist/execucoes/regras/escopoDeCapability.js';
+import { montarComentario } from '../dist/execucoes/regras/montarComentario.js';
+import { prepararPublicacao } from '../dist/execucoes/regras/prepararPublicacao.js';
+import { associarEspaco } from '../dist/projetos/regras/associarEspaco.js';
+import { criarEspaco } from '../dist/projetos/regras/criarEspaco.js';
+import { vincularPastaAoEspaco as pastaEspaco } from '../dist/projetos/regras/vincularPastaAoEspaco.js';
+import { vincularServicoAoEspaco as gravarVinculo } from '../dist/projetos/regras/vincularServicoAoEspaco.js';
 
 const base = (t) => { const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo worker ')); t.after(() => fs.rmSync(b, { recursive: true, force: true })); return b; };
 const T0 = Date.parse('2026-10-10T12:00:00Z');
@@ -152,7 +169,7 @@ test('Jira: comentário só de dados locais, prévia, publicação única, idemp
   const b = base(t); const rel = relogio(); const eid = (await criarEspaco({ nome: 'Projeto X' }, b)).id; const rid = randomUUID();
   const { trabalho } = enfileirar({ chave: 'j1', rotinaId: rid, espacoId: eid, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', origem: 'AGENDA', slot: null }, b, rel.agora());
   reivindicar(b, rel.agora());
-  const { concluir } = await import('../dist/fila.js');
+  const { concluirTrabalho: concluir } = await import('../dist/agendamentos/banco/concluirTrabalho.js');
   concluir(trabalho.id, { status: 'FAIL', motivo: 'Falha do processo', contagem: { pass: 2, fail: 1, blocked: 0, notRun: 0 }, evidenciaId: randomUUID(), detalhes: 'C3: o valor não foi preservado\nconexão com token=abcdef1234567890SECRET' }, b, rel.agora());
   const j = obterTrabalho(trabalho.id, b);
   const c = montarComentario(j, 'Projeto X');
@@ -178,7 +195,7 @@ test('Jira: comentário só de dados locais, prévia, publicação única, idemp
 test('Jira: sem execução real não há comentário (BLOCKED/NOT_RUN/INFO)', async (t) => {
   const b = base(t); const rel = relogio(); const esp2 = (await criarEspaco({ nome: 'P2' }, b)).id;
   enfileirar({ chave: 'j2', rotinaId: randomUUID(), espacoId: esp2, tipo: 'smoke', ambiente: 'local', ticket: 'SMART-1', origem: 'AGENDA', slot: null }, b, rel.agora()); const j = reivindicar(b, rel.agora());
-  const { concluir } = await import('../dist/fila.js'); concluir(j.id, { status: 'BLOCKED', motivo: 'HUMAN_APPROVAL_REQUIRED' }, b, rel.agora());
+  const { concluirTrabalho: concluir } = await import('../dist/agendamentos/banco/concluirTrabalho.js'); concluir(j.id, { status: 'BLOCKED', motivo: 'HUMAN_APPROVAL_REQUIRED' }, b, rel.agora());
   assert.throws(() => montarComentario(obterTrabalho(j.id, b), 'P'), /JIRA_COMMENT_NOT_APPLICABLE/);
 });
 
@@ -187,7 +204,7 @@ test('k6: limites, produção bloqueada, destino local, ausência do executável
   const k6fake = 'import fs from "node:fs";const a=process.argv;const i=a.indexOf("--summary-export");fs.writeFileSync(a[i+1],JSON.stringify({metrics:{http_req_duration:{"p(95)":812.5,avg:300,thresholds:{"p(95)<500":{ok:false}}},http_reqs:{count:420,rate:42},http_req_failed:{value:0,passes:0,fails:420}}}));process.exit(99);';
   const { fx, e } = await projetoComEspaco(t, b, 'LAB-K6', {}, { extras: { 'carga/script.js': 'export default function(){}', 'k6-fake.mjs': k6fake } });
   const cfg = { script: 'carga/script.js', alvo: 'http://127.0.0.1:8080', usuarios: 5, duracaoSegundos: 5 };
-  const { executarK6 } = await import('../dist/k6.js'); const p = await carregarProjeto(fx.root);
+  const { executarK6 } = await import('../dist/agendamentos/k6/executarK6.js'); const p = await carregarProjeto(fx.root);
   const exe = { executable: process.execPath, argsIniciais: [path.join(fx.root, 'k6-fake.mjs')] };
   const sem = await executarK6(p, cfg, 'local', null, true); assert.equal(sem.status, 'NOT_RUN'); assert.match(sem.reason, /RUNTIME_MISSING/);
   assert.match((await executarK6(p, cfg, 'producao', exe, true, undefined, solicitador())).reason, /POLICY_BLOCKED/);
@@ -197,7 +214,7 @@ test('k6: limites, produção bloqueada, destino local, ausência do executável
   const r = await executarK6(p, cfg, 'local', exe, true, undefined, solicitador()); assert.equal(r.status, 'FAIL'); assert.match(r.reason, /exit 99|Limiar/); assert.equal(r.cases[0].status, 'FAIL'); assert.equal(r.resultArtifact.metrics.http_req_duration['p(95)'], 812.5);
   // agendado: via worker com autorização restrita ao hash
   criarRotina({ nome: 'Carga', espacoId: e.id, tipo: 'k6', ambiente: 'local', frequencia: { tipo: 'intervalo', minutos: 10 }, fuso: 'UTC', k6: cfg }, b, rel.agora());
-  const esc = await escopoK6(p, cfg, 'local', exe); const { capabilityK6 } = await import('../dist/k6.js');
+  const esc = await escopoK6(p, cfg, 'local', exe); const { capacidadeDoK6: capabilityK6 } = await import('../dist/agendamentos/k6/capacidadeDoK6.js');
   await autorizarEscopo(p, e.id, capabilityK6(cfg), 'local', esc, { dias: 1, maxUsos: 2 }, b, solicitador());
   const w = worker(b, rel, { localizarK6: async () => exe }); w.iniciar(); t.after(() => w.parar()); rel.avancar(10); await w.tick(); await w.tick();
   const j = trabalhos(b).at(-1); assert.equal(j.tipo, 'k6'); assert.equal(j.resultado.status, 'FAIL'); assert.equal(j.resultado.contagem.fail, 1);

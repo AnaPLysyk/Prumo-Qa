@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prepararSolicitacao, revisarPrivacidade, urlOficial, linkDeIssueValido, urlBase } from '../dist/suporte.js';
+import { enderecoOficialDoRelato as urlOficial } from '../dist/suporte/regras/enderecoOficialDoRelato.js';
+import { linkDeIssueValido } from '../dist/suporte/regras/linkDeIssueValido.js';
+import { prepararRelato as prepararSolicitacao } from '../dist/suporte/regras/prepararRelato.js';
+import { revisarPrivacidadeDoRelato as revisarPrivacidade } from '../dist/suporte/regras/revisarPrivacidadeDoRelato.js';
+import { urlBase } from '../dist/suporte/tipos/suporte.js';
 
 const ctx = { versao: '2.5.0', diagnostico: '2026-10-10T10:00:00.000Z projeto:visao OK 3ms' };
 const bug = { categoria: 'bug', titulo: 'Botão não responde', descricao: 'Ao clicar em Verificar nada acontece.', passos: '1. Abrir Ajuda\n2. Clicar', esperado: 'Mostrar o resultado', consentimento: true };

@@ -2,10 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { fixture } from './fixtures.mjs';
-import { carregarProjeto } from '../dist/projeto.js';
-import { detectarFrameworks, analisarPlaywright, ehTestePlaywright, conhecimento } from '../dist/frameworks.js';
-import { revisarCobertura } from '../dist/qualidade.js';
-import { contextoCompleto } from '../dist/contextoCompleto.js';
+import { contextoCompleto } from '../dist/agentes/mcp/contextoCompleto.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { analisarPlaywright } from '../dist/testes/regras/analisarPlaywright.js';
+import { detectarFrameworks } from '../dist/testes/regras/detectarFrameworks.js';
+import { ehTestePlaywright } from '../dist/testes/regras/ehTestePlaywright.js';
+import { revisarCobertura } from '../dist/testes/regras/revisarCobertura.js';
+import { conhecimento } from '../dist/testes/tipos/frameworks.js';
 
 const pkg = (deps) => JSON.stringify({ name: 'x', devDependencies: deps });
 const spec = (corpo) => `import { test, expect } from '@playwright/test';\n${corpo}`;

@@ -4,13 +4,26 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fixture } from './fixtures.mjs';
-import { carregarProjeto, hash } from '../dist/projeto.js';
-import { iniciarAtividade, excluirAtividades, consultarAtividades, calcularMetricas, pastaAtividades, diretorioDados } from '../dist/atividades.js';
-import { salvarEvidencia, excluirEvidencias, consultarEvidencias } from '../dist/evidencias.js';
-import { registrarDiagnostico, lerDiagnostico, excluirDiagnostico } from '../dist/diagnostico.js';
-import { resumirDados, politicaRetencao } from '../dist/dados.js';
-import * as painel from '../dist/painel.js';
-import { adicionarVinculo } from '../dist/vinculos.js';
+import { resumirDados } from '../dist/ajuda/privacidade/resumirDados.js';
+import { politicaRetencao } from '../dist/ajuda/tipos/privacidade.js';
+import { diretorioDados } from '../dist/compartilhado/banco/diretorioDados.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { hash } from '../dist/compartilhado/seguranca/hash.js';
+import { consultarEvidencias } from '../dist/evidencias/banco/consultarEvidencias.js';
+import { excluirEvidencias } from '../dist/evidencias/banco/excluirEvidencias.js';
+import { salvarEvidencia } from '../dist/evidencias/banco/salvarEvidencia.js';
+import { consultarAtividades } from '../dist/logs/banco/consultarAtividades.js';
+import { excluirAtividades } from '../dist/logs/banco/excluirAtividades.js';
+import { excluirDiagnostico } from '../dist/logs/banco/excluirDiagnostico.js';
+import { lerDiagnostico } from '../dist/logs/banco/lerDiagnostico.js';
+import { pastaAtividades } from '../dist/logs/banco/pastaAtividades.js';
+import { registrarDiagnostico } from '../dist/logs/banco/registrarDiagnostico.js';
+import { exportarLogs } from '../dist/logs/regras/exportarLogs.js';
+import { iniciarAtividade } from '../dist/logs/regras/iniciarAtividade.js';
+import { calcularMetricas } from '../dist/metricas/regras/calcularMetricas.js';
+import { adicionarVinculo } from '../dist/projetos/regras/adicionarVinculo.js';
+import { listarPastasVinculadas } from '../dist/projetos/regras/listarPastasVinculadas.js';
+import { vincularPasta } from '../dist/projetos/regras/vincularPasta.js';
 
 const registrar = async (root, n = 1) => { const p = await carregarProjeto(root); for (let i = 0; i < n; i++) iniciarAtividade(p, 'contexto_projeto', { origin: 'MCP', client: 'codex' }).finalizar({ state: 'NOT_VERIFIED' }); return p; };
 const gravaveis = { execution: { requireApproval: true, blockedByDefault: [], environment: 'host', readOnly: false, envAllowlist: [], timeoutMs: 3000, maxOutputBytes: 4096 } };
@@ -31,7 +44,7 @@ test('exclusão do histórico: apaga só os registros do projeto escolhido e pre
   assert.equal(consultarAtividades(pb).activities.length, 2, 'outro projeto intacto');
   assert.ok(fs.existsSync(path.join(a.root, 'qa.project.json')) && fs.existsSync(path.join(a.root, 'README.md')) && fs.existsSync(path.join(a.root, 'src/app.mjs')), 'código preservado');
   assert.equal((await consultarEvidencias(pa)).results.length, 1, 'evidência preservada');
-  assert.equal((await painel.projetos()).length, 1, 'vínculo preservado');
+  assert.equal((await listarPastasVinculadas()).length, 1, 'vínculo preservado');
   assert.equal(calcularMetricas(consultarAtividades(pa)).totalOperations, 0);
   assert.deepEqual(excluirAtividades(pa), { deleted: 0, failed: [] }, 'idempotente');
 });
@@ -147,8 +160,8 @@ test('resumo de dados: pasta real, categorias, retenção e limites de privacida
 });
 
 test('exportação usa o esquema e nada vaza por exclusão ou exportação', async (t) => {
-  const f = await fixture(t); await registrar(f.root, 1); await painel.vincular(f.root);
-  const bruto = JSON.parse(await painel.exportarLogs(f.root));
+  const f = await fixture(t); await registrar(f.root, 1); await vincularPasta(f.root);
+  const bruto = JSON.parse(await exportarLogs(f.root));
   assert.equal(bruto.events.length, 2); assert.ok(bruto.exportedAt);
   assert.doesNotMatch(JSON.stringify(bruto), /Users|AppData|prumo espaço/i, 'sem caminhos locais');
 });

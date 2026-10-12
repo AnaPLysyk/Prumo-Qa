@@ -5,7 +5,10 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import electronPath from 'electron';
 import { repo, exe, abrir, novoDados, ir, ajustes } from './janela.mjs';
-import { modeloMenuBandeja, resumoEstado, dicaBandeja, tm } from '../dist/textosDesktop.js';
+import { dicaDaBandeja as dicaBandeja } from '../dist/aplicativo/bandeja/dicaDaBandeja.js';
+import { itensDoMenuDaBandeja as modeloMenuBandeja } from '../dist/aplicativo/bandeja/itensDoMenuDaBandeja.js';
+import { resumoDoWorker as resumoEstado } from '../dist/aplicativo/bandeja/resumoDoWorker.js';
+import { textoNoIdioma as tm } from '../dist/aplicativo/bandeja/textoNoIdioma.js';
 
 const token = (page, nome) => page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), nome);
 

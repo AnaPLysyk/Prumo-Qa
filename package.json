@@ -34,7 +34,8 @@
     "icone": "electron scripts/gerar-icone-orb.cjs",
     "dist": "npm run build && electron-builder --win nsis --publish never",
     "contratos": "npm run build && node scripts/gerar-contratos.mjs",
-    "site": "node scripts/gerar-site.mjs"
+    "site": "node scripts/gerar-site.mjs",
+    "leia-me": "node scripts/gerar-leia-me-backend.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
@@ -54,5 +55,5 @@
     "url": "https://github.com/AnaPLysyk"
   },
   "homepage": "https://github.com/AnaPLysyk/Prumo-Qa",
-  "main": "dist/desktop/main.js"
+  "main": "dist/aplicativo.js"
 }

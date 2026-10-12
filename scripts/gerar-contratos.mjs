@@ -1,7 +1,7 @@
-// Gera docs/CONTRATOS.md a partir do catálogo real (src/contratos.ts), a mesma fonte da tela Ajuda › Integrações técnicas.
+// Gera docs/CONTRATOS.md a partir do catálogo real (backend/aplicativo/api/catalogoDeContratos.ts), a mesma fonte da tela Ajuda › Integrações técnicas.
 // Uso: npm run contratos        (o teste testes/contratos.test.mjs falha se o arquivo estiver desatualizado)
 import fs from 'node:fs';
-import { catalogo } from '../dist/contratos.js';
+import { catalogo } from '../dist/aplicativo/api/catalogoDeContratos.js';
 
 export function documento() {
   const ops = catalogo(); const ipc = ops.filter((o) => o.tipo === 'IPC'); const mcp = ops.filter((o) => o.tipo === 'MCP');
@@ -9,7 +9,7 @@ export function documento() {
   const detalhe = (o) => `### \`${o.nome}\`\n\n- **Tipo:** ${o.tipo}\n- **Finalidade:** ${o.finalidade}\n- **Origem:** ${o.origem}\n- **Destino:** ${o.destino}\n- **Entrada:** ${o.entrada}\n- **Saída:** ${o.saida}\n- **Permissões:** ${o.permissoes}\n- **Efeito:** ${o.efeito}\n- **Arquivos consultados:** ${o.arquivos}\n- **Erros possíveis:** ${o.erros.join(', ')}\n- **Proteções:** ${o.protecoes.join('; ')}\n- **Registro:** ${o.registro}\n`;
   return `# Contratos técnicos do Prumo QA
 
-> Arquivo **gerado** por \`npm run contratos\` a partir de \`src/contratos.ts\`. Não edite à mão: um teste compara este texto com o catálogo real.
+> Arquivo **gerado** por \`npm run contratos\` a partir de \`backend/aplicativo/api/catalogoDeContratos.ts\`. Não edite à mão: um teste compara este texto com o catálogo real.
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 

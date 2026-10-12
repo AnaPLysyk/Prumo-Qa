@@ -5,9 +5,9 @@ import path from 'node:path';
 import { abrir, novoDados, ir, escolherPasta, exe } from './janela.mjs';
 import { servidorFixture } from './servicos-fixtures.mjs';
 import { fixture } from './fixtures.mjs';
-import { autorizarExecucao } from '../dist/autorizacoes.js';
-import { carregarProjeto } from '../dist/projeto.js';
-import { criarRotina } from '../dist/agenda.js';
+import { autorizarExecucao } from '../dist/agendamentos/autorizacoes/autorizarExecucao.js';
+import { criarRotina } from '../dist/agendamentos/regras/criarRotina.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
 
 /**
  * Demonstração ponta a ponta da 2.8 (26 passos), com projeto sintético temporário e um Jira simulado.

@@ -1,12 +1,12 @@
 # Aplicativo desktop (Windows) — Prumo QA 2.6
 
-Na 2.6, Conexões usa `painel.ts > integracoes.ts`: inspeciona metadados compatíveis, testa o MCP do próprio produto via SDK e mostra separadamente chamadas observadas com classificação atual. O núcleo e as quatro ferramentas permanecem os mesmos. Evidências de protocolo ficam em `integracoes/<hash>/<uuid>.json`; o teste chama somente consultar_evidencias.
+Na 2.6, Conexões usa `backend/conexoes/ia/` (`diagnosticarIntegracao`, `testarProtocolo`): inspeciona metadados compatíveis, testa o MCP do próprio produto via SDK e mostra separadamente chamadas observadas com classificação atual. O núcleo e as quatro ferramentas permanecem os mesmos. Evidências de protocolo ficam em `integracoes/<hash>/<uuid>.json`; o teste chama somente consultar_evidencias.
 
-Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `src/chamados.ts` lê os rótulos definidos em `app/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
+Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `backend/suporte/integracoes/consultarChamado.ts` usa os rótulos definidos em `app/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
 
 O gerador `scripts/gerar-site.mjs` usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes em [../site/README.md](../site/README.md).
 
-A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama `src/painel.ts`, que delega a `projeto`, `atividades`, `evidencias` e `conexoes`.
+A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama o arquivo `api/` da tela (ex.: `backend/logs/api/projetoLogs.ts`), que delega às regras da própria tela.
 
 ## Arquitetura
 
@@ -14,12 +14,12 @@ A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não
 Janela (app/renderer: HTML+CSS+JS, sandbox, CSP, sem rede)
    │  window.prumo.*  (app/preload.cjs — ponte mínima catalogada, objeto congelado)
    ▼
-Processo principal Electron (src/desktop/main.ts)
+Processo principal Electron (backend/aplicativo.ts; canais em backend/aplicativo/api/registrarCanaisIpc.ts)
    │  canais IPC `prumo:*`: confere remetente, valida com zod, devolve {ok,data|error}
    ▼
-Adaptador (src/painel.ts, src/vinculos.ts)  — puro Node, testado sem janela
+Arquivos api/ de cada tela (backend/<tela>/api/<canal>.ts)  — um por canal
    ▼
-Núcleo: projeto · qualidade · execucao · evidencias · atividades · conexoes
+Regras, banco e integrações de cada tela (backend/<tela>/) — puro Node, testado sem janela
 ```
 
 O **servidor MCP não roda dentro da janela**. Cada cliente de IA inicia o seu processo (`mcp.js`, stdio); fechar a janela não o afeta (há teste para isso).
@@ -27,8 +27,8 @@ O **servidor MCP não roda dentro da janela**. Cada cliente de IA inicia o seu p
 ### Como Electron, Node e MCP se integram
 
 - O app instalado não depende de Node.js. O `Prumo QA.exe` é o Electron; com a variável `ELECTRON_RUN_AS_NODE=1` ele se comporta como um Node puro, sem abrir janela.
-- `src/conexoes.ts` detecta `process.versions.electron` e propõe `command = Prumo QA.exe`, `args = [<instalação>\resources\app\dist\mcp.js, <projeto>]`, `env ELECTRON_RUN_AS_NODE=1`. Em desenvolvimento a proposta usa o `electron.exe` do projeto da mesma forma.
-- `src/execucao.ts` faz o mesmo para capacidades `node`: o filho recebe `ELECTRON_RUN_AS_NODE=1` (senão abriria uma janela do Prumo).
+- `backend/conexoes/ia/prepararConexao.ts` detecta `process.versions.electron` e propõe `command = Prumo QA.exe`, `args = [<instalação>\resources\app\dist\mcp.js, <projeto>]`, `env ELECTRON_RUN_AS_NODE=1`. Em desenvolvimento a proposta usa o `electron.exe` do projeto da mesma forma.
+- `backend/execucoes/regras/ambienteMinimo.ts` faz o mesmo para capacidades `node`: o filho recebe `ELECTRON_RUN_AS_NODE=1` (senão abriria uma janela do Prumo).
 - O build usa `asar: false` para que `dist/mcp.js` e `dist/aprovar.exe` existam como arquivos reais (um executável não roda de dentro de um `.asar`).
 - O pacote **não inclui npm**: capacidades `npm run` continuam exigindo Node com npm na máquina (falha como `RUNTIME_MISSING`, nunca como PASS).
 
@@ -38,23 +38,23 @@ Cada `tools/call` MCP (e cada comando do CLI) grava um registro de início e out
 
 ### Contratos técnicos (IPC e MCP)
 
-`src/contratos.ts` é a fonte única: os mesmos esquemas Zod que validam cada chamada IPC em `main.ts` alimentam o catálogo mostrado em **Ajuda › Integrações técnicas** e o arquivo gerado [docs/CONTRATOS.md](CONTRATOS.md) (`npm run contratos`). Testes comparam o catálogo com `main.ts`, `preload.cjs` e o servidor MCP real; uma operação nova sem documentação, ou um catálogo desatualizado, quebra a suíte. Não existe API HTTP.
+`backend/aplicativo/api/catalogoDeContratos.ts` é a fonte única: os mesmos esquemas Zod que validam cada chamada IPC em `backend/aplicativo/api/registrarCanal.ts` alimentam o catálogo mostrado em **Ajuda › Integrações técnicas** e o arquivo gerado [docs/CONTRATOS.md](CONTRATOS.md) (`npm run contratos`). Testes comparam o catálogo com `main.ts`, `preload.cjs` e o servidor MCP real; uma operação nova sem documentação, ou um catálogo desatualizado, quebra a suíte. Não existe API HTTP.
 
 ### Suporte e avisos de versão (2.5)
 
-A aba **Suporte** prepara bug, melhoria ou sugestão (`src/suporte.ts`), mostra o texto exato e a revisão de privacidade e só abre o formulário oficial do GitHub após confirmação nativa; o processo principal refaz a preparação e valida o destino. O sino do cabeçalho e as preferências (`src/preferencias.ts`, `%LOCALAPPDATA%\PrumoQA\preferencias.json`) avisam de versões novas: a verificação ao iniciar é opcional e desligada por padrão, o som toca no máximo uma vez por versão e não há processo em segundo plano. Ver [SUPORTE.md](SUPORTE.md).
+A aba **Suporte** prepara bug, melhoria ou sugestão (`backend/suporte/regras/`), mostra o texto exato e a revisão de privacidade e só abre o formulário oficial do GitHub após confirmação nativa; o processo principal refaz a preparação e valida o destino. O sino do cabeçalho e as preferências (`backend/configuracoes/` e `backend/atualizacoes/regras/`, `%LOCALAPPDATA%\PrumoQA\preferencias.json`) avisam de versões novas: a verificação ao iniciar é opcional e desligada por padrão, o som toca no máximo uma vez por versão e não há processo em segundo plano. Ver [SUPORTE.md](SUPORTE.md).
 
 ### Contextos persistentes e conhecimento de QA (2.4)
 
-`src/contextos.ts` guarda, por projeto, requisitos, regras de negócio, critérios de aceite, restrições técnicas e decisões em `%LOCALAPPDATA%\PrumoQA\contextos\<projeto>\<id>.json` (fora do projeto, sem banco, sem alterar o `qa.project.json`). Cada arquivo traz um histórico encadeado por hash (quem, quando, ação, hash do conteúdo): se for alterado fora do Prumo o contexto vira **ADULTERADO**, deixa de ser editável e **nunca** é enviado ao agente.
+`backend/contextos/` guarda, por projeto, requisitos, regras de negócio, critérios de aceite, restrições técnicas e decisões em `%LOCALAPPDATA%\PrumoQA\contextos\<projeto>\<id>.json` (fora do projeto, sem banco, sem alterar o `qa.project.json`). Cada arquivo traz um histórico encadeado por hash (quem, quando, ação, hash do conteúdo): se for alterado fora do Prumo o contexto vira **ADULTERADO**, deixa de ser editável e **nunca** é enviado ao agente.
 
 - **Estados:** RASCUNHO, APROVADO, CONFLITANTE, DESATUALIZADO. Aprovar é um ato humano (confirmação nativa; o aprovador é o usuário do Windows lido no processo principal) que vale só para o texto exato; editar volta a RASCUNHO; aprovar exige origem e ausência de conflito. Conflito é **derivado** (mesma chave com contextos vivos diferentes) ou marcado pela pessoa; o Prumo nunca escolhe um lado.
 - **MCP:** por padrão **nada** é entregue ao agente. Com "Disponibilizar ao agente" habilitado (confirmação nativa), `contexto_projeto` devolve referências estruturadas (id, chave, versão, hash, estado, origem, texto mascarado e limitado a 4000 caracteres, alerta de texto que parece instrução) e `revisar_cobertura` aceita `contextoId`, registrando o contexto usado como fato e apontando `CONTEXT_NOT_APPROVED`, `CONTEXT_OUTDATED`, `CONTEXT_CONFLICT`, `CONTEXT_SOURCE_MISSING`, `CONTEXT_MISMATCH`, `CONTEXT_TAMPERED`, `CONTEXT_UNAVAILABLE` ou `CONTEXT_SUSPICIOUS_INSTRUCTION`. Nenhuma ferramenta MCP cria, edita, aprova ou exclui contextos (teste verifica).
-- **Frameworks e Playwright:** `src/frameworks.ts` detecta Playwright por evidência (dependência `@playwright/test` em package.json mais configuração ou teste que importa o pacote → CONFIRMADO; evidência parcial → PROVAVEL; só nome de pasta → INCERTO) e analisa arquivos de teste com 12 regras `PW_*`, cada uma com linha, trecho e a fonte oficial da documentação. A análise é textual e determinística: pode errar e não sabe se há validação de persistência. As Skills `skills/playwright` e `skills/api-rest` orientam a IA; `contextoCompleto.ts` compõe a resposta de `contexto_projeto` (MCP e CLI).
+- **Frameworks e Playwright:** `backend/testes/regras/detectarFrameworks.ts` detecta Playwright por evidência (dependência `@playwright/test` em package.json mais configuração ou teste que importa o pacote → CONFIRMADO; evidência parcial → PROVAVEL; só nome de pasta → INCERTO) e analisa arquivos de teste com 12 regras `PW_*`, cada uma com linha, trecho e a fonte oficial da documentação. A análise é textual e determinística: pode errar e não sabe se há validação de persistência. As Skills `skills/playwright` e `skills/api-rest` orientam a IA; `contextoCompleto.ts` compõe a resposta de `contexto_projeto` (MCP e CLI).
 
 ### Versões e atualização
 
-`app/versoes.json` (validado por `src/versoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`scripts/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
+`app/versoes.json` (validado por `backend/ajuda/versoes/validarVersoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`scripts/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
 
 ### Dados locais: exportar e excluir
 

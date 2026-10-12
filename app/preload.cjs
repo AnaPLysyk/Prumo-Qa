@@ -1,6 +1,6 @@
 'use strict';
 // Ponte mínima: a página só enxerga estas funções. Nenhum ipcRenderer, require ou caminho livre é exposto.
-// Cada função corresponde a um canal do catálogo (src/contratos.ts); testes conferem a correspondência.
+// Cada função corresponde a um canal do catálogo (backend/aplicativo/api/catalogoDeContratos.ts); testes conferem a correspondência.
 const { contextBridge, ipcRenderer } = require('electron');
 const chamar = (canal, args) => ipcRenderer.invoke('prumo:' + canal, args);
 contextBridge.exposeInMainWorld('prumo', Object.freeze({

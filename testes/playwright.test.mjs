@@ -5,8 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
-import { converterRelatorioPlaywright } from '../dist/playwright.js';
-import { Worker } from '../dist/worker.js';
+import { Worker } from '../dist/agendamentos/worker/Worker.js';
+import { converterRelatorioPlaywright } from '../dist/testes/regras/converterRelatorioPlaywright.js';
 
 const require = createRequire(import.meta.url);
 const folha = (specs) => ({ suites: [{ title: 'login.spec.ts', file: 'login.spec.ts', specs, suites: [] }] });

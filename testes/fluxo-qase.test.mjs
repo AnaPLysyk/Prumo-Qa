@@ -6,13 +6,35 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fixture } from './fixtures.mjs';
 import { criarMundo } from './mundo-servicos.mjs';
-import { criarEspaco, pastaEspaco, gravarVinculo, associarEspaco, obterEspaco, removerVinculoServico } from '../dist/espacos.js';
-import { habilitarEscrita, executarOperacao } from '../dist/operacoesExternas.js';
-import { autorizarExecucao, delegadaPara } from '../dist/autorizacoes.js';
-import { executarValidacao } from '../dist/execucao.js';
-import { carregarProjeto } from '../dist/projeto.js';
-import { prepararRunLocal, criarRunNoQase, executarRunLocal, declararResultadoManual, publicarRunLocal, propostasDeBugs, obterRunLocal, automacaoDoCaso } from '../dist/fluxoQase.js';
-import { criarProposta, listarPropostas, revisarProposta, editarProposta, descartarProposta, podePublicar, marcarPublicada, obterProposta, MAX_IA_POR_HORA } from '../dist/propostas.js';
+import { autorizacaoDelegada as delegadaPara } from '../dist/agendamentos/autorizacoes/autorizacaoDelegada.js';
+import { autorizarExecucao } from '../dist/agendamentos/autorizacoes/autorizarExecucao.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { executarOperacao } from '../dist/conexoes/escrita/executarOperacao.js';
+import { habilitarEscrita } from '../dist/conexoes/escrita/habilitarEscrita.js';
+import { executarValidacao } from '../dist/execucoes/regras/executarValidacao.js';
+import { obterEspaco } from '../dist/projetos/banco/obterEspaco.js';
+import { associarEspaco } from '../dist/projetos/regras/associarEspaco.js';
+import { criarEspaco } from '../dist/projetos/regras/criarEspaco.js';
+import { removerVinculoServico } from '../dist/projetos/regras/removerVinculoServico.js';
+import { vincularPastaAoEspaco as pastaEspaco } from '../dist/projetos/regras/vincularPastaAoEspaco.js';
+import { vincularServicoAoEspaco as gravarVinculo } from '../dist/projetos/regras/vincularServicoAoEspaco.js';
+import { obterRunLocal } from '../dist/testes/banco/obterRunLocal.js';
+import { criarRunNoQase } from '../dist/testes/integracoes/criarRunNoQase.js';
+import { publicarRunLocal } from '../dist/testes/integracoes/publicarRunLocal.js';
+import { automacaoDoCaso } from '../dist/testes/regras/automacaoDoCaso.js';
+import { declararResultadoManual } from '../dist/testes/regras/declararResultadoManual.js';
+import { executarRunLocal } from '../dist/testes/regras/executarRunLocal.js';
+import { prepararRunLocal } from '../dist/testes/regras/prepararRunLocal.js';
+import { propostasDeBugs } from '../dist/testes/regras/propostasDeBugs.js';
+import { listarPropostas } from '../dist/tickets/banco/listarPropostas.js';
+import { obterProposta } from '../dist/tickets/banco/obterProposta.js';
+import { criarProposta } from '../dist/tickets/regras/criarProposta.js';
+import { descartarProposta } from '../dist/tickets/regras/descartarProposta.js';
+import { editarProposta } from '../dist/tickets/regras/editarProposta.js';
+import { marcarPublicada } from '../dist/tickets/regras/marcarPublicada.js';
+import { podePublicar } from '../dist/tickets/regras/podePublicar.js';
+import { revisarProposta } from '../dist/tickets/regras/revisarProposta.js';
+import { MAX_IA_POR_HORA } from '../dist/tickets/tipos/proposta.js';
 
 const base = (t) => { const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo fluxo ')); t.after(() => fs.rmSync(b, { recursive: true, force: true })); return b; };
 const solicitador = async (esc) => ({ subject: 'pessoa-simulada', method: 'Windows-CredUI-LogonUser', scopeHash: esc.scopeHash, at: new Date().toISOString() });
@@ -42,7 +64,7 @@ test('v39: trocar vínculo Qase não reutiliza automação declarada nem funde n
   assert.equal(automacaoDoCaso(c.e.id, 31, c.b), null);
   associarEspaco(c.e.id, { de: { tipo: 'qase', id: '31', vinculoId: novo.id, origem: 'Qase atual' }, para: { tipo: 'automacao', id: 'unit#C2', origem: 'qa.project.json' }, justificativa: 'Associação nova explícita' }, c.b);
   assert.equal(automacaoDoCaso(c.e.id, 31, c.b).casoRunner, 'C2');
-  const { mapaDeVinculos } = await import('../dist/rastreabilidade.js');
+  const { mapaDeVinculos } = await import('../dist/rastreabilidade/regras/mapaDeVinculos.js');
   const mapa = mapaDeVinculos(c.e.id, c.b);
   assert.equal(mapa.nos.filter(n => n.tipo === 'qase').length, 2);
   assert.equal(mapa.nos.find(n => n.id === 'qase:31:vinculo:' + c.qv.id).estado, 'DESATUALIZADO');
@@ -76,7 +98,7 @@ test('mapeamentos e bloqueios: sem mapeamento por cenário nada é inferido; sem
 });
 
 test('publicação supervisionada agendada: só com política vigente para a run; sem ela os resultados ficam locais', async (t) => {
-  const { criarPoliticaEscrita } = await import('../dist/autorizacoes.js'); const c = await cenario(t); const a = await c.caso('Editor grava'); c.ligar(a, 'unit#C1');
+  const { criarPoliticaEscrita } = await import('../dist/agendamentos/autorizacoes/criarPoliticaEscrita.js'); const c = await cenario(t); const a = await c.caso('Editor grava'); c.ligar(a, 'unit#C1');
   const run = prepararRunLocal(c.e.id, { titulo: 'Agendada', ambiente: 'teste', casos: [{ casoId: a, titulo: 'Editor grava' }] }, c.b); await criarRunNoQase(c.dep, run.id, { confirmado: true }); await executarRunLocal(c.dep, run.id, c.execucao);
   const sem = await publicarRunLocal(c.dep, run.id, { confirmado: false, origem: 'AGENDADO' }); assert.equal(sem.operacao.estado, 'BLOQUEADA'); assert.equal(sem.publicados, 0); assert.equal(c.mundo.qase.resultados.length, 0); assert.equal(obterRunLocal(run.id, c.b).casos[0].publicado, false);
   criarPoliticaEscrita(c.e.id, { operacao: 'qase.publicar_resultados', runs: [obterRunLocal(run.id, c.b).runIdRemoto], dias: 1, maxUsos: 3 }, 'pessoa', c.b);
@@ -111,7 +133,7 @@ test('propostas da IA: sem duplicata, limite por hora, revisão completa obrigat
 });
 
 test('mapa de vínculos: mostra o cadastrado, o registrado pelo Prumo e o observado; lacunas só de ausência de cadastro; não deduz por nome', async (t) => {
-  const { mapaDeVinculos } = await import('../dist/rastreabilidade.js');
+  const { mapaDeVinculos } = await import('../dist/rastreabilidade/regras/mapaDeVinculos.js');
   const c = await cenario(t); c.mundo.semear('SMART-100'); const [a, bb] = [await c.caso('Editor grava'), await c.caso('Caso sem automação nem ticket')];
   c.ligar(a, 'unit#C1'); associarEspaco(c.e.id, { de: { tipo: 'jira', id: 'SMART-100', vinculoId: c.jv.id, origem: 'Jira' }, para: { tipo: 'qase', id: String(a), vinculoId: c.qv.id, origem: 'Qase SFQ' }, justificativa: 'Declarado' }, c.b);
   const run = prepararRunLocal(c.e.id, { titulo: 'Mapa', ambiente: 'teste', casos: [{ casoId: a, titulo: 'Editor grava' }, { casoId: bb, titulo: 'Caso sem automação nem ticket' }] }, c.b); await criarRunNoQase(c.dep, run.id, { confirmado: true }); await executarRunLocal(c.dep, run.id, c.execucao);
@@ -123,7 +145,7 @@ test('mapa de vínculos: mostra o cadastrado, o registrado pelo Prumo e o observ
 });
 
 test('rotina "run do Qase" no worker: executa as automações autorizadas e só publica com política vigente para a run', async (t) => {
-  const { Worker } = await import('../dist/worker.js'); const { criarRotina } = await import('../dist/agenda.js'); const { listarTrabalhos } = await import('../dist/fila.js'); const { criarPoliticaEscrita } = await import('../dist/autorizacoes.js');
+  const { Worker } = await import('../dist/agendamentos/worker/Worker.js'); const { criarRotina } = await import('../dist/agendamentos/regras/criarRotina.js'); const { listarTrabalhos } = await import('../dist/agendamentos/banco/listarTrabalhos.js'); const { criarPoliticaEscrita } = await import('../dist/agendamentos/autorizacoes/criarPoliticaEscrita.js');
   const c = await cenario(t); const [a, bb] = [await c.caso('Editor grava'), await c.caso('Leitor é recusado')]; c.ligar(a, 'unit#C1'); c.ligar(bb, 'unit#C2');
   const run = prepararRunLocal(c.e.id, { titulo: 'Agendada no worker', ambiente: 'teste', casos: [{ casoId: a, titulo: 'Editor grava' }, { casoId: bb, titulo: 'Leitor é recusado' }] }, c.b);
   assert.throws(() => criarRotina({ nome: 'Sem run', espacoId: c.e.id, tipo: 'run-qase', ambiente: 'teste', frequencia: { tipo: 'intervalo', minutos: 10 }, fuso: 'UTC' }, c.b), /run obrigatória/);

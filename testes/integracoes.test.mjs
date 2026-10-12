@@ -3,10 +3,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fixture } from './fixtures.mjs';
-import { carregarProjeto } from '../dist/projeto.js';
-import { prepararConexao } from '../dist/conexoes.js';
-import { conferirServidores, testarProtocolo, registrosIntegracao } from '../dist/integracoes.js';
-import { iniciarAtividade, consultarAtividades } from '../dist/atividades.js';
+import { carregarProjeto } from '../dist/compartilhado/projeto/carregarProjeto.js';
+import { registrosIntegracao } from '../dist/conexoes/banco/registrosIntegracao.js';
+import { conferirServidores } from '../dist/conexoes/ia/conferirServidores.js';
+import { prepararConexao } from '../dist/conexoes/ia/prepararConexao.js';
+import { testarProtocolo } from '../dist/conexoes/ia/testarProtocolo.js';
+import { consultarAtividades } from '../dist/logs/banco/consultarAtividades.js';
+import { iniciarAtividade } from '../dist/logs/regras/iniciarAtividade.js';
 
 test('configuração exige runtime, servidor, raiz e ambiente exatos, sem expor credenciais', async t => {
   const f=await fixture(t); const p=await carregarProjeto(f.root); const plano=prepararConexao(p,'codex');

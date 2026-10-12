@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { verificarAtualizacao, destinoAutorizado, urlConsulta, mensagemOffline } from '../dist/atualizacao.js';
+import { destinoAutorizado } from '../dist/atualizacoes/regras/destinoAutorizado.js';
+import { verificarAtualizacao } from '../dist/atualizacoes/regras/verificarAtualizacao.js';
+import { mensagemOffline, urlConsulta } from '../dist/atualizacoes/tipos/consulta.js';
 
 const resp = (corpo, init = {}) => async () => new Response(typeof corpo === 'string' ? corpo : JSON.stringify(corpo), { status: 200, ...init });
 const release = (tag, extra = {}) => ({ tag_name: tag, html_url: `https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/${tag}`, body: '## Novidades\n- algo', draft: false, prerelease: false, ...extra });
@@ -81,7 +83,7 @@ test('HTTP real em loopback: lê release, não faz download e recusa redireciona
 });
 
 test('o módulo nunca baixa nem executa instalador', async () => {
-  const fonte = (await import('node:fs')).readFileSync('src/atualizacao.ts', 'utf8');
+  const fonte = (await import('node:fs')).readFileSync('backend/atualizacoes/regras/verificarAtualizacao.ts', 'utf8');
   assert.doesNotMatch(fonte, /child_process|spawn|exec\(|writeFile|createWriteStream|\.exe\b|shell\./);
 });
 

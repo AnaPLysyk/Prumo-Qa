@@ -5,7 +5,10 @@ import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
 import { createHash } from 'node:crypto';
-import { baixarAtualizacao, urlInstalador, nomeInstalador, argumentosInstalador } from '../dist/atualizacaoInstalar.js';
+import { baixarAtualizacao } from '../dist/atualizacoes/regras/baixarAtualizacao.js';
+import { enderecoDoInstalador as urlInstalador } from '../dist/atualizacoes/regras/enderecoDoInstalador.js';
+import { nomeDoInstalador as nomeInstalador } from '../dist/atualizacoes/regras/nomeDoInstalador.js';
+import { argumentosInstalador } from '../dist/atualizacoes/tipos/instalador.js';
 
 /** Servidor em 127.0.0.1 no lugar do GitHub: nenhum teste sai para a rede nem executa instalador. */
 async function servidor(t, rotas) {

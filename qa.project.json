@@ -5,7 +5,7 @@
   "context": {
     "documentation": ["README.md", "AGENTS.md", "docs/", "app/ajuda/"],
     "tests": ["testes/"],
-    "code": ["src/", "app/renderer/", "scripts/", "package.json"]
+    "code": ["backend/", "app/renderer/", "scripts/", "package.json"]
   },
   "commands": {
     "build": {

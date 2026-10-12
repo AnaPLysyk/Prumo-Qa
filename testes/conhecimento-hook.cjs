@@ -6,8 +6,10 @@ const path = require('node:path');
 const requireHook = '--require ' + JSON.stringify(__filename);
 if (!(process.env.NODE_OPTIONS ?? '').includes(__filename)) process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, requireHook].filter(Boolean).join(' ');
 const fixture = pathToFileURL(path.join(__dirname, 'conhecimento-falso.mjs')).href;
-const nomes = ['tiposConhecimento','estadosConhecimento','limitesConhecimento','caminhoConhecimento','lerPerfil','normalizarNome','salvarPerfil','listarConhecimentos','registrarConhecimento','decidirConhecimento','apagarConhecimento','norm','termos','relevantes','aprenderTermos','pesosAprendidos','vocabularioDoAgente','esquecerTermo','registrarAtendimento','avaliarAtendimento','listarAtendimentos','estadoConhecimento','conhecimentoParaIA'];
+const substitutos = require('./conhecimento-substitutos.cjs');
 registerHooks({ load(url, context, nextLoad) {
-  if (url.endsWith('/dist/conhecimento.js')) return { format: 'module', shortCircuit: true, source: `import { memoria } from ${JSON.stringify(fixture)};\n` + nomes.map(n => `export const ${n} = memoria.${n};`).join('\n') };
+  const relativo = url.split('/dist/')[1];
+  const s = relativo && substitutos[relativo];
+  if (s) return { format: 'module', shortCircuit: true, source: `import { memoria } from ${JSON.stringify(fixture)};\nexport const ${s[0]} = memoria.${s[1]};\n` };
   return nextLoad(url, context);
 } });

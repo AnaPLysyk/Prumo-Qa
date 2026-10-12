@@ -2,7 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { compararVersoes, analisarVersao, carregarVersoes, validarVersoes, conferirInstalada, apresentarVersoes, notasDaVersao, urlRelease } from '../dist/versoes.js';
+import { analisarVersao } from '../dist/ajuda/versoes/analisarVersao.js';
+import { apresentarVersoes } from '../dist/ajuda/versoes/apresentarVersoes.js';
+import { carregarVersoes } from '../dist/ajuda/versoes/carregarVersoes.js';
+import { compararVersoes } from '../dist/ajuda/versoes/compararVersoes.js';
+import { conferirInstalada } from '../dist/ajuda/versoes/conferirInstalada.js';
+import { enderecoDaVersao as urlRelease } from '../dist/ajuda/versoes/enderecoDaVersao.js';
+import { notasDaVersao } from '../dist/ajuda/versoes/notasDaVersao.js';
+import { validarVersoes } from '../dist/ajuda/versoes/validarVersoes.js';
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const bruto = () => JSON.parse(fs.readFileSync('app/versoes.json', 'utf8'));
