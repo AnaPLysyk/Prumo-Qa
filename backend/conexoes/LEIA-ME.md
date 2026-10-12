@@ -206,4 +206,3 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | `ResultadoConsulta.ts` | Descreve os dados, a próxima página e o endereço de uma consulta externa. |
 | `rotasDeEscrita.ts` | Lista fechada de métodos e caminhos de escrita permitidos por serviço. |
 | `transporte.ts` | Códigos de erro dos serviços, formato dos pedidos de leitura e escrita e da paginação. |
-
