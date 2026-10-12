@@ -1,0 +1,22 @@
+/** Liga o worker: assume a trava de instância única (ou recusa se outro estiver vivo), recupera execuções interrompidas e agenda a primeira passada. */
+import { lerTravaDoWorker } from '../banco/lerTravaDoWorker.js';
+import { recuperarInterrompidos } from '../banco/recuperarInterrompidos.js';
+import { EstadoDoWorker } from '../tipos/worker.js';
+import { agendarProximaPassada } from './agendarProximaPassada.js';
+import { emitirEventoDoWorker } from './emitirEventoDoWorker.js';
+import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';
+import { processoVivo } from './processoVivo.js';
+
+/** Assume a trava ou recusa. Dois workers sobre a mesma agenda nunca coexistem. */
+export function iniciarWorker(e: EstadoDoWorker) {
+  const agora = e.agora(); const t = lerTravaDoWorker(e.base);
+  if (t?.ativo && t.instancia !== e.instancia && agora.getTime() - Date.parse(t.batimento) < 60000 && processoVivo(t.pid) && t.pid !== process.pid) throw new Error('WORKER_ALREADY_RUNNING');
+  if (e.ativo) return;
+  e.abort = new AbortController(); e.ativo = true; gravarTravaDoWorker(e, true);
+  // Com a trava assumida, nenhum outro worker está vivo: todo EXECUTANDO que não é desta instância foi interrompido,
+  // mesmo com batimento recente (queda e reabertura em menos de 2 min travariam a fila inteira). Só um trabalho ainda
+  // em curso NESTE processo (parar() que esgotou a espera) mantém a tolerância por batimento.
+  const recuperados = recuperarInterrompidos(e.base, agora, e.processando ? 120000 : 0);
+  if (recuperados) emitirEventoDoWorker(e, 'WORKER_INTERROMPIDO', '', '', 'Execuções interrompidas recuperadas', `${recuperados} trabalho(s) estavam em andamento quando o Prumo foi encerrado; o histórico foi preservado.`);
+  agendarProximaPassada(e, 0);
+}

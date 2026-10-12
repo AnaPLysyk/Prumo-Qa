@@ -143,10 +143,32 @@ O trabalhador que roda as rotinas sozinho, um trabalho por vez.
 
 | Arquivo | O que faz |
 | --- | --- |
+| `agendarProximaPassada.ts` | Marca a próxima passada do worker daqui a alguns milissegundos; erro numa passada fica anotado e a seguinte é agendada mesmo assim. |
+| `analisarMudancasAgendada.ts` | Rotina "análise de mudanças": lê os commits do repositório vinculado e diz quantos são novos desde a última análise; nunca dispara testes sozinha. |
+| `capacidadeDaRotinaAgendada.ts` | Diz qual comando do projeto (capacidade) o trabalho da rotina vai usar: o escolhido na rotina ou o do script k6. |
+| `consultarJiraAgendada.ts` | Rotina "consulta Jira": lê até 50 tickets e informa quais são novos ou mudaram desde a consulta anterior; não executa nada. |
 | `contarCasosDaEvidencia.ts` | Conta quantos casos de uma evidência passaram, falharam, foram bloqueados ou não rodaram. |
+| `criarEstadoDoWorker.ts` | Cria o estado inicial de um worker: identidade própria, relógio, pasta de dados e intervalo entre passadas (5 s por padrão). |
+| `emitirEventoDoWorker.ts` | Avisa a janela de um acontecimento do worker, sem repetir o mesmo aviso por 30 minutos; um erro no aviso nunca derruba o worker. |
+| `enfileirarHorariosVencidos.ts` | Para cada rotina ativa, põe na fila os horários vencidos que ainda dá tempo de rodar e registra como perdidos os que passaram. |
 | `estadoDaTravaDoWorker.ts` | Diz se outro worker está vivo (trava ativa com batimento recente). |
+| `estadoDoWorker.ts` | Resume o estado real do worker para a janela e a bandeja: ligado, pausado, trava, pendentes, em execução, próxima execução e último erro. |
+| `executarK6Agendado.ts` | Rotina k6: procura o executável oficial e roda o teste de desempenho com a autorização prévia (ou a aprovação humana, se manual). |
+| `executarRotinaAgora.ts` | "Executar agora": põe na fila um trabalho manual da rotina (testes pedem a aprovação humana do Windows a cada execução). |
+| `executarRunQaseAgendada.ts` | Rotina "run do Qase": executa as automações dos casos e só publica no Qase com política vigente para a run; senão os resultados ficam locais. |
+| `executarTrabalhoDaRotina.ts` | Escolhe o que fazer conforme o tipo da rotina (smoke, regressão, validação por ticket, k6, run do Qase, consulta Jira ou análise de mudanças) e devolve o resultado. |
+| `gravarTravaDoWorker.ts` | Grava a trava do worker (worker-trava.json) com a identidade, o processo e o batimento atual, ligada ou desligada. |
+| `iniciarWorker.ts` | Liga o worker: assume a trava de instância única (ou recusa se outro estiver vivo), recupera execuções interrompidas e agenda a primeira passada. |
+| `pararWorker.ts` | Desliga o worker com cuidado: interrompe o teste em execução (e seus processos filhos), espera o registro e libera a trava. |
+| `passadaDoWorker.ts` | Uma passada do worker: bate o coração, transforma horários vencidos em trabalhos, executa um trabalho e tenta publicações pendentes. |
+| `processarTrabalho.ts` | Executa um trabalho da fila do começo ao fim: batimento, aviso de início, execução, registro do resultado e publicação; falhas viram BLOCKED ou nova tentativa, nunca PASS. |
 | `processoVivo.ts` | Diz se um processo do Windows ainda está rodando. |
+| `projetoDaRotina.ts` | Abre o contrato da pasta de automação do projeto da rotina; sem pasta vinculada, recusa com PROJECT_FOLDER_REQUIRED. |
+| `publicarComentarioSeAutorizado.ts` | Depois de uma execução agendada, publica o comentário de resultado no Jira só se uma política aprovada cobrir o ticket; sem política, deixa preparado. |
+| `repetirPublicacoesPendentes.ts` | Tenta de novo os comentários no Jira que falharam por rede ou serviço (sem duplicar); depois de 3 tentativas, marca como falha. |
+| `resultadoDaEvidencia.ts` | Transforma a evidência de uma execução no resultado do trabalho: estado, motivo, contagem de casos e as primeiras falhas. |
 | `resumoDasFalhas.ts` | Escreve as cinco primeiras falhas de uma evidência em texto curto. |
+| `validarTicketAgendado.ts` | Rotina "validação por ticket": executa as automações ligadas ao ticket nas relações do projeto (até 5) e junta os resultados, valendo o pior. |
 | `vigiarWorker.ts` | Se o worker parou sem a pessoa pedir, tenta religar e avisa; nunca finge que está ativo. |
 | `Worker.ts` | Worker de agendamentos: a cada ciclo coloca na fila os horários vencidos, executa um trabalho por vez com batimento, registra o resultado e publica quando há política aprovada. |
 | `workerDoAplicativo.ts` | O worker de agendamentos deste aplicativo, ligado aos serviços e aos avisos da janela. |

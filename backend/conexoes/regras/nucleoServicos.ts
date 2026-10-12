@@ -1,74 +1,42 @@
 /** Reúne tudo o que a tela Conexões faz com Jira, Qase e GitHub: adicionar e validar conta, listar recursos, vincular, consultar e escrever com a credencial protegida. */
-import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
-import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { cofreCredenciais } from '../banco/cofreCredenciais.js';
-import { lerContasDeServico } from '../banco/lerContasDeServico.js';
 import { listarContas } from '../banco/listarContas.js';
-import { AdaptadorServico } from '../integracoes/AdaptadorServico.js';
 import { enviarAoServico } from '../integracoes/enviarAoServico.js';
-import { ErroServico } from '../integracoes/ErroServico.js';
-import { instanciaServico } from '../integracoes/instanciaServico.js';
 import { lerDoServico } from '../integracoes/lerDoServico.js';
 import { ContextoServico, OperacaoServico } from '../tipos/adaptador.js';
-import { Conta, conexaoEntrada, contaSchema } from '../tipos/contaDeServico.js';
+import { ContextoDosServicos, conexaoEntrada } from '../tipos/contaDeServico.js';
 import { Protetor } from '../tipos/credenciais.js';
 import { Filtros } from '../tipos/leituras.js';
 import { TransporteEscrita, TransporteServico, paginaSchema } from '../tipos/transporte.js';
-import { listarEspacos } from '../../projetos/banco/listarEspacos.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { atualizarEstadoDoVinculo } from '../../projetos/regras/atualizarEstadoDoVinculo.js';
-import { configurarAceite } from '../../projetos/regras/configurarAceite.js';
-import { registrarConsultaExterna } from '../../projetos/regras/registrarConsultaExterna.js';
-import { vincularServicoAoEspaco } from '../../projetos/regras/vincularServicoAoEspaco.js';
 import { Recurso, Servico } from '../../projetos/tipos/espacos.js';
+import { adicionarConta } from './adicionarConta.js';
+import { comentarNoJira } from './comentarNoJira.js';
+import { consultarServico } from './consultarServico.js';
+import { escolherCampoAceite } from './escolherCampoAceite.js';
+import { executarComServico } from './executarComServico.js';
+import { listarRecursosDaConta } from './listarRecursosDaConta.js';
+import { procurarComentarioNoJira } from './procurarComentarioNoJira.js';
+import { removerConta } from './removerConta.js';
+import { validarConta } from './validarConta.js';
+import { validarVinculoDoServico } from './validarVinculoDoServico.js';
+import { vincularRecursoAoEspaco } from './vincularRecursoAoEspaco.js';
 
-/** Dependências só do processo principal. Testes fornecem doubles; nenhum toggle em produção. */
-export function nucleoServicos(protetor:Protetor,transporte:TransporteServico=lerDoServico,base?:string,escrita:TransporteEscrita=enviarAoServico){
-  const cofre=cofreCredenciais(protetor,base);
-  const conta=(id:string)=>{const c=lerContasDeServico(base).contas.find(c=>c.id===id&&c.ativa);if(!c)throw new ErroServico('CREDENTIAL_UNAVAILABLE');return c;};
-  const adaptador=(c:Conta)=>new AdaptadorServico({...c,token:cofre.ler(c.id)},transporte,escrita);
-  const estadoErro=(e:unknown)=>e instanceof ErroServico?(e.codigo==='SERVICE_PERMISSION'?'SEM_PERMISSAO':e.codigo==='CREDENTIAL_INVALID_OR_EXPIRED'||e.codigo==='CREDENTIAL_UNAVAILABLE'?'SEM_CREDENCIAL':e.codigo==='SERVICE_NOT_FOUND'||e.codigo==='SERVICE_SCOPE_CHANGED'?'DESATUALIZADO':'INDISPONIVEL'):'INDISPONIVEL';
-  const codigoErro=(e:unknown)=>e instanceof ErroServico?e.codigo:'CREDENTIAL_UNAVAILABLE';
-  const vinculo=(espacoId:string,servico:Servico)=>{const v=obterEspaco(espacoId,base).vinculos.find(v=>v.servico===servico);if(!v)throw new Error('WORKSPACE_LINK_NOT_FOUND');return v;};
-  const verificar=async(espacoId:string,servico:Servico,aceitarAlteracao=false)=>{
-    const v=vinculo(espacoId,servico);
-    try{const c=conta(v.conexaoId);const a=adaptador(c);const principal=await a.autenticar();if(principal.contaId!==c.contaId)throw new ErroServico('SERVICE_SCOPE_CHANGED');
-      const atual=await a.obterRecurso(v.recurso.id);if(atual.id!==v.recurso.id||atual.contaId!==v.recurso.contaId||(!aceitarAlteracao&&atual.chave!==v.recurso.chave))throw new ErroServico('SERVICE_SCOPE_CHANGED');
-      atualizarEstadoDoVinculo(espacoId,servico,'VALIDO',undefined,atual,base);return {adaptador:a,recurso:atual,campoAceite:v.campoAceite};
-    }catch(e){atualizarEstadoDoVinculo(espacoId,servico,estadoErro(e),codigoErro(e),undefined,base);throw e;}
-  };
+/** Dependências só do processo principal. Testes fornecem doubles; nenhum toggle em produção. Cada ação fica no seu arquivo. */
+export function nucleoServicos(protetor: Protetor, transporte: TransporteServico = lerDoServico, base?: string, escrita: TransporteEscrita = enviarAoServico) {
+  const c: ContextoDosServicos = { protetor, transporte, escrita, base, cofre: cofreCredenciais(protetor, base) };
   return {
-    contas:()=>listarContas(base),
-    async adicionar(entrada:z.input<typeof conexaoEntrada>){
-      const d=conexaoEntrada.parse(entrada);if(!protetor.disponivel())throw new Error('CREDENTIAL_PROTECTION_UNAVAILABLE');if(d.servico==='jira'&&!d.usuario)throw new Error('JIRA_EMAIL_REQUIRED');
-      const id=randomUUID();const instancia=instanciaServico(d.servico,d.instancia);const a=new AdaptadorServico({id,servico:d.servico,instancia,usuario:d.usuario,contaId:'pendente',token:d.token},transporte);const identidade=await a.autenticar();
-      const r=lerContasDeServico(base);if(r.contas.length>=100)throw new Error('CONNECTION_LIMIT');
-      if(d.servico!=='qase'&&r.contas.some(c=>c.ativa&&c.servico===d.servico&&c.instancia===instancia&&c.contaId===identidade.contaId))throw new Error('CONNECTION_DUPLICATE');
-      if(d.servico==='qase'&&r.contas.some(c=>{if(!c.ativa||c.servico!=='qase')return false;try{return cofre.ler(c.id)===d.token;}catch{return false;}}))throw new Error('CONNECTION_DUPLICATE');
-      const c=contaSchema.parse({id,servico:d.servico,nome:mascarar(d.nome,[d.token]),instancia,usuario:d.usuario,contaId:identidade.contaId,identidade:identidade.nome,criadaEm:new Date().toISOString(),validadaEm:new Date().toISOString(),ativa:true});
-      cofre.salvar(id,d.token);try{r.contas.push(c);gravarLocal('contas.json',r,base);}catch(e){cofre.remover(id);throw e;}return c;
-    },
-    async validarConta(id:string){const c=conta(id);const atual=await adaptador(c).autenticar();if(atual.contaId!==c.contaId)throw new ErroServico('SERVICE_SCOPE_CHANGED');const r=lerContasDeServico(base);r.contas.find(x=>x.id===id)!.validadaEm=new Date().toISOString();gravarLocal('contas.json',r,base);return conta(id);},
-    removerConta(id:string){const r=lerContasDeServico(base);const c=r.contas.find(c=>c.id===id);if(!c)throw new Error('CONNECTION_NOT_FOUND');c.ativa=false;gravarLocal('contas.json',r,base);cofre.remover(id);
-      for(const e of listarEspacos(base))for(const v of e.vinculos)if(v.conexaoId===id)atualizarEstadoDoVinculo(e.id,v.servico,'SEM_CREDENCIAL','CREDENTIAL_UNAVAILABLE',undefined,base);return {removida:true};},
-    async listar(id:string,pagina:z.input<typeof paginaSchema>={}){const c=conta(id);return adaptador(c).listar(pagina);},
-    async vincular(espacoId:string,conexaoId:string,recurso:Recurso){obterEspaco(espacoId,base);const c=conta(conexaoId);const a=adaptador(c);const atual=await a.obterRecurso(recurso.id);
-      if(JSON.stringify(atual)!==JSON.stringify(recurso))throw new ErroServico('SERVICE_SCOPE_CHANGED');return vincularServicoAoEspaco(espacoId,c.servico,c.id,atual,base);},
-    async validarVinculo(espacoId:string,servico:Servico){await verificar(espacoId,servico,true);return obterEspaco(espacoId,base);},
-    async consultar(espacoId:string,servico:Servico,operacao:OperacaoServico,pagina:z.input<typeof paginaSchema>={},id?:string,filtros?:Filtros){
-      try{const v=await verificar(espacoId,servico);const r=await v.adaptador.consultar(v.recurso,operacao,pagina,id,v.campoAceite,filtros);registrarConsultaExterna(espacoId,servico,'OK',base);return r;}
-      catch(e){registrarConsultaExterna(espacoId,servico,codigoErro(e),base);throw e;}
-    },
-    /** Executa `fn` com o adaptador JÁ revalidado (conta, vínculo e projeto). A credencial não sai do adaptador (2.9). */
-    async comContexto<T>(espacoId:string,servico:Servico,fn:(ctx:ContextoServico,recurso:Recurso,info:{vinculoId:string;conexaoId:string})=>Promise<T>):Promise<T>{
-      const v=await verificar(espacoId,servico);const vi=vinculo(espacoId,servico);
-      try{return await fn(v.adaptador.contexto(),v.recurso,{vinculoId:vi.id,conexaoId:vi.conexaoId});}catch(e){registrarConsultaExterna(espacoId,servico,codigoErro(e),base);throw e;}
-    },
-    /** Escrita controlada (2.8): só comentário Jira, depois de revalidar conta, vínculo e projeto. */
-    async comentarJira(espacoId:string,ticket:string,adf:unknown){try{const v=await verificar(espacoId,'jira');const r=await v.adaptador.publicarComentario(v.recurso,ticket,adf);registrarConsultaExterna(espacoId,'jira','COMMENT_OK',base);return {...r,vinculoId:vinculo(espacoId,'jira').id,conexaoId:vinculo(espacoId,'jira').conexaoId};}catch(e){registrarConsultaExterna(espacoId,'jira',codigoErro(e),base);throw e;}},
-    async procurarComentarioJira(espacoId:string,ticket:string,marcador:string){const v=await verificar(espacoId,'jira');return v.adaptador.procurarComentario(v.recurso,ticket,marcador);},
-    async campoAceite(espacoId:string,campo:string){const v=await verificar(espacoId,'jira');const r=await v.adaptador.consultar(v.recurso,'campos');if(!Array.isArray(r.dados)||!r.dados.some(x=>x.id===campo&&x.custom===true))throw new Error('JIRA_FIELD_NOT_AVAILABLE');return configurarAceite(espacoId,campo,base);}
+    contas: () => listarContas(base),
+    adicionar: (entrada: z.input<typeof conexaoEntrada>) => adicionarConta(c, entrada),
+    validarConta: (id: string) => validarConta(c, id),
+    removerConta: (id: string) => removerConta(c, id),
+    listar: (id: string, pagina: z.input<typeof paginaSchema> = {}) => listarRecursosDaConta(c, id, pagina),
+    vincular: (espacoId: string, conexaoId: string, recurso: Recurso) => vincularRecursoAoEspaco(c, espacoId, conexaoId, recurso),
+    validarVinculo: (espacoId: string, servico: Servico) => validarVinculoDoServico(c, espacoId, servico),
+    consultar: (espacoId: string, servico: Servico, operacao: OperacaoServico, pagina: z.input<typeof paginaSchema> = {}, id?: string, filtros?: Filtros) => consultarServico(c, espacoId, servico, operacao, pagina, id, filtros),
+    comContexto: <T>(espacoId: string, servico: Servico, fn: (ctx: ContextoServico, recurso: Recurso, info: { vinculoId: string; conexaoId: string }) => Promise<T>) => executarComServico(c, espacoId, servico, fn),
+    comentarJira: (espacoId: string, ticket: string, adf: unknown) => comentarNoJira(c, espacoId, ticket, adf),
+    procurarComentarioJira: (espacoId: string, ticket: string, marcador: string) => procurarComentarioNoJira(c, espacoId, ticket, marcador),
+    campoAceite: (espacoId: string, campo: string) => escolherCampoAceite(c, espacoId, campo),
   };
 }

@@ -132,8 +132,25 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 
 | Arquivo | O que faz |
 | --- | --- |
+| `adaptadorDaConta.ts` | Abre a conversa com o serviço de uma conta usando a credencial guardada no cofre do Windows (ela não sai do adaptador). |
+| `adicionarConta.ts` | Adiciona uma conta de Jira, Qase ou GitHub: autentica no serviço, recusa duplicada e guarda a credencial protegida pelo Windows. |
+| `codigoDoErroDeServico.ts` | Código do erro de um serviço externo (ou CREDENTIAL_UNAVAILABLE quando o erro não veio do serviço). |
+| `comentarNoJira.ts` | Publica o comentário de resultado num ticket do Jira vinculado, depois de revalidar conta, vínculo e projeto. |
+| `consultarServico.ts` | Faz uma consulta de leitura no serviço vinculado (tickets, casos, runs, commits...) e anota no histórico do projeto se deu certo. |
+| `contaAtiva.ts` | Busca uma conta de serviço ativa pelo id; se não existe ou foi removida, avisa CREDENTIAL_UNAVAILABLE. |
+| `escolherCampoAceite.ts` | Confere que o campo do Jira existe e é personalizado, e o grava como o campo de critérios de aceite do projeto. |
+| `estadoDoVinculoPeloErro.ts` | Traduz um erro do serviço no estado do vínculo: sem permissão, sem credencial, desatualizado ou indisponível. |
+| `executarComServico.ts` | Executa uma operação com o serviço já revalidado (conta, vínculo e projeto); a credencial não sai do adaptador. |
+| `listarRecursosDaConta.ts` | Lista os projetos ou repositórios que uma conta enxerga no serviço, para escolher qual vincular. |
 | `nucleoServicos.ts` | Reúne tudo o que a tela Conexões faz com Jira, Qase e GitHub: adicionar e validar conta, listar recursos, vincular, consultar e escrever com a credencial protegida. |
+| `procurarComentarioNoJira.ts` | Procura no ticket do Jira um comentário que o Prumo já publicou (pelo marcador), para não publicar duas vezes. |
+| `removerConta.ts` | Desativa uma conta, apaga sua credencial e marca os vínculos que a usavam como "sem credencial"; nada é apagado no serviço. |
 | `servicosDoAplicativo.ts` | Núcleo de serviços (Jira, Qase, GitHub) do aplicativo, com as credenciais protegidas pelo Windows. |
+| `validarConta.ts` | Confere se a credencial de uma conta ainda funciona e é da mesma identidade; anota a data da validação. |
+| `validarVinculoDoServico.ts` | Confere de novo o vínculo do projeto com o serviço (aceitando mudança de chave do recurso) e devolve o projeto atualizado. |
+| `verificarVinculoDoServico.ts` | Antes de qualquer consulta ou escrita, confere de novo a conta, a identidade e o recurso vinculado; anota no projeto se o vínculo continua válido. |
+| `vincularRecursoAoEspaco.ts` | Vincula um recurso do serviço ao projeto do Prumo depois de reler o recurso e conferir que nada mudou. |
+| `vinculoDoServico.ts` | Busca a ligação do projeto com um serviço (Jira, Qase ou GitHub); se não existe, avisa WORKSPACE_LINK_NOT_FOUND. |
 
 ## tipos/
 

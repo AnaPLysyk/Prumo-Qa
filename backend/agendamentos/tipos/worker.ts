@@ -33,3 +33,10 @@ export const estadoRot = z.object({ version: z.literal(1), itens: z.record(z.obj
 export type EstadoRot = z.infer<typeof estadoRot>;
 
 export const prioridade = { FAIL: 4, BLOCKED: 3, NOT_RUN: 2, PASS: 1 } as const;
+
+/** O que o worker guarda enquanto o aplicativo está aberto (cada função de agendamentos/worker recebe este estado). */
+export type EstadoDoWorker = {
+  readonly instancia: string; readonly d: DepsWorker; readonly agora: () => Date; readonly base?: string; readonly intervalo: number;
+  temporizador: ReturnType<typeof setTimeout> | null; ativo: boolean; emTick: boolean; abort: AbortController;
+  atual: Promise<void> | null; ultimoErro: string | null; emitidos: Map<string, number>; processando: boolean;
+};

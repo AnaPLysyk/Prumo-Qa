@@ -1,6 +1,9 @@
 /** Formato de uma conta de Jira, Qase ou GitHub (sem a credencial) e dos dados para adicioná-la. */
 import { z } from 'zod';
 import { servicoSchema } from '../../projetos/tipos/espacos.js';
+import type { cofreCredenciais } from '../banco/cofreCredenciais.js';
+import type { Protetor } from './credenciais.js';
+import type { TransporteEscrita, TransporteServico } from './transporte.js';
 
 export const conexaoEntrada=z.object({servico:servicoSchema,nome:z.string().trim().min(1).max(100),instancia:z.string().max(300).optional(),usuario:z.string().email().max(200).optional(),token:z.string().min(1).max(6000).regex(/^[^\x00-\x1f]+$/)}).strict();
 
@@ -9,3 +12,6 @@ export const contaSchema=z.object({id:z.string().uuid(),servico:servicoSchema,no
 export type Conta=z.infer<typeof contaSchema>;
 
 export const registro=z.object({version:z.literal(1),contas:z.array(contaSchema).max(100)}).strict();
+
+/** O que todas as ações da tela Conexões recebem: proteção de credenciais, transporte de leitura e escrita, pasta de dados e o cofre. */
+export type ContextoDosServicos = { protetor: Protetor; transporte: TransporteServico; escrita: TransporteEscrita; base?: string; cofre: ReturnType<typeof cofreCredenciais> };
