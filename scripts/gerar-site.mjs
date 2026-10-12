@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
-const fontes=[...fs.readdirSync(path.join(repo,'app/ajuda')).filter(n=>n.endsWith('.md')).map(n=>'app/ajuda/'+n),'docs/SEGURANCA.md','docs/SUPORTE.md','docs/ASSINATURA.md','docs/CONTRATOS.md','docs/SERVICOS.md','docs/AGENDAMENTOS.md'];
+const fontes=[...fs.readdirSync(path.join(repo,'app/ajuda')).filter(n=>n.endsWith('.md')).map(n=>'app/ajuda/'+n),'docs/CICLO-QUALIDADE.md','docs/SEGURANCA.md','docs/SUPORTE.md','docs/ASSINATURA.md','docs/CONTRATOS.md','docs/SERVICOS.md','docs/AGENDAMENTOS.md'];
 const nome=f=>'documentacao-'+path.basename(f,'.md').toLowerCase()+'.html';
 const repoUrl='https://github.com/AnaPLysyk/Prumo-Qa';
 function destino(href,origem) {
@@ -48,10 +48,13 @@ p{max-width:68ch}.lead{font-size:1.18rem;color:var(--suave);max-width:46ch}.suav
 .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center;min-height:460px;padding:24px 0 8px}
 .etiqueta{font-size:12px;letter-spacing:.14em;color:var(--acento);font-weight:600}
 .acoes{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 8px}.botao{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:999px;border:1px solid var(--linha);color:var(--texto);text-decoration:none;font-weight:600;transition:border-color .2s,background .2s,transform .15s}.botao:hover{border-color:var(--acento);background:rgba(var(--azul),.1)}.botao.primario{background:var(--acento);color:var(--acento-texto);border-color:var(--acento)}.botao.primario:hover{filter:brightness(1.1);background:var(--acento)}
-.orbita{position:relative;display:grid;place-items:center;aspect-ratio:1;max-width:460px;width:100%;margin:0 auto}.orbita img{width:44%;border-radius:50%;position:relative;z-index:1;filter:drop-shadow(0 20px 40px rgba(var(--azul),.35))}
-.anel{position:absolute;border:1px solid rgba(var(--azul),.35);border-radius:50%;inset:6% 0;animation:giro 26s linear infinite}.anel.b{inset:0 14%;border-color:rgba(var(--vermelho),.28);animation-duration:34s;animation-direction:reverse}.anel.c{inset:16% 4%;animation-duration:44s}
-.anel::after{content:"";position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:var(--acento);box-shadow:0 0 14px var(--acento)}.anel.b::after{background:rgb(var(--vermelho));box-shadow:0 0 14px rgb(var(--vermelho))}
-@keyframes giro{to{transform:rotate(360deg)}}
+.orbita{position:relative;display:grid;place-items:center;aspect-ratio:310/181;max-width:540px;width:100%;margin:0 auto}
+.orbita svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1;filter:drop-shadow(0 0 5px rgba(var(--azul),.32))}
+.orbita .orbe{width:68.4%;position:relative;z-index:2;animation:flutua 8.8s ease-in-out infinite}.orbita .orbe img{display:block;width:100%;height:auto;border-radius:50%}
+@keyframes flutua{0%,100%{transform:translate3d(0,0,0)}32%{transform:translate3d(4px,-6px,0)}68%{transform:translate3d(-3px,4px,0)}}
+.orbitas ellipse{fill:none;stroke-linecap:round}.c-azul{stroke:rgb(var(--o-azul))}.c-branco{stroke:rgb(var(--o-branco))}.c-vermelho{stroke:rgb(var(--o-vermelho))}
+:root{--o-azul:116,173,255;--o-branco:244,247,255;--o-vermelho:255,82,108}
+@media (prefers-color-scheme:light){:root{--o-azul:43,98,184;--o-branco:112,128,156;--o-vermelho:181,70,96}.orbitas .trilha{stroke:rgb(36,58,93);stroke-opacity:.24}.orbita svg{filter:none}}
 .grade2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:30px 48px;margin-top:8px}.grade2 h3{margin-top:0}.grade2 p{color:var(--suave);margin:4px 0 0}
 .tela{margin:34px 0}.tela img{width:100%;height:auto;border-radius:16px;border:1px solid var(--linha);box-shadow:0 30px 80px -40px rgba(var(--azul),.6);display:block}.tela figcaption{color:var(--suave);font-size:14px;margin-top:10px}
 .duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:26px}
@@ -84,12 +87,44 @@ footer{border-top:1px solid var(--linha);padding:28px 20px 48px;color:var(--suav
 .politica input{position:absolute;opacity:0}.politica label.chave{display:flex;align-items:center;gap:12px;cursor:pointer;padding:6px 0}.politica .trilho{width:42px;height:24px;border-radius:99px;background:color-mix(in srgb,var(--linha) 90%,transparent);position:relative;transition:background .2s}.politica .trilho::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--texto);transition:transform .2s}
 #pol:checked~label .trilho{background:var(--falha)}#pol:checked~label .trilho::after{transform:translateX(18px)}.politica .perm,.politica .bloq{margin-top:10px;padding:10px 14px;border-radius:12px;border:1px solid var(--linha);font-size:14.5px}.politica .bloq{display:none;border-color:var(--falha)}#pol:checked~.perm{display:none}#pol:checked~.bloq{display:block}
 @media (max-width:820px){.hero{grid-template-columns:1fr;min-height:0}.orbita{max-width:300px;order:-1}nav{margin-left:0}}
-@media (prefers-reduced-motion:reduce){.anel,.demo .painel{animation:none}html{scroll-behavior:auto}}`;
+@media (prefers-reduced-motion:reduce){.orbitas ellipse,.orbita .orbe,.demo .painel{animation:none}html{scroll-behavior:auto}}`;
 
-const nomesTela={'inicio':'Início com o assistente local','catalogo':'Catálogo de testes por feature, com tipo e confiança','tickets':'Busca de tickets do Jira','execucoes-plano':'Plano e execução','metricas':'Métricas por módulos','agentes':'Agentes e permissões','inicio-claro':'Tema claro'};
+// Órbitas do agente com os MESMOS parâmetros do aplicativo (app/renderer/orbitas-v36.js), lidos da fonte única.
+// O app desenha em canvas com JavaScript; o site não usa script, então vira SVG e os arcos giram por CSS
+// (stroke-dashoffset). Sem a flexão das curvas, que depende de JavaScript.
+function orbitasDoApp() {
+  const fonte=fs.readFileSync(path.join(repo,'app/renderer/orbitas-v36.js'),'utf8');
+  const m=/const orbitas = (\[[\s\S]*?\]);/.exec(fonte);if(!m)throw new Error('Parâmetros das órbitas não encontrados em orbitas-v36.js');
+  const json=m[1].replace(/([{,]\s*)([a-zA-Z]+):/g,'$1"$2":').replace(/(:\s*)(-?)\./g,'$1$20.');
+  return JSON.parse(json);
+}
+function orbitasSvg() {
+  const W=620,H=362,cx=W/2,cy=H/2,r=n=>Math.round(n*100)/100,TAU=Math.PI*2;
+  const nomeCor=c=>c[0]>235&&c[1]>230?'branco':c[0]>c[2]?'vermelho':'azul';
+  const regras=[],grupos=[];
+  orbitasDoApp().forEach((o,i)=>{
+    const rx=r(W*o.rx),ry=r(H*o.ry),giro=r(o.tilt*180/Math.PI),dur=r(TAU/Math.abs(o.speed)/1000),sentido=o.speed>0?-100:100;
+    const elipse=(cls,extra='')=>`<ellipse class="${cls}" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"${extra}/>`;
+    const arcos=[[o.colorA,o.lenA,o.phase,o.alpha,o.width+.55],[o.colorB,o.lenB,o.phase+Math.PI,o.alpha*.78,o.width+.2],[o.colorA,.07,o.phase+i*.85,.88,o.width+.85]];
+    const partes=[elipse(`trilha c-${nomeCor(o.colorA)}`,` stroke-opacity="${o.trackAlpha}" stroke-width="${r(o.width*2)}"${o.dotted?' stroke-dasharray="8 10"':''}`)];
+    arcos.forEach(([cor,len,fase,alfa,larg],k)=>{
+      const id=`a${i}${k}`,d=r(-fase/TAU*100%100),l=r(len*100);
+      regras.push(`.${id}{stroke-dasharray:${l} ${r(100-l)};animation:${id} ${dur}s linear infinite}@keyframes ${id}{from{stroke-dashoffset:${d}}to{stroke-dashoffset:${r(d+sentido)}}}`);
+      partes.push(elipse(`${id} c-${nomeCor(cor)}`,` pathLength="100" stroke-opacity="${r(alfa)}" stroke-width="${r(larg*2)}"`));
+    });
+    // Partículas: no app, a órbita i leva as partículas de cor i (vermelho, azul, branco), um pouco mais rápidas que o arco.
+    const corP=['vermelho','azul','branco'][i%3],velP=o.speed+.000135,durP=r(TAU/Math.abs(velP)/1000);
+    regras.push(`.p${i}{stroke-dasharray:0 10;animation:p${i} ${durP}s linear infinite}@keyframes p${i}{from{stroke-dashoffset:0}to{stroke-dashoffset:${velP>0?-100:100}}}`);
+    partes.push(elipse(`p${i} c-${corP}`,` pathLength="100" stroke-opacity=".42" stroke-width="2.6"`));
+    grupos.push(`<g transform="rotate(${giro} ${cx} ${cy})">${partes.join('')}</g>`);
+  });
+  return {svg:`<svg class="orbitas" viewBox="0 0 ${W} ${H}" aria-hidden="true" focusable="false">${grupos.join('')}</svg>`,css:regras.join('\n')};
+}
+
+const nomesTela={'inicio':'Início com o Prumo Orchestrator e o chat local','testes':'Testes: casos do Qase e testes do código numa lista única','codigo':'Código dos testes, somente leitura, com o caso do Qase anotado','tickets':'Tickets do Jira e defeitos do Qase numa tabela','runs':'Runs preparadas no Prumo e runs do Qase','rastreabilidade':'Trilha do ticket ao defeito, com a origem de cada vínculo','agentes':'Agentes: Orchestrator, clientes MCP e especializações','inicio-claro':'Tema claro'};
 
 export function gerarSite(out=path.join(repo,'site/public')) {
-  fs.mkdirSync(out,{recursive:true});
+  fs.mkdirSync(out,{recursive:true});const orb=orbitasSvg();
   const pkg=JSON.parse(fs.readFileSync(path.join(repo,'package.json'),'utf8'));
   const versions=JSON.parse(fs.readFileSync(path.join(repo,'app/versoes.json'),'utf8')).versions;
   const published=versions.find(v=>v.status==='publicada');if(!published)throw new Error('Sem release oficial registrada');
@@ -101,9 +136,9 @@ export function gerarSite(out=path.join(repo,'site/public')) {
   for(const n of imagens)fs.copyFileSync(path.join(repo,'site/imagens',n),path.join(out,'captura-'+n));
   const tela=(id,alt)=>imagens.includes(id+'.png')?`<figure class="tela"><img src="captura-${id}.png" alt="${esc(alt)}" width="1280" height="800" loading="lazy"><figcaption>${esc(nomesTela[id]||alt)}</figcaption></figure>`:'';
 
-  write('index.html','Do ticket à evidência',`<section class="hero"><div><span class="etiqueta">APP PARA WINDOWS · QUALIDADE DE SOFTWARE</span><h1>Do ticket à evidência.</h1><p class="lead">Testes, tickets, runs e relatórios do Jira, Qase e GitHub num só lugar. Você decide o que sai do seu computador.</p><div class="acoes"><a class="botao primario" href="versoes.html">Baixar a versão ${esc(published.version)}</a><a class="botao" href="demo.html">Ver a demonstração</a></div><p class="suave">Gratuito · dados locais · funciona sem IA</p></div><div class="orbita" aria-hidden="true"><span class="anel"></span><span class="anel b"></span><span class="anel c"></span><img src="prumo.png" alt=""></div></section>
-  <section><h2>O que o Prumo faz</h2><div class="grade2"><div><h3>Entende os testes do código</h3><p>Lê o repositório, agrupa por feature e classifica cada teste: unitário, integração, funcional, regressão, smoke.</p></div><div><h3>Conversa com Jira, Qase e GitHub</h3><p>Busca tickets, monta planos e execuções, publica resultados e abre Pull Requests, com prévia e a sua confirmação.</p></div><div><h3>Roda e agenda</h3><p>Executa automações declaradas e repete na agenda, na bandeja do Windows, mesmo com a janela fechada.</p></div><div><h3>Rastreia tudo</h3><p>Do ticket ao caso, da run à evidência. Cada ligação mostra de onde veio.</p></div><div><h3>Limita a IA</h3><p>Claude e Codex só propõem rascunhos. Cada permissão é conferida a cada chamada.</p></div><div><h3>Mostra as métricas que você escolher</h3><p>Módulos, números, barras ou rosca. Sem porcentagem inventada de qualidade.</p></div></div></section>
-  <section><h2>Por dentro</h2>${tela('inicio','Tela inicial do Prumo QA com a esfera, o assistente e o menu lateral')}${tela('catalogo','Catálogo de testes agrupado por feature com tipo e confiança')}<div class="duas">${tela('tickets','Busca de tickets do Jira com filtros')}${tela('metricas','Métricas com módulos escolhíveis')}</div></section>
+  write('index.html','Do ticket à evidência',`<section class="hero"><div><span class="etiqueta">APP PARA WINDOWS · QUALIDADE DE SOFTWARE</span><h1>Do ticket à evidência.</h1><p class="lead">Testes, tickets, runs e relatórios do Jira, Qase e GitHub num só lugar. Você decide o que sai do seu computador.</p><div class="acoes"><a class="botao primario" href="versoes.html">Baixar a versão ${esc(published.version)}</a><a class="botao" href="demo.html">Ver a demonstração</a></div><p class="suave">Gratuito · dados locais · funciona sem IA</p></div><div class="orbita" role="img" aria-label="Prumo Orchestrator: a esfera do assistente com as três órbitas, igual ao aplicativo">${orb.svg}<span class="orbe"><img src="agente.png" alt="" width="290" height="290"></span></div></section>
+  <section><h2>O que o Prumo faz</h2><div class="grade2"><div><h3>Liga o Qase ao código</h3><p>Mostra casos do Qase e testes do repositório lado a lado. Um caso só se liga a um teste por anotação no próprio código; nome parecido não liga nada.</p></div><div><h3>Conversa com Jira, Qase e GitHub</h3><p>Busca tickets e defeitos, monta planos e runs, publica resultados e abre Pull Requests, com prévia e a sua confirmação.</p></div><div><h3>Roda, agenda e mede</h3><p>Executa automações declaradas, repete na agenda pela bandeja do Windows e mostra as métricas que você escolher.</p></div><div><h3>Rastreia tudo</h3><p>Do ticket ao caso, do código à evidência e ao defeito. Cada ligação mostra de onde veio.</p></div><div><h3>Aprende só o que você aprova</h3><p>O assistente responde com os dados deste computador, sem modelo de IA. Todo aprendizado nasce rascunho e só vale depois da sua aprovação.</p></div><div><h3>Limita a IA</h3><p>Claude e Codex só propõem rascunhos. Cada permissão é conferida a cada chamada, e o Painel de atividades mostra só o que foi registrado.</p></div></div></section>
+  <section><h2>Por dentro</h2>${tela('inicio','Tela inicial do Prumo QA com o Prumo Orchestrator, as três órbitas e o chat')}<div class="duas">${tela('testes','Visão geral de Testes com casos do Qase e testes do código')}${tela('codigo','Leitor de código dos testes com o caso do Qase anotado')}</div><div class="duas">${tela('tickets','Tabela com tickets do Jira e defeitos do Qase')}${tela('rastreabilidade','Trilha de rastreabilidade com a origem de cada vínculo')}</div>${tela('agentes','Tela de Agentes com o Orchestrator, Codex, Claude Code e as especializações')}</section>
   <section><h2>Como funciona</h2><ol class="passos"><li><strong>Vincule</strong>a pasta do repositório e as contas</li><li><strong>Entenda</strong>o catálogo e os vínculos</li><li><strong>Execute</strong>com a sua autenticação do Windows</li><li><strong>Publique</strong>o resultado, conferido no serviço</li></ol></section>
   <section><h2>Seguro por padrão</h2><div class="grade2"><div><h3>Escrita desligada</h3><p>Nada é criado em serviço externo até você habilitar, por projeto.</p></div><div><h3>Sempre com prévia</h3><p>Cada operação pede confirmação do Windows e não duplica se repetir.</p></div><div><h3>Credenciais protegidas</h3><p>Ficam cifradas pelo Windows e nunca chegam à IA.</p></div></div><p class="limite">O instalador não é assinado. Confira o SHA-256 na página de download. As escritas foram validadas com serviços simulados; contas reais ainda não foram exercitadas.</p></section>`);
 
@@ -121,11 +156,14 @@ export function gerarSite(out=path.join(repo,'site/public')) {
 
   const passos=(l)=>`<ol>${l.map(x=>`<li>${x}</li>`).join('')}</ol>`;
   write('tutoriais.html','Tutoriais',`<h1>Tutoriais</h1><p class="suave">Cada passo existe no aplicativo. Os guias completos estão na <a href="documentacao.html">documentação</a>.</p>
-  <article id="catalogo"><h2>Entender os testes do repositório</h2>${passos(['Em <strong>Projetos</strong>, crie um projeto e use <strong>Vincular pasta de automação</strong>.','Abra <strong>Testes › Catálogo</strong>.','Filtre por tipo ou busque uma feature. Passe o mouse no tipo para ver o motivo e a confiança.'])}</article>
+  <article id="catalogo"><h2>Entender os testes do repositório</h2>${passos(['Em <strong>Projetos</strong>, crie um projeto e use <strong>Vincular pasta de automação</strong>.','Abra <strong>Testes › Visão geral</strong>: casos do Qase e testes do código aparecem numa lista única, com situação, nível e tags.','Em <strong>Testes › Código</strong>, abra um arquivo para ver cada teste com nível, tags, motivo da classificação e o caso do Qase.'])}</article>
+  <article id="ligar"><h2>Ligar um caso do Qase ao teste</h2>${passos(['No próprio teste, anote o caso: <code>qase(31, …)</code>, <code>@qase-31</code> ou <code>Qase: SFQ-31</code>.','Em <strong>Testes</strong>, use <strong>Atualizar</strong>.','O caso passa a “caso com código”, e o detalhe dele abre o arquivo na linha do teste. Nome parecido não liga nada.'])}</article>
   <article id="conectar"><h2>Conectar Jira, Qase e GitHub</h2>${passos(['Em <strong>Conexões</strong>, configure a conta: o token fica cifrado pelo Windows.','Liste os recursos e vincule ao projeto.','Se quiser criar ou atualizar itens, habilite a <strong>escrita</strong> do serviço. Ela nasce desligada.'])}</article>
-  <article id="run"><h2>Montar uma execução e publicar no Qase</h2>${passos(['Em <strong>Testes › Planos e execuções</strong>, marque os cenários e prepare a execução.','Crie a run no Qase e use <strong>Executar automações</strong>. Cada uma pede a sua autenticação do Windows.','<strong>Publicar resultados</strong>: o Prumo confere a run no Qase depois de enviar.'])}</article>
+  <article id="run"><h2>Montar uma run e publicar no Qase</h2>${passos(['Em <strong>Testes › Runs</strong>, use <strong>Preparar run</strong> e escolha os casos.','Abra a run, use <strong>Criar run no Qase…</strong> e <strong>Executar automações…</strong>. Cada uma pede a sua autenticação do Windows.','<strong>Publicar resultados…</strong>: o Prumo confere a run no Qase depois de enviar.'])}${tela('runs','Lista de runs preparadas no Prumo e runs do Qase')}</article>
   <article id="agenda"><h2>Repetir sozinho</h2>${passos(['Em <strong>Agendamentos</strong>, crie uma rotina “Run do Qase”.','Aprove a política de publicação para a run (validade e número de usos).','Feche a janela: o Prumo continua na bandeja do Windows.'])}</article>
-  <article id="agentes"><h2>Limitar o que a IA pode pedir</h2>${passos(['Em <strong>Agentes</strong>, escolha as especializações do projeto.','Bloqueie as capacidades que não quer expor.','A IA só propõe rascunhos; você revisa e publica.'])}</article>`);
+  <article id="agentes"><h2>Limitar o que a IA pode pedir</h2>${passos(['Em <strong>Agentes</strong>, abra uma especialização e use <strong>Configuração</strong>.','Bloqueie as capacidades que não quer expor. O bloqueio vale a cada chamada MCP.','A IA só propõe rascunhos; você revisa e publica.'])}</article>
+  <article id="aprendizados"><h2>Aprovar o que o assistente aprendeu</h2>${passos(['Converse no <strong>Início</strong> ou no chat flutuante. O Prumo pergunta como chamar você e qual o seu papel.','Aprendizados vindos da conversa ou de uma IA nascem <strong>rascunho</strong>.','Aprove ou descarte no chat ou no <strong>Cérebro</strong> do agente. Só o aprovado passa a valer.'])}</article>
+  <article id="painel"><h2>Acompanhar os agentes ao vivo</h2>${passos(['Abra <strong>Agentes › Painel de atividades</strong>.','Ligue <strong>Ao vivo</strong>: o painel consulta a cada 3 segundos com a aba visível.','Arraste para mover e use Ctrl + roda para aproximar. Toda linha corresponde a um registro gravado; nada é inferido.'])}</article>`);
 
   write('documentacao.html','Documentação',`<h1>Documentação</h1><p class="suave">Gerada dos mesmos documentos de ajuda e contratos usados pelo aplicativo.</p><ul class="indice">${docs.map(d=>`<li><a href="${nome(d.f)}">${esc(d.title)}</a></li>`).join('')}</ul>`);
 
@@ -141,7 +179,9 @@ export function gerarSite(out=path.join(repo,'site/public')) {
   write('suporte.html','Suporte',`<h1>Suporte pelo GitHub</h1><p>Prepare e revise o relato no aplicativo, exporte em Markdown ou abra o formulário oficial. O aplicativo não publica a issue por você.</p><p class="limite">Issues são públicas. Não inclua senhas, tokens, código privado ou dados pessoais. Não há e-mail de suporte.</p><div class="acoes"><a class="botao" href="${repoUrl}/issues/new?template=bug.yml">Relatar bug</a><a class="botao" href="${repoUrl}/issues/new?template=melhoria.yml">Pedir melhoria</a><a class="botao" href="${repoUrl}/issues/new?template=sugestao.yml">Enviar sugestão</a></div><h2>Acompanhe seu chamado</h2><p>O número é emitido pelo GitHub. Respostas e resolução ficam nos comentários.</p>${statuses.map(s=>`<div class="status"><h3>${esc(s.nome)}</h3><p>${esc(s.explicacao)}</p></div>`).join('')}<p><a href="${repoUrl}/issues">Consultar chamados oficiais</a> · <a href="documentacao-suporte.html">Como funciona o suporte</a></p>`);
 
   for(const d of docs)write(nome(d.f),d.title,`<article>${markdown(d.body,d.f)}</article>`);
-  fs.writeFileSync(path.join(out,'estilo.css'),css);fs.copyFileSync(path.join(repo,'assets/prumo-icon.png'),path.join(out,'prumo.png'));
+  fs.writeFileSync(path.join(out,'estilo.css'),css+'\n'+orb.css);fs.copyFileSync(path.join(repo,'assets/prumo-icon.png'),path.join(out,'prumo.png'));
+  // O agente do site é a MESMA imagem usada pelo aplicativo no Início, no chat e em Agentes.
+  fs.copyFileSync(path.join(repo,'assets/interfaces-v36/robo-original.png'),path.join(out,'agente.png'));
   return {pages:docs.length+6,output:out,version:pkg.version,published:published.version};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))console.log(JSON.stringify(gerarSite(),null,2));

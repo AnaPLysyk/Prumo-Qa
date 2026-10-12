@@ -19,7 +19,8 @@
       "improvements": [
         "Design System (tokens, componentes e modal padrão) aplicado às telas, nos temas claro e escuro, com movimento reduzido e versão em inglês das telas novas.",
         "Suporte em etapas (descrever, revisar, enviar) e Ajuda com índice agrupado, busca com trecho destacado e trilha de navegação.",
-        "Projetos mostram uma linha por vínculo; Conexões sinalizam a escrita desligada; Contextos abre em modal a partir de Agentes."
+        "Projetos mostram uma linha por vínculo; Conexões sinalizam a escrita desligada; Contextos abre em modal a partir de Agentes.",
+        "Ajuda com a página nova \"Assistente, agentes e conhecimento\" e Testes/Tickets reescritos para a 2.10; o site usa o mesmo agente do aplicativo (esfera e três órbitas) e capturas das telas novas."
       ],
       "fixes": [
         "Operações externas revalidam a conexão e o vínculo antes de reutilizar uma operação confirmada ou reconciliar uma resposta perdida; escopo divergente retorna OPERATION_SCOPE_CHANGED sem reenviar.",

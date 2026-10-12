@@ -14,5 +14,9 @@ Object.assign(window.PRUMO_EN, {
   'Quando um cliente MCP chamar o núcleo, o chat responder ou o worker executar uma rotina, a janela aparece aqui. Nenhum agente executando foi inferido.': 'When an MCP client calls the core, the chat answers or the worker runs a routine, its window appears here. No running agent was inferred.',
   'Histórico do núcleo indisponível.': 'Core history unavailable.', 'Execuções indisponíveis.': 'Runs unavailable.',
   'Conversa com {a}': 'Conversation with {a}', 'Gravada somente neste computador. Resposta {m}.': 'Stored on this computer only. Answer: {m}.', 'local, sem modelo de IA': 'local, no AI model',
-  'Execução {r}': 'Run {r}', 'Registro da fila do worker. Evidência e logs completos ficam em Execuções.': 'Worker queue record. Full evidence and logs are in Runs.', 'Abrir Execuções': 'Open Runs'
+  'Execução {r}': 'Run {r}', 'Registro da fila do worker. Evidência e logs completos ficam em Execuções.': 'Worker queue record. Full evidence and logs are in Runs.', 'Abrir Execuções': 'Open Runs',
+  // Avaliação do atendimento no chat (2.10)
+  'Útil': 'Helpful', 'Não ajudou': 'Not helpful',
+  // Abas de Testes sem tradução (a heurística do teste de idioma não as detecta)
+  'Casos Qase': 'Qase cases', 'CI e GitHub': 'CI and GitHub',
 });

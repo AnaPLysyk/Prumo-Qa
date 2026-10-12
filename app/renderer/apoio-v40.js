@@ -61,7 +61,7 @@
   const GRUPOS = [
     ['Primeiros passos', ['01-o-que-e', '02-como-funciona', '03-instalar', '04-vincular', '17-plataforma']],
     ['Fluxos de qualidade', ['15-contextos', '19-testes-e-integracoes', '18-agendamentos', '07-resultados', '08-metricas-e-logs']],
-    ['IA e agentes', ['05-conectar-ia', '06-sem-ia-e-com-ia']],
+    ['IA e agentes', ['20-assistente-e-agentes', '05-conectar-ia', '06-sem-ia-e-com-ia']],
     ['Suporte', ['09-problemas', '10-perguntas', '16-suporte']],
     ['Segurança e dados', ['12-seguranca', '11-privacidade', 'dados', '13-termos']],
     ['Referência técnica', ['versoes', 'atualizacoes', 'integracoes', '14-sobre']]
