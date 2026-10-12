@@ -103,3 +103,9 @@ backend/agentes/
 ```
 
 O sistema não transforma automaticamente o texto de uma IA em conhecimento aprovado. Falta de autorização, cliente indisponível ou falha da execução retornam ao modo LOCAL. O comportamento continua sujeito aos testes automatizados e ao CI Windows.
+
+## Execuções — evidência inicial antes de executar
+
+O fluxo começa em `backend/execucoes/regras/executarValidacao.ts`, que chama `criarEvidenciaInicial.ts` para montar o registro inicial `BLOCKED`. Nesse momento ainda não existe execução, aprovação ou resultado. Em seguida, `executarValidacao.ts` valida contrato e escopo, solicita a confirmação humana e somente então inicia um processo, respeitando os limites de tempo e de saída. O resultado final é armazenado pelo módulo Evidências.
+
+`testes/evidencia-inicial.test.mjs` verifica especificamente que uma evidência nova não simula execução ou aprovação. O fluxo completo de autorização continua sendo testado pela suíte geral; **não houve alteração das permissões humanas nesta etapa**.
