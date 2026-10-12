@@ -149,3 +149,13 @@ app/renderer/telas/
 ```
 
 Os arquivos `app/renderer/agenda.js` e `app/renderer/integracoes.js` agora são marcadores de transição e **não são carregados** pelo `index.html`. As implementações de apresentação permanecem em JavaScript clássico, com a ordem dos scripts explícita e funções globais acessíveis entre eles. A futura consolidação definitiva de `frontend/` e `backend/` ainda depende de adaptar build, empacotamento e demais arquivos.
+
+## Fluxos e Testes avançados: organização das funções sem mudar a janela
+
+As implementações grandes v40 usam funções no mesmo escopo. Para manter o código executado exatamente igual durante a migração, agora existem arquivos-fonte `.parte.js` por ação em `app/renderer/telas/<nome-da-tela>/fluxos-fonte/` e `app/renderer/telas/testes/avancados-fonte/`.
+
+Abra a pasta da tela, escolha o arquivo pelo nome da função e leia a frase inicial. Para alterar uma ação, edite **a parte-fonte** e depois rode `node scripts/gerar-telas-v40.mjs`. Não edite diretamente `fluxos-v40.js` ou `testes-v40.js`, pois agora eles são arquivos gerados que o Electron carrega. A geração não substitui testes de comportamento.
+
+Os testes em `testes/arquitetura-telas.test.mjs` comprovam que a união das partes reproduz integralmente os arquivos executados e que o `index.html` carrega apenas os bundles na ordem correta. Use `node scripts/gerar-telas-v40.mjs --check` para conferir a igualdade sem escrever arquivos.
+
+**Atenção:** `frontend/` e `backend/` continuam como organização futura. As novas telas de login e administração permanecem na documentação Proposta; não aparecem na árvore atual de código.
