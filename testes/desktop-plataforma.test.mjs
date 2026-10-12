@@ -48,8 +48,28 @@ test('demonstração 2.7: vinte verificações na janela real, dois projetos e A
   await a.page.waitForFunction(()=>document.querySelector('#fonte-remota')?.textContent.startsWith('Consulta falhou'));assert.match(await a.page.textContent('#fonte-remota'),/CREDENTIAL_UNAVAILABLE/);passo(16,'Credencial retirada gera diagnóstico explícito');
   const hist=(await a.page.evaluate(id=>window.prumo.espacoObter(id),smart.id)).data.historico;assert.ok(hist.some(x=>x.acao==='CONSULTA'&&x.codigo==='OK'));assert.ok(hist.some(x=>x.codigo==='CREDENTIAL_UNAVAILABLE'));const logs=fs.readFileSync(path.join(dados,'plataforma','espacos.json'),'utf8');assert.doesNotMatch(logs,/fixture-secret-27|Requisito fictício/);assert.doesNotMatch(fs.readFileSync(path.join(dados,'plataforma','credenciais.json'),'utf8'),/fixture-secret-27/);passo(17,'Histórico só de metadados e vault sem token claro');
   const catalogo=await a.page.evaluate(()=>window.prumo.integracoes());assert.ok(catalogo.ok);assert.ok(JSON.stringify(catalogo).includes('servicos:consultar'));assert.ok(fs.readFileSync('docs/SERVICOS.md','utf8').includes('/rest/api/3/search/jql'));passo(18,'Catálogos IPC e REST separados e consultáveis');
-  if(await a.page.locator('#qualidade-dialog[open]').count()){await a.page.click('#qualidade-dialog .qualidade-dialog-fechar');await a.page.waitForSelector('#qualidade-dialog[open]',{state:'hidden'});}await a.page.getByRole('button',{name:'Projetos',exact:true}).focus();await a.page.keyboard.press('Enter');await a.page.waitForSelector('#espaco-novo').catch(async (erro) => {
-    // Se a navegação por teclado falhar, registra somente metadados de foco, aba e modais, sem projetos ou segredos.
+  // A janela modal deve ser fechada antes de testar navegação de menu pelo teclado.
+  // Focar um elemento atrás de <dialog> modal não equivale a uma navegação possível para a pessoa.
+  if (await a.page.locator('#qualidade-dialog[open]').count()) {
+    await a.page.keyboard.press('Escape');
+    await a.page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' });
+  }
+  const itemProjetos = a.page.locator('#nav [data-aba="projetos"]');
+  await itemProjetos.focus();
+  await a.page.waitForFunction(() =>
+    document.activeElement === document.querySelector('#nav [data-aba="projetos"]') &&
+    !document.querySelector('#qualidade-dialog')?.open
+  ).catch(async (erro) => {
+    const d = await a.page.evaluate(() => ({
+      aba: estado.aba,
+      modalAberto: !!document.querySelector('#qualidade-dialog')?.open,
+      foco: document.activeElement?.id || document.activeElement?.tagName || 'nenhum'
+    }));
+    throw new Error('FOCO_NAVEGACAO_BLOQUEADO: ' + JSON.stringify(d) + '; ' + erro.message);
+  });
+  await a.page.keyboard.press('Enter');
+  await a.page.waitForSelector('#espaco-novo').catch(async (erro) => {
+    // Diagnóstico sem segredos: somente aba, foco, modal e presença do botão.
     const diagnostico = await a.page.evaluate(() => ({
       aba: estado.aba,
       elementoFocado: document.activeElement?.id || document.activeElement?.tagName || 'nenhum',
