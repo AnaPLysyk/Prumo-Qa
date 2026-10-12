@@ -1,0 +1,428 @@
+<title>Prumo QA · Documentação viva</title>
+<style>
+/* Layout: bancada de três painéis — árvore à esquerda, mapa (fluxograma) no centro, código e explicação à direita. */
+:root {
+  --fundo: #040712; --painel: #0a1122; --painel2: #0d1630; --linha: #1c2742; --texto: #f3f6fc; --suave: #9aa8c2;
+  --acento: #6ea8ff; --acento-texto: #04101f; --ok: #54d39b; --aviso: #e8b84a; --falha: #ff7b8c;
+  --api: #6ea8ff; --regras: #54d39b; --banco: #e8b84a; --integracoes: #f472b6; --tipos: #9aa8c2; --tela: #a78bfa;
+  --sombra: 0 10px 30px rgba(0,0,0,.35);
+  --fonte: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --fundo: #f5f8fc; --painel: #ffffff; --painel2: #eef3fb; --linha: #cfd9ea; --texto: #14233d; --suave: #465875;
+  --acento: #1f56b8; --acento-texto: #ffffff; --ok: #0f6b4a; --aviso: #7a5200; --falha: #b3243b;
+  --api: #1f56b8; --regras: #0f6b4a; --banco: #7a5200; --integracoes: #b8286f; --tipos: #465875; --tela: #6d3fd8;
+  --sombra: 0 10px 30px rgba(20,35,61,.12); color-scheme: light; } }
+:root[data-theme="light"] {
+  --fundo: #f5f8fc; --painel: #ffffff; --painel2: #eef3fb; --linha: #cfd9ea; --texto: #14233d; --suave: #465875;
+  --acento: #1f56b8; --acento-texto: #ffffff; --ok: #0f6b4a; --aviso: #7a5200; --falha: #b3243b;
+  --api: #1f56b8; --regras: #0f6b4a; --banco: #7a5200; --integracoes: #b8286f; --tipos: #465875; --tela: #6d3fd8;
+  --sombra: 0 10px 30px rgba(20,35,61,.12); color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--fundo); color: var(--texto); font: 13px/1.45 var(--fonte); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.app { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
+header.topo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 16px; background: var(--painel); border-bottom: 1px solid var(--linha); }
+.marca { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.esfera { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--acento); display: grid; place-items: center; flex: none; }
+.esfera::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--acento); }
+.marca strong { font-size: 13px; letter-spacing: .06em; }
+.marca span { color: var(--suave); }
+.alternar { display: inline-flex; background: var(--painel2); border: 1px solid var(--linha); border-radius: 8px; padding: 3px; gap: 2px; }
+.alternar button { border: 0; background: none; padding: 6px 14px; border-radius: 6px; color: var(--suave); }
+.alternar button[aria-pressed="true"] { background: var(--acento); color: var(--acento-texto); font-weight: 600; }
+.revisao { color: var(--suave); font-size: 12px; min-width: 0; }
+.revisao code { font-family: var(--mono); color: var(--texto); }
+.resumo { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.chip { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--linha); border-radius: 999px; padding: 2px 9px; font-size: 11px; color: var(--suave); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip i { width: 7px; height: 7px; border-radius: 50%; }
+.ponto-novo { background: var(--ok); } .ponto-alterado { background: var(--aviso); } .ponto-removido { background: var(--falha); }
+nav.abas { display: none; gap: 4px; padding: 6px 16px; background: var(--painel); border-bottom: 1px solid var(--linha); }
+nav.abas button { flex: 1; border: 1px solid var(--linha); background: var(--painel2); border-radius: 6px; padding: 6px; }
+nav.abas button[aria-pressed="true"] { border-color: var(--acento); color: var(--acento); }
+.bancada { display: grid; grid-template-columns: minmax(220px, 290px) minmax(0, 1fr) minmax(300px, 420px); min-height: 0; }
+.painel { min-height: 0; min-width: 0; display: flex; flex-direction: column; background: var(--painel); }
+.esquerda { border-right: 1px solid var(--linha); }
+.direita { border-left: 1px solid var(--linha); }
+.rotulo { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--suave); font-weight: 700; }
+.busca { padding: 12px; border-bottom: 1px solid var(--linha); display: grid; gap: 8px; }
+.busca input { width: 100%; height: 34px; border: 1px solid var(--linha); background: var(--painel2); border-radius: 7px; padding: 0 10px; }
+.arvore { overflow: auto; padding: 6px 6px 16px; min-height: 0; flex: 1; }
+.no { display: flex; align-items: center; gap: 6px; width: 100%; border: 0; background: none; text-align: left; padding: 4px 6px; border-radius: 5px; color: var(--texto); white-space: nowrap; }
+.no:hover { background: var(--painel2); }
+.no[aria-current="true"] { background: color-mix(in srgb, var(--acento) 18%, transparent); }
+.no .seta { width: 12px; color: var(--suave); flex: none; text-align: center; }
+.no .nome { overflow: hidden; text-overflow: ellipsis; }
+.no.pasta .nome { font-weight: 600; }
+.no .estado { width: 7px; height: 7px; border-radius: 50%; flex: none; margin-left: auto; }
+.centro { position: relative; display: flex; flex-direction: column; background: var(--fundo); }
+.visoes { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--linha); background: var(--painel); flex-wrap: wrap; }
+.visoes button { border: 1px solid var(--linha); background: var(--painel2); border-radius: 6px; padding: 5px 12px; }
+.visoes button[aria-pressed="true"] { border-color: var(--acento); color: var(--acento); font-weight: 600; }
+.visoes .zoom { margin-left: auto; display: flex; gap: 4px; }
+.visoes .zoom button { width: 30px; padding: 5px 0; }
+.titulo-mapa { padding: 12px 16px 0; display: grid; gap: 2px; }
+.titulo-mapa h1 { margin: 0; font-size: 18px; font-weight: 650; text-wrap: balance; word-break: break-word; }
+.titulo-mapa p { margin: 0; color: var(--suave); max-width: 70ch; }
+.mapa { flex: 1; min-height: 260px; position: relative; overflow: hidden; touch-action: none; cursor: grab;
+  background-image: radial-gradient(color-mix(in srgb, var(--suave) 30%, transparent) .8px, transparent .9px); background-size: 22px 22px; }
+.mapa:active { cursor: grabbing; }
+.mapa svg { width: 100%; height: 100%; display: block; }
+.legenda { position: absolute; left: 12px; bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.no-mapa { cursor: pointer; }
+.no-mapa rect, .no-mapa circle { fill: var(--painel); stroke: var(--linha); stroke-width: 1.2; }
+.no-mapa:hover rect, .no-mapa:hover circle { stroke: var(--acento); }
+.no-mapa.foco rect, .no-mapa.foco circle { stroke: var(--acento); stroke-width: 2; }
+.no-mapa text { fill: var(--texto); font: 600 13px var(--fonte); }
+.no-mapa text.sub { fill: var(--suave); font: 400 11.5px var(--fonte); }
+.no-mapa text.papel { font: 700 9px var(--fonte); letter-spacing: .12em; text-transform: uppercase; }
+.aresta { fill: none; stroke: color-mix(in srgb, var(--suave) 55%, transparent); stroke-width: 1.2; }
+.cabeca-col { fill: var(--suave); font: 700 10px var(--fonte); letter-spacing: .14em; text-transform: uppercase; }
+.detalhe { overflow: auto; padding: 16px; display: grid; gap: 14px; align-content: start; min-height: 0; flex: 1; }
+.detalhe h2 { margin: 0; font-size: 17px; word-break: break-word; }
+.detalhe p { margin: 0; }
+.aviso-sem { color: var(--aviso); }
+dl.meta { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: 12px; }
+dl.meta dt { color: var(--suave); }
+dl.meta dd { margin: 0; word-break: break-all; font-family: var(--mono); font-size: 11.5px; }
+.lista { display: flex; flex-wrap: wrap; gap: 5px; }
+.lista button { border: 1px solid var(--linha); background: var(--painel2); border-radius: 5px; padding: 3px 8px; font-family: var(--mono); font-size: 11.5px; }
+.lista button:hover { border-color: var(--acento); }
+.pilha { display: grid; gap: 6px; }
+.pilha button { display: grid; gap: 2px; text-align: left; border: 1px solid var(--linha); background: var(--painel2); border-radius: 6px; padding: 7px 9px; }
+.pilha button:hover { border-color: var(--acento); }
+.pilha b { font-family: var(--mono); font-size: 11.5px; font-weight: 600; }
+.pilha span { color: var(--suave); font-size: 12px; }
+.codigo { border: 1px solid var(--linha); border-radius: 8px; background: var(--fundo); overflow: auto; max-height: 60vh; }
+.codigo pre { margin: 0; padding: 8px 0; font: 12px/1.55 var(--mono); counter-reset: l; }
+.codigo pre span { display: block; padding: 0 12px 0 0; white-space: pre; }
+.codigo pre span::before { counter-increment: l; content: counter(l); display: inline-block; width: 46px; padding-right: 12px; text-align: right; color: var(--suave); opacity: .6; user-select: none; }
+.codigo pre span.marcada { background: color-mix(in srgb, var(--acento) 20%, transparent); }
+.vazio { color: var(--suave); }
+.pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 600; border: 1px solid currentColor; width: max-content; }
+@media (max-width: 900px) {
+  nav.abas { display: flex; }
+  .bancada { grid-template-columns: minmax(0, 1fr); }
+  .bancada > .painel { display: none; }
+  .bancada > .painel.visivel { display: flex; }
+  .esquerda, .direita { border: 0; }
+  .resumo { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="app">
+  <header class="topo">
+    <div class="marca"><div class="esfera" aria-hidden="true"></div><div><strong>PRUMO QA</strong> <span>/ Administração · documentação viva</span></div></div>
+    <div class="alternar" role="group" aria-label="Revisão">
+      <button id="ver-atual" type="button" aria-pressed="false">Atual</button>
+      <button id="ver-proposta" type="button" aria-pressed="true">Proposta</button>
+    </div>
+    <div class="revisao" id="revisao"></div>
+    <div class="resumo" id="resumo"></div>
+  </header>
+  <nav class="abas" aria-label="Painéis">
+    <button id="aba-arvore" type="button" aria-pressed="false">Árvore</button>
+    <button id="aba-mapa" type="button" aria-pressed="true">Mapa</button>
+    <button id="aba-codigo" type="button" aria-pressed="false">Código</button>
+  </nav>
+  <main class="bancada">
+    <section class="painel esquerda" id="painel-arvore" aria-label="Árvore do código">
+      <div class="busca"><span class="rotulo" id="rotulo-arvore">Pastas e arquivos</span><input id="busca" type="search" placeholder="Buscar arquivo, função ou canal…" autocomplete="off"></div>
+      <div class="arvore" id="arvore" role="tree"></div>
+    </section>
+    <section class="painel centro visivel" id="painel-mapa" aria-label="Mapa">
+      <div class="visoes">
+        <button id="visao-estrutura" type="button" aria-pressed="true">Pastas e arquivos</button>
+        <button id="visao-fluxos" type="button" aria-pressed="false">Fluxos de uso</button>
+        <div class="zoom"><button id="menos" type="button" aria-label="Diminuir">−</button><button id="enquadrar" type="button" aria-label="Enquadrar">⤢</button><button id="mais" type="button" aria-label="Aumentar">+</button></div>
+      </div>
+      <div class="titulo-mapa"><h1 id="titulo"></h1><p id="subtitulo"></p></div>
+      <div class="mapa" id="mapa"><svg id="svg" role="img" aria-labelledby="titulo"><g id="cena"></g></svg>
+        <div class="legenda" id="legenda"></div></div>
+    </section>
+    <section class="painel direita" id="painel-codigo" aria-label="Código e explicação">
+      <div class="detalhe" id="detalhe"></div>
+    </section>
+  </main>
+</div>
+
+<script id="dados" type="application/json">/*__DADOS__*/null</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById('dados').textContent);
+  const $ = (id) => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const base = (p) => p.split('/').pop();
+  const pai = (p) => p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '';
+  const papeis = ['api', 'regras', 'banco', 'integracoes', 'tipos'];
+  const papelDe = (p) => { const s = p.split('/'); if (p.startsWith('app/renderer')) return 'tela'; const x = s.find((t) => papeis.includes(t)); return x ?? ''; };
+  const corDoPapel = (r) => r ? `var(--${r === 'tela' ? 'tela' : r})` : 'var(--suave)';
+  const nomePapel = { api: 'Canal da janela', regras: 'Regra', banco: 'Banco local', integracoes: 'Serviço externo', tipos: 'Formato dos dados', tela: 'Tela' };
+
+  const est = { rev: (location.hash === '#atual') ? 'atual' : 'proposta', visao: 'estrutura', sel: null, canal: null, aberto: new Set(['backend', 'app', 'src']), linha: null, zoom: 1, px: 0, py: 0 };
+  let snap, porCaminho, porNome, comparacao;
+
+  function preparar() {
+    snap = D.instantaneos[est.rev];
+    porCaminho = new Map(snap.arquivos.map((a) => [a.caminho, a]));
+    porNome = new Map(); for (const a of snap.arquivos) { const n = base(a.caminho).replace(/\.(ts|mjs|cjs|js)$/, ''); if (!porNome.has(n)) porNome.set(n, a.caminho); }
+    const outra = new Map(D.instantaneos[est.rev === 'atual' ? 'proposta' : 'atual'].arquivos.map((a) => [a.caminho, a.sha256]));
+    comparacao = new Map(); let novos = 0, alterados = 0;
+    for (const a of snap.arquivos) { const s = outra.get(a.caminho); const e = s === undefined ? 'novo' : s === a.sha256 ? 'igual' : 'alterado'; comparacao.set(a.caminho, e); if (e === 'novo') novos++; if (e === 'alterado') alterados++; }
+    let fora = 0; for (const c of outra.keys()) if (!porCaminho.has(c)) fora++;
+    const r = D.revisoes[est.rev];
+    $('revisao').innerHTML = `${esc(r.explicacao)} <code>${esc(r.ref)} @ ${esc(r.commit)}</code>${r.alteracoesLocais ? ` + ${r.alteracoesLocais} alterações locais` : ''}`;
+    const outroNome = est.rev === 'atual' ? 'Proposta' : 'Atual';
+    $('resumo').innerHTML = `<span class="chip">${snap.arquivos.length} arquivos</span><span class="chip"><i class="ponto-novo"></i>${novos} só aqui</span><span class="chip"><i class="ponto-alterado"></i>${alterados} diferentes</span><span class="chip"><i class="ponto-removido"></i>${fora} só na ${outroNome}</span>`;
+    $('ver-atual').setAttribute('aria-pressed', est.rev === 'atual'); $('ver-proposta').setAttribute('aria-pressed', est.rev === 'proposta');
+    if (!est.sel || (!porCaminho.has(est.sel) && !pastasDoSnap().has(est.sel))) est.sel = snap.arquivos.some((a) => a.caminho.startsWith('backend/')) ? 'backend' : 'src';
+    if (est.canal && !snap.fluxos.some((f) => f.canal === est.canal)) est.canal = null;
+    if (!est.canal && snap.fluxos.length) est.canal = (snap.fluxos.find((f) => f.canal === 'espacos:criar') ?? snap.fluxos[0]).canal;
+  }
+  let cachePastas = null, cacheRev = null;
+  function pastasDoSnap() {
+    if (cacheRev === est.rev) return cachePastas;
+    const m = new Map();
+    for (const a of snap.arquivos) { let p = pai(a.caminho); while (p) { if (!m.has(p)) m.set(p, { pastas: new Set(), arquivos: [] }); p = pai(p); } }
+    for (const a of snap.arquivos) m.get(pai(a.caminho))?.arquivos.push(a.caminho);
+    for (const p of m.keys()) { const q = pai(p); if (q && m.has(q)) m.get(q).pastas.add(p); }
+    cachePastas = m; cacheRev = est.rev; return m;
+  }
+
+  // ---------- Árvore ----------
+  function desenharArvore() {
+    const termo = $('busca').value.trim().toLowerCase(); const alvo = $('arvore'); alvo.innerHTML = '';
+    if (est.visao === 'fluxos') { $('rotulo-arvore').textContent = `Fluxos de uso · ${snap.fluxos.length} canais`; return desenharListaDeCanais(termo); }
+    $('rotulo-arvore').textContent = 'Pastas e arquivos';
+    const pastas = pastasDoSnap();
+    const casa = (c) => !termo || c.toLowerCase().includes(termo) || (porCaminho.get(c)?.descricao ?? '').toLowerCase().includes(termo) || (porCaminho.get(c)?.funcoes ?? []).some((f) => f.nome.toLowerCase().includes(termo));
+    const visiveis = termo ? new Set(snap.arquivos.filter((a) => casa(a.caminho)).map((a) => a.caminho)) : null;
+    const pastaTem = (p) => !visiveis || [...visiveis].some((c) => c.startsWith(p + '/'));
+    const frag = document.createDocumentFragment(); let total = 0;
+    const raizes = [...pastas.keys()].filter((p) => !p.includes('/')).sort();
+    function linha(caminho, nivel, pasta) {
+      if (total++ > 4000) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'no' + (pasta ? ' pasta' : ''); b.setAttribute('role', 'treeitem');
+      b.style.paddingLeft = 6 + nivel * 14 + 'px'; if (est.sel === caminho) b.setAttribute('aria-current', 'true');
+      const aberto = pasta && (termo || est.aberto.has(caminho)); if (pasta) b.setAttribute('aria-expanded', aberto);
+      const e = pasta ? '' : comparacao.get(caminho);
+      b.innerHTML = `<span class="seta">${pasta ? (aberto ? '▾' : '▸') : ''}</span><span class="nome">${esc(base(caminho))}</span>${e === 'novo' || e === 'alterado' ? `<i class="estado ponto-${e}" title="${e === 'novo' ? 'Só nesta revisão' : 'Diferente na outra revisão'}"></i>` : ''}`;
+      b.title = pasta ? (snap.pastas[caminho] ?? caminho) : (porCaminho.get(caminho)?.descricao ?? caminho);
+      b.addEventListener('click', () => { if (pasta) { if (est.aberto.has(caminho) && est.sel === caminho) est.aberto.delete(caminho); else est.aberto.add(caminho); } selecionar(caminho); });
+      frag.appendChild(b);
+      if (pasta && aberto) {
+        const info = pastas.get(caminho);
+        for (const p of [...info.pastas].sort()) if (pastaTem(p)) linha(p, nivel + 1, true);
+        for (const a of info.arquivos.sort()) if (!visiveis || visiveis.has(a)) linha(a, nivel + 1, false);
+      }
+    }
+    for (const r of raizes) if (pastaTem(r)) linha(r, 0, true);
+    alvo.appendChild(frag);
+    if (!alvo.children.length) alvo.innerHTML = '<p class="vazio" style="padding:10px">Nada encontrado com essa busca.</p>';
+  }
+  function desenharListaDeCanais(termo) {
+    const alvo = $('arvore'); const grupos = new Map();
+    for (const f of snap.fluxos) {
+      if (termo && !(f.canal + ' ' + (f.ponte ?? '') + ' ' + f.api).toLowerCase().includes(termo)) continue;
+      const tela = f.api.startsWith('backend/') ? f.api.split('/')[1] : 'main.ts';
+      if (!grupos.has(tela)) grupos.set(tela, []); grupos.get(tela).push(f);
+    }
+    for (const [tela, fs] of [...grupos].sort()) {
+      const h = document.createElement('div'); h.className = 'rotulo'; h.style.cssText = 'padding:10px 6px 4px'; h.textContent = tela; alvo.appendChild(h);
+      for (const f of fs) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'no'; b.style.paddingLeft = '14px';
+        if (est.canal === f.canal) b.setAttribute('aria-current', 'true');
+        b.innerHTML = `<span class="nome" style="font-family:var(--mono);font-size:12px">${esc(f.canal)}</span>`;
+        b.addEventListener('click', () => { est.canal = f.canal; desenhar(); });
+        alvo.appendChild(b);
+      }
+    }
+    if (!alvo.children.length) alvo.innerHTML = '<p class="vazio" style="padding:10px">Nenhum canal com essa busca.</p>';
+  }
+
+  // ---------- Mapa ----------
+  const cena = $('cena');
+  function caixa(x, y, l, a, titulo, sub, papel, alvo, foco) {
+    const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'no-mapa' + (foco ? ' foco' : '')); g.setAttribute('tabindex', '0');
+    g.innerHTML = `<rect x="${x}" y="${y}" width="${l}" height="${a}" rx="9"></rect>` +
+      (papel ? `<text class="papel" x="${x + 12}" y="${y + 17}" style="fill:${corDoPapel(papel)}">${esc(nomePapel[papel] ?? papel)}</text>` : '') +
+      `<text x="${x + 12}" y="${y + (papel ? 35 : 24)}">${esc(cortar(titulo, Math.floor(l / 7.9)))}</text>` +
+      (sub ? `<text class="sub" x="${x + 12}" y="${y + (papel ? 52 : 42)}">${esc(cortar(sub, Math.floor(l / 6.6)))}</text>` : '');
+    if (alvo) { const ir = () => alvo(); g.addEventListener('click', ir); g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ir(); } }); }
+    const t = document.createElementNS(NS, 'title'); t.textContent = sub ? titulo + ' — ' + sub : titulo; g.appendChild(t);
+    cena.appendChild(g); return { x, y, l, a };
+  }
+  function circulo(cx, cy, r, titulo, sub, alvo, foco) {
+    const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'no-mapa' + (foco ? ' foco' : '')); g.setAttribute('tabindex', '0');
+    g.innerHTML = `<circle cx="${cx}" cy="${cy}" r="${r}"></circle><text text-anchor="middle" x="${cx}" y="${cy - 2}">${esc(cortar(titulo, 16))}</text>` + (sub ? `<text class="sub" text-anchor="middle" x="${cx}" y="${cy + 15}">${esc(cortar(sub, 18))}</text>` : '');
+    if (alvo) { g.addEventListener('click', alvo); g.addEventListener('keydown', (e) => { if (e.key === 'Enter') alvo(); }); }
+    const t = document.createElementNS(NS, 'title'); t.textContent = titulo + (sub ? ' — ' + sub : ''); g.appendChild(t);
+    cena.appendChild(g); return { x: cx - r, y: cy - r, l: 2 * r, a: 2 * r };
+  }
+  function ligar(a, b) {
+    const p = document.createElementNS(NS, 'path'); const x1 = a.x + a.l, y1 = a.y + a.a / 2, x2 = b.x, y2 = b.y + b.a / 2, m = (x1 + x2) / 2;
+    p.setAttribute('d', `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`); p.setAttribute('class', 'aresta'); p.setAttribute('marker-end', 'url(#seta)');
+    cena.insertBefore(p, cena.firstChild.nextSibling);
+  }
+  function ligarParaBaixo(a, b) {
+    const p = document.createElementNS(NS, 'path'); const x1 = a.x + a.l / 2, y1 = a.y + a.a, x2 = b.x + b.l / 2, y2 = b.y, m = (y1 + y2) / 2;
+    p.setAttribute('d', `M${x1},${y1} C${x1},${m} ${x2},${m} ${x2},${y2}`); p.setAttribute('class', 'aresta'); p.setAttribute('marker-end', 'url(#seta)');
+    cena.insertBefore(p, cena.firstChild.nextSibling);
+  }
+  function cabecalho(x, y, texto) { const t = document.createElementNS(NS, 'text'); t.setAttribute('class', 'cabeca-col'); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = texto; cena.appendChild(t); }
+  const cortar = (s, n) => (s = String(s ?? '')).length > n ? s.slice(0, Math.max(1, n - 1)) + '…' : s;
+  function limparCena() { cena.innerHTML = '<defs><marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--suave)"></path></marker></defs>'; }
+  function coluna(itens, x, larg, alt, y0, max) { const out = []; const lista = itens.slice(0, max); lista.forEach((it, i) => out.push({ it, x, y: y0 + i * (alt + 12), l: larg, a: alt })); return { out, resto: itens.length - lista.length }; }
+
+  function mapaDaPasta(p) {
+    const info = pastasDoSnap().get(p); limparCena();
+    $('titulo').textContent = p; $('subtitulo').textContent = snap.pastas[p] ?? `${info.pastas.size} pastas e ${info.arquivos.length} arquivos.`;
+    const centro = circulo(90, 200, 70, base(p), `${info.pastas.size + info.arquivos.length} itens`, null, true);
+    const itens = [...[...info.pastas].sort().map((x) => ({ c: x, pasta: true })), ...info.arquivos.sort().map((x) => ({ c: x, pasta: false }))];
+    const cols = Math.max(1, Math.min(4, Math.floor((($('mapa').clientWidth || 900) / 0.9 - 240) / 270))); const porCol = Math.max(1, Math.ceil(itens.length / cols));
+    itens.forEach((it, i) => {
+      const col = Math.floor(i / porCol), lin = i % porCol; const x = 240 + col * 270, y = 20 + lin * 72;
+      const a = porCaminho.get(it.c); const papel = it.pasta ? (papeis.includes(base(it.c)) ? base(it.c) : '') : papelDe(it.c);
+      const sub = it.pasta ? (snap.pastas[it.c] ?? 'pasta') : (a?.descricao ?? 'sem frase na primeira linha');
+      const b = caixa(x, y, 250, 60, base(it.c) + (it.pasta ? '/' : ''), sub, papel, () => selecionar(it.c));
+      if (col === 0) ligar(centro, b);
+    });
+    legenda(['api', 'regras', 'banco', 'integracoes', 'tipos']);
+    return { l: 240 + cols * 270, a: Math.max(420, Math.min(itens.length, porCol) * 72 + 40) };
+  }
+  function mapaDoArquivo(c) {
+    const a = porCaminho.get(c); limparCena();
+    $('titulo').textContent = base(c); $('subtitulo').textContent = a.descricao ?? 'Este arquivo não tem a frase de explicação na primeira linha.';
+    const usado = coluna(a.usadoPor, 0, 250, 56, 40, 10), chama = coluna(a.importa, 640, 250, 56, 40, 12);
+    const alturaCentro = Math.max(usado.out.length, chama.out.length, 1) * 68;
+    const meio = { x: 330, y: 40 + Math.max(0, alturaCentro / 2 - 60), l: 250, a: 92 };
+    cabecalho(0, 26, 'Quem usa este arquivo'); cabecalho(330, 26, 'Arquivo'); cabecalho(640, 26, 'O que ele chama');
+    const pasta = pai(c);
+    const centro = caixa(meio.x, meio.y, meio.l, meio.a, base(c), a.descricao ?? 'sem descrição', papelDe(c), () => abrirCodigo(c), true);
+    const lblPasta = caixa(meio.x, meio.y + meio.a + 16, meio.l, 40, pasta + '/', '', '', () => selecionar(pasta));
+    for (const u of usado.out) { const b = caixa(u.x, u.y, u.l, u.a, base(u.it), porCaminho.get(u.it)?.descricao ?? '', papelDe(u.it), () => selecionar(u.it)); ligar(b, centro); }
+    for (const u of chama.out) { const b = caixa(u.x, u.y, u.l, u.a, base(u.it), porCaminho.get(u.it)?.descricao ?? '', papelDe(u.it), () => selecionar(u.it)); ligar(centro, b); }
+    if (usado.resto) cabecalho(0, 40 + 10 * 68 + 10, `+ ${usado.resto} outros (ver painel)`);
+    if (chama.resto) cabecalho(640, 40 + 12 * 68 + 10, `+ ${chama.resto} outros (ver painel)`);
+    if (!a.usadoPor.length) cabecalho(0, 70, 'ninguém importa (porta de entrada ou tela)');
+    if (!a.importa.length) cabecalho(640, 70, 'não importa outros arquivos');
+    legenda(['tela', 'api', 'regras', 'banco', 'integracoes', 'tipos']);
+    return { l: 900, a: Math.max(lblPasta.y + 60, alturaCentro + 60) };
+  }
+  function mapaDoFluxo() {
+    limparCena(); const f = snap.fluxos.find((x) => x.canal === est.canal);
+    if (!f) { $('titulo').textContent = 'Fluxos de uso'; $('subtitulo').textContent = 'Esta revisão não tem canais da janela registrados.'; return { l: 600, a: 300 }; }
+    const api = porCaminho.get(f.api);
+    $('titulo').textContent = 'Canal ' + f.canal;
+    $('subtitulo').textContent = api?.descricao?.replace(/^Canal [a-z]+:[a-z]+:\s*/, '') ?? 'Caminho do clique na tela até os dados.';
+    const colunas = [
+      { titulo: 'Tela (o que a pessoa vê)', itens: f.telas.map((t) => ({ t: base(t), s: porCaminho.get(t)?.descricao ?? t, c: t, p: 'tela' })) },
+      { titulo: 'Ponte segura (preload)', itens: [{ t: f.ponte ? 'window.prumo.' + f.ponte : 'sem função na ponte', s: 'app/preload.cjs', c: 'app/preload.cjs', p: '' }] },
+      { titulo: 'Canal da janela (IPC)', itens: [{ t: f.canal, s: f.api.startsWith('backend/') ? 'validado por registrarCanal.ts' : 'registrado em main.ts', c: f.api.startsWith('backend/') ? 'backend/aplicativo/api/registrarCanal.ts' : 'src/desktop/main.ts', p: '' }] },
+      { titulo: 'Atende o pedido', itens: [{ t: base(f.api), s: api?.descricao?.replace(/^Canal [a-z]+:[a-z]+:\s*/, '') ?? '', c: f.api, p: papelDe(f.api) }] },
+      { titulo: 'O que ele usa', itens: f.chama.map((n) => { const c = porNome.get(n); return { t: n, s: c ? porCaminho.get(c)?.descricao ?? '' : '', c, p: c ? papelDe(c) : '' }; }) },
+    ];
+    if (!colunas[0].itens.length) colunas[0].itens.push({ t: 'nenhuma tela encontrada', s: 'nenhum arquivo do renderer chama esta função', c: null, p: '' });
+    if (!colunas[4].itens.length) colunas[4].itens.push({ t: f.api.startsWith('backend/') ? 'nenhuma outra função' : 'lógica dentro de main.ts', s: '', c: null, p: '' });
+    const larg = 240, passoX = 256, passoY = 112; let y = 0, largura = 0; const anteriores = [];
+    const porLinha = Math.max(1, Math.min(4, Math.floor((($('mapa').clientWidth || 900) / 0.9) / passoX)));
+    colunas.forEach((col) => {
+      cabecalho(0, y + 14, col.titulo); const atuais = []; const itens = col.itens.slice(0, 12);
+      itens.forEach((it, j) => { const b = caixa((j % porLinha) * passoX, y + 24 + Math.floor(j / porLinha) * 74, larg, 62, it.t, it.s, it.p, it.c ? () => selecionar(it.c) : null); atuais.push(b); largura = Math.max(largura, b.x + larg); });
+      for (const a of anteriores) for (const b of atuais) if (anteriores.length === 1 || atuais.length === 1) ligarParaBaixo(a, b);
+      anteriores.length = 0; anteriores.push(...atuais);
+      y += 24 + Math.ceil(itens.length / porLinha) * 74 + (passoY - 74);
+    });
+    legenda(['tela', 'api', 'regras', 'banco', 'integracoes', 'tipos']);
+    return { l: largura, a: y };
+  }
+  function legenda(lista) { $('legenda').innerHTML = lista.map((r) => `<span class="chip"><i style="background:${corDoPapel(r)}"></i>${nomePapel[r]}</span>`).join(''); }
+
+  // Pan e zoom no mapa
+  let tamanho = { l: 900, a: 500 };
+  function aplicarVista() { $('svg').setAttribute('viewBox', `${est.px} ${est.py} ${$('mapa').clientWidth / est.zoom} ${$('mapa').clientHeight / est.zoom}`); }
+  function enquadrar() { const w = $('mapa').clientWidth || 800, h = $('mapa').clientHeight || 500; est.zoom = Math.min(1.1, Math.max(.85, Math.min(w / (tamanho.l + 60), h / (tamanho.a + 60)))); est.px = -30; est.py = -20; aplicarVista(); }
+  (() => {
+    const m = $('mapa'); let arrasto = null;
+    m.addEventListener('pointerdown', (e) => { if (e.target.closest('.no-mapa')) return; arrasto = { x: e.clientX, y: e.clientY, px: est.px, py: est.py }; m.setPointerCapture(e.pointerId); });
+    m.addEventListener('pointermove', (e) => { if (!arrasto) return; est.px = arrasto.px - (e.clientX - arrasto.x) / est.zoom; est.py = arrasto.py - (e.clientY - arrasto.y) / est.zoom; aplicarVista(); });
+    m.addEventListener('pointerup', () => { arrasto = null; });
+    m.addEventListener('wheel', (e) => { e.preventDefault(); zoomEm(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.offsetX, e.offsetY); }, { passive: false });
+    $('mais').addEventListener('click', () => zoomEm(1.2, m.clientWidth / 2, m.clientHeight / 2));
+    $('menos').addEventListener('click', () => zoomEm(1 / 1.2, m.clientWidth / 2, m.clientHeight / 2));
+    $('enquadrar').addEventListener('click', enquadrar);
+    new ResizeObserver(() => aplicarVista()).observe(m);
+  })();
+  function zoomEm(f, ox, oy) { const z = Math.min(3, Math.max(.2, est.zoom * f)); est.px += ox / est.zoom - ox / z; est.py += oy / est.zoom - oy / z; est.zoom = z; aplicarVista(); }
+
+  // ---------- Painel de código e explicação ----------
+  function botaoLista(caminhos) { return caminhos.length ? `<div class="lista">${caminhos.map((c) => `<button type="button" data-ir="${esc(c)}" title="${esc(porCaminho.get(c)?.descricao ?? c)}">${esc(base(c))}</button>`).join('')}</div>` : '<p class="vazio">Nenhum.</p>'; }
+  function estadoPill(c) { const e = comparacao.get(c); const outro = est.rev === 'atual' ? 'Proposta' : 'Atual'; return e === 'novo' ? `<span class="pill" style="color:var(--ok)">Não existe na ${outro}</span>` : e === 'alterado' ? `<span class="pill" style="color:var(--aviso)">Diferente na ${outro}</span>` : `<span class="pill" style="color:var(--suave)">Igual na ${outro}</span>`; }
+  function detalheArquivo(c) {
+    const a = porCaminho.get(c); const papel = papelDe(c);
+    const linhas = a.codigo.split(/\r?\n/).map((l, i) => `<span${est.linha && i + 1 >= est.linha.de && i + 1 <= est.linha.ate ? ' class="marcada"' : ''}>${esc(l) || ' '}</span>`).join('');
+    $('detalhe').innerHTML = `
+      <div class="rotulo">Código · técnica · lógica</div>
+      <div style="display:grid;gap:6px"><h2>${esc(base(c))}</h2>${a.descricao ? `<p>${esc(a.descricao)}</p>` : '<p class="aviso-sem">Sem a frase de explicação na primeira linha.</p>'}<div style="display:flex;gap:6px;flex-wrap:wrap">${papel ? `<span class="pill" style="color:${corDoPapel(papel)}">${nomePapel[papel]}</span>` : ''}${estadoPill(c)}</div></div>
+      <dl class="meta"><dt>Caminho</dt><dd>${esc(c)}</dd><dt>Linhas</dt><dd>${a.linhas}</dd><dt>SHA-256</dt><dd>${a.sha256.slice(0, 16)}…</dd><dt>Revisão</dt><dd>${esc(D.revisoes[est.rev].ref)} @ ${esc(D.revisoes[est.rev].commit)}</dd></dl>
+      <div style="display:grid;gap:6px"><div class="rotulo">Ir para função</div>${a.funcoes.length ? `<div class="lista">${a.funcoes.map((f) => `<button type="button" data-linha="${f.linha}">${esc(f.nome)} · ${f.linha}</button>`).join('')}</div>` : '<p class="vazio">Nenhuma função declarada neste arquivo.</p>'}</div>
+      <div style="display:grid;gap:6px"><div class="rotulo">O que ele chama (${a.importa.length})</div>${botaoLista(a.importa)}</div>
+      <div style="display:grid;gap:6px"><div class="rotulo">Quem usa (${a.usadoPor.length})</div>${botaoLista(a.usadoPor)}</div>
+      <div style="display:grid;gap:6px"><div class="rotulo">Código-fonte completo · ${a.linhas} linhas</div><div class="codigo" id="codigo"><pre>${linhas}</pre></div></div>`;
+    ligarBotoes();
+    if (est.linha) { const s = $('codigo').querySelectorAll('pre span')[est.linha.de - 1]; if (s) $('codigo').scrollTop = s.offsetTop - 40; }
+  }
+  function detalhePasta(p) {
+    const info = pastasDoSnap().get(p);
+    $('detalhe').innerHTML = `<div class="rotulo">Pasta</div><div style="display:grid;gap:6px"><h2>${esc(p)}/</h2><p>${esc(snap.pastas[p] ?? 'Sem explicação registrada para esta pasta.')}</p></div>
+      <dl class="meta"><dt>Pastas</dt><dd>${info.pastas.size}</dd><dt>Arquivos</dt><dd>${info.arquivos.length}</dd></dl>
+      <div class="pilha">${[...[...info.pastas].sort().map((x) => `<button type="button" data-ir="${esc(x)}"><b>${esc(base(x))}/</b><span>${esc(snap.pastas[x] ?? '')}</span></button>`), ...info.arquivos.sort().map((x) => `<button type="button" data-ir="${esc(x)}"><b>${esc(base(x))}</b><span>${esc(porCaminho.get(x)?.descricao ?? 'sem frase na primeira linha')}</span></button>`)].join('')}</div>`;
+    ligarBotoes();
+  }
+  function detalheCanal() {
+    const f = snap.fluxos.find((x) => x.canal === est.canal); if (!f) { $('detalhe').innerHTML = '<p class="vazio">Escolha um canal na lista.</p>'; return; }
+    $('detalhe').innerHTML = `<div class="rotulo">Fluxo de uso</div><div style="display:grid;gap:6px"><h2>${esc(f.canal)}</h2><p>${esc(porCaminho.get(f.api)?.descricao ?? '')}</p></div>
+      <dl class="meta"><dt>Ponte</dt><dd>${f.ponte ? 'window.prumo.' + esc(f.ponte) : '—'}</dd><dt>Atende</dt><dd>${esc(f.api)}</dd></dl>
+      <div style="display:grid;gap:6px"><div class="rotulo">Telas que chamam (${f.telas.length})</div>${botaoLista(f.telas)}</div>
+      <div style="display:grid;gap:6px"><div class="rotulo">Arquivo que atende</div>${botaoLista([f.api].filter((c) => porCaminho.has(c)))}</div>
+      <div style="display:grid;gap:6px"><div class="rotulo">Funções usadas (${f.chama.length})</div>${botaoLista(f.chama.map((n) => porNome.get(n)).filter(Boolean))}</div>`;
+    ligarBotoes();
+  }
+  function ligarBotoes() {
+    for (const b of $('detalhe').querySelectorAll('[data-ir]')) b.addEventListener('click', () => { est.visao = 'estrutura'; selecionar(b.dataset.ir); });
+    for (const b of $('detalhe').querySelectorAll('[data-linha]')) b.addEventListener('click', () => { const a = porCaminho.get(est.sel); const i = a.funcoes.findIndex((f) => f.linha === Number(b.dataset.linha)); est.linha = { de: Number(b.dataset.linha), ate: (a.funcoes[i + 1]?.linha ?? a.linhas + 1) - 1 }; detalheArquivo(est.sel); });
+  }
+
+  // ---------- Orquestração ----------
+  function selecionar(c) { est.sel = c; est.linha = null; est.visao = 'estrutura'; let p = pai(c); while (p) { est.aberto.add(p); p = pai(p); } desenhar(true); mostrarPainel(porCaminho.has(c) ? 'mapa' : 'mapa'); }
+  function abrirCodigo(c) { est.sel = c; desenhar(false); mostrarPainel('codigo'); }
+  function desenhar(enq = true) {
+    $('visao-estrutura').setAttribute('aria-pressed', est.visao === 'estrutura'); $('visao-fluxos').setAttribute('aria-pressed', est.visao === 'fluxos');
+    desenharArvore();
+    if (est.visao === 'fluxos') { tamanho = mapaDoFluxo(); detalheCanal(); }
+    else if (porCaminho.has(est.sel)) { tamanho = mapaDoArquivo(est.sel); detalheArquivo(est.sel); }
+    else { tamanho = mapaDaPasta(est.sel); detalhePasta(est.sel); }
+    if (enq) enquadrar(); else aplicarVista();
+  }
+  function mostrarPainel(qual) {
+    for (const [id, p] of [['aba-arvore', 'painel-arvore'], ['aba-mapa', 'painel-mapa'], ['aba-codigo', 'painel-codigo']]) { const on = id === 'aba-' + qual; $(id).setAttribute('aria-pressed', on); $(p).classList.toggle('visivel', on); }
+    if (qual === 'mapa') requestAnimationFrame(enquadrar);
+  }
+  $('ver-atual').addEventListener('click', () => { est.rev = 'atual'; try { history.replaceState(null, '', '#atual'); } catch {} preparar(); desenhar(); });
+  $('ver-proposta').addEventListener('click', () => { est.rev = 'proposta'; try { history.replaceState(null, '', '#proposta'); } catch {} preparar(); desenhar(); });
+  $('visao-estrutura').addEventListener('click', () => { est.visao = 'estrutura'; desenhar(); });
+  $('visao-fluxos').addEventListener('click', () => { est.visao = 'fluxos'; desenhar(); });
+  $('busca').addEventListener('input', desenharArvore);
+  $('aba-arvore').addEventListener('click', () => mostrarPainel('arvore'));
+  $('aba-mapa').addEventListener('click', () => mostrarPainel('mapa'));
+  $('aba-codigo').addEventListener('click', () => mostrarPainel('codigo'));
+  preparar(); desenhar();
+})();
+</script>

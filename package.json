@@ -35,7 +35,8 @@
     "dist": "npm run build && electron-builder --win nsis --publish never",
     "contratos": "npm run build && node scripts/gerar-contratos.mjs",
     "site": "node scripts/gerar-site.mjs",
-    "leia-me": "node scripts/gerar-leia-me-backend.mjs"
+    "leia-me": "node scripts/gerar-leia-me-backend.mjs",
+    "arquitetura": "node scripts/gerar-arquitetura.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
