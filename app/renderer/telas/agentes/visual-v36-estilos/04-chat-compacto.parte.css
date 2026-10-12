@@ -1,0 +1,23 @@
+/** Adapta a conversa ao painel compacto. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* Versão compacta da mesma conversa */
+.v36f-painel .v36c-topo{height:127px}
+.v36f-painel .v36c-orbita{left:10px;top:12px;width:184px;height:107px}
+.v36f-painel .v36c-orbita{--v36-orb:109px}
+.v36f-painel .v36c-msgs{padding:14px 30px 24px;gap:19px}
+.v36f-painel .v36c .msg{max-width:100%}
+.v36f-painel .v36c .msg.prumo{margin-left:5px}
+.v36f-painel .v36c .msg.prumo::before{left:-12px;width:1.5px}
+.v36f-painel .v36c-ocupado{margin-left:5px}.v36f-painel .v36c-ocupado::before{left:-12px}
+.v36f-painel .v36c-texto{font-size:12px;line-height:1.58}
+.v36f-painel .v36c-fontes{margin:-8px 0 0 5px}
+.v36f-painel .v36c-interacao{padding:9px 18px 7px}
+.v36f-painel .v36c-sugestoes{display:none}
+.v36f-painel .v36c-chips{gap:7px}
+.v36f-painel .v36c-chip{font-size:11px;padding:8px 10px;gap:5px;background:rgba(var(--qc-azul),.043)}
+.v36f-painel .v36c-chip .v36-icone{width:14px;height:14px}
+.v36f-painel .v36c-seta{margin-left:3px}
+.v36f-painel .v36c-compor-caixa{padding:7px 18px 15px}
+.v36f-painel .v36c-compor{gap:5px;padding:7px 8px 7px 11px;border-radius:22px;border-color:rgba(var(--qc-azul),.15);background:rgba(var(--qc-azul),.04);box-shadow:0 0 0 3px rgba(var(--qc-azul),.055)}
+.v36f-painel .v36c-compor textarea{font-size:12px}
+.v36f-painel .v36c-enviar{width:32px;height:32px;border-radius:10px}
+.v36f-painel .v36c-rodape{display:none}

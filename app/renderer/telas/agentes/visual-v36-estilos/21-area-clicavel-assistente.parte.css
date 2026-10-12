@@ -1,0 +1,6 @@
+/** Limita o clique a esfera do robo flutuante. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* Só a esfera visível recebe o clique; as órbitas não cobrem o conteúdo do canto. */
+.v36f-botao,.v36f-orbita,.v36f-robo,.v36f-robo img{pointer-events:none}
+.v36f-alvo{position:absolute;left:50%;top:50%;z-index:3;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;pointer-events:auto;cursor:pointer}
+@media(max-width:670px){.v36f-alvo{width:52px;height:52px;margin:-26px 0 0 -26px}}
+

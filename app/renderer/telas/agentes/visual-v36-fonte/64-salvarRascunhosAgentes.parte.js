@@ -1,0 +1,5 @@
+/** Salva as previas de agentes no armazenamento local. Parte visual de interfaces-v36.js; nao carregar separadamente. */
+    function saveDrafts(next) { try { localStorage.setItem('prumo-v36-drafts-' + e.id, JSON.stringify(next)); drafts = next; return true; } catch { avisar('Não foi possível persistir a prévia local.', true); return false; } }
+    function showTab(tab) { activeTab = tab; if (tab !== 'activity') painelVivo?.parar(); tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.agentTab === tab))); if (tab === 'agents') list(); else activity(); }
+    function resumoCaps(x) { const c = capsDe(x); const auth = c.filter(k => k.estado === 'EXIGE_AUTORIZACAO').length, bloq = c.filter(k => k.estado === 'BLOQUEADO').length;
+      return [h('strong', {}, tr('{n} capacidades', { n: c.length })), auth ? h('small', {}, tr('{n} exige autorização', { n: auth })) : null, bloq ? h('small', { class: 'v36a-bloq' }, tr('{n} bloqueada(s)', { n: bloq })) : null]; }

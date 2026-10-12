@@ -118,3 +118,11 @@ No frontend, os arquivos de `app/renderer/` fora das telas listadas continuam no
 **Fonte:** estrutura publicada do Prumo QA 2.10.2 (`main` na criação da branch). O canvas da Documentação Viva é ferramenta de planejamento, não substitui código/contratos.
 
 **Política de nomes:** preferir `criarProjeto.ts` a `helpers.ts`; preferir `modalCriarProjeto/` a `componentesDiversos/`; escrever na primeira linha do arquivo uma frase exata sobre sua função.
+
+## Fontes por função — Fluxos, Testes e Visual v36
+
+Os arquivos `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-v36.css` foram **organizados como fontes por tela e função**, mantendo os quatro arquivos originais como bundles executados. O gerador `scripts/gerar-telas-modulares.mjs` recompõe os arquivos a partir de `scripts/telas-modulares.json`.
+
+**Total nesta etapa:** 35 partes de Fluxos, 17 de Testes v40, 77 do visual v36 JavaScript e 27 de estilos v36 CSS. As fontes não devem ser carregadas isoladamente porque mantêm relações de escopo e ordem de execução. O CSS preserva a ordem da cascata.
+
+**Ainda não realizado:** reorganização física final em `frontend/` e `backend/`; divisão do núcleo desktop de `src/desktop/main.ts`; implementação das novas telas de autenticação e administração; PostgreSQL e API HTTPS. A Documentação Viva Proposta não equivale a código já implementado.

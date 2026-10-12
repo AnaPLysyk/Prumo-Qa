@@ -1,0 +1,9 @@
+/** Define a largura e moldura das telas. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* ---------- Casca: as telas aprovadas usam a largura toda ---------- */
+body[data-tela=inicio] main#conteudo,body[data-tela=logs] main#conteudo{max-width:none;width:100%;padding:0;height:100vh;height:100dvh;overflow:hidden}
+body[data-tela=historico] main#conteudo{max-width:none;width:100%;padding:17px clamp(14px,2vw,26px) 24px}
+body[data-tela=metricas] main#conteudo{max-width:none;width:100%;padding:16px clamp(18px,2.4vw,34px) 40px}
+body[data-tela=inicio] main#conteudo>*,body[data-tela=logs] main#conteudo>*{height:100%;animation:none}
+body[data-tela=inicio] .topo-direita{top:22px}
+body.v36-painel-aberto:not(.v36-encaixado) .topo-direita{right:calc(min(470px,100vw - 32px) + clamp(14px,3vw,38px) + 14px)}
+

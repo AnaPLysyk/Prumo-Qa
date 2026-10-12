@@ -1,0 +1,15 @@
+/** Integra Detalhes e Cerebro ao fundo espacial. Estilo de interfaces-v36.css; nao carregar isoladamente. */
+/* Detalhe, Cérebro e fluxo sobre o mesmo céu */
+.v36a-detalhe{border-color:rgba(130,165,230,.14);background:rgba(5,9,22,.35);backdrop-filter:blur(2px)}
+.v36a-perfil{background:radial-gradient(ellipse 65% 50% at 50% 42%,color-mix(in srgb,var(--face-color) 22%,transparent),transparent 72%)}
+.v36a-perfil-info{background:linear-gradient(180deg,transparent,rgba(3,6,16,.75) 45%)}
+.v36a-form{background:rgba(6,11,26,.62);backdrop-filter:blur(14px);border-left:1px solid rgba(130,165,230,.12)}
+.v36-form-actions.v36a-commit{background:linear-gradient(to top,rgba(6,11,26,.95) 55%,transparent)}
+.v36-field input,.v36-field textarea,.v36a-cap select{background:rgba(255,255,255,.035);border-color:rgba(130,165,230,.2)}
+.v36-stage.v36a-cerebro{background:radial-gradient(ellipse 42% 52% at 50% 50%,color-mix(in srgb,var(--face-color) 16%,transparent),transparent 72%);border:1px solid rgba(130,165,230,.1)}
+.v36a-mapa{background:radial-gradient(ellipse 50% 70% at 50% 50%,rgba(40,70,150,.22),transparent 75%);border:1px solid rgba(130,165,230,.1)}
+.v36-activity-node{background:rgba(8,14,30,.55);backdrop-filter:blur(8px)}
+.v36a-secao-extra{border-top-color:rgba(130,165,230,.14)}
+.v36a .estado{background:rgba(255,255,255,.04)}
+@media(prefers-reduced-motion:reduce){.v36a-astro,.v36a-orbita-anel::after,.v36a-orbe img{animation:none!important}}
+
