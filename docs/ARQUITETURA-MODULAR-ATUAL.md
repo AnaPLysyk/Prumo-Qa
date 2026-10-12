@@ -80,3 +80,9 @@ A função `backend/conexoes/integracoes/lerDetalheDoServico.ts` encaminha cada 
 - **GitHub:** `consultarArquivosGithub.ts`, `consultarWorkflowsGithub.ts`, `consultarJobsGithub.ts`, `consultarArtefatosGithub.ts`, `consultarRevisoesGithub.ts` e `consultarCommitGithub.ts`.
 
 As definições comuns estão em `backend/conexoes/tipos/ParametrosConsulta.ts` e `ResultadoConsulta.ts`. A mudança precisa passar no CI Windows antes de ser considerada validada.
+
+## Agentes — composição do chat
+
+O arquivo `backend/agentes/chat/conversar.ts` mantém o percurso principal da pergunta. Ele agora chama `montarResposta.ts` para montar uma resposta com fontes e segredos mascarados e `juntarConhecimentos.ts` para acrescentar conhecimentos aprovados e o indicador de Cérebro. Essas ações continuam locais e não autorizam automaticamente chamadas para IA externa.
+
+A consulta ao provedor externo e a execução de validações continuam sendo funções longas a revisar separadamente, com testes de autorização e regressão antes do merge.

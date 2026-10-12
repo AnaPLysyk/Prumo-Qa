@@ -87,7 +87,9 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `intencaoDeAprender.ts` | Reconhece pedidos como "lembre que..." e registra um conhecimento. |
 | `intencaoDePerfil.ts` | Reconhece quando a pessoa diz como quer ser chamada ou qual é o papel dela, e salva. |
 | `intencaoDeSaber.ts` | Reconhece perguntas como "o que você sabe?" e lista os conhecimentos do agente. |
+| `juntarConhecimentos.ts` | Junta conhecimentos aprovados à resposta local e registra suas fontes sem duplicar fatos. |
 | `montarPrompt.ts` | Monta o texto enviado ao Claude/Codex: persona, agente, pergunta, fatos locais e regras de segurança. |
+| `montarResposta.ts` | Monta a resposta de um agente com fontes, ações e segredos mascarados. |
 | `numeroDoFato.ts` | Lê um número dos fatos coletados (ex.: falhas=3). |
 | `numeroDoTexto.ts` | Gera um número fixo a partir de um texto, para variar a saudação sem sorteio. |
 | `palavrasDaPergunta.ts` | Separa as palavras de uma pergunta já sem acentos. |
