@@ -40,6 +40,28 @@
         "app/renderer/telas/rastreabilidade/fluxos-fonte/33-declararVinculo.parte.js",
         "app/renderer/telas/compartilhado/fluxos-fonte/34-exporFuncoesDasTelas.parte.js"
       ]
+    },
+    {
+      "destino": "app/renderer/testes-v40.js",
+      "origens": [
+        "app/renderer/telas/testes/avancados-fonte/00-abrirBundleTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/01-obterContextoTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/02-definirTiposDeTeste.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/03-carregarFontesTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/04-relacionarCasoQase.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/05-montarModeloDeCasos.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/06-interpretarSituacaoCaso.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/07-definirAbasTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/08-mostrarTestesCodigoQase.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/09-mostrarVisaoGeralTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/10-abrirArquivoTeste.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/11-montarArvoreArquivosTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/12-mostrarCodigoDoTeste.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/13-mostrarCodigoGithub.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/14-mostrarAgentesNoCodigo.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/15-mostrarCodigoQueCobreCaso.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/16-exporOperacoesTestes.parte.js"
+      ]
     }
   ]
 }
