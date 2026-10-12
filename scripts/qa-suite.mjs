@@ -13,7 +13,7 @@ import { spec } from 'node:test/reporters';
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 process.chdir(repo);
 const grupo = process.env.PRUMO_QA_GRUPO ?? '';
-const todos = fs.readdirSync('testes').filter((n) => n.endsWith('.test.mjs')).sort();
+const todos = fs.readdirSync('testes', { recursive: true }).map(String).filter((n) => n.endsWith('.test.mjs')).map((n) => n.replaceAll('\\', '/')).sort();
 const abreJanela = (n) => /janela\.mjs|_electron/.test(fs.readFileSync(path.join('testes', n), 'utf8'));
 const janela = todos.filter(abreJanela);
 const grupos = { unidade: todos.filter((n) => !abreJanela(n)) };

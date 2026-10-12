@@ -85,7 +85,7 @@ test('backend: cada função tem nome único (procurar pelo nome leva a um só a
 });
 
 test('backend: cada canal da janela (IPC) é atendido por um arquivo api/ com o nome do canal', async () => {
-  const { esquemasIpc } = await import('../dist/aplicativo/api/catalogoDeContratos.js');
+  const { esquemasIpc } = await import('../../dist/aplicativo/api/catalogoDeContratos.js');
   const nomeDoArquivo = (c) => { const [p, acao] = c.split(':'); return p + acao[0].toUpperCase() + acao.slice(1).replace('politica', 'Politica'); };
   const apis = new Set(arquivos.filter((a) => a.includes('/api/')).map((a) => path.basename(a, '.ts')));
   const problemas = Object.keys(esquemasIpc).filter((c) => !apis.has(nomeDoArquivo(c))).map((c) => `canal ${c} sem arquivo ${nomeDoArquivo(c)}.ts numa pasta api/`);
@@ -93,7 +93,7 @@ test('backend: cada canal da janela (IPC) é atendido por um arquivo api/ com o 
 });
 
 test('backend: o LEIA-ME de cada tela está igual ao código (rode npm run leia-me)', async () => {
-  const { gerarLeiaMe } = await import('../scripts/gerar-leia-me-backend.mjs');
+  const { gerarLeiaMe } = await import('../../scripts/gerar-leia-me-backend.mjs');
   const problemas = [];
   for (const [arq, texto] of gerarLeiaMe()) {
     if (texto.includes('(sem explicação)')) problemas.push(`${arq}: pasta sem explicação em scripts/gerar-leia-me-backend.mjs`);
