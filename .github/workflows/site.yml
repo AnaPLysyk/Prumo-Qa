@@ -49,8 +49,9 @@ jobs:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
           if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
-            echo "::warning::Segredo RENDER_DEPLOY_HOOK_URL não configurado: o site foi gerado e conferido, mas NÃO foi publicado no Render."
-            exit 0
+            # Não esconde falha: sem o segredo o site NÃO foi publicado, então o fluxo fica vermelho.
+            echo "::error::Segredo RENDER_DEPLOY_HOOK_URL não configurado: o site foi gerado e conferido, mas NÃO foi publicado no Render. Configure-o (docs/RELEASE.md) ou use Manual Deploy no Render."
+            exit 1
           fi
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$RENDER_DEPLOY_HOOK_URL")
           echo "Render respondeu HTTP $code"

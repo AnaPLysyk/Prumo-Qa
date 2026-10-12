@@ -41,6 +41,10 @@ git push origin vX.Y.Z
 
 Depois disso, o aplicativo instalado (2.10.1 em diante) avisa sozinho: ao abrir e a cada 6 horas consulta a release mais recente e, uma vez por versão, acende o sino e mostra uma notificação do Windows que leva a Ajuda › Atualizações. Quem desligou o aviso continua podendo verificar pelo botão.
 
+## Pré-requisito: publicação do site
+
+O fluxo do site publica no Render pelo **Deploy Hook**, guardado no segredo `RENDER_DEPLOY_HOOK_URL` do repositório (Render › `prumo-qa-docs` › Settings › Deploy Hook; GitHub › Settings › Secrets and variables › Actions). Sem ele o fluxo fica vermelho e o site não muda; enquanto isso, publique pelo Render em Manual Deploy › Deploy latest commit.
+
 ## Conferência final
 
 - `https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/vX.Y.Z`: instalador e `.sha256`.
