@@ -1,6 +1,6 @@
 /** Canal suporte:chamado: Abrir a página oficial de um chamado para ler ou responder pelo GitHub. */
 import { dialog, shell } from 'electron';
-import { repositorio } from '../../ajuda/tipos/versao.js';
+import { repositorio } from '../../ajuda/tipos/versoes.js';
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 
 export const suporteChamado: TratadorDoCanal<'suporte:chamado'> = async (a,janela) => {

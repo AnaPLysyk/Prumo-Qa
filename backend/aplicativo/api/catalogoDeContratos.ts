@@ -14,8 +14,7 @@ import { conteudoSchema, estados, tipos } from '../../contextos/tipos/contexto.j
 import { filtroExecucoes } from '../../execucoes/tipos/historicoDeExecucoes.js';
 import { associacaoSchema, dadosEspaco, identidadeRecurso, servicoSchema } from '../../projetos/tipos/espacos.js';
 import { filtroSchema } from '../../projetos/tipos/painel.js';
-import { numeroChamado } from '../../suporte/tipos/chamado.js';
-import { solicitacaoSchema } from '../../suporte/tipos/suporte.js';
+import { numeroChamado, solicitacaoSchema } from '../../suporte/tipos/suporte.js';
 import { esquemaCaso } from '../../testes/tipos/escritaQase.js';
 
 /**

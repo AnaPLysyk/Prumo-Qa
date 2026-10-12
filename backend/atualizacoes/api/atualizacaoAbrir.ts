@@ -1,6 +1,6 @@
 /** Canal atualizacao:abrir: Abrir no navegador a página oficial da release encontrada. */
 import { dialog, shell } from 'electron';
-import { repositorio } from '../../ajuda/tipos/versao.js';
+import { repositorio } from '../../ajuda/tipos/versoes.js';
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { estadoDoAplicativo } from '../../aplicativo/estadoDoAplicativo.js';
 

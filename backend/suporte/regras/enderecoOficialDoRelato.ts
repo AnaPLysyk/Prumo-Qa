@@ -1,5 +1,5 @@
 /** Confere que o endereço é exatamente o formulário oficial de issues do Prumo no GitHub. */
-import { repositorio } from '../../ajuda/tipos/versao.js';
+import { repositorio } from '../../ajuda/tipos/versoes.js';
 
 /** Validação do endereço antes de abrir: só o formulário oficial do repositório, em https. */
 export function enderecoOficialDoRelato(url: string) {

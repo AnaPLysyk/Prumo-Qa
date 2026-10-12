@@ -92,3 +92,73 @@ npm run app
 ```
 
 Não fazer merge desta PR antes de conferir o comportamento das telas, o contrato IPC, o MCP e o instalador do Windows.
+
+## Suporte — como um relato chega ao GitHub
+
+```text
+app/renderer/telas/suporte/mostrarSuporte.js      mostra campos e revisão
+  ↓ api.suportePreparar
+app/preload.cjs → src/contratos.ts → src/desktop/main.ts
+  ↓ src/suporte.ts (entrada de compatibilidade)
+src/modulos/suporte/
+  definirSolicitacao.ts                           valida os campos
+  revisarPrivacidadeRelato.ts                    verifica segredos e privacidade
+  montarTextoRelato.ts                           monta a prévia em Markdown
+  gerarLinkGithubRelato.ts                       gera o link oficial
+  prepararRelato.ts                              devolve prévia sem enviar
+```
+
+## Configurações, Agentes e Ajuda
+
+```text
+src/preferencias.ts                                entrada de compatibilidade
+  ↓ src/modulos/configuracoes/                     tipo, tema, idioma e armazenamento
+  ↓ src/modulos/agentes/autorizarDelegacaoIa.ts    permissão de delegar à IA
+  ↓ src/modulos/ajuda/                             aviso e reconhecimento de versão
+```
+
+A delegação à IA só é autorizada depois de confirmação no processo principal. A gravação continua local; ainda não existe cadastro, login ou banco de usuários nesta branch.
+
+## Acompanhar um chamado de Suporte
+
+O botão Consultar chamado da tela Suporte percorre a ponte `src/chamados.ts` e os três módulos `src/modulos/suporte/definirFormatoChamado.ts`, `buscarDadosDoChamado.ts` e `consultarChamadoGithub.ts`. Nenhuma credencial é enviada à consulta pública do GitHub. O arquivo de definição de status continua sendo `app/suporte-status.json`.
+
+## Organização por tela: Início, Agendamentos, Execuções e integrações
+
+Agora `app/renderer/index.html` carrega os arquivos de interface na mesma ordem funcional em que os scripts grandes eram executados. Cada pasta tem um `LEIA-ME.md` curto. A divisão não altera os contratos IPC nem cria HTTP novo.
+
+```text
+app/renderer/telas/
+├── inicio/mostrarInicio.js                    inicia o painel
+├── agendamentos/
+│   ├── mostrarAgendamentos.js                  mostra rotinas
+│   ├── formularios/montarFormularioRotina.js   campos de criar/editar
+│   ├── cartoes/montarCartaoRotina.js           cada rotina em cartão
+│   ├── permissoes/mostrarPermissoesRotina.js  permissões de execução
+│   └── datas/interpretarHorarios.js            datas e fusos
+├── execucoes/mostrarExecucoes.js               histórico e detalhes
+├── metricas/mostrarMetricas.js                 indicadores
+├── tickets/mostrarOperacoesJira.js            ações de ticket
+├── testes/
+│   ├── formularios/montarFormularioProposta.js
+│   ├── cartoes/montarCartaoProposta.js
+│   ├── mostrarCatalogoCodigo.js
+│   └── mostrarTestesComSubabas.js
+├── runs/mostrarRunsQase.js                     runs Qase
+├── rastreabilidade/mostrarVinculos.js          vínculos declarados
+├── conexoes/mostrarEscritaExterna.js           autorizações por serviço
+├── agentes/mostrarAgentesIntegrados.js         recursos do painel Agentes
+└── configuracoes/controlesDaJanela.js         menu, tema e idioma
+```
+
+Os arquivos `app/renderer/agenda.js` e `app/renderer/integracoes.js` agora são marcadores de transição e **não são carregados** pelo `index.html`. As implementações de apresentação permanecem em JavaScript clássico, com a ordem dos scripts explícita e funções globais acessíveis entre eles. A futura consolidação definitiva de `frontend/` e `backend/` ainda depende de adaptar build, empacotamento e demais arquivos.
+
+## Fluxos e Testes avançados: organização das funções sem mudar a janela
+
+As implementações grandes v40 usam funções no mesmo escopo. Para manter o código executado exatamente igual durante a migração, agora existem arquivos-fonte `.parte.js` por ação em `app/renderer/telas/<nome-da-tela>/fluxos-fonte/` e `app/renderer/telas/testes/avancados-fonte/`.
+
+Abra a pasta da tela, escolha o arquivo pelo nome da função e leia a frase inicial. Para alterar uma ação, edite **a parte-fonte** e depois rode `node scripts/gerar-telas-v40.mjs`. Não edite diretamente `fluxos-v40.js` ou `testes-v40.js`, pois agora eles são arquivos gerados que o Electron carrega. A geração não substitui testes de comportamento.
+
+Os testes em `testes/arquitetura-telas.test.mjs` comprovam que a união das partes reproduz integralmente os arquivos executados e que o `index.html` carrega apenas os bundles na ordem correta. Use `node scripts/gerar-telas-v40.mjs --check` para conferir a igualdade sem escrever arquivos.
+
+**Atenção:** `frontend/` e `backend/` continuam como organização futura. As novas telas de login e administração permanecem na documentação Proposta; não aparecem na árvore atual de código.

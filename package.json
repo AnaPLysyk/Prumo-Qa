@@ -21,7 +21,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && node scripts/gerar-status.mjs && node scripts/build-broker.mjs",
+    "build": "node scripts/gerar-telas-v40.mjs && tsc && node scripts/gerar-status.mjs && node scripts/build-broker.mjs",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --require ./testes/conhecimento-hook.cjs --experimental-test-module-mocks --test --test-concurrency=1 testes/*.test.mjs",
     "qa": "node dist/cli.js",

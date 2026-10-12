@@ -1,10 +1,6 @@
-/** Formato do histórico de versões (app/versoes.json) e o repositório oficial. */
+/** Formato do histórico de versões (app/versoes.json), o padrão de número de versão e o repositório oficial. */
 import { z } from 'zod';
 
-/**
- * Histórico de versões: uma fonte única (app/versoes.json) alimenta a tela Ajuda › Versões, as notas de release
- * (scripts/notas-versao.mjs) e a conferência com package.json/tag. Sem rede; funciona offline.
- */
 export const repositorio = 'AnaPLysyk/Prumo-Qa';
 
 export const semver = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;

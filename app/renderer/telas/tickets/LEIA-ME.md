@@ -1,11 +1,9 @@
-# Tickets — onde encontrar cada ação
+# Tickets
 
-**O que essa tela faz:** Consulta tickets e mostra detalhes retornados pelo Jira.
+**Para que serve esta tela/pasta:** Mostra tickets do Jira e as operações de escrita autorizadas.
 
-**Arquivos desta pasta:** mostrarTickets.js.
+**Onde encontrar os arquivos:** mostrarTickets.js; mostrarOperacoesJira.js.
 
-**Como conversa com o sistema:** api.servicoConsultar via telas/compartilhado/consultarServicoRemoto.js → `app/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
+**Atenção:** O backend e o processo principal precisam autorizar qualquer escrita remota.
 
-**Quem executa a lógica:** `src/leiturasServicos.ts e src/operacoesExternas.ts (ainda não migrados)`.
-
-**Estado:** esta é a parte da tela já separada. Outros arquivos do renderer (como `integracoes.js`, `fluxos-v40.js` e `interfaces-v36.js`) ainda podem complementar ou substituir ações. Não considerar esta pasta a implementação completa até concluir a migração.
+**Como funciona:** a interface chama operações permitidas de `app/preload.cjs`; `src/contratos.ts` valida entradas e `src/desktop/main.ts` encaminha ao backend. Ainda são canais IPC, não endpoints HTTP.

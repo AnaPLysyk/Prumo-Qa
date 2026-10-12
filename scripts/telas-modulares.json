@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "bundles": [
+    {
+      "destino": "app/renderer/fluxos-v40.js",
+      "origens": [
+        "app/renderer/telas/compartilhado/fluxos-fonte/00-iniciarBundle.parte.js",
+        "app/renderer/telas/compartilhado/fluxos-fonte/01-iniciarContextoDasTelas.parte.js",
+        "app/renderer/telas/compartilhado/fluxos-fonte/02-consultarRelacoesDoProjeto.parte.js",
+        "app/renderer/telas/tickets/fluxos-fonte/03-descobrirTiposDeTicket.parte.js",
+        "app/renderer/telas/tickets/fluxos-fonte/04-mostrarTicketsAvancados.parte.js",
+        "app/renderer/telas/tickets/fluxos-fonte/05-mostrarBuscaAvancada.parte.js",
+        "app/renderer/telas/tickets/fluxos-fonte/06-abrirDetalhesTicket.parte.js",
+        "app/renderer/telas/tickets/fluxos-fonte/07-editarTicket.parte.js",
+        "app/renderer/telas/tickets/fluxos-fonte/08-criarTicket.parte.js",
+        "app/renderer/telas/tickets/fluxos-fonte/09-criarDefeitoTicket.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/10-definirTipoDeCaso.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/11-abrirCasoQase.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/12-editarCasoQase.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/13-carregarCasosQase.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/14-mostrarTestesAvancados.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/15-mostrarBuscaCasos.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/16-abrirNovaProposta.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/17-mostrarCasosQase.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/18-criarSuiteQase.parte.js",
+        "app/renderer/telas/testes/fluxos-fonte/19-mostrarSuitesQase.parte.js",
+        "app/renderer/telas/runs/fluxos-fonte/20-criarPlanoQase.parte.js",
+        "app/renderer/telas/runs/fluxos-fonte/21-mostrarPlanosQase.parte.js",
+        "app/renderer/telas/runs/fluxos-fonte/22-abrirPlanoQase.parte.js",
+        "app/renderer/telas/runs/fluxos-fonte/23-calcularEstadoRun.parte.js",
+        "app/renderer/telas/runs/fluxos-fonte/24-mostrarRunsDetalhadas.parte.js",
+        "app/renderer/telas/runs/fluxos-fonte/25-prepararRun.parte.js",
+        "app/renderer/telas/runs/fluxos-fonte/26-abrirRunLocal.parte.js",
+        "app/renderer/telas/runs/fluxos-fonte/27-abrirRunQase.parte.js",
+        "app/renderer/telas/rastreabilidade/fluxos-fonte/28-mostrarRastreabilidadeAvancada.parte.js",
+        "app/renderer/telas/rastreabilidade/fluxos-fonte/29-desenharGrafoVinculos.parte.js",
+        "app/renderer/telas/rastreabilidade/fluxos-fonte/30-identificarNoGrafo.parte.js",
+        "app/renderer/telas/rastreabilidade/fluxos-fonte/31-montarTrilha.parte.js",
+        "app/renderer/telas/rastreabilidade/fluxos-fonte/32-mostrarRelacoes.parte.js",
+        "app/renderer/telas/rastreabilidade/fluxos-fonte/33-declararVinculo.parte.js",
+        "app/renderer/telas/compartilhado/fluxos-fonte/34-exporFuncoesDasTelas.parte.js"
+      ]
+    },
+    {
+      "destino": "app/renderer/testes-v40.js",
+      "origens": [
+        "app/renderer/telas/testes/avancados-fonte/00-abrirBundleTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/01-obterContextoTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/02-definirTiposDeTeste.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/03-carregarFontesTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/04-relacionarCasoQase.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/05-montarModeloDeCasos.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/06-interpretarSituacaoCaso.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/07-definirAbasTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/08-mostrarTestesCodigoQase.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/09-mostrarVisaoGeralTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/10-abrirArquivoTeste.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/11-montarArvoreArquivosTestes.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/12-mostrarCodigoDoTeste.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/13-mostrarCodigoGithub.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/14-mostrarAgentesNoCodigo.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/15-mostrarCodigoQueCobreCaso.parte.js",
+        "app/renderer/telas/testes/avancados-fonte/16-exporOperacoesTestes.parte.js"
+      ]
+    }
+  ]
+}

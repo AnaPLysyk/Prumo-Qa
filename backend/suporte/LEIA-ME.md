@@ -22,6 +22,7 @@ Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereç
 
 | Arquivo | O que faz |
 | --- | --- |
+| `buscarDadosDoChamado.ts` | Busca no GitHub os dados públicos de uma issue, com limite de resposta, sem credencial nem redirecionamento. |
 | `consultarChamado.ts` | Consulta no GitHub, a pedido, o estado de uma issue oficial do Prumo (rótulos e eventos), sem credencial. |
 
 ## regras/
@@ -45,5 +46,4 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 
 | Arquivo | O que faz |
 | --- | --- |
-| `chamado.ts` | Formato de uma issue e de seus eventos consultados no GitHub. |
-| `suporte.ts` | Categorias, modelos e limites do relato de suporte e o formato da solicitação. |
+| `suporte.ts` | Categorias, modelos e limites do relato de suporte, o formato da solicitação e o de uma issue consultada no GitHub. |

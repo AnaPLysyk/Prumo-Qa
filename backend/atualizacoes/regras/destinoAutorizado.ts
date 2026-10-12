@@ -1,5 +1,5 @@
 /** Confere que a consulta vai só ao endereço fixo das releases do Prumo (ou ao servidor local de teste). */
-import { repositorio } from '../../ajuda/tipos/versao.js';
+import { repositorio } from '../../ajuda/tipos/versoes.js';
 
 /** Destino autorizado: fixo. Em desenvolvimento, testes podem usar um servidor em 127.0.0.1 (permitirLocal). */
 export function destinoAutorizado(url: string, permitirLocal = false): boolean {

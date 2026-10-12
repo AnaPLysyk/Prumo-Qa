@@ -1,5 +1,5 @@
 /** Confere que a versão instalada consta no histórico. */
-import { Versao } from '../tipos/versao.js';
+import { Versao } from '../tipos/versoes.js';
 
 /** A versão instalada precisa existir no histórico (package.json, histórico e tag devem concordar). */
 export function conferirInstalada(versoes: Versao[], instalada: string) {

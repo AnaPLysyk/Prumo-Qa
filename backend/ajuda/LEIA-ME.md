@@ -41,7 +41,7 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | Arquivo | O que faz |
 | --- | --- |
 | `privacidade.ts` | Textos de privacidade (retenção, o que não é transmitido, limites) e as categorias da pasta de dados. |
-| `versao.ts` | Formato do histórico de versões (app/versoes.json) e o repositório oficial. |
+| `versoes.ts` | Formato do histórico de versões (app/versoes.json), o padrão de número de versão e o repositório oficial. |
 
 ## versoes/
 

@@ -1,6 +1,6 @@
 /** Canal suporte:abrir: Abrir o formulário oficial de GitHub Issues já preenchido, depois de revisado e confirmado. */
 import { dialog, shell } from 'electron';
-import { repositorio } from '../../ajuda/tipos/versao.js';
+import { repositorio } from '../../ajuda/tipos/versoes.js';
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { enderecoOficialDoRelato } from '../regras/enderecoOficialDoRelato.js';
 import { prepararRelatoDaJanela } from '../regras/prepararRelatoDaJanela.js';

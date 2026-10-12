@@ -1,5 +1,5 @@
 /** Confere o histórico de versões: ordem decrescente, sem repetição, datas e campos obrigatórios. */
-import { Versao, versoesSchema } from '../tipos/versao.js';
+import { Versao, versoesSchema } from '../tipos/versoes.js';
 import { compararVersoes } from './compararVersoes.js';
 import { enderecoDaVersao } from './enderecoDaVersao.js';
 

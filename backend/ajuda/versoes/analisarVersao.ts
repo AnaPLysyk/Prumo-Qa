@@ -1,5 +1,5 @@
 /** Lê uma versão no formato 2.10.2 (aceita "v" na frente). */
-import { semver } from '../tipos/versao.js';
+import { semver } from '../tipos/versoes.js';
 
 /** [maior, menor, correção] ou null quando não é uma versão semântica estrita (sem sufixos). */
 export function analisarVersao(v: string): [number, number, number] | null {

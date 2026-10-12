@@ -1,5 +1,5 @@
 /** Escreve as notas de uma versão em Markdown (usadas na release do GitHub). */
-import { Versao } from '../tipos/versao.js';
+import { Versao } from '../tipos/versoes.js';
 
 /** Notas de release geradas da mesma fonte, para o GitHub Releases. */
 export function notasDaVersao(v: Versao): string {

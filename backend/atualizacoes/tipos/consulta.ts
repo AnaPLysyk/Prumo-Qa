@@ -1,6 +1,6 @@
 /** Endereço fixo da consulta de versão, formato da resposta do GitHub e do resultado. */
 import { z } from 'zod';
-import { repositorio } from '../../ajuda/tipos/versao.js';
+import { repositorio } from '../../ajuda/tipos/versoes.js';
 
 /**
  * Verificação MANUAL de atualização. Só consulta a release oficial; nunca baixa nem executa instalador.

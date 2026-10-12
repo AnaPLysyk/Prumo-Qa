@@ -1,6 +1,6 @@
 /** Lê e valida o histórico de versões (app/versoes.json). */
 import fs from 'node:fs';
-import { Versao } from '../tipos/versao.js';
+import { Versao } from '../tipos/versoes.js';
 import { validarVersoes } from './validarVersoes.js';
 
 export function carregarVersoes(arquivo: string): Versao[] {

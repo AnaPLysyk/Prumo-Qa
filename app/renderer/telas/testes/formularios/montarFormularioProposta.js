@@ -1,0 +1,17 @@
+'use strict';
+/** Monta o formulário de criação e edição de propostas de teste. */
+const passoRow = (p = {}) => { const a = h('input', { class: 'passo-acao', placeholder: 'Ação', maxlength: 2000, value: p.acao || '' }); const x = h('input', { class: 'passo-esperado', placeholder: 'Resultado esperado', maxlength: 2000, value: p.esperado || '' }); return h('div', { class: 'passo' }, a, x, botao('Remover passo', async function () { }, undefined)); };
+function formularioProposta(e, existente, aoSalvar) {
+  const d = existente?.dados || {}; const titulo = campoPlataforma('Título do caso', { id: 'pr-titulo', maxlength: 255, value: d.titulo || '' }); const desc = campoTexto('Descrição', 'pr-descricao', { value: d.descricao || '', rows: 3 }); const pre = campoTexto('Pré-condições', 'pr-pre', { value: d.preCondicoes || '', rows: 2 });
+  const passos = h('div', { id: 'pr-passos' }); const novoPasso = (p) => { const l = passoRow(p); l.querySelector('button').onclick = () => l.remove(); passos.append(l); }; for (const p of d.passos?.length ? d.passos : [{}]) novoPasso(p);
+  const suite = campoPlataforma('ID da suite no Qase (opcional)', { id: 'pr-suite', type: 'number', value: d.suiteId || '' }); const prio = campoPlataforma('Prioridade (ID do Qase, opcional)', { id: 'pr-prioridade', type: 'number', value: d.prioridade ?? '' });
+  const auto = h('select', { id: 'pr-automacao' }, [['manual', 'Manual'], ['a-automatizar', 'Manual, a automatizar'], ['automatizado', 'Automatizado']].map(([v, t]) => h('option', { value: v, selected: v === (d.automacao || 'manual') }, t))); const ticket = campoPlataforma('Ticket Jira de origem (opcional)', { id: 'pr-ticket', value: d.ticket || '', maxlength: 40 });
+  const req = campoPlataforma('Requisito que o caso cobre', { id: 'pr-requisito', maxlength: 500, value: existente?.requisito || '' }); const risco = campoPlataforma('Risco', { id: 'pr-risco', maxlength: 300, value: existente?.risco || '' }); const saida = h('div', { id: 'pr-saida', role: 'alert' });
+  return h('div', { class: 'formulario', id: 'pr-form' }, h('h2', {}, existente ? 'Editar proposta de caso' : 'Nova proposta de caso'), titulo.no, desc.no, pre.no, h('div', { class: 'campo' }, h('span', {}, 'Passos'), passos, botao('Adicionar passo', () => novoPasso({}), 'pr-add-passo')), h('label', { class: 'campo' }, 'Tipo de automação', auto), suite.no, prio.no, ticket.no, req.no, risco.no, saida,
+    botao(existente ? 'Salvar alterações' : 'Salvar rascunho', async () => {
+      const dados = { titulo: titulo.input.value, descricao: desc.input.value, preCondicoes: pre.input.value, passos: [...passos.querySelectorAll('.passo')].map(l => ({ acao: l.querySelector('.passo-acao').value, esperado: l.querySelector('.passo-esperado').value })).filter(p => p.acao.trim()), automacao: auto.value };
+      if (suite.input.value) dados.suiteId = Number(suite.input.value); if (prio.input.value !== '') dados.prioridade = Number(prio.input.value); if (ticket.input.value.trim()) dados.ticket = ticket.input.value.trim().toUpperCase();
+      const r = await (existente ? api.propostaEditar(existente.id, dados, req.input.value, risco.input.value) : api.propostaCriar(e.id, 'caso', dados, req.input.value, risco.input.value));
+      if (!r.ok) { saida.replaceChildren(h('div', { class: 'nota erro' }, r.error)); return; } avisar('Proposta salva como rascunho. Nada foi enviado ao Qase.'); aoSalvar();
+    }, 'pr-salvar'), ' ', botao('Cancelar', aoSalvar));
+}

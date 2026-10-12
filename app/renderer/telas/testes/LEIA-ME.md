@@ -1,11 +1,9 @@
-# Testes — onde encontrar cada ação
+# Testes
 
-**O que essa tela faz:** Consulta casos e planos do Qase na interface.
+**Para que serve esta tela/pasta:** Combina catálogo do repositório, casos Qase, propostas, automações e runs.
 
-**Arquivos desta pasta:** mostrarTestesRemotos.js e classificarCasoQase.js.
+**Onde encontrar os arquivos:** mostrarTestesRemotos.js; guardarTelaTestesAnterior.js; formularios/montarFormularioProposta.js; cartoes/montarCartaoProposta.js; mostrarPropostasTeste.js; componentes/organizarSubabasTestes.js; mostrarCatalogoCodigo.js; mostrarTestesComSubabas.js; classificarCasoQase.js.
 
-**Como conversa com o sistema:** api.servicoConsultar via telas/compartilhado/consultarServicoRemoto.js → `app/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
+**Atenção:** Outras implementações aprovadas continuam em testes-v40.js e fluxos-v40.js; estas pastas ainda não são exclusivas.
 
-**Quem executa a lógica:** `src/catalogoTestes.ts e src/fluxoQase.ts (ainda não migrados)`.
-
-**Estado:** esta é a parte da tela já separada. Outros arquivos do renderer (como `integracoes.js`, `fluxos-v40.js` e `interfaces-v36.js`) ainda podem complementar ou substituir ações. Não considerar esta pasta a implementação completa até concluir a migração.
+**Como funciona:** a interface chama operações permitidas de `app/preload.cjs`; `src/contratos.ts` valida entradas e `src/desktop/main.ts` encaminha ao backend. Ainda são canais IPC, não endpoints HTTP.
