@@ -80,7 +80,7 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `aplicarEstilo.ts` | Ajusta a resposta ao estilo escolhido (amigável, direto ou técnico). |
 | `argumentosDoProvedorDeIa.ts` | Monta os argumentos do CLI do Claude ou do Codex com tudo bloqueado (sem ferramentas, sem edição, só leitura). |
 | `classificarFalha.ts` | Classifica o texto de uma falha de teste: automação, ambiente, produto ou inconclusiva, com o motivo. |
-| `consultarIaExterna.ts` | Consulta Claude ou Codex somente após permissão e retorna resposta local se houver falha. |
+| `consultarIaExterna.ts` | Usa Claude ou Codex somente após autorização; retorna ao chat local quando faltar permissão ou a IA falhar. |
 | `conversar.ts` | Atende uma pergunta do chat: entende intenções, escolhe o agente, responde localmente e, se autorizado, consulta Claude ou Codex. |
 | `escolherAgente.ts` | Escolhe o agente que responde: o escolhido pela pessoa, o da conversa anterior ou o de palavras mais parecidas. |
 | `executarCliDeIa.ts` | Executa o CLI do Claude/Codex numa pasta temporária vazia, sem shell, com tempo limite, e apaga a pasta no fim. |
@@ -97,7 +97,7 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `papelNoTexto.ts` | Reconhece no texto o papel da pessoa (QA, dev, PO, analista). |
 | `personalidadeParaIa.ts` | Escreve o bloco de personalidade do agente enviado à IA (tom, foco, papel da pessoa). |
 | `proximosPassosSugeridos.ts` | Sugere as próximas perguntas úteis conforme o agente, os fatos e o papel da pessoa. |
-| `registrarSugestoesDaIa.ts` | Guarda aprendizados da IA como rascunhos e cria ações de aprovação ou descarte. |
+| `registrarSugestoesDaIa.ts` | Guarda aprendizados sugeridos pela IA apenas como rascunhos que exigem aprovação. |
 | `responderComDadosLocais.ts` | Monta a resposta do agente com os dados locais do projeto (sem IA), com fontes e fatos usados. |
 | `responderSobreTeste.ts` | Responde sobre um teste escolhido na tela Testes (tipo, arquivo, agente certo). |
 | `saudacao.ts` | Abre a conversa: cumprimenta pelo nome, resume a situação e pergunta o que falta saber da pessoa. |
