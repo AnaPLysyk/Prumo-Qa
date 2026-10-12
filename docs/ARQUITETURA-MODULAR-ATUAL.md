@@ -86,3 +86,20 @@ As definições comuns estão em `backend/conexoes/tipos/ParametrosConsulta.ts` 
 O arquivo `backend/agentes/chat/conversar.ts` mantém o percurso principal da pergunta. Ele agora chama `montarResposta.ts` para montar uma resposta com fontes e segredos mascarados e `juntarConhecimentos.ts` para acrescentar conhecimentos aprovados e o indicador de Cérebro. Essas ações continuam locais e não autorizam automaticamente chamadas para IA externa.
 
 A consulta ao provedor externo e a execução de validações continuam sendo funções longas a revisar separadamente, com testes de autorização e regressão antes do merge.
+
+## Chat: solicitação externa, resposta e aprovação
+
+No backend dos Agentes, cada etapa do Chat fica próxima da tela correspondente:
+
+```text
+backend/agentes/
+├── chat/
+│   ├── conversar.ts                  organiza a conversa
+│   ├── juntarConhecimentos.ts        acrescenta conhecimentos aprovados
+│   ├── montarResposta.ts             apresenta fontes e resposta sem segredos
+│   ├── consultarIaExterna.ts         verifica autorização antes de chamar Claude/Codex
+│   └── registrarSugestoesDaIa.ts     cria rascunhos que precisam de aprovação
+└── tipos/ContextoDelegacao.ts       explica quais dados chegam à IA externa
+```
+
+O sistema não transforma automaticamente o texto de uma IA em conhecimento aprovado. Falta de autorização, cliente indisponível ou falha da execução retornam ao modo LOCAL. O comportamento continua sujeito aos testes automatizados e ao CI Windows.
