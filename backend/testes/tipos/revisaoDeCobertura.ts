@@ -18,3 +18,12 @@ export const revisaoSchema = z.object({
 }).strict();
 
 export type Revisao = z.infer<typeof revisaoSchema>;
+
+/** Um achado da revisão: tipo (ex.: MISSING_ORACLE), severidade, cenário, fonte, recomendação e evidências. */
+export type AchadoDeCobertura = { type: string; severity: string; scenario?: string; source: string; recommendation: string; evidence: unknown[] };
+
+/** O caderno da revisão, preenchido etapa por etapa: achados, fatos lidos, hipóteses e o que falta. */
+export type AnaliseDeCobertura = {
+  findings: AchadoDeCobertura[]; facts: unknown[]; hypotheses: unknown[]; missing: string[];
+  registrar: (type: string, recommendation: string, scenario?: string, severity?: string) => void;
+};

@@ -92,7 +92,7 @@ Teste de desempenho com o executável oficial do k6, com limites e produção bl
 | `capacidadeDoK6.ts` | Nome da capacidade de um script k6 (k6:<caminho>). |
 | `enderecoLocal.ts` | Diz se um endereço é deste próprio computador (localhost, 127.x, ::1). |
 | `escopoDoK6.ts` | Calcula o escopo exato (hash do script, destino, limites e executável) que a autorização do k6 cobre. |
-| `executarK6.ts` | Executa o teste k6 autorizado, sem shell e com teto de tempo, e grava a evidência. |
+| `executarK6.ts` | Executa o teste k6 autorizado, sem shell e com teto de tempo, e grava a evidência. Três etapas: preparar (conferir e aprovar), rodar com limites e registrar o resultado por limiar. |
 | `localizarK6.ts` | Procura o executável oficial do k6 nas pastas absolutas do PATH. |
 | `metricasDoK6.ts` | Extrai do resumo do k6 as métricas principais (requisições, falhas, tempos). |
 | `validarAlvoDoK6.ts` | Confere o destino do teste k6: http(s), sem senha na URL, só localhost em ambiente local e nunca produção. |
