@@ -117,8 +117,10 @@ export function gerarSite(out=path.join(repo,'site/public')) {
 
   const lista=(title,arr)=>arr.length?`<h3>${title}</h3><ul>${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
   const inst=published.installer;
+  const download=inst?`${repoUrl}/releases/download/v${published.version}/${encodeURIComponent(inst.file)}`:null;
   write('versoes.html','Versões e download',`<h1>Versões e download</h1><p>Última versão publicada registrada: <strong>${esc(published.version)}</strong>. Confira a página oficial antes de baixar.</p>
-  <div class="acoes"><a class="botao primario" href="${esc(published.releaseUrl)}">Abrir release oficial ${esc(published.version)}</a><a class="botao" href="documentacao-03-instalar.html">Como instalar</a></div>
+  <div class="acoes">${download?`<a class="botao primario" href="${esc(download)}">Baixar instalador ${esc(published.version)} (.exe)</a>`:''}<a class="botao" href="${esc(published.releaseUrl)}">Abrir release oficial ${esc(published.version)}</a><a class="botao" href="documentacao-03-instalar.html">Como instalar</a></div>
+  <p class="suave">Este site está hospedado no Render. O instalador é baixado da release oficial do Prumo QA no GitHub.</p>
   ${inst?`<h2>Confira o arquivo</h2><p>Instalador <code>${esc(inst.file)}</code> · SHA-256:</p><p class="hash">${esc(inst.sha256)}</p><p class="suave">No PowerShell: <code>Get-FileHash .\\${esc(inst.file)} -Algorithm SHA256</code>. O resultado deve ser igual ao valor acima e ao arquivo <code>${esc(inst.file)}.sha256</code> da release.</p>`:`<p class="suave">O SHA-256 desta versão está no arquivo <code>.sha256</code> anexado à release.</p>`}
   <p class="limite">O instalador não é assinado. O SHA-256 detecta troca ou corrupção do arquivo; não prova a autoria. Não desative as proteções do Windows. Requisitos: Windows 10 ou 11 de 64 bits.</p>
   <h2>Instalar uma versão sem assinatura</h2><p>As primeiras versões do Prumo não têm assinatura digital, então o Windows avisa antes de executar. Confira o SHA-256 acima e, se for igual ao da release:</p>

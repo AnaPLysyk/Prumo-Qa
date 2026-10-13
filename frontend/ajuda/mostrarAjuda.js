@@ -77,6 +77,7 @@
       resultados.hidden = false; corpo.hidden = true; trilhaNav.hidden = true;
     });
     el.append(DS.cabecalho({ titulo: 'Ajuda', descricao: 'Documentação, versões, integrações técnicas e dados deste computador.' }),
+      h('div', { class: 'ds-barra' }, h('button', { type: 'button', id: 'ajuda-download', onclick: () => chamar(() => api.abrirSite()) }, tr('Baixar instalador no site oficial'))),
       h('div', { class: 'ds-doc ajuda' }, h('div', { class: 'ds-min0' }, h('div', { class: 'ds-barra ds-barra-solta' }, busca.no), trilhaNav, resultados, corpo), h('aside', {}, indice)));
     const alvo = itens.get(estado.ajudaAlvo); estado.ajudaAlvo = null;
     if (alvo) await abrir(alvo); else inicio();

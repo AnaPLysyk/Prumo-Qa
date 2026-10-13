@@ -1,6 +1,7 @@
 'use strict';
 // Traduções do painel de atividades v41; registros (ferramentas, estados, perguntas) não são traduzidos.
 Object.assign(window.PRUMO_EN, {
+  'Baixar instalador no site oficial': 'Download installer from the official site',
   'Clientes, agentes e o worker trabalhando, em tempo real. Só aparecem ligações que os registros deste computador comprovam.': 'Clients, agents and the worker at work, in real time. Only links proven by this computer\'s records are shown.',
   'Clientes → núcleo Prumo': 'Clients → Prumo core', 'Orchestrator → agentes': 'Orchestrator → agents', 'Worker → rotinas': 'Worker → routines',
   '{n} operações registradas': '{n} recorded operations', '{n} conversas': '{n} conversations', '{n} execuções': '{n} runs',
