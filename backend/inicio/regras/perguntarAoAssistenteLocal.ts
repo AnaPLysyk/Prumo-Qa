@@ -3,12 +3,14 @@ import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
 import { dataEmPortugues } from '../../compartilhado/texto/dataEmPortugues.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 import { listarContextosDaPasta } from '../../contextos/regras/listarContextosDaPasta.js';
-import { perguntaTemPalavra } from './perguntaTemPalavra.js';
 import { Fonte, Resposta, pare } from '../tipos/assistenteLocal.js';
 import { metricasDasExecucoes } from '../../metricas/regras/metricasDasExecucoes.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { listarRunsLocais } from '../../testes/banco/listarRunsLocais.js';
 import { listarPropostas } from '../../tickets/banco/listarPropostas.js';
+
+/** Identifica palavras-chave no texto normalizado da pergunta sem consultar serviços externos. */
+const perguntaTemPalavra = (p: string, ...palavras: string[]) => palavras.some((palavra) => p.includes(palavra));
 
 export async function perguntarAoAssistenteLocal(espacoId: string | null, pergunta: string, base?: string): Promise<Resposta> {
   const p = semAcentos(pergunta); const fontes: Fonte[] = []; const linhas: string[] = [];

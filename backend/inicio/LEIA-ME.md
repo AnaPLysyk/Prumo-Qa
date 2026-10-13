@@ -21,7 +21,6 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | Arquivo | O que faz |
 | --- | --- |
 | `perguntarAoAssistenteLocal.ts` | Responde uma pergunta do Início com os dados locais do projeto (contextos, propostas, execuções, agenda), sem IA e sem internet. |
-| `perguntaTemPalavra.ts` | Diz se a pergunta contém alguma das palavras-chave. |
 | `situacaoDoProjeto.ts` | Escreve até cinco linhas sobre o que está acontecendo no projeto agora (propostas, runs, execuções, agenda) para o painel do Início. |
 
 ## tipos/

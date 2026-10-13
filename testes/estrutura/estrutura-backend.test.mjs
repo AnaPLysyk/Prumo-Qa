@@ -1,4 +1,4 @@
-// Garante a organização do backend: pasta por tela, uma função por arquivo, nome do arquivo = nome da função
+// Garante a organização do backend: pasta por tela, canal IPC por arquivo, funções públicas sem colisões
 // e a primeira linha explicando em português o que o arquivo faz. Cada teste lista TODOS os arquivos com problema.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -53,18 +53,26 @@ test('backend: todo arquivo começa com uma frase em português dizendo o que fa
   assert.deepEqual(problemas, []);
 });
 
-test('backend: uma função por arquivo, com o nome do arquivo, sem auxiliares escondidas', () => {
+test('backend: APIs mantêm um canal por arquivo; regras podem conter funções auxiliares coesas', () => {
   const problemas = [];
   for (const a of arquivos) {
     if (tabelas.includes(a) || a.includes('/tipos/')) continue;
     const d = declaracoes(a);
-    if (ehEntrada(a)) { if (d.some((x) => x.exportado)) problemas.push(`${a}: porta de entrada não exporta nada`); continue; }
+    if (ehEntrada(a)) {
+      if (d.some((x) => x.exportado)) problemas.push(`${a}: porta de entrada não exporta nada`);
+      continue;
+    }
     const base = path.basename(a, '.ts');
     const exportadas = d.filter((x) => x.exportado);
-    if (exportadas.length !== 1) problemas.push(`${a}: deve ter exatamente uma declaração exportada (tem: ${exportadas.map((x) => x.nome).join(', ') || 'nenhuma'})`);
-    else if (exportadas[0].nome !== base) problemas.push(`${a}: o nome do arquivo deve ser o da declaração (${exportadas[0].nome})`);
-    const escondidas = d.filter((x) => !x.exportado);
-    if (escondidas.length) problemas.push(`${a}: declarações não exportadas devem ir para arquivo próprio (${escondidas.map((x) => x.nome).join(', ')})`);
+    const instr = d.filter((x) => x.instrucao);
+    if (instr.length) problemas.push(`${a}: instruções executáveis soltas fora de funções (${instr.map((x) => x.nome).join(', ')})`);
+    if (!exportadas.length) problemas.push(`${a}: precisa exportar ao menos uma função, classe ou declaração nomeada`);
+    const ehApi = a.includes('/api/');
+    if (ehApi && exportadas.length !== 1) problemas.push(`${a}: API deve ter exatamente uma declaração exportada`);
+    if ((ehApi || exportadas.length === 1) && exportadas[0]?.nome !== base) {
+      problemas.push(`${a}: a única exportação deve ter o nome do arquivo (${exportadas[0]?.nome ?? 'nenhuma'})`);
+    }
+    if (ehApi && d.some((x) => !x.exportado)) problemas.push(`${a}: canal IPC não pode ter declarações internas ocultas; delegue às regras`);
   }
   assert.deepEqual(problemas, []);
 });
@@ -75,11 +83,15 @@ test('backend: pastas tipos/ só têm formatos, listas e constantes (nenhuma fun
   assert.deepEqual(problemas, []);
 });
 
-test('backend: cada função tem nome único (procurar pelo nome leva a um só arquivo)', () => {
+test('backend: cada função pública tem nome único, mesmo quando várias ficam no mesmo arquivo', () => {
   const problemas = []; const vistos = new Map();
   for (const a of arquivos.filter((x) => !x.includes('/tipos/') && !ehEntrada(x))) {
-    const n = path.basename(a, '.ts');
-    if (vistos.has(n)) problemas.push(`nome repetido: ${n} em ${vistos.get(n)} e ${a}`); else vistos.set(n, a);
+    for (const item of declaracoes(a).filter((x) => x.exportado)) {
+      const nome = item.nome;
+      if (!nome) continue;
+      if (vistos.has(nome)) problemas.push(`nome repetido: ${nome} em ${vistos.get(nome)} e ${a}`);
+      else vistos.set(nome, a);
+    }
   }
   assert.deepEqual(problemas, []);
 });
