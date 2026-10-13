@@ -39,6 +39,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `achadoELacuna.ts` | Diz se um tipo de achado é uma lacuna (requisito faltando, cobertura, rastreabilidade...). |
 | `acompanharLogs.ts` | Acompanha o diário ao vivo (prumo logs --follow) até a pessoa interromper. |
 | `apresentarRegistroDoDiario.ts` | Prepara um registro do diário de operações para a tela, com o texto dos achados e "sem término observado" quando a operação não terminou. |
+| `descreverAchados.ts` | Escreve em texto as orientações dos achados de uma operação. |
 | `exportarLogs.ts` | Gera o texto JSON com todos os registros do diário do projeto para salvar em arquivo. |
 | `filtrarRegistrosDoDiario.ts` | Filtra registros do diário por ferramenta, estado e período. |
 | `iniciarAtividade.ts` | Registra o início de uma operação (ferramenta, origem, contagens da entrada) e devolve como registrar o término. |

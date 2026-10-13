@@ -1,8 +1,6 @@
 /** Prepara um registro do diário de operações para a tela, com o texto dos achados e "sem término observado" quando a operação não terminou. */
-import { Evento, orientacoes } from '../tipos/atividade.js';
-
-/** Converte os tipos de achado em uma descrição curta, usando apenas as orientações públicas. */
-const descreverAchados = (e: Evento) => e.summary.types.map(t => `${t.count} × ${orientacoes[t.type]}`).join(' ');
+import { descreverAchados } from './descreverAchados.js';
+import { Evento } from '../tipos/atividade.js';
 
 /** `consolidado`: o último evento da operação; se ainda for o início, nenhum término foi observado. */
 export function apresentarRegistroDoDiario(e: Evento, consolidado = false) {
