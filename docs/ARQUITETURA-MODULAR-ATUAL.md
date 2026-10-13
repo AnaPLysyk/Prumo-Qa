@@ -122,3 +122,7 @@ O fluxo começa em `backend/execucoes/regras/executarValidacao.ts`, que chama `c
 Depois de executar o processo com aprovação, `backend/execucoes/regras/mascararLogsDaExecucao.ts` remove segredos da saída para a interface e para as evidências. `gravarRelatorioRedigido.ts` mantém somente o relatório de casos redigido, substituindo o conteúdo bruto do runner antes do registro da evidência. Ambos são chamados por `executarValidacao.ts` e não podem alterar a aprovação, o comando, o timeout nem a classificação dos resultados.
 
 Os testes de regressão usam pastas temporárias e dados fictícios. `testes/seguranca/regras/logs-e-relatorios-execucao.test.mjs` confirma o mascaramento e a substituição ou exclusão de artefatos brutos. A operação ainda precisa passar no CI Windows.
+
+## Documentação viva dentro do aplicativo
+
+O build gera `app/documentacao/mapa.json` (`ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs`, não versionado) a partir do código desta versão: para cada pasta de `frontend/` e `backend/`, os arquivos com a descrição da primeira linha e as funções, os canais IPC (ponte, arquivo `api/`, funções chamadas) e os testes que importam arquivos daquela tela. A tela **Administração › Documentação viva** (`frontend/administracao/`) mostra esse mapa pelo canal `administracao:mapa` (`backend/administracao/`). O mapa não leva código-fonte nem dados da pessoa. A visão Atual (main) × Proposta (cópia de trabalho) continua disponível para desenvolvimento com `npm run arquitetura`.

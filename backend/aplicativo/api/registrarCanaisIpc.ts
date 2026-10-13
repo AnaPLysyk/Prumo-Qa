@@ -25,6 +25,7 @@ import { conhecimentoEstado } from '../../agentes/api/conhecimentoEstado.js';
 import { conhecimentoListar } from '../../agentes/api/conhecimentoListar.js';
 import { conhecimentoMostrar } from '../../agentes/api/conhecimentoMostrar.js';
 import { conhecimentoVocabulario } from '../../agentes/api/conhecimentoVocabulario.js';
+import { administracaoMapa } from '../../administracao/api/administracaoMapa.js';
 import { skillsCriar } from '../../agentes/api/skillsCriar.js';
 import { skillsDecidir } from '../../agentes/api/skillsDecidir.js';
 import { skillsImportar } from '../../agentes/api/skillsImportar.js';
@@ -221,6 +222,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('conhecimento:vocabulario', conhecimentoVocabulario);
   registrarCanal('conhecimento:esquecer', conhecimentoEsquecer);
   registrarCanal('conhecimento:mostrar', conhecimentoMostrar);
+  registrarCanal('administracao:mapa', administracaoMapa);
   registrarCanal('skills:listar', skillsListar);
   registrarCanal('skills:criar', skillsCriar);
   registrarCanal('skills:decidir', skillsDecidir);

@@ -1,5 +1,6 @@
 /** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado por npm run leia-me; não edite à mão. */
 export const arquivosDosCanais: Record<string, string> = {
+  'administracao:mapa': 'backend/administracao/api/administracaoMapa.ts > lerMapaDoAplicativo',
   'agenda:autorizar': 'backend/agendamentos/api/agendaAutorizar.ts > autorizarRotina, obterRotina, permissoesDaRotina, textoNoIdioma, confirmarNoWindows, idiomaAtual, solicitarAprovacao',
   'agenda:estado': 'backend/agendamentos/api/agendaEstado.ts > desativarRotina, pausarRotina, retomarRotina',
   'agenda:excluir': 'backend/agendamentos/api/agendaExcluir.ts > obterRotina, excluirRotina, textoNoIdioma, confirmarNoWindows, idiomaAtual',

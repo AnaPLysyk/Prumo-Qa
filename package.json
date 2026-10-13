@@ -21,7 +21,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "node ferramentas/arquitetura/dependencias.mjs && node ferramentas/frontend/sincronizar-frontend.mjs && node ferramentas/frontend/gerar-telas-modulares.mjs && tsc && node ferramentas/empacotamento/gerar-status.mjs && node ferramentas/empacotamento/build-broker.mjs",
+    "build": "node ferramentas/arquitetura/dependencias.mjs && node ferramentas/frontend/sincronizar-frontend.mjs && node ferramentas/frontend/gerar-telas-modulares.mjs && tsc && node ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs && node ferramentas/empacotamento/gerar-status.mjs && node ferramentas/empacotamento/build-broker.mjs",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && node --require ./testes/apoio/conhecimento-hook.cjs --experimental-test-module-mocks --test --test-concurrency=1 \"testes/**/*.test.mjs\"",
     "qa": "node dist/cli.js",

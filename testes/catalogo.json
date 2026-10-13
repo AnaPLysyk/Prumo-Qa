@@ -116,6 +116,20 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/e2e/ui/desktop-administracao.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e"
+      ],
+      "funcionalidade": "arquitetura",
+      "motivo": "Camada principal ui. Verifica: Administração › Documentação viva na janela real",
+      "evidencias": [
+        "Administração › Documentação viva: busca por canal abre a tela certa com interface, canais, backend e testes",
+        "../../apoio/janela.mjs"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/e2e/ui/desktop-agenda.test.mjs",
       "camada": "ui",
       "natureza": [
@@ -1187,6 +1201,21 @@
         "detecção por evidência: CONFIRMADO, PROVAVEL, INCERTO e ausente; nome de pasta nunca confirma",
         "../dist/agentes/mcp/contextoCompleto.js",
         "../dist/compartilhado/projeto/carregarProjeto.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/mapa-do-aplicativo.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "arquitetura",
+      "motivo": "Camada principal regra. Verifica: mapa da documentação viva coerente com o catálogo IPC e leitor estrito",
+      "evidencias": [
+        "mapa: cada canal IPC do catálogo aparece uma vez, na tela do seu arquivo api/, e sem código-fonte",
+        "../../../dist/administracao/banco/lerMapaDoAplicativo.js"
       ],
       "perfilReal": false
     }

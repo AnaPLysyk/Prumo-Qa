@@ -13,7 +13,8 @@ import { telas, papeis } from '../documentacao/gerar-leia-me-backend.mjs';
 const raizRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const pastasLidas = /^(frontend|backend|src|app|scripts|ferramentas|site|skills|testes)\//;
 const extensoes = /\.(ts|mjs|cjs|js|html|css|json|md)$/;
-const ignorar = /^(app\/renderer\/vendor\/|app\/ajuda\/|site\/public\/|.*\.min\.js$)/;
+// app/renderer/ e app/documentacao/ são gerados no build: a fonte da interface é frontend/.
+const ignorar = /^(app\/renderer\/|app\/documentacao\/|app\/ajuda\/|site\/public\/|.*\.min\.js$)/;
 const git = (...args) => execFileSync('git', args, { cwd: raizRepo, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
 
 /** Primeira linha de explicação: /** ... *\/ (depois de shebang ou 'use strict') ou o título de um Markdown. */
@@ -21,7 +22,7 @@ export function descricaoDoArquivo(texto, caminho) {
   if (caminho.endsWith('.md')) return /^#\s+(.+)$/m.exec(texto)?.[1]?.trim() ?? null;
   const linhas = texto.split(/\r?\n/).slice(0, 4).filter(l => !l.startsWith('#!') && !/^'use strict';?$/.test(l.trim()));
   const l = linhas[0]?.trim() ?? '';
-  const m = /^\/\*\*\s*(.+?)\s*\*\/$/.exec(l) ?? /^\/\/\s*(.{12,})$/.exec(l) ?? /^<!--\s*(.+?)\s*-->$/.exec(l);
+  const m = /^\/\*\*?\s*(.+?)\s*\*\/$/.exec(l) ??/^\/\/\s*(.{12,})$/.exec(l) ?? /^<!--\s*(.+?)\s*-->$/.exec(l);
   return m ? m[1] : null;
 }
 
@@ -62,7 +63,7 @@ function lerRevisao(ref) {
   return arquivos;
 }
 
-function lerCopiaDeTrabalho() {
+export function lerCopiaDeTrabalho() {
   const arquivos = new Map();
   for (const raiz of ['frontend', 'backend', 'src', 'app', 'scripts', 'ferramentas', 'site', 'skills', 'testes']) {
     const dir = path.join(raizRepo, raiz); if (!fs.existsSync(dir)) continue;
@@ -96,7 +97,7 @@ function fluxosDeUso(arquivos) {
   return fluxos.sort((a, b) => a.canal.localeCompare(b.canal));
 }
 
-function montarInstantaneo(arquivos) {
+export function montarInstantaneo(arquivos) {
   const existe = (c) => arquivos.has(c);
   const recursos = JSON.parse(arquivos.get('frontend/recursos.json') ?? '{"recursos":[]}').recursos;
   const fontesRuntime = new Map(recursos.map(r => [r.destino, r.fonte]));
@@ -112,8 +113,7 @@ function montarInstantaneo(arquivos) {
   const pastas = {};
   for (const [tela, frase] of Object.entries(telas)) { pastas['backend/' + tela] = frase; pastas['frontend/' + tela] = frase; }
   for (const a of lista) { const m = /^backend\/[^/]+\/([^/]+)\/[^/]+$/.exec(a.caminho); if (m && papeis[m[1]]) pastas[path.posix.dirname(a.caminho)] = papeis[m[1]]; }
-  if (arquivos.has('frontend/LEIA-ME.md')) pastas['app/renderer/telas'] = 'Cópia gerada a partir de frontend/; não editar manualmente.';
-  Object.assign(pastas, { frontend: 'O que a pessoa vê: telas e funções da interface, a fonte oficial para o Electron.', backend: 'Tudo o que roda fora da tela: canais da janela, regras, dados deste computador e integrações.', src: 'Código do backend antes da organização por tela.', app: 'A janela: ponte segura (preload), telas, estilos e ajuda.', 'app/renderer': 'O que a pessoa vê: telas, componentes e estilos.', scripts: 'Ferramentas de build, geração de documentos e release.', testes: 'Testes automáticos (unidade, integração, janela real e MCP).' });
+  Object.assign(pastas, { frontend: 'O que a pessoa vê: telas e funções da interface, a fonte oficial para o Electron.', backend: 'Tudo o que roda fora da tela: canais da janela, regras, dados deste computador e integrações.', src: 'Código do backend antes da organização por tela.', app: 'A janela: ponte segura (preload), telas, estilos e ajuda.', 'app/renderer': 'Gerado no build a partir de frontend/; não editar.', scripts: 'Ferramentas de build, geração de documentos e release (até a 2.10.2; depois em ferramentas/).', ferramentas: 'Ferramentas por finalidade: arquitetura, documentação, frontend, empacotamento, release, migração, site, qa, skills e testes.', testes: 'Testes automáticos (unidade, integração, janela real e MCP).' });
   return { arquivos: lista, pastas, fluxos: fluxosDeUso(arquivos) };
 }
 

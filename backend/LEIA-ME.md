@@ -16,6 +16,7 @@ As pastas correspondentes a telas visíveis também existem em `frontend/`; mód
 
 | Pasta | Para que serve |
 | --- | --- |
+| [`administracao/`](administracao/LEIA-ME.md) | Administração: configurações gerais, usuários, permissões, monitoramento e documentação técnica. |
 | [`agendamentos/`](agendamentos/LEIA-ME.md) | Agendamentos: rotinas, fila de trabalhos, worker residente, autorizações prévias e k6. |
 | [`agentes/`](agentes/LEIA-ME.md) | Agentes: chat com agentes, banco de conhecimento, políticas da IA e o servidor MCP. |
 | [`ajuda/`](ajuda/LEIA-ME.md) | Ajuda: documentos, versões, integrações técnicas e privacidade dos dados. |

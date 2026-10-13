@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (123 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (124 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -69,6 +69,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:conhecimento:vocabulario` | `agente` | Consulta local. |
 | `prumo:conhecimento:esquecer` | `agente`, `termo` | Remove o termo do vocabulário. |
 | `prumo:conhecimento:mostrar` | — | Abre o Explorer com o arquivo selecionado; nada é enviado. |
+| `prumo:administracao:mapa` | — | Consulta local de um arquivo do próprio aplicativo, gerado no build; não lê projetos vinculados nem dados da pessoa. |
 | `prumo:skills:listar` | `busca`, `especializacao`, `estados` | Consulta local (cria o banco e sincroniza os trechos que acompanham o aplicativo). |
 | `prumo:skills:criar` | `especializacao`, `texto`, `titulo` | Grava em skills.db com segredos mascarados e sem duplicar; passa a ir para o prompt quando combinar com a pergunta. |
 | `prumo:skills:decidir` | `estado`, `id` | Grava o estado e a data da decisão. Só trechos APROVADOS vão para o prompt. |
@@ -1019,6 +1020,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:administracao:mapa`
+
+- **Tipo:** IPC
+- **Finalidade:** Mostrar a documentação viva desta versão: para cada tela, os arquivos da interface, os canais da janela, o backend (api, regras, banco, integrações, tipos) e os testes.
+- **Origem:** Interface > Administração
+- **Destino:** backend/administracao/api/administracaoMapa.ts > lerMapaDoAplicativo
+- **Entrada:** Nenhuma
+- **Saída:** Mapa por tela com caminhos, descrições, funções e ligações (sem código-fonte)
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local de um arquivo do próprio aplicativo, gerado no build; não lê projetos vinculados nem dados da pessoa.
+- **Arquivos consultados:** app/documentacao/mapa.json (gerado no build)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, ARCHITECTURE_MAP_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Nenhum
 
 ### `prumo:skills:listar`
 

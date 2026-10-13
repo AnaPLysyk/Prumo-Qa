@@ -21,3 +21,5 @@ site/public/
 # Interface do Electron: gerada no build a partir de frontend/ (fonte única). Só a biblioteca de terceiros é versionada.
 app/renderer/*
 !app/renderer/vendor/
+# Mapa da Documentação viva (Administração): gerado no build a partir do código.
+app/documentacao/
