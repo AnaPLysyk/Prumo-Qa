@@ -11,6 +11,7 @@
         "Banco de Skills (skills.db), separado do conhecimento: cada Skill fica em trechos com origem, estado, fonte e licença. Em Agentes › configuração do agente › Skills você vê os trechos, acrescenta um trecho da equipe (já vale) e aprova ou descarta rascunhos; o Cérebro mostra os trechos com as mesmas ações.",
         "Importar pasta de Skill: escolha uma pasta aberta que já está no computador (por exemplo um repositório clonado). Só entra com licença aberta reconhecida (MIT, Apache-2.0, BSD, ISC, 0BSD, Unlicense, CC0, CC-BY, CC-BY-SA), com fonte e licença registradas, como rascunho até você aprovar.",
         "Administração › Documentação viva: para cada tela do menu, os arquivos da interface, os canais da janela, o backend (canais, regras, dados, integrações e tipos) e os testes, gerados do código desta versão; com busca por tela, arquivo, função ou canal. Em Sistema, a versão, o commit do build e a situação real de usuários e permissões.",
+        "Orquestrador observável: quando a pergunta envolve duas ou mais especialidades, o orquestrador consulta cada especialista, um de cada vez, e junta as respostas. Em Agentes › Painel de atividades › Orquestrações recentes aparecem quem participou, a ordem, o tempo de cada etapa, as fontes consultadas e o que falhou, sem gravar a pergunta nem as respostas.",
         "Agentes por profissão: cada especialização mostra profissão, especialidade e a permissão efetiva do projeto, separada da capacidade da especialização.",
         "Tudo da 2.10.2: vincular qualquer pasta de código com contrato proposto e aprovado, atualizar com um clique pela Ajuda › Atualizações e as correções encontradas testando o Prumo pelo próprio Prumo."
       ],
@@ -38,7 +39,7 @@
       ],
       "limitations": [
         "Login, usuários, administração multiusuário e banco central (PostgreSQL) ainda não existem: o Prumo continua local por conta do Windows, e o papel do perfil personaliza respostas, não autoriza nada.",
-        "O Painel de atividades mostra operações e conversas registradas localmente; ainda não é um orquestrador que distribui tarefas em paralelo entre vários agentes.",
+        "A orquestração é local e sequencial: os especialistas consultam os dados deste computador, um de cada vez; distribuir tarefas em paralelo para IAs externas ainda não existe.",
         "Python, Go, Java, .NET, Rust, PHP e Ruby continuam somente leitura: o executor aceita só node e npm.",
         "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou."
       ],
