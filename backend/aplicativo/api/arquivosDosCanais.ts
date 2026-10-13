@@ -12,6 +12,7 @@ export const arquivosDosCanais: Record<string, string> = {
   'agenda:revogarpolitica': 'backend/agendamentos/api/agendaRevogarPolitica.ts > revogarPublicacao',
   'agenda:salvar': 'backend/agendamentos/api/agendaSalvar.ts > criarRotina, editarRotina, validarRotina',
   'agentes:estado': 'backend/agentes/api/agentesEstado.ts > configuracaoDoEspaco, matrizDePoliticas, especializacoes, listarPropostas',
+  'agentes:orquestracoes': 'backend/agentes/api/agentesOrquestracoes.ts > listarOrquestracoes',
   'agentes:salvar': 'backend/agentes/api/agentesSalvar.ts > salvarConfiguracao, textoNoIdioma, confirmarNoWindows, usuarioDoWindows, idiomaAtual',
   'ajuda:documentos': 'backend/ajuda/api/ajudaDocumentos.ts > lerDocumentosDaAjuda, versao, raizDoAplicativo',
   'ajuda:integracoes': 'backend/ajuda/api/ajudaIntegracoes.ts > catalogo',

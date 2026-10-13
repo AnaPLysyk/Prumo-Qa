@@ -9,6 +9,10 @@ import { intencaoDeSaber } from './intencaoDeSaber.js';
 import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { responderComDadosLocais } from './responderComDadosLocais.js';
 import { responderSobreTeste } from './responderSobreTeste.js';
+import { orquestrar } from './orquestrar.js';
+import { planejarOrquestracao } from './planejarOrquestracao.js';
+import { registrarOrquestracao } from '../banco/registrarOrquestracao.js';
+import { Orquestracao } from '../tipos/orquestracao.js';
 import { Coleta, Opcoes, Resposta } from '../tipos/chat.js';
 import { consultarIaExterna } from './consultarIaExterna.js';
 import { montarResposta } from './montarResposta.js';
@@ -32,10 +36,18 @@ export async function conversar(o: Opcoes): Promise<Resposta> {
   const aprendidos = tentarOuPadrao(() => pesosAprendidos(pergunta, o.base), {});
   const teste = o.contexto?.tipo === 'teste' ? responderSobreTeste(o.contexto, o.espacoId, o.base) : null;
   const r = teste ? { agente: teste.agente!, rota: [], continuou: false } : escolherAgente(pergunta, o.agente, { historico, aprendidos });
-  const agente = r.agente; const local = teste ?? await responderComDadosLocais(agente, pergunta, o.espacoId, o.base);
+  // 3) Orquestração: sem agente escolhido pela pessoa e com dois ou mais especialistas fortes, cada um responde uma etapa.
+  const plano = !teste && !o.agente && !r.continuou ? planejarOrquestracao(r.rota) : null;
+  let orquestracao: Orquestracao | undefined; let avisoOrquestracao: string | undefined;
+  let agente = r.agente; let local: Coleta;
+  if (plano) {
+    const feito = await orquestrar(plano.map((id) => agentesChat.find((a) => a.id === id)!), r.rota, pergunta, o.espacoId, o.base);
+    agente = agentesChat.find((a) => a.id === 'orquestrador')!; local = feito.coleta; orquestracao = feito.registro;
+    try { registrarOrquestracao(orquestracao, o.base); } catch { avisoOrquestracao = 'Não foi possível registrar a orquestração no Painel de atividades; a resposta foi preservada.'; }
+  } else local = teste ?? await responderComDadosLocais(agente, pergunta, o.espacoId, o.base);
   juntarConhecimentos(o, agente, pergunta, historico, r.continuou, local);
   const proximos = proximosPassosSugeridos(agente.id, local.fatos, perfil?.papel ?? null, pergunta);
-  const comum = { rota: r.rota, continuou: r.continuou, proximos };
+  const comum = { rota: r.rota, continuou: r.continuou, proximos, ...(orquestracao ? { orquestracao } : {}), ...(avisoOrquestracao ? { aviso: avisoOrquestracao } : {}) };
   const provedor = o.provedor ?? 'local'; const chave = pergunta + '|' + historico.length;
   const vestido = () => aplicarEstilo(local.linhas, estilo, nome, agente, !!o.primeira, local.fatos, pessoa, chave);
   if (provedor === 'local') return montar(agente, { ...local, linhas: vestido() }, 'LOCAL', comum);

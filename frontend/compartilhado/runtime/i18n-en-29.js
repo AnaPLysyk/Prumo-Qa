@@ -2,6 +2,19 @@
 // Inglês das telas de integração da 2.9 (Tickets avançados, propostas, Planos e Runs, Vínculos, GitHub, Agentes, escrita).
 // Mesma regra de i18n-en.js: chave = português normalizado; termos técnicos e conteúdo do usuário não são traduzidos.
 Object.assign(window.PRUMO_EN, {
+  // Orquestrações (Painel de atividades e chat)
+  "Orquestrações recentes": "Recent orchestrations",
+  "Carregando orquestrações…": "Loading orchestrations…",
+  "Orquestrações indisponíveis.": "Orchestrations unavailable.",
+  "{n} registradas": "{n} recorded",
+  "Nenhuma ainda. Quando uma pergunta envolve duas ou mais especialidades, o orquestrador consulta cada uma e registra as etapas aqui.": "None yet. When a question involves two or more specialties, the orchestrator consults each one and records the steps here.",
+  "Orquestração · {quando}": "Orchestration · {quando}",
+  "Registro local de metadados: agentes, ordem, tempos, fontes e falhas. A pergunta e as respostas não foram gravadas. As etapas são independentes.": "Local metadata record: agents, order, timings, sources and failures. The question and the answers were not stored. The steps are independent.",
+  "Concluída": "Completed",
+  "Parcial": "Partial",
+  "Falhou": "Failed",
+  "Sem dados": "No data",
+  "orquestrou {n} especialistas": "orchestrated {n} specialists",
   // Administração (documentação viva)
   "Administração": "Administration",
   "Documentação viva desta versão e estado do sistema.": "Living documentation of this version and system status.",

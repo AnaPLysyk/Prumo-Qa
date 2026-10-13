@@ -62,6 +62,7 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   conhecimentoEsquecer: (agente, termo) => chamar('conhecimento:esquecer', { agente, termo }),
   conhecimentoMostrar: () => chamar('conhecimento:mostrar', {}),
   administracaoMapa: () => chamar('administracao:mapa', {}),
+  agentesOrquestracoes: (espacoId) => chamar('agentes:orquestracoes', { espacoId: espacoId ?? null }),
   skillsListar: (filtro = {}) => chamar('skills:listar', filtro),
   skillsCriar: (dados) => chamar('skills:criar', dados),
   skillsDecidir: (id, estado) => chamar('skills:decidir', { id, estado }),

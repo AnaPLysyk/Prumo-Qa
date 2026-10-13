@@ -329,6 +329,20 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/e2e/ui/desktop-orquestracao.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal ui. Verifica: orquestração do chat visível no Painel de atividades",
+      "evidencias": [
+        "Agentes › Painel de atividades: orquestração do chat mostra agentes, ordem, estado e tempo de cada etapa",
+        "../../apoio/janela.mjs"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/e2e/ui/desktop-plataforma.test.mjs",
       "camada": "ui",
       "natureza": [
@@ -1216,6 +1230,21 @@
       "evidencias": [
         "mapa: cada canal IPC do catálogo aparece uma vez, na tela do seu arquivo api/, e sem código-fonte",
         "../../../dist/administracao/banco/lerMapaDoAplicativo.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/orquestracao.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal regra. Verifica: planejamento, etapas, falha isolada, consolidação e registro sem texto",
+      "evidencias": [
+        "orquestrar: cada etapa tem ordem, tempo, fontes e estado; a falha de um agente não interrompe os outros e é mascarada",
+        "../../../dist/agentes/chat/orquestrar.js"
       ],
       "perfilReal": false
     }

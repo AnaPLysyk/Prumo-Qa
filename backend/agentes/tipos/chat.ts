@@ -2,6 +2,7 @@
 import { AgenteChat, Papel } from './persona.js';
 import { Fonte } from '../../inicio/tipos/assistenteLocal.js';
 import { TipoTeste } from '../../testes/tipos/catalogoDeTestes.js';
+import { Orquestracao } from './orquestracao.js';
 
 export const estilos = ['amigavel', 'direto', 'tecnico'] as const;
 
@@ -24,7 +25,7 @@ export type Proximo = { rotulo: string; pergunta?: string; aba?: string };
 export type Acao = { tipo: 'aprovar_conhecimento' | 'descartar_conhecimento'; id: string; rotulo: string };
 
 export type Resposta = { agente: { id: string; nome: string; especializacao: string | null }; linhas: string[]; fontes: Fonte[]; modo: 'LOCAL' | 'CLAUDE' | 'CODEX';
-  estilo: Estilo; rota: { agente: string; pontos: number }[]; fatos: string[]; aviso?: string; proximos: Proximo[]; acoes: Acao[]; pendente: Pendente; pessoa: string | null; continuou: boolean };
+  estilo: Estilo; rota: { agente: string; pontos: number }[]; fatos: string[]; aviso?: string; proximos: Proximo[]; acoes: Acao[]; pendente: Pendente; pessoa: string | null; continuou: boolean; orquestracao?: Orquestracao };
 
 export const SEGUIMENTO = /^(e |e\?|mais |mais$|detalh|explica|explique|por que|porque|como assim|isso|esse|essa|esses|essas|o primeiro|a primeira|o segundo|a segunda|o ultimo|a ultima|outro|outra|continu|e ontem|e hoje|ok e |e agora)/;
 

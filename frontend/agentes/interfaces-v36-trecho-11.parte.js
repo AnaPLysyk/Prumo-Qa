@@ -250,11 +250,27 @@
       body.replaceChildren(stage); figuraRobo(face, x, 'cerebro', campo);
     }
     // Painel de atividades (v41): canvas com janelas de terminal ligadas pelos registros locais, atualizado ao vivo.
+    // Orquestrações do chat: quem participou, em que ordem, quanto cada etapa levou, o que consultou e o que falhou (registro local, sem pergunta nem resposta).
+    async function mostrarOrquestracoes(alvo, quieto) {
+      const nomeDe = (id) => s.especializacoes?.find?.((x) => x.id === id)?.rotulo || id;
+      const ROTULO = { CONCLUIDA: 'Concluída', PARCIAL: 'Parcial', FALHOU: 'Falhou', SEM_DADOS: 'Sem dados' }; const rotulo = (x) => tr(ROTULO[x] || x);
+      const r = await quieto(() => api.agentesOrquestracoes(e.id)); if (estado.aba !== 'agentes') return;
+      if (!r) { alvo.replaceChildren(note(tr('Orquestrações indisponíveis.'))); return; }
+      const itens = r.orquestracoes.slice(0, 8);
+      const titulo = h('h3', { class: 'v36a-orq-titulo' }, tr('Orquestrações recentes'), h('small', {}, tr('{n} registradas', { n: r.orquestracoes.length })));
+      if (!itens.length) { alvo.replaceChildren(titulo, note(tr('Nenhuma ainda. Quando uma pergunta envolve duas ou mais especialidades, o orquestrador consulta cada uma e registra as etapas aqui.'))); return; }
+      alvo.replaceChildren(titulo, h('ol', { class: 'v36a-orq-lista' }, itens.map((o) => h('li', { class: 'v36a-orq-item', 'data-estado': o.estado, 'data-orquestracao': o.id },
+        h('button', { type: 'button', class: 'v36a-orq-abrir', onclick: () => caixa(tr('Orquestração · {quando}', { quando: hora(o.em) }), [note(tr('Registro local de metadados: agentes, ordem, tempos, fontes e falhas. A pergunta e as respostas não foram gravadas. As etapas são independentes.')), h('pre', {}, JSON.stringify(o, null, 2))]) },
+          h('span', { class: 'v36a-orq-quando' }, hora(o.em)), h('strong', {}, rotulo(o.estado)), h('span', { class: 'v36a-orq-tempo' }, o.duracaoMs + ' ms')),
+        h('ol', { class: 'v36a-orq-etapas' }, o.etapas.map((et) => h('li', { 'data-estado': et.estado }, h('span', { 'data-i18n-ignore': '' }, et.ordem + '. ' + nomeDe(et.agente)), ' · ', rotulo(et.estado), ' · ' + et.duracaoMs + ' ms', et.fontes.length ? h('small', {}, ' · ' + et.fontes.join(', ')) : null)))))));
+    }
     async function activity() {
       painelVivo?.parar();
       const quieto = async (fn) => { try { const r = await fn(); return r && r.ok ? r.data : null; } catch { return null; } };
       const host = h('div', { class: 'v36a-painel' });
-      body.replaceChildren(h('div', { class: 'v36a-topo' }, h('div', {}, h('h2', { class: 'v36a-titulo' }, tr('Painel de atividades')), h('p', {}, tr('Clientes, agentes e o worker trabalhando, em tempo real. Só aparecem ligações que os registros deste computador comprovam.')))), host);
+      const orq = h('section', { class: 'v36a-orq', id: 'v36-orquestracoes', 'aria-label': tr('Orquestrações recentes') }, note(tr('Carregando orquestrações…')));
+      body.replaceChildren(h('div', { class: 'v36a-topo' }, h('div', {}, h('h2', { class: 'v36a-titulo' }, tr('Painel de atividades')), h('p', {}, tr('Clientes, agentes e o worker trabalhando, em tempo real. Só aparecem ligações que os registros deste computador comprovam.')))), orq, host);
+      mostrarOrquestracoes(orq, quieto);
       painelVivo = PrumoPainelAtividades.montar(host, {
         reduzido, ativo: () => activeTab === 'activity' && estado.aba === 'agentes' && estado.espaco?.id === e.id,
         carregar: async () => {

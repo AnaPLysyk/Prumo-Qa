@@ -39,3 +39,7 @@ Prumo's MCP server offers prompts for the specializations and the `propor_aprend
 ## Limits
 
 The agent portraits are images with visual motion, without a 3D face. Claude and Codex depend on your account and your authorization. The integrations were validated with simulated services.
+
+## Orchestration
+
+When your question touches two or more specialties (for example "which failures happened and how is regression doing?") and you did not pick an agent, the orchestrator consults each specialist and combines the answers; the message signature says how many were consulted. In **Agents › Activity panel**, **Recent orchestrations** shows who took part, in which order, how long each step took, what it consulted and what failed. The question and the answers are not stored.

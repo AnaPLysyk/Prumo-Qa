@@ -11,6 +11,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | Arquivo | O que faz |
 | --- | --- |
 | `agentesEstado.ts` | Canal agentes:estado: Especializações, políticas e propostas de IA do projeto. |
+| `agentesOrquestracoes.ts` | Canal agentes:orquestracoes: Listar as orquestrações recentes do projeto: agentes, ordem, etapas, tempos, fontes e falhas. |
 | `agentesSalvar.ts` | Canal agentes:salvar: Habilitar especializações e bloquear capacidades da IA conectada neste projeto. |
 | `assistenteAgentes.ts` | Canal assistente:agentes: Listar os agentes do chat, suas especializações, capacidades e a disponibilidade de Claude Code/Codex. |
 | `assistenteAvaliar.ts` | Canal assistente:avaliar: Avaliar um atendimento (útil ou não). Ao indicar o agente certo, ensina a ele só os termos da pergunta. |
@@ -65,12 +66,14 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `linhaParaConhecimento.ts` | Converte uma linha do banco num conhecimento. |
 | `listarAtendimentos.ts` | Lista os atendimentos de um projeto e agente. |
 | `listarConhecimentos.ts` | Lista os conhecimentos por projeto, agente, estado e busca. |
+| `listarOrquestracoes.ts` | Lista as orquestrações mais recentes de um projeto (ou as gerais), ignorando e contando linhas inválidas. |
 | `listarTrechosDeSkill.ts` | Lista os trechos de Skill por especialização, estado e busca; rascunhos primeiro, depois na ordem de leitura. |
 | `pastaDasConversas.ts` | Pasta das conversas antigas do chat. |
 | `pesosAprendidos.ts` | Soma, por agente, o peso dos termos aprendidos que aparecem na frase. |
 | `registrarAtendimento.ts` | Registra um atendimento do chat (agente, modo e fontes), sem a pergunta nem a resposta. |
 | `registrarConhecimento.ts` | Registra um conhecimento: da pessoa já aprovado; da IA ou da conversa em rascunho (com limite por hora). |
 | `registrarConversa.ts` | Grava uma conversa com segredos mascarados e limite de tamanho. |
+| `registrarOrquestracao.ts` | Guarda o registro de uma orquestração (só metadados) em orquestracoes.jsonl na pasta de dados, mantendo os 500 mais recentes. |
 | `registrarTrechosDeSkill.ts` | Acrescenta trechos a uma Skill: da equipe já aprovados; importados ou de IA em rascunho. Iguais não duplicam; vários numa única transação (se um falhar, nenhum é gravado). |
 | `salvarPerfil.ts` | Salva como a pessoa quer ser chamada e o papel dela. |
 | `sementeDasSkills.ts` | Trechos das Skills que acompanham o aplicativo (pasta skills/), já divididos e com identificador estável pelo conteúdo. |
@@ -104,9 +107,11 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `montarResposta.ts` | Monta a resposta de um agente com fontes, ações e segredos mascarados. |
 | `numeroDoFato.ts` | Lê um número dos fatos coletados (ex.: falhas=3). |
 | `numeroDoTexto.ts` | Gera um número fixo a partir de um texto, para variar a saudação sem sorteio. |
+| `orquestrar.ts` | Orquestra uma pergunta entre especialistas: delega uma etapa a cada agente, registra tempo, fontes e falhas e junta as respostas. |
 | `palavrasDaPergunta.ts` | Separa as palavras de uma pergunta já sem acentos. |
 | `papelNoTexto.ts` | Reconhece no texto o papel da pessoa (QA, dev, PO, analista). |
 | `personalidadeParaIa.ts` | Escreve o bloco de personalidade do agente enviado à IA (tom, foco, papel da pessoa). |
+| `planejarOrquestracao.ts` | Decide se uma pergunta pede mais de um especialista: duas ou mais especializações com pontuação forte no roteamento. |
 | `proximosPassosSugeridos.ts` | Sugere as próximas perguntas úteis conforme o agente, os fatos e o papel da pessoa. |
 | `registrarSugestoesDaIa.ts` | Guarda aprendizados sugeridos pela IA apenas como rascunhos que exigem aprovação. |
 | `responderComDadosLocais.ts` | Monta a resposta do agente com os dados locais do projeto (sem IA): prepara a pergunta, chama a parte do agente certo e devolve linhas, fontes e fatos usados. |
@@ -179,6 +184,7 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | `ContextoDelegacao.ts` | Descreve os dados já verificados usados somente na delegação do chat para IA externa. |
 | `conversas.ts` | Formato das conversas antigas do chat (até a 2.9) e seus limites. |
 | `mcp.ts` | O que cada ferramenta do servidor MCP recebe (servidor, projeto, projeto do Prumo, respostas padronizadas) e as marcas de leitura e rascunho. |
+| `orquestracao.ts` | Formato da orquestração observável: quais agentes participaram, em que ordem, quanto tempo cada etapa levou e o que consultou. |
 | `persona.ts` | Os agentes do chat, os papéis da pessoa e a personalidade de cada agente. |
 | `politicas.ts` | Capacidades da IA, especializações e o formato da configuração de agentes por projeto. |
 | `roteiros.ts` | Os roteiros (prompts MCP) do Prumo e suas regras comuns. |

@@ -101,7 +101,7 @@
         let fontes = r.fontes || []; if (T && !fontes.some((f) => f.aba === T.aba)) fontes = [...fontes, { rotulo: tr(T.rota), aba: T.aba }];
         const meio = r.modo === 'CLAUDE' ? 'Claude Code' : r.modo === 'CODEX' ? 'Codex' : tr('local');
         if (r.aviso) avisar(r.aviso);
-        await falar(r.linhas.length ? r.linhas : [tr('Não encontrei nada sobre isso nos dados locais deste projeto.')], fontes, r.proximos || [], r.agente.nome + ' · ' + meio);
+        await falar(r.linhas.length ? r.linhas : [tr('Não encontrei nada sobre isso nos dados locais deste projeto.')], fontes, r.proximos || [], r.agente.nome + ' · ' + meio + (r.orquestracao ? ' · ' + tr('orquestrou {n} especialistas', { n: r.orquestracao.agentes.length }) : ''));
         if (v === versao) controlesResposta(r, pergunta);
       } catch { fim(); avisar(tr('Falha ao consultar o assistente local.'), true); } finally { enviar.disabled = false; }
     }

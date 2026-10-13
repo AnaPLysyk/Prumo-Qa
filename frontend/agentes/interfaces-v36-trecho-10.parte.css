@@ -14,3 +14,16 @@
 .v36a-skill p{margin:0;overflow-wrap:anywhere}
 .v36a-skill small{color:var(--suave)}
 .v36a-skill-acoes{display:flex;flex-wrap:wrap;gap:8px}
+/* Painel de atividades: orquestrações recentes (etapas reais registradas, sem pergunta nem resposta). */
+.v36a-orq{display:grid;gap:8px;margin:0 0 14px;min-width:0}
+.v36a-orq-titulo{display:flex;align-items:baseline;gap:8px;margin:0;font-size:14px;color:var(--texto)}
+.v36a-orq-titulo small{font-weight:400;color:var(--suave)}
+.v36a-orq-lista,.v36a-orq-etapas{list-style:none;margin:0;padding:0;display:grid;gap:6px;min-width:0}
+.v36a-orq-item{padding:8px 12px;border:1px solid var(--linha);border-radius:10px;background:color-mix(in srgb,var(--painel) 70%,transparent);min-width:0}
+.v36a-orq-item[data-estado=PARCIAL]{border-color:color-mix(in srgb,var(--aviso) 55%,transparent)}
+.v36a-orq-item[data-estado=FALHOU]{border-color:color-mix(in srgb,var(--falha) 55%,transparent)}
+.v36a-orq-abrir{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;width:100%;padding:0;border:0;background:none;color:var(--texto);font:inherit;text-align:left;cursor:pointer}
+.v36a-orq-quando,.v36a-orq-tempo{color:var(--suave);font-variant-numeric:tabular-nums}
+.v36a-orq-etapas{margin-top:6px;padding-left:4px;font-size:12.5px;color:var(--texto)}
+.v36a-orq-etapas li[data-estado=FALHOU]{color:var(--falha)}
+.v36a-orq-etapas small{color:var(--suave)}

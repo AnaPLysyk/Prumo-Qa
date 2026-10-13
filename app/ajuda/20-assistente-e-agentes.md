@@ -39,3 +39,7 @@ O servidor MCP do Prumo oferece prompts das especializações e a ferramenta `pr
 ## Limites
 
 Os retratos dos agentes são imagens com movimento visual, sem rosto 3D. Claude e Codex dependem da sua conta e da sua autorização. As integrações foram validadas com serviços simulados.
+
+## Orquestração
+
+Quando a sua pergunta toca duas ou mais especialidades (por exemplo "quais falhas aconteceram e como está a regressão?") e você não escolheu um agente, o orquestrador consulta cada especialista e junta as respostas; a assinatura da mensagem diz quantos foram consultados. Em **Agentes › Painel de atividades**, **Orquestrações recentes** mostra quem participou, em que ordem, quanto cada etapa levou, o que consultou e o que falhou. A pergunta e as respostas não são gravadas.
