@@ -1247,6 +1247,35 @@
         "../../../dist/agentes/chat/orquestrar.js"
       ],
       "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/rastrear-pergunta.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "regressao"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal regra. Verifica: o teste de pergunta do Cérebro segue o mesmo roteamento, orquestração e Skill do chat e não grava nada",
+      "evidencias": [
+        "rastro: o agente em foco usaria exatamente os trechos de Skill que o chat mandaria à IA",
+        "../../../dist/agentes/chat/rastrearPergunta.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/estrutura/design-system-tema.test.mjs",
+      "camada": "estrutura",
+      "natureza": [
+        "contrato",
+        "regressao"
+      ],
+      "funcionalidade": "arquitetura",
+      "motivo": "Camada principal estrutura. Verifica: cores de tema só no Design System; telas sem ramos de tema nem paleta própria",
+      "evidencias": [
+        "design system: nenhuma tela tem ramo de tema (data-tema ou prefers-color-scheme) fora de frontend/design-system/"
+      ],
+      "perfilReal": false
     }
   ]
 }

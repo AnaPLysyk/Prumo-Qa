@@ -13,8 +13,7 @@ body[data-tela=agentes] main#conteudo{--v36a-gutter:clamp(18px,2.6vw,42px);max-w
 .v36-portrait[data-motion="1"]{animation-name:v36-face-turn}.v36-portrait[data-motion="2"]{animation-direction:reverse}.v36-portrait[data-motion="3"]{animation-name:v36-face-lean}.v36-portrait[data-motion="4"]{animation-name:v36-face-turn;animation-direction:reverse}.v36-portrait[data-motion="5"]{animation-name:v36-face-lean;animation-direction:reverse}
 .v36-retrato-halo{position:absolute;inset:14% 10% 18%;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--face-color) 60%,transparent),transparent 68%);filter:blur(26px);opacity:.5;animation:v36-halo 5.5s ease-in-out infinite;pointer-events:none}
 .v36-retrato-3d{position:relative;display:block;width:100%;height:100%;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .35s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
-.v36-portrait img{display:block;width:100%;height:100%;object-fit:contain;border:0;border-radius:0;mix-blend-mode:screen;filter:saturate(1.08) contrast(1.04)}
-:root[data-tema=claro] .v36-portrait img{mix-blend-mode:multiply}
+.v36-portrait img{display:block;width:100%;height:100%;object-fit:contain;border:0;border-radius:0;mix-blend-mode:var(--ds-mistura-avatar);filter:saturate(1.08) contrast(1.04)}
 .v36-retrato-scan{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--face-color) 70%,transparent) 50%,transparent) 0 -40%/100% 26% no-repeat;mix-blend-mode:screen;opacity:.32;-webkit-mask-image:radial-gradient(ellipse 42% 48% at 50% 46%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 42% 48% at 50% 46%,#000 55%,transparent 100%);animation:v36-scan 6.5s cubic-bezier(.45,0,.55,1) infinite}
 .v36-portrait.mini{width:66px;height:66px}
 .v36-portrait.mini .v36-retrato-halo{inset:-4px;filter:blur(10px);opacity:.38}
@@ -93,17 +92,17 @@ main .v36a-titulo{margin:0;font:700 26px/1.15 "Segoe UI Variable Display","Segoe
 .v36a-fonte{flex:1;min-width:0;font-size:11px;color:var(--suave)}
 .v36a-barra-acoes{display:flex;align-items:center;gap:6px}
 .v36a-detalhe{display:grid;grid-template-columns:minmax(300px,.95fr) minmax(0,1.25fr);height:calc(100vh - 58px - 56px - 22px);height:calc(100dvh - 58px - 56px - 22px);min-height:540px;border:1px solid var(--linha);border-radius:22px;overflow:hidden;background:color-mix(in srgb,var(--painel) 55%,transparent)}
-.v36a-perfil{--face-color:#7abaff;position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-height:0;background:radial-gradient(ellipse 70% 55% at 50% 40%,color-mix(in srgb,var(--face-color) 26%,transparent),transparent 70%),linear-gradient(180deg,#0a1429,#040814 78%);color:#e9f1ff}
+.v36a-perfil{--face-color:#7abaff;position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-height:0;background:radial-gradient(ellipse 70% 55% at 50% 40%,color-mix(in srgb,var(--face-color) 26%,transparent),transparent 70%);color:var(--texto)}
 .v36a-perfil-retrato{position:absolute;inset:0 0 150px;display:grid;place-items:center;padding:20px 0 0}
 .v36a-perfil .v36-portrait.large,.v36a-cerebro .v36-portrait.large{width:min(92%,470px);height:100%}
-:root .v36a-perfil .v36-portrait .v36-retrato-3d img,:root .v36a-cerebro .v36-portrait .v36-retrato-3d img{mix-blend-mode:screen;-webkit-mask-image:linear-gradient(180deg,#000 72%,transparent 99%);mask-image:linear-gradient(180deg,#000 72%,transparent 99%)}
-.v36a-perfil-info{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding:0 24px 26px;text-align:center;background:linear-gradient(180deg,transparent,#040814 38%)}
-.v36a-olho{font-size:10px;font-weight:600;letter-spacing:.24em;color:color-mix(in srgb,var(--face-color,#7abaff) 75%,#fff)}
-main .v36a-perfil-info h2{margin:9px 0 4px;font:700 clamp(22px,2.4vw,32px)/1.12 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;letter-spacing:-.02em;text-transform:none;color:#f1f6ff}
-.v36a-perfil-info p{margin:0 0 18px;max-width:none;font-size:12px;color:#9fb2d3}
+:root .v36a-perfil .v36-portrait .v36-retrato-3d img,:root .v36a-cerebro .v36-portrait .v36-retrato-3d img{mix-blend-mode:var(--ds-mistura-retrato);-webkit-mask-image:linear-gradient(180deg,#000 72%,transparent 99%);mask-image:linear-gradient(180deg,#000 72%,transparent 99%)}
+.v36a-perfil-info{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding:0 24px 26px;text-align:center;background:linear-gradient(180deg,transparent,var(--fundo) 38%)}
+.v36a-olho{font-size:10px;font-weight:600;letter-spacing:.24em;color:color-mix(in srgb,var(--face-color,#7abaff) 75%,var(--texto))}
+main .v36a-perfil-info h2{margin:9px 0 4px;font:700 clamp(22px,2.4vw,32px)/1.12 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;letter-spacing:-.02em;text-transform:none;color:var(--texto)}
+.v36a-perfil-info p{margin:0 0 18px;max-width:none;font-size:12px;color:var(--suave)}
 .v36a-perfil-info p strong{font-weight:500}
-.v36a-cerebro-btn{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;border:1px solid color-mix(in srgb,var(--face-color) 65%,transparent);background:rgba(10,20,40,.72);color:#dfeaff;cursor:pointer;animation:v36-brilho 2.8s ease-in-out infinite;transition:transform .2s,background .2s}
-.v36a-cerebro-btn:hover{transform:scale(1.06);background:rgba(20,36,70,.9)}
+.v36a-cerebro-btn{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;border:1px solid color-mix(in srgb,var(--face-color) 65%,transparent);background:color-mix(in srgb,var(--fundo) 78%,transparent);color:var(--texto);cursor:pointer;animation:v36-brilho 2.8s ease-in-out infinite;transition:transform .2s,background .2s}
+.v36a-cerebro-btn:hover{transform:scale(1.06);background:color-mix(in srgb,var(--face-color) 22%,var(--fundo))}
 .v36a-form{overflow-y:auto;min-height:0;min-width:0;padding:22px clamp(18px,2.4vw,34px) 26px;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:var(--linha) transparent}
 .v36a-form>p.suave{margin:12px 0 0;max-width:none;font-size:11.5px}
 .v36a-form-topo{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 0 14px;border-bottom:1px solid var(--linha)}
@@ -129,11 +128,11 @@ main .v36a-form-rotulo h3{margin:0 0 6px;font-size:13.5px;font-weight:650;color:
 main .v36a-confirmar h2,.v36a-confirmar h2{margin:8px 0;font-size:20px;text-transform:none;letter-spacing:-.01em;color:var(--texto)}
 .v36a-confirmar-acoes{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
 /* Cérebro */
-.v36-stage.v36a-cerebro{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(210px,1fr) minmax(260px,1.1fr) minmax(210px,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;gap:0 20px;min-height:calc(100vh - 58px - 36px);min-height:calc(100dvh - 58px - 36px);margin-top:18px;padding:0 26px 22px;border:0;border-radius:22px;overflow:hidden;background:radial-gradient(ellipse 45% 55% at 50% 48%,color-mix(in srgb,var(--face-color) 20%,transparent),transparent 70%),#040816;color:#e6eefc}
-.v36a-cerebro-topo{grid-column:1/-1;display:flex;align-items:center;gap:22px;min-height:56px;border-bottom:1px solid rgba(120,160,230,.16)}
-.v36a-cerebro .v36a-voltar{color:#b9cdf0}.v36a-cerebro .v36a-voltar:hover{color:#fff;background:rgba(120,170,255,.1)}
+.v36-stage.v36a-cerebro{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(210px,1fr) minmax(260px,1.1fr) minmax(210px,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;gap:0 20px;min-height:calc(100vh - 58px - 36px);min-height:calc(100dvh - 58px - 36px);margin-top:18px;padding:0 26px 22px;border:0;border-radius:22px;overflow:hidden;background:radial-gradient(ellipse 45% 55% at 50% 48%,color-mix(in srgb,var(--face-color) 20%,transparent),transparent 70%);color:var(--texto)}
+.v36a-cerebro-topo{grid-column:1/-1;display:flex;align-items:center;gap:22px;min-height:56px;border-bottom:1px solid var(--ds-linha-suave)}
+.v36a-cerebro .v36a-voltar{color:var(--suave)}.v36a-cerebro .v36a-voltar:hover{color:var(--texto);background:rgba(var(--qc-azul),.1)}
 .v36a-cerebro-topo strong{font-size:14px}
-.v36a-cerebro-topo span{margin-left:auto;font-size:11px;color:#7f9bc8}
+.v36a-cerebro-topo span{margin-left:auto;font-size:11px;color:var(--suave)}
 .v36a-cerebro-legenda{grid-column:1/-1;padding:18px 0 4px;font-size:10px;letter-spacing:.26em;color:#7f9bc8}
 .v36-brain-nodes{display:flex;flex-direction:column;justify-content:space-around;gap:14px;min-width:0;padding:10px 0}
 .v36a-nos-esq{grid-column:1;grid-row:3;align-items:flex-end}.v36a-nos-dir{grid-column:3;grid-row:3;align-items:flex-start}
@@ -146,10 +145,10 @@ main .v36a-confirmar h2,.v36a-confirmar h2{margin:8px 0;font-size:20px;text-tran
 .v36-neuron-texto{display:flex;flex-direction:column;gap:2px;min-width:0}
 .v36-neuron-texto strong{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v36-neuron-texto small{font-size:11px;color:#9fb4d6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v36-brain-inspect{grid-column:1/-1;min-width:0;padding:14px 0 0;border-top:1px solid rgba(120,160,230,.16);color:#b8c9e6}
-.v36-brain-inspect p.suave{max-width:60ch;margin:0;font-size:11.5px;color:#8ea6cc}
-main .v36-brain-inspect h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#e6eefc}
-.v36-brain-inspect pre{max-height:200px;overflow:auto;margin:0;border:1px solid rgba(120,160,230,.18);border-radius:12px;background:rgba(255,255,255,.03);color:#dce8fb;white-space:pre-wrap;overflow-wrap:anywhere}
+.v36-brain-inspect{grid-column:1/-1;min-width:0;padding:14px 0 0;border-top:1px solid var(--ds-linha-suave);color:var(--texto)}
+.v36-brain-inspect p.suave{max-width:60ch;margin:0;font-size:11.5px;color:var(--suave)}
+main .v36-brain-inspect h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--texto)}
+.v36-brain-inspect pre{max-height:200px;overflow:auto;margin:0;padding:0 0 0 12px;border:0;border-left:2px solid var(--ds-linha-suave);border-radius:0;background:none;color:var(--texto);white-space:pre-wrap;overflow-wrap:anywhere}
 /* Painel de atividades */
 .v36a-carregando{padding:30px 0}
 .v36a-mapa{position:relative;isolation:isolate;overflow:hidden;border-radius:22px;background:radial-gradient(ellipse 60% 70% at 50% 50%,#0d1d3b,#040816 75%);min-height:300px}
@@ -181,7 +180,3 @@ main .v36-brain-inspect h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;te
 @media(max-width:820px){.v36a-cabecalho{display:none}.v36a-linha{grid-template-columns:minmax(0,1fr) 20px;gap:10px}.v36a-linha>.v36a-caps,.v36a-linha>.v36a-tipo{display:none}.v36a-linha>.v36a-disp{grid-column:1;grid-row:2;padding-left:82px}.v36a-linha>.v36a-seta{grid-column:2;grid-row:1}.v36a-form-secao{grid-template-columns:1fr}.v36a-cap{grid-template-columns:1fr}.v36a-abas{padding-right:var(--v36a-gutter,18px)}}
 @media(max-width:600px){.v36-stage.v36a-cerebro{grid-template-columns:1fr;padding:0 14px 16px}.v36a-nos-esq,.v36a-nos-dir{grid-column:1}.v36a-nos-dir{grid-row:5}.v36a-cerebro-topo span{display:none}.v36-neuron{max-width:none}.v36a-busca{width:100%}.v36a-acoes{width:100%;flex-wrap:wrap}.v36a-grafo-legenda{padding:0 12px 12px}}
 @media(prefers-reduced-motion:reduce){.v36-portrait,.v36-retrato-halo,.v36-retrato-scan,.v36a-cerebro-btn,.v36a-orb::before,.v36a-nucleo-halo{animation:none!important}.v36-retrato-3d,.v36a-linha,.v36-neuron{transition:none!important}}
-/* Tema "Sistema" com Windows claro: as mesmas regras do tema claro escolhido manualmente. */
-@media(prefers-color-scheme:light){
-:root:not([data-tema=escuro]) .v36-portrait img{mix-blend-mode:multiply}
-}

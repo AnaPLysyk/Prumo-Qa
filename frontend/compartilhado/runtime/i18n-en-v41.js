@@ -1,6 +1,7 @@
 'use strict';
 // Traduções do painel de atividades v41; registros (ferramentas, estados, perguntas) não são traduzidos.
 Object.assign(window.PRUMO_EN, {
+  'Não foi possível mostrar as orquestrações.': 'Could not show the orchestrations.',
   'Baixar instalador no site oficial': 'Download installer from the official site',
   'Clientes, agentes e o worker trabalhando, em tempo real. Só aparecem ligações que os registros deste computador comprovam.': 'Clients, agents and the worker at work, in real time. Only links proven by this computer\'s records are shown.',
   'Clientes → núcleo Prumo': 'Clients → Prumo core', 'Orchestrator → agentes': 'Orchestrator → agents', 'Worker → rotinas': 'Worker → routines',
@@ -32,4 +33,12 @@ Object.assign(window.PRUMO_EN, {
   'Privacidade e dados deste computador: pasta de dados, categorias, retenção, exportação e exclusão.': 'Privacy and data on this computer: data folder, categories, retention, export and deletion.',
   // Atualizar com um clique (2.10.2)
   'Atualizar agora': 'Update now', 'Conferindo a release oficial…': 'Checking the official release…', 'Baixando o instalador e conferindo o SHA-256…': 'Downloading the installer and checking the SHA-256…', 'A consulta não foi concluída; tente de novo.': 'The check did not complete; try again.',
+  // Cérebro com teste de pergunta e Painel com orquestrações na coluna (2.11)
+  'Orquestrações': 'Orchestrations', 'Palavras de roteamento': 'Routing words', '{n} palavras': '{n} words', 'Termos aprendidos': 'Learned terms', '{n} termos': '{n} terms', 'Vocabulário': 'Vocabulary',
+  'Testar uma pergunta': 'Test a question', 'Simular': 'Simulate', 'Limpar': 'Clear', 'Ex.: oi, quais testes de API falharam?': 'E.g.: hi, which API tests failed?',
+  'Mostra o caminho que o chat faria agora com esta pergunta. Não chama IA e não grava nada.': 'Shows the path the chat would take now with this question. It does not call AI and records nothing.',
+  'Orquestraria: ': 'Would orchestrate: ', 'Responderia: ': 'Would answer: ', ' · este agente participa': ' · this agent takes part', ' · outro agente atende': ' · another agent answers',
+  '{n} pts': '{n} pts', 'menção': 'mention', 'aprendido +{n}': 'learned +{n}', 'Nenhuma palavra conhecida: o Prumo Orchestrator atende por padrão.': 'No known word: Prumo Orchestrator answers by default.',
+  'Se este agente responder: {s} trechos de Skill ({o} ficam de fora) e {c} conhecimentos aprovados. Os usados acendem no anel.': 'If this agent answers: {s} Skill excerpts ({o} left out) and {c} approved knowledge items. The ones used light up on the ring.',
+  'Termos considerados: {t}': 'Terms considered: {t}', 'Testar e consultar o cérebro': 'Test and inspect the brain', 'Neurônios acesos': 'Lit neurons', 'Ticket → caso → automação → execução → evidência → defeito.': 'Ticket → case → automation → run → evidence → defect.',
 });

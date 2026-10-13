@@ -12,6 +12,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | --- | --- |
 | `agentesEstado.ts` | Canal agentes:estado: Especializações, políticas e propostas de IA do projeto. |
 | `agentesOrquestracoes.ts` | Canal agentes:orquestracoes: Listar as orquestrações recentes do projeto: agentes, ordem, etapas, tempos, fontes e falhas. |
+| `agentesRastrear.ts` | Canal agentes:rastrear: Simular o caminho de uma pergunta no chat (agente escolhido, pontuação, orquestração, conhecimentos e trechos de Skill), sem responder nem gravar. |
 | `agentesSalvar.ts` | Canal agentes:salvar: Habilitar especializações e bloquear capacidades da IA conectada neste projeto. |
 | `assistenteAgentes.ts` | Canal assistente:agentes: Listar os agentes do chat, suas especializações, capacidades e a disponibilidade de Claude Code/Codex. |
 | `assistenteAvaliar.ts` | Canal assistente:avaliar: Avaliar um atendimento (útil ou não). Ao indicar o agente certo, ensina a ele só os termos da pergunta. |
@@ -113,6 +114,7 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `personalidadeParaIa.ts` | Escreve o bloco de personalidade do agente enviado à IA (tom, foco, papel da pessoa). |
 | `planejarOrquestracao.ts` | Decide se uma pergunta pede mais de um especialista: duas ou mais especializações com pontuação forte no roteamento. |
 | `proximosPassosSugeridos.ts` | Sugere as próximas perguntas úteis conforme o agente, os fatos e o papel da pessoa. |
+| `rastrearPergunta.ts` | Simula o caminho de uma pergunta no chat, sem responder: palavras, pontuação de cada agente, orquestração e o que o agente em foco usaria. |
 | `registrarSugestoesDaIa.ts` | Guarda aprendizados sugeridos pela IA apenas como rascunhos que exigem aprovação. |
 | `responderComDadosLocais.ts` | Monta a resposta do agente com os dados locais do projeto (sem IA): prepara a pergunta, chama a parte do agente certo e devolve linhas, fontes e fatos usados. |
 | `responderSobreTeste.ts` | Responde sobre um teste escolhido na tela Testes (tipo, arquivo, agente certo). |

@@ -1,12 +1,11 @@
 /** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
 /* ---------- Agentes no espaço profundo (mesmo visual nos temas claro e escuro) ---------- */
-.v36a{--fundo:#040713;--fundo2:#070d1d;--painel:#0b1326;--linha:rgba(130,165,230,.16);--texto:#eef3ff;--suave:#9fb0cf;--acento:#7cb6ff;--acento-texto:#03101f;--ok:#5fe0a6;--falha:#ff8597;--aviso:#efc35b;--neutro:#9fb0cf;--qc-azul:124,182,255;--qc-branco:244,247,255;--qc-vermelho:255,82,108;position:relative;isolation:isolate;color:var(--texto);color-scheme:dark}
+.v36a{position:relative;isolation:isolate;color:var(--texto)}
 body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
-body[data-tela=agentes] .topo-direita{--fundo:#040713;--painel:#0b1326;--linha:rgba(130,165,230,.22);--texto:#eef3ff;--suave:#9fb0cf;color-scheme:dark}
 .v36a-ceu{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none;display:block}
-.v36a .v36-portrait img,:root[data-tema=claro] .v36a .v36-portrait img{mix-blend-mode:normal}
-.v36a-abas{border-bottom-color:rgba(130,165,230,.14)}
-.v36a-busca{background:rgba(8,14,30,.55);border-color:rgba(130,165,230,.22);backdrop-filter:blur(8px)}
+.v36a .v36-portrait img{mix-blend-mode:normal}
+.v36a-abas{border-bottom-color:var(--ds-linha-suave)}
+.v36a-busca{background:var(--ds-superficie);border-color:var(--linha);backdrop-filter:blur(8px)}
 .v36a-primario{box-shadow:0 0 24px -6px var(--acento)}
 /* Constelação */
 .v36a-constelacao{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px 22px;padding:10px 0 26px}
@@ -21,9 +20,9 @@ body[data-tela=agentes] .topo-direita{--fundo:#040713;--painel:#0b1326;--linha:r
 .v36a-orbita-anel{position:absolute;left:50%;bottom:6px;width:168px;height:44px;margin-left:-84px;border-radius:50%;border:1px solid color-mix(in srgb,var(--face-color) 55%,transparent);border-top-color:transparent;opacity:.45;box-shadow:0 6px 24px -10px var(--face-color);transition:opacity .35s,transform .35s}
 .v36a-orbita-anel::after{content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:var(--face-color);box-shadow:0 0 10px var(--face-color);offset-path:ellipse(84px 22px at 84px 22px);animation:v36a-satelite 7s linear infinite;animation-delay:var(--atraso,0s)}
 .v36a-astro:hover .v36a-orbita-anel{opacity:.95;transform:scale(1.06)}
-.v36a-astro-nome{font-size:14px;font-weight:650;letter-spacing:-.005em;color:#f2f6ff}
+.v36a-astro-nome{font-size:14px;font-weight:650;letter-spacing:-.005em;color:var(--texto)}
 .v36a-astro-sub{font-size:11px;color:var(--suave);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v36a-astro-estado{display:inline-flex;align-items:center;gap:7px;margin-top:6px;font-size:11px;color:#c9d6ee}
+.v36a-astro-estado{display:inline-flex;align-items:center;gap:7px;margin-top:6px;font-size:11px;color:var(--texto)}
 .v36a-astro-estado i{width:6px;height:6px;border-radius:50%;background:var(--aviso);box-shadow:0 0 8px var(--aviso)}
 .v36a-astro-estado i.ok{background:var(--ok);box-shadow:0 0 8px var(--ok)}
 .v36a-astro-estado i.off{background:var(--suave);box-shadow:none;opacity:.6}
@@ -33,17 +32,16 @@ body[data-tela=agentes] .topo-direita{--fundo:#040713;--painel:#0b1326;--linha:r
 @keyframes v36a-deriva{0%,100%{translate:0 0}50%{translate:0 -5px}}
 @keyframes v36a-satelite{to{offset-distance:100%}}
 /* Detalhe, Cérebro e fluxo sobre o mesmo céu */
-.v36a-detalhe{border-color:rgba(130,165,230,.14);background:rgba(5,9,22,.35);backdrop-filter:blur(2px)}
+.v36a-detalhe{border:0;border-radius:0;background:none;backdrop-filter:none}
 .v36a-perfil{background:radial-gradient(ellipse 65% 50% at 50% 42%,color-mix(in srgb,var(--face-color) 22%,transparent),transparent 72%)}
-.v36a-perfil-info{background:linear-gradient(180deg,transparent,rgba(3,6,16,.75) 45%)}
-.v36a-form{background:rgba(6,11,26,.62);backdrop-filter:blur(14px);border-left:1px solid rgba(130,165,230,.12)}
-.v36-form-actions.v36a-commit{background:linear-gradient(to top,rgba(6,11,26,.95) 55%,transparent)}
-.v36-field input,.v36-field textarea,.v36a-cap select{background:rgba(255,255,255,.035);border-color:rgba(130,165,230,.2)}
-.v36-stage.v36a-cerebro{background:radial-gradient(ellipse 42% 52% at 50% 50%,color-mix(in srgb,var(--face-color) 16%,transparent),transparent 72%);border:1px solid rgba(130,165,230,.1)}
-.v36a-mapa{background:radial-gradient(ellipse 50% 70% at 50% 50%,rgba(40,70,150,.22),transparent 75%);border:1px solid rgba(130,165,230,.1)}
-.v36-activity-node{background:rgba(8,14,30,.55);backdrop-filter:blur(8px)}
-.v36a-secao-extra{border-top-color:rgba(130,165,230,.14)}
-.v36a .estado{background:rgba(255,255,255,.04)}
+.v36a-perfil-info{background:none}
+.v36a-form{background:none;backdrop-filter:none;border-left:1px solid var(--linha)}
+.v36-field input,.v36-field textarea,.v36a-cap select{background:var(--ds-superficie);border-color:var(--linha)}
+.v36-stage.v36a-cerebro{background:radial-gradient(ellipse 42% 52% at 38% 50%,color-mix(in srgb,var(--face-color) 14%,transparent),transparent 72%);border:0;border-radius:0}
+.v36a-mapa{background:radial-gradient(ellipse 50% 70% at 50% 50%,rgba(var(--qc-azul),.12),transparent 75%);border:1px solid var(--ds-linha-suave)}
+.v36-activity-node{background:var(--ds-superficie);backdrop-filter:blur(8px)}
+.v36a-secao-extra{border-top-color:var(--ds-linha-suave)}
+.v36a .estado{background:var(--ds-hover)}
 @media(prefers-reduced-motion:reduce){.v36a-astro,.v36a-orbita-anel::after,.v36a-orbe img{animation:none!important}}
 
 /* ---------- Robôs 3D, portal e neurônios de conhecimento ---------- */
@@ -56,8 +54,8 @@ body[data-tela=agentes] .topo-direita{--fundo:#040713;--painel:#0b1326;--linha:r
 .v36a-astro:hover,.v36a-astro:focus-visible{transform:none}
 .v36a-astro:hover .v36a-astro-figura{filter:brightness(1.15)}
 .v36a-astro-cliente .v36a-astro-figura{display:grid;place-items:center;width:210px;height:220px}
-.v36a-cliente-icone{display:grid;place-items:center;width:104px;height:104px;border-radius:30px;background:radial-gradient(circle at 30% 25%,#2a3346,#0c111c 70%);box-shadow:0 0 0 1px rgba(255,255,255,.07),0 20px 50px -18px rgba(0,0,0,.8),0 0 60px -20px rgba(124,182,255,.5)}
-.v36a-cliente-icone.claude{background:radial-gradient(circle at 30% 25%,#f6efe6,#e8dccd 70%);box-shadow:0 0 0 1px rgba(255,255,255,.15),0 20px 50px -18px rgba(0,0,0,.8),0 0 60px -18px rgba(217,119,87,.6)}
+.v36a-cliente-icone{display:grid;place-items:center;width:104px;height:104px;border-radius:30px;box-shadow:var(--ds-sombra-curta)}
+.v36a-cliente-icone.claude{background:radial-gradient(circle at 30% 25%,#f6efe6,#e8dccd 70%);box-shadow:var(--ds-sombra-curta),0 0 60px -18px rgba(217,119,87,.6)}
 .v36a-cliente-icone svg{width:62px;height:62px}
 .v36a-astro-estado i.erro{background:var(--falha);box-shadow:0 0 8px var(--falha)}
 .v36a-astro-estado .estado{font-size:9.5px}
@@ -74,18 +72,18 @@ body[data-tela=agentes] .topo-direita{--fundo:#040713;--painel:#0b1326;--linha:r
 .v36-neuron-ponto::after{content:"";position:absolute;inset:-7px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--cor) 45%,transparent),transparent 70%);animation:v36a-pulso 2.6s ease-in-out infinite;animation-delay:var(--atraso,0s)}
 .v36-neuron.mudou .v36-neuron-ponto::after{animation-duration:1.2s;inset:-11px}
 .v36-neuron[aria-pressed=true] .v36-neuron-ponto{transform:scale(1.5)}
-.v36-neuron-rotulo{position:absolute;top:50%;display:flex;flex-direction:column;gap:1px;width:max-content;max-width:210px;padding:5px 10px;border-radius:10px;background:rgba(4,8,20,.72);backdrop-filter:blur(6px);transform:translateY(-50%);opacity:.0;pointer-events:none;transition:opacity .2s}
+.v36-neuron-rotulo{position:absolute;top:50%;display:flex;flex-direction:column;gap:1px;width:max-content;max-width:210px;padding:5px 10px;border-radius:10px;background:var(--ds-rotulo);box-shadow:0 0 0 1px var(--ds-linha-suave);backdrop-filter:blur(6px);transform:translateY(-50%);opacity:.0;pointer-events:none;transition:opacity .2s}
 .v36-neuron.dir .v36-neuron-rotulo{left:20px;text-align:left}.v36-neuron.esq .v36-neuron-rotulo{right:20px;text-align:right}
 .v36-neuron:hover .v36-neuron-rotulo,.v36-neuron:focus-visible .v36-neuron-rotulo,.v36-neuron[aria-pressed=true] .v36-neuron-rotulo,.v36-neuron.mudou .v36-neuron-rotulo,.v36a-campo-neural:not(:has(.v36-neuron:nth-child(18))) .v36-neuron-rotulo{opacity:1}
-.v36-neuron-rotulo strong{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#eaf2ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v36-neuron-rotulo small{font-size:10.5px;color:#9fb4d6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v36-neuron.mudou .v36-neuron-rotulo strong{color:#ffd27a}
-.v36a-cerebro-rodape{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid rgba(120,160,230,.16);padding-top:12px}
+.v36-neuron-rotulo strong{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--texto);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v36-neuron-rotulo small{font-size:10.5px;color:var(--suave);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v36-neuron.mudou .v36-neuron-rotulo strong{color:var(--aviso)}
+.v36a-cerebro-rodape{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--ds-linha-suave);padding-top:12px}
 .v36a-cerebro-rodape .v36-brain-inspect{flex:1 1 360px;border:0;padding:0}
-.v36a-legenda-neural{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:10.5px;color:#9fb4d6}
+.v36a-legenda-neural{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:10.5px;color:var(--suave)}
 .v36a-legenda-neural i,.v36a-insp-grupo i{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;vertical-align:0}
-.v36a-insp-grupo{display:flex;align-items:center;gap:4px;margin-bottom:6px;font-size:10.5px;letter-spacing:.06em;color:#9fb4d6}
-.v36a-insp-mudou{margin-left:10px;color:#ffd27a}
+.v36a-insp-grupo{display:flex;align-items:center;gap:4px;margin-bottom:6px;font-size:10.5px;letter-spacing:.06em;color:var(--suave)}
+.v36a-insp-mudou{margin-left:10px;color:var(--aviso)}
 @keyframes v36a-pulso{0%,100%{transform:scale(.7);opacity:.35}50%{transform:scale(1.25);opacity:.9}}
 @media(max-width:820px){.v36a-campo-neural .v36-brain-face{width:62%}.v36-neuron-rotulo{max-width:130px}}
 @media(prefers-reduced-motion:reduce){.v36a-astro-figura,.v36-neuron-ponto::after{animation:none!important}}
@@ -97,30 +95,6 @@ body[data-tela=agentes] .topo-direita{--fundo:#040713;--painel:#0b1326;--linha:r
 .v36f-alvo{position:absolute;left:50%;top:50%;z-index:3;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;pointer-events:auto;cursor:pointer}
 @media(max-width:670px){.v36f-alvo{width:52px;height:52px;margin:-26px 0 0 -26px}}
 
-/* Agentes no modo claro: mesmo céu, em tons perolados */
-:root[data-tema=claro] .v36a{--fundo:#eef3fb;--fundo2:#e6edf8;--painel:#ffffff;--linha:rgba(40,70,130,.16);--texto:#14233d;--suave:#4c5f80;--acento:#1f56b8;--acento-texto:#fff;--ok:#0f6b4a;--falha:#b3243b;--aviso:#7a5200;--neutro:#4c5f80;--qc-azul:43,98,184;--qc-branco:112,128,156;--qc-vermelho:181,70,96;color-scheme:light}
-@media(prefers-color-scheme:light){:root:not([data-tema=escuro]) .v36a{--fundo:#eef3fb;--fundo2:#e6edf8;--painel:#ffffff;--linha:rgba(40,70,130,.16);--texto:#14233d;--suave:#4c5f80;--acento:#1f56b8;--acento-texto:#fff;--ok:#0f6b4a;--falha:#b3243b;--aviso:#7a5200;--neutro:#4c5f80;--qc-azul:43,98,184;--qc-branco:112,128,156;--qc-vermelho:181,70,96;color-scheme:light}}
-:root[data-tema=claro] body[data-tela=agentes] .topo-direita{--fundo:#f5f8fc;--painel:#fff;--linha:#cfd9ea;--texto:#14233d;--suave:#465875;color-scheme:light}
-:root[data-tema=claro] .v36a-astro-nome{color:var(--texto)}
-:root[data-tema=claro] .v36a-astro-estado{color:var(--texto)}
-:root[data-tema=claro] .v36a-busca{background:rgba(255,255,255,.7)}
-:root[data-tema=claro] .v36a-form{background:rgba(255,255,255,.72)}
-:root[data-tema=claro] .v36-form-actions.v36a-commit{background:linear-gradient(to top,rgba(255,255,255,.96) 55%,transparent)}
-:root[data-tema=claro] .v36-field input,:root[data-tema=claro] .v36-field textarea,:root[data-tema=claro] .v36a-cap select{background:rgba(255,255,255,.85)}
-:root[data-tema=claro] .v36a-detalhe{background:rgba(255,255,255,.25)}
-:root[data-tema=claro] .v36-activity-node{background:rgba(255,255,255,.7)}
-/* Perfil, Cérebro e mapa continuam como janelas para o espaço profundo, também no claro */
-:root[data-tema=claro] .v36a-perfil,:root[data-tema=claro] .v36-stage.v36a-cerebro,:root[data-tema=claro] .v36a-mapa{--texto:#eef3ff;--suave:#9fb0cf;background:radial-gradient(ellipse 65% 55% at 50% 45%,color-mix(in srgb,var(--face-color,#6ea8ff) 24%,transparent),transparent 72%),linear-gradient(180deg,#0a1429,#040814);color:#eef3ff}
-/* Tema "Sistema" com Windows claro: as mesmas regras do tema claro escolhido manualmente. */
-@media(prefers-color-scheme:light){
-:root:not([data-tema=escuro]) body[data-tela=agentes] .topo-direita{--fundo:#f5f8fc;--painel:#fff;--linha:#cfd9ea;--texto:#14233d;--suave:#465875;color-scheme:light}
-:root:not([data-tema=escuro]) .v36a-astro-nome{color:var(--texto)}
-:root:not([data-tema=escuro]) .v36a-astro-estado{color:var(--texto)}
-:root:not([data-tema=escuro]) .v36a-busca{background:rgba(255,255,255,.7)}
-:root:not([data-tema=escuro]) .v36a-form{background:rgba(255,255,255,.72)}
-:root:not([data-tema=escuro]) .v36-form-actions.v36a-commit{background:linear-gradient(to top,rgba(255,255,255,.96) 55%,transparent)}
-:root:not([data-tema=escuro]) .v36-field input,:root:not([data-tema=escuro]) .v36-field textarea,:root:not([data-tema=escuro]) .v36a-cap select{background:rgba(255,255,255,.85)}
-:root:not([data-tema=escuro]) .v36a-detalhe{background:rgba(255,255,255,.25)}
-:root:not([data-tema=escuro]) .v36-activity-node{background:rgba(255,255,255,.7)}
-:root:not([data-tema=escuro]) .v36a-perfil,:root:not([data-tema=escuro]) .v36-stage.v36a-cerebro,:root:not([data-tema=escuro]) .v36a-mapa{--texto:#eef3ff;--suave:#9fb0cf;background:radial-gradient(ellipse 65% 55% at 50% 45%,color-mix(in srgb,var(--face-color,#6ea8ff) 24%,transparent),transparent 72%),linear-gradient(180deg,#0a1429,#040814);color:#eef3ff}
-}
+/* Ícone do Codex: placa na cor do painel do tema, com o traço na cor do texto. */
+.v36a-cliente-icone{color:var(--texto)}
+.v36a-cliente-icone:not(.claude){background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--texto) 12%,var(--painel)),var(--painel) 70%);box-shadow:0 0 0 1px var(--ds-linha-suave),var(--ds-sombra-curta)}

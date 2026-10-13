@@ -5,6 +5,8 @@ const api = window.prumo;
 const $ = (s) => document.querySelector(s);
 const estado = { aba: 'inicio', root: null, timer: null, jobId: undefined, ajudaAlvo: null, aviso: null, prefs: null };
 
+// No DOM, append(null) escreve o texto "null". Nas telas, null/undefined/false sempre significam "nada a mostrar".
+for (const P of [Element.prototype, DocumentFragment.prototype]) for (const m of ['append', 'prepend', 'replaceChildren']) { const original = P[m]; P[m] = function (...nos) { return original.apply(this, nos.filter((n) => n != null && n !== false)); }; }
 function h(tag, attrs, ...filhos) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
