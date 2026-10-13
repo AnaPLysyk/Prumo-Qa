@@ -323,7 +323,7 @@
         abrirExecucao: (x) => caixa(tr('Execução {r}', { r: x.rotina }), [note(tr('Registro da fila do worker. Evidência e logs completos ficam em Execuções.')), h('pre', {}, JSON.stringify(x, null, 2)), button(tr('Abrir Execuções'), () => { document.querySelector('.v36-dialog[open]')?.close(); mostrar('execucoes'); })]),
         abrirTela: (aba) => mostrar(aba)
       });
-      const vivo = painelVivo; mostrarOrquestracoes(orq, quieto).then((n) => { if (n && painelVivo === vivo) vivo.abrirLateral(true); });
+      const vivo = painelVivo; mostrarOrquestracoes(orq, quieto).then((n) => { if (n && painelVivo === vivo) vivo.abrirLateral(true); }).catch(() => avisar(tr('Não foi possível mostrar as orquestrações.')));
     }
     list();
   };
