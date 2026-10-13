@@ -28,14 +28,14 @@ export const capacidades: DefCap[] = [
 ];
 
 export const especializacoes = [
-  { id: 'qa-geral', rotulo: 'QA Geral', skill: 'skills/qa', capacidades: ['consultar_contexto', 'revisar_cobertura', 'consultar_evidencias', 'propor_casos', 'propor_aprendizado'] },
-  { id: 'requisitos', rotulo: 'Análise de Requisitos e Cobertura', skill: 'skills/requisitos', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos', 'propor_aprendizado'] },
-  { id: 'playwright', rotulo: 'Automação Playwright', skill: 'skills/playwright', capacidades: ['consultar_contexto', 'propor_casos', 'executar_testes', 'consultar_evidencias', 'propor_aprendizado'] },
-  { id: 'api-rest', rotulo: 'Testes de API REST', skill: 'skills/api-rest', capacidades: ['consultar_contexto', 'propor_casos', 'executar_testes', 'consultar_evidencias', 'propor_aprendizado'] },
-  { id: 'acessibilidade', rotulo: 'Acessibilidade', skill: 'skills/acessibilidade', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos', 'propor_aprendizado'] },
-  { id: 'investigacao-bugs', rotulo: 'Investigação de Bugs', skill: 'skills/investigacao-bugs', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_bugs', 'propor_aprendizado'] },
-  { id: 'regressao', rotulo: 'Regressão', skill: 'skills/regressao', capacidades: ['executar_testes', 'consultar_evidencias', 'propor_bugs', 'propor_aprendizado'] },
-  { id: 'monitoramento', rotulo: 'Monitoramento de Alterações', skill: 'skills/monitoramento', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_aprendizado'] }
+  { id: 'qa-geral', rotulo: 'QA Geral', skill: 'skills/qa', capacidades: ['consultar_contexto', 'revisar_cobertura', 'consultar_evidencias', 'propor_casos', 'propor_aprendizado'], profissao: 'Engenheiro de Qualidade', especialidade: 'Estratégia e testes exploratórios' },
+  { id: 'requisitos', rotulo: 'Análise de Requisitos e Cobertura', skill: 'skills/requisitos', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos', 'propor_aprendizado'], profissao: 'Analista de Requisitos', especialidade: 'Critérios de aceite e cobertura' },
+  { id: 'playwright', rotulo: 'Automação Playwright', skill: 'skills/playwright', capacidades: ['consultar_contexto', 'propor_casos', 'executar_testes', 'consultar_evidencias', 'propor_aprendizado'], profissao: 'Engenheiro de Automação', especialidade: 'Interface e E2E com Playwright' },
+  { id: 'api-rest', rotulo: 'Testes de API REST', skill: 'skills/api-rest', capacidades: ['consultar_contexto', 'propor_casos', 'executar_testes', 'consultar_evidencias', 'propor_aprendizado'], profissao: 'Engenheiro de Testes de API', especialidade: 'Contratos REST e integração' },
+  { id: 'acessibilidade', rotulo: 'Acessibilidade', skill: 'skills/acessibilidade', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos', 'propor_aprendizado'], profissao: 'Especialista em Acessibilidade', especialidade: 'Barreiras de uso e navegação' },
+  { id: 'investigacao-bugs', rotulo: 'Investigação de Bugs', skill: 'skills/investigacao-bugs', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_bugs', 'propor_aprendizado'], profissao: 'Analista de Defeitos', especialidade: 'Reprodução e investigação de falhas' },
+  { id: 'regressao', rotulo: 'Regressão', skill: 'skills/regressao', capacidades: ['executar_testes', 'consultar_evidencias', 'propor_bugs', 'propor_aprendizado'], profissao: 'Engenheiro de Regressão', especialidade: 'Execuções e rotinas autorizadas' },
+  { id: 'monitoramento', rotulo: 'Monitoramento de Alterações', skill: 'skills/monitoramento', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_aprendizado'], profissao: 'Analista de Qualidade', especialidade: 'Histórico e alterações observadas' }
 ] as const;
 
 export const idsCap = capacidades.map(c => c.id);

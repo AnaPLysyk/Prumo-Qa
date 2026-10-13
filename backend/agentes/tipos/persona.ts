@@ -7,13 +7,15 @@
  * A personalidade muda a FORMA de dizer, nunca os fatos: nenhuma frase daqui afirma execução, resultado ou aprovação.
  * As variações são escolhidas por uma semente determinística (mesma pergunta, mesma frase), o que mantém os testes estáveis.
  */
+import { especializacoes } from './politicas.js';
+
 export type Papel = 'qa' | 'dev' | 'po' | 'analista' | 'outro';
 
 export const papeis: readonly Papel[] = ['qa', 'dev', 'po', 'analista', 'outro'];
 
 export const rotuloPapel: Record<Papel, string> = { qa: 'QA', dev: 'Desenvolvimento', po: 'Produto (PO)', analista: 'Análise de negócio/requisitos', outro: 'Outro' };
 
-export type AgenteChat = { id: string; nome: string; especializacao: string | null; dominio: string; palavras: string[]; aba: string; rotulo: string };
+export type AgenteChat = { id: string; nome: string; especializacao: string | null; dominio: string; palavras: string[]; aba: string; rotulo: string; profissao: string; especialidade: string };
 
 export type Personalidade = { tom: string; foco: string; aberturas: string[]; assinatura: string };
 
@@ -41,7 +43,10 @@ export const agentesChat: AgenteChat[] = [
     palavras: ['!regressao', 'execucao', 'execucoes', 'rodou', 'rodada', 'run', 'resultado', 'pass', 'passou', 'smoke', 'agenda', 'rotina', 'proxima', 'agendad~', 'quando roda', 'suite'] },
   { id: 'monitoramento', nome: 'Monitoramento de Alterações', especializacao: 'monitoramento', dominio: 'Histórico de atividades e alterações recentes', aba: 'historico', rotulo: 'Histórico',
     palavras: ['historico', 'alterac~', 'mudanc~', 'mudou', 'aconteceu', 'atividade', 'recente', 'ultima', 'timeline', 'monitor~', 'metrica', 'grafico'] }
-];
+].map(a => {
+  const perfil = especializacoes.find(s => s.id === a.especializacao);
+  return { ...a, profissao: perfil?.profissao ?? 'Coordenador de Qualidade', especialidade: perfil?.especialidade ?? 'Roteamento e orientação local' };
+});
 
 /** Quem o Prumo é. Texto curto: entra no prompt da IA externa e no documento skills/qa/references/persona.md. */
 export const personaBase = [

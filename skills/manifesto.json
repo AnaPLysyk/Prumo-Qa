@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "skills": [
+    {
+      "id": "qa-geral",
+      "caminho": "skills/qa/SKILL.md",
+      "versao": "sha256:7c7b341dd4926679847348e62b549fd7af69d60ee93a872b8c2a45211ea3cea5",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/skillDoAgente.ts"
+      ],
+      "capacidades": [
+        "consultar_contexto",
+        "revisar_cobertura",
+        "consultar_evidencias",
+        "propor_casos",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "consultar_contexto": "PERMITIDO",
+        "revisar_cobertura": "PERMITIDO",
+        "consultar_evidencias": "PERMITIDO",
+        "propor_casos": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/politicas.ts"
+    },
+    {
+      "id": "requisitos",
+      "caminho": "skills/requisitos/SKILL.md",
+      "versao": "sha256:48136398d075adb47c036b279483374bf6af8a232ab1b71b2d6b732f5dff9650",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/skillDoAgente.ts"
+      ],
+      "capacidades": [
+        "consultar_contexto",
+        "revisar_cobertura",
+        "propor_casos",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "consultar_contexto": "PERMITIDO",
+        "revisar_cobertura": "PERMITIDO",
+        "propor_casos": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/politicas.ts"
+    },
+    {
+      "id": "playwright",
+      "caminho": "skills/playwright/SKILL.md",
+      "versao": "sha256:11be572d1bf6e85b56acd7a430458eb145c2a854bcdc41c5cfd20b476e7284f9",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/skillDoAgente.ts"
+      ],
+      "capacidades": [
+        "consultar_contexto",
+        "propor_casos",
+        "executar_testes",
+        "consultar_evidencias",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "consultar_contexto": "PERMITIDO",
+        "propor_casos": "PERMITIDO",
+        "executar_testes": "EXIGE_AUTORIZACAO",
+        "consultar_evidencias": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/politicas.ts"
+    },
+    {
+      "id": "api-rest",
+      "caminho": "skills/api-rest/SKILL.md",
+      "versao": "sha256:0f306e844d2df26b0c57ad92021dc52a93059a0d136349d55b70ce5d49bb7a3e",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/skillDoAgente.ts"
+      ],
+      "capacidades": [
+        "consultar_contexto",
+        "propor_casos",
+        "executar_testes",
+        "consultar_evidencias",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "consultar_contexto": "PERMITIDO",
+        "propor_casos": "PERMITIDO",
+        "executar_testes": "EXIGE_AUTORIZACAO",
+        "consultar_evidencias": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/politicas.ts"
+    },
+    {
+      "id": "acessibilidade",
+      "caminho": "skills/acessibilidade/SKILL.md",
+      "versao": "sha256:4032143f952b6a28cd644070154c99f39ba6005b693648cf479dade717801119",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/skillDoAgente.ts"
+      ],
+      "capacidades": [
+        "consultar_contexto",
+        "revisar_cobertura",
+        "propor_casos",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "consultar_contexto": "PERMITIDO",
+        "revisar_cobertura": "PERMITIDO",
+        "propor_casos": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/politicas.ts"
+    },
+    {
+      "id": "investigacao-bugs",
+      "caminho": "skills/investigacao-bugs/SKILL.md",
+      "versao": "sha256:8dd61a9e81c912d07464bbe82eea6004802713fb80d5e4450e0771afbbadb51d",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/skillDoAgente.ts"
+      ],
+      "capacidades": [
+        "consultar_contexto",
+        "consultar_evidencias",
+        "propor_bugs",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "consultar_contexto": "PERMITIDO",
+        "consultar_evidencias": "PERMITIDO",
+        "propor_bugs": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/politicas.ts"
+    },
+    {
+      "id": "regressao",
+      "caminho": "skills/regressao/SKILL.md",
+      "versao": "sha256:81d4af72e6ecb5f9ee9dc70f56e0a624c1112b65827430091535d7cd72fef08c",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/skillDoAgente.ts"
+      ],
+      "capacidades": [
+        "executar_testes",
+        "consultar_evidencias",
+        "propor_bugs",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "executar_testes": "EXIGE_AUTORIZACAO",
+        "consultar_evidencias": "PERMITIDO",
+        "propor_bugs": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/politicas.ts"
+    },
+    {
+      "id": "monitoramento",
+      "caminho": "skills/monitoramento/SKILL.md",
+      "versao": "sha256:2284a079ca9fbf60ebaac448255a9f831f3f349e1633eaaf362dab1f94fc7984",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/skillDoAgente.ts"
+      ],
+      "capacidades": [
+        "consultar_contexto",
+        "consultar_evidencias",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "consultar_contexto": "PERMITIDO",
+        "consultar_evidencias": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/politicas.ts"
+    }
+  ]
+}

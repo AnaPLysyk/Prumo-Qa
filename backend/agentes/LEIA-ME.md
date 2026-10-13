@@ -102,7 +102,7 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `responderSobreTeste.ts` | Responde sobre um teste escolhido na tela Testes (tipo, arquivo, agente certo). |
 | `saudacao.ts` | Abre a conversa: cumprimenta pelo nome, resume a situação e pergunta o que falta saber da pessoa. |
 | `separarAprendizados.ts` | Separa da resposta da IA as linhas "APRENDIZADO:" (viram rascunho) do restante. |
-| `skillDoAgente.ts` | Lê a Skill (instruções de QA) da especialização do agente para enviar à IA externa. |
+| `skillDoAgente.ts` | Lê integralmente apenas a Skill cadastrada da especialização, com limite em bytes. |
 | `termoCasaComPergunta.ts` | Diz se um termo aparece na pergunta (frase exata, prefixo~ ou palavra). |
 
 ## mcp/

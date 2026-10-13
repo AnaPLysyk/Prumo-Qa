@@ -1,6 +1,7 @@
 /** Usa Claude ou Codex somente após autorização; retorna ao chat local quando faltar permissão ou a IA falhar. */
 import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
 import { argumentosDoProvedorDeIa } from './argumentosDoProvedorDeIa.js';
+import { SkillUnavailable } from './skillDoAgente.js';
 import { montarPrompt } from './montarPrompt.js';
 import { registrarSugestoesDaIa } from './registrarSugestoesDaIa.js';
 import { separarAprendizados } from './separarAprendizados.js';
@@ -27,5 +28,5 @@ export async function consultarIaExterna({ o, agente, pergunta, local, estilo, n
     const linhas = texto.split(/\n{2,}/).map((l) => l.trim()).filter(Boolean).slice(0, 12);
     if (sugeridos) linhas.push(`${nomeP} sugeriu ${sugeridos} aprendizado(s); ficam como rascunho até você decidir.`);
     return montar(agente, { ...local, linhas }, provedor === 'claude' ? 'CLAUDE' : 'CODEX', { ...comum, acoes, ...(naoRegistrados ? { aviso: `${naoRegistrados} aprendizado(s) não foram registrados (limite ou armazenamento indisponível). A resposta da IA foi preservada.` } : {}) });
-  } catch { return voltar('Falha ao chamar a IA externa; resposta local.'); }
+  } catch (erro) { return voltar(erro instanceof SkillUnavailable ? erro.message : 'Falha ao chamar a IA externa; resposta local.'); }
 }

@@ -6,7 +6,7 @@ import { especializacoes } from '../tipos/politicas.js';
 /** Retrato do roster para a interface: agentes do chat ligados às especializações e às políticas do projeto. */
 export function agentesDoChat(espacoId: string | null, base?: string) {
   const matriz = espacoId ? matrizDePoliticas(espacoId, base) : [];
-  return agentesChat.map((a) => ({ id: a.id, nome: a.nome, dominio: a.dominio, especializacao: a.especializacao, aba: a.aba,
+  return agentesChat.map((a) => ({ id: a.id, nome: a.nome, dominio: a.dominio, profissao: a.profissao, especialidade: a.especialidade, especializacao: a.especializacao, aba: a.aba,
     skill: a.especializacao ? especializacoes.find((s) => s.id === a.especializacao)?.skill ?? null : null,
     capacidades: a.especializacao ? (especializacoes.find((s) => s.id === a.especializacao)?.capacidades ?? []).map((c) => ({ id: c, estado: matriz.find((m) => m.id === c)?.estado ?? null })) : [] }));
 }
