@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.11.0",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-13",
       "title": "Skills em banco próprio, Administração com documentação viva e código organizado pelo caminho de quem usa",
       "objective": "Dar a cada agente um banco de Skills que a equipe consegue alimentar e organizar o código para que cada tela, ferramenta e teste esteja num lugar previsível. Inclui tudo da 2.10.2, que não chegou a ser publicada: quem está na 2.10.1 recebe as duas de uma vez.",
       "features": [
@@ -47,7 +47,11 @@
       "afterUpdate": [
         "Abra Agentes, escolha um agente e veja a seção Skills: acrescente o que a sua equipe quer que ele siga ou importe uma pasta de Skill aberta e aprove os trechos."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.11.0",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.11.0.exe",
+        "sha256": "8f142a791a245d22bf7edbf14bf17fb58036079459e448505ae9b77b298db655"
+      }
     },
     {
       "version": "2.10.2",
