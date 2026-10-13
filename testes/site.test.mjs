@@ -5,6 +5,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { gerarSite,markdown } from '../scripts/gerar-site.mjs';
+import { gerarSite as gerarSiteModular, markdown as markdownModular } from '../site/gerar.mjs';
+
+test('entrada anterior reexporta a mesma implementação modular do site',()=>{
+  assert.equal(gerarSite,gerarSiteModular);
+  assert.equal(markdown,markdownModular);
+});
 test('site reproduzível, links internos resolvidos e downloads apenas de releases publicadas',t=>{
   const out=fs.mkdtempSync(path.join(os.tmpdir(),'prumo-site-'));t.after(()=>fs.rmSync(out,{recursive:true,force:true}));
   const r=gerarSite(out);assert.ok(r.pages>15);

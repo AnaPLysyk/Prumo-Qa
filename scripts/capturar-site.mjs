@@ -1,21 +1,26 @@
 // Captura as imagens do site a partir do aplicativo REAL, com dados 100% sintéticos e isolados.
 // Nada aqui toca Jira, Qase, GitHub ou projetos reais: os serviços são um servidor HTTP local de laboratório
 // (testes/servicos-fixtures.mjs) e o diretório de dados é temporário. Uso: node scripts/capturar-site.mjs
+// O bootstrap de testes substitui SQLite por armazenamento em memória. As capturas não comprovam
+// avaliação humana, uso de leitor de tela ou autenticação em serviços externos.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { _electron as electron } from 'playwright-core';
 import electronPath from 'electron';
 import { servidorFixture } from '../testes/servicos-fixtures.mjs';
 
-const repo = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const saida = path.join(repo, 'site', 'imagens');
 fs.mkdirSync(saida, { recursive: true });
 const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-site-captura-'));
-const s = await servidorFixture();
-const env = { ...process.env, PRUMO_DATA_DIR: dados }; delete env.ELECTRON_RUN_AS_NODE;
-const app = await electron.launch({ executablePath: electronPath, args: [repo], env });
+let s, app;
+const limpezas = [];
+const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1' }; delete env.ELECTRON_RUN_AS_NODE;
 try {
+  s = await servidorFixture();
+  app = await electron.launch({ executablePath: electronPath, args: [path.join(repo, 'testes/desktop-entry.cjs')], env, timeout: 30000 });
   await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
   await app.evaluate((_, p) => {
     const https = process.getBuiltinModule('node:https'), http = process.getBuiltinModule('node:http'), dns = process.getBuiltinModule('node:dns');
@@ -24,9 +29,11 @@ try {
     process.getBuiltinModule('node:module').syncBuiltinESMExports();
   }, s.port);
   const page = await app.firstWindow();
+  page.setDefaultTimeout(15000);
   await page.setViewportSize({ width: 1280, height: 800 });
   await app.evaluate(({ BrowserWindow }) => { const w = BrowserWindow.getAllWindows()[0]; w.setContentSize(1280, 800); });
   await page.waitForSelector('#nav button');
+  await page.waitForSelector('[data-aba=inicio][aria-current=page]');
   const api = (fn, ...a) => page.evaluate(([f, args]) => window.prumo[f](...args), [fn, a]);
   const ir = async (aba) => { await page.click(`[data-aba=${aba}]`); await page.waitForFunction((x) => document.querySelector(`[data-aba=${x}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(500); };
 
@@ -54,10 +61,10 @@ try {
         await page.waitForTimeout(400); await page.screenshot({ path: path.join(todas, tema + '-' + aba + '.png') });
       }
     }
-    console.log('telas capturadas'); await app.close(); await s.fechar(); fs.rmSync(dados, { recursive: true, force: true }); process.exit(0);
-  }
+    console.log('telas capturadas');
+  } else {
   // Repositório sintético para o catálogo de testes (nada de projeto real)
-  const { fixture } = await import('../testes/fixtures.mjs'); const f = await fixture({ after() {} });
+  const { fixture } = await import('../testes/fixtures.mjs'); const f = await fixture({ after(fn) { limpezas.push(fn); } });
   const escreve = async (rel, txt) => { const p = path.join(f.root, rel); fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, txt); };
   await escreve('tests/e2e/checkout.spec.ts', "import { test } from '@playwright/test';\ntest.describe('Checkout', () => {\n  test('paga com cartão @smoke', async ({ page }) => { // Qase: SFQ-31\n    await page.goto('/'); await test.step('Escolher produto', async () => {}); await test.step('Pagar com cartão', async () => {}); });\n  test('recusa cartão vencido @regression', async ({ page }) => { await page.goto('/'); });\n});\n");
   await escreve('tests/e2e/login.spec.ts', "import { test } from '@playwright/test';\ntest.describe('Login', () => {\n  test('entra com senha válida', async ({ page }) => { await page.goto('/'); });\n  test('bloqueia após 5 tentativas', async ({ page }) => { await page.goto('/'); });\n});\n");
@@ -81,8 +88,16 @@ try {
   await ir('rastreabilidade'); await texto('Caso Qase 31'); await tirar('rastreabilidade');
   await ir('agentes'); await page.waitForTimeout(1200); await tirar('agentes');
   await tema('claro'); await ir('inicio'); await page.waitForTimeout(6500); await tirar('inicio-claro');
+  }
 } finally {
-  await app.close().catch(() => {});
-  await s.fechar();
-  fs.rmSync(dados, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 });
+  try {
+    await app?.close();
+  } finally {
+    try {
+      await s?.fechar();
+    } finally {
+      try { for (const limpar of limpezas.reverse()) await limpar(); }
+      finally { fs.rmSync(dados, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); }
+    }
+  }
 }

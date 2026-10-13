@@ -7,6 +7,8 @@ services:
     buildCommand: node scripts/gerar-site.mjs
     staticPublishPath: site/public
     autoDeployTrigger: "off"
+    previews:
+      generation: manual
     envVars:
       - key: SKIP_INSTALL_DEPS
         value: "true"
