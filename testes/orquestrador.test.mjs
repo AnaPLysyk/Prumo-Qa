@@ -96,7 +96,7 @@ test('IA externa autorizada: CLI sem shell recebe skill, fatos locais e pergunta
   const claude = argumentosProvedor('claude', 'p');
   assert.equal(claude[claude.indexOf('--tools') + 1], '');
   assert.ok(claude.includes('--strict-mcp-config') && claude.includes('--no-session-persistence'));
-  assert.match(montarPrompt(agentesChat.find((a) => a.id === 'playwright'), 'q', { linhas: ['f'], fontes: [], fatos: [] }, 'tecnico', 'Aurora'), /Skill ---[\s\S]*playwright/i);
+  assert.match(montarPrompt(agentesChat.find((a) => a.id === 'playwright'), 'q', { linhas: ['f'], fontes: [], fatos: [] }, 'tecnico', 'Aurora'), /--- Skill [^\n]*---[\s\S]*playwright/i);
 });
 
 test('conversas: gravadas só localmente, por agente, com segredos mascarados, limite e exclusão', () => {

@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (119 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (123 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -69,6 +69,10 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:conhecimento:vocabulario` | `agente` | Consulta local. |
 | `prumo:conhecimento:esquecer` | `agente`, `termo` | Remove o termo do vocabulário. |
 | `prumo:conhecimento:mostrar` | — | Abre o Explorer com o arquivo selecionado; nada é enviado. |
+| `prumo:skills:listar` | `busca`, `especializacao`, `estados` | Consulta local (cria o banco e sincroniza os trechos que acompanham o aplicativo). |
+| `prumo:skills:criar` | `especializacao`, `texto`, `titulo` | Grava em skills.db com segredos mascarados e sem duplicar; passa a ir para o prompt quando combinar com a pergunta. |
+| `prumo:skills:decidir` | `estado`, `id` | Grava o estado e a data da decisão. Só trechos APROVADOS vão para o prompt. |
+| `prumo:skills:importar` | `especializacao`, `fonte` | Abre o seletor de pastas do sistema; recusa pasta sem licença aberta reconhecida (MIT, Apache-2.0, BSD, ISC, CC). Nada é baixado nem executado; scripts da pasta são ignorados. |
 | `prumo:perfil:obter` | — | Consulta local. |
 | `prumo:perfil:salvar` | `comoChamar`, `papel` | Grava a única linha da tabela perfil. |
 | `prumo:ia:delegacao` | `provedor`, `valor` | Grava preferencias.json. Autorizar exige confirmação nativa; revogar não. |
@@ -1015,6 +1019,66 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, KNOWLEDGE_*, PROFILE_*
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Banco de conhecimento local (SQLite)
+
+### `prumo:skills:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar os trechos das Skills dos agentes (do Prumo, da equipe, importados ou sugeridos por IA), por especialização, estado e busca.
+- **Origem:** Interface > Agentes (Skills)
+- **Destino:** backend/agentes/api/skillsListar.ts > listarTrechosDeSkill
+- **Entrada:** Especialização, estados e busca (opcionais)
+- **Saída:** Trechos (até 500) com origem, fonte, licença e estado
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local (cria o banco e sincroniza os trechos que acompanham o aplicativo).
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\skills.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SKILL_*, SKILLS_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de Skills local (SQLite), separado do conhecimento
+
+### `prumo:skills:criar`
+
+- **Tipo:** IPC
+- **Finalidade:** Acrescentar à Skill de uma especialização um trecho escrito pela equipe.
+- **Origem:** Interface > Agentes (Skills)
+- **Destino:** backend/agentes/api/skillsCriar.ts > registrarTrechosDeSkill
+- **Entrada:** Especialização, título e texto
+- **Saída:** Trecho APROVADO (ou o igual já existente)
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava em skills.db com segredos mascarados e sem duplicar; passa a ir para o prompt quando combinar com a pergunta.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\skills.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SKILL_*, SKILLS_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de Skills local (SQLite), separado do conhecimento
+
+### `prumo:skills:decidir`
+
+- **Tipo:** IPC
+- **Finalidade:** Aprovar ou descartar um trecho de Skill (rascunho importado ou de IA, ou um trecho existente, inclusive do Prumo).
+- **Origem:** Interface > Agentes (Skills)
+- **Destino:** backend/agentes/api/skillsDecidir.ts > decidirTrechoDeSkill
+- **Entrada:** Identificador e estado
+- **Saída:** Trecho atualizado
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava o estado e a data da decisão. Só trechos APROVADOS vão para o prompt.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\skills.db
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SKILL_*, SKILLS_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de Skills local (SQLite), separado do conhecimento
+
+### `prumo:skills:importar`
+
+- **Tipo:** IPC
+- **Finalidade:** Importar uma pasta de Skill aberta (SKILL.md e references/) já presente no computador, como rascunhos de uma especialização.
+- **Origem:** Interface > Agentes (Skills)
+- **Destino:** backend/agentes/api/skillsImportar.ts > importarPastaDeSkill, validarEspecializacao
+- **Entrada:** Especialização e fonte (endereço do repositório, opcional)
+- **Saída:** Licença reconhecida, quantidade importada e duplicada (estado RASCUNHO)
+- **Permissões:** Ação explícita da pessoa; aprovação de cada trecho antes de ir para o prompt
+- **Efeito:** Abre o seletor de pastas do sistema; recusa pasta sem licença aberta reconhecida (MIT, Apache-2.0, BSD, ISC, CC). Nada é baixado nem executado; scripts da pasta são ignorados.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\skills.db; pasta escolhida pela pessoa (somente leitura)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SKILL_*, SKILLS_*
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Banco de Skills local (SQLite), separado do conhecimento
 
 ### `prumo:perfil:obter`
 

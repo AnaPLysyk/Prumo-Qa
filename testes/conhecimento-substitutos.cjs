@@ -1,4 +1,4 @@
-// Funções do banco de conhecimento (SQLite) que os testes trocam pela versão em memória de conhecimento-falso.mjs.
+// Funções dos bancos de conhecimento e de Skills (SQLite) que os testes trocam pela versão em memória de conhecimento-falso.mjs.
 // Chave: arquivo em dist/; valor: [nome exportado pelo arquivo, nome da função em `memoria`].
 // Usado pelo hook do runner (conhecimento-hook.cjs) e pelo mock (conhecimento-memoria.mjs): uma única lista.
 module.exports = {
@@ -17,5 +17,8 @@ module.exports = {
   'agentes/banco/avaliarAtendimento.js': ['avaliarAtendimento', 'avaliarAtendimento'],
   'agentes/banco/listarAtendimentos.js': ['listarAtendimentos', 'listarAtendimentos'],
   'agentes/banco/estadoConhecimento.js': ['estadoConhecimento', 'estadoConhecimento'],
+  'agentes/banco/listarTrechosDeSkill.js': ['listarTrechosDeSkill', 'listarTrechosDeSkill'],
+  'agentes/banco/registrarTrechosDeSkill.js': ['registrarTrechosDeSkill', 'registrarTrechosDeSkill'],
+  'agentes/banco/decidirTrechoDeSkill.js': ['decidirTrechoDeSkill', 'decidirTrechoDeSkill'],
   'agentes/regras/conhecimentoParaIA.js': ['conhecimentoParaIA', 'conhecimentoParaIA'],
 };

@@ -20,7 +20,7 @@ export async function consultarIaExterna({ o, agente, pergunta, local, estilo, n
   let cwd: string | undefined; if (o.espacoId) { try { cwd = obterEspaco(o.espacoId, o.base).pastaLocal ?? undefined; } catch { cwd = undefined; } }
   const conhecimentos = tentarOuPadrao(() => conhecimentosRelevantes(o.espacoId, agente.id === 'orquestrador' ? null : agente.id, pergunta, 5, o.base), [] as Conhecimento[]).map((c) => ({ titulo: c.titulo, texto: c.texto }));
   try {
-    const x = await o.executor(exe, argumentosDoProvedorDeIa(provedor, montarPrompt(agente, pergunta, local, estilo, nome, { perfil, historico, conhecimentos })), { timeoutMs: 120000, cwd });
+    const x = await o.executor(exe, argumentosDoProvedorDeIa(provedor, montarPrompt(agente, pergunta, local, estilo, nome, { perfil, historico, conhecimentos, base: o.base })), { timeoutMs: 120000, cwd });
     const { texto: limpo, aprendizados } = separarAprendizados(mascarar(x.saida)); const texto = limpo.trim().slice(0, 6000);
     if (x.codigo !== 0 || !texto) return voltar(`${nomeP} não respondeu (código ${x.codigo ?? 'tempo esgotado'}); resposta local.`);
     const { acoes, sugeridos, naoRegistrados } = registrarSugestoesDaIa(o, agente, provedor, aprendizados);
