@@ -1081,6 +1081,23 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/skills.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal regra; usa o banco de Skills em memória. Verifica: divisão em trechos, escolha para o prompt, licença na importação e limite de tamanho",
+      "evidencias": [
+        "escolher: essencial sempre entra, o que combina com a pergunta vem antes, rascunho e descartado nunca entram",
+        "importar: sem licença aberta, com especialização inexistente ou sem licença registrada, nada é gravado",
+        "../dist/agentes/regras/escolherTrechosDaSkill.js",
+        "../dist/agentes/banco/importarPastaDeSkill.js"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/subprocesso.test.mjs",
       "camada": "integracao",
       "natureza": [

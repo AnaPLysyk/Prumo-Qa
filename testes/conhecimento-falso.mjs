@@ -3,6 +3,9 @@ import { randomUUID } from 'node:crypto';
 import { semAcentos } from '../dist/compartilhado/texto/semAcentos.js';
 import { normalizarNome } from '../dist/agentes/regras/normalizarNome.js';
 import { termosDaFrase } from '../dist/agentes/regras/termosDaFrase.js';
+import { sementeDasSkills } from '../dist/agentes/banco/sementeDasSkills.js';
+import { validarEspecializacao } from '../dist/agentes/regras/validarEspecializacao.js';
+import { mascarar } from '../dist/compartilhado/seguranca/mascarar.js';
 
 // Funções puras reais (não tocam o banco), usadas pela versão em memória.
 const real = { norm: semAcentos, normalizarNome, termos: termosDaFrase };
@@ -21,7 +24,19 @@ const registrarConhecimento = (n) => {
   const item = { ...n, id: randomUUID(), estado: n.origem === 'PESSOA' ? 'APROVADO' : 'RASCUNHO', criadoEm: new Date().toISOString(), decididoEm: null, cliente: n.cliente ?? null };
   itens.push(item); return { item, duplicado: false };
 };
+// Banco de Skills em memória: os trechos do Prumo vêm dos arquivos reais (sem SQLite); o restante só existe durante o teste.
+const trechos = sementeDasSkills().map(t => ({ ...t }));
+const listarTrechosDeSkill = (f = {}) => { if (f.especializacao) validarEspecializacao(f.especializacao); return trechos.filter(t => (!f.especializacao || t.especializacao === f.especializacao) && (!f.estados?.length || f.estados.includes(t.estado)) && (!f.busca || real.norm(t.titulo + ' ' + t.texto).includes(real.norm(f.busca)))); };
+const registrarTrechosDeSkill = (novos) => novos.map(n => {
+  validarEspecializacao(n.especializacao); if (n.origem === 'IMPORTADO' && (!n.fonte || !n.licenca)) throw new Error('SKILL_LICENSE_MISSING');
+  const titulo = mascarar(n.titulo).trim(), texto = mascarar(n.texto).trim(); if (titulo.length < 2 || texto.length < 2) throw new Error('SKILL_TEXT_REQUIRED');
+  const igual = trechos.find(t => t.estado !== 'DESCARTADO' && t.especializacao === n.especializacao && t.titulo === titulo && t.texto === texto); if (igual) return { item: igual, duplicado: true };
+  const em = new Date().toISOString(); const item = { id: randomUUID(), especializacao: n.especializacao, titulo, texto, ordem: n.ordem ?? 1000 + trechos.length, origem: n.origem, estado: n.origem === 'PESSOA' ? 'APROVADO' : 'RASCUNHO', fonte: n.fonte ?? null, licenca: n.licenca ?? null, criadoEm: em, decididoEm: n.origem === 'PESSOA' ? em : null };
+  trechos.push(item); return { item, duplicado: false };
+});
+const decidirTrechoDeSkill = (id, estado) => { const t = trechos.find(x => x.id === id); if (!t) throw new Error('SKILL_NOT_FOUND'); t.estado = estado; t.decididoEm = new Date().toISOString(); return t; };
 export const memoria = {
+  listarTrechosDeSkill, registrarTrechosDeSkill, decidirTrechoDeSkill,
   lerPerfil, listarConhecimentos, registrarConhecimento,
   salvarPerfil: (a, base) => { const p = { ...lerPerfil(base), ...a, atualizadoEm: new Date().toISOString() }; if (a.comoChamar) p.comoChamar = real.normalizarNome(a.comoChamar); perfis.set(base, p); return p; },
   decidirConhecimento: (id, estado) => { const c = itens.find(x => x.id === id); if (!c) throw new Error('KNOWLEDGE_NOT_FOUND'); c.estado = estado; return c; },

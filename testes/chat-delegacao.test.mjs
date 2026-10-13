@@ -2,7 +2,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { skillDoAgente, SkillUnavailable } from '../dist/agentes/chat/skillDoAgente.js';
+import { skillDoAgente } from '../dist/agentes/chat/skillDoAgente.js';
+import { listarTrechosDeSkill } from '../dist/agentes/banco/listarTrechosDeSkill.js';
+import { decidirTrechoDeSkill } from '../dist/agentes/banco/decidirTrechoDeSkill.js';
 import { montarPrompt } from '../dist/agentes/chat/montarPrompt.js';
 import { consultarIaExterna } from '../dist/agentes/chat/consultarIaExterna.js';
 import { registrarSugestoesDaIa } from '../dist/agentes/chat/registrarSugestoesDaIa.js';
@@ -56,51 +58,29 @@ test('sem aprendizados não grava nada nem pede aprovação', () => {
   assert.deepEqual(r, { acoes: [], sugeridos: 0, naoRegistrados: 0 });
 });
 
-function simularSkill(t, texto) {
-  let leituras = 0;
-  t.mock.method(fs, 'openSync', () => 123);
-  t.mock.method(fs, 'fstatSync', () => ({ isFile: () => true, size: Buffer.byteLength(texto) }));
-  t.mock.method(fs, 'readSync', (_fd, buffer, offset) => {
-    if (leituras++) return 0;
-    return buffer.write(texto, offset, undefined, 'utf8');
-  });
-  t.mock.method(fs, 'closeSync', () => {});
-  return () => leituras;
-}
-
-test('Skill integral acima de 6000 caracteres aparece uma vez no prompt', t => {
-  const texto = 'á'.repeat(7000) + ' FIM DA SKILL';
-  const leituras = simularSkill(t, texto);
-  const prompt = montarPrompt(agente, 'Pergunta', { linhas: ['Fato'], fontes: [], fatos: [] }, 'direto', 'Prumo');
-  assert.ok(prompt.includes(texto));
-  assert.equal(prompt.split('FIM DA SKILL').length, 2);
-  assert.equal(leituras(), 2, 'uma leitura do conteúdo e uma consulta de fim de arquivo');
+test('Skill vai ao prompt uma vez só, em trechos aprovados e dentro de 8 KB', () => {
+  const prompt = montarPrompt(agente, 'estratégia de testes e riscos', { linhas: ['Fato'], fontes: [], fatos: [] }, 'direto', 'Prumo');
+  const bloco = prompt.split('--- Skill (trechos aprovados que combinam com a pergunta) ---');
+  assert.equal(bloco.length, 2, 'um único bloco de Skill');
+  assert.ok(Buffer.byteLength(skillDoAgente(null, 'estratégia de testes e riscos').texto) <= 8000);
 });
 
-test('Skill desconhecida ou traversal é recusada antes de acessar arquivos', t => {
+test('Skill de especialização desconhecida ou com traversal é recusada antes de acessar arquivos', t => {
   let acessos = 0;
-  t.mock.method(fs, 'openSync', () => { acessos++; throw Error('não abrir'); });
-  for (const id of ['desconhecida', '../qa', 'qa/../../dados']) {
-    assert.throws(() => skillDoAgente(id), erro => erro instanceof SkillUnavailable && erro.code === 'SKILL_UNAVAILABLE');
-  }
+  for (const m of ['lstatSync', 'readFileSync', 'readdirSync', 'openSync']) t.mock.method(fs, m, () => { acessos++; throw Error('não abrir'); });
+  for (const id of ['desconhecida', '../qa', 'qa/../../dados']) assert.throws(() => skillDoAgente(id, 'pergunta'), /SKILL_SPECIALIZATION_INVALID/);
   assert.equal(acessos, 0);
 });
 
-test('Skill ausente retorna erro controlado sem silenciar a falha', t => {
-  t.mock.method(fs, 'openSync', () => { throw Object.assign(Error('ausente'), { code: 'ENOENT' }); });
-  assert.throws(() => skillDoAgente('qa-geral'), erro => erro.code === 'SKILL_UNAVAILABLE');
-});
-
-test('Skill maior que 64 KiB é recusada e não executa o provedor', async t => {
-  const leituras = simularSkill(t, 'x'.repeat(65537));
-  assert.throws(() => skillDoAgente(null), erro => erro.code === 'SKILL_UNAVAILABLE');
+test('sem trecho aprovado da especialização, a IA externa não é chamada e a falha aparece', async () => {
+  for (const t of listarTrechosDeSkill({ especializacao: 'monitoramento', estados: ['APROVADO'] })) decidirTrechoDeSkill(t.id, 'DESCARTADO');
+  assert.throws(() => skillDoAgente('monitoramento', 'histórico'), /SKILL_UNAVAILABLE/);
   let executado = false;
-  const c = contexto({ pergunta: '', espacoId: null, autorizados: { codex: true },
+  const c = contexto({ pergunta: 'histórico', espacoId: null, autorizados: { codex: true },
     executavel: () => 'codex', executor: async () => { executado = true; throw Error('não executar'); } });
-  c.pergunta = ''; // Sem termos: a coleta de conhecimentos termina antes de consultar armazenamento.
+  c.agente = { ...agente, id: 'monitoramento', especializacao: 'monitoramento' };
   const resposta = await consultarIaExterna(c);
   assert.equal(resposta.modo, 'LOCAL');
   assert.match(resposta.aviso, /SKILL_UNAVAILABLE/);
   assert.equal(executado, false);
-  assert.equal(leituras(), 0);
 });

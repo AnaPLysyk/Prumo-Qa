@@ -8,3 +8,9 @@
 export type No = { id: string; tipo: string; rotulo: string; detalhe?: string; estado?: string };
 
 export type Aresta = { de: string; para: string; tipo: string; origem: 'DECLARADO_PELO_USUARIO' | 'REGISTRADO_PELO_PRUMO' | 'OBSERVADO' | 'OBSERVADO_NO_CODIGO'; nota?: string };
+
+/** O grafo em construção: nós e ligações já anotados, e como acrescentar cada um sem repetir. */
+export type GrafoDeVinculos = { nos: Map<string, No>; arestas: Aresta[]; no: (n: No) => string; ar: (a: Aresta) => void };
+
+/** Uma lacuna de cadastro: caso sem automação, caso sem ticket ou ticket sem caso. */
+export type LacunaDoMapa = { tipo: string; id: string; mensagem: string };

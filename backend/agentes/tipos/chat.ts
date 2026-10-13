@@ -56,7 +56,7 @@ export type Meta = { linhas: string[]; pendente?: Pendente; acoes?: Acao[]; agen
 // ---------------- Delegação opcional ao Claude Code ou Codex (CLI local, com autorização prévia) ----------------
 export type Executor = (comando: string, args: string[], opcoes: { timeoutMs: number; cwd?: string }) => Promise<{ codigo: number | null; saida: string; erro: string }>;
 
-export type ExtrasPrompt = { perfil?: { comoChamar: string | null; papel: Papel | null } | null; historico?: Turno[]; conhecimentos?: { titulo: string; texto: string }[] };
+export type ExtrasPrompt = { perfil?: { comoChamar: string | null; papel: Papel | null } | null; historico?: Turno[]; conhecimentos?: { titulo: string; texto: string }[]; base?: string; skill?: string };
 
 export type Opcoes = { espacoId: string | null; pergunta: string; agente?: string | null; estilo?: Estilo; nome?: string; provedor?: Provedor; primeira?: boolean;
   historico?: Turno[]; contexto?: ContextoChat | null;

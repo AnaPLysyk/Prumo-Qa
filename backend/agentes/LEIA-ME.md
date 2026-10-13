@@ -28,6 +28,10 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `iaDelegacao.ts` | Canal ia:delegacao: Autorizar ou revogar a delegação do chat ao Claude Code ou Codex. |
 | `perfilObter.ts` | Canal perfil:obter: Ler como a pessoa quer ser chamada e o papel dela. |
 | `perfilSalvar.ts` | Canal perfil:salvar: Salvar como a pessoa quer ser chamada e o papel dela (QA, dev, PO, analista ou outro). |
+| `skillsCriar.ts` | Canal skills:criar: Acrescentar um trecho escrito pela equipe à Skill de uma especialização. |
+| `skillsDecidir.ts` | Canal skills:decidir: Aprovar ou descartar um trecho de Skill (rascunho importado ou de IA, ou um trecho existente). |
+| `skillsImportar.ts` | Canal skills:importar: Importar uma pasta de Skill aberta (com SKILL.md e licença) como rascunhos de uma especialização. |
+| `skillsListar.ts` | Canal skills:listar: Listar os trechos do banco de Skills por especialização, estado e busca. |
 
 ## banco/
 
@@ -43,26 +47,33 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `avaliarAtendimento.ts` | Guarda se a resposta foi útil ou não. |
 | `caminhoConhecimento.ts` | Caminho do banco de conhecimento conhecimento.db na pasta de dados. |
 | `comBancoDeConhecimento.ts` | Abre o banco, faz a operação e fecha sempre. |
+| `comBancoDeSkills.ts` | Abre o banco de Skills (skills.db, separado do conhecimento), garante as tabelas e os trechos do Prumo, faz a operação e fecha sempre. |
 | `conhecimentosRelevantes.ts` | Busca os conhecimentos aprovados que mais combinam com a pergunta. |
 | `conversasDoAgente.ts` | Lista as conversas antigas de um agente, das mais novas para as mais antigas. |
 | `criarEsquemaDoConhecimento.ts` | Cria as tabelas e vistas do banco de conhecimento e coloca o conhecimento inicial do Prumo. |
 | `decidirConhecimento.ts` | Aprova ou descarta um conhecimento. |
+| `decidirTrechoDeSkill.ts` | Aprova ou descarta um trecho de Skill. Aprovar é sempre ato da pessoa; descartar vale também para os trechos do Prumo. |
 | `esquecerTermo.ts` | Faz um agente esquecer um termo. |
 | `estadoConhecimento.ts` | Resume o banco de conhecimento: arquivo, tamanho, tabelas, vistas e contagens por agente. |
 | `falharConhecimento.ts` | Interrompe com um código de erro do conhecimento (ex.: KNOWLEDGE_NOT_FOUND). |
+| `importarPastaDeSkill.ts` | Importa uma pasta de Skill aberta (por exemplo um repositório já clonado) como rascunhos de uma especialização, com fonte e licença. Nada é baixado da internet. |
 | `impressaoDoConhecimento.ts` | Impressão digital de um conhecimento para não guardar o mesmo duas vezes. |
 | `lerConfiguracaoDosAgentes.ts` | Lê as configurações de agentes por projeto (agentes.json). |
 | `lerConversas.ts` | Lê as conversas antigas gravadas de um projeto. |
+| `lerPastaDeSkill.ts` | Lê uma pasta de Skill (SKILL.md e references/*.md) sem seguir atalhos, sem binários e com limite de tamanho por arquivo. |
 | `lerPerfil.ts` | Lê como a pessoa quer ser chamada e o papel dela. |
 | `linhaParaConhecimento.ts` | Converte uma linha do banco num conhecimento. |
 | `listarAtendimentos.ts` | Lista os atendimentos de um projeto e agente. |
 | `listarConhecimentos.ts` | Lista os conhecimentos por projeto, agente, estado e busca. |
+| `listarTrechosDeSkill.ts` | Lista os trechos de Skill por especialização, estado e busca; rascunhos primeiro, depois na ordem de leitura. |
 | `pastaDasConversas.ts` | Pasta das conversas antigas do chat. |
 | `pesosAprendidos.ts` | Soma, por agente, o peso dos termos aprendidos que aparecem na frase. |
 | `registrarAtendimento.ts` | Registra um atendimento do chat (agente, modo e fontes), sem a pergunta nem a resposta. |
 | `registrarConhecimento.ts` | Registra um conhecimento: da pessoa já aprovado; da IA ou da conversa em rascunho (com limite por hora). |
 | `registrarConversa.ts` | Grava uma conversa com segredos mascarados e limite de tamanho. |
+| `registrarTrechosDeSkill.ts` | Acrescenta trechos a uma Skill: da equipe já aprovados; importados ou de IA em rascunho. Iguais não duplicam; vários numa única transação (se um falhar, nenhum é gravado). |
 | `salvarPerfil.ts` | Salva como a pessoa quer ser chamada e o papel dela. |
+| `sementeDasSkills.ts` | Trechos das Skills que acompanham o aplicativo (pasta skills/), já divididos e com identificador estável pelo conteúdo. |
 | `validarAgenteDoConhecimento.ts` | Confere se o agente existe. |
 | `validarProjetoDoConhecimento.ts` | Confere o id do projeto de um conhecimento. |
 | `vistaDoAgente.ts` | Nome da vista do banco que mostra os conhecimentos de um agente (agente_<id>). |
@@ -98,11 +109,11 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `personalidadeParaIa.ts` | Escreve o bloco de personalidade do agente enviado à IA (tom, foco, papel da pessoa). |
 | `proximosPassosSugeridos.ts` | Sugere as próximas perguntas úteis conforme o agente, os fatos e o papel da pessoa. |
 | `registrarSugestoesDaIa.ts` | Guarda aprendizados sugeridos pela IA apenas como rascunhos que exigem aprovação. |
-| `responderComDadosLocais.ts` | Monta a resposta do agente com os dados locais do projeto (sem IA), com fontes e fatos usados. |
+| `responderComDadosLocais.ts` | Monta a resposta do agente com os dados locais do projeto (sem IA): prepara a pergunta, chama a parte do agente certo e devolve linhas, fontes e fatos usados. |
 | `responderSobreTeste.ts` | Responde sobre um teste escolhido na tela Testes (tipo, arquivo, agente certo). |
 | `saudacao.ts` | Abre a conversa: cumprimenta pelo nome, resume a situação e pergunta o que falta saber da pessoa. |
 | `separarAprendizados.ts` | Separa da resposta da IA as linhas "APRENDIZADO:" (viram rascunho) do restante. |
-| `skillDoAgente.ts` | Lê integralmente apenas a Skill cadastrada da especialização, com limite em bytes. |
+| `skillDoAgente.ts` | Monta a Skill do agente para a IA externa: só os trechos aprovados do banco de Skills que combinam com a pergunta, dentro do limite de bytes. |
 | `termoCasaComPergunta.ts` | Diz se um termo aparece na pergunta (frase exata, prefixo~ ou palavra). |
 
 ## mcp/
@@ -149,9 +160,13 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | --- | --- |
 | `autorizarDelegacaoDeIa.ts` | Autoriza ou revoga o chat de enviar perguntas ao Claude Code ou ao Codex. |
 | `conhecimentoParaIA.ts` | Prepara o perfil e os conhecimentos aprovados para enviar à IA conectada. |
+| `dividirSkillEmTrechos.ts` | Divide um arquivo SKILL.md em trechos curtos (descrição, seções e parágrafos), sem cortar blocos de código. |
+| `escolherTrechosDaSkill.ts` | Escolhe os trechos aprovados de uma Skill que vão para o prompt: o essencial sempre, depois os que combinam com a pergunta, até o limite de bytes. |
+| `licencaAberta.ts` | Reconhece a licença de uma Skill de terceiros e diz se ela permite reaproveitar o texto com crédito (MIT, Apache-2.0, BSD, ISC, CC-BY, CC0...). |
 | `normalizarNome.ts` | Arruma o nome dito pela pessoa (iniciais maiúsculas), recusando textos que não parecem nome. |
 | `raizDaPalavra.ts` | Encurta uma palavra para achar variações (ex.: testes → test). |
 | `termosDaFrase.ts` | Separa os termos importantes de uma frase (mais de 3 letras, sem palavras comuns). |
+| `validarEspecializacao.ts` | Confere que a especialização existe no Prumo antes de ler ou gravar Skill dela. |
 
 ## tipos/
 
@@ -167,3 +182,4 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | `persona.ts` | Os agentes do chat, os papéis da pessoa e a personalidade de cada agente. |
 | `politicas.ts` | Capacidades da IA, especializações e o formato da configuração de agentes por projeto. |
 | `roteiros.ts` | Os roteiros (prompts MCP) do Prumo e suas regras comuns. |
+| `skills.ts` | Formato do banco de Skills: trechos de instrução por especialização, com origem, licença, estado e limites. |
