@@ -13,7 +13,7 @@
     const fontesCab = [vj && DS.origem('jira', 'Jira · ' + vj.recurso.chave), vq && DS.origem('qase', 'Qase · ' + vq.recurso.chave),
       vj && !escJira ? h('span', { class: 'ds-chip', 'data-escrita-desligada': 'jira', title: tr('Escrita no Jira desligada. Habilite em Conexões.') }, tr('Jira somente leitura')) : null].filter(Boolean);
     const contagem = h('span');
-    const cab = DS.cabecalho({ titulo: 'Tickets', contagem: 0, idContagem: 'tk-contagem', descricao: [h('span', { class: 'ds-chips' }, fontesCab)],
+    const cab = DS.cabecalho({ titulo: 'Tickets', contagem: 0, idContagem: 'tk-contagem', descricao: fontesCab.some((x) => x.hasAttribute('data-escrita-desligada')) ? [h('span', { class: 'ds-chips' }, fontesCab.filter((x) => x.hasAttribute('data-escrita-desligada')))] : null,
       acoes: [vj && DS.acao('Consulta avançada', () => avancada(e), { id: 'tk-avancada', icone: 'filtro' }), vj && DS.acao('Novo ticket', () => abrirCriar(e, {}), { id: 'tk-novo', primaria: true, icone: 'mais' })] });
     void contagem;
     const q = DS.busca({ id: 'tk-q', placeholder: 'Buscar por chave ou texto', valor: f.q, aoEnter: () => buscar() });
@@ -72,7 +72,7 @@
       lista.setAttribute('aria-busy', 'false');
       fontes.replaceChildren(...[linhaFonte('jira', mem.jira, maisJira), linhaFonte('qase', mem.qase, maisQase)].filter(Boolean));
       sugestoes.replaceChildren(...[...new Set((mem.jira?.itens || []).map((i) => i.fields?.status?.name).filter(Boolean))].map((s) => h('option', { value: s })));
-      const L = linhasTabela(); const n = $('#tk-contagem'); if (n) n.textContent = String(L.length);
+      const L = linhasTabela(); const n = cab.querySelector('#tk-contagem'); if (n) n.textContent = String(L.length);
       const erros = [mem.jira?.erro, mem.qase?.erro].filter(Boolean);
       if (!L.length) { lista.replaceChildren(erros.length && erros.length === [mem.jira, mem.qase].filter(Boolean).length ? DS.estadoTela('erro', 'Não foi possível consultar as fontes', erros.join(' · '), [DS.acao('Tentar novamente', () => buscar())])
         : DS.estadoTela('vazio', 'Nenhum ticket encontrado', mem.qase && !mem.qase.erro && !mem.qase.itens.length && !mem.jira ? 'Nenhum defeito retornado pelo Qase.' : 'Ajuste os filtros ou a origem e busque novamente.')); return; }

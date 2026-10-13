@@ -32,6 +32,7 @@ const DS = (() => {
     editar: ['M4 20h4L19 9l-4-4L4 16z', 'M13.5 6.5l4 4'],
     filtro: ['M4 5h16l-6 7v6l-4 2v-8z'],
     escudo: ['M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z'],
+    info: ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z', 'M12 11v6', 'M12 7.5v.01'],
     pulso: ['M3 12h4l2-6 4 12 2-6h6']
   };
   function icone(nome, rotulo) {
@@ -43,9 +44,9 @@ const DS = (() => {
   const t = (x) => (typeof x === 'string' ? tr(x) : x);
 
   /** Cabeçalho da tela: título, contagem, uma linha de contexto e ações à direita. */
-  function cabecalho({ titulo, contagem, descricao, acoes = [], idContagem }) {
+  function cabecalho({ titulo, contagem, descricao, acoes = [], idContagem, info: sobre }) {
     const n = contagem === undefined || contagem === null ? null : h('span', { class: 'ds-contagem', id: idContagem || null, 'aria-label': tr('{n} itens', { n: contagem }) }, String(contagem));
-    return h('div', { class: 'ds-cab' }, h('div', { class: 'ds-cab-titulo' }, h('h1', {}, tr(titulo), n), descricao ? h('p', { class: 'ds-desc' }, [].concat(descricao).map(t)) : null),
+    return h('div', { class: 'ds-cab' }, h('div', { class: 'ds-cab-titulo' }, h('h1', {}, tr(titulo), n, sobre ? info(sobre) : null), descricao ? h('p', { class: 'ds-desc' }, [].concat(descricao).map(t)) : null),
       acoes.filter(Boolean).length ? h('div', { class: 'ds-cab-acoes' }, acoes.filter(Boolean)) : null);
   }
   /** Botão padrão; a ação assíncrona desabilita o botão enquanto roda (mesma regra de plataforma.js). */
@@ -93,6 +94,13 @@ const DS = (() => {
   }
   const carregando = (texto = 'Carregando…') => estadoTela('carregando', texto, null, [], { compacto: true });
   function esqueleto(n = 5) { return h('div', { class: 'ds-esqueleto', role: 'status', 'aria-label': tr('Carregando…') }, Array.from({ length: n }, () => h('i'))); }
+  /** Ressalva permanente (não é estado nem erro): ícone ⓘ que mostra o texto ao passar o mouse, focar ou clicar; o texto fica no DOM para leitor de tela. */
+  function info(texto, { id, rotulo } = {}) {
+    const caixa = h('span', { class: 'ds-info', id: id || null });
+    const botao = h('button', { type: 'button', class: 'ds-info-botao', 'aria-label': tr(rotulo || 'Sobre estes dados'), 'aria-expanded': 'false', onclick: (e) => { e.stopPropagation(); const aberto = !caixa.hasAttribute('data-aberto'); caixa.toggleAttribute('data-aberto', aberto); botao.setAttribute('aria-expanded', String(aberto)); } }, icone('info'));
+    caixa.append(botao, h('span', { class: 'ds-info-texto', role: 'note' }, [].concat(texto).map(t)));
+    return caixa;
+  }
   function alerta(texto, tom, ic) { return h('div', { class: 'ds-alerta', 'data-tom': tom || null, role: tom === 'falha' ? 'alert' : null }, icone(ic || (tom === 'ok' ? 'ok' : tom === 'falha' || tom === 'aviso' ? 'alerta' : 'escudo')), h('div', {}, [].concat(texto).map(t))); }
   function notaPermissao(texto) { return h('p', { class: 'ds-nota-perm' }, icone('cadeado'), h('span', {}, t(texto))); }
   /** Abas: itens [[chave, rótulo, contagem?]]; aoTrocar(chave). Usa aria-selected (tablist). */
@@ -161,7 +169,7 @@ const DS = (() => {
   const tom = (s) => tomEstado[s] || null;
   /** Consulta da tela falhou (o motivo já foi para o aviso): estado de erro com "Tentar de novo", nunca tela em branco. */
   const falhaConsulta = (aba, titulo) => estadoTela('erro', titulo || 'Não foi possível carregar esta tela', 'A consulta falhou e o motivo apareceu no aviso. Nada foi alterado.', [acao('Tentar de novo', () => mostrar(aba), { icone: 'atualizar' })], { id: 'falha-consulta' });
-  return { icone, cabecalho, acao, link, barra, busca, selecao, tabela, chip, origem, estadoTela, falhaConsulta, carregando, esqueleto, alerta, notaPermissao, abas: abasTela, campo, grupo, meta, secao, bloco, texto, recolher, resumo, tempo, modal, fecharModal, rodape, abasModal, iniciais, tom, nomesServico };
+  return { icone, cabecalho, acao, link, barra, busca, selecao, tabela, chip, origem, estadoTela, falhaConsulta, carregando, esqueleto, alerta, info, notaPermissao, abas: abasTela, campo, grupo, meta, secao, bloco, texto, recolher, resumo, tempo, modal, fecharModal, rodape, abasModal, iniciais, tom, nomesServico };
 })();
 // Telas que usam o layout do Design System (largura útil maior e barras sem caixa).
 (() => {

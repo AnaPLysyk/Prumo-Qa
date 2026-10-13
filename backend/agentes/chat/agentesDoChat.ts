@@ -7,6 +7,8 @@ import { especializacoes } from '../tipos/politicas.js';
 export function agentesDoChat(espacoId: string | null, base?: string) {
   const matriz = espacoId ? matrizDePoliticas(espacoId, base) : [];
   return agentesChat.map((a) => ({ id: a.id, nome: a.nome, dominio: a.dominio, profissao: a.profissao, especialidade: a.especialidade, especializacao: a.especializacao, aba: a.aba,
+    // Vocabulário de roteamento (sem os marcadores internos ! e ~), para o Cérebro mostrar o que leva a pergunta a este agente.
+    palavras: a.palavras.map((k) => k.replace(/^!/, '').replace('~', '')),
     skill: a.especializacao ? especializacoes.find((s) => s.id === a.especializacao)?.skill ?? null : null,
     capacidades: a.especializacao ? (especializacoes.find((s) => s.id === a.especializacao)?.capacidades ?? []).map((c) => ({ id: c, estado: matriz.find((m) => m.id === c)?.estado ?? null })) : [] }));
 }

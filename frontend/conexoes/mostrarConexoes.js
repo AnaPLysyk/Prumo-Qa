@@ -12,7 +12,7 @@ abas.conexoes=async el=>{
       botao('Validar e guardar credencial',async()=>{const dados={servico:tipo.value,nome:nome.input.value,token:token.input.value};if(tipo.value==='jira'){dados.instancia=instancia.input.value;dados.usuario=usuario.input.value;}try{const r=await chamar(()=>api.servicoAdicionar(dados));if(r&&!r.canceled)mostrar('conexoes');}finally{token.input.value='';dados.token='';}},'conexao-salvar'),botao('Cancelar',()=>{token.input.value='';form.replaceChildren();}));
   },'conexao-nova'),form);
   const contas=await chamar(api.servicos);if(!contas)return;
-  for(const c of contas.filter(c=>c.ativa))el.append(h('section',{class:'nota'},h('h2',{},c.nome+' · '+c.servico),h('p',{},c.identidade+' · '+c.instancia+' · validada: '+hora(c.validadaEm)),
+  for(const c of contas.filter(c=>c.ativa))el.append(h('section',{class:'nota'},h('h2',{},c.nome.toLowerCase().includes(c.servico)?c.nome:c.nome+' · '+c.servico),h('p',{},c.identidade+' · '+c.instancia+' · validada: '+hora(c.validadaEm)),
     botao('Validar conexão',async()=>{const r=await chamar(()=>api.servicoValidar(c.id));if(r)avisar('Credencial validada por consulta de leitura.');}),
     botao('Listar recursos disponíveis',()=>listar(c,{offset:0,limite:50})),
     botao('Remover conexão',async()=>{const r=await chamar(()=>api.servicoRemover(c.id));if(r&&!r.canceled)mostrar('conexoes');})));

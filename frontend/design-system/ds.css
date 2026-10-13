@@ -15,8 +15,19 @@
   --ds-dur: .18s;
   --ds-jira: #5aa2ff; --ds-qase: #a78bfa; --ds-github: #c9d1d9; --ds-local: #34d3b0; --ds-prumo: var(--acento);
 }
-:root[data-tema="claro"] { --ds-jira: #1d5fc4; --ds-qase: #6d3fd8; --ds-github: #3a4656; --ds-local: #0b7a63; --ds-sombra: 0 30px 80px -30px rgba(20, 35, 61, .45); }
-@media (prefers-color-scheme: light) { :root:not([data-tema="escuro"]) { --ds-jira: #1d5fc4; --ds-qase: #6d3fd8; --ds-github: #3a4656; --ds-local: #0b7a63; --ds-sombra: 0 30px 80px -30px rgba(20, 35, 61, .45); } }
+/* Tokens de tema usados pelas telas: as cores claro/escuro moram só aqui e em estilo.css; as telas não têm ramos de tema. */
+:root {
+  --ds-rotulo: color-mix(in srgb, var(--fundo) 86%, transparent);
+  --ds-mistura-retrato: screen; --ds-mistura-avatar: screen;
+  --ds-sombra-curta: 0 18px 40px -18px rgba(0, 0, 0, .75);
+  --ds-terminal-escuro-fundo: #050c15; --ds-terminal-escuro-fundo2: #0b1522; --ds-terminal-escuro-linha: #1c3247; --ds-terminal-escuro-texto: #c7d9eb; --ds-terminal-escuro-suave: #8fa8c4;
+  --ds-terminal-escuro-info: #8cc7ff; --ds-terminal-escuro-ok: #67daa7; --ds-terminal-escuro-erro: #fa8596; --ds-terminal-escuro-aviso: #f2c977;
+  --ds-terminal-claro-fundo: #f5f8fc; --ds-terminal-claro-fundo2: #eaf0f8; --ds-terminal-claro-linha: #c8d8eb; --ds-terminal-claro-texto: #233955; --ds-terminal-claro-suave: #627c98;
+  --ds-terminal-claro-info: #1d58aa; --ds-terminal-claro-ok: #08724c; --ds-terminal-claro-erro: #ae3049; --ds-terminal-claro-aviso: #895a05;
+  --ds-terminal-fundo: var(--ds-terminal-escuro-fundo); --ds-terminal-fundo2: var(--ds-terminal-escuro-fundo2); --ds-terminal-linha: var(--ds-terminal-escuro-linha); --ds-terminal-texto: var(--ds-terminal-escuro-texto); --ds-terminal-suave: var(--ds-terminal-escuro-suave); --ds-terminal-info: var(--ds-terminal-escuro-info); --ds-terminal-ok: var(--ds-terminal-escuro-ok); --ds-terminal-erro: var(--ds-terminal-escuro-erro); --ds-terminal-aviso: var(--ds-terminal-escuro-aviso);
+}
+:root[data-tema="claro"] { --ds-terminal-fundo: var(--ds-terminal-claro-fundo); --ds-terminal-fundo2: var(--ds-terminal-claro-fundo2); --ds-terminal-linha: var(--ds-terminal-claro-linha); --ds-terminal-texto: var(--ds-terminal-claro-texto); --ds-terminal-suave: var(--ds-terminal-claro-suave); --ds-terminal-info: var(--ds-terminal-claro-info); --ds-terminal-ok: var(--ds-terminal-claro-ok); --ds-terminal-erro: var(--ds-terminal-claro-erro); --ds-terminal-aviso: var(--ds-terminal-claro-aviso); --ds-mistura-retrato: normal; --ds-mistura-avatar: multiply; --ds-sombra-curta: 0 18px 40px -20px rgba(30, 50, 90, .35); --ds-jira: #1d5fc4; --ds-qase: #6d3fd8; --ds-github: #3a4656; --ds-local: #0b7a63; --ds-sombra: 0 30px 80px -30px rgba(20, 35, 61, .45); }
+@media (prefers-color-scheme: light) { :root:not([data-tema="escuro"]) { --ds-terminal-fundo: var(--ds-terminal-claro-fundo); --ds-terminal-fundo2: var(--ds-terminal-claro-fundo2); --ds-terminal-linha: var(--ds-terminal-claro-linha); --ds-terminal-texto: var(--ds-terminal-claro-texto); --ds-terminal-suave: var(--ds-terminal-claro-suave); --ds-terminal-info: var(--ds-terminal-claro-info); --ds-terminal-ok: var(--ds-terminal-claro-ok); --ds-terminal-erro: var(--ds-terminal-claro-erro); --ds-terminal-aviso: var(--ds-terminal-claro-aviso); --ds-mistura-retrato: normal; --ds-mistura-avatar: multiply; --ds-sombra-curta: 0 18px 40px -20px rgba(30, 50, 90, .35); --ds-jira: #1d5fc4; --ds-qase: #6d3fd8; --ds-github: #3a4656; --ds-local: #0b7a63; --ds-sombra: 0 30px 80px -30px rgba(20, 35, 61, .45); } }
 
 /* ---------- Ícones ---------- */
 .ds-ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; vertical-align: -3px; }
@@ -25,7 +36,7 @@
 .ds-cab { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--ds-3) var(--ds-6); padding-bottom: var(--ds-4); margin-bottom: var(--ds-1); border-bottom: 1px solid var(--ds-linha-suave); }
 .ds-cab-titulo { min-width: 0; }
 main .ds-cab h1 { margin: 0; }
-.ds-cab-titulo { flex: 1 1 360px; }
+.ds-cab-titulo { flex: 1 1 360px; min-height: 60px; } /* altura mínima: as ações nunca sobem até a faixa do topo (Worker, Ajustes) */
 main .ds-cab h1::before { content: ""; width: 26px; height: 26px; flex: none; border-radius: 50%; background: url("../../assets/qc-orb.png") center / cover; box-shadow: 0 0 0 2px rgba(var(--qc-azul), .35); }
 .ds-contagem { font: 500 14px/1 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; color: var(--suave); font-variant-numeric: tabular-nums; align-self: center; margin-left: 2px; }
 .ds-cab p.ds-desc { margin: 6px 0 0; font-size: 13px; color: var(--suave); max-width: 78ch; }
@@ -388,3 +399,11 @@ nav.ds-ide-arvore, .ds-doc nav.indice { display: block; }
 .ds-ide-painel .ds-texto { font-size: var(--ds-fs-md); }
 .ds-ide-painel .ds-sub { display: block; font-size: 12px; color: var(--suave); margin: 2px 0 6px; }
 .ds-ide-painel .ds-chips { margin: 4px 0; }
+
+/* ---------- Ressalva em ícone (ⓘ): não ocupa a tela; abre ao passar o mouse, focar ou clicar ---------- */
+.ds-info { position: relative; display: inline-flex; align-items: center; vertical-align: middle; margin-left: 6px; }
+.ds-info-botao { display: inline-grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--suave); cursor: pointer; }
+.ds-info-botao:hover, .ds-info-botao:focus-visible, .ds-info[data-aberto] .ds-info-botao { color: var(--acento); background: var(--ds-hover); }
+.ds-info-botao:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+.ds-info-texto { position: absolute; top: calc(100% + 6px); left: -8px; z-index: 60; display: none; width: max-content; max-width: min(380px, 80vw); padding: 10px 12px; border: 1px solid var(--linha); border-radius: var(--ds-r2); background: var(--painel); color: var(--texto); box-shadow: var(--ds-sombra-curta); font: 400 12.5px/1.5 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; letter-spacing: 0; text-transform: none; white-space: normal; }
+.ds-info:hover .ds-info-texto, .ds-info:focus-within .ds-info-texto, .ds-info[data-aberto] .ds-info-texto { display: block; }
