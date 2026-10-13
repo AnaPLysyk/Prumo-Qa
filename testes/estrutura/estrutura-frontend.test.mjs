@@ -6,6 +6,8 @@ import path from 'node:path';
 
 const origem = 'frontend';
 const copia = 'app/renderer/telas';
+const recursos = JSON.parse(fs.readFileSync('frontend/recursos.json', 'utf8')).recursos;
+const mapeadas = new Set(recursos.map(r => r.fonte.slice('frontend/'.length)));
 const lista = (base) => {
   const visitar = (p) => fs.readdirSync(p, { withFileTypes: true }).flatMap(ent =>
     ent.isDirectory() ? visitar(path.join(p, ent.name))
@@ -13,13 +15,27 @@ const lista = (base) => {
   return visitar(base).sort();
 };
 test('frontend: os mesmos arquivos e conteúdos do Electron, sem duplicatas editáveis', () => {
-  const arquivos = lista(origem);
-  assert.deepEqual(lista(copia), arquivos, 'Cópia de execução deve ter as mesmas pastas e arquivos da fonte oficial');
+  const arquivos = lista(origem).filter(arq => /\.(js|css|html)$/.test(arq) && !mapeadas.has(arq));
+  assert.deepEqual(lista(copia).filter(arq => /\.(js|css|html)$/.test(arq)), arquivos, 'Cópia de execução deve ter os mesmos arquivos distribuíveis da fonte oficial');
+  assert.ok(lista(copia).every(arq => !arq.endsWith('.md')), 'Documentação de desenvolvimento não deve ser distribuída como tela');
   for (const arq of arquivos) assert.deepEqual(
     fs.readFileSync(path.join(origem, arq)),
     fs.readFileSync(path.join(copia, arq)),
     'O arquivo executado deve coincidir com a fonte oficial: '+arq
   );
+});
+
+test('frontend: recursos têm fonte única e preservam todos os caminhos distribuídos', () => {
+  assert.equal(new Set(recursos.map(r => r.fonte)).size, recursos.length);
+  assert.equal(new Set(recursos.map(r => r.destino)).size, recursos.length);
+  for (const recurso of recursos) {
+    assert.deepEqual(fs.readFileSync(recurso.fonte), fs.readFileSync(recurso.destino), 'Recurso divergente: '+recurso.destino);
+    assert.ok(!fs.existsSync(path.join(copia, recurso.fonte.slice('frontend/'.length))), 'Recurso não deve ser copiado como tela: '+recurso.fonte);
+  }
+  const bundles = JSON.parse(fs.readFileSync('scripts/telas-modulares.json', 'utf8')).bundles.map(b => path.basename(b.destino));
+  const excluidos = new Set([...bundles, 'agenda.js', 'apoio-v40.js', 'integracoes.js', 'plataforma.js', 'status.css']);
+  const runtime = fs.readdirSync('app/renderer').filter(arq => /\.(js|css|html)$/.test(arq) && !excluidos.has(arq)).sort();
+  assert.deepEqual(recursos.map(r => path.basename(r.destino)).sort(), runtime, 'Todo recurso não gerado da raiz deve ter fonte oficial');
 });
 test('frontend: módulos de telas reconhecíveis pelo nome e backend correspondente', () => {
   for (const mod of ['inicio','projetos','tickets','testes','agendamentos','execucoes','rastreabilidade','agentes','conexoes','metricas','historico','logs','suporte','ajuda','configuracoes']) {

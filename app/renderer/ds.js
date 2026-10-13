@@ -3,6 +3,7 @@
 // não chama o núcleo nem guarda dados. Documentação: docs/DESIGN-SYSTEM.md.
 const DS = (() => {
   const NS = 'http://www.w3.org/2000/svg';
+  let sequenciaAbas = 0;
   const caminhos = {
     busca: ['M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z', 'M20 20l-4-4'],
     mais: ['M12 5v14', 'M5 12h14'],
@@ -97,9 +98,16 @@ const DS = (() => {
   /** Abas: itens [[chave, rótulo, contagem?]]; aoTrocar(chave). Usa aria-selected (tablist). */
   function abasTela(itens, atual, aoTrocar, { id, rotulo = 'Seções', attr = 'data-aba-ds' } = {}) {
     const nav = h('div', { class: 'ds-abas', role: 'tablist', 'aria-label': tr(rotulo), id: id || null });
-    const marcar = (k) => { for (const b of nav.children) b.setAttribute('aria-selected', String(b.getAttribute(attr) === k)); };
-    for (const [k, txt, n] of itens) nav.append(h('button', { type: 'button', role: 'tab', [attr]: k, 'aria-selected': String(k === atual), onclick: () => { marcar(k); aoTrocar(k); } }, t(txt), n !== undefined && n !== null ? h('span', { class: 'ds-n' }, String(n)) : null));
-    nav.addEventListener('keydown', (e) => { if (!['ArrowRight', 'ArrowLeft'].includes(e.key)) return; const bs = [...nav.children]; const i = bs.indexOf(document.activeElement); if (i < 0) return; const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length; bs[j].focus(); bs[j].click(); });
+    const selecionada = itens.some(([k]) => k === atual) ? atual : itens[0]?.[0];
+    const marcar = (k) => { for (const b of nav.children) { const ativo = b.getAttribute(attr) === k; b.setAttribute('aria-selected', String(ativo)); b.tabIndex = ativo ? 0 : -1; } };
+    for (const [k, txt, n] of itens) nav.append(h('button', { type: 'button', role: 'tab', [attr]: k, tabindex: k === selecionada ? 0 : -1, 'aria-selected': String(k === selecionada), onclick: () => { marcar(k); aoTrocar(k); } }, t(txt), n !== undefined && n !== null ? h('span', { class: 'ds-n' }, String(n)) : null));
+    nav.addEventListener('keydown', (e) => {
+      if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
+      const bs = [...nav.children]; const i = bs.indexOf(document.activeElement); if (i < 0) return;
+      e.preventDefault();
+      const j = e.key === 'Home' ? 0 : e.key === 'End' ? bs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length;
+      bs[j].focus(); bs[j].click();
+    });
     return nav;
   }
   function campo(rotulo, controle, { ajuda, inteiro, id, oculto } = {}) {
@@ -125,12 +133,28 @@ const DS = (() => {
   /** Abas dentro do modal: cada painel é montado na primeira vez em que é aberto. */
   function abasModal(paineis, inicial) {
     const area = h('div', { class: 'ds-painel' }); const feitos = new Map();
+    const prefixo = 'ds-abas-' + (++sequenciaAbas);
+    const selecionada = paineis.some(([k]) => k === inicial) ? inicial : paineis[0]?.[0];
+    let atual = selecionada;
+    const montados = new Set();
+    paineis.forEach(([k], i) => {
+      const no = h('div', { id: prefixo + '-painel-' + i, role: 'tabpanel', 'aria-labelledby': prefixo + '-aba-' + i, tabindex: 0, hidden: k !== atual, 'data-painel': k });
+      feitos.set(k, no); area.append(no);
+    });
     const exibir = async (k) => {
+      atual = k;
       for (const [chave, no] of feitos) no.hidden = chave !== k;
-      if (!feitos.has(k)) { const p = paineis.find((x) => x[0] === k); const no = h('div', { role: 'tabpanel', 'data-painel': k }, carregando()); feitos.set(k, no); area.append(no); try { no.replaceChildren(...[].concat(await p[3]()).filter(Boolean)); } catch { no.replaceChildren(estadoTela('erro', 'Não foi possível carregar esta seção.')); } }
+      if (!montados.has(k)) {
+        const i = paineis.findIndex((x) => x[0] === k); if (i < 0) return;
+        const p = paineis[i]; const no = feitos.get(k);
+        montados.add(k); no.replaceChildren(carregando());
+        try { no.replaceChildren(...[].concat(await p[3]()).filter(Boolean)); } catch { no.replaceChildren(estadoTela('erro', 'Não foi possível carregar esta seção.')); }
+        no.hidden = atual !== k;
+      }
     };
-    const nav = abasTela(paineis.map(([k, txt, n]) => [k, txt, n]), inicial || paineis[0][0], exibir, { rotulo: 'Seções do detalhe' });
-    exibir(inicial || paineis[0][0]);
+    const nav = abasTela(paineis.map(([k, txt, n]) => [k, txt, n]), selecionada, exibir, { rotulo: 'Seções do detalhe' });
+    [...nav.children].forEach((aba, i) => { aba.id = prefixo + '-aba-' + i; aba.setAttribute('aria-controls', prefixo + '-painel-' + i); });
+    if (selecionada !== undefined) exibir(selecionada);
     return [nav, area];
   }
   const iniciais = (nome) => (String(nome || '?').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('') || '?').toUpperCase();

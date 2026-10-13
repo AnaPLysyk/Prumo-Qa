@@ -20,8 +20,20 @@ function arquivosDentro(pasta, base = pasta) {
   return arquivos.sort();
 }
 
-const fontes = arquivosDentro(origem);
-const copias = arquivosDentro(destino);
+const manifesto = JSON.parse(fs.readFileSync(path.join(origem, 'recursos.json'), 'utf8'));
+if (manifesto.schemaVersion !== 1 || !Array.isArray(manifesto.recursos)) throw new Error('Manifesto de recursos inválido');
+const recursos = manifesto.recursos;
+const fontesMapeadas = new Set(); const destinosMapeados = new Set();
+for (const recurso of recursos) {
+  if (typeof recurso.fonte !== 'string' || typeof recurso.destino !== 'string' ||
+      !/^frontend\/(?:[\w-]+\/)+[\w.-]+\.(?:js|css|html)$/.test(recurso.fonte) ||
+      !/^app\/renderer\/[\w.-]+\.(?:js|css|html)$/.test(recurso.destino)) throw new Error('Caminho de recurso inválido');
+  if (fontesMapeadas.has(recurso.fonte) || destinosMapeados.has(recurso.destino)) throw new Error('Recurso duplicado: ' + recurso.fonte);
+  fontesMapeadas.add(recurso.fonte); destinosMapeados.add(recurso.destino);
+}
+const distribuivel = arquivo => /\.(js|css|html)$/.test(arquivo);
+const fontes = arquivosDentro(origem).filter(arquivo => distribuivel(arquivo) && !fontesMapeadas.has('frontend/' + arquivo.split(path.sep).join('/')));
+const copias = arquivosDentro(destino).filter(distribuivel);
 const diferencas = [];
 const fontesSet = new Set(fontes);
 for (const arquivo of copias) if (!fontesSet.has(arquivo)) diferencas.push('Copia sem fonte oficial: ' + arquivo);
@@ -37,9 +49,21 @@ for (const arquivo of fontes) {
     console.log('SINCRONIZADO: ' + arquivo);
   }
 }
+// Recursos transversais preservam os caminhos e a ordem de carga públicos do Electron.
+for (const recurso of recursos) {
+  const a = path.join(raiz, recurso.fonte);
+  const b = path.join(raiz, recurso.destino);
+  if (!fs.existsSync(a)) { diferencas.push('Fonte de recurso ausente: ' + recurso.fonte); continue; }
+  if (fs.existsSync(b) && fs.readFileSync(a).equals(fs.readFileSync(b))) continue;
+  if (somenteConferir) diferencas.push('Copia de recurso divergente: ' + recurso.destino);
+  else {
+    fs.copyFileSync(a, b);
+    console.log('SINCRONIZADO: ' + recurso.fonte);
+  }
+}
 if (diferencas.length) {
   diferencas.forEach(d => console.error('ERRO: ' + d));
   process.exitCode = 1;
 } else {
-  console.log('OK: ' + fontes.length + ' arquivos de frontend/ correspondem as copias do Electron.');
+  console.log('OK: ' + fontes.length + ' arquivos de telas e ' + recursos.length + ' recursos correspondem as copias do Electron.');
 }

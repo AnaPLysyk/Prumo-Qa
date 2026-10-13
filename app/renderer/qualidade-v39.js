@@ -23,7 +23,14 @@
     corpo.replaceChildren(); subtitulo.replaceChildren(); delete dialog.dataset.tamanho;
   }
   function encerrar() { if (dialog.open) { limpar(); dialog.close(); } }
-  dialog.addEventListener('close', () => { if (dialog.open) return; limpar(); if (origem?.isConnected) origem.focus(); });
+  dialog.addEventListener('close', () => {
+    if (dialog.open) return;
+    limpar();
+    // close chega numa tarefa posterior: a pessoa pode já ter escolhido outro controle.
+    const foco = document.activeElement;
+    if (origem?.isConnected && (!foco || foco === document.body || dialog.contains(foco))) origem.focus();
+    origem = null;
+  });
   fechar.addEventListener('click', encerrar);
   dialog.addEventListener('click', (e) => {
     if (e.target !== dialog) return;

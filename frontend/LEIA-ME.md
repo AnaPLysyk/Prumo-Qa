@@ -1,39 +1,19 @@
-# Frontend — o que aparece na tela
+# Fontes oficiais da interface
 
-**Este é o lugar para alterar o que a pessoa vê no Prumo QA.** Abra a pasta com o nome da tela. Dentro dela, o nome do arquivo indica a ação e a primeira frase explica sua função.
+Edite a interface em `frontend/`. `app/renderer/` contém cópias para executar e distribuir o Electron.
 
-## Onde procurar
+`recursos.json` mapeia explicitamente os recursos transversais para seus caminhos de execução originais:
 
-| O que precisa alterar | Onde encontrar |
-| --- | --- |
-| Tela Projetos e seus formulários | `frontend/projetos/` |
-| Tickets Jira | `frontend/tickets/` |
-| Casos de Testes, catálogo e propostas Qase | `frontend/testes/` |
-| Planos e Runs Qase | `frontend/runs/` |
-| Agendamentos e permissões de rotina | `frontend/agendamentos/` |
-| Execuções e evidências na interface | `frontend/execucoes/` |
-| Rastreabilidade | `frontend/rastreabilidade/` |
-| Agentes, chat, robô e Cérebro | `frontend/agentes/` |
-| Conexões Jira, Qase e GitHub | `frontend/conexoes/` |
-| Métricas, Histórico e Logs | `frontend/metricas/`, `frontend/historico/` e `frontend/logs/` |
-| Suporte, Ajuda e preferências | `frontend/suporte/`, `frontend/ajuda/` e `frontend/configuracoes/` |
-| Componentes usados em várias telas | `frontend/compartilhado/` |
+- `compartilhado/runtime/`: entrada `index.html`, aplicação `app.js` e todos os arquivos `i18n*.js`.
+- `design-system/`: componentes, estilos de base, tema e modal compartilhado.
+- `inicio/identidade/`: esfera, órbitas e robôs.
+- `agentes/atividades/`: painel de atividades e seu estilo.
+- `execucoes/operacao-v40.js`: apresentação das operações.
 
-**A lógica correspondente está em `backend/<nome-da-tela>/`.** Lá existem arquivos por ação em `api/` (pedidos da janela via IPC), `regras/`, `banco/` (dados locais), `integracoes/` e `tipos/` quando necessários.
+`npm run frontend:sync` sincroniza os recursos mapeados e os scripts e estilos das telas. `npm run frontend:check` detecta divergências. Documentos Markdown e o manifesto são dados de desenvolvimento, sem cópia nova para `app/renderer/telas/`.
 
-### Qual arquivo editar?
+Os bundles listados em `scripts/telas-modulares.json` são gerados das partes em `frontend/`; não têm segunda fonte editável. `app/renderer/status.css` é gerado de `app/suporte-status.json`. Os stubs `agenda.js`, `apoio-v40.js`, `integracoes.js` e `plataforma.js` e a biblioteca em `vendor/` permanecem fora do mapeamento.
 
-Edite **somente `frontend/`**. Por compatibilidade com o aplicativo Electron instalado, o build sincroniza uma cópia para `app/renderer/telas/`. Esta segunda pasta é **gerada**, não deve ser editada manualmente. O teste automático confere a igualdade de todos os arquivos, evitando versões diferentes da mesma tela.
+Para editar traduções, altere `frontend/compartilhado/runtime/i18n*.js` e sincronize. Os paths distribuídos e a ordem de carregamento permanecem os mesmos.
 
-Os scripts `app/renderer/fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e o CSS v36 continuam como bundles gerados pelas partes-fonte de `frontend/`. Alguns arquivos legados da janela ainda ficam em `app/renderer/` até que a migração completa do Electron seja validada.
-
-Comandos:
-
-```powershell
-npm.cmd run frontend:check
-npm.cmd run frontend:sync
-node scripts/gerar-telas-modulares.mjs --check
-npm.cmd run check
-```
-
-**Atenção:** nesta fase a interface ainda é Electron + JavaScript clássico e o backend usa IPC. Isto **não** significa que as telas de login, cadastro, recuperação de senha, administração e API web já estejam implementadas. Esses módulos pertencem à Proposta e devem passar por contratos, testes e permissões antes da publicação.
+A lógica correspondente permanece em `backend/<tela>/`. A interface usa Electron e JavaScript clássico, com IPC; login, cadastro, recuperação de senha e administração web continuam na Proposta.

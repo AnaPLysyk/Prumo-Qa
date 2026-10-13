@@ -57,7 +57,9 @@ Regras: um único botão primário por tela; sem cartões em volta de listas; ne
 texto explicativo que não mude a decisão da pessoa; limites reais do núcleo são
 ditos uma vez, perto da ação afetada.
 
-## 3. Componentes (`ds.js` + `ds.css`)
+## 3. Componentes (`frontend/design-system/ds.js` + `ds.css`)
+
+Estas são as fontes oficiais. `frontend:sync` gera os recursos em `app/renderer/`, preservando os caminhos do instalador. As abas oferecem foco único com Tab, setas com retorno nas extremidades e Home/End; os painéis dos modais têm vínculos ARIA estáveis e a montagem assíncrona conserva a seleção atual. O teste `desktop-design-system.test.mjs` verifica foco e respostas fora de ordem em Electron com conteúdo sintético.
 
 | Componente | API | Notas |
 |---|---|---|

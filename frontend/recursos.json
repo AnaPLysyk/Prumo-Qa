@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "recursos": [
+    {
+      "fonte": "frontend/compartilhado/runtime/app.js",
+      "destino": "app/renderer/app.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/runtime/index.html",
+      "destino": "app/renderer/index.html"
+    },
+    {
+      "fonte": "frontend/compartilhado/runtime/i18n.js",
+      "destino": "app/renderer/i18n.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/runtime/i18n-en.js",
+      "destino": "app/renderer/i18n-en.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/runtime/i18n-en-29.js",
+      "destino": "app/renderer/i18n-en-29.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/runtime/i18n-en-v36.js",
+      "destino": "app/renderer/i18n-en-v36.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/runtime/i18n-en-v40.js",
+      "destino": "app/renderer/i18n-en-v40.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/runtime/i18n-en-v41.js",
+      "destino": "app/renderer/i18n-en-v41.js"
+    },
+    {
+      "fonte": "frontend/design-system/ds.js",
+      "destino": "app/renderer/ds.js"
+    },
+    {
+      "fonte": "frontend/design-system/ds.css",
+      "destino": "app/renderer/ds.css"
+    },
+    {
+      "fonte": "frontend/design-system/qc.css",
+      "destino": "app/renderer/qc.css"
+    },
+    {
+      "fonte": "frontend/design-system/estilo.css",
+      "destino": "app/renderer/estilo.css"
+    },
+    {
+      "fonte": "frontend/design-system/qualidade-v39.css",
+      "destino": "app/renderer/qualidade-v39.css"
+    },
+    {
+      "fonte": "frontend/design-system/qualidade-v39.js",
+      "destino": "app/renderer/qualidade-v39.js"
+    },
+    {
+      "fonte": "frontend/inicio/identidade/qc.js",
+      "destino": "app/renderer/qc.js"
+    },
+    {
+      "fonte": "frontend/inicio/identidade/orbitas-v36.js",
+      "destino": "app/renderer/orbitas-v36.js"
+    },
+    {
+      "fonte": "frontend/inicio/identidade/robos-v36.js",
+      "destino": "app/renderer/robos-v36.js"
+    },
+    {
+      "fonte": "frontend/agentes/atividades/painel-atividades-v41.js",
+      "destino": "app/renderer/painel-atividades-v41.js"
+    },
+    {
+      "fonte": "frontend/agentes/atividades/painel-atividades-v41.css",
+      "destino": "app/renderer/painel-atividades-v41.css"
+    },
+    {
+      "fonte": "frontend/execucoes/operacao-v40.js",
+      "destino": "app/renderer/operacao-v40.js"
+    }
+  ]
+}

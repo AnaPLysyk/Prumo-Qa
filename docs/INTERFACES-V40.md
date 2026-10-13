@@ -50,7 +50,7 @@ validação de escopo e duplicidade existentes inalteradas.
 | `app/renderer/fluxos-v40.js` | Tickets, defeito, caso, Testes e Rastreabilidade. |
 | `app/renderer/operacao-v40.js` | Agendamentos, Execuções e evidências. |
 | `app/renderer/apoio-v40.js` | Suporte e Ajuda. |
-| `app/renderer/i18n-en-v40.js` | Inglês das telas novas; nenhuma chave existente redefinida. |
+| `frontend/compartilhado/runtime/i18n-en-v40.js` | Fonte do inglês das telas novas; gera `app/renderer/i18n-en-v40.js`, sem redefinir chaves existentes. |
 | `app/renderer/qualidade-v39.js` | Modal ganha tamanho e subtítulo. |
 | `app/renderer/agenda.js` | Formulário de rotina com o layout do DS (mesmos campos e IDs). |
 | `app/renderer/plataforma.js`, `integracoes.js` | Correções de Projetos e Conexões. |

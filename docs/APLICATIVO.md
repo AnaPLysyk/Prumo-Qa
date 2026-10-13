@@ -4,7 +4,7 @@ Na 2.6, Conexões usa `backend/conexoes/ia/` (`diagnosticarIntegracao`, `testarP
 
 Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `backend/suporte/integracoes/consultarChamado.ts` usa os rótulos definidos em `app/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
 
-O gerador `scripts/gerar-site.mjs` usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes em [../site/README.md](../site/README.md).
+O gerador `site/gerar.mjs`, chamado pela entrada compatível `scripts/gerar-site.mjs`, usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes em [../site/README.md](../site/README.md).
 
 A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama o arquivo `api/` da tela (ex.: `backend/logs/api/projetoLogs.ts`), que delega às regras da própria tela.
 
