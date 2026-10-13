@@ -41,9 +41,9 @@ aparecem em registros dos últimos 90 s. Estados `STARTED`/`SEM_TERMINO_OBSERVAD
 
 | Arquivo | Motivo |
 |---|---|
-| `app/renderer/painel-atividades-v41.js` | Modelo (fontes, hubs, folhas, arestas), disposição, canvas com pan/zoom, minimapa, atualização ao vivo. |
-| `app/renderer/painel-atividades-v41.css` | Estética grafite/terminal, nos temas claro e escuro; movimento reduzido e alto contraste. |
-| `frontend/compartilhado/runtime/i18n-en-v41.js` | Fonte do inglês das frases novas; gera `app/renderer/i18n-en-v41.js`. |
-| `app/renderer/interfaces-v36.js` | Aba Painel de atividades usa o módulo; diagrama antigo removido. |
-| `app/renderer/index.html` | Carrega os arquivos v41. |
+| `dist/renderer/painel-atividades-v41.js` | Modelo (fontes, hubs, folhas, arestas), disposição, canvas com pan/zoom, minimapa, atualização ao vivo. |
+| `dist/renderer/painel-atividades-v41.css` | Estética grafite/terminal, nos temas claro e escuro; movimento reduzido e alto contraste. |
+| `frontend/compartilhado/runtime/i18n-en-v41.js` | Fonte do inglês das frases novas; gera `dist/renderer/i18n-en-v41.js`. |
+| `dist/renderer/interfaces-v36.js` | Aba Painel de atividades usa o módulo; diagrama antigo removido. |
+| `dist/renderer/index.html` | Carrega os arquivos v41. |
 | `testes/e2e/ui/desktop-interfaces-v36.test.mjs` | Janela por cliente, hubs, uma linha por operação, nada inferido sem conversa/execução, zoom por botão e teclado. |

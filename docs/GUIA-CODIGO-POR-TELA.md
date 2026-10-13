@@ -7,7 +7,7 @@
 - Quer alterar o que aparece na tela? Abra `frontend/NOME-DA-TELA/`.
 - Quer alterar o que acontece depois do clique? Abra `backend/NOME-DA-TELA/` e leia o `LEIA-ME.md` da pasta: `api/` recebe o pedido, `regras/` decide, `banco/` grava.
 - Quer entender por que uma pasta local ganhou `qa.project.json`? Abra `backend/projetos/regras/proporContrato.ts`.
-- Quer descobrir por onde a tela conversa com as regras? Veja `app/preload.cjs` → `backend/aplicativo/api/catalogoDeContratos.ts` (formato do pedido) → `backend/<tela>/api/<canal>.ts`. **Hoje não são endpoints HTTP**: são canais IPC seguros do Electron.
+- Quer descobrir por onde a tela conversa com as regras? Veja `backend/aplicativo/preload.cjs` → `backend/aplicativo/api/catalogoDeContratos.ts` (formato do pedido) → `backend/<tela>/api/<canal>.ts`. **Hoje não são endpoints HTTP**: são canais IPC seguros do Electron.
 - Quer localizar como os dados locais são guardados? Veja `backend/projetos/banco/` → `backend/compartilhado/banco/gravarLocal.ts`.
 - **Nada aqui executa uma API HTTP própria no Render.** Isso pertence à proposta futura.
 
@@ -22,7 +22,7 @@ frontend/projetos/mostrarProjetos.js
 
   ↓ janela chama api.espacoCriar / api.espacoEditar
 
-app/preload.cjs                       expõe só operações IPC permitidas
+backend/aplicativo/preload.cjs                       expõe só operações IPC permitidas
   ↓ canais "espacos:criar" / "espacos:editar"
 backend/aplicativo/api/registrarCanal.ts       confere remetente e valida o formato (catalogoDeContratos.ts)
   ↓
@@ -98,7 +98,7 @@ Não fazer merge desta PR antes de conferir o comportamento das telas, o contrat
 ```text
 frontend/suporte/mostrarSuporte.js      mostra campos e revisão
   ↓ api.suportePreparar
-app/preload.cjs → src/contratos.ts → src/desktop/main.ts
+backend/aplicativo/preload.cjs → src/contratos.ts → src/desktop/main.ts
   ↓ src/suporte.ts (entrada de compatibilidade)
 src/modulos/suporte/
   definirSolicitacao.ts                           valida os campos
@@ -121,11 +121,11 @@ A delegação à IA só é autorizada depois de confirmação no processo princi
 
 ## Acompanhar um chamado de Suporte
 
-O botão Consultar chamado da tela Suporte percorre a ponte `src/chamados.ts` e os três módulos `src/modulos/suporte/definirFormatoChamado.ts`, `buscarDadosDoChamado.ts` e `consultarChamadoGithub.ts`. Nenhuma credencial é enviada à consulta pública do GitHub. O arquivo de definição de status continua sendo `app/suporte-status.json`.
+O botão Consultar chamado da tela Suporte percorre a ponte `src/chamados.ts` e os três módulos `src/modulos/suporte/definirFormatoChamado.ts`, `buscarDadosDoChamado.ts` e `consultarChamadoGithub.ts`. Nenhuma credencial é enviada à consulta pública do GitHub. O arquivo de definição de status continua sendo `docs/catalogo/suporte-status.json`.
 
 ## Organização por tela: Início, Agendamentos, Execuções e integrações
 
-Agora `app/renderer/index.html` carrega os arquivos de interface na mesma ordem funcional em que os scripts grandes eram executados. Cada pasta tem um `LEIA-ME.md` curto. A divisão não altera os contratos IPC nem cria HTTP novo.
+Agora `dist/renderer/index.html` carrega os arquivos de interface na mesma ordem funcional em que os scripts grandes eram executados. Cada pasta tem um `LEIA-ME.md` curto. A divisão não altera os contratos IPC nem cria HTTP novo.
 
 ```text
 frontend/
@@ -151,7 +151,7 @@ frontend/
 └── configuracoes/controlesDaJanela.js         menu, tema e idioma
 ```
 
-Os arquivos `app/renderer/agenda.js` e `app/renderer/integracoes.js` agora são marcadores de transição e **não são carregados** pelo `index.html`. As implementações de apresentação permanecem em JavaScript clássico, com a ordem dos scripts explícita e funções globais acessíveis entre eles. A futura consolidação definitiva de `frontend/` e `backend/` ainda depende de adaptar build, empacotamento e demais arquivos.
+Os arquivos `dist/renderer/agenda.js` e `dist/renderer/integracoes.js` agora são marcadores de transição e **não são carregados** pelo `index.html`. As implementações de apresentação permanecem em JavaScript clássico, com a ordem dos scripts explícita e funções globais acessíveis entre eles. A futura consolidação definitiva de `frontend/` e `backend/` ainda depende de adaptar build, empacotamento e demais arquivos.
 
 ## Fluxos e Testes avançados: organização das funções sem mudar a janela
 
@@ -165,7 +165,7 @@ Os testes em `testes/arquitetura-telas.test.mjs` comprovam que a união das part
 
 ## Visual v36: onde estão as funções do robô, chat e cérebro
 
-O visual aprovado continua funcionando por `app/renderer/interfaces-v36.js` e `app/renderer/interfaces-v36.css`. Para facilitar a manutenção, suas fontes estão divididas em pastas `frontend/<tela>/visual-v36-fonte/` e `visual-v36-estilos/`. O código gerado continua idêntico ao original na revisão da migração.
+O visual aprovado continua funcionando por `dist/renderer/interfaces-v36.js` e `dist/renderer/interfaces-v36.css`. Para facilitar a manutenção, suas fontes estão divididas em pastas `frontend/<tela>/visual-v36-fonte/` e `visual-v36-estilos/`. O código gerado continua idêntico ao original na revisão da migração.
 
 Procure **Agentes** para `montarAssistenteFlutuante`, `montarPainelChat`, `enviarPerguntaChat`, `mostrarCerebroAgente`, `listarAgentesDisponiveis` e `abrirDetalhesAgente`. Procure **Logs** para `montarLinhaLog`, `desenharLogsFiltrados` e `carregarRegistrosLog`. Procure **Histórico** para `filtrarAtividadesHistorico` e `montarTabelaHistorico`. Procure **Métricas** para `filtrarRegistrosMetricas`, `prepararDadosGrafico` e `pintarGrafico`. Em **Configurações**, `editarPreferenciasAssistente` concentra a exibição dos campos de IA, voz e estilo.
 

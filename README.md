@@ -6,14 +6,14 @@ Procure pelo nome da tela que aparece no menu: a mesma pasta existe no frontend 
 
 | Quero mexer em… | Vá para |
 | --- | --- |
-| O que aparece numa tela | `frontend/<tela>/` (fonte única; `app/renderer/` é gerado no build) |
+| O que aparece numa tela | `frontend/<tela>/` (fonte única; `dist/renderer/` é gerado no build) |
 | O que a tela faz por trás (canais, regras, dados, integrações) | `backend/<tela>/` com `api/`, `regras/`, `banco/`, `integracoes/`, `tipos/` |
 | Componentes e estilos comuns | `frontend/design-system/` e `frontend/compartilhado/` |
 | Skills dos agentes | `skills/` (arquivos do aplicativo) e o banco `skills.db` ([docs/SKILLS.md](docs/SKILLS.md)) |
 | Testes | `testes/<tipo>/<camada>/` ([testes/LEIA-ME.md](testes/LEIA-ME.md)) |
 | Build, empacotamento, release, documentação gerada | `ferramentas/<finalidade>/` |
 | Site público | `site/gerar.mjs`, `site/componentes/`, `site/estilos/` |
-| Ajuda do aplicativo e do site | `app/ajuda/*.md` |
+| Ajuda do aplicativo e do site | `docs/ajuda/*.md` |
 | Ver tudo isso dentro do aplicativo | Administração › Documentação viva (gerada do código no build) |
 
 Mapa completo: [Arquitetura modular por tela](docs/ARQUITETURA-MODULAR-ATUAL.md) · [índice do backend](backend/LEIA-ME.md) · [seleção de testes](docs/TESTES.md). `npm.cmd run check` confere dependências, tipos e a suíte inteira.
@@ -132,9 +132,9 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 | `backend/conexoes/` | Contas de serviço com credencial protegida, transporte HTTPS, escrita externa controlada, GitHub e conexão das IAs pelo MCP |
 | `backend/agentes/` | Chat com agentes, bancos de conhecimento e de Skills (SQLite local), políticas da IA e servidor MCP |
 | `backend/contextos/`, `backend/evidencias/`, `backend/logs/`, `backend/projetos/` … | Uma pasta por tela, cada uma com seu `LEIA-ME.md` |
-| `app/preload.cjs` | Ponte mínima (`window.prumo`) entre a janela e os canais IPC |
-| `frontend/<tela>/` → `app/renderer/` | Interface HTML/CSS/JS sem frameworks; `app/renderer/` é gerado no build e não é versionado |
-| `app/ajuda/*.md` | Documentos da aba Ajuda (inclui privacidade e termos em rascunho) |
+| `backend/aplicativo/preload.cjs` | Ponte mínima (`window.prumo`) entre a janela e os canais IPC |
+| `frontend/<tela>/` → `dist/renderer/` | Interface HTML/CSS/JS sem frameworks; `dist/renderer/` é gerado no build e não é versionado |
+| `docs/ajuda/*.md` | Documentos da aba Ajuda (inclui privacidade e termos em rascunho) |
 | `electron-builder.yml`, `assets/` | Instalador NSIS e ícone substituível |
 | `.github/workflows/windows.yml` | Testes, instalador, instalação em pasta com espaços e release por tag |
 | `skills/qa/SKILL.md` | Método de qualidade aplicável do ISTQB, sem meta fixa de cenários |

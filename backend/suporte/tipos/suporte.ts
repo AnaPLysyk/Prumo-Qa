@@ -5,7 +5,7 @@ import { repositorio } from '../../ajuda/tipos/versoes.js';
 
 export const numeroChamado = z.number().int().min(1).max(999999999);
 
-export const statusChamados = z.array(z.object({id:z.string(),nome:z.string(),rotulo:z.string(),cor:z.string().regex(/^[a-f0-9]{6}$/),explicacao:z.string()}).strict()).parse(JSON.parse(fs.readFileSync(new URL('../../../app/suporte-status.json',import.meta.url),'utf8')));
+export const statusChamados = z.array(z.object({id:z.string(),nome:z.string(),rotulo:z.string(),cor:z.string().regex(/^[a-f0-9]{6}$/),explicacao:z.string()}).strict()).parse(JSON.parse(fs.readFileSync(new URL('../../../docs/catalogo/suporte-status.json',import.meta.url),'utf8')));
 
 export const autor=z.object({login:z.string().max(100)}).nullable();
 

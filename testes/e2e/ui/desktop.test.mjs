@@ -50,7 +50,7 @@ test('IPC: argumentos inválidos, raiz não vinculada e remetente estranho são 
     const w = new BrowserWindow({ show: false, webPreferences: { preload, contextIsolation: true, sandbox: true } });
     await w.loadFile(pagina);
     const r = await w.webContents.executeJavaScript('window.prumo.info()'); w.destroy(); return r;
-  }, [path.join(repo, 'app', 'preload.cjs'), outra]);
+  }, [path.join(repo, 'backend', 'aplicativo', 'preload.cjs'), outra]);
   assert.equal(estranho.ok, false); assert.match(estranho.error, /IPC_SENDER_REJECTED/);
   // A URL correta em outra janela também não concede a identidade da janela principal.
   const copia = await app.evaluate(async ({ BrowserWindow }, [preload, pagina]) => {
@@ -59,7 +59,7 @@ test('IPC: argumentos inválidos, raiz não vinculada e remetente estranho são 
       await w.loadFile(pagina);
       return await w.webContents.executeJavaScript('window.prumo.info()');
     } finally { w.destroy(); }
-  }, [path.join(repo, 'app', 'preload.cjs'), path.join(repo, 'app/renderer/index.html')]);
+  }, [path.join(repo, 'backend', 'aplicativo', 'preload.cjs'), path.join(repo, 'dist/renderer/index.html')]);
   assert.equal(copia.ok, false); assert.match(copia.error, /IPC_SENDER_REJECTED/);
 });
 

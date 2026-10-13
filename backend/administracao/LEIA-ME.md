@@ -18,7 +18,7 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 
 | Arquivo | O que faz |
 | --- | --- |
-| `lerMapaDoAplicativo.ts` | Lê o mapa da Documentação viva que o build gerou em app/documentacao/mapa.json, com limite de tamanho e formato conferido. |
+| `lerMapaDoAplicativo.ts` | Lê o mapa da Documentação viva que o build gerou em dist/documentacao/mapa.json, com limite de tamanho e formato conferido. |
 
 ## tipos/
 

@@ -181,7 +181,7 @@ jobs:
             release/Prumo-QA-Setup-*.exe
             release/Prumo-QA-Setup-*.exe.sha256
           if-no-files-found: error
-      - name: Notas da release (geradas de app/versoes.json)
+      - name: Notas da release (geradas de docs/catalogo/versoes.json)
         if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         run: |
@@ -224,11 +224,11 @@ jobs:
           git checkout -B main origin/main
           node ferramentas/release/publicar-versao.mjs $v $env:SHA256_PUBLICADO $data
           if ($LASTEXITCODE -ne 0) { throw "Não foi possível marcar $v como publicada no catálogo" }
-          git diff --quiet -- app/versoes.json
+          git diff --quiet -- docs/catalogo/versoes.json
           if ($LASTEXITCODE -ne 0) {
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add app/versoes.json
+            git add docs/catalogo/versoes.json
             git commit -m "docs($v): catálogo marca a $v como publicada (release, instalador e SHA-256 conferidos pelo CI)"
             git push origin main
             if ($LASTEXITCODE -ne 0) { throw "Falha ao enviar o catálogo publicado para a main" }

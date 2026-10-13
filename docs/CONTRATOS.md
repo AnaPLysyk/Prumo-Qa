@@ -1033,7 +1033,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Mapa por tela com caminhos, descrições, funções e ligações (sem código-fonte)
 - **Permissões:** Nenhuma
 - **Efeito:** Consulta local de um arquivo do próprio aplicativo, gerado no build; não lê projetos vinculados nem dados da pessoa.
-- **Arquivos consultados:** app/documentacao/mapa.json (gerado no build)
+- **Arquivos consultados:** dist/documentacao/mapa.json (gerado no build)
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, ARCHITECTURE_MAP_*
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Nenhum
@@ -1663,7 +1663,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Documentos em texto
 - **Permissões:** Nenhuma
 - **Efeito:** Consulta local; não altera o projeto.
-- **Arquivos consultados:** app/ajuda/*.md (empacotados)
+- **Arquivos consultados:** docs/ajuda/*.md (empacotados)
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Lista fixa de arquivos
 - **Registro:** Diagnóstico IPC (somente erros)
@@ -1678,7 +1678,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Versões com funcionalidades, correções, segurança e limitações
 - **Permissões:** Nenhuma
 - **Efeito:** Consulta local; não altera o projeto.
-- **Arquivos consultados:** app/versoes.json (empacotado)
+- **Arquivos consultados:** docs/catalogo/versoes.json (empacotado)
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Fonte validada por esquema
 - **Registro:** Diagnóstico IPC (somente erros)

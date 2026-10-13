@@ -1,4 +1,4 @@
-/** Formato do histórico de versões (app/versoes.json), o padrão de número de versão e o repositório oficial. */
+/** Formato do histórico de versões (docs/catalogo/versoes.json), o padrão de número de versão e o repositório oficial. */
 import { z } from 'zod';
 
 export const repositorio = 'AnaPLysyk/Prumo-Qa';

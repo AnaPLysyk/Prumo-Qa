@@ -46,15 +46,15 @@ validação de escopo e duplicidade existentes inalteradas.
 
 | Arquivo | Motivo |
 |---|---|
-| `app/renderer/ds.css`, `ds.js` | Design System (tokens derivados, componentes, utilitários; CSP sem `style`). |
-| `app/renderer/fluxos-v40.js` | Tickets, defeito, caso, Testes e Rastreabilidade. |
-| `app/renderer/operacao-v40.js` | Agendamentos, Execuções e evidências. |
-| `app/renderer/apoio-v40.js` | Suporte e Ajuda. |
-| `frontend/compartilhado/runtime/i18n-en-v40.js` | Fonte do inglês das telas novas; gera `app/renderer/i18n-en-v40.js`, sem redefinir chaves existentes. |
-| `app/renderer/qualidade-v39.js` | Modal ganha tamanho e subtítulo. |
-| `app/renderer/agenda.js` | Formulário de rotina com o layout do DS (mesmos campos e IDs). |
-| `app/renderer/plataforma.js`, `integracoes.js` | Correções de Projetos e Conexões. |
-| `app/renderer/index.html` | Carrega os arquivos v40; remove `qualidade-fontes-v39.js` (substituído). |
+| `dist/renderer/ds.css`, `ds.js` | Design System (tokens derivados, componentes, utilitários; CSP sem `style`). |
+| `dist/renderer/fluxos-v40.js` | Tickets, defeito, caso, Testes e Rastreabilidade. |
+| `dist/renderer/operacao-v40.js` | Agendamentos, Execuções e evidências. |
+| `dist/renderer/apoio-v40.js` | Suporte e Ajuda. |
+| `frontend/compartilhado/runtime/i18n-en-v40.js` | Fonte do inglês das telas novas; gera `dist/renderer/i18n-en-v40.js`, sem redefinir chaves existentes. |
+| `dist/renderer/qualidade-v39.js` | Modal ganha tamanho e subtítulo. |
+| `dist/renderer/agenda.js` | Formulário de rotina com o layout do DS (mesmos campos e IDs). |
+| `dist/renderer/plataforma.js`, `integracoes.js` | Correções de Projetos e Conexões. |
+| `dist/renderer/index.html` | Carrega os arquivos v40; remove `qualidade-fontes-v39.js` (substituído). |
 | `testes/apoio/janela.mjs` | Espera a primeira tela e fecha o modal antes de usar o menu. |
 | `testes/e2e/ui/desktop-v40.test.mjs` | 7 testes novos (fluxos, estados, permissões, responsividade, zoom, console). |
 | `testes/apoio/servicos-fixtures.mjs` | Criação de ticket simulada, só com `aceitarCriacao`. |

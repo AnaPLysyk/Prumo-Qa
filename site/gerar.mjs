@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
-const fontes=[...fs.readdirSync(path.join(repo,'app/ajuda')).filter(n=>n.endsWith('.md')).map(n=>'app/ajuda/'+n),'docs/CICLO-QUALIDADE.md','docs/SEGURANCA.md','docs/SUPORTE.md','docs/ASSINATURA.md','docs/CONTRATOS.md','docs/SERVICOS.md','docs/AGENDAMENTOS.md'];
+const fontes=[...fs.readdirSync(path.join(repo,'docs/ajuda')).filter(n=>n.endsWith('.md')).map(n=>'docs/ajuda/'+n),'docs/CICLO-QUALIDADE.md','docs/SEGURANCA.md','docs/SUPORTE.md','docs/ASSINATURA.md','docs/CONTRATOS.md','docs/SERVICOS.md','docs/AGENDAMENTOS.md'];
 const nome=f=>'documentacao-'+path.basename(f,'.md').toLowerCase()+'.html';
 const repoUrl='https://github.com/AnaPLysyk/Prumo-Qa';
 function destino(href,origem) {
@@ -74,7 +74,7 @@ const nomesTela={'inicio':'Início com o Prumo Orchestrator e o chat local','tes
 export function gerarSite(out=path.join(repo,'site/public')) {
   fs.mkdirSync(out,{recursive:true});const orb=orbitasSvg();
   const pkg=JSON.parse(fs.readFileSync(path.join(repo,'package.json'),'utf8'));
-  const versions=JSON.parse(fs.readFileSync(path.join(repo,'app/versoes.json'),'utf8')).versions;
+  const versions=JSON.parse(fs.readFileSync(path.join(repo,'docs/catalogo/versoes.json'),'utf8')).versions;
   const published=versions.find(v=>v.status==='publicada');if(!published)throw new Error('Sem release oficial registrada');
   const docs=fontes.map(f=>{const body=fs.readFileSync(path.join(repo,f),'utf8').replaceAll('{{VERSAO}}',pkg.version).replace(/C:\\Users\\[^\\\s]+/g,'C:\\Users\\[perfil]');return {f,body,title:/^# (.+)$/m.exec(body)?.[1]??f};});
   const menu=[['index.html','Início'],['demo.html','Demonstração'],['tutoriais.html','Tutoriais'],['documentacao.html','Documentação'],['versoes.html','Download'],['suporte.html','Suporte']];
@@ -128,7 +128,7 @@ export function gerarSite(out=path.join(repo,'site/public')) {
   <p class="suave">A instalação é por usuário e preserva seus dados ao atualizar. Passo a passo completo em <a href="documentacao-03-instalar.html">Como instalar</a>.</p>
   <h2>Histórico</h2>${versions.map(v=>`<details><summary>${esc(v.version)} · ${esc(v.title)} · ${esc(v.status==='publicada'?'publicada':v.status==='repositorio'?'código, sem release':'planejada')}</summary><p>${esc(v.objective)}</p>${lista('Funcionalidades',v.features)}${lista('Correções',v.fixes)}${lista('Compatibilidade',v.compatibility)}${lista('Limitações',v.limitations)}<p>${esc(v.migration)}</p>${v.status==='publicada'?`<p><a href="${esc(v.releaseUrl)}">Release oficial</a></p>`:''}</details>`).join('')}`);
 
-  const statuses=JSON.parse(fs.readFileSync(path.join(repo,'app/suporte-status.json'),'utf8'));
+  const statuses=JSON.parse(fs.readFileSync(path.join(repo,'docs/catalogo/suporte-status.json'),'utf8'));
   write('suporte.html','Suporte',`<h1>Suporte pelo GitHub</h1><p>Prepare e revise o relato no aplicativo, exporte em Markdown ou abra o formulário oficial. O aplicativo não publica a issue por você.</p><p class="limite">Issues são públicas. Não inclua senhas, tokens, código privado ou dados pessoais. Não há e-mail de suporte.</p><div class="acoes"><a class="botao" href="${repoUrl}/issues/new?template=bug.yml">Relatar bug</a><a class="botao" href="${repoUrl}/issues/new?template=melhoria.yml">Pedir melhoria</a><a class="botao" href="${repoUrl}/issues/new?template=sugestao.yml">Enviar sugestão</a></div><h2>Acompanhe seu chamado</h2><p>O número é emitido pelo GitHub. Respostas e resolução ficam nos comentários.</p>${statuses.map(s=>`<div class="status"><h3>${esc(s.nome)}</h3><p>${esc(s.explicacao)}</p></div>`).join('')}<p><a href="${repoUrl}/issues">Consultar chamados oficiais</a> · <a href="documentacao-suporte.html">Como funciona o suporte</a></p>`);
 
   for(const d of docs)write(nome(d.f),d.title,`<article>${markdown(d.body,d.f)}</article>`);

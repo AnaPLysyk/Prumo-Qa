@@ -162,7 +162,7 @@ dl.meta dd { margin: 0; word-break: break-all; font-family: var(--mono); font-si
   const base = (p) => p.split('/').pop();
   const pai = (p) => p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '';
   const papeis = ['api', 'regras', 'banco', 'integracoes', 'tipos'];
-  const papelDe = (p) => { const s = p.split('/'); if (p.startsWith('app/renderer')) return 'tela'; const x = s.find((t) => papeis.includes(t)); return x ?? ''; };
+  const papelDe = (p) => { const s = p.split('/'); if (p.startsWith('dist/renderer')) return 'tela'; const x = s.find((t) => papeis.includes(t)); return x ?? ''; };
   const corDoPapel = (r) => r ? `var(--${r === 'tela' ? 'tela' : r})` : 'var(--suave)';
   const nomePapel = { api: 'Canal da janela', regras: 'Regra', banco: 'Banco local', integracoes: 'Serviço externo', tipos: 'Formato dos dados', tela: 'Tela' };
 
@@ -324,7 +324,7 @@ dl.meta dd { margin: 0; word-break: break-all; font-family: var(--mono); font-si
     $('subtitulo').textContent = api?.descricao?.replace(/^Canal [a-z]+:[a-z]+:\s*/, '') ?? 'Caminho do clique na tela até os dados.';
     const colunas = [
       { titulo: 'Tela (o que a pessoa vê)', itens: f.telas.map((t) => ({ t: base(t), s: porCaminho.get(t)?.descricao ?? t, c: t, p: 'tela' })) },
-      { titulo: 'Ponte segura (preload)', itens: [{ t: f.ponte ? 'window.prumo.' + f.ponte : 'sem função na ponte', s: 'app/preload.cjs', c: 'app/preload.cjs', p: '' }] },
+      { titulo: 'Ponte segura (preload)', itens: [{ t: f.ponte ? 'window.prumo.' + f.ponte : 'sem função na ponte', s: 'backend/aplicativo/preload.cjs', c: 'backend/aplicativo/preload.cjs', p: '' }] },
       { titulo: 'Canal da janela (IPC)', itens: [{ t: f.canal, s: f.api.startsWith('backend/') ? 'validado por registrarCanal.ts' : 'registrado em main.ts', c: f.api.startsWith('backend/') ? 'backend/aplicativo/api/registrarCanal.ts' : 'src/desktop/main.ts', p: '' }] },
       { titulo: 'Atende o pedido', itens: [{ t: base(f.api), s: api?.descricao?.replace(/^Canal [a-z]+:[a-z]+:\s*/, '') ?? '', c: f.api, p: papelDe(f.api) }] },
       { titulo: 'O que ele usa', itens: f.chama.map((n) => { const c = porNome.get(n); return { t: n, s: c ? porCaminho.get(c)?.descricao ?? '' : '', c, p: c ? papelDe(c) : '' }; }) },

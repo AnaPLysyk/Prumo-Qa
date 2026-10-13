@@ -15,7 +15,7 @@
     "dist",
     "skills",
     "docs",
-    "app",
+    "backend/aplicativo/preload.cjs",
     "assets",
     "ferramentas/empacotamento/aprovar.cs",
     "README.md"

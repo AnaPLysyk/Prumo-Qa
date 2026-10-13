@@ -1,4 +1,4 @@
-// Marca uma versão como PUBLICADA no catálogo (app/versoes.json) depois que a release oficial existe e o instalador foi conferido.
+// Marca uma versão como PUBLICADA no catálogo (docs/catalogo/versoes.json) depois que a release oficial existe e o instalador foi conferido.
 // É o último passo da rotina de release: o site e o aplicativo passam a oferecer essa versão (download, SHA-256 e aviso).
 // Uso: node ferramentas/release/publicar-versao.mjs <versão> <sha256> [AAAA-MM-DD]   (o CI chama sozinho após conferir a release)
 import fs from 'node:fs';
@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const arquivo = path.join(repo, 'app/versoes.json');
+const arquivo = path.join(repo, 'docs/catalogo/versoes.json');
 const [versao, sha, data = new Date().toISOString().slice(0, 10)] = process.argv.slice(2);
 if (!/^\d+\.\d+\.\d+$/.test(versao ?? '')) throw new Error('Uso: node ferramentas/release/publicar-versao.mjs <versão> <sha256> [AAAA-MM-DD]');
 if (!/^[0-9a-f]{64}$/.test(sha ?? '')) throw new Error('SHA-256 inválido: 64 caracteres hexadecimais minúsculos.');

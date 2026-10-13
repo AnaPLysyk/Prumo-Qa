@@ -53,13 +53,13 @@ dependências 3D fora do material aprovado.
 
 | Arquivo | Motivo |
 |---|---|
-| `app/renderer/interfaces-v36.js` | Adaptadores das cinco telas autorizadas, prévias locais e chat. Não substitui componentes de outros módulos. |
-| `app/renderer/interfaces-v36.css` | Estilos restritos às telas autorizadas, responsividade e movimento reduzido. |
-| `app/renderer/orbitas-v36.js` | Desenho original das órbitas do HTML, com inicialização adaptada ao controle desktop. |
-| `frontend/compartilhado/runtime/i18n-en-v36.js` | Fonte das traduções; gera a cópia `app/renderer/i18n-en-v36.js`. |
+| `dist/renderer/interfaces-v36.js` | Adaptadores das cinco telas autorizadas, prévias locais e chat. Não substitui componentes de outros módulos. |
+| `dist/renderer/interfaces-v36.css` | Estilos restritos às telas autorizadas, responsividade e movimento reduzido. |
+| `dist/renderer/orbitas-v36.js` | Desenho original das órbitas do HTML, com inicialização adaptada ao controle desktop. |
+| `frontend/compartilhado/runtime/i18n-en-v36.js` | Fonte das traduções; gera a cópia `dist/renderer/i18n-en-v36.js`. |
 | `assets/interfaces-v36/robo-original.png` e `avatar-0.webp` a `avatar-7.webp` | Assets incorporados no HTML, extraídos sem alteração da imagem; funcionamento offline. |
-| `app/renderer/index.html` | Carrega os novos arquivos locais após os componentes existentes. |
-| `app/preload.cjs` | Acrescenta a única chamada restrita `exportarTela`. |
+| `dist/renderer/index.html` | Carrega os novos arquivos locais após os componentes existentes. |
+| `backend/aplicativo/preload.cjs` | Acrescenta a única chamada restrita `exportarTela`. |
 | `src/contratos.ts` | Esquema estrito/documentação de `interface:exportar`, tipos fechados, texto limitado. |
 | `src/desktop/main.ts` | Exportação via diálogo nativo e extensões JSON/CSV. Necessária porque a janela bloqueia downloads blob. Bloqueio de rede preservado. |
 | `docs/CONTRATOS.md` | Gerado do catálogo atualizado. Não muda operações existentes. |

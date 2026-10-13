@@ -2,7 +2,7 @@
 
 Na 2.6, Conexões usa `backend/conexoes/ia/` (`diagnosticarIntegracao`, `testarProtocolo`): inspeciona metadados compatíveis, testa o MCP do próprio produto via SDK e mostra separadamente chamadas observadas com classificação atual. O núcleo e as quatro ferramentas permanecem os mesmos. Evidências de protocolo ficam em `integracoes/<hash>/<uuid>.json`; o teste chama somente consultar_evidencias.
 
-Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `backend/suporte/integracoes/consultarChamado.ts` usa os rótulos definidos em `app/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
+Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `backend/suporte/integracoes/consultarChamado.ts` usa os rótulos definidos em `docs/catalogo/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
 
 O gerador `site/gerar.mjs`, chamado pela entrada compatível `site/gerar.mjs`, usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes em [../site/README.md](../site/README.md).
 
@@ -11,8 +11,8 @@ A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não
 ## Arquitetura
 
 ```text
-Janela (app/renderer: HTML+CSS+JS, sandbox, CSP, sem rede)
-   │  window.prumo.*  (app/preload.cjs — ponte mínima catalogada, objeto congelado)
+Janela (dist/renderer: HTML+CSS+JS, sandbox, CSP, sem rede)
+   │  window.prumo.*  (backend/aplicativo/preload.cjs — ponte mínima catalogada, objeto congelado)
    ▼
 Processo principal Electron (backend/aplicativo.ts; canais em backend/aplicativo/api/registrarCanaisIpc.ts)
    │  canais IPC `prumo:*`: confere remetente, valida com zod, devolve {ok,data|error}
@@ -54,7 +54,7 @@ A aba **Suporte** prepara bug, melhoria ou sugestão (`backend/suporte/regras/`)
 
 ### Versões e atualização
 
-`app/versoes.json` (validado por `backend/ajuda/versoes/validarVersoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`ferramentas/release/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
+`docs/catalogo/versoes.json` (validado por `backend/ajuda/versoes/validarVersoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`ferramentas/release/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
 
 ### Dados locais: exportar e excluir
 

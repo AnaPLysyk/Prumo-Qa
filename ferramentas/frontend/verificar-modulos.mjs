@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const falhas = [];
-// A fonte do frontend é frontend/<tela>; app/renderer/telas é somente cópia de execução.
+// A fonte do frontend é frontend/<tela>; dist/renderer/telas é somente cópia de execução.
 try { execFileSync(process.execPath, ['ferramentas/frontend/sincronizar-frontend.mjs', '--check'], { cwd: raiz, stdio: 'pipe' }); }
 catch (e) { falhas.push('Frontend e cópia Electron divergentes: ' + String(e.stderr || e.message).slice(0,450)); }
 // Garantir que os bundles distribuídos continuam idênticos às partes das telas.
@@ -15,7 +15,7 @@ try { execFileSync(process.execPath, ['ferramentas/frontend/gerar-telas-modulare
 catch (e) { falhas.push('Bundle de telas diferente das fontes: ' + String(e.stderr || e.message).slice(0,450)); }
 const ler = (p) => fs.readFileSync(path.join(raiz, p), 'utf8');
 const existe = (p) => fs.existsSync(path.join(raiz, p));
-const frontDir='app/renderer/';
+const frontDir='dist/renderer/';
 const html=ler(frontDir+'index.html');
 const scripts=[...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m=>m[1]);
 if (new Set(scripts).size!==scripts.length) falhas.push('Script carregado em duplicidade no index.html');

@@ -1,11 +1,11 @@
-/** Gera a interface do Electron (app/renderer, não versionada) a partir da fonte única em frontend/; com --check só confere. */
+/** Gera a interface do Electron (dist/renderer, não versionada) a partir da fonte única em frontend/; com --check só confere. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const origem = path.join(raiz, 'frontend');
-const destino = path.join(raiz, 'app/renderer/telas');
+const destino = path.join(raiz, 'dist/renderer/telas');
 const somenteConferir = process.argv.includes('--check');
 // Num clone novo a pasta ainda não existe: gerar cria; conferir sem ter gerado é erro.
 if (!somenteConferir) fs.mkdirSync(destino, { recursive: true });
@@ -28,8 +28,8 @@ const recursos = manifesto.recursos;
 const fontesMapeadas = new Set(); const destinosMapeados = new Set();
 for (const recurso of recursos) {
   if (typeof recurso.fonte !== 'string' || typeof recurso.destino !== 'string' ||
-      !/^frontend\/(?:[\w-]+\/)+[\w.-]+\.(?:js|css|html)$/.test(recurso.fonte) ||
-      !/^app\/renderer\/[\w.-]+\.(?:js|css|html)$/.test(recurso.destino)) throw new Error('Caminho de recurso inválido');
+      !/^frontend\/(?:[\w-]+\/)+[\w.-]+\.(?:js|css|html|txt)$/.test(recurso.fonte) ||
+      !/^dist\/renderer\/(?:vendor\/)?[\w.-]+\.(?:js|css|html|txt)$/.test(recurso.destino)) throw new Error('Caminho de recurso inválido');
   if (fontesMapeadas.has(recurso.fonte) || destinosMapeados.has(recurso.destino)) throw new Error('Recurso duplicado: ' + recurso.fonte);
   fontesMapeadas.add(recurso.fonte); destinosMapeados.add(recurso.destino);
 }
@@ -38,7 +38,12 @@ const fontes = arquivosDentro(origem).filter(arquivo => distribuivel(arquivo) &&
 const copias = arquivosDentro(destino).filter(distribuivel);
 const diferencas = [];
 const fontesSet = new Set(fontes);
-for (const arquivo of copias) if (!fontesSet.has(arquivo)) diferencas.push('Copia sem fonte oficial: ' + arquivo);
+for (const arquivo of copias) {
+  if (fontesSet.has(arquivo)) continue;
+  // Cópia gerada que perdeu a fonte (arquivo renomeado ou removido): ao gerar, some; ao conferir, é erro.
+  if (somenteConferir) diferencas.push('Copia sem fonte oficial: ' + arquivo);
+  else { fs.rmSync(path.join(destino, arquivo)); console.log('REMOVIDO: ' + arquivo); }
+}
 for (const arquivo of fontes) {
   const a = path.join(origem, arquivo);
   const b = path.join(destino, arquivo);
@@ -59,6 +64,7 @@ for (const recurso of recursos) {
   if (fs.existsSync(b) && fs.readFileSync(a).equals(fs.readFileSync(b))) continue;
   if (somenteConferir) diferencas.push('Copia de recurso divergente: ' + recurso.destino);
   else {
+    fs.mkdirSync(path.dirname(b), { recursive: true });
     fs.copyFileSync(a, b);
     console.log('SINCRONIZADO: ' + recurso.fonte);
   }

@@ -41,7 +41,7 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | Arquivo | O que faz |
 | --- | --- |
 | `privacidade.ts` | Textos de privacidade (retenção, o que não é transmitido, limites) e as categorias da pasta de dados. |
-| `versoes.ts` | Formato do histórico de versões (app/versoes.json), o padrão de número de versão e o repositório oficial. |
+| `versoes.ts` | Formato do histórico de versões (docs/catalogo/versoes.json), o padrão de número de versão e o repositório oficial. |
 
 ## versoes/
 
@@ -51,7 +51,7 @@ Histórico de versões do Prumo.
 | --- | --- |
 | `analisarVersao.ts` | Lê uma versão no formato 2.10.2 (aceita "v" na frente). |
 | `apresentarVersoes.ts` | Prepara a lista de versões para a Ajuda, marcando a instalada. |
-| `carregarVersoes.ts` | Lê e valida o histórico de versões (app/versoes.json). |
+| `carregarVersoes.ts` | Lê e valida o histórico de versões (docs/catalogo/versoes.json). |
 | `compararVersoes.ts` | Compara duas versões: negativo se a primeira é mais antiga. |
 | `conferirInstalada.ts` | Confere que a versão instalada consta no histórico. |
 | `enderecoDaVersao.ts` | Endereço da página da versão no GitHub. |

@@ -12,7 +12,7 @@ const ler = (f) => fs.readFileSync(f, 'utf8');
 const arquivosTs = (dir) => fs.readdirSync(dir, { recursive: true }).map(String).filter((n) => n.endsWith('.ts')).map((n) => path.join(dir, n));
 const registro = ler('backend/aplicativo/api/registrarCanaisIpc.ts');
 const backend = arquivosTs('backend').map(ler).join('\n');
-const preload = ler('app/preload.cjs');
+const preload = ler('backend/aplicativo/preload.cjs');
 const ipcCatalogo = catalogo().filter((o) => o.tipo === 'IPC');
 const mcpCatalogo = catalogo().filter((o) => o.tipo === 'MCP');
 

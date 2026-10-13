@@ -10,7 +10,9 @@ directories:
   buildResources: assets
 files:
   - dist/**
-  - app/**
+  - backend/aplicativo/preload.cjs
+  - docs/ajuda/**
+  - docs/catalogo/**
   - assets/**
   - skills/**
   - reporters/**

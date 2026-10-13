@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['app/suporte-status.json', '.github/workflows/triagem.yml']
+    paths: ['docs/catalogo/suporte-status.json', '.github/workflows/triagem.yml']
   issues:
     types: [opened, reopened]
 
@@ -22,7 +22,7 @@ jobs:
         with:
           script: |
             // Fonte pública de estados; somente dados validados, nunca eval ou comando de shell.
-            const arquivo = await github.rest.repos.getContent({ owner: context.repo.owner, repo: context.repo.repo, path: 'app/suporte-status.json' });
+            const arquivo = await github.rest.repos.getContent({ owner: context.repo.owner, repo: context.repo.repo, path: 'docs/catalogo/suporte-status.json' });
             const estados = JSON.parse(Buffer.from(arquivo.data.content, 'base64').toString('utf8'));
             if (!Array.isArray(estados) || estados.length !== 5 || estados.some(s => !/^status: [\p{L} ]+$/u.test(s.rotulo) || !/^[a-f0-9]{6}$/.test(s.cor))) throw new Error('Catálogo de status inválido');
             for (const s of estados) {

@@ -4,7 +4,7 @@
 
 **Arquivos desta pasta:** mostrarSuporte.js.
 
-**Como conversa com o sistema:** api.suportePreparar, api.suporteAbrir e api.suporteConsultar → `app/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
+**Como conversa com o sistema:** api.suportePreparar, api.suporteAbrir e api.suporteConsultar → `backend/aplicativo/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
 
 **Quem executa a lógica:** `src/suporte.ts e src/chamados.ts (ainda não migrados)`.
 

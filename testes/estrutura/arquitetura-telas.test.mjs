@@ -25,15 +25,15 @@ test('bundles da interface são reproduzidos exatamente pelas partes de cada tel
   }
 });
 test('a janela carrega somente os bundles e nunca seus fragmentos internos',()=>{
-  const html=fs.readFileSync('app/renderer/index.html','utf8');
+  const html=fs.readFileSync('dist/renderer/index.html','utf8');
   for (const bundle of manifest.bundles) {
-    const relative = bundle.destino.replace('app/renderer/','');
+    const relative = bundle.destino.replace('dist/renderer/','');
     if (bundle.destino.endsWith('.css')) {
       assert.ok(html.includes('<link rel="stylesheet" href="'+relative+'">'), 'CSS deve estar no index: '+relative);
     } else {
       assert.ok(html.includes('<script src="'+relative+'"></script>'), 'bundle deve estar no index: '+relative);
     }
-    for (const parte of bundle.origens) assert.ok(!html.includes('src="'+parte.replace('app/renderer/','')+'"'), 'fragmento não pode ser carregado: '+parte);
+    for (const parte of bundle.origens) assert.ok(!html.includes('src="'+parte.replace('dist/renderer/','')+'"'), 'fragmento não pode ser carregado: '+parte);
   }
   assert.ok(html.indexOf('src="fluxos-v40.js"') < html.indexOf('src="testes-v40.js"'), 'testes avançados dependem de Fluxos');
 });

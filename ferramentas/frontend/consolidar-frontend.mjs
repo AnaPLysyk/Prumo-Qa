@@ -88,11 +88,11 @@ const excluir = (p) => {
 try {
   for (const [p, texto] of criados) {
     gravar(p, texto);
-    gravar('app/renderer/telas/' + p.slice('frontend/'.length), texto);
+    gravar('dist/renderer/telas/' + p.slice('frontend/'.length), texto);
   }
   for (const p of antigos) {
     excluir(p);
-    excluir('app/renderer/telas/' + p.slice('frontend/'.length));
+    excluir('dist/renderer/telas/' + p.slice('frontend/'.length));
   }
   gravar(manifestoPath, novosManifesto);
   gravar(testePath, destinoTeste.replace(regraAntiga, regraNova));

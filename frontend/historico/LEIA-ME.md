@@ -4,7 +4,7 @@
 
 **Arquivos desta pasta:** mostrarHistorico.js.
 
-**Como conversa com o sistema:** usa dados do projeto e a tela principal de histórico → `app/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
+**Como conversa com o sistema:** usa dados do projeto e a tela principal de histórico → `backend/aplicativo/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
 
 **Quem executa a lógica:** `src/historicoCentral.ts (ainda não migrado)`.
 

@@ -3,9 +3,9 @@
   "id": "prumo-qa",
   "name": "Prumo QA — o próprio aplicativo",
   "context": {
-    "documentation": ["README.md", "AGENTS.md", "docs/", "app/ajuda/"],
+    "documentation": ["README.md", "AGENTS.md", "docs/", "docs/ajuda/"],
     "tests": ["testes/"],
-    "code": ["backend/", "frontend/", "app/renderer/", "ferramentas/", "site/gerar.mjs", "site/componentes/", "site/estilos/", "package.json"]
+    "code": ["backend/", "frontend/", "dist/renderer/", "ferramentas/", "site/gerar.mjs", "site/componentes/", "site/estilos/", "package.json"]
   },
   "commands": {
     "build": {

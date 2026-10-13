@@ -187,7 +187,7 @@ test('aplicativo empacotado: filho node e proposta de conexão usam o runtime em
 });
 
 test('ajuda: todos os documentos existem, trazem versão e declaram limites sem prometer conformidade', () => {
-  const docs = lerDocumentosDaAjuda(path.resolve('app/ajuda'), '9.9.9');
+  const docs = lerDocumentosDaAjuda(path.resolve('docs/ajuda'), '9.9.9');
   assert.equal(docs.length, documentosAjuda.length);
   const texto = docs.map((d) => d.body).join('\n');
   for (const termo of ['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'MCP', 'Privacidade'.toLowerCase(), 'Termos', 'não é assinado', 'rascunho']) assert.match(texto.toLowerCase(), new RegExp(termo.toLowerCase()), termo);
