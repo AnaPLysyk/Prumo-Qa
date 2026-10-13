@@ -13,9 +13,13 @@ import { arquivosDoDiario } from '../banco/arquivosDoDiario.js';
 import { gravarNoDiario } from '../banco/gravarNoDiario.js';
 import { pastaAtividades } from '../banco/pastaAtividades.js';
 import { achadoELacuna } from './achadoELacuna.js';
-import { avisarFalhaDoDiario } from './avisarFalhaDoDiario.js';
 import { resumoVazio } from './resumoVazio.js';
 import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema } from '../tipos/atividade.js';
+
+/** Registra falhas de observabilidade sem alterar o resultado da operação original. */
+const avisarFalhaDoDiario = (fase: string, id: string) => {
+  process.stderr.write(`PRUMO_OBSERVABILITY_ERROR phase=${fase} operationId=${id}; resultado do núcleo preservado; verifique PRUMO_DATA_DIR/permissões/limites.\n`);
+};
 
 export function iniciarAtividade(p:Projeto,tool:string,origem:Origem,entrada:unknown={},opcoes:{base?:string;diagnostico?:(fase:string,id:string)=>void}={}) {
   const id=randomUUID();const inicio=performance.now();const r=comoObjeto(entrada);
