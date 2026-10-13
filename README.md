@@ -198,7 +198,7 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 | `backend/mcp.ts` | Porta de entrada do servidor MCP (`dist/mcp.js`, mesmo caminho das versões anteriores); ferramentas em `backend/agentes/mcp/` |
 | `backend/aplicativo/api/catalogoDeContratos.ts` | Fonte única dos esquemas IPC e do catálogo técnico (IPC + MCP); `registrarCanaisIpc.ts` liga cada canal ao arquivo `api/` da tela |
 | `backend/compartilhado/` | Só o que várias telas usam: contrato `qa.project.json` (`projeto/`), leitura segura e máscara de segredos (`seguranca/`), erros, textos e pasta de dados |
-| `backend/execucoes/` + `scripts/aprovar.cs` | Executar capacidade com aprovação humana do Windows (`dist/aprovar.exe`), histórico de execuções e comentário de resultado no Jira |
+| `backend/execucoes/` + `ferramentas/empacotamento/aprovar.cs` | Executar capacidade com aprovação humana do Windows (`dist/aprovar.exe`), histórico de execuções e comentário de resultado no Jira |
 | `backend/agendamentos/` | Rotinas, fila, worker residente, autorizações prévias e k6 |
 | `backend/testes/` | Catálogo de testes, frameworks e análise Playwright, revisão de cobertura, runs e escrita no Qase |
 | `backend/tickets/` | Propostas de caso/bug e escrita no Jira |
@@ -214,7 +214,7 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 | `exemplos/projeto-demo` | Produto fictício de publicações, dados em memória e testes reais |
 | `exemplos/plano-demo.json` | Revisão rastreável com cenário duplicado |
 | `exemplos/g3-somente-leitura.json` | Contrato externo restrito, sem comandos, para G3 |
-| `scripts/demonstrar.mjs` | Demonstração CLI/MCP com logs reais; sem simular aprovação humana |
+| `ferramentas/demonstracao/demonstrar.mjs` | Demonstração CLI/MCP com logs reais; sem simular aprovação humana |
 | `docs/` | Segurança, proveniência, validação, diagnóstico e entrega |
 
 ## Vincular um projeto

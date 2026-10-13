@@ -58,17 +58,17 @@ Para validar no Windows:
 
 ```powershell
 npm.cmd run frontend:check
-node scripts/gerar-telas-modulares.mjs --check
-node scripts/verificar-modulos.mjs
+node ferramentas/frontend/gerar-telas-modulares.mjs --check
+node ferramentas/frontend/verificar-modulos.mjs
 npm.cmd run dependencias
 npm.cmd run check
 ```
 
-Para reconstruir cópias **depois de editar o frontend**: `npm.cmd run frontend:sync` e `node scripts/gerar-telas-modulares.mjs`. O comando `npm.cmd run build` também faz essas etapas automaticamente.
+Para reconstruir cópias **depois de editar o frontend**: `npm.cmd run frontend:sync` e `node ferramentas/frontend/gerar-telas-modulares.mjs`. O comando `npm.cmd run build` também faz essas etapas automaticamente.
 
 `ferramentas/arquitetura/dependencias.mjs` resolve os imports TypeScript e informa origem, linha e destino. `--json` fornece o grafo para investigação. Um import local ausente interrompe o build; o verificador não executa módulos nem consulta projetos externos. O mapa de documentação viva também inclui `ferramentas/`, `site/` e `skills/`, sem incluir `site/public/`.
 
-O site possui fonte em `site/gerar.mjs`, estilos em `site/estilos/base.css` e template em `site/componentes/pagina.mjs`. `scripts/gerar-site.mjs` permanece uma entrada compatível para npm, Render e CI. [Testes](TESTES.md) e [Skills](SKILLS.md) têm catálogos verificáveis; não são listas de funcionalidades aprovadas.
+O site possui fonte em `site/gerar.mjs`, estilos em `site/estilos/base.css` e template em `site/componentes/pagina.mjs`. `site/gerar.mjs` permanece uma entrada compatível para npm, Render e CI. [Testes](TESTES.md) e [Skills](SKILLS.md) têm catálogos verificáveis; não são listas de funcionalidades aprovadas.
 
 ## Como cada arquivo deve ser escrito
 

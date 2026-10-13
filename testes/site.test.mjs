@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { gerarSite,markdown } from '../scripts/gerar-site.mjs';
+import { gerarSite,markdown } from '../site/gerar.mjs';
 import { gerarSite as gerarSiteModular, markdown as markdownModular } from '../site/gerar.mjs';
 
 test('entrada anterior reexporta a mesma implementação modular do site',()=>{

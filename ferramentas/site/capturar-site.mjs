@@ -1,6 +1,6 @@
 // Captura as imagens do site a partir do aplicativo REAL, com dados 100% sintéticos e isolados.
 // Nada aqui toca Jira, Qase, GitHub ou projetos reais: os serviços são um servidor HTTP local de laboratório
-// (testes/servicos-fixtures.mjs) e o diretório de dados é temporário. Uso: node scripts/capturar-site.mjs
+// (testes/servicos-fixtures.mjs) e o diretório de dados é temporário. Uso: node ferramentas/site/capturar-site.mjs
 // O bootstrap de testes substitui SQLite por armazenamento em memória. As capturas não comprovam
 // avaliação humana, uso de leitor de tela ou autenticação em serviços externos.
 import fs from 'node:fs';
@@ -9,9 +9,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { _electron as electron } from 'playwright-core';
 import electronPath from 'electron';
-import { servidorFixture } from '../testes/servicos-fixtures.mjs';
+import { servidorFixture } from '../../testes/servicos-fixtures.mjs';
 
-const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const saida = path.join(repo, 'site', 'imagens');
 fs.mkdirSync(saida, { recursive: true });
 const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-site-captura-'));
@@ -64,7 +64,7 @@ try {
     console.log('telas capturadas');
   } else {
   // Repositório sintético para o catálogo de testes (nada de projeto real)
-  const { fixture } = await import('../testes/fixtures.mjs'); const f = await fixture({ after(fn) { limpezas.push(fn); } });
+  const { fixture } = await import('../../testes/fixtures.mjs'); const f = await fixture({ after(fn) { limpezas.push(fn); } });
   const escreve = async (rel, txt) => { const p = path.join(f.root, rel); fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, txt); };
   await escreve('tests/e2e/checkout.spec.ts', "import { test } from '@playwright/test';\ntest.describe('Checkout', () => {\n  test('paga com cartão @smoke', async ({ page }) => { // Qase: SFQ-31\n    await page.goto('/'); await test.step('Escolher produto', async () => {}); await test.step('Pagar com cartão', async () => {}); });\n  test('recusa cartão vencido @regression', async ({ page }) => { await page.goto('/'); });\n});\n");
   await escreve('tests/e2e/login.spec.ts', "import { test } from '@playwright/test';\ntest.describe('Login', () => {\n  test('entra com senha válida', async ({ page }) => { await page.goto('/'); });\n  test('bloqueia após 5 tentativas', async ({ page }) => { await page.goto('/'); });\n});\n");

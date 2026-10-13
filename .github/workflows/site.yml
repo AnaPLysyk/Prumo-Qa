@@ -8,7 +8,7 @@ on:
     branches: [main]
     paths:
       - 'site/**'
-      - 'scripts/gerar-site.mjs'
+      - 'site/gerar.mjs'
       - 'app/ajuda/**'
       - 'app/versoes.json'
       - 'app/suporte-status.json'
@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: 24
       - name: Gerar o site (mesmo comando do Render)
-        run: node scripts/gerar-site.mjs
+        run: node site/gerar.mjs
       - name: Conferir que o site gerado cita a versão publicada do catálogo
         run: |
           node -e "

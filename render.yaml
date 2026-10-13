@@ -4,7 +4,7 @@ services:
     name: prumo-qa-docs
     repo: https://github.com/AnaPLysyk/Prumo-Qa
     branch: main
-    buildCommand: node scripts/gerar-site.mjs
+    buildCommand: node site/gerar.mjs
     staticPublishPath: site/public
     autoDeployTrigger: "off"
     previews:

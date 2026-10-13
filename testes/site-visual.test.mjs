@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import fs from 'node:fs';
 import { abrir,novoDados } from './janela.mjs';
-import { gerarSite } from '../scripts/gerar-site.mjs';
+import { gerarSite } from '../site/gerar.mjs';
 
 test('site no Chromium real: navegação, teclado e resoluções 1280/640/320 sem overflow da página',async t=>{
   const dados=novoDados(t);const out=path.join(dados,'site');gerarSite(out);const a=await abrir(t,dados);

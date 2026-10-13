@@ -15,7 +15,7 @@ Os nomes estão escritos no próprio caminho do arquivo. Cada parte começa com 
 
 As partes `.parte.js` são **trechos-fonte**, não programas independentes. O script executado pela janela permanece `app/renderer/interfaces-v36.js`, gerado juntando esses trechos **na mesma ordem e com conteúdo idêntico**. Isso preserva funções que compartilham o mesmo escopo e evita mudar o visual antes dos testes.
 
-Use `node scripts/gerar-telas-modulares.mjs` para regenerar; `node scripts/gerar-telas-modulares.mjs --check` para comparar sem alterar; e `npm.cmd run check` para validar. O comando antigo `scripts/gerar-telas-v40.mjs` continua funcionando como ponte temporária.
+Use `node ferramentas/frontend/gerar-telas-modulares.mjs` para regenerar; `node ferramentas/frontend/gerar-telas-modulares.mjs --check` para comparar sem alterar; e `npm.cmd run check` para validar. O comando antigo `ferramentas/frontend/gerar-telas-modulares.mjs` continua funcionando como ponte temporária.
 
 **Aviso:** Agentes personalizados seguem como prévias locais; essas telas ainda não representam execução independente, banco multiusuário ou API web. Essas funções permanecem na Proposta.
 

@@ -121,7 +121,7 @@ No frontend, os arquivos de `app/renderer/` fora das telas listadas continuam no
 
 ## Fontes por função — Fluxos, Testes e Visual v36
 
-Os arquivos `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-v36.css` foram **organizados como fontes por tela e função**, mantendo os quatro arquivos originais como bundles executados. O gerador `scripts/gerar-telas-modulares.mjs` recompõe os arquivos a partir de `scripts/telas-modulares.json`.
+Os arquivos `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-v36.css` foram **organizados como fontes por tela e função**, mantendo os quatro arquivos originais como bundles executados. O gerador `ferramentas/frontend/gerar-telas-modulares.mjs` recompõe os arquivos a partir de `ferramentas/frontend/telas-modulares.json`.
 
 **Total nesta etapa:** 35 partes de Fluxos, 17 de Testes v40, 77 do visual v36 JavaScript e 27 de estilos v36 CSS. As fontes não devem ser carregadas isoladamente porque mantêm relações de escopo e ordem de execução. O CSS preserva a ordem da cascata.
 

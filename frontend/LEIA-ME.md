@@ -12,7 +12,7 @@ Edite a interface em `frontend/`. `app/renderer/` contém cópias para executar 
 
 `npm run frontend:sync` sincroniza os recursos mapeados e os scripts e estilos das telas. `npm run frontend:check` detecta divergências. Documentos Markdown e o manifesto são dados de desenvolvimento, sem cópia nova para `app/renderer/telas/`.
 
-Os bundles listados em `scripts/telas-modulares.json` são gerados das partes em `frontend/`; não têm segunda fonte editável. `app/renderer/status.css` é gerado de `app/suporte-status.json`. Os stubs `agenda.js`, `apoio-v40.js`, `integracoes.js` e `plataforma.js` e a biblioteca em `vendor/` permanecem fora do mapeamento.
+Os bundles listados em `ferramentas/frontend/telas-modulares.json` são gerados das partes em `frontend/`; não têm segunda fonte editável. `app/renderer/status.css` é gerado de `app/suporte-status.json`. Os stubs `agenda.js`, `apoio-v40.js`, `integracoes.js` e `plataforma.js` e a biblioteca em `vendor/` permanecem fora do mapeamento.
 
 Para editar traduções, altere `frontend/compartilhado/runtime/i18n*.js` e sincronize. Os paths distribuídos e a ordem de carregamento permanecem os mesmos.
 

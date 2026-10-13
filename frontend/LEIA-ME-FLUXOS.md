@@ -6,8 +6,8 @@ Agora ele é gerado a partir de `35 partes` distribuídas entre `telas/tickets/f
 
 - Edite **somente a parte identificada pelo nome da função**.
 - Cada parte começa com uma frase descrevendo o que faz.
-- Execute `node scripts/gerar-telas-v40.mjs` para regenerar `fluxos-v40.js`.
-- Execute `node scripts/gerar-telas-v40.mjs --check` para conferir que o arquivo carregado corresponde às partes.
+- Execute `node ferramentas/frontend/gerar-telas-modulares.mjs` para regenerar `fluxos-v40.js`.
+- Execute `node ferramentas/frontend/gerar-telas-modulares.mjs --check` para conferir que o arquivo carregado corresponde às partes.
 - O comando `npm.cmd run build` já regenera antes de compilar.
 
 **Não carregue as partes diretamente no HTML**: o arquivo completo compartilha funções em um único escopo de execução. Esta organização mantém o resultado gerado idêntico ao arquivo anterior e permite a revisão por responsabilidades.

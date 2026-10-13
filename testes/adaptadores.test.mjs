@@ -55,7 +55,7 @@ test('broker compilado no Windows recusa JSON sem escopo e data expirada sem ped
 test('build do broker é incremental e só termina depois de confirmar que o Windows executa o broker',async()=>{
   if(process.platform!=='win32')return;
   const exe=path.resolve('dist/aprovar.exe'),antes=fs.statSync(exe);
-  const r=spawnSync(process.execPath,['scripts/build-broker.mjs'],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);
+  const r=spawnSync(process.execPath,['ferramentas/empacotamento/build-broker.mjs'],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);
   assert.match(r.stdout,/já compilado \(fonte inalterada\)/);assert.match(r.stdout,/executável e recusando entrada sem escopo \(verificado\)/);
   const depois=fs.statSync(exe);assert.equal(depois.mtimeMs,antes.mtimeMs,'o executável não foi recriado sem necessidade');assert.equal(depois.ino,antes.ino);
 });

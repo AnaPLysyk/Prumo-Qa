@@ -15,7 +15,7 @@ Entrada nova no topo com `status: "repositorio"`, `date: null`, `releaseUrl: nul
 
 - Páginas de ajuda em `app/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `backend/projetos/tipos/painel.ts` (`documentosAjuda`) e no índice da fonte `frontend/ajuda/mostrarAjuda.js`; sincronizar a cópia Electron.
 - Textos novos da interface com tradução em `frontend/compartilhado/runtime/i18n-en-*.js`; sincronizar as cópias distribuídas com `npm run frontend:sync`.
-- Capturas do site: `node scripts/capturar-site.mjs` (aplicativo real, dados sintéticos). Textos do site: `scripts/gerar-site.mjs`.
+- Capturas do site: `node ferramentas/site/capturar-site.mjs` (aplicativo real, dados sintéticos). Textos do site: `site/gerar.mjs`.
 - `npm run site` e conferir `site/public` (escuro, claro e celular). O site e a ajuda do aplicativo leem os mesmos arquivos de `app/ajuda`.
 
 ## 4. Verificação e main
@@ -36,7 +36,7 @@ git push origin vX.Y.Z
 1. Suíte completa, instalador NSIS, atualização sobre a 2.2, 2.6 e 2.7 publicadas com dados preservados, janela e MCP do programa instalado, desinstalação.
 2. SHA-256 do instalador e estado real da assinatura.
 3. Release `vX.Y.Z` com o `.exe`, o `.sha256` e as notas geradas do catálogo; confere que o arquivo publicado é idêntico ao gerado.
-4. `node scripts/publicar-versao.mjs X.Y.Z <sha256> <data>`: o catálogo passa a `publicada` (data, link da release e SHA-256), num commit na `main`.
+4. `node ferramentas/release/publicar-versao.mjs X.Y.Z <sha256> <data>`: o catálogo passa a `publicada` (data, link da release e SHA-256), num commit na `main`.
 5. Dispara `.github/workflows/site.yml`, que publica o site (Render) e espera o commit certo no ar (`build.txt`). O site passa a oferecer o download da versão com o SHA-256.
 
 Depois disso, o aplicativo instalado (2.10.1 em diante) avisa sozinho: ao abrir e a cada 6 horas consulta a release mais recente e, uma vez por versão, acende o sino e mostra uma notificação do Windows que leva a Ajuda › Atualizações. Quem desligou o aviso continua podendo verificar pelo botão.
@@ -54,5 +54,5 @@ O fluxo do site publica no Render pelo **Deploy Hook**, guardado no segredo `REN
 ## Se algo falhar
 
 - Etapa antes da release: nada é publicado. Corrija, faça novo commit na `main` e mova a tag só se a release ainda não existir.
-- Release criada mas catálogo ou site falharam: rode à mão `node scripts/publicar-versao.mjs X.Y.Z <sha256>` (o SHA-256 está no `.sha256` da release), faça o commit na `main` e o push; o site publica sozinho.
+- Release criada mas catálogo ou site falharam: rode à mão `node ferramentas/release/publicar-versao.mjs X.Y.Z <sha256>` (o SHA-256 está no `.sha256` da release), faça o commit na `main` e o push; o site publica sozinho.
 - Nunca apague uma release publicada nem reutilize o número de uma versão já baixada.

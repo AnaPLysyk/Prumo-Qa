@@ -8,9 +8,9 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import { telas, papeis } from './gerar-leia-me-backend.mjs';
+import { telas, papeis } from '../documentacao/gerar-leia-me-backend.mjs';
 
-const raizRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const raizRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const pastasLidas = /^(frontend|backend|src|app|scripts|ferramentas|site|skills|testes)\//;
 const extensoes = /\.(ts|mjs|cjs|js|html|css|json|md)$/;
 const ignorar = /^(app\/renderer\/vendor\/|app\/ajuda\/|site\/public\/|.*\.min\.js$)/;
@@ -137,7 +137,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const dados = gerarArquitetura({ atual: arg('--atual', 'origin/main') });
   fs.mkdirSync(saida, { recursive: true });
   fs.writeFileSync(path.join(saida, 'arquitetura.json'), JSON.stringify(dados));
-  const modelo = fs.readFileSync(path.join(raizRepo, 'scripts', 'arquitetura', 'visualizador.html'), 'utf8');
+  const modelo = fs.readFileSync(path.join(raizRepo, 'ferramentas', 'arquitetura', 'visualizador.html'), 'utf8');
   const json = JSON.stringify(dados).replace(/</g, '\\u003c');
   const pagina = modelo.replace('/*__DADOS__*/null', () => json);
   // Versão para abrir no navegador (documento completo) e versão sem cabeçalho para publicar como página do Prumo.

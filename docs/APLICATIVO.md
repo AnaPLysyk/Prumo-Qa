@@ -4,7 +4,7 @@ Na 2.6, Conexões usa `backend/conexoes/ia/` (`diagnosticarIntegracao`, `testarP
 
 Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `backend/suporte/integracoes/consultarChamado.ts` usa os rótulos definidos em `app/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
 
-O gerador `site/gerar.mjs`, chamado pela entrada compatível `scripts/gerar-site.mjs`, usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes em [../site/README.md](../site/README.md).
+O gerador `site/gerar.mjs`, chamado pela entrada compatível `site/gerar.mjs`, usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes em [../site/README.md](../site/README.md).
 
 A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama o arquivo `api/` da tela (ex.: `backend/logs/api/projetoLogs.ts`), que delega às regras da própria tela.
 
@@ -54,7 +54,7 @@ A aba **Suporte** prepara bug, melhoria ou sugestão (`backend/suporte/regras/`)
 
 ### Versões e atualização
 
-`app/versoes.json` (validado por `backend/ajuda/versoes/validarVersoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`scripts/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
+`app/versoes.json` (validado por `backend/ajuda/versoes/validarVersoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`ferramentas/release/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
 
 ### Dados locais: exportar e excluir
 

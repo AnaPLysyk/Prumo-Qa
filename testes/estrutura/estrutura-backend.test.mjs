@@ -105,10 +105,10 @@ test('backend: cada canal da janela (IPC) é atendido por um arquivo api/ com o 
 });
 
 test('backend: o LEIA-ME de cada tela está igual ao código (rode npm run leia-me)', async () => {
-  const { gerarLeiaMe } = await import('../../scripts/gerar-leia-me-backend.mjs');
+  const { gerarLeiaMe } = await import('../../ferramentas/documentacao/gerar-leia-me-backend.mjs');
   const problemas = [];
   for (const [arq, texto] of gerarLeiaMe()) {
-    if (texto.includes('(sem explicação)')) problemas.push(`${arq}: pasta sem explicação em scripts/gerar-leia-me-backend.mjs`);
+    if (texto.includes('(sem explicação)')) problemas.push(`${arq}: pasta sem explicação em ferramentas/documentacao/gerar-leia-me-backend.mjs`);
     if (!fs.existsSync(arq) || fs.readFileSync(arq, 'utf8').split('\r').join('') !== texto) problemas.push(`${arq}: desatualizado`);
   }
   assert.deepEqual(problemas, []);

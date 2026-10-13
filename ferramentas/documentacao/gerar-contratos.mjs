@@ -1,7 +1,7 @@
 // Gera docs/CONTRATOS.md a partir do catálogo real (backend/aplicativo/api/catalogoDeContratos.ts), a mesma fonte da tela Ajuda › Integrações técnicas.
 // Uso: npm run contratos        (o teste testes/contratos.test.mjs falha se o arquivo estiver desatualizado)
 import fs from 'node:fs';
-import { catalogo } from '../dist/aplicativo/api/catalogoDeContratos.js';
+import { catalogo } from '../../dist/aplicativo/api/catalogoDeContratos.js';
 
 export function documento() {
   const ops = catalogo(); const ipc = ops.filter((o) => o.tipo === 'IPC'); const mcp = ops.filter((o) => o.tipo === 'MCP');
@@ -29,6 +29,6 @@ ${tabela(mcp)}
 ${[...ipc, ...mcp].map(detalhe).join('\n')}`;
 }
 if (process.argv[1] && import.meta.url === new URL(`file:///${process.argv[1].replaceAll('\\', '/')}`).href) {
-  fs.writeFileSync(new URL('../docs/CONTRATOS.md', import.meta.url), documento());
+  fs.writeFileSync(new URL('../../docs/CONTRATOS.md', import.meta.url), documento());
   console.log('docs/CONTRATOS.md atualizado.');
 }

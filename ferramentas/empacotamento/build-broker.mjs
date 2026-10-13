@@ -13,7 +13,7 @@ import path from 'node:path';
  *   executável, o build avisa claramente (e falha no CI), porque a execução protegida ficaria BLOCKED.
  */
 if (process.platform === 'win32') {
-  const output = path.resolve('dist/aprovar.exe'); const fonte = path.resolve('scripts/aprovar.cs'); const carimbo = output + '.fonte.sha256';
+  const output = path.resolve('dist/aprovar.exe'); const fonte = path.resolve('ferramentas/empacotamento/aprovar.cs'); const carimbo = output + '.fonte.sha256';
   // Caminhos locais escolhidos pelo build, escapados para literals PowerShell; sem entrada de prompt.
   const literal = (s) => "'" + s.replaceAll("'", "''") + "'";
   const command = `$ErrorActionPreference='Stop'; Add-Type -Path ${literal(fonte)} -ReferencedAssemblies 'System.dll','System.Core.dll','System.Web.Extensions.dll' -OutputAssembly ${literal(output)} -OutputType ConsoleApplication`;

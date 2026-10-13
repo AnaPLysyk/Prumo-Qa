@@ -1,11 +1,11 @@
 // Gera assets/prumo-icon.png e .ico a partir da esfera (assets/qc-orb.png), a identidade do Prumo.
-// Roda dentro do Electron (usa nativeImage): npx electron scripts/gerar-icone-orb.cjs
+// Roda dentro do Electron (usa nativeImage): npx electron ferramentas/empacotamento/gerar-icone-orb.cjs
 const { app, nativeImage } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 
 app.whenReady().then(() => {
-  const raiz = path.resolve(__dirname, '..');
+  const raiz = path.resolve(__dirname, '../..');
   const orig = nativeImage.createFromPath(path.join(raiz, 'assets', 'qc-orb.png'));
   const { width, height } = orig.getSize(); const bmp = orig.toBitmap(); // BGRA
   let x0 = width, y0 = height, x1 = 0, y1 = 0;

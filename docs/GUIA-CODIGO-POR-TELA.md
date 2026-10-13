@@ -157,9 +157,9 @@ Os arquivos `app/renderer/agenda.js` e `app/renderer/integracoes.js` agora são 
 
 As implementações grandes v40 usam funções no mesmo escopo. Para manter o código executado exatamente igual durante a migração, agora existem arquivos-fonte `.parte.js` por ação em `app/renderer/telas/<nome-da-tela>/fluxos-fonte/` e `app/renderer/telas/testes/avancados-fonte/`.
 
-Abra a pasta da tela, escolha o arquivo pelo nome da função e leia a frase inicial. Para alterar uma ação, edite **a parte-fonte** e depois rode `node scripts/gerar-telas-v40.mjs`. Não edite diretamente `fluxos-v40.js` ou `testes-v40.js`, pois agora eles são arquivos gerados que o Electron carrega. A geração não substitui testes de comportamento.
+Abra a pasta da tela, escolha o arquivo pelo nome da função e leia a frase inicial. Para alterar uma ação, edite **a parte-fonte** e depois rode `node ferramentas/frontend/gerar-telas-modulares.mjs`. Não edite diretamente `fluxos-v40.js` ou `testes-v40.js`, pois agora eles são arquivos gerados que o Electron carrega. A geração não substitui testes de comportamento.
 
-Os testes em `testes/arquitetura-telas.test.mjs` comprovam que a união das partes reproduz integralmente os arquivos executados e que o `index.html` carrega apenas os bundles na ordem correta. Use `node scripts/gerar-telas-v40.mjs --check` para conferir a igualdade sem escrever arquivos.
+Os testes em `testes/arquitetura-telas.test.mjs` comprovam que a união das partes reproduz integralmente os arquivos executados e que o `index.html` carrega apenas os bundles na ordem correta. Use `node ferramentas/frontend/gerar-telas-modulares.mjs --check` para conferir a igualdade sem escrever arquivos.
 
 **Atenção:** `frontend/` e `backend/` continuam como organização futura. As novas telas de login e administração permanecem na documentação Proposta; não aparecem na árvore atual de código.
 
@@ -169,6 +169,6 @@ O visual aprovado continua funcionando por `app/renderer/interfaces-v36.js` e `a
 
 Procure **Agentes** para `montarAssistenteFlutuante`, `montarPainelChat`, `enviarPerguntaChat`, `mostrarCerebroAgente`, `listarAgentesDisponiveis` e `abrirDetalhesAgente`. Procure **Logs** para `montarLinhaLog`, `desenharLogsFiltrados` e `carregarRegistrosLog`. Procure **Histórico** para `filtrarAtividadesHistorico` e `montarTabelaHistorico`. Procure **Métricas** para `filtrarRegistrosMetricas`, `prepararDadosGrafico` e `pintarGrafico`. Em **Configurações**, `editarPreferenciasAssistente` concentra a exibição dos campos de IA, voz e estilo.
 
-O gerador atualizado é `node scripts/gerar-telas-modulares.mjs`; com `--check` ele compara as fontes sem escrever. O comando anterior `node scripts/gerar-telas-v40.mjs` continua funcionando como ponte, mas use o novo nome. `testes/arquitetura-telas.test.mjs` confere os bundles JavaScript, o CSS gerado e o carregamento das páginas.
+O gerador atualizado é `node ferramentas/frontend/gerar-telas-modulares.mjs`; com `--check` ele compara as fontes sem escrever. O comando anterior `node ferramentas/frontend/gerar-telas-modulares.mjs` continua funcionando como ponte, mas use o novo nome. `testes/arquitetura-telas.test.mjs` confere os bundles JavaScript, o CSS gerado e o carregamento das páginas.
 
 **Limite da comprovação:** arquivos gerados idênticos comprovam que a refatoração das fontes não alterou esses bytes na migração; não comprovam isoladamente o funcionamento de todas as telas, nem substituem os testes do Electron e a validação visual.

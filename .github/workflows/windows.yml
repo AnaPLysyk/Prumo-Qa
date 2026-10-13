@@ -75,7 +75,7 @@ jobs:
           $v = (Get-Content "$dir\resources\app\package.json" -Raw | ConvertFrom-Json).version
           if ($v -ne '2.2.0') { throw "Versão instalada inesperada: $v" }
       - name: Criar dados reais com a 2.2.0 (vínculo, chamadas MCP, evidência BLOCKED)
-        run: node scripts/preparar-dados-22.mjs "C:\Prumo QA instalação"
+        run: node ferramentas/migracao/preparar-dados-22.mjs "C:\Prumo QA instalação"
       - name: Atualizar para a versão atual instalando SOBRE a 2.2.0
         shell: pwsh
         run: |
@@ -110,7 +110,7 @@ jobs:
           if ((Get-FileHash $anterior26 -Algorithm SHA256).Hash.ToLower() -ne '53c1de612536f13afe817b0dd4f9ff09343991d5ac4bb3c60eabc68486fec183') { throw 'Hash da 2.6 publicada não confere' }
           $dir = 'C:\Prumo QA instalação'
           Start-Process -FilePath $anterior26 -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
-          node scripts/preparar-dados-26.mjs $dir
+          node ferramentas/migracao/preparar-dados-26.mjs $dir
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
           Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
@@ -134,7 +134,7 @@ jobs:
           if ((Get-FileHash $anterior27 -Algorithm SHA256).Hash.ToLower() -ne '3febfd139ced5d201c934dbb8674294677645301999a432e0cfd82b78a5cdbf5') { throw 'Hash da 2.7 publicada não confere' }
           $dir = 'C:\Prumo QA instalação'
           Start-Process -FilePath $anterior27 -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
-          node scripts/preparar-dados-27.mjs $dir
+          node ferramentas/migracao/preparar-dados-27.mjs $dir
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
           Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
@@ -187,7 +187,7 @@ jobs:
         run: |
           $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
           if ($env:GITHUB_REF_NAME -ne "v$v") { throw "A tag $($env:GITHUB_REF_NAME) não corresponde à versão $v do package.json" }
-          node scripts/notas-versao.mjs $v | Out-File -Encoding utf8 release-notes.md
+          node ferramentas/release/notas-versao.mjs $v | Out-File -Encoding utf8 release-notes.md
       - name: Criar release (instalador não assinado)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -222,7 +222,7 @@ jobs:
           $data = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'E. South America Standard Time').ToString('yyyy-MM-dd')
           git fetch --no-tags origin main
           git checkout -B main origin/main
-          node scripts/publicar-versao.mjs $v $env:SHA256_PUBLICADO $data
+          node ferramentas/release/publicar-versao.mjs $v $env:SHA256_PUBLICADO $data
           if ($LASTEXITCODE -ne 0) { throw "Não foi possível marcar $v como publicada no catálogo" }
           git diff --quiet -- app/versoes.json
           if ($LASTEXITCODE -ne 0) {

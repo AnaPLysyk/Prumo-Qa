@@ -90,13 +90,13 @@ test('notas de release saem da mesma fonte, sem copiar texto à mão', () => {
   assert.match(notas, new RegExp(`## Prumo QA ${v.version.replaceAll('.', '\\.')}`));
   for (const f of v.features.slice(0, 2)) assert.ok(notas.includes(f));
   assert.ok(notas.includes(v.differential) && notas.includes('Limitações conhecidas') && notas.includes('Migração de dados'));
-  const gerado = execFileSync(process.execPath, ['scripts/notas-versao.mjs', v.version], { encoding: 'utf8' });
+  const gerado = execFileSync(process.execPath, ['ferramentas/release/notas-versao.mjs', v.version], { encoding: 'utf8' });
   assert.ok(gerado.includes(notas.trim().split('\n')[0]) && gerado.includes('NÃO ASSINADO') && gerado.includes('SHA-256'));
-  assert.throws(() => execFileSync(process.execPath, ['scripts/notas-versao.mjs', '9.9.9'], { stdio: 'pipe' }));
+  assert.throws(() => execFileSync(process.execPath, ['ferramentas/release/notas-versao.mjs', '9.9.9'], { stdio: 'pipe' }));
 });
 
 test('notas de release só afirmam "assinado" quando o pipeline confirmou (PRUMO_ASSINADO=true); por padrão dizem NÃO ASSINADO', () => {
-  const rodar = (extra) => execFileSync(process.execPath, ['scripts/notas-versao.mjs', '2.3.1'], { encoding: 'utf8', env: { ...process.env, PRUMO_ASSINADO: '', ...extra } });
+  const rodar = (extra) => execFileSync(process.execPath, ['ferramentas/release/notas-versao.mjs', '2.3.1'], { encoding: 'utf8', env: { ...process.env, PRUMO_ASSINADO: '', ...extra } });
   const padrao = rodar({});
   assert.match(padrao, /Instalador NÃO ASSINADO/); assert.doesNotMatch(padrao, /assinado digitalmente \(Authenticode/);
   assert.match(rodar({ PRUMO_ASSINADO: 'false' }), /NÃO ASSINADO/);

@@ -16,7 +16,7 @@ Testes têm catálogo por camada/natureza/funcionalidade e seleção combinável
 
 ## Existente, mas necessitando refatoração
 
-`frontend/` mantém fragmentos `.parte.js/.css` cuja ordem compõe IIFEs e escopos compartilhados. Sua consolidação exige preservar esses consumidores. `backend/` contém 816 fontes no checkpoint e ampla fragmentação; remover wrappers exige investigar contratos, geradores e imports. `scripts/` ainda contém entradas de build, broker, release e migração usadas por CI/Render/empacotamento; não é uma pasta descartável. `app/` reúne runtime, preload, conteúdo público, vendor e arquivos gerados. `reporters/` contém o adaptador público de Playwright utilizado em projetos vinculados.
+`frontend/` mantém fragmentos `.parte.js/.css` cuja ordem compõe IIFEs e escopos compartilhados. Sua consolidação exige preservar esses consumidores. `backend/` contém 816 fontes no checkpoint e ampla fragmentação; remover wrappers exige investigar contratos, geradores e imports. `scripts/` foi eliminada: as entradas de build, broker, release e migração passaram para `ferramentas/<finalidade>/` com os consumidores (package.json, CI, Render, electron-builder) atualizados. `app/` reúne runtime, preload, conteúdo público, vendor e arquivos gerados. `reporters/` contém o adaptador público de Playwright utilizado em projetos vinculados.
 
 A validação IPC foi endurecida para página exata/frame principal/janela registrada. O verificador de dependências agora identifica imports ausentes antes de compilar, incluindo todos os consumidores de um helper removido.
 

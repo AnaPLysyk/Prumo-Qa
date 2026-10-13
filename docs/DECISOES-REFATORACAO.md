@@ -20,6 +20,6 @@ O site permanece estático, com geração manual de prévias declarada em `rende
 
 ## Fontes, adaptadores e testes
 
-As entradas em `scripts/` usadas por package, Render, Electron Builder e workflows ficam preservadas até a migração dos consumidores. `scripts/gerar-site.mjs` é agora um adaptador pequeno para `site/gerar.mjs`. `app/` continua contendo runtime, preload, ajuda e catálogo de versões. Remover essas pastas em bloco quebraria consumidores conhecidos.
+A pasta genérica `scripts/` foi eliminada: cada ferramenta está em `ferramentas/<finalidade>/` (arquitetura, documentacao, frontend, empacotamento, release, migracao, site, qa, skills, testes, demonstracao), e o site é gerado diretamente por `site/gerar.mjs`. `app/` continua contendo runtime, preload, ajuda e catálogo de versões. Remover essa pasta em bloco quebraria consumidores conhecidos.
 
 O catálogo de testes separa camada e natureza por arquivo. Arquivos com múltiplas responsabilidades não se tornam unitários só por não abrir janela; a divisão de casos dentro dos arquivos continua um trabalho posterior. Nada foi removido ou convertido em aprovação por nome semelhante.

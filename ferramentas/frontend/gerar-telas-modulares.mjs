@@ -3,8 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const manifesto = JSON.parse(fs.readFileSync(path.join(raiz, 'scripts/telas-modulares.json'), 'utf8'));
+const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const manifesto = JSON.parse(fs.readFileSync(path.join(raiz, 'ferramentas/frontend/telas-modulares.json'), 'utf8'));
 const conferir = process.argv.includes('--check');
 let falhas = 0;
 for (const bundle of manifesto.bundles) {

@@ -1,5 +1,5 @@
 // Prepara dados REAIS com o Prumo 2.2.0 instalado, para provar que a atualização para a 2.3.0 os preserva.
-// Uso: node scripts/preparar-dados-22.mjs "<pasta de instalação do 2.2.0>"   (usa o diretório de dados padrão do usuário)
+// Uso: node ferramentas/migracao/preparar-dados-22.mjs "<pasta de instalação do 2.2.0>"   (usa o diretório de dados padrão do usuário)
 // Passos: vincula o projeto de demonstração com o código da 2.2.0 e faz chamadas MCP reais ao servidor da 2.2.0
 // (rodando no runtime embutido do app instalado). Grava um marcador e um instantâneo em %LOCALAPPDATA%\PrumoQA.
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';

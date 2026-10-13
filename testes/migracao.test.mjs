@@ -5,7 +5,7 @@ import path from 'node:path';
 import { versao, exe, ir, mcp, abrirPadrao } from './janela.mjs';
 
 /**
- * Atualização 2.2.0 → 2.3.0 sobre dados REAIS criados pela 2.2.0 instalada (scripts/preparar-dados-22.mjs),
+ * Atualização 2.2.0 → 2.3.0 sobre dados REAIS criados pela 2.2.0 instalada (ferramentas/migracao/preparar-dados-22.mjs),
  * no diretório de dados padrão do usuário. Só roda no CI de instalação: PRUMO_MIGRACAO=1 e PRUMO_APP_EXE.
  */
 const ativo = process.env.PRUMO_MIGRACAO === '1' && exe;

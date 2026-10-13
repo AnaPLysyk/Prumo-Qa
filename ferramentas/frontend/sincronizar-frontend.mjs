@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const origem = path.join(raiz, 'frontend');
 const destino = path.join(raiz, 'app/renderer/telas');
 const somenteConferir = process.argv.includes('--check');

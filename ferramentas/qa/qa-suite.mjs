@@ -2,16 +2,16 @@
 // O grupo vem de PRUMO_QA_GRUPO (o contrato não aceita flags: cada argumento de um comando node é um arquivo do escopo).
 // Grupos: nucleo (sem janela; inclui contratos e integração) e janela-1..3 (Electron real).
 // Arquivos de teste novos entram sozinhos: os de janela são distribuídos em rodízio pela ordem alfabética.
-// Requer o build atual (capacidade "build"). Uso local: PRUMO_QA_GRUPO=unidade node scripts/qa-suite.mjs
+// Requer o build atual (capacidade "build"). Uso local: PRUMO_QA_GRUPO=unidade node ferramentas/qa/qa-suite.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { casoDoNode } from '../reporters/prumo-node-reporter.mjs';
+import { casoDoNode } from '../../reporters/prumo-node-reporter.mjs';
 import { run } from 'node:test';
 import { spec } from 'node:test/reporters';
 
-const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 process.chdir(repo);
 const pedido = process.env.PRUMO_QA_GRUPO ?? '';
 const grupo = pedido === 'unidade' ? 'nucleo' : pedido; // Alias para contratos anteriores.
@@ -30,7 +30,7 @@ if (!process.env.PATH && process.platform === 'win32') {
   process.env.PATH = fixos.filter((d) => d && fs.existsSync(d)).join(path.delimiter);
 }
 // Mesmo ambiente de `npm test`: conhecimento em memória (nunca o banco real) e mocks de módulo.
-createRequire(import.meta.url)('../testes/conhecimento-hook.cjs');
+createRequire(import.meta.url)('../../testes/conhecimento-hook.cjs');
 console.log(`Prumo QA · grupo ${grupo}: ${grupos[grupo].length} arquivo(s)\n${grupos[grupo].join('\n')}\n`);
 let falhas = 0;
 const casos = [];

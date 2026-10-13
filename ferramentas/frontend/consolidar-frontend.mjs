@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 const raiz = process.cwd();
 const aplicar = process.argv.includes('--aplicar');
 const rel = (p) => path.join(raiz, p);
-const manifestoPath = 'scripts/telas-modulares.json';
+const manifestoPath = 'ferramentas/frontend/telas-modulares.json';
 const testePath = 'testes/arquitetura-telas.test.mjs';
 const somar = (valores) => valores.reduce((a, b) => a + b, 0);
 const conteudo = (p) => fs.readFileSync(rel(p), 'utf8');
@@ -102,9 +102,9 @@ try {
     if (conteudo(b.destino) !== gerado) throw new Error('Bundle alterado: ' + b.destino);
   }
   for (const args of [
-    ['scripts/sincronizar-frontend.mjs', '--check'],
-    ['scripts/gerar-telas-modulares.mjs', '--check'],
-    ['scripts/verificar-modulos.mjs'],
+    ['ferramentas/frontend/sincronizar-frontend.mjs', '--check'],
+    ['ferramentas/frontend/gerar-telas-modulares.mjs', '--check'],
+    ['ferramentas/frontend/verificar-modulos.mjs'],
   ]) execFileSync(process.execPath, args, { cwd: raiz, stdio: 'inherit' });
   console.log('MIGRAÇÃO CONCLUÍDA: fontes consolidadas e cópias Electron sincronizadas.');
   console.log('Revise o git diff e execute npm.cmd run check antes de qualquer commit.');

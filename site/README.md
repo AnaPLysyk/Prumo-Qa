@@ -2,9 +2,9 @@
 
 `npm.cmd run site` gera `site/public` a partir de `app/ajuda`, documentos públicos selecionados, `app/versoes.json` e `app/suporte-status.json`. Sem framework, dependências, backend ou acesso ao núcleo pelo visitante. Os arquivos gerados não são fonte editorial e ficam fora do Git.
 
-A implementação fica em `site/gerar.mjs`, com a estrutura HTML comum em `site/componentes/pagina.mjs` e o CSS estático em `site/estilos/base.css`. As regras de animação das órbitas continuam geradas junto ao SVG e são acrescentadas ao CSS publicado. `scripts/gerar-site.mjs` mantém a entrada compatível e reexporta `gerarSite` e `markdown`; npm, Render e consumidores existentes continuam usando o mesmo comando. Os caminhos das fontes são resolvidos a partir do módulo, sem depender da pasta atual do terminal.
+A implementação fica em `site/gerar.mjs`, com a estrutura HTML comum em `site/componentes/pagina.mjs` e o CSS estático em `site/estilos/base.css`. As regras de animação das órbitas continuam geradas junto ao SVG e são acrescentadas ao CSS publicado. `site/gerar.mjs` mantém a entrada compatível e reexporta `gerarSite` e `markdown`; npm, Render e consumidores existentes continuam usando o mesmo comando. Os caminhos das fontes são resolvidos a partir do módulo, sem depender da pasta atual do terminal.
 
-Render Static Site gratuito: repositório oficial, branch main, build `node scripts/gerar-site.mjs`, publish `site/public`, `SKIP_INSTALL_DEPS=true`. Configuração reproduzível em `render.yaml`. Auto deploy desligado para publicação deliberada. Somente esse novo serviço pertence à tarefa.
+Render Static Site gratuito: repositório oficial, branch main, build `node site/gerar.mjs`, publish `site/public`, `SKIP_INSTALL_DEPS=true`. Configuração reproduzível em `render.yaml`. Auto deploy desligado para publicação deliberada. Somente esse novo serviço pertence à tarefa.
 
 O build não compila o broker Windows. A mesma fonte de versões alimenta o desktop, o site e as release notes. Apenas versões marcadas como publicadas têm download oficial; código da 2.6 não deve ser anunciado como release até o CI de distribuição passar.
 

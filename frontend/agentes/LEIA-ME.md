@@ -12,4 +12,4 @@
 
 As funções visuais avançadas estão em `app/renderer/telas/agentes/visual-v36-fonte/` (como `listarAgentesDisponiveis`, `mostrarCerebroAgente`, `abrirDetalhesAgente` e `montarAssistenteFlutuante`). Seus estilos estão em `app/renderer/telas/agentes/visual-v36-estilos/` (retratos, cérebro, tema claro e cenário).
 
-Essas fontes compõem os bundles do visual v36; não carregue partes isoladas. Para testar identidade, rode `node scripts/gerar-telas-modulares.mjs --check` e `npm.cmd run check`.
+Essas fontes compõem os bundles do visual v36; não carregue partes isoladas. Para testar identidade, rode `node ferramentas/frontend/gerar-telas-modulares.mjs --check` e `npm.cmd run check`.

@@ -32,7 +32,7 @@ test('frontend: recursos têm fonte única e preservam todos os caminhos distrib
     assert.deepEqual(fs.readFileSync(recurso.fonte), fs.readFileSync(recurso.destino), 'Recurso divergente: '+recurso.destino);
     assert.ok(!fs.existsSync(path.join(copia, recurso.fonte.slice('frontend/'.length))), 'Recurso não deve ser copiado como tela: '+recurso.fonte);
   }
-  const bundles = JSON.parse(fs.readFileSync('scripts/telas-modulares.json', 'utf8')).bundles.map(b => path.basename(b.destino));
+  const bundles = JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json', 'utf8')).bundles.map(b => path.basename(b.destino));
   const excluidos = new Set([...bundles, 'agenda.js', 'apoio-v40.js', 'integracoes.js', 'plataforma.js', 'status.css']);
   const runtime = fs.readdirSync('app/renderer').filter(arq => /\.(js|css|html)$/.test(arq) && !excluidos.has(arq)).sort();
   assert.deepEqual(recursos.map(r => path.basename(r.destino)).sort(), runtime, 'Todo recurso não gerado da raiz deve ter fonte oficial');
