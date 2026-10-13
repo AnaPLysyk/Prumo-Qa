@@ -98,7 +98,7 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `personalidadeParaIa.ts` | Escreve o bloco de personalidade do agente enviado à IA (tom, foco, papel da pessoa). |
 | `proximosPassosSugeridos.ts` | Sugere as próximas perguntas úteis conforme o agente, os fatos e o papel da pessoa. |
 | `registrarSugestoesDaIa.ts` | Guarda aprendizados sugeridos pela IA apenas como rascunhos que exigem aprovação. |
-| `responderComDadosLocais.ts` | Monta a resposta do agente com os dados locais do projeto (sem IA), com fontes e fatos usados. |
+| `responderComDadosLocais.ts` | Monta a resposta do agente com os dados locais do projeto (sem IA): prepara a pergunta, chama a parte do agente certo e devolve linhas, fontes e fatos usados. |
 | `responderSobreTeste.ts` | Responde sobre um teste escolhido na tela Testes (tipo, arquivo, agente certo). |
 | `saudacao.ts` | Abre a conversa: cumprimenta pelo nome, resume a situação e pergunta o que falta saber da pessoa. |
 | `separarAprendizados.ts` | Separa da resposta da IA as linhas "APRENDIZADO:" (viram rascunho) do restante. |
