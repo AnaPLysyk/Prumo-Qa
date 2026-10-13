@@ -2,6 +2,52 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.11.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "Skills em banco próprio, agentes por profissão e código organizado pelo caminho de quem usa",
+      "objective": "Dar a cada agente um banco de Skills que a equipe consegue alimentar e organizar o código para que cada tela, ferramenta e teste esteja num lugar previsível. Inclui tudo da 2.10.2, que não chegou a ser publicada: quem está na 2.10.1 recebe as duas de uma vez.",
+      "features": [
+        "Banco de Skills (skills.db), separado do conhecimento: cada Skill fica em trechos com origem, estado, fonte e licença. Em Agentes › configuração do agente › Skills você vê os trechos, acrescenta um trecho da equipe (já vale) e aprova ou descarta rascunhos; o Cérebro mostra os trechos com as mesmas ações.",
+        "Importar pasta de Skill: escolha uma pasta aberta que já está no computador (por exemplo um repositório clonado). Só entra com licença aberta reconhecida (MIT, Apache-2.0, BSD, ISC, 0BSD, Unlicense, CC0, CC-BY, CC-BY-SA), com fonte e licença registradas, como rascunho até você aprovar.",
+        "Agentes por profissão: cada especialização mostra profissão, especialidade e a permissão efetiva do projeto, separada da capacidade da especialização.",
+        "Tudo da 2.10.2: vincular qualquer pasta de código com contrato proposto e aprovado, atualizar com um clique pela Ajuda › Atualizações e as correções encontradas testando o Prumo pelo próprio Prumo."
+      ],
+      "improvements": [
+        "A IA externa recebe só os trechos aprovados da Skill que combinam com a pergunta (até 8 KB), em vez do arquivo inteiro: prompts menores e longe do limite de linha de comando do Windows.",
+        "Código organizado pelo caminho de quem usa: frontend/<tela> e backend/<tela>; ferramentas por finalidade (a pasta genérica scripts/ deixou de existir); testes por tipo e depois por camada; a interface do Electron é gerada no build a partir de frontend/, sem cópias para editar.",
+        "Verificador de dependências antes de cada build e seletor de testes por tipo, camada e funcionalidade.",
+        "Design system como fonte oficial; abas navegáveis com setas, Home e End, com painéis ligados por ARIA."
+      ],
+      "fixes": [
+        "No tema Sistema com o Windows em modo claro, o painel de configuração dos agentes ficava escuro com texto escuro; agora segue o tema claro.",
+        "Os canais da janela só aceitam pedidos da janela principal, do quadro principal e da página do aplicativo; quadros internos, janelas clonadas ou páginas diferentes são recusados antes da operação."
+      ],
+      "differential": "Os agentes ficam mais fortes com o conhecimento da equipe e de Skills abertas, sempre com aprovação humana antes de chegar à IA.",
+      "howItWorks": [
+        "Os trechos das Skills que acompanham o aplicativo são sincronizados a cada versão; um trecho que você descartou continua descartado enquanto o texto não mudar.",
+        "A importação lê só SKILL.md e references/*.md (até 64 KB cada, sem binário e sem atalho) da pasta escolhida no seletor do sistema; nada é baixado nem executado."
+      ],
+      "security": [
+        "Trecho de Skill é instrução para a IA externa: só os aprovados vão para o prompt e nenhum deles autoriza comandos, testes, agendamentos ou publicação.",
+        "Especialização desconhecida é recusada antes de ler qualquer arquivo; sem trecho aprovado, a IA externa não é chamada e a resposta local mostra o motivo."
+      ],
+      "compatibility": [
+        "Dados, projetos, preferências, conhecimentos e contratos da 2.10.1 são preservados. O skills.db é criado na primeira consulta, sem mexer no conhecimento.db."
+      ],
+      "limitations": [
+        "Login, usuários, administração multiusuário e banco central (PostgreSQL) ainda não existem: o Prumo continua local por conta do Windows, e o papel do perfil personaliza respostas, não autoriza nada.",
+        "O Painel de atividades mostra operações e conversas registradas localmente; ainda não é um orquestrador que distribui tarefas em paralelo entre vários agentes.",
+        "Python, Go, Java, .NET, Rust, PHP e Ruby continuam somente leitura: o executor aceita só node e npm.",
+        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou."
+      ],
+      "migration": "A instalação preserva os dados existentes; o banco de Skills é novo e não altera nenhum formato anterior.",
+      "afterUpdate": [
+        "Abra Agentes, escolha um agente e veja a seção Skills: acrescente o que a sua equipe quer que ele siga ou importe uma pasta de Skill aberta e aprove os trechos."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.10.2",
       "status": "repositorio",
       "date": null,

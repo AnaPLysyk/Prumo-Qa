@@ -15,7 +15,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `ajudaVersoes.ts` | Canal ajuda:versoes: Histórico de versões e versão instalada. |
 | `dadosExcluir.ts` | Canal dados:excluir: Excluir histórico operacional, evidências de um projeto ou diagnósticos do aplicativo. |
 | `dadosResumo.ts` | Canal dados:resumo: Mostrar onde ficam os dados locais e quanto espaço ocupam. |
-| `siteAbrir.ts` | Canal site:abrir: Abrir o site institucional oficial no navegador, depois de confirmar. |
+| `siteAbrir.ts` | Canal site:abrir: Abrir o site oficial do Prumo QA no navegador, depois de confirmar. |
 
 ## privacidade/
 
