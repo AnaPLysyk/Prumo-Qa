@@ -1,4 +1,4 @@
-/** Sincroniza os módulos oficiais de frontend/ com as cópias de execução da janela Electron. */
+/** Gera a interface do Electron (app/renderer, não versionada) a partir da fonte única em frontend/; com --check só confere. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +7,8 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const origem = path.join(raiz, 'frontend');
 const destino = path.join(raiz, 'app/renderer/telas');
 const somenteConferir = process.argv.includes('--check');
+// Num clone novo a pasta ainda não existe: gerar cria; conferir sem ter gerado é erro.
+if (!somenteConferir) fs.mkdirSync(destino, { recursive: true });
 
 function arquivosDentro(pasta, base = pasta) {
   if (!fs.existsSync(pasta)) throw new Error('Pasta ausente: ' + pasta);

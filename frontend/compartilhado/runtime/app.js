@@ -498,7 +498,7 @@ async function mostrar(aba) {
 }
 
 (async () => {
-  // Espera todos os scripts da página (plataforma.js, agenda.js) terminarem de executar antes de montar a primeira tela.
+  // Espera todos os scripts da página terminarem de executar antes de montar a primeira tela.
   if (document.readyState === 'loading') await new Promise((ok) => document.addEventListener('DOMContentLoaded', ok, { once: true }));
   const info = await chamar(api.info); if (info) $('#versao').textContent = 'v' + info.version;
   try { estado.root = localStorage.getItem('raiz'); } catch { /* ignora */ }

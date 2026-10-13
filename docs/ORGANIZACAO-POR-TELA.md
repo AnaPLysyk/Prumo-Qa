@@ -1,6 +1,6 @@
 # Organização didática por tela — migração em andamento
 
-> **Situação:** esta branch já contém `backend/<tela>/` e `frontend/<tela>/`. O Electron ainda usa uma cópia gerada em `app/renderer/telas/` e arquivos legados em `app/renderer/`. Consulte [o guia atual](ARQUITETURA-MODULAR-ATUAL.md) antes das notas históricas abaixo. A `main` não mudou.
+> **Situação:** esta branch já contém `backend/<tela>/` e `frontend/<tela>/`. O Electron carrega `app/renderer/`, gerado no build a partir de `frontend/` e não versionado. Consulte [o guia atual](ARQUITETURA-MODULAR-ATUAL.md) antes das notas históricas abaixo. A `main` não mudou.
 
 ## Objetivo
 
@@ -87,7 +87,7 @@ Exceção registrada: `backend/aplicativo/api/catalogoDeContratos.ts` continua u
 
 ## Segunda etapa: arquivos existentes na branch, separados por tela
 
-Agora os scripts de interface estão dentro de `app/renderer/telas/`, carregados explicitamente por `app/renderer/index.html`. Projetos tem seu formulário em `telas/projetos/modais/criarEditarProjeto/`. Suporte e Ajuda já possuem arquivos separados; Contextos é um modal em Agentes. Os scripts genéricos `plataforma.js` e `apoio-v40.js` foram deixados apenas como marcadores de migração, **não executados** na página.
+Agora os scripts de interface estão dentro de `frontend/`, carregados explicitamente por `app/renderer/index.html`. Projetos tem seu formulário em `telas/projetos/modais/criarEditarProjeto/`. Suporte e Ajuda já possuem arquivos separados; Contextos é um modal em Agentes. Os scripts genéricos `plataforma.js` e `apoio-v40.js` foram deixados apenas como marcadores de migração, **não executados** na página.
 
 
 **Leia `docs/GUIA-CODIGO-POR-TELA.md`** para acompanhar a lógica da tela Projetos, incluindo os canais IPC, a regra e o armazenamento.
@@ -125,4 +125,4 @@ Os arquivos `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-
 
 **Total nesta etapa:** 35 partes de Fluxos, 17 de Testes v40, 77 do visual v36 JavaScript e 27 de estilos v36 CSS. As fontes não devem ser carregadas isoladamente porque mantêm relações de escopo e ordem de execução. O CSS preserva a ordem da cascata.
 
-**Ainda não realizado:** eliminação das cópias de compatibilidade do Electron, migração total dos scripts legados e adaptação completa do empacotamento; divisão restante do núcleo desktop; implementação das novas telas de autenticação e administração; PostgreSQL e API HTTPS. A Documentação Viva Proposta não equivale a código já implementado.
+**Realizado:** as cópias do Electron deixaram de ser versionadas; `app/renderer/` é gerado no build. **Ainda não realizado:** migração total dos scripts legados e adaptação completa do empacotamento; divisão restante do núcleo desktop; implementação das novas telas de autenticação e administração; PostgreSQL e API HTTPS. A Documentação Viva Proposta não equivale a código já implementado.

@@ -4,7 +4,7 @@
 
 ## Comece por aqui
 
-- Quer alterar o que aparece na tela? Abra `app/renderer/telas/NOME-DA-TELA/`.
+- Quer alterar o que aparece na tela? Abra `frontend/NOME-DA-TELA/`.
 - Quer alterar o que acontece depois do clique? Abra `backend/NOME-DA-TELA/` e leia o `LEIA-ME.md` da pasta: `api/` recebe o pedido, `regras/` decide, `banco/` grava.
 - Quer entender por que uma pasta local ganhou `qa.project.json`? Abra `backend/projetos/regras/proporContrato.ts`.
 - Quer descobrir por onde a tela conversa com as regras? Veja `app/preload.cjs` → `backend/aplicativo/api/catalogoDeContratos.ts` (formato do pedido) → `backend/<tela>/api/<canal>.ts`. **Hoje não são endpoints HTTP**: são canais IPC seguros do Electron.
@@ -15,7 +15,7 @@
 
 ```text
 frontend / tela Projetos
-app/renderer/telas/projetos/mostrarProjetos.js
+frontend/projetos/mostrarProjetos.js
   ├── selecionarProjeto.js               escolhe o projeto na interface
   └── modais/criarEditarProjeto/
       └── abrirFormularioProjeto.js       mostra campos e botão Salvar
@@ -65,17 +65,17 @@ backend/projetos/regras/
 
 | Tela | Abra este arquivo | O que ele mostra |
 | --- | --- | --- |
-| Conexões | `app/renderer/telas/conexoes/mostrarConexoes.js` | Formulário de serviço, credencial e seleção de recurso |
-| Tickets | `app/renderer/telas/tickets/mostrarTickets.js` | Consulta de tickets Jira |
-| Testes | `app/renderer/telas/testes/mostrarTestesRemotos.js` | Consulta de casos e planos Qase |
-| Automações | `app/renderer/telas/automacoes/mostrarAutomacoes.js` | Automações da pasta local e repositório |
-| Rastreabilidade | `app/renderer/telas/rastreabilidade/mostrarRastreabilidade.js` | Liga um ticket a um caso com confirmação da pessoa |
-| Histórico | `app/renderer/telas/historico/mostrarHistorico.js` | Histórico dos vínculos, consultas e eventos |
-| Suporte | `app/renderer/telas/suporte/mostrarSuporte.js` | Relatos revisáveis e informações de diagnóstico |
-| Ajuda | `app/renderer/telas/ajuda/mostrarAjuda.js` | Guias, busca, versões e documentação |
-| Agentes / Contextos | `app/renderer/telas/agentes/abrirModalContextos.js` | Modal de contextos associado à tela Agentes |
+| Conexões | `frontend/conexoes/mostrarConexoes.js` | Formulário de serviço, credencial e seleção de recurso |
+| Tickets | `frontend/tickets/mostrarTickets.js` | Consulta de tickets Jira |
+| Testes | `frontend/testes/mostrarTestesRemotos.js` | Consulta de casos e planos Qase |
+| Automações | `frontend/automacoes/mostrarAutomacoes.js` | Automações da pasta local e repositório |
+| Rastreabilidade | `frontend/rastreabilidade/mostrarRastreabilidade.js` | Liga um ticket a um caso com confirmação da pessoa |
+| Histórico | `frontend/historico/mostrarHistorico.js` | Histórico dos vínculos, consultas e eventos |
+| Suporte | `frontend/suporte/mostrarSuporte.js` | Relatos revisáveis e informações de diagnóstico |
+| Ajuda | `frontend/ajuda/mostrarAjuda.js` | Guias, busca, versões e documentação |
+| Agentes / Contextos | `frontend/agentes/abrirModalContextos.js` | Modal de contextos associado à tela Agentes |
 
-Os pequenos componentes comuns ficam em `app/renderer/telas/compartilhado/`: cada arquivo se chama pelo que faz, por exemplo `criarBotaoAcao.js`, `criarCampoFormulario.js` e `consultarServicoRemoto.js`.
+Os pequenos componentes comuns ficam em `frontend/compartilhado/`: cada arquivo se chama pelo que faz, por exemplo `criarBotaoAcao.js`, `criarCampoFormulario.js` e `consultarServicoRemoto.js`.
 
 **Atenção:** o renderer possui outras versões que complementam ou substituem esses fluxos (por exemplo, `fluxos-v40.js`, `testes-v40.js`, `integracoes.js` e `interfaces-v36.js`). Esses arquivos **ainda não foram migrados**. Não conclua que os arquivos acima são a única implementação de cada tela.
 
@@ -96,7 +96,7 @@ Não fazer merge desta PR antes de conferir o comportamento das telas, o contrat
 ## Suporte — como um relato chega ao GitHub
 
 ```text
-app/renderer/telas/suporte/mostrarSuporte.js      mostra campos e revisão
+frontend/suporte/mostrarSuporte.js      mostra campos e revisão
   ↓ api.suportePreparar
 app/preload.cjs → src/contratos.ts → src/desktop/main.ts
   ↓ src/suporte.ts (entrada de compatibilidade)
@@ -128,7 +128,7 @@ O botão Consultar chamado da tela Suporte percorre a ponte `src/chamados.ts` e 
 Agora `app/renderer/index.html` carrega os arquivos de interface na mesma ordem funcional em que os scripts grandes eram executados. Cada pasta tem um `LEIA-ME.md` curto. A divisão não altera os contratos IPC nem cria HTTP novo.
 
 ```text
-app/renderer/telas/
+frontend/
 ├── inicio/mostrarInicio.js                    inicia o painel
 ├── agendamentos/
 │   ├── mostrarAgendamentos.js                  mostra rotinas
@@ -155,7 +155,7 @@ Os arquivos `app/renderer/agenda.js` e `app/renderer/integracoes.js` agora são 
 
 ## Fluxos e Testes avançados: organização das funções sem mudar a janela
 
-As implementações grandes v40 usam funções no mesmo escopo. Para manter o código executado exatamente igual durante a migração, agora existem arquivos-fonte `.parte.js` por ação em `app/renderer/telas/<nome-da-tela>/fluxos-fonte/` e `app/renderer/telas/testes/avancados-fonte/`.
+As implementações grandes v40 usam funções no mesmo escopo. Para manter o código executado exatamente igual durante a migração, agora existem arquivos-fonte `.parte.js` por ação em `frontend/<nome-da-tela>/fluxos-fonte/` e `frontend/testes/avancados-fonte/`.
 
 Abra a pasta da tela, escolha o arquivo pelo nome da função e leia a frase inicial. Para alterar uma ação, edite **a parte-fonte** e depois rode `node ferramentas/frontend/gerar-telas-modulares.mjs`. Não edite diretamente `fluxos-v40.js` ou `testes-v40.js`, pois agora eles são arquivos gerados que o Electron carrega. A geração não substitui testes de comportamento.
 
@@ -165,7 +165,7 @@ Os testes em `testes/arquitetura-telas.test.mjs` comprovam que a união das part
 
 ## Visual v36: onde estão as funções do robô, chat e cérebro
 
-O visual aprovado continua funcionando por `app/renderer/interfaces-v36.js` e `app/renderer/interfaces-v36.css`. Para facilitar a manutenção, suas fontes estão divididas em pastas `app/renderer/telas/<tela>/visual-v36-fonte/` e `visual-v36-estilos/`. O código gerado continua idêntico ao original na revisão da migração.
+O visual aprovado continua funcionando por `app/renderer/interfaces-v36.js` e `app/renderer/interfaces-v36.css`. Para facilitar a manutenção, suas fontes estão divididas em pastas `frontend/<tela>/visual-v36-fonte/` e `visual-v36-estilos/`. O código gerado continua idêntico ao original na revisão da migração.
 
 Procure **Agentes** para `montarAssistenteFlutuante`, `montarPainelChat`, `enviarPerguntaChat`, `mostrarCerebroAgente`, `listarAgentesDisponiveis` e `abrirDetalhesAgente`. Procure **Logs** para `montarLinhaLog`, `desenharLogsFiltrados` e `carregarRegistrosLog`. Procure **Histórico** para `filtrarAtividadesHistorico` e `montarTabelaHistorico`. Procure **Métricas** para `filtrarRegistrosMetricas`, `prepararDadosGrafico` e `pintarGrafico`. Em **Configurações**, `editarPreferenciasAssistente` concentra a exibição dos campos de IA, voz e estilo.
 

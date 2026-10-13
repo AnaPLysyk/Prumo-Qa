@@ -17,3 +17,7 @@ release/
 site/public/
 
 .lab/
+
+# Interface do Electron: gerada no build a partir de frontend/ (fonte única). Só a biblioteca de terceiros é versionada.
+app/renderer/*
+!app/renderer/vendor/

@@ -51,7 +51,7 @@ backend/projetos/banco/gravarEspacos.ts  grava os dados locais
 - `frontend/design-system/ds.js` e `ds.css` são as fontes oficiais dos componentes compartilhados; o gerador preserva os caminhos `app/renderer/ds.js` e `ds.css`.
 - `frontend/recursos.json` mapeia os 20 recursos transversais da interface, incluindo entrada, traduções, identidade e painel de atividades, para os caminhos distribuídos existentes. Markdown de desenvolvimento não é copiado para o renderer.
 - `backend/<tela>/` é a **fonte oficial das funções executadas fora da interface**.
-- `app/renderer/telas/` é **uma cópia gerada para compatibilidade** com o Electron: não editar manualmente.
+- `app/renderer/` é **gerado no build** a partir de `frontend/` (fonte única) e não é versionado; só `app/renderer/vendor/` (biblioteca de terceiros) fica no git. Não editar `app/renderer/`.
 - `app/renderer/fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-v36.css` são bundles gerados das partes-fonte organizadas no `frontend/`. Ainda existem componentes antigos não migrados na raiz `app/renderer/`.
 
 Para validar no Windows:

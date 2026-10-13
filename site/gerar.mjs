@@ -37,11 +37,11 @@ export function markdown(s,origem='README.md') {
 // Mesma identidade do aplicativo (Quality Control): tokens, esfera, tipografia. Sem JavaScript: a demonstração usa CSS puro.
 const css=fs.readFileSync(new URL('./estilos/base.css',import.meta.url),'utf8');
 
-// Órbitas do agente com os MESMOS parâmetros do aplicativo (app/renderer/orbitas-v36.js), lidos da fonte única.
+// Órbitas do agente com os MESMOS parâmetros do aplicativo (frontend/inicio/identidade/orbitas-v36.js), lidos da fonte única.
 // O app desenha em canvas com JavaScript; o site não usa script, então vira SVG e os arcos giram por CSS
 // (stroke-dashoffset). Sem a flexão das curvas, que depende de JavaScript.
 function orbitasDoApp() {
-  const fonte=fs.readFileSync(path.join(repo,'app/renderer/orbitas-v36.js'),'utf8');
+  const fonte=fs.readFileSync(path.join(repo,'frontend/inicio/identidade/orbitas-v36.js'),'utf8');
   const m=/const orbitas = (\[[\s\S]*?\]);/.exec(fonte);if(!m)throw new Error('Parâmetros das órbitas não encontrados em orbitas-v36.js');
   const json=m[1].replace(/([{,]\s*)([a-zA-Z]+):/g,'$1"$2":').replace(/(:\s*)(-?)\./g,'$1$20.');
   return JSON.parse(json);
