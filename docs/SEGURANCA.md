@@ -1,5 +1,11 @@
 # Segurança e limites de confiança
 
+## Refatoração da branch em desenvolvimento
+
+Os handlers IPC exigem o `webContents` da janela principal registrada, seu frame principal e a URL exata de `index.html`. Abrir uma cópia da mesma página em outra janela não concede acesso aos canais. Argumentos continuam sujeitos aos esquemas; esta alteração não concede capacidades novas.
+
+O seletor de testes catalogados recusa flags de migração e executável instalado na execução normal. Capturas de revisão usam o bootstrap exclusivo dos testes, conhecimento em memória e serviços sintéticos; não comprovam credenciais externas, autenticação humana ou persistência SQLite.
+
 ## Evolução 2.10.2
 
 - **Contrato proposto para qualquer pasta de código.** Ao vincular uma pasta sem `qa.project.json`, o aplicativo lê só a lista de arquivos da raiz (sem recursão, sem seguir links, sem itens sensíveis nem pastas geradas), detecta a stack e propõe um contrato v2. O arquivo só é criado depois da confirmação nativa do Windows, que mostra pastas, comandos e observações; é a **única** escrita do Prumo na pasta do projeto. Nunca sobrescreve um contrato existente (gravação exclusiva) e, se o arquivo não passar no validador do núcleo, é apagado. O caminho vem do seletor do sistema, nunca da janela.

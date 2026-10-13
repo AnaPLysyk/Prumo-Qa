@@ -6,7 +6,7 @@ import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';
 
 export const rendererDir = path.join(raizDoAplicativo, 'app', 'renderer');
 
-export const origemPermitida = pathToFileURL(rendererDir).href + '/';
+export const origemPermitida = pathToFileURL(path.join(rendererDir, 'index.html')).href;
 
 export const versao = app.getVersion();
 
