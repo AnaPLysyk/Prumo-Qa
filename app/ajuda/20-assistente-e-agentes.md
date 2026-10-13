@@ -21,7 +21,8 @@ Todo aprendizado vindo de conversa ou de IA nasce **rascunho**. Você aprova ou 
 A tela Agentes mostra o **Prumo Orchestrator**, os clientes Codex e Claude Code conectados por MCP e as oito especializações do projeto, cada uma com o seu retrato. Em cada agente:
 
 - **Configuração** liga ou desliga a especialização e define o que a IA pode pedir. O bloqueio vale no servidor MCP a cada chamada.
-- **Cérebro** mostra a skill, as capacidades, os motivos das políticas e os conhecimentos aprovados ou em rascunho.
+- **Skills** mostra os trechos de instrução do agente. Só os **aprovados** vão para o Claude Code ou o Codex, escolhidos pela pergunta (até 8 KB). O que você escreve em **Acrescentar trecho** já vale; **Importar pasta de Skill** lê uma pasta aberta que já está no computador (por exemplo um repositório clonado), só com licença aberta, e cada trecho entra como **rascunho** até você aprovar. Scripts da pasta não são executados.
+- **Cérebro** mostra a skill, as capacidades, os motivos das políticas os conhecimentos e os trechos de Skill da equipe, aprovados ou em rascunho.
 
 **Nova prévia** cria um agente personalizado apenas como prévia local da janela (até 50 por projeto, importação JSON de até 32 KiB). Ela não cria especialização, conexão nem processo no núcleo. **Contextos** abre a partir desta tela.
 

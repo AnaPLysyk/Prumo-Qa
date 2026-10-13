@@ -111,3 +111,16 @@ body[data-tela=agentes] .topo-direita{--fundo:#040713;--painel:#0b1326;--linha:r
 :root[data-tema=claro] .v36-activity-node{background:rgba(255,255,255,.7)}
 /* Perfil, Cérebro e mapa continuam como janelas para o espaço profundo, também no claro */
 :root[data-tema=claro] .v36a-perfil,:root[data-tema=claro] .v36-stage.v36a-cerebro,:root[data-tema=claro] .v36a-mapa{--texto:#eef3ff;--suave:#9fb0cf;background:radial-gradient(ellipse 65% 55% at 50% 45%,color-mix(in srgb,var(--face-color,#6ea8ff) 24%,transparent),transparent 72%),linear-gradient(180deg,#0a1429,#040814);color:#eef3ff}
+/* Tema "Sistema" com Windows claro: as mesmas regras do tema claro escolhido manualmente. */
+@media(prefers-color-scheme:light){
+:root:not([data-tema=escuro]) body[data-tela=agentes] .topo-direita{--fundo:#f5f8fc;--painel:#fff;--linha:#cfd9ea;--texto:#14233d;--suave:#465875;color-scheme:light}
+:root:not([data-tema=escuro]) .v36a-astro-nome{color:var(--texto)}
+:root:not([data-tema=escuro]) .v36a-astro-estado{color:var(--texto)}
+:root:not([data-tema=escuro]) .v36a-busca{background:rgba(255,255,255,.7)}
+:root:not([data-tema=escuro]) .v36a-form{background:rgba(255,255,255,.72)}
+:root:not([data-tema=escuro]) .v36-form-actions.v36a-commit{background:linear-gradient(to top,rgba(255,255,255,.96) 55%,transparent)}
+:root:not([data-tema=escuro]) .v36-field input,:root:not([data-tema=escuro]) .v36-field textarea,:root:not([data-tema=escuro]) .v36a-cap select{background:rgba(255,255,255,.85)}
+:root:not([data-tema=escuro]) .v36a-detalhe{background:rgba(255,255,255,.25)}
+:root:not([data-tema=escuro]) .v36-activity-node{background:rgba(255,255,255,.7)}
+:root:not([data-tema=escuro]) .v36a-perfil,:root:not([data-tema=escuro]) .v36-stage.v36a-cerebro,:root:not([data-tema=escuro]) .v36a-mapa{--texto:#eef3ff;--suave:#9fb0cf;background:radial-gradient(ellipse 65% 55% at 50% 45%,color-mix(in srgb,var(--face-color,#6ea8ff) 24%,transparent),transparent 72%),linear-gradient(180deg,#0a1429,#040814);color:#eef3ff}
+}

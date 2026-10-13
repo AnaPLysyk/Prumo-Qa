@@ -349,6 +349,21 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/e2e/ui/desktop-skills.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e",
+        "seguranca"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal ui. Verifica: Agentes › Skills na janela real com banco em memória",
+      "evidencias": [
+        "Agentes › Skills: trecho da equipe nasce aprovado, aparece na lista e pode ser descartado",
+        "../../apoio/janela.mjs"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/e2e/ui/desktop-suporte.test.mjs",
       "camada": "ui",
       "natureza": [

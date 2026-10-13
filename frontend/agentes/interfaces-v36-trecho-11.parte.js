@@ -117,6 +117,41 @@
           h('div', { role: 'cell' }, c.editavel.length ? h('select', { 'data-pol': c.id, 'aria-label': c.rotulo, onchange: ev => { pol[c.id] = ev.target.value; change(); } }, c.editavel.map(v => h('option', { value: v, selected: (pol[c.id] ?? c.editavel[0]) === v }, v))) : h('span', { class: 'v36a-pessoa' }, tr('Somente pessoa'))))));
     }
     const secao = (titulo, texto, ...campos) => h('section', { class: 'v36a-form-secao' }, h('div', { class: 'v36a-form-rotulo' }, h('h3', {}, tr(titulo)), h('p', {}, tr(texto))), h('div', { class: 'v36a-campos' }, ...campos));
+    // Skills do agente (banco skills.db): só trechos APROVADOS vão para a IA externa; importado ou sugerido por IA espera a pessoa.
+    function secaoSkills(x) {
+      const lista = h('div', { class: 'v36a-skills', id: 'v36-skills-lista', 'aria-live': 'polite' }, note(tr('Carregando trechos da Skill…')));
+      const titulo = h('input', { id: 'v36-skill-titulo', maxlength: 120, placeholder: tr('Ex.: Padrão de contrato da equipe') });
+      const texto = h('textarea', { id: 'v36-skill-texto', rows: 4, maxlength: 4000, placeholder: tr('Instrução que a equipe quer que este agente siga') });
+      const fonte = h('input', { id: 'v36-skill-fonte', maxlength: 300, placeholder: tr('Endereço do repositório de origem (opcional)') });
+      const origemDe = (t) => t.origem === 'IMPORTADO' ? tr('Importado de {f} · {l}', { f: t.fonte, l: t.licenca }) : t.origem === 'IA' ? tr('Sugerido por IA') : t.origem === 'PESSOA' ? tr('Da equipe') : tr('Prumo');
+      function item(t) {
+        const acoes = [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']].filter(([st]) => st !== t.estado)
+          .map(([st, rot]) => button(tr(rot), async () => { if (await chamar(() => api.skillsDecidir(t.id, st))) carregar(); }, { 'data-skill-acao': st }));
+        return h('article', { class: 'v36a-skill', 'data-skill': t.id }, h('strong', {}, t.titulo), h('small', {}, origemDe(t) + ' · ' + tr(t.estado)),
+          h('p', {}, t.texto.length > 280 ? t.texto.slice(0, 280) + '…' : t.texto), h('div', { class: 'v36a-skill-acoes' }, ...acoes));
+      }
+      async function carregar() {
+        const trechos = await chamar(() => api.skillsListar({ especializacao: x.id })); if (!trechos) return;
+        const conta = (st) => trechos.filter((t) => t.estado === st).length;
+        const rascunhos = trechos.filter((t) => t.estado === 'RASCUNHO'), daEquipe = trechos.filter((t) => t.origem !== 'PRUMO' && t.estado === 'APROVADO');
+        lista.replaceChildren(h('p', { class: 'v36a-skills-resumo', id: 'v36-skills-resumo' }, tr('{a} aprovados · {r} rascunhos · {d} descartados', { a: conta('APROVADO'), r: conta('RASCUNHO'), d: conta('DESCARTADO') })),
+          ...(rascunhos.length ? [h('h4', {}, tr('Aguardando sua decisão')), ...rascunhos.map(item)] : []),
+          ...(daEquipe.length ? [h('h4', {}, tr('Da equipe e importados')), ...daEquipe.map(item)] : []));
+      }
+      const acrescentar = button(tr('Acrescentar trecho'), async () => {
+        if (titulo.value.trim().length < 2 || texto.value.trim().length < 2) { avisar(tr('Preencha título e texto do trecho.'), true); return; }
+        const r = await chamar(() => api.skillsCriar({ especializacao: x.id, titulo: titulo.value, texto: texto.value })); if (!r) return;
+        avisar(r.duplicado ? tr('Esse trecho já existia.') : tr('Trecho acrescentado e aprovado.')); titulo.value = ''; texto.value = ''; carregar();
+      }, { id: 'v36-skill-acrescentar' });
+      const importar = button(tr('Importar pasta de Skill…'), async () => {
+        const r = await chamar(() => api.skillsImportar(x.id, fonte.value.trim() || undefined)); if (!r || r.canceled) return;
+        avisar(tr('{n} trecho(s) importado(s) como rascunho ({l}). Aprove cada um antes de ir para a IA.', { n: r.importados, l: r.licenca })); carregar();
+      }, { id: 'v36-skill-importar' });
+      carregar();
+      return secao('Skills', 'Só os trechos aprovados vão para a IA externa, escolhidos pela pergunta (até 8 KB). A importação aceita apenas licença aberta e entra como rascunho.',
+        lista, field(tr('Título do trecho'), titulo), field(tr('Texto'), texto), h('div', { class: 'v36a-skill-acoes' }, acrescentar),
+        field(tr('Origem da pasta importada'), fonte), h('div', { class: 'v36a-skill-acoes' }, importar));
+    }
     function detail(x, isNew = false) {
       const pol = { ...s.configuracao.politicas }, esp = new Set(s.configuracao.especializacoes);
       const name = h('input', { id: 'v36-agent-name', value: x.nome, maxlength: 100, required: true, readonly: !x.preview, placeholder: tr('Ex.: Agente de regressão') });
@@ -156,7 +191,8 @@
       else form.append(
         secao('Identidade', 'Especialização fixa do núcleo; nome e skill não são editáveis.', field(tr('Nome *'), name), field(tr('Skill configurada'), h('input', { value: x.skill, readonly: true }))),
         secao('Disponibilidade', 'Habilitar não inicia sessão nem execução; o cliente de IA decide quando usar.', h('label', { class: 'v36a-interruptor' }, enabled, h('span', { class: 'v36a-trilho', 'aria-hidden': 'true' }), h('span', {}, tr('Especialização habilitada')))),
-        secao('Permissões', 'As políticas são compartilhadas pelo projeto e aplicadas pelo servidor MCP.', policyTable(pol, sync, x.capacidades)));
+        secao('Permissões', 'As políticas são compartilhadas pelo projeto e aplicadas pelo servidor MCP.', policyTable(pol, sync, x.capacidades)),
+        secaoSkills(x));
       const rodape = h('div', { class: 'v36-form-actions v36a-commit' }, cancel, save); form.append(rodape);
       body.replaceChildren(barra, h('div', { class: 'v36a-detalhe' }, perfil, form)); figuraRobo(retrato, x, 'perfil', perfil);
     }
@@ -169,7 +205,7 @@
     const bolinha = (cor) => { const i = h('i'); i.style.background = cor; return i; };
     async function brain(x) {
       const caps = capsDe(x); const mudou = lerMudancas()[x.id];
-      const GRUPOS = { base: ['Identidade', '#7cb6ff'], cap: ['Capacidade', '#52e0c4'], ctx: ['Contexto do projeto', '#b38cff'], inst: ['Instrução', '#7ad7ff'], conv: ['Atendimento', '#ff9f6b'], saber: ['Conhecimento', '#52e0c4'] };
+      const GRUPOS = { base: ['Identidade', '#7cb6ff'], cap: ['Capacidade', '#52e0c4'], ctx: ['Contexto do projeto', '#b38cff'], inst: ['Instrução', '#7ad7ff'], conv: ['Atendimento', '#ff9f6b'], saber: ['Conhecimento', '#52e0c4'], skill: ['Trecho de Skill', '#f2c977'] };
       const neuronios = x.preview
         ? [{ t: 'Identidade', r: x.nome, v: { nome: x.nome, descricao: x.descricao }, g: 'base' }, { t: 'Objetivo', r: x.objetivo, v: x.objetivo, g: 'base' }, ...linhasInstrucao(x.instrucoes).map((l, i) => ({ t: tr('Instrução {n}', { n: i + 1 }), r: l, v: l, g: 'inst' })), { t: 'Estado', r: tr('Prévia local · sem execução'), v: previewNotice, g: 'base' }]
         : [{ t: 'Identidade', r: x.rotulo, v: { id: x.id, rotulo: x.rotulo }, g: 'base' }, { t: 'Skill', r: x.skill, v: x.skill, g: 'base' }, { t: 'Disponibilidade', r: habilitada(x.id) ? tr('Habilitada no projeto') : tr('Desabilitada no projeto'), v: { habilitada: habilitada(x.id) }, g: 'base' }, ...caps.map(c => ({ t: c.rotulo, r: c.estado, v: c, g: 'cap' }))];
@@ -182,6 +218,9 @@
       if (!x.preview) {
         const conhecimentos = await chamar(() => api.conhecimentoListar(e.id, { agente: x.id })); if (estado.aba !== 'agentes') return;
         for (const c of conhecimentos || []) neuronios.push({ t: c.titulo, r: c.estado + ' · ' + c.origem, v: c, g: 'saber' });
+        // Trechos de Skill: rascunhos primeiro, depois os da equipe e importados (os do Prumo aparecem na seção Skills).
+        const trechos = await chamar(() => api.skillsListar({ especializacao: x.id, estados: ['RASCUNHO', 'APROVADO'] })); if (estado.aba !== 'agentes') return;
+        for (const t of (trechos || []).filter((t) => t.estado === 'RASCUNHO' || t.origem !== 'PRUMO').slice(0, 16)) neuronios.push({ t: t.titulo, r: t.estado + ' · ' + t.origem, v: t, g: 'skill' });
       }
       // Atendimentos recentes têm metadados; conversas antigas podem conter texto.
       if (!x.preview) { const conv = await chamar(() => api.conversasListar(e.id, x.id)); if (estado.aba !== 'agentes') return;
@@ -200,6 +239,7 @@
         b.addEventListener('click', () => { campo.querySelectorAll('.v36-neuron').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
           inspect.replaceChildren(h('div', { class: 'v36a-insp-grupo' }, bolinha(cor), tr(GRUPOS[nr.g][0]), alterado ? h('span', { class: 'v36a-insp-mudou' }, tr('Alterado em {quando}', { quando: hora(mudou.em) })) : null), h('h3', {}, nr.t), h('pre', {}, typeof nr.v === 'string' ? nr.v : JSON.stringify(nr.v, null, 2)));
           if (nr.g === 'saber') for (const [estado, rotulo] of [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']]) if (nr.v.estado !== estado) inspect.append(h('button', { type: 'button', class: 'v36c-fonte', onclick: async () => { const resultado = await chamar(() => api.conhecimentoDecidir(nr.v.id, estado)); if (resultado) brain(x); } }, rotulo));
+          if (nr.g === 'skill') for (const [estado, rotulo] of [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']]) if (nr.v.estado !== estado) inspect.append(h('button', { type: 'button', class: 'v36c-fonte', onclick: async () => { const resultado = await chamar(() => api.skillsDecidir(nr.v.id, estado)); if (resultado) brain(x); } }, rotulo));
         });
         campo.append(b);
       });

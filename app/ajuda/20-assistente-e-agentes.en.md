@@ -21,6 +21,7 @@ Every learning that comes from a conversation or from an AI starts as a **draft*
 The Agents screen shows the **Prumo Orchestrator**, the Codex and Claude Code clients connected through MCP and the project's eight specializations, each with its own portrait. For each agent:
 
 - **Configuration** turns the specialization on or off and defines what the AI may request. The block applies in the MCP server on every call.
+- **Skills** lists the agent's instruction passages. Only **approved** passages reach Claude Code or Codex, chosen by the question (up to 8 KB). What you write in **Add passage** applies right away; **Import Skill folder** reads an open Skill folder already on your computer (for example a cloned repository), open licenses only, and each passage arrives as a **draft** until you approve it. Scripts in the folder are never run.
 - **Brain** shows the skill, the capabilities, the reasons behind the policies and the approved or draft knowledge.
 
 **New preview** creates a custom agent only as a local preview in the window (up to 50 per project, JSON import up to 32 KiB). It does not create a specialization, connection or process in the core. **Contexts** opens from this screen.
