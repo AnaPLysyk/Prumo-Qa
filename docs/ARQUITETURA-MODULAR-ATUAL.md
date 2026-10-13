@@ -115,10 +115,10 @@ O sistema não transforma automaticamente o texto de uma IA em conhecimento apro
 
 O fluxo começa em `backend/execucoes/regras/executarValidacao.ts`, que chama `criarEvidenciaInicial.ts` para montar o registro inicial `BLOCKED`. Nesse momento ainda não existe execução, aprovação ou resultado. Em seguida, `executarValidacao.ts` valida contrato e escopo, solicita a confirmação humana e somente então inicia um processo, respeitando os limites de tempo e de saída. O resultado final é armazenado pelo módulo Evidências.
 
-`testes/evidencia-inicial.test.mjs` verifica especificamente que uma evidência nova não simula execução ou aprovação. O fluxo completo de autorização continua sendo testado pela suíte geral; **não houve alteração das permissões humanas nesta etapa**.
+`testes/unitario/regras/evidencia-inicial.test.mjs` verifica especificamente que uma evidência nova não simula execução ou aprovação. O fluxo completo de autorização continua sendo testado pela suíte geral; **não houve alteração das permissões humanas nesta etapa**.
 
 ### Logs e relatórios da execução
 
 Depois de executar o processo com aprovação, `backend/execucoes/regras/mascararLogsDaExecucao.ts` remove segredos da saída para a interface e para as evidências. `gravarRelatorioRedigido.ts` mantém somente o relatório de casos redigido, substituindo o conteúdo bruto do runner antes do registro da evidência. Ambos são chamados por `executarValidacao.ts` e não podem alterar a aprovação, o comando, o timeout nem a classificação dos resultados.
 
-Os testes de regressão usam pastas temporárias e dados fictícios. `testes/logs-e-relatorios-execucao.test.mjs` confirma o mascaramento e a substituição ou exclusão de artefatos brutos. A operação ainda precisa passar no CI Windows.
+Os testes de regressão usam pastas temporárias e dados fictícios. `testes/seguranca/regras/logs-e-relatorios-execucao.test.mjs` confirma o mascaramento e a substituição ou exclusão de artefatos brutos. A operação ainda precisa passar no CI Windows.

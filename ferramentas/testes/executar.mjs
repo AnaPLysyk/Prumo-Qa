@@ -39,7 +39,7 @@ export function planoDeExecucao(selecao, env = process.env) {
   if (Object.entries(env).some(([k,v]) => (k === 'PRUMO_APP_EXE' || k.startsWith('PRUMO_MIGRACAO')) && v)) throw new Error('TEST_REAL_PROFILE_BLOCKED: remova PRUMO_APP_EXE e flags PRUMO_MIGRACAO');
   if (!selecao.length) throw new Error('TEST_SELECTION_EMPTY');
   if (selecao.some(t => t.perfilReal)) throw new Error('TEST_REAL_PROFILE_BLOCKED: migração pertence ao workflow isolado de instalação');
-  return ['--require', './testes/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
+  return ['--require', './testes/apoio/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
 }
 export function executar(args = process.argv.slice(2)) {
   const { filtros, listar } = argumentos(args);

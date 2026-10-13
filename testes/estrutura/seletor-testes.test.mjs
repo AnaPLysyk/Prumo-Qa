@@ -21,7 +21,7 @@ test('filtros combinam camada, natureza e funcionalidade com AND', () => {
 });
 test('runner mantém hook, não adiciona build e bloqueia perfil real', () => {
   const argv = planoDeExecucao([fixture.testes[0]], {});
-  assert.ok(argv.includes('./testes/conhecimento-hook.cjs')); assert.ok(argv.includes('--test')); assert.ok(!argv.includes('build'));
+  assert.ok(argv.includes('./testes/apoio/conhecimento-hook.cjs')); assert.ok(argv.includes('--test')); assert.ok(!argv.includes('build'));
   for (const env of [{ PRUMO_APP_EXE: 'app.exe' }, { PRUMO_MIGRACAO_26: '1' }, { PRUMO_MIGRACAO: '0' }]) assert.throws(() => planoDeExecucao([fixture.testes[0]], env), /TEST_REAL_PROFILE_BLOCKED/);
   assert.throws(() => planoDeExecucao([fixture.testes[2]], {}), /TEST_REAL_PROFILE_BLOCKED/);
   assert.throws(() => planoDeExecucao([], {}), /TEST_SELECTION_EMPTY/);

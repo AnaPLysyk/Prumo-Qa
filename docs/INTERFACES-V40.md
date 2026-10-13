@@ -55,9 +55,9 @@ validação de escopo e duplicidade existentes inalteradas.
 | `app/renderer/agenda.js` | Formulário de rotina com o layout do DS (mesmos campos e IDs). |
 | `app/renderer/plataforma.js`, `integracoes.js` | Correções de Projetos e Conexões. |
 | `app/renderer/index.html` | Carrega os arquivos v40; remove `qualidade-fontes-v39.js` (substituído). |
-| `testes/janela.mjs` | Espera a primeira tela e fecha o modal antes de usar o menu. |
-| `testes/desktop-v40.test.mjs` | 7 testes novos (fluxos, estados, permissões, responsividade, zoom, console). |
-| `testes/servicos-fixtures.mjs` | Criação de ticket simulada, só com `aceitarCriacao`. |
+| `testes/apoio/janela.mjs` | Espera a primeira tela e fecha o modal antes de usar o menu. |
+| `testes/e2e/ui/desktop-v40.test.mjs` | 7 testes novos (fluxos, estados, permissões, responsividade, zoom, console). |
+| `testes/apoio/servicos-fixtures.mjs` | Criação de ticket simulada, só com `aceitarCriacao`. |
 | Testes desktop existentes | Seletores do novo padrão de modal; mesmas verificações funcionais. |
 
 ## Limites e pendências

@@ -30,7 +30,7 @@ if (!process.env.PATH && process.platform === 'win32') {
   process.env.PATH = fixos.filter((d) => d && fs.existsSync(d)).join(path.delimiter);
 }
 // Mesmo ambiente de `npm test`: conhecimento em memória (nunca o banco real) e mocks de módulo.
-createRequire(import.meta.url)('../../testes/conhecimento-hook.cjs');
+createRequire(import.meta.url)('../../testes/apoio/conhecimento-hook.cjs');
 console.log(`Prumo QA · grupo ${grupo}: ${grupos[grupo].length} arquivo(s)\n${grupos[grupo].join('\n')}\n`);
 let falhas = 0;
 const casos = [];

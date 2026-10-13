@@ -63,9 +63,9 @@ dependências 3D fora do material aprovado.
 | `src/contratos.ts` | Esquema estrito/documentação de `interface:exportar`, tipos fechados, texto limitado. |
 | `src/desktop/main.ts` | Exportação via diálogo nativo e extensões JSON/CSV. Necessária porque a janela bloqueia downloads blob. Bloqueio de rede preservado. |
 | `docs/CONTRATOS.md` | Gerado do catálogo atualizado. Não muda operações existentes. |
-| `testes/desktop.test.mjs` | Seletores da tabela de Logs adaptados ao terminal, mantendo assertions de MCP real/BLOCKED/persistência; inclui a nova função na ponte esperada. |
-| `testes/desktop-interfaces-v36.test.mjs` | Fluxos novos, persistência, confirmação, validação/importação/exportação, eventos reais, zoom e isolamento. |
-| `testes/worker.test.mjs` | Corrige a preparação do cenário de expiração: criação da autorização e worker usam o mesmo relógio simulado. Mantém a assertion BLOCKED e acrescenta checagem da validade exata de um dia. Nenhum código de worker/autorização foi alterado. |
+| `testes/e2e/ui/desktop.test.mjs` | Seletores da tabela de Logs adaptados ao terminal, mantendo assertions de MCP real/BLOCKED/persistência; inclui a nova função na ponte esperada. |
+| `testes/e2e/ui/desktop-interfaces-v36.test.mjs` | Fluxos novos, persistência, confirmação, validação/importação/exportação, eventos reais, zoom e isolamento. |
+| `testes/seguranca/externa/worker.test.mjs` | Corrige a preparação do cenário de expiração: criação da autorização e worker usam o mesmo relógio simulado. Mantém a assertion BLOCKED e acrescenta checagem da validade exata de um dia. Nenhum código de worker/autorização foi alterado. |
 | `docs/INTERFACES-V36.md` | Auditoria, limitações, evidências e reprodução local. |
 
 ## Preservação de módulos

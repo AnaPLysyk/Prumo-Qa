@@ -5,7 +5,7 @@ Estes testes verificam a organização das telas, os contratos de arquivos e a s
 Execute todos com `npm run check`. Para rodar só esta pasta, após o build:
 
 ```powershell
-node --require ./testes/conhecimento-hook.cjs --experimental-test-module-mocks --test --test-concurrency=1 testes/estrutura/*.test.mjs
+node --require ./testes/apoio/conhecimento-hook.cjs --experimental-test-module-mocks --test --test-concurrency=1 testes/estrutura/*.test.mjs
 ```
 
 O executor `ferramentas/qa/qa-suite.mjs` também descobre esses arquivos nas subpastas.

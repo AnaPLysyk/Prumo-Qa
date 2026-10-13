@@ -1,6 +1,6 @@
 # Seleção e classificação dos testes
 
-`testes/catalogo.json` enumera cada `.test.mjs` existente sem renomear arquivos. Cada registro distingue a camada principal (`ui`, `ipc`, `mcp`, `regra`, `persistencia`, `integracao`, `estrutura`) das naturezas (`unidade`, `contrato`, `smoke`, `e2e`, `regressao`, `seguranca`, `migracao`, `acessibilidade`, `visual`). Um arquivo pode reunir naturezas e responsabilidades; sua camada principal não transforma todos os casos internos em testes unitários.
+Os arquivos ficam em `testes/<tipo>/<camada>/` (por exemplo `testes/contrato/mcp/`, `testes/seguranca/externa/`, `testes/e2e/ui/`), regras do repositório em `testes/estrutura/` e auxiliares em `testes/apoio/`; o mapa completo está em [testes/LEIA-ME.md](../testes/LEIA-ME.md) e `testes/estrutura/organizacao-testes.test.mjs` recusa arquivo fora do lugar. `testes/catalogo.json` enumera cada `.test.mjs` existente. Cada registro distingue a camada principal (`ui`, `ipc`, `mcp`, `regra`, `persistencia`, `integracao`, `estrutura`) das naturezas (`unidade`, `contrato`, `smoke`, `e2e`, `regressao`, `seguranca`, `migracao`, `acessibilidade`, `visual`). Um arquivo pode reunir naturezas e responsabilidades; sua camada principal não transforma todos os casos internos em testes unitários.
 
 Os motivos e evidências registram títulos e imports das fontes lidas. Não são resultados de execução nem porcentagens de cobertura. `perfilReal` identifica os três testes de migração que dependem do perfil de instalação; a migração 2.9 usa fixtures e permanece selecionável normalmente.
 
@@ -16,7 +16,7 @@ node ferramentas/testes/executar.mjs --camada estrutura
 
 Os filtros combinam com AND e valores desconhecidos falham. `--listar` apenas lê o catálogo e as pastas; não importa módulos da aplicação e não abre banco, janela ou rede. O catálogo precisa cobrir exatamente todos os arquivos, incluindo novos testes estruturais. Atualize-o ao criar um teste; não há classificação silenciosa de arquivos novos.
 
-A execução usa `node:test`, concorrência 1, module mocks e o hook atual `testes/conhecimento-hook.cjs`, que substitui conhecimento por memória. Não existe build implícito: os testes que importam `dist/` exigem build prévio. Não há interface para comandos arbitrários ou caminhos de teste fornecidos pelo usuário.
+A execução usa `node:test`, concorrência 1, module mocks e o hook atual `testes/apoio/conhecimento-hook.cjs`, que substitui conhecimento por memória. Não existe build implícito: os testes que importam `dist/` exigem build prévio. Não há interface para comandos arbitrários ou caminhos de teste fornecidos pelo usuário.
 
 Sem filtros, o runner seleciona todos os arquivos que não usam perfil real. Com filtros explícitos, selecionar uma migração de perfil real falha; ela pertence exclusivamente ao workflow de instalação isolado. A presença de qualquer valor em `PRUMO_APP_EXE` ou `PRUMO_MIGRACAO*` bloqueia a execução normal, mesmo que um arquivo de migração não tenha sido selecionado. Nenhuma flag deste seletor desativa essa proteção.
 

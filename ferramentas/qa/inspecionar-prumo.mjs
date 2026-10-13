@@ -11,7 +11,7 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo autoinspecao '));
 const saida = path.join(raiz, 'tmp/evidencias/refatoracao');
 fs.mkdirSync(saida, { recursive: true });
-const hook = path.join(raiz, 'testes/conhecimento-hook.cjs');
+const hook = path.join(raiz, 'testes/apoio/conhecimento-hook.cjs');
 const relatorio = { inicio: new Date().toISOString(), raiz, cli: [], mcp: {}, aprovacaoHumana: 'NOT_RUN' };
 let cliente;
 try {

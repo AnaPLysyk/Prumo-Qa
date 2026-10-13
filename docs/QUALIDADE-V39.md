@@ -45,7 +45,7 @@ usadas para escolher a automação de um caso no vínculo atual.
 - `src/rastreabilidade.ts`, `src/fluxoQase.ts`: isolamento de associações antigas.
 - `src/contratos.ts`, `src/desktop/main.ts`, `docs/CONTRATOS.md`: tipo fechado
   `evidencia-json` no exportador nativo existente, sem caminho vindo da janela.
-- `testes/desktop-qualidade-v39.test.mjs`, `servicos.test.mjs`,
+- `testes/e2e/ui/desktop-qualidade-v39.test.mjs`, `servicos.test.mjs`,
   `servicos-fixtures.mjs`, `escrita.test.mjs`, `fluxo-qase.test.mjs`: testes novos.
   `janela.mjs` e regressões desktop adaptam a navegação para o modal mantendo
   as verificações funcionais.

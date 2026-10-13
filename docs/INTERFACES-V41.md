@@ -46,4 +46,4 @@ aparecem em registros dos últimos 90 s. Estados `STARTED`/`SEM_TERMINO_OBSERVAD
 | `frontend/compartilhado/runtime/i18n-en-v41.js` | Fonte do inglês das frases novas; gera `app/renderer/i18n-en-v41.js`. |
 | `app/renderer/interfaces-v36.js` | Aba Painel de atividades usa o módulo; diagrama antigo removido. |
 | `app/renderer/index.html` | Carrega os arquivos v41. |
-| `testes/desktop-interfaces-v36.test.mjs` | Janela por cliente, hubs, uma linha por operação, nada inferido sem conversa/execução, zoom por botão e teclado. |
+| `testes/e2e/ui/desktop-interfaces-v36.test.mjs` | Janela por cliente, hubs, uma linha por operação, nada inferido sem conversa/execução, zoom por botão e teclado. |

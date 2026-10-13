@@ -3,24 +3,52 @@
   "criterio": "Classificação por arquivo com camada principal; naturezas coexistem. Evidências referem-se a títulos e imports lidos, não a resultados executados.",
   "testes": [
     {
-      "arquivo": "testes/aceitacao-extra.test.mjs",
-      "camada": "regra",
+      "arquivo": "testes/contrato/externa/reporter-node.test.mjs",
+      "camada": "integracao",
       "natureza": [
-        "regressao",
-        "seguranca"
+        "contrato",
+        "regressao"
       ],
-      "funcionalidade": "ciclo-qa",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: readonly bloqueia execução sem gravar no projeto",
+      "funcionalidade": "evidencias",
+      "motivo": "Runner sintetico em subprocesso fornece eventos reais PASS FAIL skip TODO",
       "evidencias": [
-        "readonly bloqueia execução sem gravar no projeto",
-        "tabela de decisão e estados exigem condições; óraculo ainda é necessário",
-        "../dist/compartilhado/projeto/carregarProjeto.js",
-        "../dist/compartilhado/seguranca/hash.js"
+        "reporter node preserva PASS, FAIL e skip/TODO a partir de eventos reais"
       ],
       "perfilReal": false
     },
     {
-      "arquivo": "testes/adaptadores.test.mjs",
+      "arquivo": "testes/contrato/ipc/contratos.test.mjs",
+      "camada": "ipc",
+      "natureza": [
+        "contrato",
+        "regressao"
+      ],
+      "funcionalidade": "ipc",
+      "motivo": "Camada principal ipc; outras responsabilidades podem coexistir no arquivo. Verifica: IPC: canais registrados, esquemas e catálogo são exatamente os mesmos",
+      "evidencias": [
+        "IPC: canais registrados, esquemas e catálogo são exatamente os mesmos",
+        "IPC: preload expõe apenas canais do catálogo, cada um uma vez, sem ipcRenderer livre",
+        "../dist/agentes/mcp/criarServidor.js",
+        "../dist/aplicativo/api/catalogoDeContratos.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/contrato/ipc/ipc-remetente.test.mjs",
+      "camada": "ipc",
+      "natureza": [
+        "contrato",
+        "seguranca"
+      ],
+      "funcionalidade": "aplicativo",
+      "motivo": "Valida rejeicao de remetentes antes de executar handler",
+      "evidencias": [
+        "IPC rejeita subframe, janela clonada, URL diferente e janela destruida antes do handler"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/contrato/mcp/adaptadores.test.mjs",
       "camada": "mcp",
       "natureza": [
         "contrato",
@@ -37,23 +65,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/agenda.test.mjs",
-      "camada": "persistencia",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "agendamentos",
-      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: fuso: horário de parede vira o instante UTC certo, inclusive no verão",
-      "evidencias": [
-        "fuso: horário de parede vira o instante UTC certo, inclusive no verão",
-        "horário de verão: salto da primavera avança para depois do salto; fim do verão usa a primeira ocorrência",
-        "../dist/agendamentos/banco/agendaPausada.js",
-        "../dist/agendamentos/banco/listarRotinas.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/agentes.test.mjs",
+      "arquivo": "testes/contrato/mcp/agentes.test.mjs",
       "camada": "mcp",
       "natureza": [
         "contrato",
@@ -71,218 +83,23 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/assinatura.test.mjs",
-      "camada": "estrutura",
+      "arquivo": "testes/contrato/mcp/mcp-ciclo-ia.test.mjs",
+      "camada": "mcp",
       "natureza": [
         "contrato",
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "instalacao",
-      "motivo": "Camada principal estrutura; outras responsabilidades podem coexistir no arquivo. Verifica: sem credencial: não executa nada e o arquivo permanece não assinado (build não finge assinatura)",
-      "evidencias": [
-        "sem credencial: não executa nada e o arquivo permanece não assinado (build não finge assinatura)",
-        "com credencial: chama o signtool sem shell, com SHA-256 e carimbo de tempo"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/atividades.test.mjs",
-      "camada": "persistencia",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "logs-metricas",
-      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: histórico vazio não fabrica atividades, duração, conexão, tokens ou custos",
-      "evidencias": [
-        "histórico vazio não fabrica atividades, duração, conexão, tokens ou custos",
-        "revisão real: contagens, duração e recomendações sobrevivem a novos processos",
-        "../dist/compartilhado/projeto/carregarProjeto.js",
-        "../dist/compartilhado/projeto/contextoProjeto.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/atualizacao-instalar.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "atualizacoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: atualizar (2.10.2): baixa, confere o SHA-256 publicado e devolve só o instalador verificado",
-      "evidencias": [
-        "atualizar (2.10.2): baixa, confere o SHA-256 publicado e devolve só o instalador verificado",
-        "atualizar: SHA-256 divergente apaga o arquivo; sem .sha256 válido nada é baixado",
-        "../dist/atualizacoes/regras/baixarAtualizacao.js",
-        "../dist/atualizacoes/regras/enderecoDoInstalador.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/atualizacao.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "atualizacoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: versão mais recente disponível: resumo das mudanças e página oficial reconstruída localmente",
-      "evidencias": [
-        "versão mais recente disponível: resumo das mudanças e página oficial reconstruída localmente",
-        "versão igual, instalada mais nova e comparação numérica (2.10 > 2.9)",
-        "../dist/atualizacoes/regras/destinoAutorizado.js",
-        "../dist/atualizacoes/regras/verificarAtualizacao.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/catalogo-testes.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "testes",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: catálogo agrupa por feature, extrai cenários e passos e classifica cada teste com motivo e confiança",
-      "evidencias": [
-        "catálogo agrupa por feature, extrai cenários e passos e classifica cada teste com motivo e confiança",
-        "entra com senha válida @smoke",
-        "../dist/testes/regras/arquivoDeTeste.js",
-        "../dist/testes/regras/catalogoDeTestes.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/chamados.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "suporte",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: chamado usa dados reais da resposta, histórico e destino fixo, sem enviar contexto ou credencial",
-      "evidencias": [
-        "chamado usa dados reais da resposta, histórico e destino fixo, sem enviar contexto ou credencial",
-        "não fabrica status sem rótulo, com rótulos conflitantes, issue fechada ou falha de rede",
-        "../dist/suporte/integracoes/consultarChamado.js",
-        "../dist/suporte/regras/prepararRelato.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/chat-delegacao.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "unidade",
         "regressao"
       ],
       "funcionalidade": "agentes",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: sem autorização não procura nem executa Claude/Codex",
+      "motivo": "Camada principal mcp; outras responsabilidades podem coexistir no arquivo. Verifica: MCP: prompts list/get, validação e aprendizado em rascunho obedecem política sem banco",
       "evidencias": [
-        "sem autorização não procura nem executa Claude/Codex",
-        "mesmo autorizado, sem executável retorna somente dados locais",
-        "../dist/agentes/chat/consultarIaExterna.js",
-        "../dist/agentes/chat/registrarSugestoesDaIa.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/conexoes.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "conexoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: conector exige confirmação exata e preserva configuração existente",
-      "evidencias": [
-        "conector exige confirmação exata e preserva configuração existente",
-        "falha de inspeção impede escrita; cliente recebe argv sem shell somente após confirmação",
-        "../dist/compartilhado/projeto/carregarProjeto.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/consultas-detalhadas.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "conexoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: consultas recusam operação pertencente a outro serviço sem chamar rede",
-      "evidencias": [
-        "consultas recusam operação pertencente a outro serviço sem chamar rede",
-        "consulta de arquivos do GitHub recusa caminhos com subida de pasta",
-        "../dist/conexoes/integracoes/lerDetalheDoServico.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/contextos.test.mjs",
-      "camada": "persistencia",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "contextos",
-      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: cadastro, persistência e histórico: nasce RASCUNHO v1 com hash e sobrevive a nova leitura",
-      "evidencias": [
-        "cadastro, persistência e histórico: nasce RASCUNHO v1 com hash e sobrevive a nova leitura",
-        "edição gera nova versão em rascunho; sem mudança é recusada; editar contexto aprovado invalida a aprovação",
-        "../dist/agentes/mcp/contextoCompleto.js",
+        "MCP: prompts list/get, validação e aprendizado em rascunho obedecem política sem banco",
+        "../dist/agentes/banco/listarConhecimentos.js",
         "../dist/agentes/mcp/criarServidor.js"
       ],
       "perfilReal": false
     },
     {
-      "arquivo": "testes/contrato-detectado.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "projetos",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: contrato proposto (2.10.2): projeto npm ganha comandos só de scripts reais; e2e e deploy ficam bloqueados",
-      "evidencias": [
-        "contrato proposto (2.10.2): projeto npm ganha comandos só de scripts reais; e2e e deploy ficam bloqueados",
-        "contrato proposto: Python, Go, Java e .NET ficam somente leitura, com o comando nativo explicado",
-        "../dist/projetos/regras/gravarContratoProposto.js",
-        "../dist/projetos/regras/proporContrato.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/contratos.test.mjs",
-      "camada": "ipc",
-      "natureza": [
-        "contrato",
-        "regressao"
-      ],
-      "funcionalidade": "ipc",
-      "motivo": "Camada principal ipc; outras responsabilidades podem coexistir no arquivo. Verifica: IPC: canais registrados, esquemas e catálogo são exatamente os mesmos",
-      "evidencias": [
-        "IPC: canais registrados, esquemas e catálogo são exatamente os mesmos",
-        "IPC: preload expõe apenas canais do catálogo, cada um uma vez, sem ipcRenderer livre",
-        "../dist/agentes/mcp/criarServidor.js",
-        "../dist/aplicativo/api/catalogoDeContratos.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/dados.test.mjs",
-      "camada": "persistencia",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "privacidade",
-      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: exclusão do histórico: apaga só os registros do projeto escolhido e preserva código, evidências, vínculo e outros projetos",
-      "evidencias": [
-        "exclusão do histórico: apaga só os registros do projeto escolhido e preserva código, evidências, vínculo e outros projetos",
-        "exclusão do histórico: falha parcial (arquivo em uso/permissão) é informada e o restante é apagado",
-        "../dist/ajuda/privacidade/resumirDados.js",
-        "../dist/ajuda/tipos/privacidade.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/demonstracao-28.test.mjs",
+      "arquivo": "testes/e2e/ui/demonstracao-28.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -299,7 +116,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-agenda.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-agenda.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -318,7 +135,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-ajuda.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-ajuda.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -335,7 +152,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-atualizacao.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-atualizacao.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -350,7 +167,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-ciclo-ia.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-ciclo-ia.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -366,7 +183,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-contextos.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-contextos.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -382,7 +199,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-design-system.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-design-system.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -398,7 +215,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-fluxos-2-10-2.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-fluxos-2-10-2.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -414,7 +231,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-i18n.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-i18n.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -430,7 +247,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-integracoes.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-integracoes.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -447,7 +264,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-integracoes29.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-integracoes29.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -463,7 +280,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-interfaces-v36.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-interfaces-v36.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -481,7 +298,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-jira.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-jira.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -498,7 +315,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-plataforma.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-plataforma.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -513,7 +330,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-qualidade-v39.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-qualidade-v39.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -532,7 +349,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-suporte.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-suporte.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -549,7 +366,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-ux.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-ux.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -565,7 +382,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop-v40.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop-v40.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -583,7 +400,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/desktop.test.mjs",
+      "arquivo": "testes/e2e/ui/desktop.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -601,19 +418,19 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/escrita.test.mjs",
-      "camada": "integracao",
+      "arquivo": "testes/e2e/ui/site-visual.test.mjs",
+      "camada": "ui",
       "natureza": [
+        "e2e",
         "regressao",
-        "seguranca"
+        "acessibilidade",
+        "visual"
       ],
-      "funcionalidade": "conexoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: lista fechada de rotas: só as escritas previstas passam; apagar, traversal e rotas alheias são recusados",
+      "funcionalidade": "site",
+      "motivo": "Interage com janela Electron/Chromium pelo helper de janela; verifica: site no Chromium real: navegação, teclado e resoluções 1280/640/320 sem overflow da página",
       "evidencias": [
-        "lista fechada de rotas: só as escritas previstas passam; apagar, traversal e rotas alheias são recusados",
-        "portões: escrita desligada por padrão, confirmação humana obrigatória, leitura não dá permissão de escrita",
-        "../dist/agendamentos/autorizacoes/criarPoliticaEscrita.js",
-        "../dist/agendamentos/autorizacoes/estadoDaPoliticaDeEscrita.js"
+        "site no Chromium real: navegação, teclado e resoluções 1280/640/320 sem overflow da página",
+        "./janela.mjs"
       ],
       "perfilReal": false
     },
@@ -629,6 +446,22 @@
       "evidencias": [
         "bundles da interface são reproduzidos exatamente pelas partes de cada tela",
         "a janela carrega somente os bundles e nunca seus fragmentos internos"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/estrutura/assinatura.test.mjs",
+      "camada": "estrutura",
+      "natureza": [
+        "contrato",
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "instalacao",
+      "motivo": "Camada principal estrutura; outras responsabilidades podem coexistir no arquivo. Verifica: sem credencial: não executa nada e o arquivo permanece não assinado (build não finge assinatura)",
+      "evidencias": [
+        "sem credencial: não executa nada e o arquivo permanece não assinado (build não finge assinatura)",
+        "com credencial: chama o signtool sem shell, com SHA-256 e carimbo de tempo"
       ],
       "perfilReal": false
     },
@@ -679,6 +512,20 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/estrutura/organizacao-testes.test.mjs",
+      "camada": "estrutura",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "arquitetura",
+      "motivo": "Camada principal estrutura. Verifica: cada teste fica em testes/<tipo>/<camada>/ coerente com o catálogo",
+      "evidencias": [
+        "testes: cada arquivo fica em testes/<tipo>/<camada>/ coerente com o catálogo (ou em testes/estrutura/)",
+        "testes: nada solto na raiz de testes/ além do catálogo e do LEIA-ME; auxiliares ficam em testes/apoio/"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/estrutura/seletor-testes.test.mjs",
       "camada": "estrutura",
       "natureza": [
@@ -692,6 +539,20 @@
         "catálogo cobre exatamente todos os arquivos reais",
         "filtros combinam camada, natureza e funcionalidade com AND",
         "../../ferramentas/testes/executar.mjs"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/estrutura/site.test.mjs",
+      "camada": "estrutura",
+      "natureza": [
+        "contrato",
+        "regressao"
+      ],
+      "funcionalidade": "site",
+      "motivo": "Camada principal estrutura; outras responsabilidades podem coexistir no arquivo. Verifica: site reproduzível, links internos resolvidos e downloads apenas de releases publicadas",
+      "evidencias": [
+        "site reproduzível, links internos resolvidos e downloads apenas de releases publicadas"
       ],
       "perfilReal": false
     },
@@ -712,423 +573,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/evidencia-inicial.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "unidade",
-        "regressao"
-      ],
-      "funcionalidade": "evidencias",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: evidência começa bloqueada, sem execução, autorização ou resultado inventado",
-      "evidencias": [
-        "evidência começa bloqueada, sem execução, autorização ou resultado inventado",
-        "../dist/execucoes/regras/criarEvidenciaInicial.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/execucao.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "execucoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: sem consentimento, capability ausente e bloqueio de política não executam",
-      "evidencias": [
-        "sem consentimento, capability ausente e bloqueio de política não executam",
-        "../dist/compartilhado/projeto/carregarProjeto.js",
-        "../dist/compartilhado/seguranca/hash.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/fluxo-qase.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "testes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: v39: trocar vínculo Qase não reutiliza automação declarada nem funde nós históricos",
-      "evidencias": [
-        "v39: trocar vínculo Qase não reutiliza automação declarada nem funde nós históricos",
-        "fluxo completo: casos -> run -> execução autorizada -> resultados por cenário e manual -> publicação -> releitura; sem PASS inventado",
-        "../dist/agendamentos/autorizacoes/autorizacaoDelegada.js",
-        "../dist/agendamentos/autorizacoes/autorizarExecucao.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/frameworks.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "unidade",
-        "regressao"
-      ],
-      "funcionalidade": "testes",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: detecção por evidência: CONFIRMADO, PROVAVEL, INCERTO e ausente; nome de pasta nunca confirma",
-      "evidencias": [
-        "detecção por evidência: CONFIRMADO, PROVAVEL, INCERTO e ausente; nome de pasta nunca confirma",
-        "../dist/agentes/mcp/contextoCompleto.js",
-        "../dist/compartilhado/projeto/carregarProjeto.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/integracoes.test.mjs",
-      "camada": "persistencia",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "conexoes",
-      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: configuração exige runtime, servidor, raiz e ambiente exatos, sem expor credenciais",
-      "evidencias": [
-        "configuração exige runtime, servidor, raiz e ambiente exatos, sem expor credenciais",
-        "protocolo stdio real: handshake, quatro tools e leitura; evidência persiste e SDK não é Codex",
-        "../dist/compartilhado/projeto/carregarProjeto.js",
-        "../dist/conexoes/banco/registrosIntegracao.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/ipc-remetente.test.mjs",
-      "camada": "ipc",
-      "natureza": [
-        "contrato",
-        "seguranca"
-      ],
-      "funcionalidade": "aplicativo",
-      "motivo": "Valida rejeicao de remetentes antes de executar handler",
-      "evidencias": [
-        "IPC rejeita subframe, janela clonada, URL diferente e janela destruida antes do handler"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/leituras.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "conexoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: JQL de tickets: projeto sempre fixado pelo ID do vínculo; filtros validados e escapados (sem injeção)",
-      "evidencias": [
-        "JQL de tickets: projeto sempre fixado pelo ID do vínculo; filtros validados e escapados (sem injeção)",
-        "Jira: metadados de criação, transições, histórico e anexos; ticket de outro projeto é recusado",
-        "../dist/conexoes/integracoes/lerDetalheDoServico.js",
-        "../dist/conexoes/tipos/adaptador.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/logs-e-relatorios-execucao.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "execucoes",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: logs escondem segredos mesmo quando a saída chega em várias partes",
-      "evidencias": [
-        "logs escondem segredos mesmo quando a saída chega em várias partes",
-        "relatório aprovado substitui o conteúdo bruto por casos já redigidos",
-        "../dist/execucoes/regras/mascararLogsDaExecucao.js",
-        "../dist/execucoes/regras/gravarRelatorioRedigido.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/mcp-ciclo-ia.test.mjs",
-      "camada": "mcp",
-      "natureza": [
-        "contrato",
-        "regressao"
-      ],
-      "funcionalidade": "agentes",
-      "motivo": "Camada principal mcp; outras responsabilidades podem coexistir no arquivo. Verifica: MCP: prompts list/get, validação e aprendizado em rascunho obedecem política sem banco",
-      "evidencias": [
-        "MCP: prompts list/get, validação e aprendizado em rascunho obedecem política sem banco",
-        "../dist/agentes/banco/listarConhecimentos.js",
-        "../dist/agentes/mcp/criarServidor.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/migracao-2-9.test.mjs",
-      "camada": "ui",
-      "natureza": [
-        "e2e",
-        "regressao",
-        "migracao"
-      ],
-      "funcionalidade": "instalacao",
-      "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: migração 2.8 → 2.9: agenda e histórico preservados, arquivos novos só no primeiro uso e escrita externa desligada",
-      "evidencias": [
-        "migração 2.8 → 2.9: agenda e histórico preservados, arquivos novos só no primeiro uso e escrita externa desligada",
-        "./janela.mjs",
-        "../dist/agendamentos/banco/concluirTrabalho.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/migracao-26.test.mjs",
-      "camada": "ui",
-      "natureza": [
-        "e2e",
-        "regressao",
-        "migracao"
-      ],
-      "funcionalidade": "instalacao",
-      "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: instalação 2.6 → atual preserva contexto exato, preferências, histórico e MCP",
-      "evidencias": [
-        "instalação 2.6 → atual preserva contexto exato, preferências, histórico e MCP",
-        "./janela.mjs"
-      ],
-      "perfilReal": true
-    },
-    {
-      "arquivo": "testes/migracao-27.test.mjs",
-      "camada": "ui",
-      "natureza": [
-        "e2e",
-        "regressao",
-        "migracao"
-      ],
-      "funcionalidade": "instalacao",
-      "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: instalação 2.7 → atual preserva projeto, contexto exato, preferências e MCP; agenda nasce vazia e o worker sobe",
-      "evidencias": [
-        "instalação 2.7 → atual preserva projeto, contexto exato, preferências e MCP; agenda nasce vazia e o worker sobe",
-        "./janela.mjs"
-      ],
-      "perfilReal": true
-    },
-    {
-      "arquivo": "testes/migracao.test.mjs",
-      "camada": "ui",
-      "natureza": [
-        "e2e",
-        "regressao",
-        "migracao"
-      ],
-      "funcionalidade": "instalacao",
-      "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: migração: versão nova, vínculo, histórico, métricas e evidências da 2.2.0 preservados",
-      "evidencias": [
-        "migração: versão nova, vínculo, histórico, métricas e evidências da 2.2.0 preservados",
-        "migração: o MCP configurado como na 2.2.0 (mesmo executável e mcp.js) continua utilizável, informa 2.3.0 e acrescenta ao histórico",
-        "./janela.mjs"
-      ],
-      "perfilReal": true
-    },
-    {
-      "arquivo": "testes/orquestrador.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "agentes",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: menção explícita ao agente decide; pergunta sem sinal vai ao orquestrador",
-      "evidencias": [
-        "menção explícita ao agente decide; pergunta sem sinal vai ao orquestrador",
-        "sem projeto e sem integrações todos os agentes respondem sem erro e sem inventar"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/painel.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "terminal",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: vinculos: projeto integrado, sem manifesto, manifesto inválido e pasta ausente",
-      "evidencias": [
-        "vinculos: projeto integrado, sem manifesto, manifesto inválido e pasta ausente",
-        "vinculos: só vincula contrato válido, persiste, não duplica e desvincular preserva arquivos",
-        "../dist/ajuda/regras/lerDocumentosDaAjuda.js",
-        "../dist/compartilhado/projeto/carregarProjeto.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/playwright.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "testes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: relatório JSON do Playwright vira cenários individuais sem inventar nada",
-      "evidencias": [
-        "relatório JSON do Playwright vira cenários individuais sem inventar nada",
-        "../dist/agendamentos/worker/Worker.js",
-        "../dist/testes/regras/converterRelatorioPlaywright.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/preferencias.test.mjs",
-      "camada": "persistencia",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "configuracoes",
-      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: padrão: aviso automático de versão nova ligado (2.10.1), som desligado, sem aviso pendente",
-      "evidencias": [
-        "padrão: aviso automático de versão nova ligado (2.10.1), som desligado, sem aviso pendente",
-        "arquivo da 2.9 (verificarAoIniciar=false gravado, sem avisoAutomatico) passa a avisar; desligar é respeitado",
-        "../dist/atualizacoes/regras/avisoDeVersaoPendente.js",
-        "../dist/atualizacoes/regras/marcarVersaoVista.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/projeto.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "projetos",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: fixtures API, web e automação reconhecidas com fontes reais",
-      "evidencias": [
-        "fixtures API, web e automação reconhecidas com fontes reais",
-        "contrato inválido, v1, tipos incorretos e requireApproval=false recusados",
-        "../dist/compartilhado/projeto/carregarProjeto.js",
-        "../dist/compartilhado/projeto/contextoProjeto.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/qualidade.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "testes",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: rastreabilidade, fonte real e proposta nunca PASS",
-      "evidencias": [
-        "rastreabilidade, fonte real e proposta nunca PASS",
-        "redundância candidata comparada com teste real, não quantidade fixa",
-        "../dist/compartilhado/projeto/carregarProjeto.js",
-        "../dist/testes/regras/revisarCobertura.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/reporter-node.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "contrato",
-        "regressao"
-      ],
-      "funcionalidade": "evidencias",
-      "motivo": "Runner sintetico em subprocesso fornece eventos reais PASS FAIL skip TODO",
-      "evidencias": [
-        "reporter node preserva PASS, FAIL e skip/TODO a partir de eventos reais"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/servicos.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "conexoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: projetos manuais concorrentes persistem com IDs e contextos separados, sem pasta",
-      "evidencias": [
-        "projetos manuais concorrentes persistem com IDs e contextos separados, sem pasta",
-        "cofre recusa proteção ausente e não escreve token claro; exclusão retira credencial",
-        "../dist/conexoes/banco/cofreCredenciais.js",
-        "../dist/conexoes/integracoes/AdaptadorServico.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/site-visual.test.mjs",
-      "camada": "ui",
-      "natureza": [
-        "e2e",
-        "regressao",
-        "acessibilidade",
-        "visual"
-      ],
-      "funcionalidade": "site",
-      "motivo": "Interage com janela Electron/Chromium pelo helper de janela; verifica: site no Chromium real: navegação, teclado e resoluções 1280/640/320 sem overflow da página",
-      "evidencias": [
-        "site no Chromium real: navegação, teclado e resoluções 1280/640/320 sem overflow da página",
-        "./janela.mjs"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/site.test.mjs",
-      "camada": "estrutura",
-      "natureza": [
-        "contrato",
-        "regressao"
-      ],
-      "funcionalidade": "site",
-      "motivo": "Camada principal estrutura; outras responsabilidades podem coexistir no arquivo. Verifica: site reproduzível, links internos resolvidos e downloads apenas de releases publicadas",
-      "evidencias": [
-        "site reproduzível, links internos resolvidos e downloads apenas de releases publicadas"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/skills.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "unidade",
-        "seguranca"
-      ],
-      "funcionalidade": "agentes",
-      "motivo": "Camada principal regra; usa o banco de Skills em memória. Verifica: divisão em trechos, escolha para o prompt, licença na importação e limite de tamanho",
-      "evidencias": [
-        "escolher: essencial sempre entra, o que combina com a pergunta vem antes, rascunho e descartado nunca entram",
-        "importar: sem licença aberta, com especialização inexistente ou sem licença registrada, nada é gravado",
-        "../dist/agentes/regras/escolherTrechosDaSkill.js",
-        "../dist/agentes/banco/importarPastaDeSkill.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/subprocesso.test.mjs",
-      "camada": "integracao",
-      "natureza": [
-        "regressao"
-      ],
-      "funcionalidade": "execucoes",
-      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: error",
-      "evidencias": [
-        "../dist/compartilhado/projeto/carregarProjeto.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/suporte.test.mjs",
-      "camada": "regra",
-      "natureza": [
-        "regressao",
-        "seguranca"
-      ],
-      "funcionalidade": "suporte",
-      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: relato válido: texto, endereço oficial e aviso de issue pública; nada anexado sem marcação",
-      "evidencias": [
-        "relato válido: texto, endereço oficial e aviso de issue pública; nada anexado sem marcação",
-        "sistema e diagnóstico só entram quando marcados",
-        "../dist/suporte/regras/enderecoOficialDoRelato.js",
-        "../dist/suporte/regras/linkDeIssueValido.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/versoes.test.mjs",
+      "arquivo": "testes/estrutura/versoes.test.mjs",
       "camada": "estrutura",
       "natureza": [
         "contrato",
@@ -1145,7 +590,379 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/worker.test.mjs",
+      "arquivo": "testes/integracao/banco/agenda.test.mjs",
+      "camada": "persistencia",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "agendamentos",
+      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: fuso: horário de parede vira o instante UTC certo, inclusive no verão",
+      "evidencias": [
+        "fuso: horário de parede vira o instante UTC certo, inclusive no verão",
+        "horário de verão: salto da primavera avança para depois do salto; fim do verão usa a primeira ocorrência",
+        "../dist/agendamentos/banco/agendaPausada.js",
+        "../dist/agendamentos/banco/listarRotinas.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/banco/integracoes.test.mjs",
+      "camada": "persistencia",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "conexoes",
+      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: configuração exige runtime, servidor, raiz e ambiente exatos, sem expor credenciais",
+      "evidencias": [
+        "configuração exige runtime, servidor, raiz e ambiente exatos, sem expor credenciais",
+        "protocolo stdio real: handshake, quatro tools e leitura; evidência persiste e SDK não é Codex",
+        "../dist/compartilhado/projeto/carregarProjeto.js",
+        "../dist/conexoes/banco/registrosIntegracao.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/banco/preferencias.test.mjs",
+      "camada": "persistencia",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "configuracoes",
+      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: padrão: aviso automático de versão nova ligado (2.10.1), som desligado, sem aviso pendente",
+      "evidencias": [
+        "padrão: aviso automático de versão nova ligado (2.10.1), som desligado, sem aviso pendente",
+        "arquivo da 2.9 (verificarAoIniciar=false gravado, sem avisoAutomatico) passa a avisar; desligar é respeitado",
+        "../dist/atualizacoes/regras/avisoDeVersaoPendente.js",
+        "../dist/atualizacoes/regras/marcarVersaoVista.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/externa/atualizacao-instalar.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "atualizacoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: atualizar (2.10.2): baixa, confere o SHA-256 publicado e devolve só o instalador verificado",
+      "evidencias": [
+        "atualizar (2.10.2): baixa, confere o SHA-256 publicado e devolve só o instalador verificado",
+        "atualizar: SHA-256 divergente apaga o arquivo; sem .sha256 válido nada é baixado",
+        "../dist/atualizacoes/regras/baixarAtualizacao.js",
+        "../dist/atualizacoes/regras/enderecoDoInstalador.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/externa/atualizacao.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "atualizacoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: versão mais recente disponível: resumo das mudanças e página oficial reconstruída localmente",
+      "evidencias": [
+        "versão mais recente disponível: resumo das mudanças e página oficial reconstruída localmente",
+        "versão igual, instalada mais nova e comparação numérica (2.10 > 2.9)",
+        "../dist/atualizacoes/regras/destinoAutorizado.js",
+        "../dist/atualizacoes/regras/verificarAtualizacao.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/externa/chamados.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "suporte",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: chamado usa dados reais da resposta, histórico e destino fixo, sem enviar contexto ou credencial",
+      "evidencias": [
+        "chamado usa dados reais da resposta, histórico e destino fixo, sem enviar contexto ou credencial",
+        "não fabrica status sem rótulo, com rótulos conflitantes, issue fechada ou falha de rede",
+        "../dist/suporte/integracoes/consultarChamado.js",
+        "../dist/suporte/regras/prepararRelato.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/externa/conexoes.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "conexoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: conector exige confirmação exata e preserva configuração existente",
+      "evidencias": [
+        "conector exige confirmação exata e preserva configuração existente",
+        "falha de inspeção impede escrita; cliente recebe argv sem shell somente após confirmação",
+        "../dist/compartilhado/projeto/carregarProjeto.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/externa/consultas-detalhadas.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "conexoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: consultas recusam operação pertencente a outro serviço sem chamar rede",
+      "evidencias": [
+        "consultas recusam operação pertencente a outro serviço sem chamar rede",
+        "consulta de arquivos do GitHub recusa caminhos com subida de pasta",
+        "../dist/conexoes/integracoes/lerDetalheDoServico.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/externa/fluxo-qase.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "testes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: v39: trocar vínculo Qase não reutiliza automação declarada nem funde nós históricos",
+      "evidencias": [
+        "v39: trocar vínculo Qase não reutiliza automação declarada nem funde nós históricos",
+        "fluxo completo: casos -> run -> execução autorizada -> resultados por cenário e manual -> publicação -> releitura; sem PASS inventado",
+        "../dist/agendamentos/autorizacoes/autorizacaoDelegada.js",
+        "../dist/agendamentos/autorizacoes/autorizarExecucao.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/externa/subprocesso.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "execucoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: error",
+      "evidencias": [
+        "../dist/compartilhado/projeto/carregarProjeto.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/migracao/ui/migracao-2-9.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e",
+        "regressao",
+        "migracao"
+      ],
+      "funcionalidade": "instalacao",
+      "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: migração 2.8 → 2.9: agenda e histórico preservados, arquivos novos só no primeiro uso e escrita externa desligada",
+      "evidencias": [
+        "migração 2.8 → 2.9: agenda e histórico preservados, arquivos novos só no primeiro uso e escrita externa desligada",
+        "./janela.mjs",
+        "../dist/agendamentos/banco/concluirTrabalho.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/migracao/ui/migracao-26.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e",
+        "regressao",
+        "migracao"
+      ],
+      "funcionalidade": "instalacao",
+      "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: instalação 2.6 → atual preserva contexto exato, preferências, histórico e MCP",
+      "evidencias": [
+        "instalação 2.6 → atual preserva contexto exato, preferências, histórico e MCP",
+        "./janela.mjs"
+      ],
+      "perfilReal": true
+    },
+    {
+      "arquivo": "testes/migracao/ui/migracao-27.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e",
+        "regressao",
+        "migracao"
+      ],
+      "funcionalidade": "instalacao",
+      "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: instalação 2.7 → atual preserva projeto, contexto exato, preferências e MCP; agenda nasce vazia e o worker sobe",
+      "evidencias": [
+        "instalação 2.7 → atual preserva projeto, contexto exato, preferências e MCP; agenda nasce vazia e o worker sobe",
+        "./janela.mjs"
+      ],
+      "perfilReal": true
+    },
+    {
+      "arquivo": "testes/migracao/ui/migracao.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e",
+        "regressao",
+        "migracao"
+      ],
+      "funcionalidade": "instalacao",
+      "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: migração: versão nova, vínculo, histórico, métricas e evidências da 2.2.0 preservados",
+      "evidencias": [
+        "migração: versão nova, vínculo, histórico, métricas e evidências da 2.2.0 preservados",
+        "migração: o MCP configurado como na 2.2.0 (mesmo executável e mcp.js) continua utilizável, informa 2.3.0 e acrescenta ao histórico",
+        "./janela.mjs"
+      ],
+      "perfilReal": true
+    },
+    {
+      "arquivo": "testes/seguranca/banco/atividades.test.mjs",
+      "camada": "persistencia",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "logs-metricas",
+      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: histórico vazio não fabrica atividades, duração, conexão, tokens ou custos",
+      "evidencias": [
+        "histórico vazio não fabrica atividades, duração, conexão, tokens ou custos",
+        "revisão real: contagens, duração e recomendações sobrevivem a novos processos",
+        "../dist/compartilhado/projeto/carregarProjeto.js",
+        "../dist/compartilhado/projeto/contextoProjeto.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/banco/contextos.test.mjs",
+      "camada": "persistencia",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "contextos",
+      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: cadastro, persistência e histórico: nasce RASCUNHO v1 com hash e sobrevive a nova leitura",
+      "evidencias": [
+        "cadastro, persistência e histórico: nasce RASCUNHO v1 com hash e sobrevive a nova leitura",
+        "edição gera nova versão em rascunho; sem mudança é recusada; editar contexto aprovado invalida a aprovação",
+        "../dist/agentes/mcp/contextoCompleto.js",
+        "../dist/agentes/mcp/criarServidor.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/banco/dados.test.mjs",
+      "camada": "persistencia",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "privacidade",
+      "motivo": "Camada principal persistencia; outras responsabilidades podem coexistir no arquivo. Verifica: exclusão do histórico: apaga só os registros do projeto escolhido e preserva código, evidências, vínculo e outros projetos",
+      "evidencias": [
+        "exclusão do histórico: apaga só os registros do projeto escolhido e preserva código, evidências, vínculo e outros projetos",
+        "exclusão do histórico: falha parcial (arquivo em uso/permissão) é informada e o restante é apagado",
+        "../dist/ajuda/privacidade/resumirDados.js",
+        "../dist/ajuda/tipos/privacidade.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/externa/escrita.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "conexoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: lista fechada de rotas: só as escritas previstas passam; apagar, traversal e rotas alheias são recusados",
+      "evidencias": [
+        "lista fechada de rotas: só as escritas previstas passam; apagar, traversal e rotas alheias são recusados",
+        "portões: escrita desligada por padrão, confirmação humana obrigatória, leitura não dá permissão de escrita",
+        "../dist/agendamentos/autorizacoes/criarPoliticaEscrita.js",
+        "../dist/agendamentos/autorizacoes/estadoDaPoliticaDeEscrita.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/externa/execucao.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "execucoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: sem consentimento, capability ausente e bloqueio de política não executam",
+      "evidencias": [
+        "sem consentimento, capability ausente e bloqueio de política não executam",
+        "../dist/compartilhado/projeto/carregarProjeto.js",
+        "../dist/compartilhado/seguranca/hash.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/externa/leituras.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "conexoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: JQL de tickets: projeto sempre fixado pelo ID do vínculo; filtros validados e escapados (sem injeção)",
+      "evidencias": [
+        "JQL de tickets: projeto sempre fixado pelo ID do vínculo; filtros validados e escapados (sem injeção)",
+        "Jira: metadados de criação, transições, histórico e anexos; ticket de outro projeto é recusado",
+        "../dist/conexoes/integracoes/lerDetalheDoServico.js",
+        "../dist/conexoes/tipos/adaptador.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/externa/painel.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "terminal",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: vinculos: projeto integrado, sem manifesto, manifesto inválido e pasta ausente",
+      "evidencias": [
+        "vinculos: projeto integrado, sem manifesto, manifesto inválido e pasta ausente",
+        "vinculos: só vincula contrato válido, persiste, não duplica e desvincular preserva arquivos",
+        "../dist/ajuda/regras/lerDocumentosDaAjuda.js",
+        "../dist/compartilhado/projeto/carregarProjeto.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/externa/playwright.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "testes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: relatório JSON do Playwright vira cenários individuais sem inventar nada",
+      "evidencias": [
+        "relatório JSON do Playwright vira cenários individuais sem inventar nada",
+        "../dist/agendamentos/worker/Worker.js",
+        "../dist/testes/regras/converterRelatorioPlaywright.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/externa/servicos.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "conexoes",
+      "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: projetos manuais concorrentes persistem com IDs e contextos separados, sem pasta",
+      "evidencias": [
+        "projetos manuais concorrentes persistem com IDs e contextos separados, sem pasta",
+        "cofre recusa proteção ausente e não escreve token claro; exclusão retira credencial",
+        "../dist/conexoes/banco/cofreCredenciais.js",
+        "../dist/conexoes/integracoes/AdaptadorServico.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/externa/worker.test.mjs",
       "camada": "integracao",
       "natureza": [
         "regressao",
@@ -1158,6 +975,203 @@
         "sem autorização, expirada, revogada, esgotada ou com o comando alterado: BLOCKED e o processo NÃO roda",
         "../dist/agendamentos/autorizacoes/autorizarEscopo.js",
         "../dist/agendamentos/autorizacoes/autorizarExecucao.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/aceitacao-extra.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "ciclo-qa",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: readonly bloqueia execução sem gravar no projeto",
+      "evidencias": [
+        "readonly bloqueia execução sem gravar no projeto",
+        "tabela de decisão e estados exigem condições; óraculo ainda é necessário",
+        "../dist/compartilhado/projeto/carregarProjeto.js",
+        "../dist/compartilhado/seguranca/hash.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/banco-de-skills.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal regra; usa o banco de Skills em memória. Verifica: divisão em trechos, escolha para o prompt, licença na importação e limite de tamanho",
+      "evidencias": [
+        "escolher: essencial sempre entra, o que combina com a pergunta vem antes, rascunho e descartado nunca entram",
+        "importar: sem licença aberta, com especialização inexistente ou sem licença registrada, nada é gravado",
+        "../dist/agentes/regras/escolherTrechosDaSkill.js",
+        "../dist/agentes/banco/importarPastaDeSkill.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/logs-e-relatorios-execucao.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "execucoes",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: logs escondem segredos mesmo quando a saída chega em várias partes",
+      "evidencias": [
+        "logs escondem segredos mesmo quando a saída chega em várias partes",
+        "relatório aprovado substitui o conteúdo bruto por casos já redigidos",
+        "../dist/execucoes/regras/mascararLogsDaExecucao.js",
+        "../dist/execucoes/regras/gravarRelatorioRedigido.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/orquestrador.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: menção explícita ao agente decide; pergunta sem sinal vai ao orquestrador",
+      "evidencias": [
+        "menção explícita ao agente decide; pergunta sem sinal vai ao orquestrador",
+        "sem projeto e sem integrações todos os agentes respondem sem erro e sem inventar"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/projeto.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "projetos",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: fixtures API, web e automação reconhecidas com fontes reais",
+      "evidencias": [
+        "fixtures API, web e automação reconhecidas com fontes reais",
+        "contrato inválido, v1, tipos incorretos e requireApproval=false recusados",
+        "../dist/compartilhado/projeto/carregarProjeto.js",
+        "../dist/compartilhado/projeto/contextoProjeto.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/qualidade.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "testes",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: rastreabilidade, fonte real e proposta nunca PASS",
+      "evidencias": [
+        "rastreabilidade, fonte real e proposta nunca PASS",
+        "redundância candidata comparada com teste real, não quantidade fixa",
+        "../dist/compartilhado/projeto/carregarProjeto.js",
+        "../dist/testes/regras/revisarCobertura.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/suporte.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "suporte",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: relato válido: texto, endereço oficial e aviso de issue pública; nada anexado sem marcação",
+      "evidencias": [
+        "relato válido: texto, endereço oficial e aviso de issue pública; nada anexado sem marcação",
+        "sistema e diagnóstico só entram quando marcados",
+        "../dist/suporte/regras/enderecoOficialDoRelato.js",
+        "../dist/suporte/regras/linkDeIssueValido.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/catalogo-testes.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "testes",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: catálogo agrupa por feature, extrai cenários e passos e classifica cada teste com motivo e confiança",
+      "evidencias": [
+        "catálogo agrupa por feature, extrai cenários e passos e classifica cada teste com motivo e confiança",
+        "entra com senha válida @smoke",
+        "../dist/testes/regras/arquivoDeTeste.js",
+        "../dist/testes/regras/catalogoDeTestes.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/chat-delegacao.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "regressao"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: sem autorização não procura nem executa Claude/Codex",
+      "evidencias": [
+        "sem autorização não procura nem executa Claude/Codex",
+        "mesmo autorizado, sem executável retorna somente dados locais",
+        "../dist/agentes/chat/consultarIaExterna.js",
+        "../dist/agentes/chat/registrarSugestoesDaIa.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/contrato-detectado.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "regressao"
+      ],
+      "funcionalidade": "projetos",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: contrato proposto (2.10.2): projeto npm ganha comandos só de scripts reais; e2e e deploy ficam bloqueados",
+      "evidencias": [
+        "contrato proposto (2.10.2): projeto npm ganha comandos só de scripts reais; e2e e deploy ficam bloqueados",
+        "contrato proposto: Python, Go, Java e .NET ficam somente leitura, com o comando nativo explicado",
+        "../dist/projetos/regras/gravarContratoProposto.js",
+        "../dist/projetos/regras/proporContrato.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/evidencia-inicial.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "regressao"
+      ],
+      "funcionalidade": "evidencias",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: evidência começa bloqueada, sem execução, autorização ou resultado inventado",
+      "evidencias": [
+        "evidência começa bloqueada, sem execução, autorização ou resultado inventado",
+        "../dist/execucoes/regras/criarEvidenciaInicial.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/frameworks.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "regressao"
+      ],
+      "funcionalidade": "testes",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: detecção por evidência: CONFIRMADO, PROVAVEL, INCERTO e ausente; nome de pasta nunca confirma",
+      "evidencias": [
+        "detecção por evidência: CONFIRMADO, PROVAVEL, INCERTO e ausente; nome de pasta nunca confirma",
+        "../dist/agentes/mcp/contextoCompleto.js",
+        "../dist/compartilhado/projeto/carregarProjeto.js"
       ],
       "perfilReal": false
     }
