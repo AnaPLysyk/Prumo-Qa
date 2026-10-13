@@ -33,6 +33,15 @@ Derivados v40 (sempre calculados dos tokens acima): `--ds-linha-suave`,
 Cores de origem, usadas só em pontos e indicadores: `--ds-jira`, `--ds-qase`,
 `--ds-github`, `--ds-local`, `--ds-prumo`.
 
+Tokens de tema para as telas (2.11, em `ds.css`, com escuro, claro escolhido e claro do sistema): `--ds-rotulo`
+(camada ou rótulo sobre o fundo), `--ds-mistura-retrato` e `--ds-mistura-avatar` (mistura das imagens dos agentes),
+`--ds-sombra-curta` e a paleta do terminal `--ds-terminal-*` (mais `--ds-terminal-claro-*` e `--ds-terminal-escuro-*`
+para a escolha por janela em Logs).
+
+**Regra:** as cores de tema moram só em `frontend/design-system/` (`estilo.css`, `qc.css`, `ds.css`). Nenhuma tela tem
+`data-tema` ou `prefers-color-scheme` nem redefine `--fundo`, `--painel`, `--linha`, `--texto`, `--suave`, `--acento` ou
+os estados; trocar uma cor é trocar um arquivo. `testes/estrutura/design-system-tema.test.mjs` garante a regra.
+
 ### Espaço, raio e tipo
 
 - Espaço: `--ds-1`…`--ds-8` = 4, 8, 12, 16, 20, 24, 32, 40 px.

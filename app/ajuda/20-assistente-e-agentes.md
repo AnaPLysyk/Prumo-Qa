@@ -22,7 +22,8 @@ A tela Agentes mostra o **Prumo Orchestrator**, os clientes Codex e Claude Code 
 
 - **Configuração** liga ou desliga a especialização e define o que a IA pode pedir. O bloqueio vale no servidor MCP a cada chamada.
 - **Skills** mostra os trechos de instrução do agente. Só os **aprovados** vão para o Claude Code ou o Codex, escolhidos pela pergunta (até 8 KB). O que você escreve em **Acrescentar trecho** já vale; **Importar pasta de Skill** lê uma pasta aberta que já está no computador (por exemplo um repositório clonado), só com licença aberta, e cada trecho entra como **rascunho** até você aprovar. Scripts da pasta não são executados.
-- **Cérebro** mostra a skill, as capacidades, os motivos das políticas os conhecimentos e os trechos de Skill da equipe, aprovados ou em rascunho.
+- **Cérebro** mostra tudo o que o agente consulta: identidade, palavras de roteamento, termos aprendidos, capacidades, contextos aprovados, conhecimentos, todos os trechos de Skill e os atendimentos recentes, agrupados por cor.
+- **Testar uma pergunta** (no Cérebro) mostra o caminho que o chat faria agora: as palavras reconhecidas, a pontuação de cada agente, quem responderia, se haveria orquestração e quais trechos de Skill e conhecimentos este agente usaria; os usados acendem no anel. Não chama IA e não grava nada.
 
 **Nova prévia** cria um agente personalizado apenas como prévia local da janela (até 50 por projeto, importação JSON de até 32 KiB). Ela não cria especialização, conexão nem processo no núcleo. **Contextos** abre a partir desta tela.
 
@@ -42,4 +43,4 @@ Os retratos dos agentes são imagens com movimento visual, sem rosto 3D. Claude 
 
 ## Orquestração
 
-Quando a sua pergunta toca duas ou mais especialidades (por exemplo "quais falhas aconteceram e como está a regressão?") e você não escolheu um agente, o orquestrador consulta cada especialista e junta as respostas; a assinatura da mensagem diz quantos foram consultados. Em **Agentes › Painel de atividades**, **Orquestrações recentes** mostra quem participou, em que ordem, quanto cada etapa levou, o que consultou e o que falhou. A pergunta e as respostas não são gravadas.
+Quando a sua pergunta toca duas ou mais especialidades (por exemplo "quais falhas aconteceram e como está a regressão?") e você não escolheu um agente, o orquestrador consulta cada especialista e junta as respostas; a assinatura da mensagem diz quantos foram consultados. Em **Agentes › Painel de atividades**, **Orquestrações** (coluna à direita do canvas) mostra quem participou, em que ordem, quanto cada etapa levou, o que consultou e o que falhou. A pergunta e as respostas não são gravadas.

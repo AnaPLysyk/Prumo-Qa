@@ -18,6 +18,8 @@ const PrumoPainelAtividades = (() => {
   const data = (iso) => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); };
   const duracao = (n) => (n == null ? '' : n < 1000 ? Math.round(n) + ' ms' : (n / 1000).toFixed(1) + ' s');
   const recente = (iso) => !!iso && Date.now() - Date.parse(iso) < RECENTE_MS;
+  const temaClaro = () => { const t = document.documentElement.dataset.tema; return t === 'claro' || (t !== 'escuro' && matchMedia('(prefers-color-scheme: light)').matches); };
+  const corCodex = () => (temaClaro() ? '#3b4a63' : '#e8edf6');
   const nomeCliente = (c) => (c === 'claude' ? 'Claude Code' : c === 'codex' ? 'Codex' : c || 'cliente');
   const assinatura = (d) => JSON.stringify([d.atividades.map((a) => a.operationId + a.state), d.conversas.map((c) => c.id + ':' + (c.avaliacao || '')), d.execucoes.map((x) => x.id + x.estado)]);
 
@@ -35,7 +37,7 @@ const PrumoPainelAtividades = (() => {
       for (const [c, lista] of porCliente) {
         const [origem, cliente] = c.split(' · ');
         const f = { id: 'cli:' + c, tipo: 'cliente', titulo: origem + ' · ' + nomeCliente(cliente), sub: tr('{n} operações registradas', { n: lista.length }), vivo: lista.some((a) => recente(a.at)),
-          linhas: lista.slice(0, 7).map((a) => ({ hora: curto(a.at), texto: a.tool, estado: a.state, extra: duracao(a.durationMs) })), cor: cliente === 'claude' ? '#d97757' : cliente === 'codex' ? '#e8edf6' : '#8fb4ff' };
+          linhas: lista.slice(0, 7).map((a) => ({ hora: curto(a.at), texto: a.tool, estado: a.state, extra: duracao(a.durationMs) })), cor: cliente === 'claude' ? '#d97757' : cliente === 'codex' ? corCodex() : '#8fb4ff' };
         fontes.push(f); sec.fontes.push(f);
       }
       for (const [tool, lista] of porFerramenta) {
@@ -67,11 +69,11 @@ const PrumoPainelAtividades = (() => {
           const f = { id: 'cv:' + c.id, tipo: 'conversa', dado: c, cor: hub.cor, etiqueta: c.modo === 'LOCAL' ? tr('resposta local') : c.modo === 'CLAUDE' ? 'Claude Code' : 'Codex', estado: '', hora: data(c.em) + ' ' + curto(c.em), vivo: recente(c.em),
             linhas: ['› ' + (c.pergunta || 'Atendimento sem texto persistido'), '‹ ' + (c.linhas?.[0] || c.avaliacao || 'Sem avaliação'), c.fontes.length ? tr('fontes: {f}', { f: c.fontes.map((x) => typeof x === 'string' ? x : x.rotulo).join(', ') }) : (c.estilo || c.modo)], rotulo: ag.nome + ': ' + (c.pergunta || 'Atendimento') };
           folhas.push(f); hub.folhas.push(f); arestas.push({ de: hub.id, para: f.id, tipo: 'folha', vivo: f.vivo });
-          if (c.modo !== 'LOCAL') { const p = c.modo === 'CLAUDE' ? 'claude' : 'codex'; if (!externos.has(p)) externos.set(p, []); externos.get(p).push(c); arestas.push({ de: f.id, para: 'ext:' + p, tipo: 'delegacao', vivo: f.vivo, cor: p === 'claude' ? '#d97757' : '#e8edf6' }); }
+          if (c.modo !== 'LOCAL') { const p = c.modo === 'CLAUDE' ? 'claude' : 'codex'; if (!externos.has(p)) externos.set(p, []); externos.get(p).push(c); arestas.push({ de: f.id, para: 'ext:' + p, tipo: 'delegacao', vivo: f.vivo, cor: p === 'claude' ? '#d97757' : corCodex() }); }
         }
       });
       for (const [p, lista] of externos) {
-        const f = { id: 'ext:' + p, tipo: 'externo', titulo: nomeCliente(p), sub: tr('{n} respostas delegadas pelo chat', { n: lista.length }), vivo: lista.some((c) => recente(c.em)), cor: p === 'claude' ? '#d97757' : '#e8edf6',
+        const f = { id: 'ext:' + p, tipo: 'externo', titulo: nomeCliente(p), sub: tr('{n} respostas delegadas pelo chat', { n: lista.length }), vivo: lista.some((c) => recente(c.em)), cor: p === 'claude' ? '#d97757' : corCodex(),
           linhas: lista.slice(0, 7).map((c) => ({ hora: curto(c.em), texto: '‹ ' + (c.linhas?.[0] || 'Resposta externa registrada').slice(0, 44), estado: c.agenteNome || c.agente, extra: '' })) };
         fontes.push(f); sec.fontes.push(f);
       }
@@ -154,18 +156,29 @@ const PrumoPainelAtividades = (() => {
         h('span', { class: 'pa-zoom', role: 'group', 'aria-label': tr('Zoom') }, btn('−', 'Afastar', () => zoomCentro(1 / 1.25)), zoomTxt, btn('+', 'Aproximar', () => zoomCentro(1.25))),
         btn('⤢', 'Ajustar à tela', () => ajustar(true), { id: 'pa-ajustar' }),
         btn('⛶', 'Tela cheia', alternarTelaCheia, { id: 'pa-tela-cheia' })));
+    const lateral = o.lateral ? h('div', { class: 'pa-lateral', id: 'pa-lateral', hidden: true }, o.lateral.conteudo) : null;
+    const botaoLateral = lateral ? h('button', { type: 'button', class: 'pa-btn pa-btn-texto', id: 'pa-lateral-botao', 'aria-controls': 'pa-lateral', 'aria-expanded': 'false', onclick: () => abrirLateral(lateral.hidden) }, '☰ ', h('span', {}, o.lateral.rotulo)) : null;
+    if (botaoLateral) barra.lastChild.prepend(botaoLateral);
+    function abrirLateral(aberta) { if (!lateral) return; lateral.hidden = !aberta; botaoLateral.setAttribute('aria-expanded', String(aberta)); requestAnimationFrame(() => ajustar(!o.reduzido())); }
     const ajuda = h('p', { class: 'pa-ajuda', id: 'pa-ajuda' }, tr('Arraste para mover, use a pinça ou Ctrl + roda para o zoom. Teclado: setas movem, + e − aproximam, 0 ajusta à tela. Cada linha liga registros gravados neste computador.'));
     const svg = sv('svg', { class: 'pa-arestas', 'aria-hidden': 'true' });
     const mundo = h('div', { class: 'pa-mundo' }); mundo.append(svg);
     const camada = h('div', { class: 'pa-nos' }); mundo.append(camada);
-    const vp = h('div', { class: 'pa-viewport', tabindex: '0', role: 'region', 'aria-label': tr('Canvas de atividades dos agentes'), 'aria-describedby': 'pa-ajuda' }, mundo);
+    const vp = h('div', { class: 'pa-viewport', tabindex: '0', role: 'region', 'aria-label': tr('Canvas de atividades dos agentes'), 'aria-describedby': 'pa-ajuda', title: tr('Arraste para mover, use a pinça ou Ctrl + roda para o zoom. Teclado: setas movem, + e − aproximam, 0 ajusta à tela. Cada linha liga registros gravados neste computador.') }, mundo);
     const mini = h('canvas', { class: 'pa-mini', width: 180, height: 110, 'aria-hidden': 'true' });
     const legenda = h('div', { class: 'pa-legenda' },
       ...[['ok', 'PASS · OK'], ['falha', 'FAIL · ERROR'], ['aviso', 'BLOCKED · STARTED · NOT_VERIFIED']].map(([c, t]) => h('span', {}, h('i', { class: c }), h('span', { 'data-i18n-ignore': '' }, t))),
       h('span', {}, h('i', { class: 'pulso' }), h('span', {}, tr('Pulso: registrado nos últimos 90 s'))),
       h('span', {}, h('i', { class: 'delegacao' }), h('span', {}, tr('Delegação do chat à IA externa'))));
-    const palco = h('div', { class: 'pa-palco' }, vp, mini);
+    const palco = h('div', { class: 'pa-palco' }, vp, mini, lateral);
     raiz.append(barra, palco, legenda, ajuda); host.replaceChildren(raiz);
+    // O canvas ocupa a altura que sobra na janela abaixo dele (legenda e ajuda incluídas), com um mínimo legível.
+    function medirAltura() {
+      if (!raiz.isConnected || document.fullscreenElement === raiz) return;
+      const topo = vp.getBoundingClientRect().top, abaixo = raiz.getBoundingClientRect().bottom - palco.getBoundingClientRect().bottom;
+      raiz.style.setProperty('--pa-altura', Math.round(Math.max(320, innerHeight - topo - abaixo - (o.margemInferior ?? 16))) + 'px');
+    }
+    medirAltura(); addEventListener('resize', medirAltura);
 
     // ---------- Vista: pan/zoom ----------
     function aplicar() {
@@ -238,7 +251,7 @@ const PrumoPainelAtividades = (() => {
       vista.x = vp.clientWidth / 2 - wx * vista.k; vista.y = vp.clientHeight / 2 - wy * vista.k; aplicar();
     });
     function alternarTelaCheia() { if (document.fullscreenElement) document.exitFullscreen?.(); else raiz.requestFullscreen?.().catch(() => avisar(tr('Tela cheia indisponível nesta janela.'), true)); }
-    const telaCheia = () => { raiz.classList.toggle('pa-cheia', document.fullscreenElement === raiz); if (raiz.isConnected) setTimeout(() => ajustar(false), 60); }; document.addEventListener('fullscreenchange', telaCheia);
+    const telaCheia = () => { raiz.classList.toggle('pa-cheia', document.fullscreenElement === raiz); medirAltura(); if (raiz.isConnected) setTimeout(() => ajustar(false), 60); }; document.addEventListener('fullscreenchange', telaCheia);
     // Mudança grande de proporção (girar o celular, tela cheia, janela lateral) refaz a disposição e reajusta.
     let proporcao = 0;
     const observador = new ResizeObserver(() => {
@@ -254,8 +267,8 @@ const PrumoPainelAtividades = (() => {
       const tudo = vista.x >= -2 && vista.y >= -2 && vista.x + layout.largura * vista.k <= vp.clientWidth + 2 && vista.y + layout.altura * vista.k <= vp.clientHeight + 2;
       mini.hidden = tudo; if (tudo) return; const ctx = mini.getContext('2d'); if (!ctx) return; const { s, ox, oy } = escalaMini();
       ctx.clearRect(0, 0, mini.width, mini.height);
-      for (const [id, p] of layout.pos) { const f = modelo.mapa.get(id); ctx.fillStyle = f?.cor ? f.cor + (id.includes(':') && !modelo.fonteIds.has(id) ? '99' : 'cc') : '#ffffff55'; ctx.fillRect(ox + p.x * s, oy + p.y * s, Math.max(1.5, p.w * s), Math.max(1.5, p.h * s)); }
-      ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1;
+      for (const [id, p] of layout.pos) { const f = modelo.mapa.get(id); ctx.fillStyle = f?.cor ? f.cor + (id.includes(':') && !modelo.fonteIds.has(id) ? '99' : 'cc') : (temaClaro() ? '#14233d55' : '#ffffff55'); ctx.fillRect(ox + p.x * s, oy + p.y * s, Math.max(1.5, p.w * s), Math.max(1.5, p.h * s)); }
+      ctx.strokeStyle = temaClaro() ? 'rgba(31,86,184,.9)' : 'rgba(255,255,255,.85)'; ctx.lineWidth = 1;
       ctx.strokeRect(ox + (-vista.x / vista.k) * s, oy + (-vista.y / vista.k) * s, (vp.clientWidth / vista.k) * s, (vp.clientHeight / vista.k) * s);
     }
 
@@ -342,13 +355,13 @@ const PrumoPainelAtividades = (() => {
       } finally { carregando = false; }
     }
     function parar() { clearInterval(timer); timer = null; }
-    function destruir() { parar(); observador.disconnect(); document.removeEventListener('fullscreenchange', telaCheia); }
+    function destruir() { parar(); observador.disconnect(); document.removeEventListener('fullscreenchange', telaCheia); removeEventListener('resize', medirAltura); }
     function agendar() {
       parar(); status.classList.toggle('vivo', vivoChk.checked);
       if (vivoChk.checked) timer = setInterval(() => { if (!raiz.isConnected || !o.ativo()) { destruir(); return; } if (!document.hidden) carregar(false); }, 3000);
     }
     carregar(false).then(agendar);
-    return { parar: destruir, recarregar: () => carregar(true) };
+    return { parar: destruir, recarregar: () => carregar(true), abrirLateral, medirAltura };
   }
   return { montar, modelar, dispor };
 })();

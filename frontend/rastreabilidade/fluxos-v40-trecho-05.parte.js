@@ -3,7 +3,7 @@
     const e = estado.espaco; const sub = estado.sub?.rastreabilidade === 'vinculos' ? 'vinculos' : 'mapa';
     if (!e) { el.append(DS.cabecalho({ titulo: 'Rastreabilidade' }), barraSub('rastreabilidade', [['mapa', 'Trilha'], ['vinculos', 'Relações']], sub), h('div', { id: 'sub-conteudo' }, DS.estadoTela('vazio', 'Nenhum projeto selecionado', 'Selecione ou crie um projeto para continuar.', [DS.acao('Ir para Projetos', () => mostrar('projetos'))]))); return; }
     const espacos = (await chamar(api.espacos)) || [];
-    el.append(DS.cabecalho({ titulo: 'Rastreabilidade', descricao: 'Ticket → caso → automação → execução → evidência → defeito. Somente vínculos declarados, registrados por fluxos do Prumo, observados em execuções ou lidos estaticamente no código.',
+    el.append(DS.cabecalho({ titulo: 'Rastreabilidade', descricao: 'Ticket → caso → automação → execução → evidência → defeito.',
       acoes: [DS.acao('Declarar vínculo', () => declarar(e), { id: 'rastro-declarar', primaria: true, icone: 'vinculo' })] }), barraSub('rastreabilidade', [['mapa', 'Trilha'], ['vinculos', 'Relações']], sub));
     const m = await chamar(() => api.vinculosMapa(e.id)); if (!m) return el.append(DS.falhaConsulta('rastreabilidade'));
     const corpo = h('div', { id: 'sub-conteudo' }); el.append(corpo);

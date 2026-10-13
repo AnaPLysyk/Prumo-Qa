@@ -22,7 +22,8 @@ The Agents screen shows the **Prumo Orchestrator**, the Codex and Claude Code cl
 
 - **Configuration** turns the specialization on or off and defines what the AI may request. The block applies in the MCP server on every call.
 - **Skills** lists the agent's instruction passages. Only **approved** passages reach Claude Code or Codex, chosen by the question (up to 8 KB). What you write in **Add passage** applies right away; **Import Skill folder** reads an open Skill folder already on your computer (for example a cloned repository), open licenses only, and each passage arrives as a **draft** until you approve it. Scripts in the folder are never run.
-- **Brain** shows the skill, the capabilities, the reasons behind the policies and the approved or draft knowledge.
+- **Brain** shows everything the agent looks up: identity, routing words, learned terms, capabilities, approved contexts, knowledge, every Skill excerpt and recent answers, grouped by color.
+- **Test a question** (in the Brain) shows the path the chat would take now: recognized words, each agent's score, who would answer, whether it would orchestrate and which Skill excerpts and knowledge this agent would use; the ones used light up on the ring. It does not call AI and records nothing.
 
 **New preview** creates a custom agent only as a local preview in the window (up to 50 per project, JSON import up to 32 KiB). It does not create a specialization, connection or process in the core. **Contexts** opens from this screen.
 
@@ -42,4 +43,4 @@ The agent portraits are images with visual motion, without a 3D face. Claude and
 
 ## Orchestration
 
-When your question touches two or more specialties (for example "which failures happened and how is regression doing?") and you did not pick an agent, the orchestrator consults each specialist and combines the answers; the message signature says how many were consulted. In **Agents › Activity panel**, **Recent orchestrations** shows who took part, in which order, how long each step took, what it consulted and what failed. The question and the answers are not stored.
+When your question touches two or more specialties (for example "which failures happened and how is regression doing?") and you did not pick an agent, the orchestrator consults each specialist and combines the answers; the message signature says how many were consulted. In **Agents › Activity panel**, **Orchestrations** (the column to the right of the canvas) shows who took part, in which order, how long each step took, what it consulted and what failed. The question and the answers are not stored.

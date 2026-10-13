@@ -23,7 +23,7 @@ test('demonstração 2.7: vinte verificações na janela real, dois projetos e A
   for(const servico of ['jira','qase','github']){
     await ir(a.page,'conexoes');await a.page.click('#conexao-nova');await a.page.selectOption('#conexao-servico',servico);await a.page.fill('#conexao-nome','Simulação '+servico);await a.page.fill('#conexao-token','fixture-secret-27-'+servico);
     if(servico==='jira'){await a.page.fill('#conexao-instancia','https://lab.atlassian.net');await a.page.fill('#conexao-usuario','fixture@example.test');}
-    await a.page.click('#conexao-salvar');await a.page.waitForFunction(s=>document.querySelector('#conteudo').textContent.includes('Simulação '+s+' ·'),servico);
+    await a.page.click('#conexao-salvar');await a.page.waitForFunction(s=>[...document.querySelectorAll('#conteudo h2')].some(x=>x.textContent==='Simulação '+s),servico);
     const conta=(await a.page.evaluate(()=>window.prumo.servicos())).data.find(c=>c.servico===servico);assert.ok(conta);assert.doesNotMatch(await a.page.textContent('body'),/fixture-secret-27/);
     await a.page.getByRole('button',{name:'Listar recursos disponíveis',exact:true}).filter({visible:true}).all().then(async botoes=>{await botoes[botoes.length-1].click();});
     await a.page.waitForSelector('#recursos-remotos .nota');assert.doesNotMatch(await a.page.textContent('#recursos-remotos'),/Selecione primeiro/,JSON.stringify(await a.page.evaluate(()=>({root:estado.root,espaco:estado.espaco}))));

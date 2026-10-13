@@ -10,7 +10,7 @@
 .v36a-skills{display:grid;gap:8px;min-width:0}
 .v36a-skills h4{margin:6px 0 0;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--suave)}
 .v36a-skills-resumo{margin:0;font-variant-numeric:tabular-nums;color:var(--suave)}
-.v36a-skill{display:grid;gap:4px;padding:10px 12px;border:1px solid rgba(var(--qc-azul),.18);border-radius:10px;background:rgba(var(--qc-azul),.04);min-width:0}
+.v36a-skill{display:grid;gap:4px;padding:10px 0;border-bottom:1px solid var(--linha);min-width:0}
 .v36a-skill p{margin:0;overflow-wrap:anywhere}
 .v36a-skill small{color:var(--suave)}
 .v36a-skill-acoes{display:flex;flex-wrap:wrap;gap:8px}
@@ -27,3 +27,52 @@
 .v36a-orq-etapas{margin-top:6px;padding-left:4px;font-size:12.5px;color:var(--texto)}
 .v36a-orq-etapas li[data-estado=FALHOU]{color:var(--falha)}
 .v36a-orq-etapas small{color:var(--suave)}
+/* Painel de atividades: cabeçalho compacto para o canvas ocupar a janela; orquestrações na gaveta do canvas. */
+.v36a-topo.v36a-topo-painel{margin:16px 0 10px}
+.v36a-topo-painel p{max-width:none}
+.pa-lateral .v36a-orq{margin:0}
+.pa-lateral .v36a-orq-lista{gap:0}
+.pa-lateral .v36a-orq-item{padding:10px 0;border:0;border-bottom:1px solid var(--linha);border-radius:0;background:none}
+.pa-lateral .v36a-orq-item[data-estado=PARCIAL],.pa-lateral .v36a-orq-item[data-estado=FALHOU]{border-color:var(--linha);box-shadow:inset 3px 0 0 var(--aviso);padding-left:10px}
+.pa-lateral .v36a-orq-item[data-estado=FALHOU]{box-shadow:inset 3px 0 0 var(--falha)}
+/* Cérebro: neurônios à esquerda ocupando a altura da janela; teste de pergunta, inspetor e legenda numa coluna à direita. */
+.v36-stage.v36a-cerebro{height:calc(100vh - 58px - 30px);height:calc(100dvh - 58px - 30px);min-height:520px;margin-top:14px;padding:0 22px 14px}
+.v36a-cerebro-corpo{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,360px);gap:0 22px}
+.v36a-cerebro-corpo .v36a-campo-neural{min-height:0;margin:0}
+.v36a-anel{position:absolute;inset:5% clamp(110px,16%,210px)}
+.v36a-cerebro-lado{display:flex;flex-direction:column;gap:16px;min-height:0;overflow:auto;padding:14px 0 4px 22px;border-left:1px solid var(--ds-linha-suave);scrollbar-width:thin}
+.v36a-cerebro-lado .v36-brain-inspect{padding-top:14px;border-top:1px solid var(--ds-linha-suave)}
+.v36a-simulador{display:flex;flex-direction:column;gap:8px}
+.v36a-simulador label{font-size:12px;font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:var(--texto)}
+.v36a-simulador small{font-size:11px;color:var(--suave)}
+.v36a-sim-linha{display:flex;gap:8px;min-width:0}
+.v36a-sim-linha input{flex:1;min-width:0;height:36px;padding:0 12px;border:1px solid var(--ds-linha-suave);border-radius:10px;background:var(--ds-superficie);color:var(--texto);font:inherit}
+.v36a-sim-linha input:focus{outline:2px solid var(--acento);outline-offset:1px}
+.v36a-sim-linha button{height:36px;padding:0 12px}
+.v36a-sim-resultado{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--texto)}
+.v36a-sim-resultado:empty{display:none}
+.v36a-sim-quem{margin:4px 0 0}.v36a-sim-quem .ok{color:var(--ok)}
+.v36a-sim-rota{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.v36a-sim-rota li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:6px 0;border-bottom:1px solid var(--ds-linha-suave)}
+.v36a-sim-rota li.este span{font-weight:650}
+.v36a-sim-rota b{font-variant-numeric:tabular-nums;font-weight:600}
+.v36a-sim-rota small{grid-column:1/-1;color:var(--suave)}
+.v36a-sim-uso,.v36a-sim-termos{margin:0;color:var(--suave)}
+.v36a-simulando .v36-neuron:not(.aceso){opacity:.25}
+.v36a-simulando .v36-neuron:not(:hover):not(:focus-visible):not([aria-pressed=true]) .v36-neuron-rotulo{opacity:0}
+.v36a-sim-acesos{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.v36a-sim-acesos button{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border:1px solid var(--ds-linha-suave);border-radius:999px;background:none;color:var(--texto);font:inherit;font-size:11.5px;cursor:pointer}
+.v36a-sim-acesos button:hover{border-color:var(--acento)}
+.v36a-sim-acesos i{width:7px;height:7px;border-radius:50%}
+.v36-neuron.aceso .v36-neuron-ponto{transform:scale(1.6)}
+@media(max-width:1100px){.v36-stage.v36a-cerebro{height:auto}.v36a-cerebro-corpo{grid-template-columns:1fr}.v36a-cerebro-corpo .v36a-campo-neural{min-height:min(68vh,560px)}.v36a-cerebro-lado{padding:14px 0 0;border-left:0;border-top:1px solid var(--ds-linha-suave);overflow:visible}.v36a-anel{inset:5% clamp(90px,18%,160px)}}
+@media(prefers-reduced-motion:reduce){.v36a-simulando .v36-neuron{transition:none}}
+
+/* × e ✓ do formulário ficam na barra do topo: sempre à vista e sem faixa por cima do conteúdo. */
+.v36a .v36-form-actions.v36a-commit{position:static;margin:0;padding:0 0 0 8px;gap:8px;border:0;background:none;backdrop-filter:none}
+.v36a .v36a-barra .v36a-commit button{width:36px;height:36px;font-size:16px}
+.v36a-barra-acoes{display:flex;align-items:center;gap:12px;margin-left:auto}
+
+/* Permissões: sem selo (quando repetiria o seletor), o seletor ocupa a linha toda. */
+.v36a-campos .v36a-cap>[role=cell]:empty{display:none}
+.v36a-campos .v36a-cap:has(>[role=cell]:empty){grid-template-columns:minmax(0,1fr)}

@@ -27,10 +27,8 @@
       corpo,
       h('div', { class: 'v36l-rodape' }, h('div', { class: 'v36l-led' }, h('i'), contador), h('div', { class: 'v36l-rodape-acoes' }, h('label', {}, seguir, h('span', {}, tr('Seguir saída'))), diagnostico)));
     el.append(h('h1', { class: 'v36-sr' }, 'Logs'), janela);
-    const boot = () => h('div', { class: 'v36l-boot' }, h('span', { class: 'v36l-destaque' }, 'Prumo QA'), ' · ', h('span', {}, tr('visualizador de logs')), h('br'),
-      h('span', { class: 'v36l-sub' }, '● ', h('span', {}, tr('Terminal de eventos · registros locais do núcleo (MCP e CLI)'))), h('br'),
-      h('span', { class: 'v36l-sub' }, tr('Selecione uma linha para inspecionar seus metadados. Nenhum comando é executado nesta tela.')));
-    if (!root) { corpo.append(boot(), h('div', { class: 'v36l-vazio' }, semProjeto())); [busca, fFerramenta, fNivel, fCliente, limpar, seguir].forEach((c) => { c.disabled = true; }); contador.textContent = tr('Nenhum projeto selecionado'); return; }
+    const boot = (temLinhas) => temLinhas ? h('div', { class: 'v36l-boot' }, h('span', { class: 'v36l-sub' }, tr('Selecione uma linha para inspecionar seus metadados. Nenhum comando é executado nesta tela.'))) : null;
+    if (!root) { corpo.append(h('div', { class: 'v36l-vazio' }, semProjeto())); [busca, fFerramenta, fNivel, fCliente, limpar, seguir].forEach((c) => { c.disabled = true; }); contador.textContent = tr('Nenhum projeto selecionado'); return; }
     const chave = (e) => e.operationId + ':' + e.phase;
     function mensagem(e) { return e.phase === 'start' ? [h('span', {}, tr('Operação iniciada')), ' · ', ignorar(e.origin + '/' + e.client)] : [h('span', {}, tr('Operação encerrada')), ' · ', ignorar([e.state, e.summary?.code, ms(e.durationMs)].filter(Boolean).join(' · '))]; }
     function detalhe(e) {
@@ -55,7 +53,7 @@
       const q = busca.value.trim().toLowerCase();
       const linhas = eventos.filter((e) => (!fFerramenta.value || e.tool === fFerramenta.value) && (!fNivel.value || nivelDe(e.state) === fNivel.value) && (!fCliente.value || e.client === fCliente.value)
         && (!q || [e.operationId, e.tool, e.state, e.origin, e.client, e.phase, e.summary?.code].join(' ').toLowerCase().includes(q)));
-      const diag = corpo.querySelector('.v36l-diagnostico'); corpo.replaceChildren(boot(), aviso, ...linhas.map(linha));
+      const diag = corpo.querySelector('.v36l-diagnostico'); corpo.replaceChildren(boot(linhas.length > 0), aviso, ...linhas.map(linha));
       if (!linhas.length) corpo.append(h('div', { class: 'v36l-vazio' }, eventos.length ? tr('Nenhum registro para estes filtros.') : tr('Nenhum registro ainda. As chamadas MCP e CLI deste projeto aparecem aqui.')));
       if (diag) corpo.append(diag);
       const ops = new Set(linhas.map((e) => e.operationId)).size;

@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (125 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (126 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -71,6 +71,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:conhecimento:mostrar` | — | Abre o Explorer com o arquivo selecionado; nada é enviado. |
 | `prumo:administracao:mapa` | — | Consulta local de um arquivo do próprio aplicativo, gerado no build; não lê projetos vinculados nem dados da pessoa. |
 | `prumo:agentes:orquestracoes` | `espacoId` | Consulta local de orquestracoes.jsonl; o registro guarda só metadados, sem a pergunta e sem a resposta. |
+| `prumo:agentes:rastrear` | `agente`, `espacoId`, `pergunta` | Consulta local: não chama IA e não grava conversa, atendimento nem aprendizado. |
 | `prumo:skills:listar` | `busca`, `especializacao`, `estados` | Consulta local (cria o banco e sincroniza os trechos que acompanham o aplicativo). |
 | `prumo:skills:criar` | `especializacao`, `texto`, `titulo` | Grava em skills.db com segredos mascarados e sem duplicar; passa a ir para o prompt quando combinar com a pergunta. |
 | `prumo:skills:decidir` | `estado`, `id` | Grava o estado e a data da decisão. Só trechos APROVADOS vão para o prompt. |
@@ -1051,6 +1052,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, ORCHESTRATION_*
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Metadados das orquestrações do chat
+
+### `prumo:agentes:rastrear`
+
+- **Tipo:** IPC
+- **Finalidade:** Simular o caminho de uma pergunta no chat: palavras reconhecidas, pontuação de cada agente, quem responderia, se haveria orquestração e quais conhecimentos e trechos de Skill o agente em foco usaria.
+- **Origem:** Interface > Agentes (Cérebro)
+- **Destino:** backend/agentes/api/agentesRastrear.ts > rastrearPergunta
+- **Entrada:** Projeto (ou geral), pergunta e agente em foco
+- **Saída:** Rastro com palavras, termos, rota pontuada, agente escolhido, orquestração e o que o agente em foco usaria
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local: não chama IA e não grava conversa, atendimento nem aprendizado.
+- **Arquivos consultados:** conhecimento.db e skills.db na pasta de dados (somente leitura)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
 
 ### `prumo:skills:listar`
 
