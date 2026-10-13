@@ -5,11 +5,12 @@
       "version": "2.11.0",
       "status": "repositorio",
       "date": null,
-      "title": "Skills em banco próprio, agentes por profissão e código organizado pelo caminho de quem usa",
+      "title": "Skills em banco próprio, Administração com documentação viva e código organizado pelo caminho de quem usa",
       "objective": "Dar a cada agente um banco de Skills que a equipe consegue alimentar e organizar o código para que cada tela, ferramenta e teste esteja num lugar previsível. Inclui tudo da 2.10.2, que não chegou a ser publicada: quem está na 2.10.1 recebe as duas de uma vez.",
       "features": [
         "Banco de Skills (skills.db), separado do conhecimento: cada Skill fica em trechos com origem, estado, fonte e licença. Em Agentes › configuração do agente › Skills você vê os trechos, acrescenta um trecho da equipe (já vale) e aprova ou descarta rascunhos; o Cérebro mostra os trechos com as mesmas ações.",
         "Importar pasta de Skill: escolha uma pasta aberta que já está no computador (por exemplo um repositório clonado). Só entra com licença aberta reconhecida (MIT, Apache-2.0, BSD, ISC, 0BSD, Unlicense, CC0, CC-BY, CC-BY-SA), com fonte e licença registradas, como rascunho até você aprovar.",
+        "Administração › Documentação viva: para cada tela do menu, os arquivos da interface, os canais da janela, o backend (canais, regras, dados, integrações e tipos) e os testes, gerados do código desta versão; com busca por tela, arquivo, função ou canal. Em Sistema, a versão, o commit do build e a situação real de usuários e permissões.",
         "Agentes por profissão: cada especialização mostra profissão, especialidade e a permissão efetiva do projeto, separada da capacidade da especialização.",
         "Tudo da 2.10.2: vincular qualquer pasta de código com contrato proposto e aprovado, atualizar com um clique pela Ajuda › Atualizações e as correções encontradas testando o Prumo pelo próprio Prumo."
       ],

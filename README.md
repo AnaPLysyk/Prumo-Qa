@@ -14,6 +14,7 @@ Procure pelo nome da tela que aparece no menu: a mesma pasta existe no frontend 
 | Build, empacotamento, release, documentação gerada | `ferramentas/<finalidade>/` |
 | Site público | `site/gerar.mjs`, `site/componentes/`, `site/estilos/` |
 | Ajuda do aplicativo e do site | `app/ajuda/*.md` |
+| Ver tudo isso dentro do aplicativo | Administração › Documentação viva (gerada do código no build) |
 
 Mapa completo: [Arquitetura modular por tela](docs/ARQUITETURA-MODULAR-ATUAL.md) · [índice do backend](backend/LEIA-ME.md) · [seleção de testes](docs/TESTES.md). `npm.cmd run check` confere dependências, tipos e a suíte inteira.
 
