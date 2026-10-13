@@ -13,8 +13,8 @@ Entrada nova no topo com `status: "repositorio"`, `date: null`, `releaseUrl: nul
 
 ## 3. Ajuda e site
 
-- Páginas de ajuda em `app/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `backend/projetos/tipos/painel.ts` (`documentosAjuda`) e no índice de `app/renderer/telas/ajuda/mostrarAjuda.js`.
-- Textos novos da interface com tradução em `app/renderer/i18n-en-*.js`.
+- Páginas de ajuda em `app/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `backend/projetos/tipos/painel.ts` (`documentosAjuda`) e no índice da fonte `frontend/ajuda/mostrarAjuda.js`; sincronizar a cópia Electron.
+- Textos novos da interface com tradução em `frontend/compartilhado/runtime/i18n-en-*.js`; sincronizar as cópias distribuídas com `npm run frontend:sync`.
 - Capturas do site: `node scripts/capturar-site.mjs` (aplicativo real, dados sintéticos). Textos do site: `scripts/gerar-site.mjs`.
 - `npm run site` e conferir `site/public` (escuro, claro e celular). O site e a ajuda do aplicativo leem os mesmos arquivos de `app/ajuda`.
 

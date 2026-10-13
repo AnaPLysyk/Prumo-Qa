@@ -1,6 +1,6 @@
 # Arquitetura modular do Prumo QA — branch em revisão
 
-**Situação real:** esta documentação descreve a branch `refatoracao-modular-por-tela`, **não a `main` publicada**. O aplicativo de produção permanece na versão existente. A refatoração depende do CI Windows e de testes locais antes do merge.
+**Situação real:** esta documentação descreve a branch `simplificacao-didatica-prumo-qa`, **não a `main` publicada**. O aplicativo de produção permanece na versão existente. A refatoração depende do CI Windows e de testes locais antes do merge.
 
 ## Primeiro, escolha o nome da tela
 
@@ -48,6 +48,8 @@ backend/projetos/banco/gravarEspacos.ts  grava os dados locais
 ## Onde editar sem criar duas versões da mesma tela
 
 - `frontend/<tela>/` é a **fonte oficial da interface**.
+- `frontend/design-system/ds.js` e `ds.css` são as fontes oficiais dos componentes compartilhados; o gerador preserva os caminhos `app/renderer/ds.js` e `ds.css`.
+- `frontend/recursos.json` mapeia os 20 recursos transversais da interface, incluindo entrada, traduções, identidade e painel de atividades, para os caminhos distribuídos existentes. Markdown de desenvolvimento não é copiado para o renderer.
 - `backend/<tela>/` é a **fonte oficial das funções executadas fora da interface**.
 - `app/renderer/telas/` é **uma cópia gerada para compatibilidade** com o Electron: não editar manualmente.
 - `app/renderer/fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-v36.css` são bundles gerados das partes-fonte organizadas no `frontend/`. Ainda existem componentes antigos não migrados na raiz `app/renderer/`.
@@ -58,10 +60,15 @@ Para validar no Windows:
 npm.cmd run frontend:check
 node scripts/gerar-telas-modulares.mjs --check
 node scripts/verificar-modulos.mjs
+npm.cmd run dependencias
 npm.cmd run check
 ```
 
 Para reconstruir cópias **depois de editar o frontend**: `npm.cmd run frontend:sync` e `node scripts/gerar-telas-modulares.mjs`. O comando `npm.cmd run build` também faz essas etapas automaticamente.
+
+`ferramentas/arquitetura/dependencias.mjs` resolve os imports TypeScript e informa origem, linha e destino. `--json` fornece o grafo para investigação. Um import local ausente interrompe o build; o verificador não executa módulos nem consulta projetos externos. O mapa de documentação viva também inclui `ferramentas/`, `site/` e `skills/`, sem incluir `site/public/`.
+
+O site possui fonte em `site/gerar.mjs`, estilos em `site/estilos/base.css` e template em `site/componentes/pagina.mjs`. `scripts/gerar-site.mjs` permanece uma entrada compatível para npm, Render e CI. [Testes](TESTES.md) e [Skills](SKILLS.md) têm catálogos verificáveis; não são listas de funcionalidades aprovadas.
 
 ## Como cada arquivo deve ser escrito
 
