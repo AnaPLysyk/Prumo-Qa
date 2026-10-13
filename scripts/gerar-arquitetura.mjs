@@ -11,9 +11,9 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import { telas, papeis } from './gerar-leia-me-backend.mjs';
 
 const raizRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const pastasLidas = /^(frontend|backend|src|app|scripts|testes)\//;
+const pastasLidas = /^(frontend|backend|src|app|scripts|ferramentas|site|skills|testes)\//;
 const extensoes = /\.(ts|mjs|cjs|js|html|css|json|md)$/;
-const ignorar = /^(app\/renderer\/vendor\/|app\/ajuda\/|.*\.min\.js$)/;
+const ignorar = /^(app\/renderer\/vendor\/|app\/ajuda\/|site\/public\/|.*\.min\.js$)/;
 const git = (...args) => execFileSync('git', args, { cwd: raizRepo, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
 
 /** Primeira linha de explicação: /** ... *\/ (depois de shebang ou 'use strict') ou o título de um Markdown. */
@@ -64,7 +64,7 @@ function lerRevisao(ref) {
 
 function lerCopiaDeTrabalho() {
   const arquivos = new Map();
-  for (const raiz of ['frontend', 'backend', 'src', 'app', 'scripts', 'testes']) {
+  for (const raiz of ['frontend', 'backend', 'src', 'app', 'scripts', 'ferramentas', 'site', 'skills', 'testes']) {
     const dir = path.join(raizRepo, raiz); if (!fs.existsSync(dir)) continue;
     for (const rel of fs.readdirSync(dir, { recursive: true }).map(String)) {
       const nome = (raiz + '/' + rel).split(path.sep).join('/');
@@ -98,8 +98,11 @@ function fluxosDeUso(arquivos) {
 
 function montarInstantaneo(arquivos) {
   const existe = (c) => arquivos.has(c);
+  const recursos = JSON.parse(arquivos.get('frontend/recursos.json') ?? '{"recursos":[]}').recursos;
+  const fontesRuntime = new Map(recursos.map(r => [r.destino, r.fonte]));
+  const fonteOficial = caminho => fontesRuntime.get(caminho) ?? (caminho.startsWith('app/renderer/telas/') && arquivos.has(caminho.replace('app/renderer/telas/', 'frontend/')) ? caminho.replace('app/renderer/telas/', 'frontend/') : null);
   const lista = [...arquivos].sort((a, b) => a[0].localeCompare(b[0])).map(([caminho, texto]) => ({
-    caminho, descricao: caminho.startsWith('app/renderer/telas/') && arquivos.has(caminho.replace('app/renderer/telas/', 'frontend/')) ? 'Cópia gerada da interface; para editar, abra ' + caminho.replace('app/renderer/telas/', 'frontend/') : descricaoDoArquivo(texto, caminho), linhas: texto.split(/\r?\n/).length,
+    caminho, fonteOficial: fonteOficial(caminho), descricao: fonteOficial(caminho) ? 'Cópia gerada da interface; para editar, abra ' + fonteOficial(caminho) : descricaoDoArquivo(texto, caminho), linhas: texto.split(/\r?\n/).length,
     sha256: createHash('sha256').update(texto).digest('hex'), funcoes: /\.(ts|mjs|cjs|js)$/.test(caminho) ? funcoesDoArquivo(texto) : [],
     importa: /\.(ts|mjs|cjs|js|html)$/.test(caminho) ? importsDoArquivo(texto, caminho, existe) : [], codigo: texto
   }));
@@ -116,7 +119,7 @@ function montarInstantaneo(arquivos) {
 
 export function gerarArquitetura({ atual = 'origin/main' } = {}) {
   const head = git('rev-parse', '--short', 'HEAD').trim(); const ramo = git('rev-parse', '--abbrev-ref', 'HEAD').trim();
-  const local = git('status', '--porcelain', '--', 'backend', 'src', 'app', 'scripts', 'testes').trim();
+  const local = git('status', '--porcelain', '--', 'frontend', 'backend', 'src', 'app', 'scripts', 'ferramentas', 'site', 'skills', 'testes').trim();
   const refAtual = git('rev-parse', '--short', atual).trim(); const dataAtual = git('log', '-1', '--format=%cI', atual).trim();
   return {
     geradoEm: new Date().toISOString(),

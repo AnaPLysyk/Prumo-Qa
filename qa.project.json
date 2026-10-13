@@ -5,13 +5,19 @@
   "context": {
     "documentation": ["README.md", "AGENTS.md", "docs/", "app/ajuda/"],
     "tests": ["testes/"],
-    "code": ["backend/", "app/renderer/", "scripts/", "package.json"]
+    "code": ["backend/", "frontend/", "app/renderer/", "scripts/", "ferramentas/", "site/gerar.mjs", "site/componentes/", "site/estilos/", "package.json"]
   },
   "commands": {
     "build": {
       "executable": "npm",
       "args": ["run", "build"],
       "timeoutMs": 300000
+    },
+    "nucleo": {
+      "executable": "node",
+      "args": ["scripts/qa-suite.mjs"],
+      "env": { "PRUMO_QA_GRUPO": "nucleo", "PRUMO_MIGRACAO": "0" },
+      "requiredFiles": ["dist/cli.js"]
     },
     "unidade": {
       "executable": "node",

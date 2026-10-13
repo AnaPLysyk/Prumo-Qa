@@ -50,6 +50,15 @@ jobs:
             if ($l -match '^✖ (.+?) \(') { $nome = $Matches[1] }
             elseif ($nome -and $l -match '^\s+(\w*Error[^:]*:.*|.*Error: .*)') { if ($n++ -lt 9) { '::error::' + $nome.Substring(0, [Math]::Min(70, $nome.Length)) + ' => ' + $Matches[1].Trim().Substring(0, [Math]::Min(220, $Matches[1].Trim().Length)) }; $nome = '' } } }
           exit $codigo
+      - name: Preservar o resultado da verificação, inclusive quando falhar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prumo-qa-verificacao
+          path: |
+            check.txt
+            tmp/evidencias/**
+          if-no-files-found: error
       - name: Gerar instalador
         run: npm run dist
       - name: Instalar a versão 2.2.0 publicada (hash fixado) em pasta com espaços e acentos
