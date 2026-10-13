@@ -2,6 +2,47 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.11.1",
+      "status": "repositorio",
+      "date": null,
+      "title": "Download direto no site e na Ajuda, Cérebro com teste de pergunta e Painel de atividades em tela cheia",
+      "objective": "Corrigir o caminho de download do instalador (o site no Render não oferecia o arquivo da versão atual) e acrescentar ao Cérebro dos agentes um teste de pergunta somente leitura. Inclui tudo da 2.11.0.",
+      "features": [
+        "Site › Versões e download: botão \"Baixar instalador X.Y.Z (.exe)\" que leva ao arquivo da release oficial no GitHub, com o SHA-256 para conferência. O instalador continua hospedado só no GitHub; o Render hospeda o site.",
+        "Ajuda: botão \"Baixar instalador no site oficial\", que abre o site depois da confirmação do Windows.",
+        "Cérebro › Testar uma pergunta: simula o caminho que o chat faria (canal agentes:rastrear, somente leitura) e acende os neurônios usados, sem chamar IA."
+      ],
+      "improvements": [
+        "Painel de atividades ocupa a altura da janela, com as orquestrações numa coluna ao lado.",
+        "Cores de tema ficam só em frontend/design-system (tokens --ds-*); as telas respeitam a cor de destaque escolhida, e um teste de estrutura impede paleta própria nas telas."
+      ],
+      "fixes": [
+        "O build do site no Render falhava quando o serviço ainda usava o caminho antigo scripts/gerar-site.mjs; um atalho com esse nome chama o gerador atual.",
+        "Textos \"null\" deixam de aparecer em Testes › CI e Rastreabilidade › Relações; contador de Tickets corrigido."
+      ],
+      "differential": "Os agentes ficam mais fortes com o conhecimento da equipe e de Skills abertas, sempre com aprovação humana antes de chegar à IA.",
+      "howItWorks": [
+        "O site é gerado por site/gerar.mjs a partir do catálogo de versões; o link de download só aparece para uma versão marcada como publicada, com arquivo e SHA-256 registrados."
+      ],
+      "security": [
+        "O botão da Ajuda abre uma URL fixa do site oficial, só após confirmação nativa. O teste de pergunta do Cérebro só lê dados locais e não chama IA externa."
+      ],
+      "compatibility": [
+        "Dados, projetos, preferências, conhecimentos e contratos da 2.11.0 são preservados."
+      ],
+      "limitations": [
+        "Login, usuários, administração multiusuário e banco central (PostgreSQL) ainda não existem: o Prumo continua local por conta do Windows, e o papel do perfil personaliza respostas, não autoriza nada.",
+        "A orquestração é local e sequencial: os especialistas consultam os dados deste computador, um de cada vez; distribuir tarefas em paralelo para IAs externas ainda não existe.",
+        "Python, Go, Java, .NET, Rust, PHP e Ruby continuam somente leitura: o executor aceita só node e npm.",
+        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou."
+      ],
+      "migration": "A instalação preserva os dados existentes; o banco de Skills é novo e não altera nenhum formato anterior.",
+      "afterUpdate": [
+        "Abra Agentes, escolha um agente e veja a seção Skills: acrescente o que a sua equipe quer que ele siga ou importe uma pasta de Skill aberta e aprove os trechos."
+      ],
+      "releaseUrl": null
+    },
+    {
       "version": "2.11.0",
       "status": "publicada",
       "date": "2026-10-13",
