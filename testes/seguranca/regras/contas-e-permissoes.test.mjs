@@ -24,7 +24,7 @@ test('sem conta o login fica desligado: todos os canais atendem e entrar/cadastr
   for (const canal of ['usuarios:listar', 'agentes:salvar', 'dados:excluir', 'espacos:criar']) assert.doesNotThrow(() => conferirAcessoAoCanal(canal, b));
   await codigo(() => entrarNaConta({ login: 'x', senha: 'y' }, b), /^LOGIN_NOT_ACTIVE/);
   await codigo(() => cadastrarConta({ login: 'novo', nome: 'Novo', senha: 'Senha-forte-123' }, b), /^LOGIN_NOT_ACTIVE/);
-  assert.equal(fs.existsSync(path.join(b, 'plataforma', 'contas.json')), false, 'consultar não cria o arquivo');
+  assert.equal(fs.existsSync(path.join(b, 'plataforma', 'acessos.json')), false, 'consultar não cria o arquivo');
 });
 
 test('ativar o login cria o administrador, guarda só resumos e já abre a sessão; não ativa duas vezes', async (t) => {
@@ -32,7 +32,7 @@ test('ativar o login cria o administrador, guarda só resumos e já abre a sess�
   const r = await ativarLogin(ADMIN, b);
   assert.match(r.codigoRecuperacao, /^[A-Z2-7]{5}(-[A-Z2-7]{5}){3}$/);
   assert.equal(r.conta.papel, 'administrador'); assert.equal(sessaoParaJanela(b).usuario.login, 'ana.admin');
-  const bruto = fs.readFileSync(path.join(b, 'plataforma', 'contas.json'), 'utf8');
+  const bruto = fs.readFileSync(path.join(b, 'plataforma', 'acessos.json'), 'utf8');
   assert.ok(!bruto.includes(ADMIN.senha) && !bruto.includes(r.codigoRecuperacao) && !bruto.includes(r.codigoRecuperacao.replaceAll('-', '')), 'senha e código nunca em texto claro');
   assert.match(bruto, /"algoritmo":"scrypt"/);
   await codigo(() => ativarLogin({ ...ADMIN, login: 'outra' }, b), /^LOGIN_ALREADY_ACTIVE/);

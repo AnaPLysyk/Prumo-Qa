@@ -107,7 +107,9 @@ window.PrumoConta = (() => {
 
   /** Esconde do menu o que o papel não permite (e o grupo que ficar vazio) e mostra quem está na sessão. */
   function aplicarMenu() {
-    for (const b of document.querySelectorAll('#nav button[data-aba]')) b.hidden = !pode(b.dataset.aba);
+    // Contextos (dentro de Agentes) e Evidências (dentro de Execuções) não têm item próprio no menu: o papel nunca os mostra.
+    const SEM_ITEM_NO_MENU = ['contextos', 'evidencias'];
+    for (const b of document.querySelectorAll('#nav button[data-aba]')) b.hidden = SEM_ITEM_NO_MENU.includes(b.dataset.aba) || !pode(b.dataset.aba);
     for (const g of document.querySelectorAll('#nav .grupo-nav')) g.hidden = ![...g.querySelectorAll('button[data-aba]')].some((b) => !b.hidden);
     document.querySelector('#conta-caixa')?.remove();
     if (!sessao?.usuario) return;

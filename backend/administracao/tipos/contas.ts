@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 /**
- * Login do Prumo (2.11): contas locais deste computador, guardadas em plataforma/contas.json. Senhas e códigos de
+ * Login do Prumo (2.11): contas locais deste computador, guardadas em plataforma/acessos.json. Senhas e códigos de
  * recuperação só existem como resumo scrypt com sal próprio; nada é enviado pela rede. Enquanto não existe conta,
  * o Prumo funciona como antes (a conta do Windows é a dona de tudo); criar o primeiro administrador liga o login.
  */

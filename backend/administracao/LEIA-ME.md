@@ -41,10 +41,10 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | Arquivo | O que faz |
 | --- | --- |
 | `gravarAgentesDaPlataforma.ts` | Grava a configuração geral dos agentes da plataforma conferindo o formato antes. |
-| `gravarContas.ts` | Grava contas.json conferindo o formato antes (cópia temporária e troca, sem atalhos). |
+| `gravarContas.ts` | Grava acessos.json conferindo o formato antes (cópia temporária e troca, sem atalhos). |
 | `lerAgentesDaPlataforma.ts` | Lê a configuração geral dos agentes da plataforma (agentes-plataforma.json); sem arquivo vale o padrão. |
 | `lerCodigoDoAplicativo.ts` | Lê o código de um arquivo do aplicativo para a Documentação viva, do codigo.json gerado no build (só caminhos que existem nele). |
-| `lerContas.ts` | Lê as contas, os papéis e a configuração de acesso (contas.json); sem arquivo, o login está desligado. |
+| `lerContas.ts` | Lê as contas, os papéis e a configuração de acesso (acessos.json); sem arquivo, o login está desligado. |
 | `lerMapaDoAplicativo.ts` | Lê o mapa da Documentação viva que o build gerou em dist/documentacao/mapa.json, com limite de tamanho e formato conferido. |
 
 ## regras/

@@ -145,18 +145,18 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:conta:recuperar` | `codigo`, `login`, `novaSenha` | Troca a senha e o código; tentativas erradas contam para o bloqueio. |
 | `prumo:conta:senha` | `atual`, `nova` | Grava o resumo da senha nova. |
 | `prumo:conta:perfil` | `nome` | Grava o nome na conta. |
-| `prumo:usuarios:ativar` | `login`, `nome`, `senha` | Cria contas.json; a partir daí a janela exige login e confere as permissões em cada canal. |
+| `prumo:usuarios:ativar` | `login`, `nome`, `senha` | Cria acessos.json; a partir daí a janela exige login e confere as permissões em cada canal. |
 | `prumo:usuarios:listar` | — | Consulta local. |
 | `prumo:usuarios:criar` | `login`, `nome`, `papel` | Grava a conta; a pessoa troca a senha no primeiro acesso. |
 | `prumo:usuarios:alterar` | `estado`, `id`, `nome`, `papel` | Grava a conta; vale no próximo pedido daquela pessoa. |
 | `prumo:usuarios:senha` | `id` | Troca a senha, exige troca no próximo acesso e desbloqueia a conta. |
 | `prumo:usuarios:desbloquear` | `id` | Zera as tentativas erradas. |
-| `prumo:usuarios:excluir` | `id` | Remove a conta de contas.json. |
+| `prumo:usuarios:excluir` | `id` | Remove a conta de acessos.json. |
 | `prumo:papeis:listar` | — | Consulta local. |
 | `prumo:papeis:salvar` | `descricao`, `id`, `nome`, `telas` | Grava o papel; o Administrador é fixo. |
 | `prumo:papeis:excluir` | `id` | Remove o papel. |
 | `prumo:acesso:configuracao` | — | Consulta local. |
-| `prumo:acesso:salvar` | `aprovarCadastros`, `cadastroAberto`, `minutosDeBloqueio`, `minutosDeInatividade`, `papelDoCadastro`, `tentativasAntesDoBloqueio` | Grava em contas.json; novos cadastros nunca entram como administrador. |
+| `prumo:acesso:salvar` | `aprovarCadastros`, `cadastroAberto`, `minutosDeBloqueio`, `minutosDeInatividade`, `papelDoCadastro`, `tentativasAntesDoBloqueio` | Grava em acessos.json; novos cadastros nunca entram como administrador. |
 | `prumo:plataforma:agentes` | — | Consulta local. |
 | `prumo:plataforma:salvar` | `desligados`, `iaExterna`, `orquestracao` | Grava agentes-plataforma.json; vale para o chat e para o servidor MCP. |
 
@@ -2090,7 +2090,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** loginAtivo, conta visível (sem resumos), telas e regras de cadastro
 - **Permissões:** Nenhuma (atende antes do login)
 - **Efeito:** Consulta local; não renova a sessão.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2105,7 +2105,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Sessão (conta e telas)
 - **Permissões:** Nenhuma (atende antes do login)
 - **Efeito:** Abre a sessão na memória; conta tentativas erradas e bloqueia a conta no limite configurado.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, LOGIN_INVALID, ACCOUNT_LOCKED, ACCOUNT_PENDING, ACCOUNT_DISABLED, LOGIN_RATE_LIMIT
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2120,7 +2120,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Sessão vazia
 - **Permissões:** Sessão aberta
 - **Efeito:** Esquece a sessão da memória.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2135,7 +2135,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Estado (PENDENTE ou ATIVO) e código de recuperação mostrado uma vez
 - **Permissões:** Login ligado e cadastro aberto na Administração
 - **Efeito:** Grava a conta com o papel de cadastro; com aprovação ligada, ela só entra depois que a Administração aprovar.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, SIGNUP_CLOSED, LOGIN_TAKEN, PASSWORD_WEAK, LOGIN_INVALID_FORMAT
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2150,7 +2150,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Código de recuperação novo (o anterior deixa de valer)
 - **Permissões:** Código de recuperação da própria conta
 - **Efeito:** Troca a senha e o código; tentativas erradas contam para o bloqueio.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, RECOVERY_INVALID, ACCOUNT_LOCKED, PASSWORD_WEAK
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2165,7 +2165,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Sessão e, quando a senha era temporária, código de recuperação novo
 - **Permissões:** Sessão aberta e senha atual
 - **Efeito:** Grava o resumo da senha nova.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, PASSWORD_INVALID, PASSWORD_WEAK
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2180,7 +2180,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Sessão atualizada
 - **Permissões:** Sessão aberta
 - **Efeito:** Grava o nome na conta.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2194,8 +2194,8 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Entrada:** Login, nome e senha
 - **Saída:** Conta criada e código de recuperação mostrado uma vez
 - **Permissões:** Só enquanto não existe nenhuma conta
-- **Efeito:** Cria contas.json; a partir daí a janela exige login e confere as permissões em cada canal.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Efeito:** Cria acessos.json; a partir daí a janela exige login e confere as permissões em cada canal.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, LOGIN_ALREADY_ACTIVE, PASSWORD_WEAK
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2210,7 +2210,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Contas visíveis (sem resumos) e qual é a sua
 - **Permissões:** Administração: VER
 - **Efeito:** Consulta local.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2225,7 +2225,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Conta e senha temporária mostrada uma vez
 - **Permissões:** Administração: USAR
 - **Efeito:** Grava a conta; a pessoa troca a senha no primeiro acesso.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, LOGIN_TAKEN, ROLE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2240,7 +2240,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Conta atualizada
 - **Permissões:** Administração: USAR
 - **Efeito:** Grava a conta; vale no próximo pedido daquela pessoa.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, LAST_ADMIN, SELF_DISABLE, SELF_DEMOTE, ROLE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2255,7 +2255,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Senha temporária mostrada uma vez
 - **Permissões:** Administração: USAR
 - **Efeito:** Troca a senha, exige troca no próximo acesso e desbloqueia a conta.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, USE_MY_ACCOUNT, ACCOUNT_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2270,7 +2270,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Conta atualizada
 - **Permissões:** Administração: USAR
 - **Efeito:** Zera as tentativas erradas.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2284,8 +2284,8 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Entrada:** Id da conta
 - **Saída:** Id excluído
 - **Permissões:** Administração: USAR
-- **Efeito:** Remove a conta de contas.json.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Efeito:** Remove a conta de acessos.json.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, ACCOUNT_ACTIVE, SELF_DELETE, LAST_ADMIN
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2300,7 +2300,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Papéis, telas, níveis e contas por papel
 - **Permissões:** Administração: VER
 - **Efeito:** Consulta local.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2315,7 +2315,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Papéis atualizados
 - **Permissões:** Administração: USAR
 - **Efeito:** Grava o papel; o Administrador é fixo.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, ROLE_FIXED, ROLE_NAME_TAKEN, ROLE_NAME_INVALID
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2330,7 +2330,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Papéis atualizados
 - **Permissões:** Administração: USAR
 - **Efeito:** Remove o papel.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, ROLE_IN_USE, ROLE_FIXED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2345,7 +2345,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Cadastro, aprovação, papel de cadastro, inatividade e bloqueio
 - **Permissões:** Administração: VER
 - **Efeito:** Consulta local.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
@@ -2359,8 +2359,8 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Entrada:** Cadastro aberto, aprovação, papel de cadastro, minutos de inatividade, tentativas e minutos de bloqueio
 - **Saída:** Configuração salva
 - **Permissões:** Administração: USAR
-- **Efeito:** Grava em contas.json; novos cadastros nunca entram como administrador.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Efeito:** Grava em acessos.json; novos cadastros nunca entram como administrador.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, SIGNUP_ROLE_FORBIDDEN, ROLE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
