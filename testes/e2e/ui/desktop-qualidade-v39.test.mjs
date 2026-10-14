@@ -62,11 +62,12 @@ test('v39: evidência BLOCKED real é consultada e exportada dentro de Execuçõ
 test('v39: casos e defeitos Qase usam dados consultados e modais; falha e vazio são explícitos', async t => {
   // v40: Casos é uma tabela consultada ao abrir a aba; o detalhe abre em modal e a lista fica intacta.
   const a = await preparar(t); await ir(a.page, 'testes'); await a.page.click('[data-sub=repositorio]');
-  await a.page.getByRole('button', { name: 'Abrir caso 31', exact: true }).click();
+  const abrirCaso31 = () => a.page.locator('#cat-lista tr[data-caso="31"]').first().getByRole('button', { name: /^Abrir / });
+  await abrirCaso31().click();
   await modal(a.page).waitFor(); await modal(a.page).locator('#caso-detalhe').waitFor(); assert.match(await modal(a.page).textContent(), /Entrar como Editor fictício|expected_result/);
   assert.match(await modal(a.page).textContent(), /Manual/, 'tipo de execução explícito'); assert.match(await modal(a.page).textContent(), /Não executado no Prumo/, 'automação/execução não presumidas');
   await captura(a, 'caso-qase-modal'); await fechar(a.page);
-  assert.equal(await a.page.getByRole('button', { name: 'Abrir caso 31', exact: true }).count(), 1, 'lista preservada');
+  assert.equal(await abrirCaso31().count(), 1, 'lista preservada');
   // Tickets consolida Jira e defeitos do Qase com a origem identificada em cada linha.
   a.s.controle.corpo = null; await ir(a.page, 'tickets'); await a.page.waitForSelector('#tk-tabela [data-defeito="91"]');
   assert.match(await a.page.textContent('#tk-tabela [data-defeito="91"]'), /Qase/); assert.match(await a.page.textContent('#tk-tabela [data-ticket="SMART-1"]'), /Jira/);
