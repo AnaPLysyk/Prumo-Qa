@@ -34,9 +34,9 @@ test('leitor do mapa: ausente, grande demais, atalho ou fora do formato é recus
 test('código da Documentação viva: só arquivos do mapa, caminho com .. recusado no contrato, arquivo grande encurtado', async (t) => {
   const { lerCodigoDoAplicativo } = await import('../../../dist/administracao/banco/lerCodigoDoAplicativo.js');
   const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-codigo-')); t.after(() => fs.rmSync(raiz, { recursive: true, force: true }));
-  fs.mkdirSync(path.join(raiz, 'app', 'documentacao'), { recursive: true });
+  fs.mkdirSync(path.join(raiz, 'dist', 'documentacao'), { recursive: true });
   const grande = 'x'.repeat(250 * 1024);
-  fs.writeFileSync(path.join(raiz, 'app', 'documentacao', 'codigo.json'), JSON.stringify({ 'backend/a/api/um.ts': 'linha 1\nlinha 2', 'backend/a/banco/grande.ts': grande }));
+  fs.writeFileSync(path.join(raiz, 'dist', 'documentacao', 'codigo.json'), JSON.stringify({ 'backend/a/api/um.ts': 'linha 1\nlinha 2', 'backend/a/banco/grande.ts': grande }));
   const um = lerCodigoDoAplicativo('backend/a/api/um.ts', raiz);
   assert.equal(um.linhas, 2); assert.equal(um.truncado, false); assert.match(um.texto, /linha 2/);
   const g = lerCodigoDoAplicativo('backend/a/banco/grande.ts', raiz); assert.equal(g.truncado, true); assert.ok(Buffer.byteLength(g.texto) <= 200 * 1024);
@@ -46,5 +46,5 @@ test('código da Documentação viva: só arquivos do mapa, caminho com .. recus
   assert.equal(contrato.safeParse({ caminho: 'backend/a/../../segredo.ts' }).success, false);
   assert.equal(contrato.safeParse({ caminho: 'C:/Windows/win.ini' }).success, false);
   assert.equal(contrato.safeParse({ caminho: 'backend/a/api/um.ts' }).success, true);
-  fs.rmSync(path.join(raiz, 'app', 'documentacao', 'codigo.json')); assert.throws(() => lerCodigoDoAplicativo('backend/a/api/um.ts', raiz), /ARCHITECTURE_CODE_MISSING/);
+  fs.rmSync(path.join(raiz, 'dist', 'documentacao', 'codigo.json')); assert.throws(() => lerCodigoDoAplicativo('backend/a/api/um.ts', raiz), /ARCHITECTURE_CODE_MISSING/);
 });

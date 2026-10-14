@@ -2205,7 +2205,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Listar as contas com papel, estado, bloqueio e último acesso.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
-- **Destino:** backend/administracao/api/usuariosListar.ts > listarContas
+- **Destino:** backend/administracao/api/usuariosListar.ts > listarContasDeAcesso
 - **Entrada:** Nenhuma
 - **Saída:** Contas visíveis (sem resumos) e qual é a sua
 - **Permissões:** Administração: VER
