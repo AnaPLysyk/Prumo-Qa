@@ -9,6 +9,14 @@
 - **Papéis:** o Administrador é fixo; o cadastro público nunca cria administrador; o último administrador não pode ser excluído nem rebaixado; alterar o papel ou desativar uma conta vale no próximo pedido da pessoa.
 - **Limites:** o worker, a bandeja e o servidor MCP seguem com a conta do Windows e as políticas de cada projeto; a confirmação nativa para executar e publicar continua obrigatória. O login não isola dados de quem compartilha a mesma conta do Windows.
 
+## IDE de Testes: escrita de arquivos (2.13)
+
+- **Canal único:** `testes:gravar`. Grava ou cria só arquivo de teste (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`), dentro da pasta vinculada ao projeto, sem link simbólico (de arquivo ou de pasta), em pasta que não seja `node_modules`, `.git`, `dist`, `.prumo` e similares, e até 300 KB de texto.
+- **Confirmação nativa do Windows** a cada gravação, com a pasta, o arquivo e o efeito (arquivo novo ou conteúdo substituído). A página não consegue simular essa caixa.
+- **Sem sobrescrever o que a pessoa não viu:** a gravação leva o SHA-256 do conteúdo lido; se o arquivo mudou fora do Prumo, é recusada (`TEST_FILE_CHANGED`); criar sobre um arquivo existente também (`TEST_FILE_EXISTS`). A troca é atômica (arquivo temporário e renomeação) e o fim de linha original (CRLF) é preservado.
+- **Segredos:** arquivo cujo conteúdo teria algo mascarado não é aberto para edição, para que a máscara nunca seja gravada por cima do valor real nem o valor real apareça na janela.
+- O editor (CodeMirror 5) vem embutido no aplicativo e não usa rede nem `eval`; nada é executado ao editar. Com o login ligado, o canal exige o nível Usar na tela Testes.
+
 ## Refatoração da branch em desenvolvimento
 
 Os handlers IPC exigem o `webContents` da janela principal registrada, seu frame principal e a URL exata de `index.html`. Abrir uma cópia da mesma página em outra janela não concede acesso aos canais. Argumentos continuam sujeitos aos esquemas; esta alteração não concede capacidades novas.

@@ -10,11 +10,11 @@ Selecione um projeto Prumo. Use Listar recursos disponíveis na conexão, confir
 
 ## Consultas manuais
 
-Tickets consulta Jira; Testes mostra suites, casos e planos Qase; Execuções mostra runs/resultados Qase; Automações apresenta o contrato local opcional e consultas GitHub. Escolha a operação e clique Consultar API. IDs exigidos devem vir dos dados consultados. Cada resposta mostra fonte e data, sem cache persistido. Erro é exibido como erro, nunca como lista vazia bem-sucedida.
+Tickets consulta Jira; Testes mostra suites, casos e planos Qase; Testes › Runs mostra execuções, runs preparadas e runs do Qase; Automações apresenta o contrato local opcional e consultas GitHub. Escolha a operação e clique Consultar API. IDs exigidos devem vir dos dados consultados. Cada resposta mostra fonte e data, sem cache persistido. Erro é exibido como erro, nunca como lista vazia bem-sucedida.
 
 Para critérios de aceite Jira, escolha Descobrir campos e selecione um customfield retornado. Não há campo deduzido automaticamente. Detalhes mostram estados, passos e relações tal como o serviço retornou. Sem relação disponível, aparece Vínculo ainda não definido. Resultado de run externo não é evidência local ou cobertura verificada. Dados extras ficam no detalhe expansível.
 
-Em Rastreabilidade, informe ticket, ID do caso e justificativa. O Prumo consulta os dois no projeto selecionado antes de registrar sua associação como DECLARADO PELO USUÁRIO. Isso não comprova cobertura. Remover um vínculo conserva a relação anterior como desatualizada; não transfere para o recurso novo.
+Em Testes › Repositório (vínculos declarados), informe ticket, ID do caso e justificativa. O Prumo consulta os dois no projeto selecionado antes de registrar sua associação como DECLARADO PELO USUÁRIO. Isso não comprova cobertura. Remover um vínculo conserva a relação anterior como desatualizada; não transfere para o recurso novo.
 
 Importar descrição de ticket exige prévia e confirmação nativa. O contexto entra como RASCUNHO. Aprovação e disponibilização ao MCP continuam decisões separadas. Agentes mantém configuração e teste das ferramentas MCP existentes; a IA não é necessária para usar estas telas.
 

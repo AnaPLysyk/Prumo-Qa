@@ -16,6 +16,8 @@ Ferramentas de build (electron-builder, playwright-core, typescript) são depend
 
 ## Código de terceiros
 
+Dois arquivos de terceiros são distribuídos como estão, com a licença junto: **Three.js 0.159.0** (MIT, `frontend/compartilhado/vendor/THREE-LICENSE.txt`) e **CodeMirror 5.65.20** (MIT, `frontend/compartilhado/vendor/CODEMIRROR-LICENSE.txt`), o editor da IDE de Testes, com os modos JavaScript/TypeScript, Python, Gherkin e YAML. Foram obtidos do pacote oficial `codemirror` no npm, sem alteração e sem acesso à rede em tempo de execução.
+
 Nenhum código de projetos terceiros foi copiado para o repositório. As referências conceituais ao QA Orchestrator anterior estão em `docs/ORIGEM.md`.
 
 ## Assinatura de código

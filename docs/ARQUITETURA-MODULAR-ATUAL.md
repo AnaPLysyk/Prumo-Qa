@@ -12,8 +12,8 @@
 | Agentes, chat e Cérebro | `frontend/agentes/` | `backend/agentes/` |
 | Conexões e integrações | `frontend/conexoes/` | `backend/conexoes/` |
 | Agendamentos | `frontend/agendamentos/` | `backend/agendamentos/` |
-| Execuções | `frontend/execucoes/` | `backend/execucoes/` |
-| Rastreabilidade | `frontend/rastreabilidade/` | `backend/rastreabilidade/` |
+| Execuções (aparecem em Testes › Runs) | `frontend/execucoes/` | `backend/execucoes/` |
+| Vínculos (aparecem em Testes › Repositório) | `frontend/rastreabilidade/` | `backend/rastreabilidade/` |
 | Métricas | `frontend/metricas/` | `backend/metricas/` |
 | Histórico | `frontend/historico/` | `backend/historico/` |
 | Logs | `frontend/logs/` | `backend/logs/` |

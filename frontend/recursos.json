@@ -88,6 +88,34 @@
     {
       "fonte": "frontend/compartilhado/vendor/THREE-LICENSE.txt",
       "destino": "dist/renderer/vendor/THREE-LICENSE.txt"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/codemirror-5.65.20.css",
+      "destino": "dist/renderer/vendor/codemirror-5.65.20.css"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/codemirror-5.65.20.js",
+      "destino": "dist/renderer/vendor/codemirror-5.65.20.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/codemirror-modo-javascript.js",
+      "destino": "dist/renderer/vendor/codemirror-modo-javascript.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/codemirror-modo-python.js",
+      "destino": "dist/renderer/vendor/codemirror-modo-python.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/codemirror-modo-gherkin.js",
+      "destino": "dist/renderer/vendor/codemirror-modo-gherkin.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/codemirror-modo-yaml.js",
+      "destino": "dist/renderer/vendor/codemirror-modo-yaml.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/CODEMIRROR-LICENSE.txt",
+      "destino": "dist/renderer/vendor/CODEMIRROR-LICENSE.txt"
     }
   ]
 }

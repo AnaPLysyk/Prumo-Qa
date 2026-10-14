@@ -1,20 +1,18 @@
-# Testes, tickets e integrações (2.10)
+# Testes, tickets e integrações (2.13)
 
 O Prumo lê os testes do seu repositório, mostra-os ao lado dos casos do Qase e, quando você autoriza, cria e atualiza itens no Jira, no Qase e no GitHub. Tudo é feito por ações suas, uma de cada vez.
 
 ## Testes
 
-Testes representa o que existe no Qase **e** no código do projeto, em abas.
+Testes tem quatro seções, na ordem do fluxo: caso de teste → automação → execução com evidências.
 
-**Visão geral** junta casos do Qase e testes do repositório numa lista única. Um caso e um teste só ficam juntos por anotação explícita no próprio teste: `qase(31, …)`, `qase.id(31)`, `@qase(31)`, `@qase-31` ou `Qase: SFQ-31`. Nome parecido não liga nada. Cada linha mostra a situação (caso com código, manual, automação planejada, automatizado no Qase sem código encontrado, código que anota um caso inexistente ou código sem caso), o nível (unitário, API, E2E…), as tags e o último resultado no Prumo. Filtre por fonte, nível, execução e tag; agrupe por tag, feature ou nível.
+**IDE** usa a tela inteira, sem títulos, como um editor de código. À esquerda, a árvore dos arquivos de teste da pasta vinculada; no meio, o código com numeração e marcadores por teste (nível, tags, caso do Qase); à direita, o caso, os tickets, os resultados e as permissões reais dos agentes neste código. **Editar** abre o arquivo num editor com realce de sintaxe (TypeScript, JavaScript, Python, Gherkin); **Salvar** (ou Ctrl+S) pede a confirmação nativa do Windows e só grava se o arquivo não mudou fora do Prumo. **Novo arquivo** cria uma automação e, se você informar o caso do Qase, grava no arquivo a anotação `Qase: CHAVE-ID` que liga a automação ao caso. O Prumo só grava arquivos de teste (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`) dentro da pasta vinculada, sem link simbólico e até 300 KB; arquivo com o que parece um segredo não é aberto para edição. Nada é executado. O modo **Pipelines CI/CD** mostra o contrato da pasta e as execuções do GitHub Actions; o Prumo só escreve em branches `prumo/...`, nunca no principal, e abre o Pull Request como rascunho.
 
-**Código** é uma visão somente leitura dos arquivos de teste: árvore de pastas, leitor com numeração e marcadores por teste (nível, tags, caso do Qase) e um painel com o caso, os tickets, os resultados e as permissões reais dos agentes neste código. Só arquivos de teste dentro da pasta vinculada, sem link simbólico, até 300 KB e com segredos mascarados. A classificação vem de tag (`@smoke`, `@regression`), caminho e conteúdo, com motivo e confiança. Nada é executado.
+**Repositório** junta, numa lista única, os casos do Qase (quando vinculado) e os testes do código, manuais e automatizados. Um caso e um teste só ficam juntos por anotação explícita no próprio teste: `qase(31, …)`, `qase.id(31)`, `@qase(31)`, `@qase-31` ou `Qase: SFQ-31`. Nome parecido não liga nada. Cada linha mostra a situação (caso com código, manual, automação planejada, automatizado no Qase sem código encontrado, código que anota um caso inexistente ou código sem caso), o nível, as tags e o último resultado no Prumo. Abaixo da lista ficam as **propostas em revisão** (rascunhos de caso feitos por você, pelo Prumo ou por uma IA conectada, que esperam a sua revisão antes de ir para o Qase), as **suites** do Qase e os **vínculos declarados** (ticket ↔ caso ↔ automação). O detalhe do caso mostra passos, resultados locais e o código que o implementa, e tem o botão **Criar automação na IDE**. Sem o Qase vinculado, o repositório mostra o que existe no código da pasta.
 
-**Casos Qase**, **Suites** e **Planos** aparecem quando o Qase está vinculado. O detalhe do caso mostra passos, resultados locais, associação a ticket, declaração de automação e o código que o implementa. Rascunhos feitos por você, pelo Prumo ou por uma IA conectada esperam a sua revisão (duplicidade, requisito, risco e cobertura) antes de publicar.
+**Runs** é uma lista só com tudo o que roda ou rodou: as execuções locais (manuais e agendadas, com as evidências e o comentário no Jira), as runs preparadas no Prumo e as runs do Qase. Filtre por origem e por situação (em andamento, concluídas, com falha). Uma run local registra resultados manuais, roda as automações associadas (cada uma pede a sua autenticação do Windows) e publica no Qase conferindo a run. **Evidências CLI/MCP** abre as evidências de validação gravadas na pasta do projeto.
 
-**Runs** reúne as runs preparadas no Prumo e as do Qase. Uma run local registra resultados manuais, roda as automações associadas (cada uma pede a sua autenticação do Windows) e publica no Qase conferindo a run.
-
-**CI e GitHub** mostra o contrato da pasta e as execuções do GitHub Actions. O Prumo só escreve em branches `prumo/...`, nunca no principal, e abre o Pull Request como rascunho.
+**Planos** lista e cria os planos de teste do Qase, quando vinculado.
 
 ## Tickets
 

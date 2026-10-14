@@ -61,7 +61,7 @@ Tipos que só leem (consulta Jira, análise de mudanças) usam as conexões de l
 |---|---|---|
 | `consulta-jira` | Lista tickets do projeto Jira vinculado ou um ticket | Compara `updated` com a consulta anterior; resultado `INFO` |
 | `smoke`, `regressao` | Executa a capability declarada | Evidência, cenários individuais quando o runner os reporta |
-| `validacao-ticket` | Executa as automações associadas ao ticket em Rastreabilidade | Sem associação verificável: `BLOCKED NO_VERIFIED_LINK` |
+| `validacao-ticket` | Executa as automações associadas ao ticket em Testes › Repositório | Sem associação verificável: `BLOCKED NO_VERIFIED_LINK` |
 | `analise-mudancas` | Lê commits do GitHub vinculado | Recomenda regressão; **não** dispara execução |
 | `k6` | Executa o k6 oficial | Veja abaixo |
 

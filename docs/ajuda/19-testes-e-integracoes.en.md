@@ -1,20 +1,18 @@
-# Tests, tickets and integrations (2.10)
+# Tests, tickets and integrations (2.13)
 
 Prumo reads your repository's tests, shows them next to the Qase cases and, when you allow it, creates and updates items in Jira, Qase and GitHub. Everything happens through your own actions, one at a time.
 
 ## Tests
 
-Tests represents what exists in Qase **and** in the project's code, in tabs.
+Tests has four sections, in the order of the flow: test case → automation → execution with evidence.
 
-**Overview** joins Qase cases and repository tests in a single list. A case and a test only go together through an explicit annotation in the test itself: `qase(31, …)`, `qase.id(31)`, `@qase(31)`, `@qase-31` or `Qase: SFQ-31`. A similar name links nothing. Each row shows the situation (case with code, manual, planned automation, automated in Qase with no code found, code that annotates a missing case or code without a case), the level (unit, API, E2E…), the tags and the last result in Prumo. Filter by source, level, execution and tag; group by tag, feature or level.
+**IDE** uses the whole screen, without titles, like a code editor. On the left, the tree of the linked folder's test files; in the middle, the code with line numbers and markers per test (level, tags, Qase case); on the right, the case, the tickets, the results and the agents' real permissions on this code. **Edit** opens the file in an editor with syntax highlighting (TypeScript, JavaScript, Python, Gherkin); **Save** (or Ctrl+S) asks for the native Windows confirmation and only writes if the file did not change outside Prumo. **New file** creates an automation and, if you enter the Qase case, writes the `Qase: KEY-ID` annotation in the file, which links the automation to the case. Prumo only writes test files (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`) inside the linked folder, without symbolic links and up to 300 KB; a file with what looks like a secret is not opened for editing. Nothing is executed. The **CI/CD pipelines** mode shows the folder's contract and GitHub Actions runs; Prumo only writes to `prumo/...` branches, never to the main one, and opens the Pull Request as a draft.
 
-**Code** is a read-only view of the test files: folder tree, reader with line numbers and markers per test (level, tags, Qase case) and a panel with the case, the tickets, the results and the agents' real permissions on this code. Only test files inside the linked folder, no symbolic links, up to 300 KB and with secrets masked. The classification comes from tags (`@smoke`, `@regression`), path and content, with reason and confidence. Nothing is executed.
+**Repository** joins, in a single list, the Qase cases (when linked) and the code's tests, manual and automated. A case and a test only go together through an explicit annotation in the test itself: `qase(31, …)`, `qase.id(31)`, `@qase(31)`, `@qase-31` or `Qase: SFQ-31`. A similar name links nothing. Each row shows the situation (case with code, manual, planned automation, automated in Qase with no code found, code that annotates a missing case, or code without a case), the level, the tags and the last result in Prumo. Below the list are the **proposals under review** (case drafts made by you, by Prumo or by a connected AI, which wait for your review before going to Qase), the Qase **suites** and the **declared links** (ticket ↔ case ↔ automation). The case detail shows steps, local results and the code that implements it, and has the **Create automation in the IDE** button. Without Qase linked, the repository shows what exists in the folder's code.
 
-**Qase cases**, **Suites** and **Plans** appear when Qase is linked. The case detail shows steps, local results, link to a ticket, automation declaration and the code that implements it. Drafts made by you, by Prumo or by a connected AI wait for your review (duplicates, requirement, risk and coverage) before publishing.
+**Runs** is a single list of everything that runs or has run: local executions (manual and scheduled, with evidence and the Jira comment), runs prepared in Prumo and Qase runs. Filter by origin and by status (in progress, completed, failed). A local run records manual results, runs the associated automations (each one asks for your Windows authentication) and publishes to Qase, checking the run. **CLI/MCP evidence** opens the validation evidence saved in the project folder.
 
-**Runs** gathers the runs prepared in Prumo and the Qase runs. A local run records manual results, runs the associated automations (each one asks for your Windows authentication) and publishes to Qase, checking the run.
-
-**CI and GitHub** shows the folder's contract and GitHub Actions runs. Prumo only writes to `prumo/...` branches, never to the main one, and opens the Pull Request as a draft.
+**Plans** lists and creates the Qase test plans, when linked.
 
 ## Tickets
 

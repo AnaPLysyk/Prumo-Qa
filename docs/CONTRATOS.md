@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (148 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (149 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -53,6 +53,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:vinculos:mapa` | `espacoId` | Consulta local; não prova cobertura. |
 | `prumo:testes:catalogo` | `espacoId` | Leitura estática da pasta vinculada; nada é executado nem alterado. |
 | `prumo:testes:arquivo` | `arquivo`, `espacoId` | Somente leitura dentro da pasta vinculada; recusa caminho fora dela, link simbólico, arquivo que não é de teste ou maior que 300 KB. |
+| `prumo:testes:gravar` | `arquivo`, `conteudo`, `espacoId`, `hashBase` | Pede confirmação nativa do Windows; grava só dentro da pasta vinculada, só arquivo de teste (.spec/.test, .feature, test_*.py), até 300 KB, sem link simbólico, por troca atômica; recusa se o arquivo mudou fora do Prumo ou já existe ao criar. Nada é executado nem enviado. |
 | `prumo:assistente:perguntar` | `espacoId`, `pergunta` | Consulta local; nada é gravado nem enviado. |
 | `prumo:assistente:situacao` | `espacoId` | Consulta local. |
 | `prumo:assistente:conversar` | `agente`, `contexto`, `espacoId`, `historico`, `pergunta`, `primeira`, `provedor` | Não grava a conversa: registra só o atendimento (agente, modo e fontes) em conhecimento.db. A memória da sessão (até 6 turnos) e o contexto do teste aberto vêm da janela. Pedidos como "me chama de…" e "lembra que…" gravam o perfil ou um rascunho de conhecimento. Com provedor externo autorizado, executa o CLI local sem shell, com tempo limite; linhas APRENDIZADO da IA viram rascunho. |
@@ -795,11 +796,26 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Ler o conteúdo de um arquivo de teste listado pelo catálogo, para a visão de código.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/testes/api/testesArquivo.ts > mascarar, obterEspaco, arquivoDeTeste
+- **Destino:** backend/testes/api/testesArquivo.ts > hash, mascarar, obterEspaco, arquivoDeTeste
 - **Entrada:** Projeto e caminho relativo do arquivo de teste
 - **Saída:** Caminho, número de linhas e conteúdo com segredos mascarados
 - **Permissões:** Nenhuma
 - **Efeito:** Somente leitura dentro da pasta vinculada; recusa caminho fora dela, link simbólico, arquivo que não é de teste ou maior que 300 KB.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:testes:gravar`
+
+- **Tipo:** IPC
+- **Finalidade:** Gravar ou criar um arquivo de teste na pasta vinculada, pela IDE de Testes.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** undefined
+- **Entrada:** Projeto, caminho relativo, conteúdo e SHA-256 do conteúdo lido (nulo para arquivo novo)
+- **Saída:** Caminho, número de linhas, novo SHA-256 e se o arquivo foi criado
+- **Permissões:** Testes: USAR
+- **Efeito:** Pede confirmação nativa do Windows; grava só dentro da pasta vinculada, só arquivo de teste (.spec/.test, .feature, test_*.py), até 300 KB, sem link simbólico, por troca atômica; recusa se o arquivo mudou fora do Prumo ou já existe ao criar. Nada é executado nem enviado.
 - **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs

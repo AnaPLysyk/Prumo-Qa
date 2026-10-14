@@ -8,7 +8,7 @@ O projeto Prumo tem identidade própria e pode vincular uma pasta local, um repo
 2. Em Testes, consulte casos manuais/Qase e a automação encontrada no repositório. O catálogo apresenta features, cenários, arquivo, linha e classificação com motivo/confiança.
 3. Associe o caso ao cenário por anotação Qase explícita no próprio cenário, ou relação declarada com o identificador `arquivo:linha`. Prefixos Qase pertencem ao projeto conectado; nomes semelhantes não provam vínculo.
 4. Prepare uma run. Registre resultados manuais com evidência ou execute uma capability autorizada. O resultado de uma rodada inteira não é automaticamente o resultado de cada caso.
-5. Consulte Execuções, Evidências e Rastreabilidade. PASS, FAIL, BLOCKED e NOT_RUN conservam seu significado. Os links estáticos não comprovam execução nem cobertura.
+5. Consulte Testes › Runs (execuções e evidências) e Testes › Repositório (vínculos). PASS, FAIL, BLOCKED e NOT_RUN conservam seu significado. Os links estáticos não comprovam execução nem cobertura.
 6. Revise as propostas e, com a escrita habilitada e a confirmação do produto, publique no Qase. A operação precisa reler o serviço para confirmar; falhas permanecem visíveis.
 7. Agende rotinas existentes com escopo, validade e limites. Sem autorização a execução é bloqueada. Computador desligado ou suspenso não executa trabalho.
 

@@ -161,14 +161,15 @@
     const porArquivo = cat.features.map((f) => ({ arquivo: f.arquivo, feature: f.nome, testes: f.testes, tipos: f.tipos }));
     const casosPorId = new Map((src.casos?.itens || []).map((c) => [String(c.id), c]));
     const caixa = h('div', { class: 'ds-ide', id: 'ide' }); const arvoreEl = h('nav', { class: 'ds-ide-arvore', 'aria-label': tr('Arquivos de teste') }); const editor = h('section', { class: 'ds-ide-editor', 'aria-live': 'polite' }); const painel = h('aside', { class: 'ds-ide-painel' });
-    caixa.append(arvoreEl, editor, painel); corpo.append(agentesNoCodigo(e), caixa);
+    caixa.append(arvoreEl, editor, painel); corpo.append(caixa, agentesNoCodigo(e));
     const pasta = (nome, n, nivel) => { const det = h('details', { class: 'ds-ide-pasta', open: nivel < 3 }, h('summary', {}, DS.icone('pasta'), h('span', {}, nome))); for (const [k, sub] of [...n.pastas.entries()].sort()) det.append(pasta(k, sub, nivel + 1)); for (const a of n.arquivos.sort((x, y) => x.arquivo.localeCompare(y.arquivo))) det.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, title: a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo.split('/').at(-1)), h('span', { class: 'ds-n' }, String(a.testes.length)))); return det; };
     const raiz = arvore(porArquivo); arvoreEl.append(h('p', { class: 'ds-doc-grupo' }, tr('{n} arquivo(s) · {t} teste(s)', { n: porArquivo.length, t: cat.testes })));
     for (const [k, sub] of [...raiz.pastas.entries()].sort()) arvoreEl.append(pasta(k, sub, 0)); for (const a of raiz.arquivos) arvoreEl.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo)));
-    if (!porArquivo.length) { editor.append(DS.estadoTela('vazio', 'Nenhum arquivo de teste encontrado na pasta vinculada.', 'O Prumo reconhece *.spec/*.test (JS/TS), *.feature e test_*.py.')); return; }
+    arvoreEl.prepend(h('div', { class: 'ds-ide-barra' }, DS.acao('Novo arquivo', () => novoArquivo(), { id: 'ide-novo', compacto: true, icone: 'mais' })));
+    if (!porArquivo.length) { editor.append(DS.estadoTela('vazio', 'Nenhum arquivo de teste encontrado na pasta vinculada.', 'O Prumo reconhece *.spec/*.test (JS/TS), *.feature e test_*.py. Use "Novo arquivo" para criar a primeira automação.')); if (mem.ide?.novo) novoArquivo(mem.ide.novo); return; }
     painel.append(DS.estadoTela('vazio', 'Selecione um teste', 'As conexões do teste com casos, tickets, execuções e agentes aparecem aqui.', [], { compacto: true }));
     async function abrir(arquivo, linha) {
-      mem.ide = { arquivo, linha }; for (const b of arvoreEl.querySelectorAll('.ds-ide-arquivo')) b.setAttribute('aria-current', String(b.dataset.arquivo === arquivo));
+      const quererEditar = !!mem.ide?.editar && mem.ide.arquivo === arquivo; mem.ide = { arquivo, linha }; for (const b of arvoreEl.querySelectorAll('.ds-ide-arquivo')) b.setAttribute('aria-current', String(b.dataset.arquivo === arquivo));
       editor.replaceChildren(DS.carregando('Lendo arquivo…'));
       const r = await api.testesArquivo(e.id, arquivo); if (!r.ok) { editor.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o arquivo', r.error)); return; }
       const info = porArquivo.find((x) => x.arquivo === arquivo); const porLinha = new Map((info?.testes || []).map((t) => [t.linha, t]));
@@ -176,8 +177,51 @@
       r.data.conteudo.split(/\r?\n/).forEach((txt, i) => { const t = porLinha.get(i + 1); const li = h('li', { 'data-linha': i + 1, class: t ? 'ds-ide-teste' : null }, h('code', {}, txt || ' '));
         if (t) li.prepend(h('button', { type: 'button', class: 'ds-ide-marca', 'aria-label': tr('Ver conexões do teste {t}', { t: t.titulo }), onclick: () => selecionar(t, li) }, chipNivel(t.tipo), ...(t.qase || []).map((q) => h('span', { class: 'ds-chip', 'data-tom': 'info' }, 'Qase ' + q)), ...t.tags.slice(0, 3).map(chipTag)));
         linhasEl.append(li); });
-      editor.replaceChildren(h('div', { class: 'ds-ide-aba' }, DS.icone('codigo'), h('strong', {}, arquivo), h('span', { class: 'ds-sub' }, tr('{n} linhas · {t} teste(s) · somente leitura', { n: r.data.linhas, t: info?.testes.length || 0 }))), linhasEl);
+      const editavel = r.data.editavel === true; const bloqueado = r.data.editavel === false;
+      editor.replaceChildren(h('div', { class: 'ds-ide-aba' }, DS.icone('codigo'), h('strong', {}, arquivo), h('span', { class: 'ds-sub' }, tr('{n} linhas · {t} teste(s) · somente leitura', { n: r.data.linhas, t: info?.testes.length || 0 })),
+        editavel ? DS.acao('Editar', () => editarArquivo(arquivo, r.data), { id: 'ide-editar', compacto: true }) : null,
+        bloqueado ? h('span', { class: 'ds-chip', 'data-tom': 'aviso', id: 'ide-bloqueado', title: tr('O arquivo contém o que parece um segredo; o Prumo não o exibe para edição. Edite em outro editor.') }, tr('Edição bloqueada')) : null), linhasEl);
+      if (editavel && quererEditar) { editarArquivo(arquivo, r.data); return; }
       const alvo = linha && linhasEl.querySelector(`[data-linha="${linha}"]`); if (alvo) { alvo.scrollIntoView({ block: 'center' }); const t = porLinha.get(linha); if (t) selecionar(t, alvo); }
+    }
+    // Edição: CodeMirror (embutido, sem rede) sobre o arquivo lido. Salvar pede confirmação nativa e só grava se o arquivo não mudou fora do Prumo.
+    function editarArquivo(arquivo, dados) {
+      const modo = /\.tsx?$/i.test(arquivo) ? { name: 'javascript', typescript: true } : /\.[cm]?jsx?$/i.test(arquivo) ? 'javascript' : /\.py$/i.test(arquivo) ? 'python' : /\.feature$/i.test(arquivo) ? 'gherkin' : null;
+      const host = h('div', { class: 'ds-ide-cm' }); const estadoEl = h('span', { class: 'ds-sub', id: 'ide-estado', role: 'status' }, tr('Editando'));
+      let hashAtual = dados.hash; let sujo = false; let armado = false;
+      const salvarBtn = DS.acao('Salvar', () => salvar(), { id: 'ide-salvar', primaria: true, compacto: true, titulo: 'Ctrl+S' });
+      const descartarBtn = DS.acao('Descartar', () => { if (sujo && !armado) { armado = true; descartarBtn.lastChild.textContent = tr('Descartar alterações?'); return; } abrir(arquivo, mem.ide?.linha); }, { id: 'ide-descartar', compacto: true });
+      editor.replaceChildren(h('div', { class: 'ds-ide-aba' }, DS.icone('codigo'), h('strong', {}, arquivo), estadoEl, salvarBtn, descartarBtn), host);
+      const cm = window.CodeMirror(host, { value: String(dados.conteudo).replace(/\r\n/g, '\n'), mode: modo, lineNumbers: true, indentUnit: 2, tabSize: 2, indentWithTabs: false, theme: 'prumo', viewportMargin: 40,
+        extraKeys: { 'Ctrl-S': () => salvar(), 'Cmd-S': () => salvar(), Tab: (c) => c.execCommand(c.somethingSelected() ? 'indentMore' : 'insertSoftTab'), 'Shift-Tab': (c) => c.execCommand('indentLess') } });
+      cm.setSize('100%', '100%'); cm.on('change', () => { sujo = true; armado = false; descartarBtn.lastChild.textContent = tr('Descartar'); estadoEl.textContent = tr('Alterações não salvas'); });
+      requestAnimationFrame(() => { cm.refresh(); cm.focus(); });
+      async function salvar() {
+        if (!sujo) { estadoEl.textContent = tr('Nada a salvar'); return; }
+        const r = await chamar(() => api.testesGravar(e.id, arquivo, cm.getValue(), hashAtual)); if (!r || r.canceled) return;
+        hashAtual = r.hash; sujo = false; estadoEl.textContent = tr('Salvo · {n} linhas', { n: r.linhas }); avisar(tr('Arquivo salvo.')); delete mem.fontes; await fontes(e, { forcar: true });
+      }
+    }
+    const modeloDeTeste = (caminho, casoId, titulo) => {
+      const chave = vinc(e, 'qase')?.recurso?.chave; const ref = casoId && chave ? `${chave}-${casoId}` : null; const nome = titulo || 'descreva o cenário';
+      if (/\.feature$/i.test(caminho)) return `${ref ? `# Qase: ${ref}\n` : ''}Feature: ${nome}\n\n  Scenario: ${nome}\n    Given o sistema está pronto\n    When a pessoa executa o passo\n    Then o resultado esperado aparece\n`;
+      if (/\.py$/i.test(caminho)) return `${ref ? `# Qase: ${ref}\n` : ''}def test_${(nome.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '').toLowerCase() || 'cenario')}():\n    # passos do cenário\n    assert True\n`;
+      return `${ref ? `// Qase: ${ref}\n` : ''}test(${JSON.stringify(nome)}, async () => {\n  // passos do cenário\n});\n`;
+    };
+    function novoArquivo(inicio) {
+      const caminho = h('input', { id: 'ide-novo-caminho', maxlength: 300, placeholder: 'tests/e2e/login.spec.ts', value: inicio ? `tests/${String(inicio.titulo || 'caso-' + inicio.casoId).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'novo'}.spec.ts` : '' });
+      const caso = h('input', { id: 'ide-novo-caso', type: 'number', min: 1, placeholder: vinc(e, 'qase') ? '31' : '', value: inicio?.casoId || '', disabled: !vinc(e, 'qase') });
+      const titulo = h('input', { id: 'ide-novo-titulo', maxlength: 200, value: inicio?.titulo || '' });
+      if (mem.ide) delete mem.ide.novo;
+      DS.modal('Novo arquivo de teste', [h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() },
+        DS.campo('Caminho dentro da pasta do projeto', caminho, { inteiro: true, ajuda: 'Nome de teste: *.spec.ts, *.test.js, *.feature ou test_*.py.' }), DS.campo('Título do cenário', titulo, { inteiro: true }),
+        DS.campo('Caso do Qase (opcional)', caso, { inteiro: true, ajuda: 'Grava a anotação "Qase: CHAVE-ID" no arquivo, que liga a automação ao caso.' })),
+      DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar…', async () => {
+        const c = caminho.value.trim(); if (!c) { avisar(tr('Informe o caminho do arquivo.'), true); return; }
+        const r = await chamar(() => api.testesGravar(e.id, c, modeloDeTeste(c, caso.value ? Number(caso.value) : null, titulo.value.trim()), null)); if (!r || r.canceled) return;
+        DS.fecharModal(); await fontes(e, { forcar: true }); mem.ide = { arquivo: r.arquivo, editar: true }; mostrar('testes');
+      }, { id: 'ide-novo-criar', primaria: true }))], { tamanho: 'md' });
+      caminho.focus();
     }
     function selecionar(t, li) {
       for (const x of editor.querySelectorAll('.ds-ide-teste[aria-current]')) x.removeAttribute('aria-current'); li.setAttribute('aria-current', 'true');
@@ -194,6 +238,7 @@
     const peso = (x) => x.testes.filter((t) => (t.qase || []).length).length * 1000 + x.testes.length; const inicial = [...porArquivo].sort((x, y) => peso(y) - peso(x))[0];
     const alvo = mem.ide?.arquivo && porArquivo.some((x) => x.arquivo === mem.ide.arquivo) ? mem.ide : { arquivo: inicial.arquivo, linha: inicial.testes.find((t) => (t.qase || []).length)?.linha };
     await abrir(alvo.arquivo, alvo.linha);
+    if (mem.ide?.novo) novoArquivo(mem.ide.novo);
   }
   async function codigoGithub(e, vg, corpo) {
     const caixa = h('div', { class: 'ds-ide' }); const arvoreEl = h('nav', { class: 'ds-ide-arvore', 'aria-label': tr('Arquivos do repositório') }); const editor = h('section', { class: 'ds-ide-editor' });

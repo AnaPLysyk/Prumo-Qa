@@ -19,8 +19,9 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `runsPublicar.ts` | Canal runs:publicar: Publicar no Qase os resultados ainda não publicados e reler a run. |
 | `runsResultado.ts` | Canal runs:resultado: Declarar o resultado de um caso manual. |
 | `runsRevogar.ts` | Canal runs:revogar: Revogar uma política de escrita agendada. |
-| `testesArquivo.ts` | Canal testes:arquivo: Ler o conteúdo de um arquivo de teste listado pelo catálogo, para a visão de código. |
+| `testesArquivo.ts` | Canal testes:arquivo: Ler o conteúdo de um arquivo de teste listado pelo catálogo, para a IDE (só é editável se não tiver segredo mascarado). |
 | `testesCatalogo.ts` | Canal testes:catalogo: Ler os arquivos de teste da pasta do projeto, agrupar por feature e classificar cada teste (unitário, integração, funcional, regressão, smoke, desempenho, acessibilidade). |
+| `testesGravar.ts` | Canal testes:gravar: Gravar ou criar um arquivo de teste na pasta vinculada, depois da confirmação nativa do Windows. |
 
 ## banco/
 
@@ -87,6 +88,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `declararResultadoManual.ts` | Registra o resultado de um caso manual dito pela pessoa, sem apagar resultado de execução. |
 | `detectarFrameworks.ts` | Descobre, por evidência (dependência, configuração, imports), quais frameworks de teste o projeto usa. |
 | `ehTestePlaywright.ts` | Diz se o arquivo é um teste Playwright. |
+| `escreverArquivoDeTeste.ts` | Grava ou cria um arquivo de teste só dentro da pasta do projeto: sem atalhos, até 300 KB, troca atômica e recusa se o arquivo mudou desde a leitura. |
 | `etiquetasDoTeste.ts` | Lê as etiquetas @tag de um trecho de teste (ex.: @smoke). |
 | `executarRunLocal.ts` | Executa as automações dos casos da run (só capacidades declaradas) e anota os resultados. |
 | `funcionalidadeDoArquivo.ts` | Deduz o nome da funcionalidade a partir do caminho do arquivo de teste. |

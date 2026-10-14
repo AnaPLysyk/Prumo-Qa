@@ -274,6 +274,19 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/e2e/ui/desktop-ide.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e"
+      ],
+      "funcionalidade": "testes",
+      "motivo": "Camada principal ui. Verifica: IDE de Testes na janela real, editar, criar e salvar com confirmação nativa",
+      "evidencias": [
+        "IDE: editar um arquivo existente pede confirmação nativa, grava no disco e mantém CRLF"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/e2e/ui/desktop-integracoes.test.mjs",
       "camada": "ui",
       "natureza": [
@@ -1120,6 +1133,21 @@
       "motivo": "Camada principal regra. Verifica: contas locais, papéis e permissões por canal",
       "evidencias": [
         "contas e permissões"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/ide-escrita.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "testes",
+      "motivo": "Camada principal regra. Verifica: escrita de arquivos de teste na pasta vinculada, sem sair dela, sem atalho e sem sobrescrever o que mudou fora",
+      "evidencias": [
+        "cria arquivo novo em pasta nova",
+        "recusa caminho fora da pasta"
       ],
       "perfilReal": false
     },

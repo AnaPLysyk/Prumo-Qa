@@ -409,4 +409,23 @@ nav.ds-ide-arvore, .ds-doc nav.indice { display: block; }
 .ds-info:hover .ds-info-texto, .ds-info:focus-within .ds-info-texto, .ds-info[data-aberto] .ds-info-texto { display: block; }
 
 /* 2.13: IDE de Testes usa a tela inteira, como um editor: sem moldura de título, altura da janela. */
-.ds-ide-cheio .ds-ide { min-height: calc(100vh - 150px); }
+.ds-ide-cheio .ds-ide { height: calc(100vh - 190px); min-height: 420px; margin-top: 8px; }
+/* A IDE ocupa a largura toda da janela, sem a margem de leitura das outras telas. */
+main#conteudo:has(.ds-ide-cheio) { max-width: none; padding: 14px 18px 12px; }
+
+/* 2.13: editor da IDE (CodeMirror embutido) com as cores do Design System, nos temas claro e escuro. */
+.ds-ide-barra { padding: 0 6px 8px; }
+.ds-ide-cm { flex: 1; min-height: 0; position: relative; }
+.ds-ide-cm .CodeMirror { height: 100%; background: transparent; color: var(--texto); font: 12.5px/1.6 Consolas, "Cascadia Mono", monospace; }
+.ds-ide-cm .CodeMirror-gutters { background: var(--ds-superficie); border-right: 1px solid var(--ds-linha-suave); }
+.ds-ide-cm .CodeMirror-linenumber { color: var(--suave); }
+.ds-ide-cm .CodeMirror-cursor { border-left: 2px solid var(--acento); }
+.ds-ide-cm .CodeMirror-activeline-background { background: var(--ds-hover); }
+.ds-ide-cm .CodeMirror-selected, .ds-ide-cm .CodeMirror-focused .CodeMirror-selected { background: var(--ds-selecionado); }
+.ds-ide-cm .CodeMirror-matchingbracket { color: var(--acento); outline: 1px solid var(--acento); }
+.cm-s-prumo .cm-keyword, .cm-s-prumo .cm-atom, .cm-s-prumo .cm-builtin { color: var(--acento); }
+.cm-s-prumo .cm-string, .cm-s-prumo .cm-string-2 { color: var(--ok); }
+.cm-s-prumo .cm-comment { color: var(--suave); font-style: italic; }
+.cm-s-prumo .cm-number, .cm-s-prumo .cm-def, .cm-s-prumo .cm-tag, .cm-s-prumo .cm-qualifier { color: var(--aviso); }
+.cm-s-prumo .cm-property, .cm-s-prumo .cm-variable-2, .cm-s-prumo .cm-meta { color: var(--texto); }
+.cm-s-prumo .cm-error { color: var(--falha); }

@@ -32,17 +32,17 @@ PASS sem cenários individuais significa apenas que o processo terminou com suce
 
 ## Consultar uma execução antiga
 
-Em Execuções você vê o histórico de todos os projetos ou de um projeto, filtrado por ticket e resultado. Cada linha mostra quem executou (agenda ou manual), tentativas, duração, cenários e o estado do comentário Jira. Ver evidência abre o resultado real guardado na pasta do projeto. Consultar a tela não conta como execução de QA.
+Em Testes › Runs você vê o histórico de todos os projetos ou de um projeto, filtrado por ticket e resultado. Cada linha mostra quem executou (agenda ou manual), tentativas, duração, cenários e o estado do comentário Jira. Ver evidência abre o resultado real guardado na pasta do projeto. Consultar a tela não conta como execução de QA.
 
 ## Relacionar uma execução a um ticket
 
-Informe o ticket na rotina. Para validação por ticket, as automações vêm das associações declaradas em Rastreabilidade (Jira para automação). Sem associação, a rotina fica BLOCKED e nada é executado.
+Informe o ticket na rotina. Para validação por ticket, as automações vêm das associações declaradas em Testes › Repositório (Jira para automação). Sem associação, a rotina fica BLOCKED e nada é executado.
 
 ## Comentários no Jira
 
 O Prumo pode registrar o resultado no ticket como um comentário: ticket, tipo, ambiente, cenários, PASS e FAIL, resumo das falhas e a referência local da evidência. Ele não diz que o ticket foi aprovado e nunca muda o status do ticket.
 
-Manual: em Execuções, abra Comentário Jira, leia a prévia e confirme. Agendado: crie antes uma política de publicação restrita a tickets, tipos de rotina, validade e quantidade. Sem política, nenhuma rotina agendada comenta. Repetir ou tentar de novo não cria comentário duplicado. Se a publicação falhar, o registro local fica como pendência.
+Manual: em Testes › Runs, abra a execução e clique em Comentário Jira, leia a prévia e confirme. Agendado: crie antes uma política de publicação restrita a tickets, tipos de rotina, validade e quantidade. Sem política, nenhuma rotina agendada comenta. Repetir ou tentar de novo não cria comentário duplicado. Se a publicação falhar, o registro local fica como pendência.
 
 ## O que depende de IA
 

@@ -45,6 +45,7 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   runRevogarPolitica: (id) => chamar('runs:revogar', {id}),
   testesCatalogo: (espacoId) => chamar('testes:catalogo', {espacoId}),
   testesArquivo: (espacoId,arquivo) => chamar('testes:arquivo', {espacoId,arquivo}),
+  testesGravar: (espacoId,arquivo,conteudo,hashBase) => chamar('testes:gravar', {espacoId,arquivo,conteudo,hashBase}),
   assistentePerguntar: (espacoId,pergunta) => chamar('assistente:perguntar', {espacoId,pergunta}),
   assistenteSituacao: (espacoId) => chamar('assistente:situacao', {espacoId}),
   assistenteConversar: (espacoId, pergunta, opcoes = {}) => chamar('assistente:conversar', { espacoId, pergunta, ...opcoes }),
