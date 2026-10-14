@@ -20,14 +20,41 @@ const selo = (s) => h('span', { class: 'estado ' + s }, rotulosSelo[s] || s.repl
 const hora = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR') : '—');
 const ms = (n) => (n === null || n === undefined ? 'indisponível' : Math.round(n * 10) / 10 + ' ms');
 
+/**
+ * 2.11: o aviso aparece embaixo, centralizado na área de conteúdo, e some sozinho (4 s; erro 8 s; clique fecha antes).
+ * Não cobre nada fixo: desvia do robô e do painel do chat, reserva espaço no fim da página e, com um modal aberto,
+ * entra no fim do próprio modal (no fluxo, empurrando o conteúdo) em vez de flutuar por cima dele.
+ */
 function avisar(msg, erro) {
-  const el = $('#aviso'); el.textContent = msg; el.className = erro ? 'erro' : ''; el.hidden = false;
-  clearTimeout(avisar.t); avisar.t = setTimeout(() => { el.hidden = true; }, erro ? 8000 : 4000);
+  const el = $('#aviso'); clearTimeout(avisar.t);
+  el.textContent = msg; el.className = erro ? 'erro' : ''; el.hidden = false; el.onclick = () => esconderAviso(el);
+  posicionarAviso(el);
+  avisar.t = setTimeout(() => esconderAviso(el), erro ? 8000 : 4000);
 }
-/** Chamada ao núcleo; erros viram aviso, nunca exceção solta. */
+function esconderAviso(el) {
+  clearTimeout(avisar.t); el.hidden = true; document.body.classList.remove('com-aviso');
+  if (el.parentElement !== document.body) document.body.append(el);
+}
+function posicionarAviso(el) {
+  const visivel = (n) => !!n && n.getClientRects().length > 0 && getComputedStyle(n).visibility !== 'hidden';
+  const modal = [...document.querySelectorAll('dialog[open]')].pop();
+  if (modal) { modal.append(el); el.removeAttribute('style'); document.body.classList.remove('com-aviso'); return; }
+  if (el.parentElement !== document.body) document.body.append(el);
+  const area = $('#conteudo').getBoundingClientRect(); const esquerda = Math.max(area.left, 0); let direita = Math.min(area.right, innerWidth);
+  const painel = document.querySelector('.v36f-painel'); if (visivel(painel)) direita = Math.min(direita, painel.getBoundingClientRect().left - 12);
+  const centro = (esquerda + direita) / 2; let largura = Math.min(520, direita - esquerda - 24); let baixo = 16;
+  const robo = document.querySelector('.v36f-botao');
+  if (visivel(robo)) {
+    const r = robo.getBoundingClientRect(); const livre = 2 * (r.left - 12 - centro);
+    if (livre >= 220) largura = Math.min(largura, livre); else baixo = Math.max(baixo, innerHeight - r.top + 8);
+  }
+  Object.assign(el.style, { left: Math.round(centro) + 'px', bottom: Math.round(baixo) + 'px', maxWidth: Math.max(200, Math.floor(largura)) + 'px' });
+  document.body.style.setProperty('--aviso-reserva', Math.ceil(el.getBoundingClientRect().height + baixo + 16) + 'px'); document.body.classList.add('com-aviso');
+}
+/** Chamada ao núcleo; erros viram aviso, nunca exceção solta. Sessão encerrada abre a tela de entrada em vez de repetir avisos. */
 async function chamar(fn) {
   const r = await fn();
-  if (!r.ok) { avisar(textoErro(r.error), true); return null; }
+  if (!r.ok) { if (window.PrumoConta?.tratarErro(r.error)) return null; avisar(textoErro(r.error), true); return null; }
   return r.data;
 }
 /** 2.10.2: explicação primeiro, código técnico só como detalhe no fim ("CODIGO: texto" → "Texto (código CODIGO)"). */
@@ -503,6 +530,8 @@ async function mostrar(aba) {
   // Espera todos os scripts da página terminarem de executar antes de montar a primeira tela.
   if (document.readyState === 'loading') await new Promise((ok) => document.addEventListener('DOMContentLoaded', ok, { once: true }));
   const info = await chamar(api.info); if (info) $('#versao').textContent = 'v' + info.version;
+  // 2.11: com o login ligado, nada mais carrega antes de a pessoa entrar (a tela de entrada recarrega a janela ao concluir).
+  if (window.PrumoConta && !(await window.PrumoConta.iniciar())) return;
   try { estado.root = localStorage.getItem('raiz'); } catch { /* ignora */ }
   for (const b of document.querySelectorAll('#nav button')) b.addEventListener('click', () => mostrar(b.dataset.aba));
   iniciarMenu();

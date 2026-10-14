@@ -3,7 +3,7 @@ import { BrowserWindow, app, Notification } from 'electron';
 import path from 'node:path';
 import { textoNoIdioma } from '../bandeja/textoNoIdioma.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
-import { rendererDir } from '../tipos/aplicativo.js';
+import { origemPermitida, rendererDir } from '../tipos/aplicativo.js';
 import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
 
@@ -15,7 +15,8 @@ export function criarJanela(): BrowserWindow {
   });
   janela.once('ready-to-show', () => janela.show());
   janela.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  janela.webContents.on('will-navigate', e => e.preventDefault());
+  // 2.11: a única navegação permitida é recarregar a própria página (ao entrar ou sair da conta, para não sobrar dado da sessão anterior).
+  janela.webContents.on('will-navigate', (e, url) => { if (url !== origemPermitida) e.preventDefault(); });
   janela.webContents.on('will-attach-webview', e => e.preventDefault());
   // Fechar a janela NÃO encerra o Prumo: ele continua na bandeja para que as rotinas sigam funcionando.
   janela.on('close', e => {

@@ -7,6 +7,7 @@ import { mensagemComCodigo } from './mensagemComCodigo.js';
 import { Resposta, origemPermitida } from '../tipos/aplicativo.js';
 import { registrarDiagnostico } from '../../logs/banco/registrarDiagnostico.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
+import { conferirAcessoAoCanal } from '../../administracao/regras/conferirAcessoAoCanal.js';
 
 /**
  * Registra um canal do catálogo: recusa remetente que não seja a nossa página, valida com o esquema do contrato,
@@ -29,6 +30,8 @@ export function registrarCanal<C extends CanalIpc>(nome: C, fn: (a: z.output<(ty
       const entrada = esquemasIpc[nome].safeParse(bruto ?? {});
       if (!entrada.success) throw new Error('INVALID_ARGUMENTS: argumentos recusados.');
       const args = entrada.data as z.output<(typeof esquemasIpc)[C]>;
+      // 2.11: com o login ligado, cada canal exige sessão e o nível da tela no papel da pessoa (administracao/tipos/acessoDosCanais.ts).
+      conferirAcessoAoCanal(nome);
       apagaDiagnostico = nome === 'dados:excluir' && (args as { escopo?: string }).escopo === 'diagnostico';
       const data = await fn(args, janela);
       diag('OK'); return { ok: true, data };

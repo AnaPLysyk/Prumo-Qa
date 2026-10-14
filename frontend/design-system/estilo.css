@@ -57,8 +57,15 @@ pre { background: var(--painel); border: 1px solid var(--linha); border-radius: 
 .grade span { font-size: 12px; color: var(--suave); }
 .nota { border-left: 3px solid var(--aviso); padding: 6px 12px; margin: 12px 0; background: var(--painel); }
 .vazio { padding: 28px 8px; color: var(--suave); }
-#aviso { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 200; width: max-content; max-width: min(520px, calc(100vw - 32px)); box-shadow: var(--ds-sombra-curta, 0 12px 30px -16px rgba(0,0,0,.6)); background: var(--painel); border: 1px solid var(--linha); border-left: 3px solid var(--acento); padding: 10px 14px; border-radius: var(--raio); }
+/* 2.11: aviso embaixo e centralizado (a posição exata é calculada em app.js para desviar do robô e do chat); some sozinho. */
+#aviso { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 200; width: max-content; max-width: min(520px, calc(100vw - 32px)); box-shadow: var(--ds-sombra-curta, 0 12px 30px -16px rgba(0,0,0,.6)); background: var(--painel); border: 1px solid var(--linha); border-left: 3px solid var(--acento); padding: 10px 14px; border-radius: var(--raio); cursor: pointer; animation: aviso-entra .2s ease both; }
 #aviso.erro { border-left-color: var(--falha); }
+#aviso[hidden] { display: none; }
+@keyframes aviso-entra { from { opacity: 0; transform: translate(-50%, 8px); } }
+/* Reserva o espaço do aviso no fim da página: o último conteúdo sempre pode rolar para cima dele. */
+body.com-aviso main#conteudo::after { content: ""; display: block; height: var(--aviso-reserva, 72px); }
+/* Com modal aberto o aviso vira a última linha do modal, no fluxo: empurra o conteúdo em vez de cobrir. */
+dialog[open] > #aviso { position: static; transform: none; width: auto; max-width: none; margin: 0 16px 14px; box-shadow: none; flex: none; animation: none; }
 .ajuda { display: grid; grid-template-columns: 200px 1fr; gap: 24px; }
 .ajuda ul.indice { list-style: none; margin: 0; padding: 0; position: sticky; top: 12px; align-self: start; }
 .ajuda .indice button { width: 100%; text-align: left; background: none; border: 0; color: var(--suave); padding: 5px 8px; font: inherit; cursor: pointer; border-left: 2px solid var(--linha); }

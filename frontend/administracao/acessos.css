@@ -1,0 +1,38 @@
+/* Entrada do Prumo (login), menu da conta e Administração › Usuários, Permissões, Agentes e Configurações gerais. Só tokens do Design System. */
+.entrada { border: 1px solid var(--linha); border-radius: 18px; padding: 0; background: var(--painel); color: var(--texto); width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; box-shadow: var(--ds-sombra, 0 24px 90px rgba(0, 0, 0, .5)); }
+.entrada::backdrop { background: var(--fundo); }
+.entrada-cartao { display: flex; flex-direction: column; gap: 12px; padding: 28px 28px 24px; }
+.entrada-marca { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+.entrada h1 { font-size: 20px; margin: 4px 0 0; }
+.entrada-desc, .entrada-regra { margin: 0; color: var(--suave); }
+.entrada-form { display: flex; flex-direction: column; gap: 10px; }
+.entrada-form .ds-campo input { width: 100%; }
+.entrada-enviar { margin-top: 4px; padding: 9px 14px; }
+.entrada-erro { margin: 0; padding: 8px 10px; border-left: 3px solid var(--falha); background: color-mix(in srgb, var(--falha) 10%, transparent); border-radius: 6px; color: var(--texto); }
+.entrada-erro[hidden] { display: none; }
+.entrada-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.entrada-codigo { display: block; font-size: 18px; letter-spacing: .06em; text-align: center; padding: 12px; border: 1px dashed var(--acento); border-radius: 10px; user-select: all; overflow-wrap: anywhere; }
+body.com-entrada > *:not(dialog):not(#aviso) { visibility: hidden; }
+dialog.entrada > #aviso { margin: 0 28px 20px; }
+
+.conta-botao { display: inline-flex; align-items: center; gap: 8px; max-width: 220px; padding: 3px 12px 3px 3px; border: 1px solid var(--linha); border-radius: 999px; background: color-mix(in srgb, var(--painel) 80%, transparent); color: var(--texto); font: inherit; font-size: 13px; cursor: pointer; }
+.conta-botao:hover, .conta-botao[aria-expanded="true"] { border-color: var(--acento); }
+.conta-iniciais { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--acento); color: var(--acento-texto); font-weight: 650; font-size: 12px; flex: none; }
+.conta-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conta-menu { gap: 8px; }
+.conta-menu .acao { width: 100%; text-align: left; }
+.conta-quem { display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; border-bottom: 1px solid var(--linha); overflow-wrap: anywhere; }
+@media (max-width: 860px) { .conta-nome { display: none; } .conta-botao { padding-right: 3px; } }
+
+.adm-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 16px; max-width: 760px; }
+.adm-barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 12px 0; }
+.adm-barra p { margin: 0; }
+.adm-acoes { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.adm-estado { display: flex; flex-wrap: wrap; gap: 4px; }
+.perm-caixa { overflow-x: auto; }
+.perm-papel { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
+#perm-matriz select { min-width: 110px; }
+#perm-matriz select[data-nivel="NENHUM"] { color: var(--suave); }
+#perm-matriz select[data-nivel="USAR"] { border-color: color-mix(in srgb, var(--ok) 55%, var(--linha)); }
+#perm-matriz select[data-nivel="VER"] { border-color: color-mix(in srgb, var(--acento) 55%, var(--linha)); }
+.perm-lista li { gap: 4px; }

@@ -5,6 +5,7 @@ import { tiposConhecimento } from '../../agentes/tipos/conhecimento.js';
 import { papeis } from '../../agentes/tipos/persona.js';
 import { especializacoes } from '../../agentes/tipos/politicas.js';
 import { estadosTrecho, idTrecho } from '../../agentes/tipos/skills.js';
+import { configuracaoDeAcessoSchema, idPapelSchema, niveisDeAcesso } from '../../administracao/tipos/contas.js';
 import { arquivosDosCanais } from './arquivosDosCanais.js';
 import { operacoesServico } from '../../conexoes/tipos/adaptador.js';
 import { conexaoEntrada } from '../../conexoes/tipos/contaDeServico.js';
@@ -26,6 +27,9 @@ import { esquemaCaso } from '../../testes/tipos/escritaQase.js';
  *   main.ts, preload.cjs e o servidor MCP real, então documentação e código não divergem em silêncio.
  * É puro Node (sem Electron). Não existe API HTTP: só IPC local e MCP por stdio.
  */
+const textoCurto = z.string().min(1).max(60);
+const textoNome = z.string().min(1).max(80);
+const textoSenha = z.string().min(1).max(200);
 const raiz = z.string().min(1).max(1000);
 const soRaiz = z.object({ root: raiz }).strict();
 const vazio = z.object({}).strict();
@@ -159,7 +163,29 @@ export const esquemasIpc = {
   'suporte:abrir': solicitacaoSchema,
   'suporte:exportar': solicitacaoSchema,
   'suporte:consultar': z.object({numero:numeroChamado}).strict(),
-  'suporte:chamado': z.object({numero:numeroChamado}).strict()
+  'suporte:chamado': z.object({numero:numeroChamado}).strict(),
+  // 2.11: login, contas, papéis com permissão por tela e agentes da plataforma (Administração).
+  'conta:sessao': vazio,
+  'conta:entrar': z.object({ login: textoCurto, senha: textoSenha }).strict(),
+  'conta:sair': vazio,
+  'conta:cadastrar': z.object({ login: textoCurto, nome: textoNome, senha: textoSenha }).strict(),
+  'conta:recuperar': z.object({ login: textoCurto, codigo: z.string().min(1).max(40), novaSenha: textoSenha }).strict(),
+  'conta:senha': z.object({ atual: textoSenha, nova: textoSenha }).strict(),
+  'conta:perfil': z.object({ nome: textoNome }).strict(),
+  'usuarios:ativar': z.object({ login: textoCurto, nome: textoNome, senha: textoSenha }).strict(),
+  'usuarios:listar': vazio,
+  'usuarios:criar': z.object({ login: textoCurto, nome: textoNome, papel: idPapelSchema }).strict(),
+  'usuarios:alterar': z.object({ id: z.string().uuid(), nome: textoNome.optional(), papel: idPapelSchema.optional(), estado: z.enum(['ATIVO', 'DESATIVADO']).optional() }).strict(),
+  'usuarios:senha': z.object({ id: z.string().uuid() }).strict(),
+  'usuarios:desbloquear': z.object({ id: z.string().uuid() }).strict(),
+  'usuarios:excluir': z.object({ id: z.string().uuid() }).strict(),
+  'papeis:listar': vazio,
+  'papeis:salvar': z.object({ id: idPapelSchema.optional(), nome: z.string().min(1).max(40), descricao: z.string().max(200).optional(), telas: z.record(z.enum(niveisDeAcesso)).refine((t) => Object.keys(t).length <= 40) }).strict(),
+  'papeis:excluir': z.object({ id: idPapelSchema }).strict(),
+  'acesso:configuracao': vazio,
+  'acesso:salvar': configuracaoDeAcessoSchema,
+  'plataforma:agentes': vazio,
+  'plataforma:salvar': z.object({ desligados: z.array(z.string().min(1).max(40)).max(16), iaExterna: z.boolean(), orquestracao: z.boolean() }).strict()
 } as const;
 export type CanalIpc = keyof typeof esquemasIpc;
 export type Operacao = {
@@ -309,6 +335,32 @@ Object.assign(ipc, {
   'worker:estado': agendaDesc('Estado real do worker de agendamentos.', 'Nenhuma', 'Em execução, pausado, batimento, pendentes, próxima execução, último erro', 'Consulta local.', 'Nenhuma', { origem: 'Interface > cabeçalho e bandeja', destino: 'main.ts > worker.ts' }),
   'worker:eventos': agendaDesc('Receber avisos do worker e pedidos de navegação da bandeja desde o último número visto.', 'Último número de evento recebido', 'Eventos (iniciado, concluído, falhou, bloqueado, publicação falhou, worker interrompido, navegar) e último número', 'Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte).', 'Nenhuma', { origem: 'Interface > avisos e navegação pela bandeja', destino: 'main.ts > worker.ts' }),
   'worker:pausa': agendaDesc('Pausar ou retomar todos os agendamentos.', 'pausado (true/false)', 'Estado do worker', 'Grava a pausa global; trabalho em andamento termina sem ser corrompido.', 'Ação explícita da pessoa', { origem: 'Interface > Agendamentos ou menu da bandeja' })
+});
+const contaErros = [...ipcErros, 'SESSION_REQUIRED', 'SESSION_EXPIRED', 'PERMISSION_DENIED', 'LOGIN_NOT_ACTIVE', 'LOCAL_DATA_INVALID'];
+const contaProt = [...ipcProtecoes, 'Senha e código de recuperação só como resumo scrypt com sal próprio', 'Sessão só na memória do processo principal, com expiração por inatividade', 'Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)'];
+const contaDesc = (finalidade: string, entrada: string, saida: string, efeito: string, permissoes: string, extra: Partial<Descricao> = {}): Descricao => ({ finalidade, origem: 'Interface > Entrada do Prumo, Minha conta ou Administração', destino: 'backend/administracao/regras', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\contas.json', erros: contaErros, protecoes: contaProt, registro: 'Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)', ...extra });
+Object.assign(ipc, {
+  'conta:sessao': contaDesc('Saber se o login está ligado, quem está na sessão e o nível de cada tela para o papel dessa pessoa.', 'Nenhuma', 'loginAtivo, conta visível (sem resumos), telas e regras de cadastro', 'Consulta local; não renova a sessão.', 'Nenhuma (atende antes do login)'),
+  'conta:entrar': contaDesc('Entrar com login e senha.', 'Login e senha', 'Sessão (conta e telas)', 'Abre a sessão na memória; conta tentativas erradas e bloqueia a conta no limite configurado.', 'Nenhuma (atende antes do login)', { erros: [...contaErros, 'LOGIN_INVALID', 'ACCOUNT_LOCKED', 'ACCOUNT_PENDING', 'ACCOUNT_DISABLED', 'LOGIN_RATE_LIMIT'] }),
+  'conta:sair': contaDesc('Encerrar a sessão.', 'Nenhuma', 'Sessão vazia', 'Esquece a sessão da memória.', 'Sessão aberta'),
+  'conta:cadastrar': contaDesc('Criar a própria conta pela tela de entrada.', 'Login, nome e senha', 'Estado (PENDENTE ou ATIVO) e código de recuperação mostrado uma vez', 'Grava a conta com o papel de cadastro; com aprovação ligada, ela só entra depois que a Administração aprovar.', 'Login ligado e cadastro aberto na Administração', { erros: [...contaErros, 'SIGNUP_CLOSED', 'LOGIN_TAKEN', 'PASSWORD_WEAK', 'LOGIN_INVALID_FORMAT'] }),
+  'conta:recuperar': contaDesc('Definir senha nova com o código de recuperação.', 'Login, código de recuperação e senha nova', 'Código de recuperação novo (o anterior deixa de valer)', 'Troca a senha e o código; tentativas erradas contam para o bloqueio.', 'Código de recuperação da própria conta', { erros: [...contaErros, 'RECOVERY_INVALID', 'ACCOUNT_LOCKED', 'PASSWORD_WEAK'] }),
+  'conta:senha': contaDesc('Trocar a própria senha, inclusive a temporária dada pela Administração.', 'Senha atual e senha nova', 'Sessão e, quando a senha era temporária, código de recuperação novo', 'Grava o resumo da senha nova.', 'Sessão aberta e senha atual', { erros: [...contaErros, 'PASSWORD_INVALID', 'PASSWORD_WEAK'] }),
+  'conta:perfil': contaDesc('Trocar o próprio nome de exibição.', 'Nome', 'Sessão atualizada', 'Grava o nome na conta.', 'Sessão aberta'),
+  'usuarios:ativar': contaDesc('Ligar o login criando a primeira conta, de administrador.', 'Login, nome e senha', 'Conta criada e código de recuperação mostrado uma vez', 'Cria contas.json; a partir daí a janela exige login e confere as permissões em cada canal.', 'Só enquanto não existe nenhuma conta', { erros: [...contaErros, 'LOGIN_ALREADY_ACTIVE', 'PASSWORD_WEAK'] }),
+  'usuarios:listar': contaDesc('Listar as contas com papel, estado, bloqueio e último acesso.', 'Nenhuma', 'Contas visíveis (sem resumos) e qual é a sua', 'Consulta local.', 'Administração: VER'),
+  'usuarios:criar': contaDesc('Criar conta para outra pessoa.', 'Login, nome e papel', 'Conta e senha temporária mostrada uma vez', 'Grava a conta; a pessoa troca a senha no primeiro acesso.', 'Administração: USAR', { erros: [...contaErros, 'LOGIN_TAKEN', 'ROLE_NOT_FOUND'] }),
+  'usuarios:alterar': contaDesc('Aprovar cadastro, trocar papel ou nome, desativar ou reativar uma conta.', 'Id e campos alterados', 'Conta atualizada', 'Grava a conta; vale no próximo pedido daquela pessoa.', 'Administração: USAR', { erros: [...contaErros, 'LAST_ADMIN', 'SELF_DISABLE', 'SELF_DEMOTE', 'ROLE_NOT_FOUND'] }),
+  'usuarios:senha': contaDesc('Redefinir a senha de outra pessoa.', 'Id da conta', 'Senha temporária mostrada uma vez', 'Troca a senha, exige troca no próximo acesso e desbloqueia a conta.', 'Administração: USAR', { erros: [...contaErros, 'USE_MY_ACCOUNT', 'ACCOUNT_NOT_FOUND'] }),
+  'usuarios:desbloquear': contaDesc('Desbloquear uma conta travada por tentativas erradas.', 'Id da conta', 'Conta atualizada', 'Zera as tentativas erradas.', 'Administração: USAR'),
+  'usuarios:excluir': contaDesc('Excluir uma conta pendente ou desativada.', 'Id da conta', 'Id excluído', 'Remove a conta de contas.json.', 'Administração: USAR', { erros: [...contaErros, 'ACCOUNT_ACTIVE', 'SELF_DELETE', 'LAST_ADMIN'] }),
+  'papeis:listar': contaDesc('Listar os papéis e a matriz de permissões por tela.', 'Nenhuma', 'Papéis, telas, níveis e contas por papel', 'Consulta local.', 'Administração: VER'),
+  'papeis:salvar': contaDesc('Criar ou alterar um papel e o nível de cada tela (NENHUM, VER, USAR).', 'Id opcional, nome, descrição e telas', 'Papéis atualizados', 'Grava o papel; o Administrador é fixo.', 'Administração: USAR', { erros: [...contaErros, 'ROLE_FIXED', 'ROLE_NAME_TAKEN', 'ROLE_NAME_INVALID'] }),
+  'papeis:excluir': contaDesc('Excluir um papel que ninguém usa.', 'Id do papel', 'Papéis atualizados', 'Remove o papel.', 'Administração: USAR', { erros: [...contaErros, 'ROLE_IN_USE', 'ROLE_FIXED'] }),
+  'acesso:configuracao': contaDesc('Ler as configurações gerais de acesso.', 'Nenhuma', 'Cadastro, aprovação, papel de cadastro, inatividade e bloqueio', 'Consulta local.', 'Administração: VER'),
+  'acesso:salvar': contaDesc('Salvar as configurações gerais de acesso.', 'Cadastro aberto, aprovação, papel de cadastro, minutos de inatividade, tentativas e minutos de bloqueio', 'Configuração salva', 'Grava em contas.json; novos cadastros nunca entram como administrador.', 'Administração: USAR', { erros: [...contaErros, 'SIGNUP_ROLE_FORBIDDEN', 'ROLE_NOT_FOUND'] }),
+  'plataforma:agentes': contaDesc('Ler a configuração geral dos agentes da plataforma.', 'Nenhuma', 'Agentes com estado ligado, IA externa e orquestração', 'Consulta local.', 'Administração: VER', { arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agentes-plataforma.json' }),
+  'plataforma:salvar': contaDesc('Ligar ou desligar agentes, o uso de Claude Code/Codex e a orquestração em todos os projetos.', 'Agentes desligados, iaExterna e orquestracao', 'Configuração salva', 'Grava agentes-plataforma.json; vale para o chat e para o servidor MCP.', 'Administração: USAR', { arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agentes-plataforma.json', erros: [...contaErros, 'AGENT_UNKNOWN'] })
 });
 export const canaisFrequentes: ReadonlySet<string> = new Set(['testes:catalogo','testes:arquivo','assistente:situacao','operacoes:previa','operacoes:listar','escrita:estado','propostas:listar','runs:listar','vinculos:mapa','agentes:estado','worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter', 'conhecimento:estado', 'conhecimento:listar', 'perfil:obter', 'assistente:abertura', 'conhecimento:vocabulario']);
 const mcpProtecoes = ['Projeto fixado na configuração do servidor, nunca pela ferramenta', 'Leitura limitada à raiz autorizada', 'Registro de início e término'];

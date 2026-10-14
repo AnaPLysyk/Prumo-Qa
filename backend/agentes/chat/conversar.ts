@@ -19,6 +19,7 @@ import { montarResposta } from './montarResposta.js';
 import { juntarConhecimentos } from './juntarConhecimentos.js';
 import { AgenteChat, agentesChat } from '../tipos/persona.js';
 import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
+import { regrasDosAgentes } from '../../administracao/regras/agentesDaPlataforma.js';
 
 export async function conversar(o: Opcoes): Promise<Resposta> {
   const pergunta = o.pergunta.trim(); const estilo = o.estilo ?? 'amigavel'; const nome = (o.nome || 'Prumo').slice(0, 40); const historico = (o.historico ?? []).slice(-6);
@@ -34,10 +35,12 @@ export async function conversar(o: Opcoes): Promise<Resposta> {
 
   // 2) Roteamento (com memória da sessão e vocabulário aprendido) e resposta local com dados reais.
   const aprendidos = tentarOuPadrao(() => pesosAprendidos(pergunta, o.base), {});
+  // Administração (2.11): agentes desligados não respondem, a orquestração pode ser desligada e a IA externa também.
+  const plataforma = regrasDosAgentes(o.base);
   const teste = o.contexto?.tipo === 'teste' ? responderSobreTeste(o.contexto, o.espacoId, o.base) : null;
-  const r = teste ? { agente: teste.agente!, rota: [], continuou: false } : escolherAgente(pergunta, o.agente, { historico, aprendidos });
+  const r = teste ? { agente: teste.agente!, rota: [], continuou: false } : escolherAgente(pergunta, o.agente, { historico, aprendidos, desligados: plataforma.desligados });
   // 3) Orquestração: sem agente escolhido pela pessoa e com dois ou mais especialistas fortes, cada um responde uma etapa.
-  const plano = !teste && !o.agente && !r.continuou ? planejarOrquestracao(r.rota) : null;
+  const plano = !teste && !o.agente && !r.continuou && plataforma.orquestracao ? planejarOrquestracao(r.rota) : null;
   let orquestracao: Orquestracao | undefined; let avisoOrquestracao: string | undefined;
   let agente = r.agente; let local: Coleta;
   if (plano) {
@@ -47,8 +50,10 @@ export async function conversar(o: Opcoes): Promise<Resposta> {
   } else local = teste ?? await responderComDadosLocais(agente, pergunta, o.espacoId, o.base);
   juntarConhecimentos(o, agente, pergunta, historico, r.continuou, local);
   const proximos = proximosPassosSugeridos(agente.id, local.fatos, perfil?.papel ?? null, pergunta);
-  const comum = { rota: r.rota, continuou: r.continuou, proximos, ...(orquestracao ? { orquestracao } : {}), ...(avisoOrquestracao ? { aviso: avisoOrquestracao } : {}) };
-  const provedor = o.provedor ?? 'local'; const chave = pergunta + '|' + historico.length;
+  const externaDesligada = (o.provedor ?? 'local') !== 'local' && !plataforma.iaExterna;
+  const aviso = [avisoOrquestracao, externaDesligada ? 'A Administração desligou o uso de Claude Code e Codex nesta instalação; a resposta usou só os dados deste computador.' : null].filter(Boolean).join(' ');
+  const comum = { rota: r.rota, continuou: r.continuou, proximos, ...(orquestracao ? { orquestracao } : {}), ...(aviso ? { aviso } : {}) };
+  const provedor = externaDesligada ? 'local' : o.provedor ?? 'local'; const chave = pergunta + '|' + historico.length;
   const vestido = () => aplicarEstilo(local.linhas, estilo, nome, agente, !!o.primeira, local.fatos, pessoa, chave);
   if (provedor === 'local') return montar(agente, { ...local, linhas: vestido() }, 'LOCAL', comum);
 

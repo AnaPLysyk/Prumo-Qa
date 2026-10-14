@@ -9,6 +9,8 @@ test('Administração › Documentação viva: busca por canal abre a tela certa
   const dados = novoDados(t), a = await abrir(t, dados);
   await a.page.emulateMedia({ reducedMotion: 'reduce' });
   await ir(a.page, 'administracao');
+  // 2.11: a Administração abre em Usuários; a documentação viva fica na própria aba.
+  await a.page.getByRole('tab', { name: 'Documentação viva' }).click();
   await a.page.waitForSelector('#adm-resumo');
   assert.match(await a.page.textContent('#adm-resumo'), /\d+telas/);
   await a.page.fill('#adm-busca', 'skills:criar');

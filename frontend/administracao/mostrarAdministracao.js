@@ -47,17 +47,25 @@
   function sistema(area, mapa) {
     area.replaceChildren(
       DS.secao('Versão', DS.meta([['Versão', mapa.versao], ['Commit do build', mapa.commit || tr('não registrado')], ['Mapa gerado em', new Date(mapa.geradoEm).toLocaleString()]])),
-      DS.secao('Usuários e permissões', DS.alerta('O Prumo ainda não tem login nem contas próprias: usa a conta do Windows deste computador. As permissões que valem hoje são as políticas de cada projeto (Agentes) e a confirmação nativa do Windows para executar e publicar.', 'info')));
+      DS.secao('Usuários e permissões', DS.alerta(window.PrumoConta?.sessao()?.loginAtivo
+        ? 'Login ligado: cada pessoa entra com a própria conta e cada tela respeita o papel dela (abas Usuários e Permissões). O worker de agendamentos, a bandeja e o servidor MCP continuam rodando com a conta do Windows deste computador.'
+        : 'Login desligado: o Prumo usa a conta do Windows deste computador e todas as telas ficam liberadas. Ative o login na aba Usuários. As políticas de cada projeto (Agentes) e a confirmação nativa do Windows para executar e publicar continuam valendo.', 'info')));
   }
 
+  // 2.11: Usuários, Permissões, Agentes e Configurações gerais ficam em gerenciarAcessos.js.
+  const ACESSOS = ['usuarios', 'permissoes', 'agentes', 'geral'];
   abas.administracao = async (el) => {
-    el.append(DS.cabecalho({ titulo: 'Administração', descricao: 'Documentação viva desta versão e estado do sistema.' }));
+    el.append(DS.cabecalho({ titulo: 'Administração', descricao: 'Usuários, permissões por tela, agentes da plataforma, configurações gerais e documentação viva desta versão.' }));
     const area = h('div', { id: 'adm-area' }, DS.carregando());
-    const mapa = await chamar(() => api.administracaoMapa());
-    if (!mapa) { area.replaceChildren(DS.estadoTela('erro', 'Documentação indisponível', 'O mapa é gerado no build do aplicativo. Gere de novo com npm run build.', [], { id: 'adm-erro' })); el.append(area); return; }
-    const sub = estado.sub?.administracao || 'documentacao';
-    const trocar = (k) => { (estado.sub ||= {}).administracao = k; if (k === 'sistema') sistema(area, mapa); else documentacao(area, mapa); };
-    el.append(DS.abas([['documentacao', 'Documentação viva'], ['sistema', 'Sistema']], sub, trocar, { id: 'adm-abas', rotulo: 'Seções da administração' }), area);
-    trocar(sub);
+    const sub = estado.sub?.administracao || 'usuarios'; let mapa = null;
+    const trocar = async (k) => {
+      (estado.sub ||= {}).administracao = k;
+      if (ACESSOS.includes(k)) return window.PrumoAdministracaoAcessos[k](area);
+      mapa ||= await chamar(() => api.administracaoMapa());
+      if (!mapa) { area.replaceChildren(DS.estadoTela('erro', 'Documentação indisponível', 'O mapa é gerado no build do aplicativo. Gere de novo com npm run build.', [], { id: 'adm-erro' })); return; }
+      if (k === 'sistema') sistema(area, mapa); else documentacao(area, mapa);
+    };
+    el.append(DS.abas([['usuarios', 'Usuários'], ['permissoes', 'Permissões'], ['agentes', 'Agentes'], ['geral', 'Configurações gerais'], ['documentacao', 'Documentação viva'], ['sistema', 'Sistema']], sub, trocar, { id: 'adm-abas', rotulo: 'Seções da administração' }), area);
+    await trocar(sub);
   };
 })();
