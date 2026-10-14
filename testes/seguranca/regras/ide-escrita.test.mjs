@@ -55,3 +55,19 @@ test('não segue atalho de pasta nem de arquivo para fora do projeto', (t) => {
   assert.throws(() => escreverArquivoDeTeste(raiz, 'ligacao/x.spec.ts', 'x', null), /TEST_FILE_INVALID/);
   assert.deepEqual(fs.readdirSync(fora), [], 'nada foi escrito fora do projeto');
 });
+
+test('pipelines do GitHub Actions: lista nome, eventos e jobs; grava só em .github/workflows e recusa o resto', async (t) => {
+  const { listarPipelines } = await import('../../../dist/testes/regras/listarPipelines.js');
+  const raiz = pasta(t);
+  assert.deepEqual(listarPipelines(raiz), [], 'sem pasta de workflows não há pipelines');
+  const novo = escreverArquivoDeTeste(raiz, '.github/workflows/ci.yml', "name: CI do projeto\non:\n  push:\n    branches: [main]\n  pull_request:\njobs:\n  testes:\n    runs-on: ubuntu-latest\n  lint:\n    runs-on: ubuntu-latest\n", null);
+  assert.equal(novo.criado, true);
+  escreverArquivoDeTeste(raiz, '.github/workflows/nightly.yaml', 'on: [schedule, workflow_dispatch]\njobs:\n  e2e:\n    runs-on: x\n', null);
+  const lista = listarPipelines(raiz);
+  assert.deepEqual(lista.map((p) => p.arquivo), ['.github/workflows/ci.yml', '.github/workflows/nightly.yaml']);
+  assert.equal(lista[0].nome, 'CI do projeto'); assert.deepEqual(lista[0].eventos, ['push', 'pull_request']); assert.deepEqual(lista[0].jobs, ['testes', 'lint']);
+  assert.equal(lista[1].nome, 'nightly'); assert.deepEqual(lista[1].eventos, ['schedule', 'workflow_dispatch']); assert.deepEqual(lista[1].jobs, ['e2e']);
+  for (const ruim of ['.github/workflows/sub/x.yml', '.github/workflows/x.txt', '.github/outro.yml', '.github/workflows/../x.yml', 'workflows/x.yml', '.github/workflows/.yml'])
+    assert.throws(() => escreverArquivoDeTeste(raiz, ruim, 'x', null), /TEST_FILE_INVALID/, ruim);
+  assert.deepEqual(fs.readdirSync(path.join(raiz, '.github/workflows')).sort(), ['ci.yml', 'nightly.yaml']);
+});

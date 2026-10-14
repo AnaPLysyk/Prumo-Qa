@@ -11,7 +11,7 @@
 
 ## IDE de Testes: escrita de arquivos (2.13)
 
-- **Canal único:** `testes:gravar`. Grava ou cria só arquivo de teste (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`), dentro da pasta vinculada ao projeto, sem link simbólico (de arquivo ou de pasta), em pasta que não seja `node_modules`, `.git`, `dist`, `.prumo` e similares, e até 300 KB de texto.
+- **Canal único:** `testes:gravar`. Grava ou cria só arquivo de teste (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`), ou pipeline do GitHub Actions (`.github/workflows/*.yml`, sem subpastas; a confirmação avisa que é CI/CD e que só vale depois de enviado ao GitHub), dentro da pasta vinculada ao projeto, sem link simbólico (de arquivo ou de pasta), em pasta que não seja `node_modules`, `.git`, `dist`, `.prumo` e similares, e até 300 KB de texto.
 - **Confirmação nativa do Windows** a cada gravação, com a pasta, o arquivo e o efeito (arquivo novo ou conteúdo substituído). A página não consegue simular essa caixa.
 - **Sem sobrescrever o que a pessoa não viu:** a gravação leva o SHA-256 do conteúdo lido; se o arquivo mudou fora do Prumo, é recusada (`TEST_FILE_CHANGED`); criar sobre um arquivo existente também (`TEST_FILE_EXISTS`). A troca é atômica (arquivo temporário e renomeação) e o fim de linha original (CRLF) é preservado.
 - **Segredos:** arquivo cujo conteúdo teria algo mascarado não é aberto para edição, para que a máscara nunca seja gravada por cima do valor real nem o valor real apareça na janela.

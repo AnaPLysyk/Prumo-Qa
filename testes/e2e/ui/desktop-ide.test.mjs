@@ -64,3 +64,22 @@ test('IDE: arquivo com o que parece um segredo não é aberto para edição', as
   await a.page.locator('#ide-bloqueado').waitFor(); assert.equal(await a.page.locator('#ide-editar').count(), 0);
   assert.doesNotMatch(await a.page.textContent('.ds-ide-linhas'), /ghp_a{36}/, 'o segredo continua mascarado');
 });
+
+test('Pipelines CI/CD: lista os workflows do repositório do projeto, edita e cria com confirmação nativa', async (t) => {
+  const { a, f } = await preparar(t);
+  await f.write('.github/workflows/ci.yml', 'name: CI do projeto\non:\n  push:\n    branches: [main]\njobs:\n  testes:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm test\n').catch(async () => { fs.mkdirSync(path.join(f.root, '.github/workflows'), { recursive: true }); await f.write('.github/workflows/ci.yml', 'name: CI do projeto\non:\n  push:\n    branches: [main]\njobs:\n  testes:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm test\n'); });
+  await ir(a.page, 'automacoes');
+  await a.page.locator('button[data-arquivo=".github/workflows/ci.yml"]').waitFor();
+  assert.match(await a.page.textContent('.ds-ide-painel'), /CI do projeto[\s\S]*push[\s\S]*testes/, 'nome, eventos e jobs lidos do arquivo');
+  await a.page.click('#ide-editar'); await cm(a.page).waitFor();
+  await a.page.evaluate(() => { const c = document.querySelector('.CodeMirror').CodeMirror; c.setValue(c.getValue().replace('npm test', 'npm run e2e')); });
+  await a.page.click('#ide-salvar'); await a.page.waitForFunction(() => /Salvo/.test(document.querySelector('#ide-estado')?.textContent || ''));
+  assert.match(fs.readFileSync(path.join(f.root, '.github/workflows/ci.yml'), 'utf8'), /npm run e2e/);
+  assert.deepEqual(await confirmacoes(a), ['Salvar pipeline']);
+  await a.page.click('#pipe-novo'); await a.page.fill('#pipe-novo-nome', 'nightly.yml'); await a.page.fill('#pipe-novo-titulo', 'Noturno'); await a.page.click('#pipe-novo-criar');
+  await a.page.waitForFunction(() => !!document.querySelector('.ds-ide-cm .CodeMirror'));
+  assert.match(fs.readFileSync(path.join(f.root, '.github/workflows/nightly.yml'), 'utf8'), /^name: Noturno/);
+  assert.deepEqual(await confirmacoes(a), ['Salvar pipeline', 'Criar pipeline']);
+  assert.equal((await a.page.evaluate((id) => window.prumo.testesGravar(id, '.github/workflows/sub/x.yml', 'x', null), (await a.page.evaluate(() => window.prumo.espacos())).data[0].id)).ok, false, 'subpasta de workflows é recusada');
+  assert.deepEqual(a.erros, []);
+});

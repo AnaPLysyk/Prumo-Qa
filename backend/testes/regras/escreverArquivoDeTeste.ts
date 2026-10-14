@@ -1,7 +1,8 @@
-/** Grava ou cria um arquivo de teste só dentro da pasta do projeto: sem atalhos, até 300 KB, troca atômica e recusa se o arquivo mudou desde a leitura. */
+/** Grava ou cria um arquivo de teste ou de pipeline (.github/workflows) só dentro da pasta do projeto: sem atalhos, até 300 KB, troca atômica e recusa se o arquivo mudou desde a leitura. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { hash } from '../../compartilhado/seguranca/hash.js';
+import { pareceArquivoDePipeline } from './pareceArquivoDePipeline.js';
 import { pareceArquivoDeTeste } from './pareceArquivoDeTeste.js';
 import { IGNORAR, limites } from '../tipos/catalogoDeTestes.js';
 
@@ -10,7 +11,7 @@ export type ResultadoDaEscrita = { arquivo: string; linhas: number; hash: string
 function caminhoRelativo(relativo: string): string {
   const rel = String(relativo).replaceAll('\\', '/');
   if (!rel || rel.length > 400 || rel.startsWith('/') || /^[a-z]:/i.test(rel) || /[\x00-\x1f]/.test(rel)
-    || rel.split('/').some((x) => x === '..' || x === '.' || x === '' || IGNORAR.has(x)) || !pareceArquivoDeTeste(rel.split('/').at(-1)!)) throw new Error('TEST_FILE_INVALID: caminho ou nome de arquivo de teste inválido.');
+    || rel.split('/').some((x) => x === '..' || x === '.' || x === '' || IGNORAR.has(x)) || (!pareceArquivoDeTeste(rel.split('/').at(-1)!) && !pareceArquivoDePipeline(rel))) throw new Error('TEST_FILE_INVALID: caminho ou nome de arquivo de teste ou de pipeline inválido.');
   return rel;
 }
 

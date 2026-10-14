@@ -31,7 +31,7 @@ export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
   'espacos:pasta': ['projetos', 'USAR'], 'servicos:desvincular': ['projetos', 'USAR'], 'servicos:conferir': ['projetos', 'VER'],
   'contextos:listar': ['contextos', 'VER'], 'contextos:obter': ['contextos', 'VER'], 'contextos:salvar': ['contextos', 'USAR'], 'contextos:aprovar': ['contextos', 'USAR'], 'contextos:desatualizar': ['contextos', 'USAR'],
   'contextos:conflito': ['contextos', 'USAR'], 'contextos:excluir': ['contextos', 'USAR'], 'contextos:mcp': ['contextos', 'USAR'], 'servicos:importar': ['contextos', 'USAR'],
-  'espacos:automacoes': ['testes', 'VER'], 'testes:catalogo': ['testes', 'VER'], 'testes:arquivo': ['testes', 'VER'], 'testes:gravar': ['testes', 'USAR'], 'propostas:listar': ['testes', 'VER'], 'runs:listar': ['testes', 'VER'],
+  'espacos:automacoes': ['testes', 'VER'], 'testes:catalogo': ['testes', 'VER'], 'testes:arquivo': ['testes', 'VER'], 'testes:gravar': ['testes', 'USAR'], 'testes:pipelines': ['testes', 'VER'], 'propostas:listar': ['testes', 'VER'], 'runs:listar': ['testes', 'VER'],
   'propostas:criar': ['testes', 'USAR'], 'propostas:editar': ['testes', 'USAR'], 'propostas:revisar': ['testes', 'USAR'], 'propostas:descartar': ['testes', 'USAR'], 'propostas:publicar': ['testes', 'USAR'],
   'runs:preparar': ['testes', 'USAR'], 'runs:criar': ['testes', 'USAR'], 'runs:executar': ['testes', 'USAR'], 'runs:resultado': ['testes', 'USAR'], 'runs:publicar': ['testes', 'USAR'], 'runs:bugs': ['testes', 'USAR'],
   'runs:politica': ['testes', 'USAR'], 'runs:revogar': ['testes', 'USAR'], 'operacoes:executar': ['testes', 'USAR'],
