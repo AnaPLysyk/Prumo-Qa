@@ -42,7 +42,7 @@
     "app": "npm run build && electron .",
     "icone": "electron ferramentas/empacotamento/gerar-icone-orb.cjs",
     "dist": "npm run build && electron-builder --win nsis --publish never",
-    "dist:mac": "npm run build && electron-builder --mac dmg --publish never",
+    "dist:mac": "npm run build && electron-builder --mac dmg --arm64 --x64 --publish never",
     "dist:linux": "npm run build && electron-builder --linux AppImage deb --publish never",
     "contratos": "npm run build && node ferramentas/documentacao/gerar-contratos.mjs",
     "site": "node site/gerar.mjs",

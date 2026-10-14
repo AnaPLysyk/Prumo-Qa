@@ -49,9 +49,8 @@ jobs:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
           if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
-            # Não esconde falha: sem o segredo o site NÃO foi publicado, então o fluxo fica vermelho.
-            echo "::error::Segredo RENDER_DEPLOY_HOOK_URL não configurado: o site foi gerado e conferido, mas NÃO foi publicado no Render. Configure-o (docs/RELEASE.md) ou use Manual Deploy no Render."
-            exit 1
+            echo "::notice::Sem RENDER_DEPLOY_HOOK_URL: aguardando deploy manual no Render. A etapa seguinte exige este commit no ar; sem publicação, o fluxo falha."
+            exit 0
           fi
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$RENDER_DEPLOY_HOOK_URL")
           echo "Render respondeu HTTP $code"
@@ -60,7 +59,6 @@ jobs:
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          [ -z "$RENDER_DEPLOY_HOOK_URL" ] && exit 0
           esperado=$(node -e "const v=JSON.parse(require('fs').readFileSync('docs/catalogo/versoes.json','utf8')).versions.find(x=>x.status==='publicada');console.log(v.version)")
           # 2.10.1: espera o site gerado DESTE commit (build.txt), não só a versão anunciada, que pode não ter mudado.
           for i in $(seq 1 45); do

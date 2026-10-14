@@ -53,7 +53,7 @@ O build do site no Render roda `node site/construir-no-render.mjs` (`render.yaml
 
 ## Pré-requisito: publicação do site
 
-O fluxo do site publica no Render pelo **Deploy Hook**, guardado no segredo `RENDER_DEPLOY_HOOK_URL` do repositório (Render › `prumo-qa-docs` › Settings › Deploy Hook; GitHub › Settings › Secrets and variables › Actions). Sem ele o fluxo fica vermelho e o site não muda; enquanto isso, publique pelo Render em Manual Deploy › Deploy latest commit.
+O fluxo do site publica no Render pelo **Deploy Hook**, guardado no segredo `RENDER_DEPLOY_HOOK_URL` do repositório (Render › `prumo-qa-docs` › Settings › Deploy Hook; GitHub › Settings › Secrets and variables › Actions). Sem ele, publique pelo Render em Manual Deploy › Deploy latest commit (ou pelo conector do Render). O fluxo aguarda e exige o commit exato no `build.txt` e a versão publicada no site; sem essa prova fica vermelho. Gerar as páginas não comprova publicação.
 
 ## Conferência final
 

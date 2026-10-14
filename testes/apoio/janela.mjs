@@ -18,7 +18,8 @@ export const abas = ['inicio', 'projetos', 'contextos', 'tickets', 'testes', 'au
 // Cada teste tem seu diretório de dados; ao final os aplicativos abertos são fechados ANTES de apagá-lo.
 const abertos = new Map();
 export const novoDados = (t) => {
-  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo dados desktop ')); abertos.set(d, []);
+  // macOS pode expor /var como link para /private/var; a fixture usa o caminho físico, sem relaxar a proteção do produto.
+  const d = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'prumo dados desktop '))); abertos.set(d, []);
   t.after(async () => { for (const fechar of abertos.get(d)) await fechar().catch(() => {}); abertos.delete(d); fs.rmSync(d, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
   return d;
 };
@@ -33,7 +34,11 @@ export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   const erros = []; page.on('pageerror', (e) => erros.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
   await page.waitForSelector('#nav button');
   // Espera a primeira tela: antes disso os listeners do menu ainda não existem e um clique se perde (corrida da 2.9/v39).
-  await page.waitForSelector('[data-aba=inicio][aria-current=page]');
+  try { await page.waitForSelector('[data-aba=inicio][aria-current=page]'); }
+  catch (erro) {
+    const vista = await page.evaluate(() => ({ entrada: document.querySelector('#entrada-titulo')?.textContent, aviso: document.querySelector('#aviso')?.textContent })).catch(() => ({}));
+    throw new Error('A janela não iniciou: ' + JSON.stringify({ erros, vista }), { cause: erro });
+  }
   // A janela abre em Início (2.8). Os testes anteriores partem de Projetos; Início tem teste próprio (desktop-agenda.test.mjs).
   if (!opcoes.inicio) await ir(page, 'projetos');
   return { app, page, erros, fechar };
