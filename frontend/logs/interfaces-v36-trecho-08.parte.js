@@ -27,7 +27,7 @@
       corpo,
       h('div', { class: 'v36l-rodape' }, h('div', { class: 'v36l-led' }, h('i'), contador), h('div', { class: 'v36l-rodape-acoes' }, h('label', {}, seguir, h('span', {}, tr('Seguir saída'))), diagnostico)));
     el.append(h('h1', { class: 'v36-sr' }, 'Logs'), janela);
-    const boot = (temLinhas) => temLinhas ? h('div', { class: 'v36l-boot' }, h('span', { class: 'v36l-sub' }, tr('Selecione uma linha para inspecionar seus metadados. Nenhum comando é executado nesta tela.'))) : null;
+    const boot = (temLinhas) => temLinhas ? h('div', { class: 'v36l-boot' }, DS.info('Selecione uma linha para inspecionar seus metadados. Nenhum comando é executado nesta tela.', { rotulo: 'Como usar' })) : null;
     if (!root) { corpo.append(h('div', { class: 'v36l-vazio' }, semProjeto())); [busca, fFerramenta, fNivel, fCliente, limpar, seguir].forEach((c) => { c.disabled = true; }); contador.textContent = tr('Nenhum projeto selecionado'); return; }
     const chave = (e) => e.operationId + ':' + e.phase;
     function mensagem(e) { return e.phase === 'start' ? [h('span', {}, tr('Operação iniciada')), ' · ', ignorar(e.origin + '/' + e.client)] : [h('span', {}, tr('Operação encerrada')), ' · ', ignorar([e.state, e.summary?.code, ms(e.durationMs)].filter(Boolean).join(' · '))]; }

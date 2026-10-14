@@ -20,3 +20,9 @@ export type MapaDoAplicativo = z.infer<typeof mapaDoAplicativoSchema>;
 
 /** O mapa tem no máximo este tamanho em bytes; maior que isso é recusado sem ler. */
 export const LIMITE_MAPA = 4 * 1024 * 1024;
+
+/** Código de cada arquivo do mapa, gerado no build em app/documentacao/codigo.json (caminho → texto). Lido um arquivo por pedido. */
+export const LIMITE_CODIGO_TOTAL = 12 * 1024 * 1024;
+export const LIMITE_CODIGO_ARQUIVO = 200 * 1024;
+export const caminhoDeCodigoSchema = z.string().max(300).regex(/^(frontend|backend|testes)\/[A-Za-z0-9_./-]+\.(ts|js|mjs|cjs|css|html)$/).refine((c) => !c.split('/').includes('..'));
+export type CodigoDoArquivo = { caminho: string; texto: string; linhas: number; bytes: number; truncado: boolean };

@@ -94,9 +94,9 @@
       const clientContent = h('div', { id: 'v36-client-panel' }); let loaded = false;
       const clients = h('details', { class: 'v36a-secao-extra', id: 'v36-clients', ontoggle: async ev => { if (!ev.currentTarget.open || loaded) return; loaded = true; await agentesLegado(clientContent); clientContent.querySelector('h1')?.remove(); } }, h('summary', {}, tr('Clientes MCP · diagnóstico e configuração')), clientContent);
       body.replaceChildren(
-        h('div', { class: 'v36a-topo' }, h('div', {}, h('h2', { class: 'v36a-titulo' }, tr('Agentes'), ' ', conta), h('p', {}, tr('Especializações do núcleo e prévias locais deste projeto.'))),
+        h('div', { class: 'v36a-topo' }, h('div', {}, h('h2', { class: 'v36a-titulo' }, tr('Agentes'), ' ', conta, DS.info(['Especializações do núcleo e prévias locais deste projeto.', 'Especializações reais do núcleo. Habilitação não comprova sessão nem execução ativa. Retratos com movimento visual, sem articulação facial 3D.'], { id: 'v36a-sobre' }))),
           h('div', { class: 'v36a-acoes' }, h('label', { class: 'v36a-busca' }, iconeBusca(), search), novo)),
-        lista, h('p', { class: 'v36a-nota' }, tr('Especializações reais do núcleo. Habilitação não comprova sessão nem execução ativa. Retratos com movimento visual, sem articulação facial 3D.')),
+        lista,
         legacyPolicies(), clients);
       render();
     }
@@ -232,7 +232,7 @@
         // Atendimentos recentes têm metadados; conversas antigas podem conter texto.
         for (const c of (conv || []).slice(0, 12)) neuronios.push({ id: 'conv:' + c.id, t: c.semTexto ? 'Atendimento · ' + (c.avaliacao || 'Sem avaliação') : '“' + c.pergunta.slice(0, 38) + (c.pergunta.length > 38 ? '…”' : '”'), r: (c.modo === 'LOCAL' ? tr('local') : c.modo) + ' · ' + hora(c.em), v: { pergunta: c.pergunta, resposta: c.linhas, fontes: c.fontes.map((f) => f.rotulo), modo: c.modo, estilo: c.estilo, em: c.em }, g: 'conv' });
       }
-      const inspect = h('section', { class: 'v36-brain-inspect', 'aria-live': 'polite' }, note(tr('Cada ponto é um conhecimento configurado deste agente. Selecione um para consultar. Isso não representa memória aprendida automaticamente.')));
+      const inspect = h('section', { class: 'v36-brain-inspect', 'aria-live': 'polite' });
       const campo = h('div', { class: 'v36a-campo-neural' }); const anel = h('div', { class: 'v36a-anel' });
       const face = h('div', { class: 'v36-brain-face' }); const stage = h('div', { class: 'v36-stage v36-brain v36a-cerebro' });
       // Os grupos ficam juntos no anel (setores), na ordem da legenda, para a ramificação ser legível.
@@ -276,10 +276,10 @@
           h('p', { class: 'v36a-sim-termos' }, tr('Termos considerados: {t}', { t: r.termos.join(', ') || '—' })));
       }
       const simulador = h('form', { class: 'v36a-simulador', id: 'v36-brain-simulador', onsubmit: simular },
-        h('label', { for: 'v36-brain-pergunta' }, tr('Testar uma pergunta')),
+        h('label', { for: 'v36-brain-pergunta' }, tr('Testar uma pergunta'), DS.info('Mostra o caminho que o chat faria agora com esta pergunta. Não chama IA e não grava nada.')),
         h('div', { class: 'v36a-sim-linha' }, pergunta, h('button', { type: 'submit', class: 'v36a-primario' }, tr('Simular')), h('button', { type: 'button', class: 'v36a-quieto', onclick: () => { pergunta.value = ''; limpar(); pergunta.focus(); } }, tr('Limpar'))),
-        h('small', {}, tr('Mostra o caminho que o chat faria agora com esta pergunta. Não chama IA e não grava nada.')), rastro);
-      stage.append(h('div', { class: 'v36a-cerebro-topo' }, h('button', { type: 'button', class: 'v36a-voltar', onclick: () => detail(x) }, '← ', tr('Configuração')), h('strong', { 'data-i18n-ignore': '' }, x.nome), h('span', {}, tr('{n} conhecimentos', { n: neuronios.length }))),
+        rastro);
+      stage.append(h('div', { class: 'v36a-cerebro-topo' }, h('button', { type: 'button', class: 'v36a-voltar', onclick: () => detail(x) }, '← ', tr('Configuração')), h('strong', { 'data-i18n-ignore': '' }, x.nome), DS.info('Cada ponto é um conhecimento configurado deste agente. Selecione um para consultar. Isso não representa memória aprendida automaticamente.'), h('span', {}, tr('{n} conhecimentos', { n: neuronios.length }))),
         h('div', { class: 'v36a-cerebro-corpo' }, campo, h('aside', { class: 'v36a-cerebro-lado', 'aria-label': tr('Testar e consultar o cérebro') }, simulador, inspect, legenda)));
       stage.style.setProperty('--face-color', palette[x.index % 8]); neural(stage, { pontos: 110 });
       body.replaceChildren(stage); figuraRobo(face, x, 'cerebro', campo);

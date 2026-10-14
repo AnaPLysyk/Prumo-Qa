@@ -1,5 +1,7 @@
 /** Lista oficial do que a janela (IPC) e os agentes de IA (MCP) podem pedir ao Prumo, com o formato de cada pedido e sua explicação. */
 import { z } from 'zod';
+import { operacoesConta } from '../../contas/tipos/contas.js';
+import { caminhoDeCodigoSchema } from '../../administracao/tipos/mapaDoAplicativo.js';
 import { ambientes, dadosRotinaSchema } from '../../agendamentos/tipos/rotina.js';
 import { tiposConhecimento } from '../../agentes/tipos/conhecimento.js';
 import { papeis } from '../../agentes/tipos/persona.js';
@@ -34,6 +36,16 @@ const raiz = z.string().min(1).max(1000);
 const soRaiz = z.object({ root: raiz }).strict();
 const vazio = z.object({}).strict();
 export const esquemasIpc = {
+  'conta:estado': operacoesConta.estado,
+  'conta:login': operacoesConta.login,
+  'conta:cadastrar': operacoesConta.cadastrar,
+  'conta:confirmar': operacoesConta.confirmar,
+  'conta:recuperar': operacoesConta.recuperar,
+  'conta:redefinir': operacoesConta.redefinir,
+  'conta:sair': operacoesConta.sair,
+  'conta:excluir': operacoesConta.excluir,
+  'conta:listar': operacoesConta.listar,
+  'conta:permissao': operacoesConta.permissao,
   'interface:exportar': z.object({ tipo: z.enum(['agente', 'metricas-json', 'metricas-csv', 'evidencia-json']), texto: z.string().min(1).max(2 * 1024 * 1024) }).strict(),
   'espacos:listar': vazio,
   'espacos:criar': dadosEspaco,
@@ -93,6 +105,7 @@ export const esquemasIpc = {
   'conhecimento:esquecer': z.object({agente:z.string().regex(/^[a-z0-9-]{1,40}$/),termo:z.string().min(1).max(60)}).strict(),
   'conhecimento:mostrar': z.object({}).strict(),
   'administracao:mapa': z.object({}).strict(),
+  'administracao:codigo': z.object({caminho:caminhoDeCodigoSchema}).strict(),
   'agentes:orquestracoes': z.object({espacoId:z.string().uuid().nullable()}).strict(),
   'agentes:rastrear': z.object({espacoId:z.string().uuid().nullable(),pergunta:z.string().trim().min(1).max(500),agente:z.string().regex(/^[a-z0-9-]{1,40}$/).nullable()}).strict(),
   'skills:listar': z.object({especializacao:z.enum(especializacoes.map(e=>e.id) as [string,...string[]]).nullable().optional(),estados:z.array(z.enum(estadosTrecho)).max(3).optional(),busca:z.string().max(100).optional()}).strict(),
@@ -288,6 +301,7 @@ Object.assign(ipc, {
   'conhecimento:vocabulario': extDesc("Listar os termos que um agente aprendeu com as correções da pessoa.", "Agente", "Termos, peso e data", "Consulta local.", "Nenhuma", { origem: 'Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes', destino: 'main.ts > orquestrador.ts / conhecimento.ts', arquivos: "%LOCALAPPDATA%\\PrumoQA\\conhecimento.db", registro: 'Banco de conhecimento local (SQLite)', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'KNOWLEDGE_*', 'PROFILE_*'] }),
   'conhecimento:esquecer': extDesc("Fazer um agente esquecer um termo aprendido.", "Agente e termo", "apagado", "Remove o termo do vocabulário.", "Ação explícita da pessoa", { origem: 'Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes', destino: 'main.ts > orquestrador.ts / conhecimento.ts', arquivos: "%LOCALAPPDATA%\\PrumoQA\\conhecimento.db", registro: 'Banco de conhecimento local (SQLite)', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'KNOWLEDGE_*', 'PROFILE_*'] }),
   'conhecimento:mostrar': extDesc("Mostrar o arquivo conhecimento.db no Explorer (para abrir no Beekeeper Studio ou outro gerenciador SQLite).", "Nenhuma", "Caminho do arquivo", "Abre o Explorer com o arquivo selecionado; nada é enviado.", "Ação explícita da pessoa", { origem: 'Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes', destino: 'main.ts > orquestrador.ts / conhecimento.ts', arquivos: "%LOCALAPPDATA%\\PrumoQA\\conhecimento.db", registro: 'Banco de conhecimento local (SQLite)', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'KNOWLEDGE_*', 'PROFILE_*'] }),
+  'administracao:codigo': extDesc('Mostrar o código de um arquivo do aplicativo na Documentação viva, ao lado da explicação do que ele faz.', 'Caminho do arquivo (frontend/, backend/ ou testes/) que consta do mapa desta versão', 'Texto do arquivo, linhas, bytes e se foi encurtado (até 200 KB)', 'Consulta local: lê app/documentacao/codigo.json, gerado no build; nada do projeto da pessoa é lido.', 'Nenhuma', { origem: 'Interface > Administração (Documentação viva)', destino: 'backend/administracao/api/administracaoCodigo.ts > lerCodigoDoAplicativo', arquivos: 'app/documentacao/codigo.json (do próprio aplicativo)' }),
   'administracao:mapa': extDesc('Mostrar a documentação viva desta versão: para cada tela, os arquivos da interface, os canais da janela, o backend (api, regras, banco, integrações, tipos) e os testes.', 'Nenhuma', 'Mapa por tela com caminhos, descrições, funções e ligações (sem código-fonte)', 'Consulta local de um arquivo do próprio aplicativo, gerado no build; não lê projetos vinculados nem dados da pessoa.', 'Nenhuma', { origem: 'Interface > Administração', arquivos: 'app/documentacao/mapa.json (gerado no build)', registro: 'Nenhum', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'ARCHITECTURE_MAP_*'] }),
   'agentes:rastrear': extDesc('Simular o caminho de uma pergunta no chat: palavras reconhecidas, pontuação de cada agente, quem responderia, se haveria orquestração e quais conhecimentos e trechos de Skill o agente em foco usaria.', 'Projeto (ou geral), pergunta e agente em foco', 'Rastro com palavras, termos, rota pontuada, agente escolhido, orquestração e o que o agente em foco usaria', 'Consulta local: não chama IA e não grava conversa, atendimento nem aprendizado.', 'Nenhuma', { origem: 'Interface > Agentes (Cérebro)', destino: 'backend/agentes/api/agentesRastrear.ts > rastrearPergunta', arquivos: 'conhecimento.db e skills.db na pasta de dados (somente leitura)' }),
   'agentes:orquestracoes': extDesc('Listar as orquestrações recentes do projeto: agentes participantes, ordem de delegação, etapas com início, fim, duração, fontes consultadas, falhas e resultado.', 'Projeto (ou geral)', 'Até 50 orquestrações, da mais recente para a mais antiga, e quantas linhas inválidas foram ignoradas', 'Consulta local de orquestracoes.jsonl; o registro guarda só metadados, sem a pergunta e sem a resposta.', 'Nenhuma', { origem: 'Interface > Agentes > Painel de atividades', arquivos: '%LOCALAPPDATA%\\PrumoQA\\orquestracoes.jsonl', registro: 'Metadados das orquestrações do chat', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'ORCHESTRATION_*'] }),
@@ -377,6 +391,9 @@ const mcpExtra: { nome: string; campos: string[]; d: Descricao }[] = [
   { nome: 'propor_aprendizado', campos: ['agente', 'texto', 'tipo', 'titulo'], d: { finalidade: 'Sugerir conhecimento para os agentes deste projeto como rascunho local.', origem: 'Agente de IA por MCP (stdio)', destino: 'backend/agentes/mcp/criarServidor.ts > registrarConhecimento', entrada: 'Tipo (fato, glossario, preferencia, procedimento ou risco), título de 2 a 120 caracteres, texto de 2 a 2000 caracteres e agente opcional', saida: 'Identificador, estado, duplicado e aviso de aprovação pendente', permissoes: 'Projeto Prumo vinculado à raiz do servidor MCP', efeito: 'Grava RASCUNHO em conhecimento.db; não aprova nem publica.', arquivos: 'conhecimento.db', erros: ['NO_WORKSPACE', 'KNOWLEDGE_AGENT_UNKNOWN', 'KNOWLEDGE_RATE_LIMIT', 'KNOWLEDGE_LIMIT'], protecoes: [...mcpProtecoes, 'Isolamento por projeto', 'Limite de 20 sugestões de IA por hora', 'Só a pessoa aprova'], registro: 'Banco de conhecimento local e histórico de atividades MCP' } }
 ];
 mcp.push(...mcpExtra);
+for (const op of Object.keys(operacoesConta)) {
+  ipc[`conta:${op}` as CanalIpc] = { finalidade: `Conta online: ${op}.`, origem: 'Interface > Configuração > Meu perfil / Administração', destino: `backend/contas/api/conta${op.charAt(0).toUpperCase()}${op.slice(1)}.ts`, entrada: 'Esquema estrito compartilhado com o serviço online; sem escolha de privilégio no cadastro.', saida: 'Identidade pública ou confirmação; token nunca vai à janela.', permissoes: ['listar','permissao'].includes(op) ? 'Administrador conferido no servidor.' : 'Conta pessoal; exclusão exige sessão, senha e confirmação nativa.', efeito: 'Consulta ou alteração explícita no serviço online de contas. Nenhum projeto local é enviado.', arquivos: 'Postgres do serviço de contas; sessão desktop só em memória.', erros: [...ipcErros,'ACCOUNT_CONFIG_REQUIRED','ACCOUNT_LOGIN_REQUIRED','ACCOUNT_ADMIN_REQUIRED','ACCOUNT_CREDENTIAL_INVALID','ACCOUNT_CODE_INVALID','ACCOUNT_RATE_LIMIT','ACCOUNT_EMAIL_UNAVAILABLE','ACCOUNT_UNAVAILABLE','ACCOUNT_CHANGE_CONFLICT'], protecoes: [...ipcProtecoes,'HTTPS sem redirecionamento','Senhas com scrypt no servidor','Código expirável e de uso único','Sessão revogada ao redefinir senha ou excluir','Sem ferramenta MCP de gestão de contas'], registro: 'Diagnóstico IPC apenas de metadados; nenhum e-mail, senha ou token.' };
+}
 export function catalogo(): Operacao[] {
   return [
     ...(Object.keys(esquemasIpc) as CanalIpc[]).map(c => ({ tipo: 'IPC' as const, nome: 'prumo:' + c, campos: camposDe(esquemasIpc[c]), ...ipc[c]!, destino: arquivosDosCanais[c]! })),

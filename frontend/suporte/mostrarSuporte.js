@@ -3,7 +3,7 @@
 (() => {
   // ======================= Suporte =======================
   abas.suporte = async (el) => {
-    el.append(DS.cabecalho({ titulo: 'Suporte', descricao: 'Relate um bug, peça uma melhoria ou envie uma sugestão pelo GitHub Issues. O texto é revisado aqui antes de qualquer envio.' }));
+    el.append(DS.cabecalho({ titulo: 'Suporte', info: 'Relate um bug, peça uma melhoria ou envie uma sugestão pelo GitHub Issues. O texto é revisado aqui antes de qualquer envio.' }));
     const categoria = h('select', { id: 'sup-categoria' }, [['bug', 'Bug'], ['melhoria', 'Melhoria'], ['sugestao', 'Sugestão']].map(([v, t]) => h('option', { value: v }, tr(t))));
     const titulo = h('input', { id: 'sup-titulo', type: 'text', maxlength: '120', placeholder: tr('Resumo do problema ou da ideia') });
     const descricao = h('textarea', { id: 'sup-descricao', rows: '5', maxlength: '4000', placeholder: tr('O que aconteceu? Em qual tela?') });
@@ -30,7 +30,7 @@
       saida.replaceChildren(...nos.filter(Boolean)); saida.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     };
     const form = h('form', { class: 'ds-form', onsubmit: (ev) => { ev.preventDefault(); revisar(); } }, DS.campo('Tipo', categoria), h('span'), DS.campo('Título', titulo, { inteiro: true }), DS.campo('Descrição', descricao, { inteiro: true }), gPassos, gEsperado,
-      DS.grupo('O que incluir', h('div', { class: 'ds-opcoes inteiro coluna' }, incVersao, incSistema, incDiag), h('p', { class: 'suave inteiro' }, tr('Logs, evidências, caminhos, contextos e código do seu projeto nunca são anexados.'))),
+      DS.grupo('O que incluir', h('div', { class: 'ds-opcoes inteiro coluna' }, incVersao, incSistema, incDiag), DS.info('Logs, evidências, caminhos, contextos e código do seu projeto nunca são anexados.')),
       h('div', { class: 'ds-alerta inteiro', 'data-tom': 'aviso', id: 'aviso-publico' }, DS.icone('alerta'), h('div', {}, h('strong', {}, tr('Atenção: ')), tr('issues do repositório oficial são públicas. Não inclua senhas, tokens, documentos privados, código confidencial ou dados pessoais. Nenhum e-mail de suporte é oferecido; o canal oficial é o GitHub Issues.'))),
       h('div', { class: 'ds-opcoes inteiro' }, consente), h('div', { class: 'ds-form-acoes' }, h('button', { class: 'acao primaria', id: 'sup-revisar', type: 'submit' }, tr('Revisar'))));
     // Lateral: acesso rápido, diagnóstico local e acompanhamento de chamado.
@@ -46,7 +46,7 @@
     const diag = h('div', { class: 'ds-diag', id: 'sup-diagnostico-local' }, h('div', {}, h('span', {}, tr('Consultando…'))));
     const aside = h('aside', {},
       h('div', {}, h('h2', {}, tr('Antes de solicitar')), h('ul', { class: 'ds-links' }, [['Consultar documentação', () => mostrar('ajuda')], ['Verificar logs', () => mostrar('logs')], ['Conferir conexões', () => mostrar('conexoes')], ['Problemas comuns', () => { estado.ajudaAlvo = '09-problemas'; mostrar('ajuda'); }]].map(([t, fn]) => h('li', {}, h('button', { type: 'button', onclick: fn }, tr(t)))))),
-      h('div', {}, h('h2', {}, tr('Diagnóstico local')), diag, h('p', { class: 'suave ds-mt' }, tr('Lido deste computador. Não é anexado ao relato sem a sua escolha.'))),
+      h('div', {}, h('h2', {}, tr('Diagnóstico local'), DS.info('Lido deste computador. Não é anexado ao relato sem a sua escolha.')), diag),
       h('div', {}, h('h2', {}, tr('Acompanhar chamado')), h('div', { class: 'ds-cab-acoes' }, numero, DS.acao('Consultar chamado', consultar, { compacto: true })), chamado));
     el.append(h('div', { class: 'ds-atendimento' }, h('div', {}, etapas, form, saida), aside));
     gPassos.hidden = categoria.value !== 'bug';

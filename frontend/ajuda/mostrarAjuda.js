@@ -76,7 +76,8 @@
       resultados.replaceChildren(h('p', { class: 'suave' }, tr('{n} resultado(s) para "{q}"', { n: achados.length, q: busca.input.value.trim() })), ...(achados.length ? achados.map((it) => h('div', { class: 'ds-doc-resultado' }, h('button', { type: 'button', onclick: () => abrir(it) }, it.title), h('span', { class: 'ds-chip ds-ml' }, tr(grupoDe(it.id) || '')), it.corpo ? trecho(it.corpo, primeiroAchado(it.corpo, ts) || null) : null)) : [DS.estadoTela('vazio', 'Nada encontrado', 'Tente outro termo ou navegue pelo índice.', [], { compacto: true })]));
       resultados.hidden = false; corpo.hidden = true; trilhaNav.hidden = true;
     });
-    el.append(DS.cabecalho({ titulo: 'Ajuda', descricao: 'Documentação, versões, integrações técnicas e dados deste computador.' }),
+    el.append(DS.cabecalho({ titulo: 'Ajuda', info: 'Documentação, versões, integrações técnicas e dados deste computador.' }),
+      h('div', { class: 'ds-barra' }, h('button', { type: 'button', id: 'ajuda-download', onclick: () => chamar(() => api.abrirSite()) }, tr('Baixar instalador no site oficial'))),
       h('div', { class: 'ds-doc ajuda' }, h('div', { class: 'ds-min0' }, h('div', { class: 'ds-barra ds-barra-solta' }, busca.no), trilhaNav, resultados, corpo), h('aside', {}, indice)));
     const alvo = itens.get(estado.ajudaAlvo); estado.ajudaAlvo = null;
     if (alvo) await abrir(alvo); else inicio();

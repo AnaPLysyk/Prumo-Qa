@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 
 const raiz = 'backend';
 export const telas = {
+  contas: 'Contas: cadastro e autenticação online, recuperação por e-mail e administração de acessos; profissão não concede privilégio.',
   inicio: 'Início: o painel do projeto e o assistente local que responde com os dados deste computador, sem IA.',
   projetos: 'Projetos: projetos do Prumo, pastas de código vinculadas e o contrato qa.project.json.',
   contextos: 'Contextos: requisitos, regras, critérios e decisões do projeto, com aprovação humana e histórico verificável.',

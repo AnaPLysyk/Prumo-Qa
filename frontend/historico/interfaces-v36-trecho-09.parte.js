@@ -37,7 +37,7 @@
     el.append(h('div', { class: 'v36h-barra' }, periodo, botaoFiltros, h('div', { class: 'v36-direita' }, exportar, imprimir)), filtros,
       h('div', { class: 'v36h-troca' }, abas2, h('div', { class: 'v36h-info' }, contagem, h('label', { class: 'v36h-ordem' }, h('span', {}, tr('Ordenar')), ordemSel))),
       ...(r.complete ? [] : [h('div', { class: 'nota' }, tr('Histórico parcial: registros inválidos excluídos.'))]), lista,
-      h('p', { class: 'v36h-nota' }, h('span', {}, r.notice), ' ', h('span', {}, tr('Até 1000 atividades por consulta. STARTED sem término não comprova processo ainda ativo.'))));
+      h('p', { class: 'v36h-nota' }, DS.info([r.notice, 'Até 1000 atividades por consulta. STARTED sem término não comprova processo ainda ativo.'], { rotulo: 'Sobre o histórico' })));
     function desenharPeriodo() { periodo.replaceChildren(...opcoesPeriodo.map(([d, t]) => h('button', { type: 'button', 'aria-pressed': String(dias === d), onclick: () => { dias = d; desenhar(); } }, tr(t)))); }
     function desenharAbas() { abas2.replaceChildren(...[['linha', 'Linha do tempo'], ['tabela', 'Tabela']].map(([v, t]) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(vista === v), onclick: () => { vista = v; desenhar(); } }, tr(t)))); }
     const tituloDe = (a) => tr(ROTULO_FERRAMENTA[a.tool] || a.tool);

@@ -27,7 +27,7 @@
     const tkIn = h('input', { id: 'caso-ticket', class: 'ds-w-sm', placeholder: 'SMART-123', maxlength: 40, 'aria-label': tr('Ticket Jira') });
     const aside = h('aside', {}, DS.meta([['Origem', DS.origem('qase', 'Qase · ' + vq.recurso.chave)], ['Tipo de execução', chipTipoCaso(c)], ['Situação no Prumo', locais[0] ? h('span', {}, selo(locais[0].status), ' ', h('span', { class: 'suave' }, quando(locais[0].em))) : DS.chip('Sem resultado')], ['Suite', c.suite_id != null ? String(c.suite_id) : null], ['Prioridade', c.priority != null ? String(c.priority) : null], ['Severidade', c.severity != null ? String(c.severity) : null], ['Tags', (c.tags || []).map((x) => x.title || x).join(', ') || null], ['Atualizado', c.updated_at || c.updated ? quando(c.updated_at || c.updated) : null]]),
       h('div', { class: 'ds-acoes-col' }, h('h3', { class: 'ds-h' }, tr('Automação relacionada')), autos.length ? h('div', { class: 'ds-celula-nos' }, autos.map((a) => noRef(e, a, a.id))) : h('p', { class: 'suave' }, tr('Nenhuma automação declarada no Prumo.')),
-        h('p', { class: 'ds-nota-perm' }, DS.icone('escudo'), h('span', {}, tr('Automação vinculada não aprova o caso: só um resultado registrado comprova a execução.'))),
+        DS.info('Automação vinculada não aprova o caso: só um resultado registrado comprova a execução.'),
         capSel.options.length ? h('div', { class: 'ds-cab-acoes' }, capSel, DS.acao('Declarar', async () => { const x = await chamar(() => api.espacoAssociar(e.id, { de: { tipo: 'qase', id: String(id), vinculoId: vq.id, origem: vq.recurso.chave }, para: { tipo: 'automacao', id: capSel.value, origem: 'qa.project.json' }, justificativa: tr('Declarado pela pessoa') })); if (x) { await atualizarEspaco(e); avisar(tr('Vínculo declarado.')); abrirCaso(estado.espaco, id); } }, { id: 'caso-declarar', compacto: true })) : null),
       h('div', { class: 'ds-acoes-col' }, h('h3', { class: 'ds-h' }, tr('Tickets')), tks.length ? h('div', { class: 'ds-celula-nos' }, tks.map((k) => noRef(e, { tipo: 'jira', id: k, vinculoId: vinc(e, 'jira')?.id }, k))) : h('p', { class: 'suave' }, tr('Nenhum ticket associado.')),
         h('div', { class: 'ds-cab-acoes' }, tkIn, DS.acao('Associar…', async () => { resultadoOp(saida, await executarOperacao(e, 'qase.associar_ticket', { casoId: Number(id), ticket: tkIn.value.trim().toUpperCase() })); }, { id: 'caso-associar', compacto: true, desabilitado: !esc }))),
@@ -79,7 +79,7 @@
     else { await abaAutomacao(corpo); semTitulo(corpo); }
   };
   async function avancadaQase(e) {
-    const caixa = h('div', { class: 'ds-avancada' }, h('p', { class: 'suave' }, tr('Consulta direta ao Qase vinculado: suites, casos, detalhe com passos e planos, com os dados retornados.')));
+    const caixa = h('div', { class: 'ds-avancada' }, DS.info('Consulta direta ao Qase vinculado: suites, casos, detalhe com passos e planos, com os dados retornados.'));
     DS.modal('Consulta avançada · Qase', caixa, { tamanho: 'lg' }); await consultaManual(caixa, 'qase', { suites: 'Suites', casos: 'Casos manuais e automatizados', caso: 'Detalhe e passos do caso', planos: 'Planos' });
   }
   function novaProposta(e) { DS.modal('Nova proposta de caso', formularioProposta(e, null, () => { DS.fecharModal(); mostrar('testes'); }), { tamanho: 'md' }); }
@@ -91,7 +91,7 @@
     const area = h('div', { id: 'casos-area' }, DS.esqueleto(6)); const fonte = h('div');
     corpo.append(DS.barra(q.no, tipo, suite, DS.acao('Atualizar', async () => { delete mem.casos; await carregar(); }, { id: 'casos-atualizar', icone: 'atualizar' })), fonte, area);
     const slot = h('div', { id: 'pr-slot' }); const propostas = h('div', { id: 'pr-lista' });
-    corpo.append(DS.secao('Propostas em revisão', [h('p', { class: 'suave' }, tr('Rascunhos locais de casos e bugs. Nada é publicado sem revisão e confirmação.')), slot, propostas]));
+    corpo.append(DS.secao('Propostas em revisão', [DS.info('Rascunhos locais de casos e bugs. Nada é publicado sem revisão e confirmação.'), slot, propostas]));
     const [runs] = await Promise.all([api.runs(e.id)]); const rl = runs.ok ? runs.data : [];
     const desenhar = () => {
       f.q = q.input.value.trim(); f.tipo = tipo.value; f.suite = suite.value; const qq = f.q.toLowerCase();

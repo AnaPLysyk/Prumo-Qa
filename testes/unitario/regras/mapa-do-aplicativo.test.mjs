@@ -30,3 +30,21 @@ test('leitor do mapa: ausente, grande demais, atalho ou fora do formato é recus
   fs.writeFileSync(alvo, JSON.stringify(gerarMapaDoAplicativo()));
   const mapa = lerMapaDoAplicativo(raiz); assert.equal(mapa.schemaVersion, 1); assert.ok(mapa.telas.length > 10);
 });
+
+test('código da Documentação viva: só arquivos do mapa, caminho com .. recusado no contrato, arquivo grande encurtado', async (t) => {
+  const { lerCodigoDoAplicativo } = await import('../../../dist/administracao/banco/lerCodigoDoAplicativo.js');
+  const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-codigo-')); t.after(() => fs.rmSync(raiz, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(raiz, 'app', 'documentacao'), { recursive: true });
+  const grande = 'x'.repeat(250 * 1024);
+  fs.writeFileSync(path.join(raiz, 'app', 'documentacao', 'codigo.json'), JSON.stringify({ 'backend/a/api/um.ts': 'linha 1\nlinha 2', 'backend/a/banco/grande.ts': grande }));
+  const um = lerCodigoDoAplicativo('backend/a/api/um.ts', raiz);
+  assert.equal(um.linhas, 2); assert.equal(um.truncado, false); assert.match(um.texto, /linha 2/);
+  const g = lerCodigoDoAplicativo('backend/a/banco/grande.ts', raiz); assert.equal(g.truncado, true); assert.ok(Buffer.byteLength(g.texto) <= 200 * 1024);
+  assert.throws(() => lerCodigoDoAplicativo('backend/a/api/outro.ts', raiz), /ARCHITECTURE_CODE_NOT_FOUND/);
+  assert.throws(() => lerCodigoDoAplicativo('README.md', raiz), /ARCHITECTURE_CODE_NOT_FOUND/, 'só o que o build gravou, nunca o disco');
+  const contrato = esquemasIpc['administracao:codigo'];
+  assert.equal(contrato.safeParse({ caminho: 'backend/a/../../segredo.ts' }).success, false);
+  assert.equal(contrato.safeParse({ caminho: 'C:/Windows/win.ini' }).success, false);
+  assert.equal(contrato.safeParse({ caminho: 'backend/a/api/um.ts' }).success, true);
+  fs.rmSync(path.join(raiz, 'app', 'documentacao', 'codigo.json')); assert.throws(() => lerCodigoDoAplicativo('backend/a/api/um.ts', raiz), /ARCHITECTURE_CODE_MISSING/);
+});

@@ -12,6 +12,24 @@ import { textoNoIdioma as tm } from '../../../dist/aplicativo/bandeja/textoNoIdi
 
 const token = (page, nome) => page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), nome);
 
+test('Configuração começa fechada, mostra Meu perfil recolhido e fecha por Escape', async (t) => {
+  const a = await abrir(t, novoDados(t), [], {}, { inicio: true });
+  assert.equal(await a.page.isVisible('#controles'), false);
+  await a.page.click('#ajustes');
+  await a.page.waitForSelector('#controles', { state: 'visible' });
+  assert.equal(await a.page.locator('#controles details[open]').count(), 0);
+  const perfil = a.page.locator('#controles .v36-ajustes-perfil');
+  assert.equal(await perfil.locator('summary').textContent(), 'Meu perfil');
+  assert.equal(await a.page.isVisible('#ia-pessoa'), false);
+  await perfil.locator('summary').click();
+  assert.equal(await a.page.isVisible('#ia-pessoa'), true);
+  assert.equal(await a.page.isVisible('#ia-papel'), true);
+  await a.page.keyboard.press('Escape');
+  assert.equal(await a.page.isVisible('#controles'), false);
+  assert.equal(await a.page.getAttribute('#ajustes', 'aria-expanded'), 'false');
+  assert.deepEqual(a.erros, []);
+});
+
 test('Início com esfera Quality Control: parada quando nada roda; tema e idioma persistem entre reinicializações', async (t) => {
   const dados = novoDados(t); let a = await abrir(t, dados, [], {}, { inicio: true });
   assert.equal(await a.page.getAttribute('[data-aba=inicio]', 'aria-current'), 'page');

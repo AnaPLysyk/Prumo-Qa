@@ -21,7 +21,7 @@
     const mem = memoria('agenda', 'filtros'); mem.projeto ??= estado.espaco?.id || '';
     const lista = await chamar(() => api.agendaListar(mem.projeto || undefined)); if (!lista) return el.append(DS.cabecalho({ titulo: 'Agendamentos' }), DS.falhaConsulta('agenda'));
     const novo = () => abrirFormulario(espacos, null, recarregar);
-    el.append(DS.cabecalho({ titulo: 'Agendamentos', contagem: lista.length, descricao: 'Rotinas de QA por projeto: fluxo, horário, autorização e destino dos resultados.',
+    el.append(DS.cabecalho({ titulo: 'Agendamentos', contagem: lista.length, info: 'Rotinas de QA por projeto: fluxo, horário, autorização e destino dos resultados.',
       acoes: [DS.acao('Políticas e preferências', () => abrirPoliticas(espacos, recarregar), { id: 'agenda-politicas', icone: 'escudo' }), DS.acao(w?.pausado ? 'Retomar todos os agendamentos' : 'Pausar todos os agendamentos', async () => { if (await chamar(() => api.workerPausa(!w?.pausado))) recarregar(); }, { id: 'agenda-pausa', icone: w?.pausado ? 'play' : 'pausa' }), DS.acao('Nova rotina', novo, { id: 'rotina-nova', primaria: true, icone: 'mais' })] }));
     const ativas = lista.filter((r) => r.estado === 'ATIVA').length, pausadas = lista.filter((r) => r.estado === 'PAUSADA').length, semAut = lista.filter((r) => PRECISA_AUT.includes(r.tipo) && r.estado === 'ATIVA' && !r.autorizacoes.some((a) => a.estado === 'VIGENTE')).length;
     el.append(h('div', { id: 'agenda-worker' }, DS.resumo([[textoWorker(w), 'worker', nivelWorker(w) === 'ok' ? 'ok' : nivelWorker(w) === 'falha' ? 'falha' : 'aviso'], [w?.proximaExecucao ? hora(w.proximaExecucao) : tr('nenhuma agendada'), 'próxima execução'], [w?.pendentes ?? 0, 'pendentes na fila'], [ativas, 'rotinas ativas', 'ok'], [pausadas, 'pausadas', pausadas ? 'aviso' : null], [semAut, 'ativas sem autorização', semAut ? 'aviso' : null]])));
@@ -29,7 +29,7 @@
     const proj = DS.selecao({ id: 'agenda-projeto', rotulo: 'Projeto', opcoes: [['', 'Todos os projetos'], ...espacos.map((e) => [e.id, e.nome])], valor: mem.projeto, aoMudar: (v) => { mem.projeto = v; recarregar(); } });
     const est = DS.selecao({ id: 'agenda-estado', rotulo: 'Estado', opcoes: [['', 'Todos os estados'], ...Object.entries(ESTADOS_ROTINA)], valor: mem.estado || '' });
     const area = h('div', { id: 'agenda-lista' });
-    el.append(DS.barra(busca.no, proj, est, h('span', { class: 'ds-meta-barra' }, tr('Horário perdido nunca conta como execução.'))), area);
+    el.append(DS.barra(busca.no, proj, est, DS.info('Horário perdido nunca conta como execução.')), area);
     const desenhar = () => {
       mem.q = busca.input.value; mem.estado = est.value; const q = mem.q.trim().toLowerCase();
       const vis = lista.filter((r) => (!mem.estado || r.estado === mem.estado) && (!q || (r.nome + ' ' + rotuloTipo(r.tipo) + ' ' + (r.capability || '') + ' ' + (r.ticket || '')).toLowerCase().includes(q)));
@@ -114,7 +114,7 @@
     const periodo = {}; if (f.desde) periodo.since = new Date(f.desde + 'T00:00:00').toISOString(); if (f.ate) periodo.until = new Date(f.ate + 'T23:59:59.999').toISOString();
     const [m, lista] = await Promise.all([chamar(() => api.metricasExecucoes(f.espacoId)), chamar(() => api.execucoes({ espacoId: f.espacoId, rotinaId: f.rotinaId, ticket: f.ticket, resultado: f.resultado, ...periodo, limite: 100 }))]); if (!lista) return el.append(DS.cabecalho({ titulo: 'Execuções' }), DS.falhaConsulta('execucoes'));
     const itens = lista.execucoes.filter((x) => (!f.tipo || x.tipo === f.tipo) && (!f.origem || x.origem === f.origem));
-    el.append(DS.cabecalho({ titulo: 'Execuções', contagem: itens.length, descricao: 'Histórico das execuções do Prumo. As evidências ficam dentro de cada execução.',
+    el.append(DS.cabecalho({ titulo: 'Execuções', contagem: itens.length, info: 'Histórico das execuções do Prumo. As evidências ficam dentro de cada execução.',
       acoes: [DS.acao('Runs do Qase', () => mostrar('runs'), { id: 'exec-runs', icone: 'externo' }), DS.acao('Evidências CLI/MCP', () => { estado.jobId = undefined; mostrar('evidencias'); }, { id: 'exec-evidencias', icone: 'escudo', titulo: 'Evidências de validações solicitadas por agentes (MCP) ou pela linha de comando' })] }));
     if (m) el.append(DS.resumo([[m.execucoes, 'execuções'], [m.pass, 'PASS', 'ok'], [m.fail, 'FAIL', 'falha'], [m.blocked, 'BLOCKED', 'aviso'], [m.notRun, 'NOT_RUN'], [m.consultas, 'consultas (INFO)'], [m.falhasDeAgendamento, 'falhas de agendamento', m.falhasDeAgendamento ? 'falha' : null], [m.comentariosPendentes, 'comentários pendentes', m.comentariosPendentes ? 'aviso' : null]], { id: 'metricas-exec' }));
     el.append(DS.barra(proj, tk, res, tipo, org, h('span', { class: 'ds-periodo' }, tr('Período'), desde, tr('até'), ate), DS.acao('Filtrar', () => { if (!desde.reportValidity() || !ate.reportValidity()) return; aplicar(); }, { id: 'f-aplicar', icone: 'filtro' }),
@@ -141,8 +141,7 @@
       h('p', { class: 'suave ds-mb' }, quando(e.endedAt) + ' · ' + tr('código de saída {c}', { c: e.exitCode ?? 'n/d' }) + ' · ' + tr('escopo da evidência: {s}', { s: e.evidenceScope }) + ' · ' + (e.executed ? tr('executado') : tr('não executado'))),
       e.reason ? DS.alerta(e.reason, e.status === 'PASS' ? 'ok' : e.status === 'FAIL' ? 'falha' : 'aviso') : null,
       h('div', { class: 'ds-arquivos' }, cartaoArquivo('codigo', tr('Registro da evidência (JSON)'), e.evidencePath, exportar(ev, i === 0)), e.stdout ? cartaoArquivo('arquivo', tr('Saída padrão (stdout)'), tr('{n} caracteres', { n: e.stdout.length })) : null, e.stderr ? cartaoArquivo('alerta', tr('Saída de erro (stderr)'), tr('{n} caracteres', { n: e.stderr.length })) : null),
-      e.cases.length ? DS.bloco(tr('Cenários individuais ({n})', { n: e.cases.length }), DS.tabela({ colunas: ['Cenário', 'Resultado', 'Evidência'], linhas: e.cases.map((c) => ({ celulas: [c.id, selo(c.status), h('span', { class: 'ds-resumo-texto' }, c.evidence)] })) })) : h('p', { class: 'suave' }, tr('Sem resultados individuais verificáveis.')),
-      h('p', { class: 'ds-nota-perm' }, DS.icone('escudo'), h('span', {}, tr('Capturas de tela, vídeos e relatórios só aparecem quando o executor os registra; nenhum arquivo é presumido.'))))).concat(ev.trust ? [h('p', { class: 'suave' }, ev.trust)] : []);
+      e.cases.length ? DS.bloco(tr('Cenários individuais ({n})', { n: e.cases.length }), DS.tabela({ colunas: ['Cenário', 'Resultado', 'Evidência'], linhas: e.cases.map((c) => ({ celulas: [c.id, selo(c.status), h('span', { class: 'ds-resumo-texto' }, c.evidence)] })) })) : h('p', { class: 'suave' }, tr('Sem resultados individuais verificáveis.')))).concat([DS.info(['Capturas de tela, vídeos e relatórios só aparecem quando o executor os registra; nenhum arquivo é presumido.'].concat(ev.trust ? [' ', ev.trust] : []))]);
   }
   function painelLogs(x, ev) {
     const blocos = [];
@@ -184,7 +183,7 @@
     const e = estado.espaco; const raiz = e?.pastaLocal || estado.root; const alvo = estado.jobId; estado.jobId = undefined;
     if (!raiz) { el.append(DS.estadoTela('vazio', 'Nenhuma pasta de projeto vinculada', 'Vincule a pasta do repositório em Projetos para consultar evidências locais.', [], { compacto: true })); return; }
     const r = await chamar(() => api.evidencias(raiz, alvo)); if (!r) { el.append(DS.estadoTela('erro', 'Não foi possível consultar a evidência.', null, [], { compacto: true })); return; }
-    el.append(h('p', { class: 'suave' }, alvo ? tr('Filtrada pela evidência {id}', { id: alvo }) : tr('Resultados reais preservados em .prumo/evidencias do projeto. Código de saída 0 valida a rodada, não cada cenário.')), ...painelEvidencias(r, { vazio: 'Nenhuma evidência para esta consulta.' }));
+    el.append(alvo ? h('p', { class: 'suave' }, tr('Filtrada pela evidência {id}', { id: alvo })) : DS.info('Resultados reais preservados em .prumo/evidencias do projeto. Código de saída 0 valida a rodada, não cada cenário.'), ...painelEvidencias(r, { vazio: 'Nenhuma evidência para esta consulta.' }));
   };
   async function abrirEvidencia(e, jobId) {
     const raiz = e?.pastaLocal || estado.root; const vivo = DS.modal(tr('Evidência {id}', { id: String(jobId).slice(0, 8) }), DS.carregando(), { tamanho: 'lg' });

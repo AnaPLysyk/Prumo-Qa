@@ -92,7 +92,7 @@
     corpo.replaceChildren(...[
       DS.resumo([[src.casos ? src.casos.itens.length : '—', 'casos no Qase'], [m.codigo.length, 'testes no código'], [m.ligados, 'casos com código', m.ligados ? 'ok' : null], [m.linhas.filter((l) => l.caso && !l.impl.length).length, 'casos sem código'], [autoQaseSemCodigo, 'automatizados no Qase sem código', autoQaseSemCodigo ? 'aviso' : null], [m.linhas.filter((l) => !l.caso).length, 'testes sem caso']], { id: 'cat-resumo' }),
       DS.barra(busca.no, fonte, nivel, execucao, agrupar), todasTags.length ? chips : null, lista,
-      h('p', { class: 'ds-nota-perm', id: 'cat-aviso' }, DS.icone('escudo'), h('span', {}, tr('A ligação caso ↔ código vem de anotação no código (qase(31), qase.id(31), @qase(31) ou "Qase: SFQ-31") ou de vínculo declarado; nomes parecidos não ligam nada. Nível e tags vêm da leitura estática; nada foi executado.'))),
+      DS.info('A ligação caso ↔ código vem de anotação no código (qase(31), qase.id(31), @qase(31) ou "Qase: SFQ-31") ou de vínculo declarado; nomes parecidos não ligam nada. Nível e tags vêm da leitura estática; nada foi executado.', { id: 'cat-aviso' }),
       c?.truncado ? DS.alerta('Leitura limitada: o repositório tem mais arquivos de teste do que o Prumo lê de uma vez.', 'aviso') : null,
       src.casos?.erro ? DS.alerta(tr('Casos do Qase indisponíveis: {e}', { e: src.casos.erro }), 'falha') : null].filter(Boolean));
     function passa(l) {
@@ -176,7 +176,7 @@
   }
   async function codigoGithub(e, vg, corpo) {
     const caixa = h('div', { class: 'ds-ide' }); const arvoreEl = h('nav', { class: 'ds-ide-arvore', 'aria-label': tr('Arquivos do repositório') }); const editor = h('section', { class: 'ds-ide-editor' });
-    corpo.append(agentesNoCodigo(e), DS.alerta(tr('Repositório {r} lido pelo GitHub vinculado. Para classificar testes e ler anotações Qase, vincule também a pasta local do repositório.', { r: vg.recurso.chave }), null, 'escudo'), caixa); caixa.append(arvoreEl, editor);
+    corpo.append(agentesNoCodigo(e), DS.info(tr('Repositório {r} lido pelo GitHub vinculado. Para classificar testes e ler anotações Qase, vincule também a pasta local do repositório.', { r: vg.recurso.chave })), caixa); caixa.append(arvoreEl, editor);
     async function listar(caminho, destino) {
       destino.replaceChildren(DS.carregando()); const r = await api.servicoConsultar(e.id, 'github', 'arquivos', {}, caminho || '');
       if (!r.ok) { destino.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o repositório', r.error, [], { compacto: true })); return; }

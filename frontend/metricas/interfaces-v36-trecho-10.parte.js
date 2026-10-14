@@ -146,7 +146,7 @@
       ...(m.complete ? [] : [h('div', { class: 'v36m-aviso' }, tr('Histórico parcial: registros inválidos ou truncados foram excluídos; os números são parciais.'))]),
       grade,
       h('div', { class: 'grade v36m-resumo' }, h('span', { class: 'v36m-resumo-titulo' }, tr('Totais do núcleo · todo o período')), totais.map(([n, t]) => h('div', {}, h('b', {}, String(n ?? 0)), h('span', {}, tr(t))))),
-      h('p', { class: 'v36m-nota' }, h('span', {}, tr('Os gráficos refletem os filtros selecionados. Uma consulta (INFO) não conta como teste PASS.')), ' ',
+      h('p', { class: 'v36m-nota' }, DS.info('Os gráficos refletem os filtros selecionados. Uma consulta (INFO) não conta como teste PASS.', { rotulo: 'Sobre os gráficos' }), ' ',
         h('span', {}, tr('Última atividade:')), ' ', ignorar(hora(m.lastActivity)), ' · ', h('span', {}, tr('Tokens e custos:')), ' ', ignorar(String(m.providerMetrics)), ' · ', h('span', {}, tr('Última chamada MCP de:')), ' ', ignorar(v.lastMcpClient || '—')));
     function noPeriodo(at) { const d = diaIso(at); if (intervalo) return d >= intervalo[0] && d <= intervalo[1]; return Date.parse(at) >= Date.now() - dias * 86400000; }
     function filtrados() {

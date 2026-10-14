@@ -21,3 +21,5 @@
   .v36m-secao,.v36h-grupo{break-inside:avoid}
 }
 
+/* Na Início o campo do chat fica embaixo no centro: o aviso rápido sobe para não cobri-lo. */
+body[data-tela=inicio] #aviso{bottom:132px}

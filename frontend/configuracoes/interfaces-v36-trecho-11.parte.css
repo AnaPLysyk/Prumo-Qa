@@ -8,3 +8,11 @@
 .v36-ajustes-linha small{margin-left:auto;font-size:10.5px;color:var(--suave)}
 .v36-ajustes-sub{margin:10px 0 2px;font-size:11px;font-weight:600;color:var(--suave)}
 .v36-ajustes-nota{max-width:none;margin:8px 0 0;font-size:10.5px;color:var(--suave)}
+/* Painel de Configurações: largo e baixo, em duas colunas, acima do robô flutuante; rola por dentro se a janela for baixa. */
+#controles.popover{display:block;width:min(420px,calc(100vw - 32px));max-height:calc(100vh - 80px);max-height:calc(100dvh - 80px);overflow:auto;z-index:120;padding:16px 18px;scrollbar-width:thin}
+#controles.popover[hidden]{display:none}
+#controles details{min-width:0;padding:8px 0}
+#controles details+details{border-top:1px solid var(--linha)}
+#controles summary{cursor:pointer;font-size:12px}
+#controles .v36-ajustes-conteudo{display:flex;flex-direction:column;gap:12px;padding-top:10px}
+#controles .v36-ajustes-ia{margin:0;padding:8px 0;border:0}

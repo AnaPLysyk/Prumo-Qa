@@ -1,6 +1,7 @@
 // Gera o mapa que a tela Administração › Documentação mostra: para cada tela, os arquivos da interface, os canais IPC,
 // o backend (api, regras, banco, integrações, tipos) e os testes que a exercitam. Lido do código desta versão no build,
-// sem o código-fonte (só caminhos, descrições, funções e ligações). Saída: app/documentacao/mapa.json (não versionado).
+// sem o código-fonte (só caminhos, descrições, funções e ligações). Saída: app/documentacao/mapa.json (não versionado);
+// o código de cada arquivo listado vai para app/documentacao/codigo.json, lido um arquivo por pedido (canal administracao:codigo).
 // Uso: node ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs [--check]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -45,6 +46,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const mapa = gerarMapaDoAplicativo();
   fs.mkdirSync(path.dirname(destino), { recursive: true });
   fs.writeFileSync(destino, JSON.stringify(mapa));
+  // O código fica num arquivo à parte (o mapa continua sem código): só os arquivos que o mapa lista, lidos um por pedido.
+  const texto = lerCopiaDeTrabalho(); const caminhos = mapa.telas.flatMap((t) => [...t.frontend, ...Object.values(t.backend).flat(), ...t.testes].map((a) => a.caminho));
+  fs.writeFileSync(path.join(path.dirname(destino), 'codigo.json'), JSON.stringify(Object.fromEntries([...new Set(caminhos)].filter((c) => texto.has(c)).map((c) => [c, texto.get(c)]))));
   const t = mapa.totais;
   console.log(`Mapa do aplicativo: ${t.telas} telas, ${t.arquivosFrontend} arquivos de interface, ${t.arquivosBackend} do backend, ${t.canais} canais e ${t.testes} testes (${Math.round(fs.statSync(destino).size / 1024)} KB).`);
 }

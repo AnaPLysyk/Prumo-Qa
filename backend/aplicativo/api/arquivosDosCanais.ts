@@ -2,6 +2,7 @@
 export const arquivosDosCanais: Record<string, string> = {
   'acesso:configuracao': 'backend/administracao/api/acessoConfiguracao.ts > configuracaoDeAcesso',
   'acesso:salvar': 'backend/administracao/api/acessoSalvar.ts > salvarConfiguracaoDeAcesso',
+  'administracao:codigo': 'backend/administracao/api/administracaoCodigo.ts > lerCodigoDoAplicativo',
   'administracao:mapa': 'backend/administracao/api/administracaoMapa.ts > lerMapaDoAplicativo',
   'agenda:autorizar': 'backend/agendamentos/api/agendaAutorizar.ts > autorizarRotina, obterRotina, permissoesDaRotina, textoNoIdioma, confirmarNoWindows, idiomaAtual, solicitarAprovacao',
   'agenda:estado': 'backend/agendamentos/api/agendaEstado.ts > desativarRotina, pausarRotina, retomarRotina',
