@@ -8,11 +8,11 @@
 | `retratos-dos-agentes.parte.js` | Retrato, paralaxe e fundo neural usados pelos agentes. |
 | `conversa-do-orchestrator.parte.js` | Bolhas, digitação, voz e sugestões do chat dos agentes. |
 | `orchestrator-flutuante.parte.js` | Assistente flutuante (abrir, encaixar, mover, dicas). |
-| `interfaces-v36-trecho-02/06/08/10.parte.css` | Estilos da tela: retratos, cérebro, tema claro e escuro, cartões de Skill. |
+| `tela-agentes.parte.css`, `espaco-profundo.parte.css` e `seletor-de-agente.parte.css` | Estilos da tela: retratos, cérebro, tema claro e escuro, cartões de Skill. |
 | `atividades/painel-atividades-v41.js` e `.css` | Painel de atividades montado a partir dos registros locais. |
 | `usarTelaAgentes.js` | Guarda a tela anterior antes do carregamento de Conexões. |
 | `mostrarAgentesIntegrados.js` | Lista de agentes integrados com profissão, especialidade e permissão efetiva. |
-| `abrirModalContextos.js` | Modal de Contextos aberto a partir desta tela. |
+| `modais/contextos/abrirContextos.js` | Modal de Contextos aberto a partir desta tela. |
 
 Os arquivos `.parte.js/.css` são juntados, na ordem de `ferramentas/frontend/telas-modulares.json`, em `dist/renderer/interfaces-v36.js` e `.css` durante o build. Edite só aqui; `dist/renderer/` é gerado.
 

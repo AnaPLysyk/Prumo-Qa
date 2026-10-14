@@ -4,7 +4,7 @@
 
 **Arquivos desta pasta:** mostrarAjuda.js.
 
-**Como conversa com o sistema:** api.ajuda e funções do painel de versões → `backend/aplicativo/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
+**Como conversa com o sistema:** api.ajuda e funções do painel de versões → `backend/aplicativo/preload.cjs` → `backend/aplicativo/api/catalogoDeContratos.ts` → `backend/aplicativo/api/registrarCanaisIpc.ts`.
 
 **Quem executa a lógica:** `src/painel.ts e src/versoes.ts (ainda não migrados)`.
 
