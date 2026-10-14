@@ -1,6 +1,14 @@
 'use strict';
 // Traduções do painel de atividades v41; registros (ferramentas, estados, perguntas) não são traduzidos.
 Object.assign(window.PRUMO_EN, {
+  'Trazer o repositório do GitHub': 'Bring the GitHub repository',
+  'Atualizar do GitHub': 'Update from GitHub',
+  'Baixa uma cópia para este computador e a vincula ao projeto, para editar na IDE': 'Downloads a copy to this computer and links it to the project, to edit in the IDE',
+  'Atualiza a cópia deste computador só por avanço; suas mudanças não são sobrescritas': 'Updates the copy on this computer by fast-forward only; your changes are not overwritten',
+  'Repositório {r} lido pelo GitHub vinculado, somente leitura. Traga uma cópia para este computador para editar, criar automações e classificar testes.': 'Repository {r} read through the linked GitHub, read-only. Bring a copy to this computer to edit, create automations and classify tests.',
+  'Repositório atualizado do GitHub.': 'Repository updated from GitHub.',
+  'Repositório trazido do GitHub e vinculado ao projeto.': 'Repository brought from GitHub and linked to the project.',
+  'Repositório trazido, mas a pasta ainda não foi vinculada ao projeto.': 'Repository brought, but the folder has not been linked to the project yet.',
   'Pipelines do repositório': 'Repository pipelines',
   '{n} pipeline(s)': '{n} pipeline(s)',
   'Novo pipeline': 'New pipeline',

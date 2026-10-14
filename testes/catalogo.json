@@ -1123,6 +1123,20 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/seguranca/regras/clonar-repositorio.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "projetos",
+      "motivo": "Camada principal regra. Verifica: trazer o repositório do GitHub só por https do github.com, sem hooks, atualização só por avanço; testes com repositório local, sem rede",
+      "evidencias": [
+        "clona, depois atualiza só por avanço e recusa pasta alheia, outro remoto e divergência"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/seguranca/regras/contas-e-permissoes.test.mjs",
       "camada": "regra",
       "natureza": [

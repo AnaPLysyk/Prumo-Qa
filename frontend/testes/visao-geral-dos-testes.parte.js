@@ -153,6 +153,14 @@
   // ======================= Código (visão de IDE) =======================
   function abrirNoCodigo(e, arquivo, linha) { DS.fecharModal(); const mem = memoria('testes', e.id); mem.ide = { arquivo, linha }; (estado.sub ||= {}).testes = 'codigo'; mostrar('testes'); }
   function arvore(arquivos) { const raiz = { pastas: new Map(), arquivos: [] }; for (const a of arquivos) { const partes = a.arquivo.split('/'); let n = raiz; for (const p of partes.slice(0, -1)) { if (!n.pastas.has(p)) n.pastas.set(p, { pastas: new Map(), arquivos: [] }); n = n.pastas.get(p); } n.arquivos.push(a); } return raiz; }
+  // Trazer (clonar) ou atualizar o repositório do GitHub vinculado: usa o git deste computador e a confirmação nativa; ao terminar, a IDE passa a editar a pasta.
+  async function trazerDoGithub(e, atualizar) {
+    const r = await chamar(() => api.espacoTrazer(e.id)); if (!r || r.canceled) return;
+    avisar(atualizar ? tr('Repositório atualizado do GitHub.') : r.vinculada === false ? tr('Repositório trazido, mas a pasta ainda não foi vinculada ao projeto.') : tr('Repositório trazido do GitHub e vinculado ao projeto.'));
+    mostrar('testes');
+  }
+  const pastaDoPrumo = (e) => !!e.pastaLocal && /[\\/]repositorios[\\/]/.test(e.pastaLocal);
+
   // Editor de arquivo (CodeMirror embutido, sem rede) usado pela IDE e pelos pipelines. Salvar pede a confirmação nativa do Windows e
   // só grava se o arquivo não mudou fora do Prumo; o fim de linha original é preservado pelo backend.
   function abrirEditor({ e, editor, arquivo, dados, aoDescartar, aoSalvar }) {
@@ -179,7 +187,7 @@
   async function telaPipelines(e, mem, corpo) {
     const vg = vinc(e, 'github');
     if (!e.pastaLocal) {
-      corpo.append(DS.estadoTela('vazio', 'Vincule a pasta do repositório', 'Os pipelines (.github/workflows) são lidos e editados na pasta do repositório vinculada ao projeto. Vincule a pasta em Projetos.', [DS.acao('Abrir Projetos', () => mostrar('projetos'))], { id: 'pipe-sem-pasta', compacto: true }));
+      corpo.append(DS.estadoTela('vazio', 'Vincule a pasta do repositório', 'Os pipelines (.github/workflows) são lidos e editados na pasta do repositório vinculada ao projeto. Vincule a pasta em Projetos.', [...(vg ? [DS.acao('Trazer o repositório do GitHub', () => trazerDoGithub(e, false), { id: 'ide-trazer', primaria: true })] : []), DS.acao('Abrir Projetos', () => mostrar('projetos'))], { id: 'pipe-sem-pasta', compacto: true }));
       if (vg || e.vinculos.length) { const legado = h('div', { id: 'pipe-github' }); corpo.append(legado); await abaAutomacao(legado); semTitulo(legado); }
       return;
     }
@@ -234,7 +242,7 @@
     const pasta = (nome, n, nivel) => { const det = h('details', { class: 'ds-ide-pasta', open: nivel < 3 }, h('summary', {}, DS.icone('pasta'), h('span', {}, nome))); for (const [k, sub] of [...n.pastas.entries()].sort()) det.append(pasta(k, sub, nivel + 1)); for (const a of n.arquivos.sort((x, y) => x.arquivo.localeCompare(y.arquivo))) det.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, title: a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo.split('/').at(-1)), h('span', { class: 'ds-n' }, String(a.testes.length)))); return det; };
     const raiz = arvore(porArquivo); arvoreEl.append(h('p', { class: 'ds-doc-grupo' }, tr('{n} arquivo(s) · {t} teste(s)', { n: porArquivo.length, t: cat.testes })));
     for (const [k, sub] of [...raiz.pastas.entries()].sort()) arvoreEl.append(pasta(k, sub, 0)); for (const a of raiz.arquivos) arvoreEl.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo)));
-    arvoreEl.prepend(h('div', { class: 'ds-ide-barra' }, DS.acao('Novo arquivo', () => novoArquivo(), { id: 'ide-novo', compacto: true, icone: 'mais' })));
+    arvoreEl.prepend(h('div', { class: 'ds-ide-barra' }, DS.acao('Novo arquivo', () => novoArquivo(), { id: 'ide-novo', compacto: true, icone: 'mais' }), vinc(e, 'github') && pastaDoPrumo(e) ? DS.acao('Atualizar do GitHub', () => trazerDoGithub(e, true), { id: 'ide-atualizar-github', compacto: true, titulo: 'Atualiza a cópia deste computador só por avanço; suas mudanças não são sobrescritas' }) : null));
     if (!porArquivo.length) { editor.append(DS.estadoTela('vazio', 'Nenhum arquivo de teste encontrado na pasta vinculada.', 'O Prumo reconhece *.spec/*.test (JS/TS), *.feature e test_*.py. Use "Novo arquivo" para criar a primeira automação.')); if (mem.ide?.novo) novoArquivo(mem.ide.novo); return; }
     painel.append(DS.estadoTela('vazio', 'Selecione um teste', 'As conexões do teste com casos, tickets, execuções e agentes aparecem aqui.', [], { compacto: true }));
     async function abrir(arquivo, linha) {
@@ -294,7 +302,7 @@
   }
   async function codigoGithub(e, vg, corpo) {
     const caixa = h('div', { class: 'ds-ide' }); const arvoreEl = h('nav', { class: 'ds-ide-arvore', 'aria-label': tr('Arquivos do repositório') }); const editor = h('section', { class: 'ds-ide-editor' });
-    corpo.append(agentesNoCodigo(e), DS.info(tr('Repositório {r} lido pelo GitHub vinculado. Para classificar testes e ler anotações Qase, vincule também a pasta local do repositório.', { r: vg.recurso.chave })), caixa); caixa.append(arvoreEl, editor);
+    corpo.append(DS.barra(DS.acao('Trazer o repositório do GitHub', () => trazerDoGithub(e, false), { id: 'ide-trazer', primaria: true, titulo: 'Baixa uma cópia para este computador e a vincula ao projeto, para editar na IDE' })), DS.info(tr('Repositório {r} lido pelo GitHub vinculado, somente leitura. Traga uma cópia para este computador para editar, criar automações e classificar testes.', { r: vg.recurso.chave })), caixa, agentesNoCodigo(e)); caixa.append(arvoreEl, editor);
     async function listar(caminho, destino) {
       destino.replaceChildren(DS.carregando()); const r = await api.servicoConsultar(e.id, 'github', 'arquivos', {}, caminho || '');
       if (!r.ok) { destino.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o repositório', r.error, [], { compacto: true })); return; }

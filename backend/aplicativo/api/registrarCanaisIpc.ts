@@ -120,6 +120,7 @@ import { espacosEditar } from '../../projetos/api/espacosEditar.js';
 import { espacosListar } from '../../projetos/api/espacosListar.js';
 import { espacosObter } from '../../projetos/api/espacosObter.js';
 import { espacosPasta } from '../../projetos/api/espacosPasta.js';
+import { espacosTrazer } from '../../projetos/api/espacosTrazer.js';
 import { projetosDemo } from '../../projetos/api/projetosDemo.js';
 import { projetosDesvincular } from '../../projetos/api/projetosDesvincular.js';
 import { projetosEscolher } from '../../projetos/api/projetosEscolher.js';
@@ -189,6 +190,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('espacos:obter', espacosObter);
   registrarCanal('espacos:editar', espacosEditar);
   registrarCanal('espacos:pasta', espacosPasta);
+  registrarCanal('espacos:trazer', espacosTrazer);
   registrarCanal('espacos:automacoes', espacosAutomacoes);
   registrarCanal('espacos:associar', espacosAssociar);
   registrarCanal('servicos:listar', servicosListar);

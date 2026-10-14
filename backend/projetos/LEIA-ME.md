@@ -17,6 +17,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `espacosListar.ts` | Canal espacos:listar: Lista os projetos do Prumo para a tela Projetos. |
 | `espacosObter.ts` | Canal espacos:obter: Abre um projeto do Prumo com vínculos, relações e histórico. |
 | `espacosPasta.ts` | Canal espacos:pasta: Vincular a pasta de um repositório de código ao projeto Prumo, de qualquer stack. |
+| `espacosTrazer.ts` | Canal espacos:trazer: Trazer o repositório do GitHub vinculado ao projeto para uma pasta deste computador (ou atualizá-lo), depois da confirmação nativa. |
 | `projetosDemo.ts` | Canal projetos:demo: Copiar o projeto de demonstração para uma pasta gravável e vinculá-lo. |
 | `projetosDesvincular.ts` | Canal projetos:desvincular: Remover o vínculo de um projeto da lista. |
 | `projetosEscolher.ts` | Canal projetos:escolher: Abrir o seletor nativo de pasta e vincular o projeto se o contrato for válido. |
@@ -56,6 +57,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `associarEspaco.ts` | Registra uma ligação explícita entre dois itens (ex.: ticket Jira ↔ caso Qase) no projeto, recusando duplicadas e serviços não vinculados. |
 | `atualizarEstadoDoVinculo.ts` | Atualiza o estado da ligação com um serviço (válida, sem permissão, indisponível...) depois de uma conferência. |
 | `caminhoComparavel.ts` | Normaliza um caminho de pasta (caminho real, minúsculas) para comparar se duas pastas são a mesma. |
+| `clonarRepositorio.ts` | Traz um repositório do GitHub para uma pasta deste computador com o git instalado (clone) ou o atualiza só por avanço (fast-forward), sem hooks e sem mexer em credenciais. |
 | `configurarAceite.ts` | Escolhe qual campo do Jira guarda os critérios de aceite deste projeto. |
 | `copiarDemonstracao.ts` | Copia o projeto de demonstração para a pasta de dados do usuário (sem sobrescrever) para poder vinculá-lo. |
 | `criarEspaco.ts` | Cria um projeto do Prumo: pasta própria, contrato somente leitura e registro na lista de projetos. |
@@ -78,6 +80,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `situacaoProjeto.ts` | Diz em que estado está uma pasta: integrada, sem contrato, com contrato inválido ou inexistente. |
 | `vincularPasta.ts` | Vincula uma pasta de projeto usando a pasta de dados escolhida. |
 | `vincularPastaAoEspaco.ts` | Liga a pasta de código ao projeto do Prumo, conferindo o contrato e se outra pessoa/projeto já usa a mesma pasta. |
+| `vincularPastaDoDisco.ts` | Vincula uma pasta de código ao projeto: confere o contrato (propondo um, com confirmação, se a pasta ainda não tem) e se a pasta já é de outro projeto. |
 | `vincularServicoAoEspaco.ts` | Liga o projeto a um recurso de um serviço (ex.: projeto Jira ABC) depois de validado. |
 | `visaoGeralDoProjeto.ts` | Monta a visão geral de um projeto: contrato, capacidades, métricas e a última chamada de IA observada. |
 

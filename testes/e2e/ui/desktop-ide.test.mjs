@@ -83,3 +83,10 @@ test('Pipelines CI/CD: lista os workflows do repositório do projeto, edita e cr
   assert.equal((await a.page.evaluate((id) => window.prumo.testesGravar(id, '.github/workflows/sub/x.yml', 'x', null), (await a.page.evaluate(() => window.prumo.espacos())).data[0].id)).ok, false, 'subpasta de workflows é recusada');
   assert.deepEqual(a.erros, []);
 });
+
+test('Trazer do GitHub: projeto sem GitHub vinculado recusa com explicação e nada é criado', async (t) => {
+  const { a, e } = await preparar(t);
+  const r = await a.page.evaluate((id) => window.prumo.espacoTrazer(id), e.id);
+  assert.equal(r.ok, false); assert.match(r.error, /GITHUB_NOT_LINKED/);
+  assert.deepEqual(await confirmacoes(a), [], 'nenhuma confirmação foi pedida: nada ia acontecer');
+});

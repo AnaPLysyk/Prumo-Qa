@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   espacoObter: (id) => chamar('espacos:obter', {id}),
   espacoEditar: (id,dados) => chamar('espacos:editar', {id,dados}),
   espacoPasta: (id) => chamar('espacos:pasta', {id}),
+  espacoTrazer: (id) => chamar('espacos:trazer', {id}),
   espacoAutomacoes: (id) => chamar('espacos:automacoes', {id}),
   espacoAssociar: (id,dados) => chamar('espacos:associar', {id,dados}),
   servicos: () => chamar('servicos:listar', {}),

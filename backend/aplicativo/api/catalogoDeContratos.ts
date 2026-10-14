@@ -41,6 +41,7 @@ export const esquemasIpc = {
   'espacos:obter': z.object({id:z.string().uuid()}).strict(),
   'espacos:editar': z.object({id:z.string().uuid(),dados:dadosEspaco}).strict(),
   'espacos:pasta': z.object({id:z.string().uuid()}).strict(),
+  'espacos:trazer': z.object({id:z.string().uuid()}).strict(),
   'espacos:automacoes': z.object({id:z.string().uuid()}).strict(),
   'espacos:associar': z.object({id:z.string().uuid(),dados:associacaoSchema}).strict(),
   'servicos:listar': vazio,
@@ -259,6 +260,7 @@ for(const nome of Object.keys(esquemasIpc).filter(n=>n.startsWith('espacos:')||n
 // 2.10.2: vincular qualquer pasta de código propõe o contrato e só o cria com confirmação nativa.
 const pastaBase = ipc['espacos:pasta']!;
 ipc['espacos:pasta'] = { ...pastaBase, finalidade: 'Vincular a pasta de um repositório de código ao projeto Prumo, de qualquer stack.', entrada: 'Id do projeto; a pasta vem do diálogo nativo, nunca da página', efeito: 'Grava a pasta no projeto Prumo. Sem qa.project.json, detecta a stack pela raiz e propõe o contrato; só cria o arquivo após confirmação nativa (gravação exclusiva, nunca sobrescreve). Contrato inválido não é vinculado.', arquivos: 'qa.project.json da pasta escolhida (criado só com aprovação); dados locais plataforma', erros: [...pastaBase.erros, 'WORKSPACE_LOCAL_CONTRACT_INVALID', 'WORKSPACE_LOCAL_FOLDER_MISSING', 'WORKSPACE_LOCAL_DUPLICATE', 'CONTRACT_EXISTS'] };
+ipc['espacos:trazer'] = { ...pastaBase, finalidade: 'Trazer o repositório do GitHub vinculado ao projeto para uma pasta deste computador (ou atualizá-lo), para a IDE de Testes poder editá-lo.', origem: 'Interface > Testes > IDE', entrada: 'Id do projeto', saida: 'Ação (clonado ou atualizado), pasta, ramo e se a pasta foi vinculada ao projeto', efeito: 'Pede confirmação nativa do Windows e usa o git instalado, só com o endereço do GitHub do repositório vinculado (por https), hooks e links simbólicos desligados e as credenciais do próprio git (o Prumo não entrega a dele). Clona na pasta de dados do Prumo (repositorios); atualizar é só avanço, sem sobrescrever o trabalho local.', permissoes: 'Projetos: USAR', arquivos: 'Pasta de dados do Prumo, repositorios/<projeto>/<repositório>', erros: [...pastaBase.erros, 'GIT_UNAVAILABLE', 'GIT_AUTH', 'GIT_FAILED', 'GIT_TIMEOUT', 'GIT_URL_INVALID', 'GITHUB_NOT_LINKED', 'CLONE_DESTINATION_BUSY', 'CLONE_REMOTE_MISMATCH', 'CLONE_CANNOT_FAST_FORWARD', 'CLONE_NOT_FROM_PRUMO'] };
 // ---- 2.9: escritas externas, propostas, runs Qase, vínculos e agentes ----
 const extProt = [...ipcProtecoes, 'Isolamento por projeto Prumo, conexão e instância', 'Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts)', 'Escrita desligada por padrão por projeto e serviço', 'Confirmação nativa que a página não consegue simular', 'Idempotência e reconciliação; sem token nos logs'];
 const extErros = [...ipcErros, ...codigosServico, 'WRITE_NOT_ENABLED', 'HUMAN_CONFIRMATION_REQUIRED', 'WRITE_POLICY_MISSING', 'OPERATION_UNKNOWN', 'OPERATION_RETRY_LIMIT', 'WORKSPACE_NOT_FOUND'];

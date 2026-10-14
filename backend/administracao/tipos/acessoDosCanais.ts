@@ -28,7 +28,7 @@ export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
   'perfil:obter': 'base', 'perfil:salvar': 'base', 'preferencias:salvar': 'base', 'preferencias:visualizada': 'base', 'ajuda:documentos': 'base', 'ajuda:versoes': 'base',
   'ajuda:integracoes': 'base', 'dados:resumo': 'base', 'atualizacao:verificar': 'base', 'atualizacao:abrir': 'base', 'site:abrir': 'base',
   'projetos:escolher': ['projetos', 'USAR'], 'projetos:demo': ['projetos', 'USAR'], 'projetos:desvincular': ['projetos', 'USAR'], 'espacos:criar': ['projetos', 'USAR'], 'espacos:editar': ['projetos', 'USAR'],
-  'espacos:pasta': ['projetos', 'USAR'], 'servicos:desvincular': ['projetos', 'USAR'], 'servicos:conferir': ['projetos', 'VER'],
+  'espacos:pasta': ['projetos', 'USAR'], 'espacos:trazer': ['projetos', 'USAR'], 'servicos:desvincular': ['projetos', 'USAR'], 'servicos:conferir': ['projetos', 'VER'],
   'contextos:listar': ['contextos', 'VER'], 'contextos:obter': ['contextos', 'VER'], 'contextos:salvar': ['contextos', 'USAR'], 'contextos:aprovar': ['contextos', 'USAR'], 'contextos:desatualizar': ['contextos', 'USAR'],
   'contextos:conflito': ['contextos', 'USAR'], 'contextos:excluir': ['contextos', 'USAR'], 'contextos:mcp': ['contextos', 'USAR'], 'servicos:importar': ['contextos', 'USAR'],
   'espacos:automacoes': ['testes', 'VER'], 'testes:catalogo': ['testes', 'VER'], 'testes:arquivo': ['testes', 'VER'], 'testes:gravar': ['testes', 'USAR'], 'testes:pipelines': ['testes', 'VER'], 'propostas:listar': ['testes', 'VER'], 'runs:listar': ['testes', 'VER'],

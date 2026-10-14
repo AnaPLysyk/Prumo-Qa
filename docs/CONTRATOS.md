@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (150 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (151 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -17,6 +17,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:espacos:obter` | `id` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
 | `prumo:espacos:editar` | `dados`, `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
 | `prumo:espacos:pasta` | `id` | Grava a pasta no projeto Prumo. Sem qa.project.json, detecta a stack pela raiz e propõe o contrato; só cria o arquivo após confirmação nativa (gravação exclusiva, nunca sobrescreve). Contrato inválido não é vinculado. |
+| `prumo:espacos:trazer` | `id` | Pede confirmação nativa do Windows e usa o git instalado, só com o endereço do GitHub do repositório vinculado (por https), hooks e links simbólicos desligados e as credenciais do próprio git (o Prumo não entrega a dele). Clona na pasta de dados do Prumo (repositorios); atualizar é só avanço, sem sobrescrever o trabalho local. |
 | `prumo:espacos:automacoes` | `id` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
 | `prumo:espacos:associar` | `dados`, `id` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
 | `prumo:servicos:listar` | — | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
@@ -257,13 +258,28 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Vincular a pasta de um repositório de código ao projeto Prumo, de qualquer stack.
 - **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
-- **Destino:** backend/projetos/api/espacosPasta.ts > confirmarNoWindows, obterEspaco, gravarContratoProposto, proporContrato, resumirContratoProposto, situacaoProjeto, vincularPastaAoEspaco
+- **Destino:** backend/projetos/api/espacosPasta.ts > confirmarNoWindows, obterEspaco, vincularPastaDoDisco
 - **Entrada:** Id do projeto; a pasta vem do diálogo nativo, nunca da página
 - **Saída:** Registro local ou confirmação de cancelamento
 - **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
 - **Efeito:** Grava a pasta no projeto Prumo. Sem qa.project.json, detecta a stack pela raiz e propõe o contrato; só cria o arquivo após confirmação nativa (gravação exclusiva, nunca sobrescreve). Contrato inválido não é vinculado.
 - **Arquivos consultados:** qa.project.json da pasta escolhida (criado só com aprovação); dados locais plataforma
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE, WORKSPACE_LOCAL_CONTRACT_INVALID, WORKSPACE_LOCAL_FOLDER_MISSING, WORKSPACE_LOCAL_DUPLICATE, CONTRACT_EXISTS
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
+- **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
+
+### `prumo:espacos:trazer`
+
+- **Tipo:** IPC
+- **Finalidade:** Trazer o repositório do GitHub vinculado ao projeto para uma pasta deste computador (ou atualizá-lo), para a IDE de Testes poder editá-lo.
+- **Origem:** Interface > Testes > IDE
+- **Destino:** backend/projetos/api/espacosTrazer.ts > confirmarNoWindows, diretorioDados, obterEspaco, clonarOuAtualizarRepositorio, repositorioValido, vincularPastaDoDisco
+- **Entrada:** Id do projeto
+- **Saída:** Ação (clonado ou atualizado), pasta, ramo e se a pasta foi vinculada ao projeto
+- **Permissões:** Projetos: USAR
+- **Efeito:** Pede confirmação nativa do Windows e usa o git instalado, só com o endereço do GitHub do repositório vinculado (por https), hooks e links simbólicos desligados e as credenciais do próprio git (o Prumo não entrega a dele). Clona na pasta de dados do Prumo (repositorios); atualizar é só avanço, sem sobrescrever o trabalho local.
+- **Arquivos consultados:** Pasta de dados do Prumo, repositorios/<projeto>/<repositório>
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WORKSPACE_NOT_FOUND, CREDENTIAL_PROTECTION_UNAVAILABLE, GIT_UNAVAILABLE, GIT_AUTH, GIT_FAILED, GIT_TIMEOUT, GIT_URL_INVALID, GITHUB_NOT_LINKED, CLONE_DESTINATION_BUSY, CLONE_REMOTE_MISMATCH, CLONE_CANNOT_FAST_FORWARD, CLONE_NOT_FROM_PRUMO
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
 - **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
 

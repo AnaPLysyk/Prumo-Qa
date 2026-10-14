@@ -17,6 +17,14 @@
 - **Segredos:** arquivo cujo conteúdo teria algo mascarado não é aberto para edição, para que a máscara nunca seja gravada por cima do valor real nem o valor real apareça na janela.
 - O editor (CodeMirror 5) vem embutido no aplicativo e não usa rede nem `eval`; nada é executado ao editar. Com o login ligado, o canal exige o nível Usar na tela Testes.
 
+## Trazer o repositório do GitHub (2.13)
+
+- **Canal `espacos:trazer`**, com confirmação nativa do Windows (repositório, destino e efeito). Só `https://github.com/<dono>/<repositório>.git`, montado a partir do repositório vinculado e validado (sem `..`, barras extras ou caracteres que mudem o endereço).
+- **Git do computador, credenciais do próprio git.** O Prumo não entrega a credencial dele ao git: o ambiente do processo filho não herda variáveis com `token`, `secret`, `password`, `api_key` ou `credential` nem `GIT_*`; repositório privado depende do Git Credential Manager da própria pessoa.
+- **Opções fixas:** hooks desligados, `protocol.allow=never` (só https), `core.symlinks=false`, `core.autocrlf=false`, `transfer.fsckObjects=true`, sem submódulos, 50 commits e sem tags; tempo limite de 10 minutos.
+- **Destino fixo** em `%LOCALAPPDATA%\PrumoQAepositorios\<projeto>\<repositório>`. Atualizar só avança (fast-forward) e só numa pasta que o Prumo trouxe e cujo remoto confere; divergência é recusada sem tocar no trabalho local. Clone que falha apaga a pasta pela metade.
+- Depois do clone a pasta é vinculada pelo mesmo caminho de sempre (contrato proposto e confirmado). Nada do repositório é executado.
+
 ## Refatoração da branch em desenvolvimento
 
 Os handlers IPC exigem o `webContents` da janela principal registrada, seu frame principal e a URL exata de `index.html`. Abrir uma cópia da mesma página em outra janela não concede acesso aos canais. Argumentos continuam sujeitos aos esquemas; esta alteração não concede capacidades novas.
