@@ -1,26 +1,35 @@
-# Interfaces v36 — onde editar cada elemento da interface
+# Interfaces v36 — onde editar cada elemento
 
-Esta pasta reúne partes do visual aprovado de Agentes, Chat, Logs, Histórico, Métricas e Configurações.
+O visual de Início, Agentes, Chat, Logs, Histórico, Métricas e Configurações é carregado de `dist/renderer/interfaces-v36.js` e `dist/renderer/interfaces-v36.css`, **gerados no build** a partir das partes abaixo (a ordem importa). Edite a parte, não o arquivo gerado.
 
-- **Agentes:** busque `listarAgentesDisponiveis`, `abrirDetalhesAgente`, `mostrarCerebroAgente`, `mostrarAtividadesAgentes` ou `montarAssistenteFlutuante`.
-- **Chat:** busque `montarPainelChat`, `enviarPerguntaChat`, `montarBolhaMensagem` ou `lerRespostaEmVozAlta`.
-- **Logs:** busque `montarTelaLogs`, `filtrar`, `desenharLogsFiltrados` ou `carregarRegistrosLog`.
-- **Histórico:** busque `montarTelaHistorico`, `filtrarAtividadesHistorico` ou `montarTabelaHistorico`.
-- **Métricas:** busque `montarTelaMetricas`, `filtrarRegistrosMetricas` ou `pintarGrafico`.
-- **Configurações:** busque `editarPreferenciasAssistente`.
+## interfaces-v36.js
 
-Os nomes estão escritos no próprio caminho do arquivo. Cada parte começa com uma frase de responsabilidade.
+1. `frontend/compartilhado/interfaces-abertura.parte.js`
+2. `frontend/agentes/retratos-dos-agentes.parte.js`
+3. `frontend/compartilhado/exportar-e-icones.parte.js`
+4. `frontend/agentes/conversa-do-orchestrator.parte.js`
+5. `frontend/compartilhado/abrir-tela-pelo-orchestrator.parte.js`
+6. `frontend/agentes/orchestrator-flutuante.parte.js`
+7. `frontend/inicio/tela-inicio-v36.parte.js`
+8. `frontend/logs/tela-logs.parte.js`
+9. `frontend/historico/tela-historico.parte.js`
+10. `frontend/metricas/tela-metricas.parte.js`
+11. `frontend/agentes/tela-agentes.parte.js`
+12. `frontend/configuracoes/ajustes-do-assistente.parte.js`
+13. `frontend/compartilhado/interfaces-fechamento.parte.js`
 
-## Como funciona
+## interfaces-v36.css
 
-As partes `.parte.js` são **trechos-fonte**, não programas independentes. O script executado pela janela permanece `dist/renderer/interfaces-v36.js`, gerado juntando esses trechos **na mesma ordem e com conteúdo idêntico**. Isso preserva funções que compartilham o mesmo escopo e evita mudar o visual antes dos testes.
+1. `frontend/compartilhado/interfaces-base.parte.css`
+2. `frontend/agentes/conversa-do-orchestrator.parte.css`
+3. `frontend/logs/tela-logs.parte.css`
+4. `frontend/historico/tela-historico.parte.css`
+5. `frontend/metricas/tela-metricas.parte.css`
+6. `frontend/agentes/tela-agentes.parte.css`
+7. `frontend/compartilhado/reflow-zoom-e-movimento.parte.css`
+8. `frontend/agentes/espaco-profundo.parte.css`
+9. `frontend/configuracoes/menu-lateral-ceu.parte.css`
+10. `frontend/agentes/seletor-de-agente.parte.css`
+11. `frontend/configuracoes/ajustes-em-secoes.parte.css`
 
-Use `node ferramentas/frontend/gerar-telas-modulares.mjs` para regenerar; `node ferramentas/frontend/gerar-telas-modulares.mjs --check` para comparar sem alterar; e `npm.cmd run check` para validar. O comando antigo `ferramentas/frontend/gerar-telas-modulares.mjs` continua funcionando como ponte temporária.
-
-**Aviso:** Agentes personalizados seguem como prévias locais; essas telas ainda não representam execução independente, banco multiusuário ou API web. Essas funções permanecem na Proposta.
-
-## Onde encontrar os estilos
-
-Os estilos antigos de `interfaces-v36.css` agora também possuem fontes nomeadas por função em pastas `visual-v36-estilos` dentro de cada tela. Exemplos: `telas/logs/visual-v36-estilos/06-terminal.parte.css`, `telas/historico/visual-v36-estilos/07-historico.parte.css`, `telas/metricas/visual-v36-estilos/08-metricas.parte.css` e `telas/agentes/visual-v36-estilos/14-atividades.parte.css`.
-
-Os arquivos `.parte.css` são trechos que se juntam **sem alterar uma única regra**. O navegador continua carregando `interfaces-v36.css` do mesmo endereço, preservando a ordem da cascata. Não vincular as partes diretamente ao HTML.
+Cores de tema ficam só em `frontend/design-system` (tokens `--ds-*`); as partes de tela usam os tokens e não têm paleta própria.

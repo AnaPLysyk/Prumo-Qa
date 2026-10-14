@@ -33,7 +33,7 @@ aparecem em registros dos últimos 90 s. Estados `STARTED`/`SEM_TERMINO_OBSERVAD
 
 - O Prumo continua sendo **aplicativo desktop** (Electron). O painel é responsivo, aceita toque e usa só APIs
   padrão da web, mas não existe versão para navegador ou celular: isso exigiria servidor HTTP, o que
-  [SEGURANCA.md](SEGURANCA.md) não permite hoje.
+  [SEGURANCA.md](../SEGURANCA.md) não permite hoje.
 - Até 1000 operações, 200 execuções e 40 conversas por agente por consulta (limites já existentes nos canais IPC).
 - Nenhum canal IPC, contrato MCP ou dado do núcleo foi alterado.
 

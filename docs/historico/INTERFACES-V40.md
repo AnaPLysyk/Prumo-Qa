@@ -4,7 +4,7 @@ Trabalho local na branch `prumo/interfaces-aprovadas-v36`, sobre as alterações
 v36/v39 ainda não confirmadas. Sem deploy, publicação ou alteração da main.
 Referência visual: `prumo_qa_v39_qualidade_fluxos.html`. O código existente é a
 fonte da verdade funcional; dados e números do protótipo não foram importados.
-Design System: [DESIGN-SYSTEM.md](DESIGN-SYSTEM.md).
+Design System: [DESIGN-SYSTEM.md](../DESIGN-SYSTEM.md).
 
 ## Linha de base (antes da v40)
 

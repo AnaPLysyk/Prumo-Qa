@@ -31,7 +31,6 @@ Autorizações prévias e políticas aprovadas pela pessoa, com validade e limit
 | Arquivo | O que faz |
 | --- | --- |
 | `autorizacaoDelegada.ts` | Cria a verificação que o worker usa: só executa se houver autorização vigente para exatamente o mesmo escopo, e gasta um uso. |
-| `autorizacaoVigente.ts` | Diz se uma autorização ainda vale (não revogada e não vencida). |
 | `autorizarEscopo.ts` | Pede a autenticação humana do Windows e grava a autorização para um escopo exato (projeto, comando por hash, ambiente). |
 | `autorizarExecucao.ts` | Autoriza execuções agendadas de uma capacidade do projeto. |
 | `autorizarRotina.ts` | Pede a autenticação do Windows e cria a autorização prévia para a rotina rodar sozinha (escopo exato, validade e limite de usos). |
@@ -39,7 +38,6 @@ Autorizações prévias e políticas aprovadas pela pessoa, com validade e limit
 | `consumirPublicacao.ts` | Gasta uma publicação da política antes de publicar. |
 | `criarPoliticaEscrita.ts` | Cria a política que permite rotinas publicarem resultados numa run do Qase, com validade e limite. |
 | `criarPoliticaPublicacao.ts` | Cria a política que permite a rotina publicar comentário em tickets escolhidos, com validade e limite. |
-| `devolverPublicacao.ts` | Devolve a publicação gasta quando o envio falhou. |
 | `estadoDaAutorizacao.ts` | Diz o estado de uma autorização de execução: vigente, expirada, revogada ou esgotada. |
 | `estadoDaPoliticaDeEscrita.ts` | Diz o estado de uma política de escrita no Qase. |
 | `estadoDaPoliticaDePublicacao.ts` | Diz o estado de uma política de publicação no Jira. |
@@ -57,7 +55,6 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | --- | --- |
 | `agendaPausada.ts` | Diz se todos os agendamentos estão pausados. |
 | `alterarRotina.ts` | Abre uma rotina, aplica uma alteração, confere e grava. |
-| `cancelarTrabalho.ts` | Cancela um trabalho que ainda não começou. |
 | `concluirTrabalho.ts` | Marca o trabalho como concluído com o resultado. |
 | `definirEstadoJiraDoTrabalho.ts` | Anota o estado da publicação do comentário no Jira para o trabalho. |
 | `enfileirar.ts` | Coloca um trabalho na fila uma única vez (a mesma chave nunca vira dois trabalhos). |

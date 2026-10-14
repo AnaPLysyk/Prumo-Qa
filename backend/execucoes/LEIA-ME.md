@@ -30,7 +30,6 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | --- | --- |
 | `gravarPublicacoesJira.ts` | Grava o registro das publicações de comentário no Jira, guardando as 1.000 últimas. |
 | `lerPublicacoesJira.ts` | Lê o registro das publicações de comentário no Jira (publicacoes-jira.json). |
-| `listarPublicacoes.ts` | Lista as publicações de comentário no Jira. |
 | `publicacaoDoTrabalho.ts` | Busca a publicação de comentário de uma execução. |
 
 ## integracoes/

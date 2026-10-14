@@ -1,6 +1,6 @@
 # Arquitetura modular do Prumo QA — branch em revisão
 
-**Situação real:** esta documentação descreve a branch `simplificacao-didatica-prumo-qa`, **não a `main` publicada**. O aplicativo de produção permanece na versão existente. A refatoração depende do CI Windows e de testes locais antes do merge.
+**Situação:** descreve a estrutura atual do repositório (2.13): uma pasta por tela em `backend/` e em `frontend/`, a interface do Electron gerada em `dist/renderer/` no build e os testes em `testes/`, por tipo e depois por camada. Registros de decisões e de versões anteriores ficam em `docs/historico/`.
 
 ## Primeiro, escolha o nome da tela
 

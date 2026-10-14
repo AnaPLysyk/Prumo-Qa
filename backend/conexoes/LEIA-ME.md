@@ -69,7 +69,6 @@ Escrita externa: catálogo de operações, permissão por projeto, prévia, envi
 | `marcadorDaOperacao.ts` | Marcador "prumo-xxxxxxxxxx" posto no item criado, para reconhecê-lo depois e não duplicar. |
 | `operacaoPodeRepetir.ts` | Diz se vale tentar a operação de novo (tempo, indisponível, limite, resposta inválida). |
 | `operacaoPorId.ts` | Busca uma operação de escrita pelo id (ex.: jira.comentar). |
-| `operacoesDeEscritaPorServico.ts` | Lista as rotas de escrita permitidas de um serviço, para a Ajuda. |
 | `permissoesDoEspaco.ts` | Mostra, para Jira, Qase e GitHub, se a escrita está ligada no projeto. |
 | `prepararOperacao.ts` | Mostra a prévia de uma operação externa: resumo, efeito e chave, sem enviar nada. |
 | `rotaEscritaPermitida.ts` | Diz se um método e caminho de escrita está na lista fechada do serviço (sem DELETE, sem truques no caminho). |
@@ -139,7 +138,6 @@ Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereç
 | `contextoDoAdaptador.ts` | Dá às operações de escrita só o necessário (ler, enviar e limpar), sem nunca entregar a credencial; erros viram ErroServico. |
 | `enderecoPublico.ts` | Diz se um IP é público (recusa rede interna, localhost e faixas especiais). |
 | `enviarAoServico.ts` | Envia uma escrita (POST/PUT/PATCH) ao serviço, com corpo limitado a 12 MB. |
-| `enviarComentarioAoJira.ts` | Envia só o comentário de resultado ao Jira (único caminho aceito). |
 | `ErroServico.ts` | Erro de serviço externo com código fixo (sem permissão, limite de consultas, tempo esgotado...). |
 | `idNumericoDaConsulta.ts` | Confere que o id pedido é um número (até 15 dígitos) e o prepara para ir no endereço; senão recusa. |
 | `instanciaServico.ts` | Devolve o endereço oficial do serviço (Qase e GitHub fixos; Jira só *.atlassian.net). |

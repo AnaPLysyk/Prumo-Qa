@@ -1,6 +1,6 @@
 # Organização didática por tela — migração em andamento
 
-> **Situação:** esta branch já contém `backend/<tela>/` e `frontend/<tela>/`. O Electron carrega `dist/renderer/`, gerado no build a partir de `frontend/` e não versionado. Consulte [o guia atual](ARQUITETURA-MODULAR-ATUAL.md) antes das notas históricas abaixo. A `main` não mudou.
+> **Situação:** esta branch já contém `backend/<tela>/` e `frontend/<tela>/`. O Electron carrega `dist/renderer/`, gerado no build a partir de `frontend/` e não versionado. Consulte [o guia atual](../ARQUITETURA-MODULAR-ATUAL.md) antes das notas históricas abaixo. A `main` não mudou.
 
 ## Objetivo
 
@@ -90,14 +90,14 @@ Exceção registrada: `backend/aplicativo/api/catalogoDeContratos.ts` continua u
 Agora os scripts de interface estão dentro de `frontend/`, carregados explicitamente por `dist/renderer/index.html`. Projetos tem seu formulário em `telas/projetos/modais/criarEditarProjeto/`. Suporte e Ajuda já possuem arquivos separados; Contextos é um modal em Agentes. Os scripts genéricos `plataforma.js` e `apoio-v40.js` foram deixados apenas como marcadores de migração, **não executados** na página.
 
 
-**Leia `docs/GUIA-CODIGO-POR-TELA.md`** para acompanhar a lógica da tela Projetos, incluindo os canais IPC, a regra e o armazenamento.
+**Leia `docs/historico/GUIA-CODIGO-POR-TELA.md`** para acompanhar a lógica da tela Projetos, incluindo os canais IPC, a regra e o armazenamento.
 
 Há etapas posteriores obrigatórias: migrar arquivos grandes `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js`, `integracoes.js`; só depois reorganizar `rootDir`, `dist`, Electron, CLI, MCP e instalador para o layout final `frontend/` e `backend/`. Login, banco multiusuário e API HTTPS continuam como proposta.
 
 
 ## Atualização: telas separadas nesta branch
 
-Também foram decompostos `dist/renderer/agenda.js` (Início, Agendamentos, Execuções, controles da janela e worker) e `dist/renderer/integracoes.js` (Tickets, Testes, Runs, Conexões, Automações, Agentes, Rastreabilidade e Métricas). `dist/renderer/index.html` passou a listar os novos scripts por tela na ordem de execução original. Os dois arquivos antigos são apenas marcadores de transição. Documentação em `docs/GUIA-CODIGO-POR-TELA.md`.
+Também foram decompostos `dist/renderer/agenda.js` (Início, Agendamentos, Execuções, controles da janela e worker) e `dist/renderer/integracoes.js` (Tickets, Testes, Runs, Conexões, Automações, Agentes, Rastreabilidade e Métricas). `dist/renderer/index.html` passou a listar os novos scripts por tela na ordem de execução original. Os dois arquivos antigos são apenas marcadores de transição. Documentação em `docs/historico/GUIA-CODIGO-POR-TELA.md`.
 
 **Atenção:** ainda há código de interface concentrado em `dist/renderer/fluxos-v40.js`, `dist/renderer/testes-v40.js`, `dist/renderer/interfaces-v36.js` e outros. A interface modularizada ainda não é a arquitetura final `frontend/`.
 

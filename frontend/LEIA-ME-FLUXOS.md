@@ -1,15 +1,24 @@
-# Fluxos de Tickets, Testes, Runs e Rastreabilidade
+# Fluxos de Tickets, Testes, Runs e Vínculos
 
-O arquivo `dist/renderer/fluxos-v40.js` **continua sendo o script carregado no Electron** para não quebrar o estado compartilhado, os canais IPC e o visual.
+A janela carrega `dist/renderer/fluxos-v40.js` e `dist/renderer/testes-v40.js`. Os dois são **gerados no build** a partir das partes abaixo, na ordem em que aparecem (a ordem importa: as partes compartilham o mesmo escopo). Edite a parte, não o arquivo gerado.
 
-Agora ele é gerado a partir de `35 partes` distribuídas entre `telas/tickets/fluxos-fonte/`, `telas/testes/fluxos-fonte/`, `telas/runs/fluxos-fonte/`, `telas/rastreabilidade/fluxos-fonte/` e `telas/compartilhado/fluxos-fonte/`.
+## fluxos-v40.js
 
-- Edite **somente a parte identificada pelo nome da função**.
-- Cada parte começa com uma frase descrevendo o que faz.
-- Execute `node ferramentas/frontend/gerar-telas-modulares.mjs` para regenerar `fluxos-v40.js`.
-- Execute `node ferramentas/frontend/gerar-telas-modulares.mjs --check` para conferir que o arquivo carregado corresponde às partes.
-- O comando `npm.cmd run build` já regenera antes de compilar.
+1. `frontend/compartilhado/fluxos-abertura.parte.js`
+2. `frontend/tickets/fluxos-tickets.parte.js`
+3. `frontend/testes/fluxos-casos-qase.parte.js`
+4. `frontend/runs/fluxos-planos-e-runs.parte.js`
+5. `frontend/rastreabilidade/fluxos-rastreabilidade.parte.js`
+6. `frontend/compartilhado/fluxos-fechamento.parte.js`
 
-**Não carregue as partes diretamente no HTML**: o arquivo completo compartilha funções em um único escopo de execução. Esta organização mantém o resultado gerado idêntico ao arquivo anterior e permite a revisão por responsabilidades.
+## testes-v40.js
 
-As regras de escrita remota, confirmação humana, MCP, rastreabilidade declarada e dados continuam no núcleo; esses trechos são apenas apresentação.
+1. `frontend/testes/visao-geral-dos-testes.parte.js`
+
+## Como regenerar e conferir
+
+- `node ferramentas/frontend/gerar-telas-modulares.mjs` gera os bundles; com `--check`, só confere se o carregado corresponde às partes.
+- `npm run build` já regenera antes de compilar.
+- Cada parte começa com um comentário de uma linha dizendo o que faz. O nome do arquivo diz a tela e o assunto.
+
+Em Testes, as seções são IDE, Repositório, Runs e Planos (ver `frontend/testes/visao-geral-dos-testes.parte.js`). Execuções e Rastreabilidade não são mais telas do menu: a lista de execuções é Testes › Runs e os vínculos aparecem em Testes › Repositório.

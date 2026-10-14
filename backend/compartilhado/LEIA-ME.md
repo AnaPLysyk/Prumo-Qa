@@ -65,7 +65,6 @@ Proteções usadas por todas as telas: caminhos seguros, sem atalhos, segredos m
 | `hash.ts` | Calcula a impressão digital SHA-256 de um texto ou arquivo, usada para detectar alterações. |
 | `lerSeguro.ts` | Lê um arquivo de texto do projeto com limite de tamanho, recusando arquivos binários e caminhos proibidos. |
 | `mascarar.ts` | Esconde segredos num texto (tokens, senhas, chaves privadas, URLs com senha) trocando-os por [REDACTED]. |
-| `mascararObjeto.ts` | Mascara segredos em qualquer objeto antes de mostrá-lo. |
 | `semLinks.ts` | Recusa caminhos que passam por atalhos (links simbólicos ou junctions) em qualquer pasta do caminho. |
 | `sensivel.ts` | Diz se um caminho aponta para algo que nunca deve ser lido: senhas, chaves, .env, .git, node_modules, builds. |
 | `validarRelativo.ts` | Recusa caminhos absolutos, com "..", unidades de disco ou caracteres de controle: o caminho tem de ficar dentro da pasta do projeto. |
@@ -80,7 +79,6 @@ Pequenas funções de texto usadas em várias telas.
 | `comoLista.ts` | Trata um valor como lista (ou lista vazia se não for). |
 | `comoObjeto.ts` | Trata um valor como objeto (ou objeto vazio se não for). |
 | `dataEmPortugues.ts` | Escreve uma data em formato brasileiro, ou "—" quando não há data. |
-| `novoIdentificador.ts` | Gera um identificador único novo. |
 | `numeroDoId.ts` | Converte um id de texto em número inteiro positivo (ou nada). |
 | `parametrosDaUrl.ts` | Monta os parâmetros de consulta de uma URL, ignorando os vazios. |
 | `semAcentos.ts` | Deixa o texto em minúsculas e sem acentos para comparar palavras. |

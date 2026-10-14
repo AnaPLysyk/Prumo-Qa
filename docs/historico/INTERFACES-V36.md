@@ -66,7 +66,7 @@ dependências 3D fora do material aprovado.
 | `testes/e2e/ui/desktop.test.mjs` | Seletores da tabela de Logs adaptados ao terminal, mantendo assertions de MCP real/BLOCKED/persistência; inclui a nova função na ponte esperada. |
 | `testes/e2e/ui/desktop-interfaces-v36.test.mjs` | Fluxos novos, persistência, confirmação, validação/importação/exportação, eventos reais, zoom e isolamento. |
 | `testes/seguranca/externa/worker.test.mjs` | Corrige a preparação do cenário de expiração: criação da autorização e worker usam o mesmo relógio simulado. Mantém a assertion BLOCKED e acrescenta checagem da validade exata de um dia. Nenhum código de worker/autorização foi alterado. |
-| `docs/INTERFACES-V36.md` | Auditoria, limitações, evidências e reprodução local. |
+| `docs/historico/INTERFACES-V36.md` | Auditoria, limitações, evidências e reprodução local. |
 
 ## Preservação de módulos
 
