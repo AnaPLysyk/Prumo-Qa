@@ -27,7 +27,7 @@ assert.equal(vinculo.linked, true);
 
 const client = new Client({ name: 'codex-preparacao-2.2', version: '1.0.0' });
 await client.connect(new StdioClientTransport({ command: exe, args: [path.join(app, 'dist', 'mcp.js'), demo], env: { ELECTRON_RUN_AS_NODE: '1' } }));
-const plano = JSON.parse(fs.readFileSync('exemplos/plano-demo.json', 'utf8'));
+const plano = JSON.parse(fs.readFileSync('backend/projetos/exemplos/plano-demo.json', 'utf8'));
 const chamar = async (name, args) => JSON.parse((await client.callTool({ name, arguments: args })).content[0].text);
 try {
   assert.equal((await client.getServerVersion()).version, '2.2.0');

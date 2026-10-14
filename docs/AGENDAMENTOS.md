@@ -69,7 +69,7 @@ A rotina nunca recebe comando livre: o esquema é estrito e a capability precisa
 
 ## Playwright
 
-O Prumo não impõe organização ao repositório. Ele executa a capability declarada e lê o resultado estruturado: o reporter incluído (`reporters/prumo-playwright-reporter.cjs`) grava `PRUMO_RESULT_FILE`, ou `backend/testes/regras/converterRelatorioPlaywright.ts` converte o JSON nativo (`passed`, `failed`, `timedOut`, `skipped`, `interrupted`, `flaky`). Teste ignorado vira `NOT_RUN`, interrompido vira `NOT_RUN`, falha vira `FAIL`. Sem relatório estruturado a rodada fica sem cenários individuais; o exit code não inventa cenários. A execução real do Playwright depende do projeto do usuário (dependências e navegadores) e não foi exercitada no laboratório.
+O Prumo não impõe organização ao repositório. Ele executa a capability declarada e lê o resultado estruturado: o reporter incluído (`backend/testes/reporters/prumo-playwright-reporter.cjs`) grava `PRUMO_RESULT_FILE`, ou `backend/testes/regras/converterRelatorioPlaywright.ts` converte o JSON nativo (`passed`, `failed`, `timedOut`, `skipped`, `interrupted`, `flaky`). Teste ignorado vira `NOT_RUN`, interrompido vira `NOT_RUN`, falha vira `FAIL`. Sem relatório estruturado a rodada fica sem cenários individuais; o exit code não inventa cenários. A execução real do Playwright depende do projeto do usuário (dependências e navegadores) e não foi exercitada no laboratório.
 
 ## k6
 

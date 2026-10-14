@@ -14,12 +14,12 @@ export function fontesSkills(base = raiz) {
 }
 
 export function verificarSkills(base = raiz) {
-  const manifesto = JSON.parse(fs.readFileSync(path.join(base, 'skills/manifesto.json'), 'utf8'));
+  const manifesto = JSON.parse(fs.readFileSync(path.join(base, 'backend/agentes/skills/manifesto.json'), 'utf8'));
   const { capacidades, especializacoes } = fontesSkills(base);
   const exigir = (condicao, mensagem) => { if (!condicao) throw new Error('SKILLS_MANIFEST_INVALID: ' + mensagem); };
   exigir(manifesto.schemaVersion === 1 && manifesto.skills.length === especializacoes.length, 'versão ou quantidade divergente');
   exigir(new Set(manifesto.skills.map(s => s.id)).size === manifesto.skills.length, 'identificador repetido');
-  const pastas = fs.readdirSync(path.join(base, 'skills'), { withFileTypes: true }).filter(e => e.isDirectory() && fs.existsSync(path.join(base, 'skills', e.name, 'SKILL.md'))).map(e => 'skills/' + e.name + '/SKILL.md').sort();
+  const pastas = fs.readdirSync(path.join(base, 'backend', 'agentes', 'skills'), { withFileTypes: true }).filter(e => e.isDirectory() && fs.existsSync(path.join(base, 'backend', 'agentes', 'skills', e.name, 'SKILL.md'))).map(e => 'backend/agentes/skills/' + e.name + '/SKILL.md').sort();
   exigir(JSON.stringify(pastas) === JSON.stringify(manifesto.skills.map(s => s.caminho).sort()), 'Skill sem registro ou caminho inexistente');
   for (const esperado of especializacoes) {
     const item = manifesto.skills.find(s => s.id === esperado.id);

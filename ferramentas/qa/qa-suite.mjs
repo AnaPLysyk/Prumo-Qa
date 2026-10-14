@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { casoDoNode } from '../../reporters/prumo-node-reporter.mjs';
+import { casoDoNode } from '../../backend/testes/reporters/prumo-node-reporter.mjs';
 import { run } from 'node:test';
 import { spec } from 'node:test/reporters';
 

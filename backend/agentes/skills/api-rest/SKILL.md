@@ -28,7 +28,7 @@ description: "Fundamentos para revisar testes de API REST: contrato, status, cor
 
 ## Com Playwright
 
-A fixture `request` do Playwright permite testar a API, preparar estado antes de testes de interface e conferir o estado depois de uma ação de interface ([api-testing](https://playwright.dev/docs/api-testing)). A orientação específica de Playwright está em `skills/playwright/SKILL.md`.
+A fixture `request` do Playwright permite testar a API, preparar estado antes de testes de interface e conferir o estado depois de uma ação de interface ([api-testing](https://playwright.dev/docs/api-testing)). A orientação específica de Playwright está em `backend/agentes/skills/playwright/SKILL.md`.
 
 ## Fonte
 

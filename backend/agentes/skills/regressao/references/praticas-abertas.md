@@ -1,6 +1,6 @@
 # Seleção de regressão e saúde da suíte
 
-Adaptado de `playwright-regression-testing` (fugazi/test-automation-skills-agents, MIT; ver `skills/TERCEIROS.md`) e ajustado às regras do Prumo QA: o Prumo só executa capabilities declaradas no contrato e autorizadas pela pessoa.
+Adaptado de `playwright-regression-testing` (fugazi/test-automation-skills-agents, MIT; ver `backend/agentes/skills/TERCEIROS.md`) e ajustado às regras do Prumo QA: o Prumo só executa capabilities declaradas no contrato e autorizadas pela pessoa.
 
 ## Camadas de execução (referência, não obrigação)
 

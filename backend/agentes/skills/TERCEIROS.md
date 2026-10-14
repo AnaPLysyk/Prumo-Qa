@@ -4,7 +4,7 @@ Os arquivos `references/praticas-abertas.md` (acessibilidade, api-rest, investig
 
 | Origem | Usado em | Licença |
 | --- | --- | --- |
-| [anthropics/skills — `skills/webapp-testing`](https://github.com/anthropics/skills/tree/main/skills/webapp-testing) | playwright | Apache-2.0 — Copyright 2026 Anthropic, PBC. Texto em [licencas/APACHE-2.0.txt](licencas/APACHE-2.0.txt) |
+| [anthropics/skills — `backend/agentes/skills/webapp-testing`](https://github.com/anthropics/skills/tree/main/skills/webapp-testing) | playwright | Apache-2.0 — Copyright 2026 Anthropic, PBC. Texto em [licencas/APACHE-2.0.txt](licencas/APACHE-2.0.txt) |
 | [testdino-hq/playwright-skill](https://github.com/testdino-hq/playwright-skill) | playwright (lista de temas de apoio) | MIT — Copyright (c) 2026 TestDino |
 | [fugazi/test-automation-skills-agents](https://github.com/fugazi/test-automation-skills-agents) — `qa-investigation`, `a11y-playwright-testing`, `playwright-regression-testing`, `api-testing`, `grill-me-qa` | investigacao-bugs, acessibilidade, regressao, monitoramento, api-rest, qa | MIT — Copyright (c) 2026 Douglas Urrea Ocampo |
 

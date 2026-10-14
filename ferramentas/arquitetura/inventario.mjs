@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const antes = '245710462ee4859f3740807bb5bb85ec04b71478';
-const pastas = ['frontend', 'backend', 'testes', 'site', 'scripts', 'ferramentas', 'reporters', 'skills'];
+const pastas = ['frontend', 'backend', 'testes', 'site', 'scripts', 'ferramentas'];
 const nomes = (args) => execFileSync('git', args, { cwd: raiz, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
 const antigos = nomes(['ls-tree', '-r', '--name-only', antes]);
 const atuais = [...new Set(nomes(['ls-files', '--cached', '--others', '--exclude-standard']))];

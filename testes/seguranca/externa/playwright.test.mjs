@@ -31,7 +31,7 @@ test('relatório JSON do Playwright vira cenários individuais sem inventar nada
 });
 
 test('reporter do Prumo grava o contrato PRUMO_RESULT_FILE, trata retentativas e ignora execução fora do Prumo', (t) => {
-  const Reporter = require('../../../reporters/prumo-playwright-reporter.cjs'); const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo rep ')); t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const Reporter = require('../../../backend/testes/reporters/prumo-playwright-reporter.cjs'); const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo rep ')); t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const alvo = path.join(dir, 'r.json'); process.env.PRUMO_RESULT_FILE = alvo; process.env.PRUMO_JOB_ID = '11111111-1111-4111-8111-111111111111'; t.after(() => { delete process.env.PRUMO_RESULT_FILE; delete process.env.PRUMO_JOB_ID; });
   const tt = (id, titulo) => ({ id, expectedStatus: 'passed', titlePath: () => ['', 'chromium', 'login.spec.ts', titulo] });
   const r = new Reporter(); const a = tt('a', 'abre'); const b = tt('b', 'grava');

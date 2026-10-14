@@ -12,8 +12,8 @@ export type Framework = { id: 'playwright' | 'api-rest'; nome: string; estado: '
 export const doc = 'https://playwright.dev/docs';
 
 export const conhecimento = {
-  playwright: { id: 'playwright', nome: 'Playwright (TypeScript/JavaScript)', skill: 'skills/playwright/SKILL.md', fontes: [`${doc}/best-practices`, `${doc}/locators`, `${doc}/test-assertions`, `${doc}/test-retries`, `${doc}/actionability`, `${doc}/writing-tests`, `${doc}/api-testing`] },
-  'api-rest': { id: 'api-rest', nome: 'Fundamentos de testes de API REST', skill: 'skills/api-rest/SKILL.md', fontes: [`${doc}/api-testing`] }
+  playwright: { id: 'playwright', nome: 'Playwright (TypeScript/JavaScript)', skill: 'backend/agentes/skills/playwright/SKILL.md', fontes: [`${doc}/best-practices`, `${doc}/locators`, `${doc}/test-assertions`, `${doc}/test-retries`, `${doc}/actionability`, `${doc}/writing-tests`, `${doc}/api-testing`] },
+  'api-rest': { id: 'api-rest', nome: 'Fundamentos de testes de API REST', skill: 'backend/agentes/skills/api-rest/SKILL.md', fontes: [`${doc}/api-testing`] }
 } as const;
 
 export const config = /(^|[\\/])playwright\.config\.(ts|js|mjs|cjs)$/;

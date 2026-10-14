@@ -38,6 +38,13 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `listarEspacos.ts` | Lista todos os projetos do Prumo. |
 | `obterEspaco.ts` | Busca um projeto do Prumo pelo id; se não existe, avisa WORKSPACE_NOT_FOUND. |
 
+## exemplos/
+
+Projeto de demonstração e planos de exemplo usados pela demonstração e pelos testes.
+
+| Arquivo | O que faz |
+| --- | --- |
+
 ## regras/
 
 O que a tela decide: validações, cálculos e os passos de cada ação.

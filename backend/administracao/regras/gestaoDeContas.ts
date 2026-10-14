@@ -22,7 +22,7 @@ function garantirAdministrador(r: RegistroDeContas): void {
   if (!r.usuarios.some((u) => u.papel === 'administrador' && u.estado === 'ATIVO')) throw new Error('LAST_ADMIN: precisa existir ao menos um administrador ativo.');
 }
 
-export function listarContas(b?: string): { contas: ContaVisivel[]; voce: string | null } {
+export function listarContasDeAcesso(b?: string): { contas: ContaVisivel[]; voce: string | null } {
   const r = lerContas(b); const agora = Date.now(); const s = situacaoDaSessao(b, agora, false);
   const ordem = { PENDENTE: 0, ATIVO: 1, DESATIVADO: 2 } as const;
   return { contas: r.usuarios.map((u) => contaParaJanela(r, u, agora)).sort((a, z) => ordem[a.estado] - ordem[z.estado] || a.nome.localeCompare(z.nome, 'pt-BR')), voce: s.tipo === 'ATIVA' ? s.usuario.id : null };

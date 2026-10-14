@@ -99,6 +99,13 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `revisarCobertura.ts` | Revisa um plano de testes contra o requisito: rastreabilidade, riscos, oráculos, lacunas e cenários repetidos. Nunca diz que está aprovado. |
 | `seletorFragil.ts` | Diz se um seletor de tela é frágil (XPath, nth-child, classes geradas, cadeias de div). |
 
+## reporters/
+
+Relatores (Playwright e node:test) que gravam o resultado de cada caso no formato do Prumo, para usar nos projetos.
+
+| Arquivo | O que faz |
+| --- | --- |
+
 ## tipos/
 
 Formato dos dados, listas fixas e limites. Não tem funções.

@@ -1,6 +1,6 @@
 # Acessibilidade automatizada com Playwright e axe-core
 
-Adaptado de `a11y-playwright-testing` (fugazi/test-automation-skills-agents, MIT; ver `skills/TERCEIROS.md`) e ajustado às regras do Prumo QA. Só aplique quando o projeto já usa Playwright; não instale ferramentas para gerar pontuação.
+Adaptado de `a11y-playwright-testing` (fugazi/test-automation-skills-agents, MIT; ver `backend/agentes/skills/TERCEIROS.md`) e ajustado às regras do Prumo QA. Só aplique quando o projeto já usa Playwright; não instale ferramentas para gerar pontuação.
 
 ## Varredura com axe
 

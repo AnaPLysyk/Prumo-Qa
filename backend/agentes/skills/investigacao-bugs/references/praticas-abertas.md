@@ -1,6 +1,6 @@
 # Investigação de falhas: método
 
-Adaptado de `qa-investigation` (fugazi/test-automation-skills-agents, MIT; ver `skills/TERCEIROS.md`) e ajustado às regras do Prumo QA.
+Adaptado de `qa-investigation` (fugazi/test-automation-skills-agents, MIT; ver `backend/agentes/skills/TERCEIROS.md`) e ajustado às regras do Prumo QA.
 
 ## Classifique só depois de reproduzir
 

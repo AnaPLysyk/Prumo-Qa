@@ -1,6 +1,6 @@
 # Revisão de estratégia de teste (entrevista guiada)
 
-Adaptado de `grill-me-qa` (fugazi/test-automation-skills-agents, MIT; ver `skills/TERCEIROS.md`) e ajustado às regras do Prumo QA. Use quando a pessoa pedir para revisar um plano de automação, estratégia de teste ou adoção de IA nos testes, antes de implementar.
+Adaptado de `grill-me-qa` (fugazi/test-automation-skills-agents, MIT; ver `backend/agentes/skills/TERCEIROS.md`) e ajustado às regras do Prumo QA. Use quando a pessoa pedir para revisar um plano de automação, estratégia de teste ou adoção de IA nos testes, antes de implementar.
 
 ## Como conduzir
 

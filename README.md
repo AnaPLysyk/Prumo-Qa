@@ -9,7 +9,7 @@ Procure pelo nome da tela que aparece no menu: a mesma pasta existe no frontend 
 | O que aparece numa tela | `frontend/<tela>/` (fonte única; `dist/renderer/` é gerado no build) |
 | O que a tela faz por trás (canais, regras, dados, integrações) | `backend/<tela>/` com `api/`, `regras/`, `banco/`, `integracoes/`, `tipos/` |
 | Componentes e estilos comuns | `frontend/design-system/` e `frontend/compartilhado/` |
-| Skills dos agentes | `skills/` (arquivos do aplicativo) e o banco `skills.db` ([docs/SKILLS.md](docs/SKILLS.md)) |
+| Skills dos agentes | `backend/agentes/skills/` (arquivos do aplicativo) e o banco `skills.db` ([docs/SKILLS.md](docs/SKILLS.md)) |
 | Testes | `testes/<tipo>/<camada>/` ([testes/LEIA-ME.md](testes/LEIA-ME.md)) |
 | Build, empacotamento, release, documentação gerada | `ferramentas/<finalidade>/` |
 | Site público | `site/gerar.mjs`, `site/componentes/`, `site/estilos/` |
@@ -137,12 +137,12 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 | `docs/ajuda/*.md` | Documentos da aba Ajuda (inclui privacidade e termos em rascunho) |
 | `electron-builder.yml`, `assets/` | Instalador NSIS e ícone substituível |
 | `.github/workflows/windows.yml` | Testes, instalador, instalação em pasta com espaços e release por tag |
-| `skills/qa/SKILL.md` | Método de qualidade aplicável do ISTQB, sem meta fixa de cenários |
+| `backend/agentes/skills/qa/SKILL.md` | Método de qualidade aplicável do ISTQB, sem meta fixa de cenários |
 | `testes/<tipo>/<camada>/` | Unitários, contratos (IPC, MCP), integração, segurança, E2E na janela real e migração; regras do repositório em `testes/estrutura/` |
 | `ferramentas/` | Ferramentas por finalidade: arquitetura, documentação, frontend, empacotamento, release, migração, site, qa, skills e testes |
-| `exemplos/projeto-demo` | Produto fictício de publicações, dados em memória e testes reais |
-| `exemplos/plano-demo.json` | Revisão rastreável com cenário duplicado |
-| `exemplos/g3-somente-leitura.json` | Contrato externo restrito, sem comandos, para G3 |
+| `backend/projetos/exemplos/projeto-demo` | Produto fictício de publicações, dados em memória e testes reais |
+| `backend/projetos/exemplos/plano-demo.json` | Revisão rastreável com cenário duplicado |
+| `backend/projetos/exemplos/g3-somente-leitura.json` | Contrato externo restrito, sem comandos, para G3 |
 | `ferramentas/demonstracao/demonstrar.mjs` | Demonstração CLI/MCP com logs reais; sem simular aprovação humana |
 | `docs/` | Segurança, proveniência, validação, diagnóstico e entrega |
 
@@ -262,7 +262,7 @@ npx.cmd @modelcontextprotocol/inspector --cli node "$server" "$demo" --method to
 
 ## Disponibilizar a Skill
 
-Codex reconhece `.agents/skills` no projeto e no perfil; Claude Code reconhece `.claude/skills`. A pasta `skills/qa` deste pacote é fonte portátil e não é carregada universalmente por todos os hosts. Instale em um projeto autorizado, sem sobrescrever uma Skill existente:
+Codex reconhece `.agents/skills` no projeto e no perfil; Claude Code reconhece `.claude/skills`. A pasta `backend/agentes/skills/qa` deste pacote é fonte portátil e não é carregada universalmente por todos os hosts. Instale em um projeto autorizado, sem sobrescrever uma Skill existente:
 
 ```powershell
 $destCodex = Join-Path (Get-Location) '.agents\skills\qa'

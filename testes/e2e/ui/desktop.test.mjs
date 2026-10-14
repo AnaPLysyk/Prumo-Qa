@@ -93,7 +93,7 @@ test('projetos com e sem manifesto: diagnóstico sem alterar a pasta e vínculo 
 test('fluxo ponta a ponta: MCP real aparece em logs ao vivo, métricas e histórico; execução protegida fica BLOCKED; persiste após reiniciar', async (t) => {
   const dados = novoDados(t);
   const f = await fixture(t);
-  const plano = JSON.parse(fs.readFileSync('exemplos/plano-demo.json', 'utf8'));
+  const plano = JSON.parse(fs.readFileSync('backend/projetos/exemplos/plano-demo.json', 'utf8'));
   const primeira = await abrir(t, dados);
   await escolherPasta(primeira.app, f.root); await primeira.page.click('text=Vincular pasta…'); await primeira.page.waitForSelector('table');
   await ir(primeira.page, 'metricas');

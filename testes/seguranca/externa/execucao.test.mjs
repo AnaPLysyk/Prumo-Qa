@@ -82,7 +82,7 @@ test('evidência corrompida e transferida para outro projeto recusadas',async t=
 test('demo end-to-end: assertions reais e relatório de seis casos, broker substituído explicitamente',async t=>{
   const {cp,mkdtemp,rm}=await import('node:fs/promises');const os=await import('node:os');
   const root=await mkdtemp(path.join(os.tmpdir(),'prumo demo espaço '));t.after(()=>rm(root,{recursive:true,force:true}));
-  await cp(path.resolve('exemplos/projeto-demo'),root,{recursive:true,filter:s=>!s.includes('.prumo')});
+  await cp(path.resolve('backend/projetos/exemplos/projeto-demo'),root,{recursive:true,filter:s=>!s.includes('.prumo')});
   const e=await executarValidacao(await carregarProjeto(root),'unit',true);
   assert.equal(e.status,'PASS');assert.equal(e.cases.length,6);assert.ok(e.cases.every(c=>c.status==='PASS'));assert.equal(e.approval.method,'test-double');
 });

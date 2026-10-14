@@ -3,7 +3,7 @@
 /**
  * Banco de Skills (skills.db), separado do conhecimento.db. Cada Skill é guardada em TRECHOS (um parágrafo ou seção),
  * para que o prompt leve só o que combina com a pergunta, em vez do arquivo inteiro.
- * - PRUMO: trechos das Skills que acompanham o aplicativo (pasta skills/), sincronizados a cada versão.
+ * - PRUMO: trechos das Skills que acompanham o aplicativo (pasta backend/agentes/skills/), sincronizados a cada versão.
  * - PESSOA: escritos pela equipe na tela; nascem APROVADO (é a decisão dela).
  * - IMPORTADO: vindos de uma pasta de Skill aberta (ex.: repositório clonado), com fonte e licença; nascem RASCUNHO.
  * - IA: sugeridos por IA; nascem RASCUNHO.

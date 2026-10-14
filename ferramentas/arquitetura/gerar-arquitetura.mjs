@@ -65,7 +65,7 @@ function lerRevisao(ref) {
 
 export function lerCopiaDeTrabalho() {
   const arquivos = new Map();
-  for (const raiz of ['frontend', 'backend', 'src', 'scripts', 'ferramentas', 'site', 'skills', 'testes']) {
+  for (const raiz of ['frontend', 'backend', 'src', 'scripts', 'ferramentas', 'site', 'testes']) {
     const dir = path.join(raizRepo, raiz); if (!fs.existsSync(dir)) continue;
     for (const rel of fs.readdirSync(dir, { recursive: true }).map(String)) {
       const nome = (raiz + '/' + rel).split(path.sep).join('/');
@@ -119,7 +119,7 @@ export function montarInstantaneo(arquivos) {
 
 export function gerarArquitetura({ atual = 'origin/main' } = {}) {
   const head = git('rev-parse', '--short', 'HEAD').trim(); const ramo = git('rev-parse', '--abbrev-ref', 'HEAD').trim();
-  const local = git('status', '--porcelain', '--', 'frontend', 'backend', 'src', 'scripts', 'ferramentas', 'site', 'skills', 'testes').trim();
+  const local = git('status', '--porcelain', '--', 'frontend', 'backend', 'src', 'scripts', 'ferramentas', 'site', 'testes').trim();
   const refAtual = git('rev-parse', '--short', atual).trim(); const dataAtual = git('log', '-1', '--format=%cI', atual).trim();
   return {
     geradoEm: new Date().toISOString(),

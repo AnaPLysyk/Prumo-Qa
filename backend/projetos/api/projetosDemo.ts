@@ -7,6 +7,6 @@ import { adicionarVinculo } from '../regras/adicionarVinculo.js';
 import { copiarDemonstracao } from '../regras/copiarDemonstracao.js';
 
 export const projetosDemo: TratadorDoCanal<'projetos:demo'> = async () => {
-  const origem = app.isPackaged ? path.join(process.resourcesPath, 'demo') : path.join(raizDoAplicativo, 'exemplos', 'projeto-demo');
+  const origem = app.isPackaged ? path.join(process.resourcesPath, 'demo') : path.join(raizDoAplicativo, 'backend', 'projetos', 'exemplos', 'projeto-demo');
   return adicionarVinculo(copiarDemonstracao(origem));
 };

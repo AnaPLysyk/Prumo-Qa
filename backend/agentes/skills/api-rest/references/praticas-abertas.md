@@ -1,6 +1,6 @@
 # Checklist de testes de API
 
-Adaptado de `api-testing` (fugazi/test-automation-skills-agents, MIT; ver `skills/TERCEIROS.md`) e ajustado às regras do Prumo QA: endpoints, campos e códigos vêm do requisito ou do contrato aprovado, nunca de dedução.
+Adaptado de `api-testing` (fugazi/test-automation-skills-agents, MIT; ver `backend/agentes/skills/TERCEIROS.md`) e ajustado às regras do Prumo QA: endpoints, campos e códigos vêm do requisito ou do contrato aprovado, nunca de dedução.
 
 ## Por resposta
 

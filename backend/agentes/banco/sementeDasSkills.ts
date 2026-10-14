@@ -1,4 +1,4 @@
-/** Trechos das Skills que acompanham o aplicativo (pasta skills/), já divididos e com identificador estável pelo conteúdo. */
+/** Trechos das Skills que acompanham o aplicativo (pasta backend/agentes/skills/), já divididos e com identificador estável pelo conteúdo. */
 import path from 'node:path';
 import { lerPastaDeSkill } from './lerPastaDeSkill.js';
 import { dividirSkillEmTrechos } from '../regras/dividirSkillEmTrechos.js';

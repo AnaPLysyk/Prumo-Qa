@@ -27,7 +27,7 @@ export function criarEsquemaDoConhecimento(db: DatabaseSync) {
     db.prepare(`INSERT OR REPLACE INTO meta (chave, valor) VALUES ('esquema', ?)`).run(String(VERSAO_ESQUEMA));
     const up = db.prepare(`INSERT INTO agentes (id, nome, dominio, skill, tom, foco, lema) VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET nome = excluded.nome, dominio = excluded.dominio, skill = excluded.skill, tom = excluded.tom, foco = excluded.foco, lema = excluded.lema`);
-    for (const a of agentesChat) { const p = personalidades[a.id]!; up.run(a.id, a.nome, a.dominio, a.especializacao ? 'skills/' + (a.especializacao === 'qa-geral' ? 'qa' : a.especializacao) : null, p.tom, p.foco, p.assinatura); }
+    for (const a of agentesChat) { const p = personalidades[a.id]!; up.run(a.id, a.nome, a.dominio, a.especializacao ? 'backend/agentes/skills/' + (a.especializacao === 'qa-geral' ? 'qa' : a.especializacao) : null, p.tom, p.foco, p.assinatura); }
     const agora = new Date().toISOString(); const ins = db.prepare(`INSERT OR IGNORE INTO conhecimentos (id, agente_id, espaco_id, tipo, titulo, texto, origem, estado, criado_em, decidido_em, cliente, hash) VALUES (?, ?, NULL, ?, ?, ?, 'PRUMO', 'APROVADO', ?, ?, NULL, ?)`);
     for (const s of SEMENTE) ins.run(s.id, s.agente, s.tipo, s.titulo, s.texto, agora, agora, impressaoDoConhecimento(s.agente, null, s.tipo, s.titulo, s.texto));
     for (const a of agentesChat) db.exec(`CREATE VIEW IF NOT EXISTS ${vistaDoAgente(a.id)} AS SELECT id, tipo, titulo, texto, origem, estado, espaco_id, criado_em, decidido_em FROM conhecimentos WHERE agente_id = '${a.id}' OR agente_id IS NULL`);

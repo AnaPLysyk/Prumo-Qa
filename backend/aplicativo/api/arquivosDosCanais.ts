@@ -142,7 +142,7 @@ export const arquivosDosCanais: Record<string, string> = {
   'usuarios:criar': 'backend/administracao/api/usuariosCriar.ts > criarContaPelaAdministracao',
   'usuarios:desbloquear': 'backend/administracao/api/usuariosDesbloquear.ts > desbloquearConta',
   'usuarios:excluir': 'backend/administracao/api/usuariosExcluir.ts > excluirConta',
-  'usuarios:listar': 'backend/administracao/api/usuariosListar.ts > listarContas',
+  'usuarios:listar': 'backend/administracao/api/usuariosListar.ts > listarContasDeAcesso',
   'usuarios:senha': 'backend/administracao/api/usuariosSenha.ts > redefinirSenhaPelaAdministracao',
   'vinculos:mapa': 'backend/rastreabilidade/api/vinculosMapa.ts > mapaDeVinculos',
   'worker:estado': 'backend/agendamentos/api/workerEstado.ts > workerDoAplicativo, estadoDoAplicativo',

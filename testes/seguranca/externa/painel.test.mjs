@@ -21,7 +21,7 @@ import { vincularPasta } from '../../../dist/projetos/regras/vincularPasta.js';
 import { visaoGeralDoProjeto } from '../../../dist/projetos/regras/visaoGeralDoProjeto.js';
 import { documentosAjuda } from '../../../dist/projetos/tipos/painel.js';
 
-const demo = path.resolve('exemplos/projeto-demo');
+const demo = path.resolve('backend/projetos/exemplos/projeto-demo');
 const registrar = async (root, tool, resultado, entrada = {}) => {
   const p = await carregarProjeto(root);
   iniciarAtividade(p, tool, { origin: 'MCP', client: 'test-client' }, entrada).finalizar(resultado);

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { casoDoNode } from '../../../reporters/prumo-node-reporter.mjs';
+import { casoDoNode } from '../../../backend/testes/reporters/prumo-node-reporter.mjs';
 
 test('reporter node preserva PASS, FAIL e skip/TODO a partir de eventos reais', async (t) => {
   const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo reporter '));
@@ -14,7 +14,7 @@ test('reporter node preserva PASS, FAIL e skip/TODO a partir de eventos reais', 
   fs.writeFileSync(fonte, "import test from 'node:test'; import assert from 'node:assert/strict';\ntest('passa', () => assert.equal(1, 1));\ntest('falha', () => assert.equal(1, 2));\ntest.skip('pulado', () => {});\ntest.todo('pendente');\n");
   const runner = path.join(raiz, 'runner.mjs');
   fs.writeFileSync(runner, `import { run } from 'node:test';
-import { casoDoNode } from ${JSON.stringify(new URL('../../../reporters/prumo-node-reporter.mjs', import.meta.url).href)};
+import { casoDoNode } from ${JSON.stringify(new URL('../../../backend/testes/reporters/prumo-node-reporter.mjs', import.meta.url).href)};
 const raiz = ${JSON.stringify(raiz)}, fonte = ${JSON.stringify(fonte)}, casos = [];
 for await (const e of run({ files: [fonte], concurrency: 1 })) {
   if (!['test:pass', 'test:fail'].includes(e.type)) continue;

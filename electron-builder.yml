@@ -14,8 +14,8 @@ files:
   - docs/ajuda/**
   - docs/catalogo/**
   - assets/**
-  - skills/**
-  - reporters/**
+  - backend/agentes/skills/**
+  - backend/testes/reporters/**
   - docs/AGENDAMENTOS.md
   - docs/SERVICOS.md
   - package.json
@@ -24,7 +24,7 @@ files:
   - "!dist/**/*.fonte.sha256"
 extraResources:
   # Projeto de demonstração (somente leitura na instalação; o app o copia para LOCALAPPDATA ao vincular).
-  - from: exemplos/projeto-demo
+  - from: backend/projetos/exemplos/projeto-demo
     to: demo
     filter: ["**/*", "!.prumo/**", "!node_modules/**"]
 win:

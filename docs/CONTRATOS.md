@@ -845,7 +845,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Agente, linhas, fontes, modo (LOCAL/CLAUDE/CODEX), estilo, rota, próximos passos, ações (aprovar/descartar aprendizado), pendência de perfil e atendimentoId
 - **Permissões:** Delegação externa exige autorização prévia com confirmação nativa
 - **Efeito:** Não grava a conversa: registra só o atendimento (agente, modo e fontes) em conhecimento.db. A memória da sessão (até 6 turnos) e o contexto do teste aberto vêm da janela. Pedidos como "me chama de…" e "lembra que…" gravam o perfil ou um rascunho de conhecimento. Com provedor externo autorizado, executa o CLI local sem shell, com tempo limite; linhas APRENDIZADO da IA viram rascunho.
-- **Arquivos consultados:** conhecimento.db; skills/<especialização>/SKILL.md
+- **Arquivos consultados:** conhecimento.db; backend/agentes/skills/<especialização>/SKILL.md
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Livro-razão local de operações externas e histórico do projeto

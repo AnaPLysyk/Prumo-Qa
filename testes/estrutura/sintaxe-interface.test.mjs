@@ -8,7 +8,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const renderer = path.join(raiz, 'app', 'renderer');
+const renderer = path.join(raiz, 'dist', 'renderer');
 
 test('interface: todo script da janela (dist/renderer/*.js) compila', () => {
   const scripts = fs.readdirSync(renderer).filter((n) => n.endsWith('.js'));

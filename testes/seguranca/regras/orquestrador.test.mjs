@@ -130,18 +130,18 @@ test('falha de armazenamento do aprendizado preserva a resposta externa e avisa 
 
 test('roster liga cada agente do chat à especialização e ao estado das capacidades do projeto', () => {
   const r = rosterDoChat(espaco.id, dados); const qa = r.find((a) => a.id === 'qa-geral');
-  assert.equal(qa.skill, 'skills/qa'); assert.ok(qa.capacidades.length > 0 && qa.capacidades.every((c) => c.estado));
+  assert.equal(qa.skill, 'backend/agentes/skills/qa'); assert.ok(qa.capacidades.length > 0 && qa.capacidades.every((c) => c.estado));
   assert.equal(r.find((a) => a.id === 'orquestrador').skill, null);
 });
 
 test('skills adaptadas de fontes abertas: referência ligada no SKILL.md, crédito e licença registrados', () => {
-  const terceiros = fs.readFileSync('skills/TERCEIROS.md', 'utf8');
+  const terceiros = fs.readFileSync('backend/agentes/skills/TERCEIROS.md', 'utf8');
   for (const [skill, ref] of [['investigacao-bugs', 'praticas-abertas.md'], ['acessibilidade', 'praticas-abertas.md'], ['regressao', 'praticas-abertas.md'], ['api-rest', 'praticas-abertas.md'], ['playwright', 'praticas-abertas.md'], ['qa', 'estrategia.md']]) {
-    const texto = fs.readFileSync(`skills/${skill}/references/${ref}`, 'utf8');
-    assert.match(texto, /TERCEIROS\.md/, `${skill}: aponta os créditos`); assert.match(fs.readFileSync(`skills/${skill}/SKILL.md`, 'utf8'), new RegExp(`references/${ref}`), `${skill}: SKILL.md liga a referência`);
+    const texto = fs.readFileSync(`backend/agentes/skills/${skill}/references/${ref}`, 'utf8');
+    assert.match(texto, /TERCEIROS\.md/, `${skill}: aponta os créditos`); assert.match(fs.readFileSync(`backend/agentes/skills/${skill}/SKILL.md`, 'utf8'), new RegExp(`references/${ref}`), `${skill}: SKILL.md liga a referência`);
     assert.match(terceiros, new RegExp(skill), `${skill}: aparece nos créditos`);
   }
   assert.match(terceiros, /Copyright \(c\) 2026 TestDino/); assert.match(terceiros, /Copyright \(c\) 2026 Douglas Urrea Ocampo/); assert.match(terceiros, /Copyright 2026 Anthropic, PBC/);
-  assert.match(fs.readFileSync('skills/licencas/APACHE-2.0.txt', 'utf8'), /Apache License[\s\S]*Version 2\.0/);
+  assert.match(fs.readFileSync('backend/agentes/skills/licencas/APACHE-2.0.txt', 'utf8'), /Apache License[\s\S]*Version 2\.0/);
 });
 

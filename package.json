@@ -13,7 +13,7 @@
   },
   "files": [
     "dist",
-    "skills",
+    "backend/agentes/skills",
     "docs",
     "backend/aplicativo/preload.cjs",
     "assets",

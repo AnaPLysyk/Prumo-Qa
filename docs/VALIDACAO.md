@@ -18,7 +18,7 @@ Ambiente: Windows, PowerShell, Node v24.20.0, npm 11.19.0, SDK MCP 1.32.1, TypeS
 | `codex mcp add prumo-qa-demo -- node <server> <demo>` e `codex mcp get prumo-qa-demo` | Servidor stdio habilitado na configuração local |
 | `codex exec ...` com tools Prumo | contexto_projeto, revisar_cobertura e consultar_evidencias concluídas; executar_validacao rejeitada pela política de aprovação do cliente |
 | `codex exec ...` com `$qa` e exemplo de redundância | Análise NOT_VERIFIED, redundância reconhecida, consulta de fonte e distinção código/requisito |
-| Skill Creator `quick_validate.py skills/qa` | Skill is valid! |
+| Skill Creator `quick_validate.py backend/agentes/skills/qa` | Skill is valid! |
 | Contexto G3 com `--readonly-contract` | Web/Angular/Express/Playwright e fontes reais reconhecidos, sem execução ou alteração |
 
 Os testes abrangem fixtures web/API/automação, manifesto inválido/v1/tipos, capability inexistente, strings/objetos de comando, comando não autorizado, shell/eval/flags, paths absolutos/traversal/UNC/ADS, symlink/junction, limites de leitura, binários, credenciais, mascaramento de saída, ambiente sem segredo/NODE_TEST_CONTEXT, timeout e limite de saída, arquivo/pré-condição faltante, recusa de aprovação fabricada, mudança de escopo, resultado antigo/malformado, hash e contexto de evidência, PASS/FAIL/BLOCKED/NOT_RUN, subprocessos, npm, CLI em caminhos com espaços, handshake e tools/call MCP reais, análise de equivalência/limites/autorização/tabelas/estados/lacunas/contradição e testes ignorados.
@@ -63,4 +63,4 @@ Em `C:\Users\DELL\projetos-github\Prumo-Qa\.prumo\demonstracao\`:
 - `g3-contexto.json`: contexto real com fontes e hashes, mantido local.
 - `aprovacao-humana.json`: tentativa sem autenticação concluída, BLOCKED.
 
-Jobs do exemplo: `exemplos/projeto-demo/.prumo/evidencias/*.json`. Logs e contextos ficam fora do Git; não transferimos conteúdo de empresas.
+Jobs do exemplo: `backend/projetos/exemplos/projeto-demo/.prumo/evidencias/*.json`. Logs e contextos ficam fora do Git; não transferimos conteúdo de empresas.

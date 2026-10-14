@@ -26,6 +26,6 @@ Autenticação remota, sessão, logout/expiração, recuperação de acesso, ges
 
 ## Evidências e limitações
 
-`node ferramentas/arquitetura/inventario.mjs` produz contagens antes/depois a partir de arquivos reais. `npm run dependencias` verifica imports locais; `npm run arquitetura` gera o mapa navegável; `testes/catalogo.json` e `skills/manifesto.json` são conferidos por testes estruturais. `tmp/evidencias/refatoracao/autoinspecao.json` contém respostas reais da autoinspeção, com dados de atividade isolados do perfil.
+`node ferramentas/arquitetura/inventario.mjs` produz contagens antes/depois a partir de arquivos reais. `npm run dependencias` verifica imports locais; `npm run arquitetura` gera o mapa navegável; `testes/catalogo.json` e `backend/agentes/skills/manifesto.json` são conferidos por testes estruturais. `tmp/evidencias/refatoracao/autoinspecao.json` contém respostas reais da autoinspeção, com dados de atividade isolados do perfil.
 
 Nenhuma versão foi subida, publicada ou marcada como aprovada. Instalação/migração/desinstalação e publicação continuam exigindo evidências próprias. O relatório consolidado deve distinguir atividades concluídas e pendentes, falhas e skips, sem porcentagem de qualidade.

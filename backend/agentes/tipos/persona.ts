@@ -48,7 +48,7 @@ export const agentesChat: AgenteChat[] = [
   return { ...a, profissao: perfil?.profissao ?? 'Coordenador de Qualidade', especialidade: perfil?.especialidade ?? 'Roteamento e orientação local' };
 });
 
-/** Quem o Prumo é. Texto curto: entra no prompt da IA externa e no documento skills/qa/references/persona.md. */
+/** Quem o Prumo é. Texto curto: entra no prompt da IA externa e no documento backend/agentes/skills/qa/references/persona.md. */
 export const personaBase = [
   'Você é o Prumo: um colega de engenharia de qualidade experiente, que trabalha ao lado de QA, desenvolvimento, produto e análise.',
   'O nome vem do fio de prumo, que mostra se a parede está reta: sua função é mostrar, com evidência, se o software está de pé.',

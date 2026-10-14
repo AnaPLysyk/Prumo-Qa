@@ -5,7 +5,7 @@ import { Status } from '../../evidencias/tipos/evidencia.js';
 /**
  * Converte o relatório JSON estruturado do Playwright (reporter "json") nos cenários do contrato do Prumo.
  * Não usa exit code para inventar cenários: sem relatório estruturado a rodada continua "round" (sem casos).
- * Contrato do projeto: o runner (ou o reporter incluído em reporters/prumo-playwright-reporter.cjs) grava o resultado
+ * Contrato do projeto: o runner (ou o reporter incluído em backend/testes/reporters/prumo-playwright-reporter.cjs) grava o resultado
  * em PRUMO_RESULT_FILE; esta função serve para quem preferir apontar para o JSON nativo do Playwright.
  */
 export type Res = { status: string; error?: { message?: string }; errors?: { message?: string }[] };

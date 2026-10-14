@@ -20,7 +20,7 @@ import { agentesChat } from '../../../dist/agentes/tipos/persona.js';
 import { especializacoes } from '../../../dist/agentes/tipos/politicas.js';
 
 const pastaTemporaria = (t) => { const p = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-skill-')); t.after(() => fs.rmSync(p, { recursive: true, force: true })); return p; };
-const trecho = (x) => ({ id: x.id, especializacao: 'api-rest', titulo: x.titulo ?? 'Seção', texto: x.texto, ordem: x.ordem ?? 5, origem: x.origem ?? 'PRUMO', estado: x.estado ?? 'APROVADO', fonte: x.fonte ?? 'skills/api-rest/SKILL.md', licenca: null, criadoEm: '', decididoEm: null });
+const trecho = (x) => ({ id: x.id, especializacao: 'api-rest', titulo: x.titulo ?? 'Seção', texto: x.texto, ordem: x.ordem ?? 5, origem: x.origem ?? 'PRUMO', estado: x.estado ?? 'APROVADO', fonte: x.fonte ?? 'backend/agentes/skills/api-rest/SKILL.md', licenca: null, criadoEm: '', decididoEm: null });
 
 test('dividir: descrição do cabeçalho vira o primeiro trecho, seções viram títulos e bloco de código não é cortado', () => {
   const md = '---\r\nname: x\r\ndescription: Revisar contratos de API.\r\n---\r\n# Contratos\r\n\r\nPrimeiro parágrafo.\r\n\r\n## Exemplo\r\n\r\n```js\r\nconst a = 1;\r\n\r\nconst b = 2;\r\n```\r\n';
@@ -41,8 +41,8 @@ test('dividir: parágrafo enorme vira vários trechos dentro do limite, sem perd
 test('escolher: essencial sempre entra, o que combina com a pergunta vem antes, rascunho e descartado nunca entram', () => {
   const lista = [
     trecho({ id: 'a', titulo: 'Para que serve', texto: 'Skill de API.', ordem: 0 }),
-    trecho({ id: 'b', titulo: 'Autenticação', texto: 'Teste token expirado e 401.', ordem: 3, fonte: 'skills/api-rest/references/x.md' }),
-    trecho({ id: 'c', titulo: 'Paginação', texto: 'Teste páginas vazias.', ordem: 4, fonte: 'skills/api-rest/references/x.md' }),
+    trecho({ id: 'b', titulo: 'Autenticação', texto: 'Teste token expirado e 401.', ordem: 3, fonte: 'backend/agentes/skills/api-rest/references/x.md' }),
+    trecho({ id: 'c', titulo: 'Paginação', texto: 'Teste páginas vazias.', ordem: 4, fonte: 'backend/agentes/skills/api-rest/references/x.md' }),
     trecho({ id: 'd', titulo: 'Autenticação extra', texto: 'Token em rascunho.', origem: 'IA', estado: 'RASCUNHO' }),
     trecho({ id: 'e', titulo: 'Autenticação antiga', texto: 'Token descartado.', origem: 'PESSOA', estado: 'DESCARTADO' })
   ];

@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ativarLogin, cadastrarConta, entrarNaConta, recuperarConta, sairDaConta, trocarMinhaSenha } from '../../../dist/administracao/regras/contas.js';
-import { alterarContaPelaAdministracao, criarContaPelaAdministracao, desbloquearConta, excluirConta, listarContas, redefinirSenhaPelaAdministracao } from '../../../dist/administracao/regras/gestaoDeContas.js';
+import { alterarContaPelaAdministracao, criarContaPelaAdministracao, desbloquearConta, excluirConta, listarContasDeAcesso, redefinirSenhaPelaAdministracao } from '../../../dist/administracao/regras/gestaoDeContas.js';
 import { excluirPapel, salvarConfiguracaoDeAcesso, salvarPapel } from '../../../dist/administracao/regras/papeis.js';
 import { conferirAcessoAoCanal } from '../../../dist/administracao/regras/conferirAcessoAoCanal.js';
 import { encerrarSessao, sessaoParaJanela } from '../../../dist/administracao/regras/sessao.js';
@@ -53,7 +53,7 @@ test('entrar: mesma mensagem para login inexistente e senha errada; bloqueia no 
   await codigo(() => entrarNaConta({ login: 'bruno', senha: 'errada-1234' }, b), /^ACCOUNT_LOCKED/);
   await codigo(() => entrarNaConta({ login: 'bruno', senha: senhaTemporaria }, b), /^ACCOUNT_LOCKED/);
   await entrarNaConta({ login: 'ana.admin', senha: ADMIN.senha }, b);
-  const bruno = listarContas(b).contas.find((c) => c.login === 'bruno'); assert.equal(bruno.bloqueada, true);
+  const bruno = listarContasDeAcesso(b).contas.find((c) => c.login === 'bruno'); assert.equal(bruno.bloqueada, true);
   desbloquearConta(bruno.id, b); sairDaConta(b);
   const s = await entrarNaConta({ login: 'BRUNO ', senha: senhaTemporaria }, b);
   assert.equal(s.usuario.login, 'bruno'); assert.equal(s.usuario.trocarSenha, true);
@@ -115,7 +115,7 @@ test('cadastro: fechado, pendente até aprovar, nunca como administrador; recupe
   await codigo(() => cadastrarConta({ login: 'dani', nome: 'Outra', senha: 'Segunda-chave-26' }, b), /^LOGIN_TAKEN/);
   sairDaConta(b); await codigo(() => entrarNaConta({ login: 'dani', senha: 'Cadastro-firme-26' }, b), /^ACCOUNT_PENDING/);
   await entrarNaConta({ login: 'ana.admin', senha: ADMIN.senha }, b);
-  const dani = listarContas(b).contas.find((c) => c.login === 'dani'); assert.equal(dani.papel, 'leitor');
+  const dani = listarContasDeAcesso(b).contas.find((c) => c.login === 'dani'); assert.equal(dani.papel, 'leitor');
   alterarContaPelaAdministracao({ id: dani.id, estado: 'ATIVO' }, b);
   assert.throws(() => salvarConfiguracaoDeAcesso({ cadastroAberto: true, aprovarCadastros: false, papelDoCadastro: 'administrador', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15 }, b), /SIGNUP_ROLE_FORBIDDEN/);
   salvarConfiguracaoDeAcesso({ cadastroAberto: false, aprovarCadastros: true, papelDoCadastro: 'leitor', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15 }, b);
@@ -141,8 +141,8 @@ test('Administração: sempre sobra um administrador ativo e ninguém se desativ
   const nova = await redefinirSenhaPelaAdministracao(outro.conta.id, b);
   assert.notEqual(nova.senhaTemporaria, outro.senhaTemporaria); assert.equal(nova.conta.trocarSenha, true);
   alterarContaPelaAdministracao({ id: outro.conta.id, estado: 'DESATIVADO' }, b); excluirConta(outro.conta.id, b);
-  assert.deepEqual(listarContas(b).contas.map((c) => c.login), ['ana.admin']);
-  assert.ok(!JSON.stringify(listarContas(b)).includes('"senha"') && !JSON.stringify(listarContas(b)).includes('resumo'), 'a janela nunca recebe resumos');
+  assert.deepEqual(listarContasDeAcesso(b).contas.map((c) => c.login), ['ana.admin']);
+  assert.ok(!JSON.stringify(listarContasDeAcesso(b)).includes('"senha"') && !JSON.stringify(listarContasDeAcesso(b)).includes('resumo'), 'a janela nunca recebe resumos');
 });
 
 test('todo canal da janela tem tela e nível definidos; os de conta pública são só os da entrada', () => {

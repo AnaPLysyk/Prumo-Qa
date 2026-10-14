@@ -77,7 +77,7 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `registrarOrquestracao.ts` | Guarda o registro de uma orquestração (só metadados) em orquestracoes.jsonl na pasta de dados, mantendo os 500 mais recentes. |
 | `registrarTrechosDeSkill.ts` | Acrescenta trechos a uma Skill: da equipe já aprovados; importados ou de IA em rascunho. Iguais não duplicam; vários numa única transação (se um falhar, nenhum é gravado). |
 | `salvarPerfil.ts` | Salva como a pessoa quer ser chamada e o papel dela. |
-| `sementeDasSkills.ts` | Trechos das Skills que acompanham o aplicativo (pasta skills/), já divididos e com identificador estável pelo conteúdo. |
+| `sementeDasSkills.ts` | Trechos das Skills que acompanham o aplicativo (pasta backend/agentes/skills/), já divididos e com identificador estável pelo conteúdo. |
 | `validarAgenteDoConhecimento.ts` | Confere se o agente existe. |
 | `validarProjetoDoConhecimento.ts` | Confere o id do projeto de um conhecimento. |
 | `vistaDoAgente.ts` | Nome da vista do banco que mostra os conhecimentos de um agente (agente_<id>). |
@@ -174,6 +174,13 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `raizDaPalavra.ts` | Encurta uma palavra para achar variações (ex.: testes → test). |
 | `termosDaFrase.ts` | Separa os termos importantes de uma frase (mais de 3 letras, sem palavras comuns). |
 | `validarEspecializacao.ts` | Confere que a especialização existe no Prumo antes de ler ou gravar Skill dela. |
+
+## skills/
+
+As Skills dos agentes (SKILL.md e referências) que acompanham o aplicativo; viram trechos aprovados no banco de Skills.
+
+| Arquivo | O que faz |
+| --- | --- |
 
 ## tipos/
 

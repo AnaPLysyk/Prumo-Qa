@@ -21,6 +21,6 @@ Faça uma chamada a partir do cliente de IA e atualize Conexões para observar o
 
 ## Skill de QA
 
-A Skill (skills/qa/SKILL.md) orienta o método de qualidade da IA. Nem todo cliente a reconhece automaticamente: no Codex invoque $qa explicitamente e, no Claude Code, use /qa depois de instalá-la conforme o README.
+A Skill (backend/agentes/skills/qa/SKILL.md) orienta o método de qualidade da IA. Nem todo cliente a reconhece automaticamente: no Codex invoque $qa explicitamente e, no Claude Code, use /qa depois de instalá-la conforme o README.
 
 As políticas de aprovação do cliente de IA continuam valendo; o Prumo não as contorna.

@@ -1,6 +1,6 @@
 # Playwright: reconhecer antes de agir
 
-Adaptado de `webapp-testing` (anthropics/skills, Apache-2.0) e dos guias de `playwright-skill` (testdino-hq, MIT); ver `skills/TERCEIROS.md`. Ajustado às regras do Prumo QA.
+Adaptado de `webapp-testing` (anthropics/skills, Apache-2.0) e dos guias de `playwright-skill` (testdino-hq, MIT); ver `backend/agentes/skills/TERCEIROS.md`. Ajustado às regras do Prumo QA.
 
 ## Reconhecimento, depois ação
 

@@ -2,7 +2,7 @@
 
 Inspeção em 10/10/2026, repositório grupog3-software/sistema-admin, commit **5b9977eb45531943844e3cd8b8c82f1a6b58a688**. Foi obtida uma cópia Git separada, com checkout restrito dos arquivos listados no contrato. Nenhum comando do produto, instalação de dependências, serviço ou consulta SQL foi executado. Nenhum arquivo do repositório original foi alterado.
 
-O próprio Prumo reconheceu tipo `web`, Angular, TypeScript, Express e Playwright, usando `exemplos/g3-somente-leitura.json` como contrato externo. O contrato impõe readOnly=true e commands vazio; nenhuma capacidade de execução pode ser ativada por essa configuração.
+O próprio Prumo reconheceu tipo `web`, Angular, TypeScript, Express e Playwright, usando `backend/projetos/exemplos/g3-somente-leitura.json` como contrato externo. O contrato impõe readOnly=true e commands vazio; nenhuma capacidade de execução pode ser ativada por essa configuração.
 
 | Fonte real consultada | Constatação |
 |---|---|
