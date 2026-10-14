@@ -2,8 +2,8 @@
 import { dialog } from 'electron';
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { textoExclusao } from '../../aplicativo/tipos/aplicativo.js';
-import { excluirTodosContextos } from '../../contextos/banco/excluirTodosContextos.js';
-import { excluirEvidencias } from '../../evidencias/banco/excluirEvidencias.js';
+import { excluirTodosContextos } from '../../agentes/banco/excluirTodosContextos.js';
+import { excluirEvidencias } from '../../testes/banco/excluirEvidencias.js';
 import { excluirAtividades } from '../../logs/banco/excluirAtividades.js';
 import { excluirDiagnostico } from '../../logs/banco/excluirDiagnostico.js';
 import { projetoVinculado } from '../../projetos/regras/projetoVinculado.js';

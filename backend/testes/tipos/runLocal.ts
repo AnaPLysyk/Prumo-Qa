@@ -1,8 +1,8 @@
 /** Formato de uma run local (casos, resultados, publicações) e a tradução de estados para o Qase. */
 import { z } from 'zod';
 import { Executor } from '../../conexoes/tipos/operacoesExternas.js';
-import { executarValidacao } from '../../execucoes/regras/executarValidacao.js';
-import { Delegada } from '../../execucoes/tipos/execucao.js';
+import { executarValidacao } from '../regras/executarValidacao.js';
+import { Delegada } from './execucao.js';
 
 /**
  * Fluxo real de QA com o Qase (2.9): casos -> plano/run -> execução autorizada das automações associadas -> resultados verificáveis ->

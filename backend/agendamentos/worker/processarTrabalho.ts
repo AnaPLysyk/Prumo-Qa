@@ -1,7 +1,7 @@
 /** Executa um trabalho da fila do começo ao fim: batimento, aviso de início, execução, registro do resultado e publicação; falhas viram BLOCKED ou nova tentativa, nunca PASS. */
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
-import { publicacaoPodeRepetir } from '../../execucoes/regras/publicacaoPodeRepetir.js';
+import { publicacaoPodeRepetir } from '../../testes/regras/publicacaoPodeRepetir.js';
 import { concluirTrabalho } from '../banco/concluirTrabalho.js';
 import { definirEstadoJiraDoTrabalho } from '../banco/definirEstadoJiraDoTrabalho.js';
 import { falharPorInfraestrutura } from '../banco/falharPorInfraestrutura.js';

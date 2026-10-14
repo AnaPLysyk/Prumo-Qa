@@ -133,13 +133,13 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 | `backend/mcp.ts` | Porta de entrada do servidor MCP (`dist/mcp.js`, mesmo caminho das versões anteriores); ferramentas em `backend/agentes/mcp/` |
 | `backend/aplicativo/api/catalogoDeContratos.ts` | Fonte única dos esquemas IPC e do catálogo técnico (IPC + MCP); `registrarCanaisIpc.ts` liga cada canal ao arquivo `api/` da tela |
 | `backend/compartilhado/` | Só o que várias telas usam: contrato `qa.project.json` (`projeto/`), leitura segura e máscara de segredos (`seguranca/`), erros, textos e pasta de dados |
-| `backend/execucoes/` + `ferramentas/empacotamento/aprovar.cs` | Executar capacidade com aprovação humana do Windows (`dist/aprovar.exe`), histórico de execuções e comentário de resultado no Jira |
+| `backend/testes/` + `ferramentas/empacotamento/aprovar.cs` | Executar capacidade com aprovação humana do Windows (`dist/aprovar.exe`), histórico de execuções e comentário de resultado no Jira |
 | `backend/agendamentos/` | Rotinas, fila, worker residente, autorizações prévias e k6 |
 | `backend/testes/` | Catálogo de testes, frameworks e análise Playwright, revisão de cobertura, runs e escrita no Qase |
 | `backend/tickets/` | Propostas de caso/bug e escrita no Jira |
 | `backend/conexoes/` | Contas de serviço com credencial protegida, transporte HTTPS, escrita externa controlada, GitHub e conexão das IAs pelo MCP |
 | `backend/agentes/` | Chat com agentes, bancos de conhecimento e de Skills (SQLite local), políticas da IA e servidor MCP |
-| `backend/contextos/`, `backend/evidencias/`, `backend/logs/`, `backend/projetos/` … | Uma pasta por tela, cada uma com seu `LEIA-ME.md` |
+| `backend/agentes/`, `backend/testes/`, `backend/logs/`, `backend/projetos/` … | Uma pasta por tela, cada uma com seu `LEIA-ME.md` |
 | `backend/aplicativo/preload.cjs` | Ponte mínima (`window.prumo`) entre a janela e os canais IPC |
 | `frontend/<tela>/` → `dist/renderer/` | Interface HTML/CSS/JS sem frameworks; `dist/renderer/` é gerado no build e não é versionado |
 | `docs/ajuda/*.md` | Documentos da aba Ajuda (inclui privacidade e termos em rascunho) |

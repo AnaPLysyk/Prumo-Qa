@@ -7,8 +7,8 @@ import { fixture } from '../../apoio/fixtures.mjs';
 import { lerDocumentosDaAjuda } from '../../../dist/ajuda/regras/lerDocumentosDaAjuda.js';
 import { carregarProjeto } from '../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { situacaoDasConexoesDeIa } from '../../../dist/conexoes/ia/situacaoDasConexoesDeIa.js';
-import { salvarEvidencia } from '../../../dist/evidencias/banco/salvarEvidencia.js';
-import { listarEvidenciasDoProjeto } from '../../../dist/evidencias/regras/listarEvidenciasDoProjeto.js';
+import { salvarEvidencia } from '../../../dist/testes/banco/salvarEvidencia.js';
+import { listarEvidenciasDoProjeto } from '../../../dist/testes/regras/listarEvidenciasDoProjeto.js';
 import { listarHistoricoDoProjeto } from '../../../dist/historico/regras/listarHistoricoDoProjeto.js';
 import { exportarLogs } from '../../../dist/logs/regras/exportarLogs.js';
 import { iniciarAtividade } from '../../../dist/logs/regras/iniciarAtividade.js';
@@ -172,7 +172,7 @@ test('conexões: proposta sem alterar nada e com runtime embutido quando empacot
 
 test('aplicativo empacotado: filho node e proposta de conexão usam o runtime embutido (ELECTRON_RUN_AS_NODE) e nada mais vaza', async (t) => {
   const f = await fixture(t); await vincularPasta(f.root);
-  const { ambienteMinimo } = await import('../../../dist/execucoes/regras/ambienteMinimo.js');
+  const { ambienteMinimo } = await import('../../../dist/testes/regras/ambienteMinimo.js');
   const p = await carregarProjeto(f.root);
   const comando = { executable: 'node', args: ['tests/test.mjs'], cwd: '.', env: {}, requiredFiles: [], requiredEnv: [] };
   process.env.SEGREDO_DO_HOST = 'nao-herdar';

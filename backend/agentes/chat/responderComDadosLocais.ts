@@ -7,7 +7,7 @@ import { Coleta, GUIA_MANUAL, guia } from '../tipos/chat.js';
 import { AgenteChat } from '../tipos/persona.js';
 import { dataEmPortugues } from '../../compartilhado/texto/dataEmPortugues.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
-import { listarContextosDaPasta } from '../../contextos/regras/listarContextosDaPasta.js';
+import { listarContextosDaPasta } from '../regras/listarContextosDaPasta.js';
 import { listarHistoricoDoProjeto } from '../../historico/regras/listarHistoricoDoProjeto.js';
 import { perguntarAoAssistenteLocal } from '../../inicio/regras/perguntarAoAssistenteLocal.js';
 import { situacaoDoProjeto } from '../../inicio/regras/situacaoDoProjeto.js';

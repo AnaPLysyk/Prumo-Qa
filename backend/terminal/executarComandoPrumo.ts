@@ -6,7 +6,7 @@ import { textoDoPrompt } from '../agentes/mcp/textoDoPrompt.js';
 import { promptsPrumo } from '../agentes/tipos/roteiros.js';
 import { carregarProjeto } from '../compartilhado/projeto/carregarProjeto.js';
 import { Projeto } from '../compartilhado/tipos/projeto.js';
-import { executarValidacao } from '../execucoes/regras/executarValidacao.js';
+import { executarValidacao } from '../testes/regras/executarValidacao.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
 import { calcularMetricas } from '../metricas/regras/calcularMetricas.js';
 import { avisarHistoricoIncompleto } from './avisarHistoricoIncompleto.js';

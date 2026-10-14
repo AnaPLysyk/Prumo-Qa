@@ -1,6 +1,6 @@
 /** Formato do relatório JSON do Playwright e do caso convertido para o Prumo. */
 import { z } from 'zod';
-import { Status } from '../../evidencias/tipos/evidencia.js';
+import { Status } from './evidencia.js';
 
 /**
  * Converte o relatório JSON estruturado do Playwright (reporter "json") nos cenários do contrato do Prumo.

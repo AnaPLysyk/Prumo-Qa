@@ -3,7 +3,7 @@ import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { revisaoSchema, AnaliseDeCobertura, Revisao } from '../tipos/revisaoDeCobertura.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';
-import { contextoParaRevisao } from '../../contextos/regras/contextoParaRevisao.js';
+import { contextoParaRevisao } from '../../agentes/regras/contextoParaRevisao.js';
 import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { analisarPlaywright } from './analisarPlaywright.js';

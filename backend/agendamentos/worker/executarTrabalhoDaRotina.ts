@@ -1,5 +1,5 @@
 /** Escolhe o que fazer conforme o tipo da rotina (smoke, regressão, validação por ticket, k6, run do Qase, consulta Jira ou análise de mudanças) e devolve o resultado. */
-import { executarValidacao } from '../../execucoes/regras/executarValidacao.js';
+import { executarValidacao } from '../../testes/regras/executarValidacao.js';
 import { autorizacaoDelegada } from '../autorizacoes/autorizacaoDelegada.js';
 import { ResultadoTrabalho, Trabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';

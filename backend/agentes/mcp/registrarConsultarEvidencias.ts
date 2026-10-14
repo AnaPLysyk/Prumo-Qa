@@ -1,6 +1,6 @@
 /** Ferramenta MCP consultar_evidencias: devolve à IA as evidências reais do projeto com integridade conferida; sem evidência, NOT_RUN. */
 import { z } from 'zod';
-import { consultarEvidencias } from '../../evidencias/banco/consultarEvidencias.js';
+import { consultarEvidencias } from '../../testes/banco/consultarEvidencias.js';
 import { MeiosDoServidorMcp, somenteLeitura } from '../tipos/mcp.js';
 
 export function registrarConsultarEvidencias(m: MeiosDoServidorMcp) {

@@ -4,7 +4,7 @@ import { textoNoIdioma } from '../../aplicativo/bandeja/textoNoIdioma.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';
 import { servicosDoAplicativo } from '../../conexoes/regras/servicosDoAplicativo.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
-import { executarValidacao } from '../../execucoes/regras/executarValidacao.js';
+import { executarValidacao } from '../regras/executarValidacao.js';
 import { obterRunLocal } from '../banco/obterRunLocal.js';
 import { executarRunLocal } from '../regras/executarRunLocal.js';
 

@@ -4,8 +4,8 @@ import { executarK6 } from '../k6/executarK6.js';
 import { ExecutavelK6 } from './k6.js';
 import { OperacaoServico } from '../../conexoes/tipos/adaptador.js';
 import { Executor } from '../../conexoes/tipos/operacoesExternas.js';
-import { executarValidacao } from '../../execucoes/regras/executarValidacao.js';
-import { PublicadorJira } from '../../execucoes/tipos/comentarioJira.js';
+import { executarValidacao } from '../../testes/regras/executarValidacao.js';
+import { PublicadorJira } from '../../testes/tipos/comentarioJira.js';
 
 /**
  * Worker de rotinas (2.8): UM laço no processo principal do Electron (sem serviço do Windows, sem tarefa agendada).

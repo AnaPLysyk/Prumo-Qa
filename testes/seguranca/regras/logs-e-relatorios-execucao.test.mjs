@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
 import { fixture } from '../../apoio/fixtures.mjs';
-import { mascararLogsDaExecucao } from '../../../dist/execucoes/regras/mascararLogsDaExecucao.js';
-import { gravarRelatorioRedigido } from '../../../dist/execucoes/regras/gravarRelatorioRedigido.js';
+import { mascararLogsDaExecucao } from '../../../dist/testes/regras/mascararLogsDaExecucao.js';
+import { gravarRelatorioRedigido } from '../../../dist/testes/regras/gravarRelatorioRedigido.js';
 import { hash } from '../../../dist/compartilhado/seguranca/hash.js';
 
 test('logs escondem segredos mesmo quando a saída chega em várias partes', async t => {

@@ -92,7 +92,7 @@ test('anotações Qase não vazam entre cenários adjacentes', (t) => {
 test('rastreabilidade liga feature, cenário e Qase só no projeto anotado', async (t) => {
   const { fixture } = await import('../../apoio/fixtures.mjs');
   const { criarEspaco } = await import('../../../dist/projetos/regras/criarEspaco.js'); const { vincularPastaAoEspaco: pastaEspaco } = await import('../../../dist/projetos/regras/vincularPastaAoEspaco.js'); const { vincularServicoAoEspaco: gravarVinculo } = await import('../../../dist/projetos/regras/vincularServicoAoEspaco.js');
-  const { mapaDeVinculos } = await import('../../../dist/rastreabilidade/regras/mapaDeVinculos.js');
+  const { mapaDeVinculos } = await import('../../../dist/testes/regras/mapaDeVinculos.js');
   const { randomUUID } = await import('node:crypto');
   const b = repo(t, {}), fx = await fixture(t);
   await fx.write('tests/login.spec.ts', "describe('Login', () => {\ntest('entra', () => { qase.id(31); });\ntest('outro', () => { /* Qase: OUTRO-32 */ });\n});\n");

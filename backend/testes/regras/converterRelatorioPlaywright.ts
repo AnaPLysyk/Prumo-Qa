@@ -1,6 +1,6 @@
 /** Transforma o relatório JSON do Playwright em um resultado por cenário (PASS, FAIL, BLOCKED) com evidência. */
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { Status } from '../../evidencias/tipos/evidencia.js';
+import { Status } from '../tipos/evidencia.js';
 import { CasoConvertido, Suite, relatorio } from '../tipos/relatorioPlaywright.js';
 
 export function converterRelatorioPlaywright(json: unknown, segredos: string[] = []): CasoConvertido[] {

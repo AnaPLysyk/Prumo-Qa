@@ -2,7 +2,7 @@
 import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
 import { dataEmPortugues } from '../../compartilhado/texto/dataEmPortugues.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
-import { listarContextosDaPasta } from '../../contextos/regras/listarContextosDaPasta.js';
+import { listarContextosDaPasta } from '../../agentes/regras/listarContextosDaPasta.js';
 import { Fonte, Resposta, pare } from '../tipos/assistenteLocal.js';
 import { metricasDasExecucoes } from '../../metricas/regras/metricasDasExecucoes.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';

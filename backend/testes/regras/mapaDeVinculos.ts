@@ -3,8 +3,8 @@ import { listarOperacoes } from '../../conexoes/banco/listarOperacoes.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { GrafoDeVinculos, LacunaDoMapa } from '../tipos/mapaDeVinculos.js';
 import { Espaco } from '../../projetos/tipos/espacos.js';
-import { catalogoDeTestes } from '../../testes/regras/catalogoDeTestes.js';
-import { listarRunsLocais } from '../../testes/banco/listarRunsLocais.js';
+import { catalogoDeTestes } from './catalogoDeTestes.js';
+import { listarRunsLocais } from '../banco/listarRunsLocais.js';
 import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
 import { listarPropostas } from '../../tickets/banco/listarPropostas.js';
 

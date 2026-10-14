@@ -2,7 +2,7 @@
 import { aprendizadosParaMcp } from './aprendizadosParaMcp.js';
 import { contextoProjeto } from '../../compartilhado/projeto/contextoProjeto.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { contextosParaMcp } from '../../contextos/regras/contextosParaMcp.js';
+import { contextosParaMcp } from '../regras/contextosParaMcp.js';
 import { detectarFrameworks } from '../../testes/regras/detectarFrameworks.js';
 import { conhecimento } from '../../testes/tipos/frameworks.js';
 

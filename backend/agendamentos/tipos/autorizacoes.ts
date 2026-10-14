@@ -1,6 +1,6 @@
 /** Formato das autorizações de execução e das políticas de publicação no Jira e escrita no Qase, com validade e usos. */
 import { z } from 'zod';
-import { solicitarAprovacao } from '../../execucoes/aprovacao/solicitarAprovacao.js';
+import { solicitarAprovacao } from '../../testes/aprovacao/solicitarAprovacao.js';
 
 /**
  * Autorizações para trabalho agendado (2.8).

@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fixture } from '../../apoio/fixtures.mjs';
 import { carregarProjeto } from '../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { hash } from '../../../dist/compartilhado/seguranca/hash.js';
-import { executarValidacao } from '../../../dist/execucoes/regras/executarValidacao.js';
+import { executarValidacao } from '../../../dist/testes/regras/executarValidacao.js';
 import { revisarCobertura } from '../../../dist/testes/regras/revisarCobertura.js';
 
 test('readonly bloqueia execução sem gravar no projeto',async t=>{

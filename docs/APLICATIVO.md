@@ -28,7 +28,7 @@ O **servidor MCP não roda dentro da janela**. Cada cliente de IA inicia o seu p
 
 - O app instalado não depende de Node.js. O `Prumo QA.exe` é o Electron; com a variável `ELECTRON_RUN_AS_NODE=1` ele se comporta como um Node puro, sem abrir janela.
 - `backend/conexoes/ia/prepararConexao.ts` detecta `process.versions.electron` e propõe `command = Prumo QA.exe`, `args = [<instalação>\resources\app\dist\mcp.js, <projeto>]`, `env ELECTRON_RUN_AS_NODE=1`. Em desenvolvimento a proposta usa o `electron.exe` do projeto da mesma forma.
-- `backend/execucoes/regras/ambienteMinimo.ts` faz o mesmo para capacidades `node`: o filho recebe `ELECTRON_RUN_AS_NODE=1` (senão abriria uma janela do Prumo).
+- `backend/testes/regras/ambienteMinimo.ts` faz o mesmo para capacidades `node`: o filho recebe `ELECTRON_RUN_AS_NODE=1` (senão abriria uma janela do Prumo).
 - O build usa `asar: false` para que `dist/mcp.js` e `dist/aprovar.exe` existam como arquivos reais (um executável não roda de dentro de um `.asar`).
 - O pacote **não inclui npm**: capacidades `npm run` continuam exigindo Node com npm na máquina (falha como `RUNTIME_MISSING`, nunca como PASS).
 
@@ -46,7 +46,7 @@ A aba **Suporte** prepara bug, melhoria ou sugestão (`backend/suporte/regras/`)
 
 ### Contextos persistentes e conhecimento de QA (2.4)
 
-`backend/contextos/` guarda, por projeto, requisitos, regras de negócio, critérios de aceite, restrições técnicas e decisões em `%LOCALAPPDATA%\PrumoQA\contextos\<projeto>\<id>.json` (fora do projeto, sem banco, sem alterar o `qa.project.json`). Cada arquivo traz um histórico encadeado por hash (quem, quando, ação, hash do conteúdo): se for alterado fora do Prumo o contexto vira **ADULTERADO**, deixa de ser editável e **nunca** é enviado ao agente.
+`backend/agentes/` guarda, por projeto, requisitos, regras de negócio, critérios de aceite, restrições técnicas e decisões em `%LOCALAPPDATA%\PrumoQA\contextos\<projeto>\<id>.json` (fora do projeto, sem banco, sem alterar o `qa.project.json`). Cada arquivo traz um histórico encadeado por hash (quem, quando, ação, hash do conteúdo): se for alterado fora do Prumo o contexto vira **ADULTERADO**, deixa de ser editável e **nunca** é enviado ao agente.
 
 - **Estados:** RASCUNHO, APROVADO, CONFLITANTE, DESATUALIZADO. Aprovar é um ato humano (confirmação nativa; o aprovador é o usuário do Windows lido no processo principal) que vale só para o texto exato; editar volta a RASCUNHO; aprovar exige origem e ausência de conflito. Conflito é **derivado** (mesma chave com contextos vivos diferentes) ou marcado pela pessoa; o Prumo nunca escolhe um lado.
 - **MCP:** por padrão **nada** é entregue ao agente. Com "Disponibilizar ao agente" habilitado (confirmação nativa), `contexto_projeto` devolve referências estruturadas (id, chave, versão, hash, estado, origem, texto mascarado e limitado a 4000 caracteres, alerta de texto que parece instrução) e `revisar_cobertura` aceita `contextoId`, registrando o contexto usado como fato e apontando `CONTEXT_NOT_APPROVED`, `CONTEXT_OUTDATED`, `CONTEXT_CONFLICT`, `CONTEXT_SOURCE_MISSING`, `CONTEXT_MISMATCH`, `CONTEXT_TAMPERED`, `CONTEXT_UNAVAILABLE` ou `CONTEXT_SUSPICIOUS_INSTRUCTION`. Nenhuma ferramenta MCP cria, edita, aprova ou exclui contextos (teste verifica).

@@ -14,12 +14,12 @@ import { hash } from '../../compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { salvarEvidencia } from '../../evidencias/banco/salvarEvidencia.js';
-import { classificarResultado } from '../../evidencias/regras/classificarResultado.js';
-import { Evidencia } from '../../evidencias/tipos/evidencia.js';
-import { solicitarAprovacao } from '../../execucoes/aprovacao/solicitarAprovacao.js';
-import { criarEvidenciaInicial } from '../../execucoes/regras/criarEvidenciaInicial.js';
-import { Delegada } from '../../execucoes/tipos/execucao.js';
+import { salvarEvidencia } from '../../testes/banco/salvarEvidencia.js';
+import { classificarResultado } from '../../testes/regras/classificarResultado.js';
+import { Evidencia } from '../../testes/tipos/evidencia.js';
+import { solicitarAprovacao } from '../../testes/aprovacao/solicitarAprovacao.js';
+import { criarEvidenciaInicial } from '../../testes/regras/criarEvidenciaInicial.js';
+import { Delegada } from '../../testes/tipos/execucao.js';
 
 /** O que fica pronto depois das conferências e da aprovação: os argumentos, o arquivo de resumo e o tempo máximo. */
 type K6Preparado = { args: string[]; resumoRel: string; timeoutMs: number };

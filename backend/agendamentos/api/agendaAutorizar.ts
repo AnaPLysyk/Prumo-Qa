@@ -6,7 +6,7 @@ import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { textoNoIdioma } from '../../aplicativo/bandeja/textoNoIdioma.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
-import { solicitarAprovacao } from '../../execucoes/aprovacao/solicitarAprovacao.js';
+import { solicitarAprovacao } from '../../testes/aprovacao/solicitarAprovacao.js';
 
 export const agendaAutorizar: TratadorDoCanal<'agenda:autorizar'> = async (a, j) => {
   const i = idiomaAtual(); const r = obterRotina(a.id);

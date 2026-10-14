@@ -11,7 +11,7 @@ import { autorizarExecucao } from '../../../dist/agendamentos/autorizacoes/autor
 import { carregarProjeto } from '../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { executarOperacao } from '../../../dist/conexoes/escrita/executarOperacao.js';
 import { habilitarEscrita } from '../../../dist/conexoes/escrita/habilitarEscrita.js';
-import { executarValidacao } from '../../../dist/execucoes/regras/executarValidacao.js';
+import { executarValidacao } from '../../../dist/testes/regras/executarValidacao.js';
 import { obterEspaco } from '../../../dist/projetos/banco/obterEspaco.js';
 import { associarEspaco } from '../../../dist/projetos/regras/associarEspaco.js';
 import { criarEspaco } from '../../../dist/projetos/regras/criarEspaco.js';
@@ -64,7 +64,7 @@ test('v39: trocar vínculo Qase não reutiliza automação declarada nem funde n
   assert.equal(automacaoDoCaso(c.e.id, 31, c.b), null);
   associarEspaco(c.e.id, { de: { tipo: 'qase', id: '31', vinculoId: novo.id, origem: 'Qase atual' }, para: { tipo: 'automacao', id: 'unit#C2', origem: 'qa.project.json' }, justificativa: 'Associação nova explícita' }, c.b);
   assert.equal(automacaoDoCaso(c.e.id, 31, c.b).casoRunner, 'C2');
-  const { mapaDeVinculos } = await import('../../../dist/rastreabilidade/regras/mapaDeVinculos.js');
+  const { mapaDeVinculos } = await import('../../../dist/testes/regras/mapaDeVinculos.js');
   const mapa = mapaDeVinculos(c.e.id, c.b);
   assert.equal(mapa.nos.filter(n => n.tipo === 'qase').length, 2);
   assert.equal(mapa.nos.find(n => n.id === 'qase:31:vinculo:' + c.qv.id).estado, 'DESATUALIZADO');
@@ -133,7 +133,7 @@ test('propostas da IA: sem duplicata, limite por hora, revisão completa obrigat
 });
 
 test('mapa de vínculos: mostra o cadastrado, o registrado pelo Prumo e o observado; lacunas só de ausência de cadastro; não deduz por nome', async (t) => {
-  const { mapaDeVinculos } = await import('../../../dist/rastreabilidade/regras/mapaDeVinculos.js');
+  const { mapaDeVinculos } = await import('../../../dist/testes/regras/mapaDeVinculos.js');
   const c = await cenario(t); c.mundo.semear('SMART-100'); const [a, bb] = [await c.caso('Editor grava'), await c.caso('Caso sem automação nem ticket')];
   c.ligar(a, 'unit#C1'); associarEspaco(c.e.id, { de: { tipo: 'jira', id: 'SMART-100', vinculoId: c.jv.id, origem: 'Jira' }, para: { tipo: 'qase', id: String(a), vinculoId: c.qv.id, origem: 'Qase SFQ' }, justificativa: 'Declarado' }, c.b);
   const run = prepararRunLocal(c.e.id, { titulo: 'Mapa', ambiente: 'teste', casos: [{ casoId: a, titulo: 'Editor grava' }, { casoId: bb, titulo: 'Caso sem automação nem ticket' }] }, c.b); await criarRunNoQase(c.dep, run.id, { confirmado: true }); await executarRunLocal(c.dep, run.id, c.execucao);

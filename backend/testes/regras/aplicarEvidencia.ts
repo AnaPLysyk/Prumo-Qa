@@ -1,5 +1,5 @@
 /** Copia o resultado de uma execução para os casos da run que usam a mesma automação. */
-import { Evidencia } from '../../evidencias/tipos/evidencia.js';
+import { Evidencia } from '../tipos/evidencia.js';
 import { RunLocal } from '../tipos/runLocal.js';
 
 export function aplicarEvidencia(run: RunLocal, capability: string, ev: Evidencia, agora: string) {

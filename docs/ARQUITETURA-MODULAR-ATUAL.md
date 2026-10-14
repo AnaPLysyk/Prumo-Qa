@@ -12,8 +12,8 @@
 | Agentes, chat e Cérebro | `frontend/agentes/` | `backend/agentes/` |
 | Conexões e integrações | `frontend/conexoes/` | `backend/conexoes/` |
 | Agendamentos | `frontend/agendamentos/` | `backend/agendamentos/` |
-| Execuções (aparecem em Testes › Runs) | `frontend/execucoes/` | `backend/execucoes/` |
-| Vínculos (aparecem em Testes › Repositório) | `frontend/rastreabilidade/` | `backend/rastreabilidade/` |
+| Execuções (aparecem em Testes › Runs) | `frontend/execucoes/` | `backend/testes/` |
+| Vínculos (aparecem em Testes › Repositório) | `frontend/rastreabilidade/` | `backend/testes/` |
 | Métricas | `frontend/metricas/` | `backend/metricas/` |
 | Histórico | `frontend/historico/` | `backend/historico/` |
 | Logs | `frontend/logs/` | `backend/logs/` |
@@ -74,7 +74,7 @@ O site possui fonte em `site/gerar.mjs`, estilos em `site/estilos/base.css` e te
 
 A primeira linha explica o que faz, com uma frase curta em português. Um arquivo de regra faz uma ação; um arquivo de armazenamento faz uma leitura ou gravação; um formulário fica dentro da pasta do modal ou da tela. Evitar nomes como `utils.ts` ou `servicoGeral.ts` quando for possível descrever a responsabilidade.
 
-As funções `backend/conexoes/integracoes/lerDetalheDoServico.ts`, `backend/agentes/chat/conversar.ts` e `backend/execucoes/regras/executarValidacao.ts` ainda concentram etapas longas. A outra sessão descreveu divisões dessas funções em arquivos temporários, **mas essas divisões não aparecem nos commits publicados** e não são tratadas aqui como código implementado.
+As funções `backend/conexoes/integracoes/lerDetalheDoServico.ts`, `backend/agentes/chat/conversar.ts` e `backend/testes/regras/executarValidacao.ts` ainda concentram etapas longas. A outra sessão descreveu divisões dessas funções em arquivos temporários, **mas essas divisões não aparecem nos commits publicados** e não são tratadas aqui como código implementado.
 
 **Documentação Viva:** `npm.cmd run arquitetura` gera as visões Atual (`origin/main`) e Proposta (cópia da branch), com referências ao código. Publicação de uma nova revisão só muda a Atual quando houver merge na `main`.
 
@@ -113,13 +113,13 @@ O sistema não transforma automaticamente o texto de uma IA em conhecimento apro
 
 ## Execuções — evidência inicial antes de executar
 
-O fluxo começa em `backend/execucoes/regras/executarValidacao.ts`, que chama `criarEvidenciaInicial.ts` para montar o registro inicial `BLOCKED`. Nesse momento ainda não existe execução, aprovação ou resultado. Em seguida, `executarValidacao.ts` valida contrato e escopo, solicita a confirmação humana e somente então inicia um processo, respeitando os limites de tempo e de saída. O resultado final é armazenado pelo módulo Evidências.
+O fluxo começa em `backend/testes/regras/executarValidacao.ts`, que chama `criarEvidenciaInicial.ts` para montar o registro inicial `BLOCKED`. Nesse momento ainda não existe execução, aprovação ou resultado. Em seguida, `executarValidacao.ts` valida contrato e escopo, solicita a confirmação humana e somente então inicia um processo, respeitando os limites de tempo e de saída. O resultado final é armazenado pelo módulo Evidências.
 
 `testes/unitario/regras/evidencia-inicial.test.mjs` verifica especificamente que uma evidência nova não simula execução ou aprovação. O fluxo completo de autorização continua sendo testado pela suíte geral; **não houve alteração das permissões humanas nesta etapa**.
 
 ### Logs e relatórios da execução
 
-Depois de executar o processo com aprovação, `backend/execucoes/regras/mascararLogsDaExecucao.ts` remove segredos da saída para a interface e para as evidências. `gravarRelatorioRedigido.ts` mantém somente o relatório de casos redigido, substituindo o conteúdo bruto do runner antes do registro da evidência. Ambos são chamados por `executarValidacao.ts` e não podem alterar a aprovação, o comando, o timeout nem a classificação dos resultados.
+Depois de executar o processo com aprovação, `backend/testes/regras/mascararLogsDaExecucao.ts` remove segredos da saída para a interface e para as evidências. `gravarRelatorioRedigido.ts` mantém somente o relatório de casos redigido, substituindo o conteúdo bruto do runner antes do registro da evidência. Ambos são chamados por `executarValidacao.ts` e não podem alterar a aprovação, o comando, o timeout nem a classificação dos resultados.
 
 Os testes de regressão usam pastas temporárias e dados fictícios. `testes/seguranca/regras/logs-e-relatorios-execucao.test.mjs` confirma o mascaramento e a substituição ou exclusão de artefatos brutos. A operação ainda precisa passar no CI Windows.
 

@@ -23,11 +23,11 @@ import { estadoDaTravaDoWorker as estadoTrava } from '../../../dist/agendamentos
 import { Worker } from '../../../dist/agendamentos/worker/Worker.js';
 import { carregarProjeto } from '../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { ErroServico } from '../../../dist/conexoes/integracoes/ErroServico.js';
-import { publicacaoDoTrabalho } from '../../../dist/execucoes/banco/publicacaoDoTrabalho.js';
-import { publicarComentarioDeResultado as publicar } from '../../../dist/execucoes/integracoes/publicarComentarioDeResultado.js';
-import { escopoDeCapability } from '../../../dist/execucoes/regras/escopoDeCapability.js';
-import { montarComentario } from '../../../dist/execucoes/regras/montarComentario.js';
-import { prepararPublicacao } from '../../../dist/execucoes/regras/prepararPublicacao.js';
+import { publicacaoDoTrabalho } from '../../../dist/testes/banco/publicacaoDoTrabalho.js';
+import { publicarComentarioDeResultado as publicar } from '../../../dist/testes/integracoes/publicarComentarioDeResultado.js';
+import { escopoDeCapability } from '../../../dist/testes/regras/escopoDeCapability.js';
+import { montarComentario } from '../../../dist/testes/regras/montarComentario.js';
+import { prepararPublicacao } from '../../../dist/testes/regras/prepararPublicacao.js';
 import { associarEspaco } from '../../../dist/projetos/regras/associarEspaco.js';
 import { criarEspaco } from '../../../dist/projetos/regras/criarEspaco.js';
 import { vincularPastaAoEspaco as pastaEspaco } from '../../../dist/projetos/regras/vincularPastaAoEspaco.js';

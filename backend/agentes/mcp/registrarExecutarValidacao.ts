@@ -1,6 +1,6 @@
 /** Ferramenta MCP executar_validacao: executa uma capacidade do contrato só com aprovação humana nativa do Windows; sem ela, BLOCKED. */
 import { z } from 'zod';
-import { executarValidacao } from '../../execucoes/regras/executarValidacao.js';
+import { executarValidacao } from '../../testes/regras/executarValidacao.js';
 import { MeiosDoServidorMcp } from '../tipos/mcp.js';
 
 export function registrarExecutarValidacao(m: MeiosDoServidorMcp) {

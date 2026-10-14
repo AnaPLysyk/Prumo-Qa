@@ -1,7 +1,7 @@
 /** Grava somente o relatório de testes redigido e remove artefatos não validados. */
 import { promises as fs } from 'node:fs';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { Evidencia } from '../../evidencias/tipos/evidencia.js';
+import { Evidencia } from '../tipos/evidencia.js';
 import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 

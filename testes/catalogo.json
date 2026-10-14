@@ -60,7 +60,7 @@
         "CLI doctor/context/review/run/evidence funciona por processo em caminho com espaços",
         "produção não aceita booleano forjado nem env de aprovação",
         "../dist/compartilhado/projeto/carregarProjeto.js",
-        "../dist/execucoes/regras/executarValidacao.js"
+        "../dist/testes/regras/executarValidacao.js"
       ],
       "perfilReal": false
     },
@@ -1177,8 +1177,8 @@
       "evidencias": [
         "logs escondem segredos mesmo quando a saída chega em várias partes",
         "relatório aprovado substitui o conteúdo bruto por casos já redigidos",
-        "../dist/execucoes/regras/mascararLogsDaExecucao.js",
-        "../dist/execucoes/regras/gravarRelatorioRedigido.js"
+        "../dist/testes/regras/mascararLogsDaExecucao.js",
+        "../dist/testes/regras/gravarRelatorioRedigido.js"
       ],
       "perfilReal": false
     },
@@ -1308,7 +1308,7 @@
       "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: evidência começa bloqueada, sem execução, autorização ou resultado inventado",
       "evidencias": [
         "evidência começa bloqueada, sem execução, autorização ou resultado inventado",
-        "../dist/execucoes/regras/criarEvidenciaInicial.js"
+        "../dist/testes/regras/criarEvidenciaInicial.js"
       ],
       "perfilReal": false
     },

@@ -1,7 +1,7 @@
 /** Rotina "run do Qase": executa as automações dos casos e só publica no Qase com política vigente para a run; senão os resultados ficam locais. */
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { Executor } from '../../conexoes/tipos/operacoesExternas.js';
-import { executarValidacao } from '../../execucoes/regras/executarValidacao.js';
+import { executarValidacao } from '../../testes/regras/executarValidacao.js';
 import { obterRunLocal } from '../../testes/banco/obterRunLocal.js';
 import { publicarRunLocal } from '../../testes/integracoes/publicarRunLocal.js';
 import { executarRunLocal } from '../../testes/regras/executarRunLocal.js';

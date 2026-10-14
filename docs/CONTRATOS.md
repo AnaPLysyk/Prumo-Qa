@@ -468,7 +468,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** servicos:importar: gestão explícita do projeto Prumo e integrações de leitura.
 - **Origem:** Interface > Projetos, Tickets, Testes ou Conexões
-- **Destino:** backend/contextos/api/servicosImportar.ts > confirmarNoWindows, usuarioDoWindows, textoRemoto, servicosDoAplicativo, salvarContextoDaPasta, obterEspaco
+- **Destino:** backend/agentes/api/servicosImportar.ts > confirmarNoWindows, usuarioDoWindows, textoRemoto, servicosDoAplicativo, salvarContextoDaPasta, obterEspaco
 - **Entrada:** Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário
 - **Saída:** Registro local ou confirmação de cancelamento
 - **Permissões:** Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.
@@ -783,7 +783,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Mapa de vínculos entre projeto, Jira, Qase, repositório, tickets, casos, runs, execuções e evidências, com lacunas de cadastro.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/rastreabilidade/api/vinculosMapa.ts > mapaDeVinculos
+- **Destino:** backend/testes/api/vinculosMapa.ts > mapaDeVinculos
 - **Entrada:** Projeto
 - **Saída:** Nós, arestas com origem (declarado, registrado ou observado), lacunas e operações recentes
 - **Permissões:** Nenhuma
@@ -1443,7 +1443,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Histórico centralizado de execuções por projeto, repositório, ticket, rotina, estado e período.
 - **Origem:** Interface > Execuções
-- **Destino:** backend/execucoes/api/execucoesListar.ts > listarExecucoes
+- **Destino:** backend/testes/api/execucoesListar.ts > listarExecucoes
 - **Entrada:** Filtros opcionais e limite
 - **Saída:** Execuções com resultado, contagens, tentativas, evidência, comentário Jira e erros
 - **Permissões:** Nenhuma
@@ -1473,7 +1473,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Mostrar o comentário de resultado que seria publicado no Jira.
 - **Origem:** Interface > Execuções > Comentário Jira
-- **Destino:** backend/execucoes/api/jiraPrevia.ts > prepararPublicacao
+- **Destino:** backend/testes/api/jiraPrevia.ts > prepararPublicacao
 - **Entrada:** Id da execução
 - **Saída:** Texto do comentário e estado de publicação
 - **Permissões:** Nenhuma
@@ -1488,7 +1488,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Publicar o comentário de resultado em um ticket do projeto vinculado (única escrita remota do produto).
 - **Origem:** Interface > Execuções > Publicar no Jira
-- **Destino:** backend/execucoes/api/jiraPublicar.ts > textoNoIdioma, confirmarNoWindows, servicosDoAplicativo, idiomaAtual, publicarComentarioDeResultado, prepararPublicacao
+- **Destino:** backend/testes/api/jiraPublicar.ts > textoNoIdioma, confirmarNoWindows, servicosDoAplicativo, idiomaAtual, publicarComentarioDeResultado, prepararPublicacao
 - **Entrada:** Id da execução
 - **Saída:** Estado da publicação e id remoto do comentário
 - **Permissões:** Confirmação nativa que mostra o texto exato; credencial protegida no Windows com permissão de comentar
@@ -1668,7 +1668,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Resultados e logs de execuções reais, preservando PASS, FAIL, BLOCKED e NOT_RUN.
 - **Origem:** Interface > Evidências
-- **Destino:** backend/evidencias/api/projetoEvidencias.ts > listarEvidenciasDoProjeto
+- **Destino:** backend/testes/api/projetoEvidencias.ts > listarEvidenciasDoProjeto
 - **Entrada:** Projeto selecionado + jobId opcional (UUID)
 - **Saída:** Evidências com cenários, saída mascarada e caminho
 - **Permissões:** Projeto previamente vinculado (vinculos.json).
@@ -1893,7 +1893,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Listar e pesquisar os contextos do projeto (requisitos, regras, critérios, restrições, decisões).
 - **Origem:** Interface > Contextos
-- **Destino:** backend/contextos/api/contextosListar.ts > listarContextosDaPasta
+- **Destino:** backend/agentes/api/contextosListar.ts > listarContextosDaPasta
 - **Entrada:** Projeto selecionado + filtros (tipo, estado, busca, chave)
 - **Saída:** Resumos com estado efetivo, versão, origem, hash e conflitos
 - **Permissões:** Projeto previamente vinculado (vinculos.json).
@@ -1908,7 +1908,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Ver um contexto com seu histórico completo de alterações.
 - **Origem:** Interface > Contextos > detalhe
-- **Destino:** backend/contextos/api/contextosObter.ts > obterContextoDaPasta
+- **Destino:** backend/agentes/api/contextosObter.ts > obterContextoDaPasta
 - **Entrada:** Projeto selecionado + id do contexto
 - **Saída:** Contexto, texto, estado efetivo e histórico (quem, quando, hash)
 - **Permissões:** Projeto previamente vinculado (vinculos.json).
@@ -1923,7 +1923,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Criar um contexto, editá-lo (nova versão em rascunho) ou substituí-lo por uma versão posterior.
 - **Origem:** Interface > Contextos > formulário
-- **Destino:** backend/contextos/api/contextosSalvar.ts > usuarioDoWindows, salvarContextoDaPasta
+- **Destino:** backend/agentes/api/contextosSalvar.ts > usuarioDoWindows, salvarContextoDaPasta
 - **Entrada:** Projeto, dados do contexto e, para editar ou substituir, o id
 - **Saída:** Contexto salvo com nova versão
 - **Permissões:** Projeto previamente vinculado (vinculos.json).
@@ -1938,7 +1938,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Aprovar explicitamente o conteúdo atual de um contexto.
 - **Origem:** Interface > Contextos > Aprovar
-- **Destino:** backend/contextos/api/contextosAprovar.ts > confirmarNoWindows, usuarioDoWindows, aprovarContextoDaPasta, obterContextoDaPasta
+- **Destino:** backend/agentes/api/contextosAprovar.ts > confirmarNoWindows, usuarioDoWindows, aprovarContextoDaPasta, obterContextoDaPasta
 - **Entrada:** Projeto selecionado + id do contexto
 - **Saída:** Contexto APROVADO com quem aprovou e quando
 - **Permissões:** Projeto previamente vinculado (vinculos.json). Confirmação nativa que a página não consegue simular; o aprovador é o usuário do Windows lido pelo processo principal. Não existe como ferramenta MCP.
@@ -1953,7 +1953,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Marcar um contexto como desatualizado (sem validade atual).
 - **Origem:** Interface > Contextos > Marcar desatualizado
-- **Destino:** backend/contextos/api/contextosDesatualizar.ts > confirmarNoWindows, usuarioDoWindows, desatualizarContextoDaPasta, obterContextoDaPasta
+- **Destino:** backend/agentes/api/contextosDesatualizar.ts > confirmarNoWindows, usuarioDoWindows, desatualizarContextoDaPasta, obterContextoDaPasta
 - **Entrada:** Projeto selecionado + id do contexto
 - **Saída:** Contexto DESATUALIZADO
 - **Permissões:** Projeto previamente vinculado (vinculos.json). Confirmação nativa.
@@ -1968,7 +1968,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Marcar ou resolver explicitamente um conflito entre contextos.
 - **Origem:** Interface > Contextos > Conflito
-- **Destino:** backend/contextos/api/contextosConflito.ts > usuarioDoWindows, conflitoDeContextoDaPasta
+- **Destino:** backend/agentes/api/contextosConflito.ts > usuarioDoWindows, conflitoDeContextoDaPasta
 - **Entrada:** Projeto, id e (para marcar) o id do outro contexto
 - **Saída:** Contexto com o conflito registrado ou resolvido
 - **Permissões:** Projeto previamente vinculado (vinculos.json).
@@ -1983,7 +1983,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Excluir definitivamente um contexto.
 - **Origem:** Interface > Contextos > Excluir
-- **Destino:** backend/contextos/api/contextosExcluir.ts > confirmarNoWindows, excluirContextoDaPasta, obterContextoDaPasta
+- **Destino:** backend/agentes/api/contextosExcluir.ts > confirmarNoWindows, excluirContextoDaPasta, obterContextoDaPasta
 - **Entrada:** Projeto selecionado + id do contexto
 - **Saída:** deleted
 - **Permissões:** Projeto previamente vinculado (vinculos.json). Confirmação nativa destrutiva. Não existe como ferramenta MCP.
@@ -1998,7 +1998,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Escolher se os contextos do projeto são disponibilizados ao agente de IA conectado por MCP.
 - **Origem:** Interface > Contextos > Disponibilizar ao agente
-- **Destino:** backend/contextos/api/contextosMcp.ts > confirmarNoWindows, permitirContextosNoMcp
+- **Destino:** backend/agentes/api/contextosMcp.ts > confirmarNoWindows, permitirContextosNoMcp
 - **Entrada:** Projeto selecionado + habilitar (true/false)
 - **Saída:** disponibilizarAoMcp
 - **Permissões:** Projeto previamente vinculado (vinculos.json). Habilitar exige confirmação nativa. Padrão: desabilitado.

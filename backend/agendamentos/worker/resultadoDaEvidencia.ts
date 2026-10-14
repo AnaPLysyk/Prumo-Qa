@@ -1,5 +1,5 @@
 /** Transforma a evidência de uma execução no resultado do trabalho: estado, motivo, contagem de casos e as primeiras falhas. */
-import { Evidencia } from '../../evidencias/tipos/evidencia.js';
+import { Evidencia } from '../../testes/tipos/evidencia.js';
 import { ResultadoTrabalho } from '../tipos/fila.js';
 import { contarCasosDaEvidencia } from './contarCasosDaEvidencia.js';
 import { resumoDasFalhas } from './resumoDasFalhas.js';

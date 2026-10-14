@@ -12,7 +12,7 @@ import { contextoProjeto } from '../../../dist/compartilhado/projeto/contextoPro
 import { hash } from '../../../dist/compartilhado/seguranca/hash.js';
 import { aplicarConexao } from '../../../dist/conexoes/ia/aplicarConexao.js';
 import { prepararConexao } from '../../../dist/conexoes/ia/prepararConexao.js';
-import { executarValidacao } from '../../../dist/execucoes/regras/executarValidacao.js';
+import { executarValidacao } from '../../../dist/testes/regras/executarValidacao.js';
 import { consultarAtividades } from '../../../dist/logs/banco/consultarAtividades.js';
 import { pastaAtividades } from '../../../dist/logs/banco/pastaAtividades.js';
 import { acompanharLogs } from '../../../dist/logs/regras/acompanharLogs.js';
