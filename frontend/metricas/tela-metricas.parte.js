@@ -120,7 +120,7 @@
     const botaoCal = h('button', { type: 'button', class: 'v36-btn-texto', 'aria-expanded': 'false', onclick: () => { calendario.hidden = !calendario.hidden; botaoCal.setAttribute('aria-expanded', String(!calendario.hidden)); } }, tr('Calendário'));
     const fFonte = h('select', { id: 'v36-met-fonte' }, h('option', { value: '' }, tr('Todas as fontes')), Object.entries(FONTES).map(([k, t]) => h('option', { value: k }, tr(t))));
     const fRes = h('select', { id: 'v36-met-resultado' }, h('option', { value: '' }, tr('Qualquer resultado')), [...RESULTADOS, 'INFO', 'ERRO_INFRA'].map((s) => h('option', { value: s }, s)));
-    const fTipo = h('select', { id: 'v36-met-tipo' }, h('option', { value: '' }, tr('Todas as rotinas')), [...new Set(registros.map((r) => r.tipo))].sort().map((t) => h('option', { value: t }, t)));
+    const fTipo = h('select', { id: 'v36-met-tipo' }, h('option', { value: '' }, tr('Todas as rotinas')), [...new Set(registros.map((r) => r.tipo))].sort((a, b) => String(a).localeCompare(String(b))).map((t) => h('option', { value: t }, t)));
     const fAmb = h('select', { id: 'v36-met-ambiente' }, h('option', { value: '' }, tr('Todos os ambientes')), Object.entries(AMBIENTES).map(([k, t]) => h('option', { value: k }, tr(t))));
     const fOri = h('select', { id: 'v36-met-execucao' }, h('option', { value: '' }, tr('Qualquer execução')), [['AGENDA', 'Agendada'], ['MANUAL', 'Manual'], ['MCP', 'MCP'], ['CLI', 'CLI']].map(([k, t]) => h('option', { value: k }, tr(t))));
     const fTicket = h('input', { type: 'search', id: 'v36-met-ticket', placeholder: 'SMART-1556', autocomplete: 'off' });
@@ -206,8 +206,8 @@
       const ativos = vista.filter((v) => v.on);
       grade.replaceChildren(...(ativos.length ? ativos.map((v) => secao(v, lista)) : [h('div', { class: 'v36m-vazio' }, tr('Escolha pelo menos um gráfico em Editar gráficos.'))]));
       menu.replaceChildren(
-        h('button', { type: 'button', role: 'menuitem', onclick: () => { menu.hidden = true; download('prumo-metricas-observadas.json', JSON.stringify({ fonte: 'registros-locais', periodo: intervalo || { dias }, complete: m.complete, registros: lista }, null, 2)); } }, tr('Exportar JSON')),
-        h('button', { type: 'button', role: 'menuitem', onclick: () => { menu.hidden = true; const cel = (x) => '"' + String(x ?? '').replaceAll('"', '""').replace(/^[\t\r\n ]*[=+@-]/, "'$&") + '"'; download('prumo-metricas-observadas.csv', ['Horário,Tipo,Resultado,Fonte,Ambiente,Execução,Ticket,Duração (ms)', ...lista.map((r) => [r.at, r.tipo, r.status, r.fonte, r.ambiente, r.origem, r.ticket, r.duracao].map(cel).join(','))].join('\r\n'), 'text/csv;charset=utf-8'); } }, tr('Exportar CSV')));
+        h('button', { type: 'button', role: 'menuitem', onclick: () => { menu.hidden = true; void download('prumo-metricas-observadas.json', JSON.stringify({ fonte: 'registros-locais', periodo: intervalo || { dias }, complete: m.complete, registros: lista }, null, 2)); } }, tr('Exportar JSON')),
+        h('button', { type: 'button', role: 'menuitem', onclick: () => { menu.hidden = true; const cel = (x) => '"' + String(x ?? '').replaceAll('"', '""').replace(/^[\t\r\n ]*[=+@-]/, "'$&") + '"'; void download('prumo-metricas-observadas.csv', ['Horário,Tipo,Resultado,Fonte,Ambiente,Execução,Ticket,Duração (ms)', ...lista.map((r) => [r.at, r.tipo, r.status, r.fonte, r.ambiente, r.origem, r.ticket, r.duracao].map(cel).join(','))].join('\r\n'), 'text/csv;charset=utf-8'); } }, tr('Exportar CSV')));
     }
     [busca, fTicket].forEach((c) => c.addEventListener('input', desenhar)); [fFonte, fRes, fTipo, fAmb, fOri].forEach((c) => c.addEventListener('change', desenhar));
     desenhar();

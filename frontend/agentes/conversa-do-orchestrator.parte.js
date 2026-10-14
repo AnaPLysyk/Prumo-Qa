@@ -78,10 +78,10 @@
     const idAtual = () => estado.espaco?.id ?? null;
     async function saudar() {
       const v = versao; const abertura = await chamar(() => api.assistenteAbertura(idAtual())); if (v !== versao || !abertura) return;
-      pendente = abertura.pendente; falar(abertura.linhas, null, abertura.proximos);
+      pendente = abertura.pendente; void falar(abertura.linhas, null, abertura.proximos);
     }
-    function reiniciar() { versao++; primeira = true; fila = Promise.resolve(); historico = []; pendente = null; delete el.dataset.conversou; msgs.replaceChildren(); projeto = idAtual(); sugerir(INICIAIS); saudar(); }
-    function sincronizar() { if (!el) return; carregarRoster(); entrada.setAttribute('aria-label', tr('Mensagem para o Prumo')); entrada.placeholder = tr('Pergunte alguma coisa ao Prumo…'); if (projeto !== idAtual()) reiniciar(); }
+    function reiniciar() { versao++; primeira = true; fila = Promise.resolve(); historico = []; pendente = null; delete el.dataset.conversou; msgs.replaceChildren(); projeto = idAtual(); void sugerir(INICIAIS); saudar(); }
+    function sincronizar() { if (!el) return; void carregarRoster(); entrada.setAttribute('aria-label', tr('Mensagem para o Prumo')); entrada.placeholder = tr('Pergunte alguma coisa ao Prumo…'); if (projeto !== idAtual()) void reiniciar(); }
     function ajustarAltura() { entrada.style.height = 'auto'; entrada.style.height = Math.min(125, entrada.scrollHeight) + 'px'; }
     async function perguntar(q, topico) {
       q = String(q || '').trim(); if (q.length < 2 || enviar.disabled) return;
@@ -121,13 +121,13 @@
         h('div', { class: 'v36c-topo' }, orbita), msgs,
         h('div', { class: 'v36c-interacao' }, h('div', { class: 'v36c-sugestoes' }, h('span', { class: 'v36c-faisca', 'aria-hidden': 'true' }, icone('faisca', 15)), h('span', {}, tr('O que vamos explorar?'))), chips),
         h('div', { class: 'v36c-compor-caixa' }, h('div', { class: 'v36c-opcoes' }, seletorAgente, seletorProvedor), form, h('div', { class: 'v36c-rodape' }, rodapeTexto = h('span', {}, tr('Respostas com os dados deste computador, sem modelo de IA.')), h('span', {}, 'Enter ↵ · Shift+Enter'))));
-      form.addEventListener('submit', (e) => { e.preventDefault(); perguntar(entrada.value); });
+      form.addEventListener('submit', (e) => { e.preventDefault(); void perguntar(entrada.value); });
       entrada.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); } });
       entrada.addEventListener('input', ajustarAltura);
-      reiniciar(); carregarRoster(); return el;
+      void reiniciar(); void carregarRoster(); return el;
     }
-    function contexto(aba, texto) { montar(); sincronizar(); falar([texto], null, PROXIMOS[TOPICO_DA_TELA[aba]] || INICIAIS); }
+    function contexto(aba, texto) { void montar(); void sincronizar(); void falar([texto], null, PROXIMOS[TOPICO_DA_TELA[aba]] || INICIAIS); }
     function focar() { setTimeout(() => entrada?.focus({ preventScroll: true }), 220); }
     function estadoOrbita() { el?.querySelectorAll('.qc-orb, .qc-campo').forEach((e) => { e.dataset.estado = estadoOrb(estado.worker); }); }
-    return { montar, sincronizar, contexto, focar, estadoOrbita, recarregar: () => { if (el) { carregarRoster(); } } };
+    return { montar, sincronizar, contexto, focar, estadoOrbita, recarregar: () => { if (el) { void carregarRoster(); } } };
   })();

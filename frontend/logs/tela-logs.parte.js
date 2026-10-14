@@ -39,7 +39,7 @@
         h('dl', {}, campos.map(([k, v]) => h('div', {}, h('dt', {}, tr(k)), h('dd', { 'data-i18n-ignore': '' }, String(v))))),
         h('pre', {}, JSON.stringify(e, null, 2)),
         h('small', {}, tr('Somente os metadados registrados pelo núcleo para esta operação.')),
-        ev ? h('button', { type: 'button', class: 'v36l-mini', onclick: () => { estado.jobId = ev; mostrar('evidencias'); } }, tr('Ver evidência')) : null);
+        ev ? h('button', { type: 'button', class: 'v36l-mini', onclick: () => { estado.jobId = ev; void mostrar('evidencias'); } }, tr('Ver evidência')) : null);
     }
     function linha(e) {
       const nivel = nivelDe(e.state), ab = aberto === chave(e);
@@ -66,7 +66,7 @@
       const novos = [...r.events].sort((a, b) => a.at.localeCompare(b.at) || (a.phase === 'start' ? -1 : 1));
       const ass = novos.length + '|' + (novos.at(-1) ? chave(novos.at(-1)) + novos.at(-1).at : '') + '|' + r.complete;
       if (ass === assinatura) return; assinatura = ass; eventos = novos; aviso.hidden = r.complete;
-      preencher(fFerramenta, [...new Set(eventos.map((e) => e.tool))].sort()); preencher(fCliente, [...new Set(eventos.map((e) => e.client))].sort()); desenhar();
+      preencher(fFerramenta, [...new Set(eventos.map((e) => e.tool))].sort((a, b) => String(a).localeCompare(String(b)))); preencher(fCliente, [...new Set(eventos.map((e) => e.client))].sort((a, b) => String(a).localeCompare(String(b)))); desenhar();
     }
     function acompanhar() { clearInterval(estado.timer); status.classList.toggle('vivo', seguir.checked); status.lastChild.textContent = seguir.checked ? tr('AO VIVO · REGISTROS LOCAIS') : tr('REGISTROS LOCAIS'); if (seguir.checked) estado.timer = setInterval(carregar, 2000); }
     [busca].forEach((c) => c.addEventListener('input', desenhar)); [fFerramenta, fNivel, fCliente].forEach((c) => c.addEventListener('change', desenhar));

@@ -53,7 +53,7 @@
   // Runs (execuções e runs numa lista só) e Planos. Os nomes antigos das subabas continuam abrindo o lugar novo.
   const ABAS = () => [['ide', 'IDE'], ['repositorio', 'Repositório'], ['runs', 'Runs'], ['planos', 'Planos']];
   const SUBABA_ANTIGA = { catalogo: 'repositorio', casos: 'repositorio', suites: 'repositorio', vinculos: 'repositorio', codigo: 'ide', automacao: 'pipelines' };
-  const modosIde = (sub) => h('div', { class: 'segmentos sub ds-ide-modos', role: 'group', 'aria-label': 'Modo da IDE' }, [['ide', 'Código'], ['pipelines', 'Pipelines CI/CD']].map(([k, t]) => h('button', { type: 'button', 'data-ide-modo': k, 'aria-pressed': String(k === sub), onclick: () => { (estado.sub ||= {}).testes = k; mostrar('testes'); } }, t)));
+  const modosIde = (sub) => h('div', { class: 'segmentos sub ds-ide-modos', role: 'group', 'aria-label': 'Modo da IDE' }, [['ide', 'Código'], ['pipelines', 'Pipelines CI/CD']].map(([k, t]) => h('button', { type: 'button', 'data-ide-modo': k, 'aria-pressed': String(k === sub), onclick: () => { (estado.sub ||= {}).testes = k; void mostrar('testes'); } }, t)));
   abas.testes = async (el) => {
     const e = estado.espaco; const itens = ABAS();
     let sub = SUBABA_ANTIGA[estado.sub?.testes] || estado.sub?.testes || 'repositorio'; if (!itens.some(([k]) => k === sub) && sub !== 'pipelines') sub = 'repositorio';
@@ -65,7 +65,7 @@
     }
     const vq = vinc(e, 'qase'), vg = vinc(e, 'github'); const mem = memoria('testes', e.id);
     const perm = vq ? await escritaDoProjeto(e) : {}; const esc = !!perm.qase;
-    const acoes = { repositorio: [DS.acao('Atualizar', async () => { await fontes(e, { forcar: true }); delete mem.casos; mostrar('testes'); }, { id: 'testes-atualizar', icone: 'atualizar' }),
+    const acoes = { repositorio: [DS.acao('Atualizar', async () => { await fontes(e, { forcar: true }); delete mem.casos; void mostrar('testes'); }, { id: 'testes-atualizar', icone: 'atualizar' }),
         ...(vq ? [DS.acao('Consulta avançada', () => F.avancadaQase(e), { id: 'testes-avancada', icone: 'filtro' }), DS.acao('Nova suite', () => F.novaSuite(e, esc), { id: 'su-nova', icone: 'mais' })] : []),
         DS.acao('Nova proposta de caso', () => F.novaProposta(e), { id: 'pr-nova', primaria: true, icone: 'mais' })],
       planos: [DS.acao('Novo plano', () => F.novoPlano(e, esc), { id: 'plano-novo', primaria: true, icone: 'mais' })],
@@ -98,7 +98,7 @@
     const area = h('div', { id: 'cat-carregando' }, DS.esqueleto(6)); corpo.append(area);
     const src = await fontes(e); const vq = src.vq;
     if (src.cat?.erro) { area.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o repositório', src.cat.erro)); return; }
-    if (src.cat?.semPasta && !vq) { area.replaceChildren(DS.estadoTela('vazio', 'Nenhuma fonte de testes vinculada', 'Vincule a pasta do repositório (ou o repositório do GitHub) e o projeto do Qase em Projetos.', [DS.acao('Vincular pasta…', async () => { const x = await chamar(() => api.espacoPasta(e.id)); if (x && !x.canceled) { delete mem.catalogo; mostrar('testes'); } }, { id: 'cat-vincular', primaria: true }), DS.acao('Abrir Projetos', () => mostrar('projetos'))], { id: 'cat-sem-pasta' })); return; }
+    if (src.cat?.semPasta && !vq) { area.replaceChildren(DS.estadoTela('vazio', 'Nenhuma fonte de testes vinculada', 'Vincule a pasta do repositório (ou o repositório do GitHub) e o projeto do Qase em Projetos.', [DS.acao('Vincular pasta…', async () => { const x = await chamar(() => api.espacoPasta(e.id)); if (x && !x.canceled) { delete mem.catalogo; void mostrar('testes'); } }, { id: 'cat-vincular', primaria: true }), DS.acao('Abrir Projetos', () => void mostrar('projetos'))], { id: 'cat-sem-pasta' })); return; }
     const m = modelo(e, src); const c = src.cat?.catalogo;
     const f = (mem.fVisao ||= { q: '', fonte: '', nivel: '', execucao: '', tags: [], agrupar: 'tag' }); const tagsAtivas = new Set(f.tags);
     const todasTags = [...m.linhas.reduce((acc, l) => { for (const t of l.tags) acc.set(t, (acc.get(t) || 0) + 1); return acc; }, new Map()).entries()].sort((a, b) => b[1] - a[1]);
@@ -151,13 +151,13 @@
   }
 
   // ======================= Código (visão de IDE) =======================
-  function abrirNoCodigo(e, arquivo, linha) { DS.fecharModal(); const mem = memoria('testes', e.id); mem.ide = { arquivo, linha }; (estado.sub ||= {}).testes = 'codigo'; mostrar('testes'); }
+  function abrirNoCodigo(e, arquivo, linha) { DS.fecharModal(); const mem = memoria('testes', e.id); mem.ide = { arquivo, linha }; (estado.sub ||= {}).testes = 'codigo'; void mostrar('testes'); }
   function arvore(arquivos) { const raiz = { pastas: new Map(), arquivos: [] }; for (const a of arquivos) { const partes = a.arquivo.split('/'); let n = raiz; for (const p of partes.slice(0, -1)) { if (!n.pastas.has(p)) n.pastas.set(p, { pastas: new Map(), arquivos: [] }); n = n.pastas.get(p); } n.arquivos.push(a); } return raiz; }
   // Trazer (clonar) ou atualizar o repositório do GitHub vinculado: usa o git deste computador e a confirmação nativa; ao terminar, a IDE passa a editar a pasta.
   async function trazerDoGithub(e, atualizar) {
     const r = await chamar(() => api.espacoTrazer(e.id)); if (!r || r.canceled) return;
     avisar(atualizar ? tr('Repositório atualizado do GitHub.') : r.vinculada === false ? tr('Repositório trazido, mas a pasta ainda não foi vinculada ao projeto.') : tr('Repositório trazido do GitHub e vinculado ao projeto.'));
-    mostrar('testes');
+    void mostrar('testes');
   }
   const pastaDoPrumo = (e) => !!e.pastaLocal && /[\\/]repositorios[\\/]/.test(e.pastaLocal);
 
@@ -223,7 +223,7 @@
         DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar…', async () => {
           const n = nome.value.trim(); if (!n) { avisar(tr('Informe o nome do arquivo.'), true); return; }
           const arquivo = '.github/workflows/' + n; const r = await chamar(() => api.testesGravar(e.id, arquivo, MODELO_PIPELINE(titulo.value.trim() || 'CI'), null)); if (!r || r.canceled) return;
-          DS.fecharModal(); mem.pipe = { arquivo: r.arquivo, editar: true }; mostrar('testes');
+          DS.fecharModal(); mem.pipe = { arquivo: r.arquivo, editar: true }; void mostrar('testes');
         }, { id: 'pipe-novo-criar', primaria: true }))], { tamanho: 'md' });
       nome.focus();
     }
@@ -239,9 +239,9 @@
     const casosPorId = new Map((src.casos?.itens || []).map((c) => [String(c.id), c]));
     const caixa = h('div', { class: 'ds-ide', id: 'ide' }); const arvoreEl = h('nav', { class: 'ds-ide-arvore', 'aria-label': tr('Arquivos de teste') }); const editor = h('section', { class: 'ds-ide-editor', 'aria-live': 'polite' }); const painel = h('aside', { class: 'ds-ide-painel' });
     caixa.append(arvoreEl, editor, painel); corpo.append(caixa, agentesNoCodigo(e));
-    const pasta = (nome, n, nivel) => { const det = h('details', { class: 'ds-ide-pasta', open: nivel < 3 }, h('summary', {}, DS.icone('pasta'), h('span', {}, nome))); for (const [k, sub] of [...n.pastas.entries()].sort()) det.append(pasta(k, sub, nivel + 1)); for (const a of n.arquivos.sort((x, y) => x.arquivo.localeCompare(y.arquivo))) det.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, title: a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo.split('/').at(-1)), h('span', { class: 'ds-n' }, String(a.testes.length)))); return det; };
+    const pasta = (nome, n, nivel) => { const det = h('details', { class: 'ds-ide-pasta', open: nivel < 3 }, h('summary', {}, DS.icone('pasta'), h('span', {}, nome))); for (const [k, sub] of [...n.pastas.entries()].sort((a, b) => a[0].localeCompare(b[0]))) det.append(pasta(k, sub, nivel + 1)); for (const a of n.arquivos.sort((x, y) => x.arquivo.localeCompare(y.arquivo))) det.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, title: a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo.split('/').at(-1)), h('span', { class: 'ds-n' }, String(a.testes.length)))); return det; };
     const raiz = arvore(porArquivo); arvoreEl.append(h('p', { class: 'ds-doc-grupo' }, tr('{n} arquivo(s) · {t} teste(s)', { n: porArquivo.length, t: cat.testes })));
-    for (const [k, sub] of [...raiz.pastas.entries()].sort()) arvoreEl.append(pasta(k, sub, 0)); for (const a of raiz.arquivos) arvoreEl.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo)));
+    for (const [k, sub] of [...raiz.pastas.entries()].sort((a, b) => a[0].localeCompare(b[0]))) arvoreEl.append(pasta(k, sub, 0)); for (const a of raiz.arquivos) arvoreEl.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo)));
     arvoreEl.prepend(h('div', { class: 'ds-ide-barra' }, DS.acao('Novo arquivo', () => novoArquivo(), { id: 'ide-novo', compacto: true, icone: 'mais' }), vinc(e, 'github') && pastaDoPrumo(e) ? DS.acao('Atualizar do GitHub', () => trazerDoGithub(e, true), { id: 'ide-atualizar-github', compacto: true, titulo: 'Atualiza a cópia deste computador só por avanço; suas mudanças não são sobrescritas' }) : null));
     if (!porArquivo.length) { editor.append(DS.estadoTela('vazio', 'Nenhum arquivo de teste encontrado na pasta vinculada.', 'O Prumo reconhece *.spec/*.test (JS/TS), *.feature e test_*.py. Use "Novo arquivo" para criar a primeira automação.')); if (mem.ide?.novo) novoArquivo(mem.ide.novo); return; }
     painel.append(DS.estadoTela('vazio', 'Selecione um teste', 'As conexões do teste com casos, tickets, execuções e agentes aparecem aqui.', [], { compacto: true }));
@@ -279,7 +279,7 @@
       DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar…', async () => {
         const c = caminho.value.trim(); if (!c) { avisar(tr('Informe o caminho do arquivo.'), true); return; }
         const r = await chamar(() => api.testesGravar(e.id, c, modeloDeTeste(c, caso.value ? Number(caso.value) : null, titulo.value.trim()), null)); if (!r || r.canceled) return;
-        DS.fecharModal(); await fontes(e, { forcar: true }); mem.ide = { arquivo: r.arquivo, editar: true }; mostrar('testes');
+        DS.fecharModal(); await fontes(e, { forcar: true }); mem.ide = { arquivo: r.arquivo, editar: true }; void mostrar('testes');
       }, { id: 'ide-novo-criar', primaria: true }))], { tamanho: 'md' });
       caminho.focus();
     }
@@ -307,7 +307,7 @@
       destino.replaceChildren(DS.carregando()); const r = await api.servicoConsultar(e.id, 'github', 'arquivos', {}, caminho || '');
       if (!r.ok) { destino.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o repositório', r.error, [], { compacto: true })); return; }
       const itens = Array.isArray(r.data.dados) ? r.data.dados : []; destino.replaceChildren(...itens.sort((a, b) => (a.tipo === b.tipo ? a.nome.localeCompare(b.nome) : a.tipo === 'dir' ? -1 : 1)).map((x) => {
-        if (x.tipo === 'dir') { const det = h('details', { class: 'ds-ide-pasta' }, h('summary', {}, DS.icone('pasta'), h('span', {}, x.nome))); const filhos = h('div'); det.append(filhos); det.addEventListener('toggle', () => { if (det.open && !filhos.childNodes.length) listar(x.caminho, filhos); }); return det; }
+        if (x.tipo === 'dir') { const det = h('details', { class: 'ds-ide-pasta' }, h('summary', {}, DS.icone('pasta'), h('span', {}, x.nome))); const filhos = h('div'); det.append(filhos); det.addEventListener('toggle', () => { if (det.open && !filhos.childNodes.length) void listar(x.caminho, filhos); }); return det; }
         return h('button', { type: 'button', class: 'ds-ide-arquivo', onclick: () => abrir(x.caminho) }, DS.icone('codigo'), h('span', {}, x.nome));
       }));
     }
@@ -332,7 +332,7 @@
   /** Bloco "Código que implementa" no modal do caso (usa o catálogo já carregado ou carrega). */
   function blocoCodigoDoCaso(e, id) {
     const alvo = h('div', {}, h('p', { class: 'suave' }, tr('Procurando anotações no código…')));
-    (async () => { if (!e.pastaLocal) { alvo.replaceChildren(h('p', { class: 'suave' }, tr('Vincule a pasta do repositório para localizar o código deste caso.'))); return; }
+    void (async () => { if (!e.pastaLocal) { alvo.replaceChildren(h('p', { class: 'suave' }, tr('Vincule a pasta do repositório para localizar o código deste caso.'))); return; }
       const src = await fontes(e); const vq = vinc(e, 'qase'); const declarados = relacoesDe(e, ['qase'], id).map((x) => outroLado(x, ['qase'], id)).filter((x) => x.tipo === 'automacao').map((x) => x.id); const impl = []; for (const f of src.cat?.catalogo?.features || []) for (const t of f.testes) if (casaQase(vq, t.qase || [], id) || declarados.includes(f.arquivo + ':' + t.linha)) impl.push({ ...t, arquivo: f.arquivo });
       alvo.replaceChildren(impl.length ? h('ul', { class: 'ds-lista' }, impl.map((t) => h('li', {}, h('button', { type: 'button', class: 'ds-link seta', onclick: () => abrirNoCodigo(e, t.arquivo, t.linha) }, t.arquivo + ':' + t.linha), h('span', { class: 'ds-sub' }, t.titulo), h('span', { class: 'ds-chips' }, chipNivel(t.tipo), ...t.tags.map(chipTag)))))
         : h('p', { class: 'suave' }, tr('Nenhum teste do código anota este caso (qase({id}) ou "Qase: {id}").', { id }))); })();

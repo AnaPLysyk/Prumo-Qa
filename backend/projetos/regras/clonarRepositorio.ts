@@ -19,13 +19,24 @@ const ambienteDoGit = (): NodeJS.ProcessEnv => {
 /** Opções fixas: hooks desligados, nenhum protocolo além do HTTPS (o `file` só nos testes), links simbólicos e conversão de fim de linha desligados. */
 const seguras = (protocolo: 'https' | 'file') => ['-c', `core.hooksPath=${process.platform === 'win32' ? 'NUL' : '/dev/null'}`, '-c', 'core.fsmonitor=false', '-c', 'core.symlinks=false', '-c', 'core.autocrlf=false', '-c', 'protocol.allow=never', '-c', `protocol.${protocolo}.allow=always`, '-c', 'transfer.fsckObjects=true', '-c', 'submodule.recurse=false'];
 
+/** Caminho absoluto do git: primeiro as pastas fixas de instalação do Git para Windows, depois as pastas absolutas do PATH. Nunca executa `git` pelo nome. */
+export function localizarGit(): string | null {
+  const exe = process.platform === 'win32' ? 'git.exe' : 'git';
+  const bases = [process.env.ProgramFiles, process.env['ProgramFiles(x86)'], process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Programs') : undefined].filter((b): b is string => !!b && path.isAbsolute(b));
+  const fixos = bases.flatMap((b) => [path.join(b, 'Git', 'cmd', exe), path.join(b, 'Git', 'bin', exe)]);
+  const doPath = (process.env.PATH ?? process.env.Path ?? '').split(path.delimiter).filter((d) => d && path.isAbsolute(d)).map((d) => path.join(d, exe));
+  return [...fixos, ...doPath].find((c) => { try { return fs.statSync(c).isFile(); } catch { return false; } }) ?? null;
+}
+const GIT_AUSENTE = 'GIT_UNAVAILABLE: o git não foi encontrado neste computador. Instale o Git para Windows (git-scm.com) e tente de novo, ou vincule uma pasta que você já tem.';
+
 function git(args: string[], cwd: string | undefined, limiteMs: number): Promise<{ codigo: number; saida: string }> {
   return new Promise((resolve, reject) => {
-    const filho = spawn('git', args, { cwd, env: ambienteDoGit(), windowsHide: true, shell: false });
+    const exe = localizarGit(); if (!exe) { reject(new Error(GIT_AUSENTE)); return; }
+    const filho = spawn(exe, args, { cwd, env: ambienteDoGit(), windowsHide: true, shell: false });
     let saida = ''; const acumular = (b: Buffer) => { if (saida.length < 20_000) saida += b.toString('utf8'); };
     filho.stdout.on('data', acumular); filho.stderr.on('data', acumular);
     const relogio = setTimeout(() => { filho.kill(); reject(new Error('GIT_TIMEOUT: o git demorou demais e foi interrompido.')); }, limiteMs);
-    filho.on('error', (e: NodeJS.ErrnoException) => { clearTimeout(relogio); reject(new Error(e.code === 'ENOENT' ? 'GIT_UNAVAILABLE: o git não foi encontrado neste computador. Instale o Git para Windows (git-scm.com) e tente de novo, ou vincule uma pasta que você já tem.' : 'GIT_FAILED: não foi possível iniciar o git.')); });
+    filho.on('error', (e: NodeJS.ErrnoException) => { clearTimeout(relogio); reject(new Error(e.code === 'ENOENT' ? GIT_AUSENTE : 'GIT_FAILED: não foi possível iniciar o git.')); });
     filho.on('close', (codigo) => { clearTimeout(relogio); resolve({ codigo: codigo ?? 1, saida: saida.trim() }); });
   });
 }

@@ -54,9 +54,9 @@ test('clone que falha não deixa a pasta pela metade', async (t) => {
 });
 
 test('sem o git instalado a mensagem diz o que fazer', async (t) => {
-  const antes = { P: process.env.PATH, p: process.env.Path };
-  t.after(() => { if (antes.P !== undefined) process.env.PATH = antes.P; if (antes.p !== undefined) process.env.Path = antes.p; });
-  process.env.PATH = ''; process.env.Path = '';
+  const chaves = ['PATH', 'Path', 'ProgramFiles', 'ProgramFiles(x86)', 'LOCALAPPDATA']; const antes = Object.fromEntries(chaves.map((k) => [k, process.env[k]]));
+  t.after(() => { for (const k of chaves) { if (antes[k] === undefined) delete process.env[k]; else process.env[k] = antes[k]; } });
+  for (const k of chaves) process.env[k] = '';
   const d = pasta(t);
   await assert.rejects(() => clonarOuAtualizarRepositorio('https://github.com/a/b.git', path.join(d, 'x')), /GIT_UNAVAILABLE: o git não foi encontrado/);
 });

@@ -38,8 +38,8 @@
       h('div', { class: 'v36-ajustes-sub' }, tr('IA externa no chat (opcional)')), externos,
       h('p', { class: 'v36-ajustes-nota' }, DS.info('Sem IA externa, os agentes respondem com os dados deste computador. Autorizar pede confirmação.', { rotulo: 'Sobre a IA externa' }))));
     caixa.replaceChildren(perfil, sistema, assistente);
-    desenharExternos(); carregarPerfil();
-    $('#ajustes')?.addEventListener('click', () => { nome.value = ia().nome; estilo.value = ia().estilo; ler.checked = !!ia().lerRespostas; vozes(); desenharExternos(); carregarPerfil(); if (perfil.open) window.PrumoContas?.montar(contaOnline); });
+    void desenharExternos(); void carregarPerfil();
+    $('#ajustes')?.addEventListener('click', () => { nome.value = ia().nome; estilo.value = ia().estilo; ler.checked = !!ia().lerRespostas; vozes(); void desenharExternos(); void carregarPerfil(); if (perfil.open) window.PrumoContas?.montar(contaOnline); });
   }
   if (typeof montarControles === 'function') { const base = montarControles; montarControles = function () { base(); ajustesAssistente(); }; }
   // mostrar() transfere os filhos do recipiente temporário para o main; a classe

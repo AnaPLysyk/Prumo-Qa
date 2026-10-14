@@ -30,7 +30,7 @@
         const linha = comNivel(h('button', { type: 'button', class: 'adm-no adm-pasta-no', role: 'treeitem', 'aria-expanded': String(aberta), onclick: () => { aberta ? abertas.delete(caminho) : abertas.add(caminho); montar(); } }, h('span', { class: 'adm-seta', 'aria-hidden': 'true' }, aberta ? '▾' : '▸'), h('span', { 'data-i18n-ignore': '' }, nome)), nivel);
         return [linha, ...(aberta ? filhos(n, caminho, nivel + 1) : [])];
       };
-      const filhos = (n, prefixo, nivel) => [...Object.keys(n).filter((k) => k !== '\0').sort().flatMap((k) => pasta(k, n[k], prefixo, nivel)),
+      const filhos = (n, prefixo, nivel) => [...Object.keys(n).filter((k) => k !== '\0').sort((a, b) => String(a).localeCompare(String(b))).flatMap((k) => pasta(k, n[k], prefixo, nivel)),
         ...(n['\0'] || []).sort((a, b) => a.caminho.localeCompare(b.caminho)).map((a) => comNivel(h('button', { type: 'button', class: 'adm-no adm-arquivo-no' + (a.caminho === selecionado ? ' ativo' : ''), role: 'treeitem', 'aria-selected': String(a.caminho === selecionado), 'data-caminho': a.caminho, title: a.descricao || a.caminho, onclick: () => aoEscolher(a.caminho) }, h('span', { class: 'adm-ponto', 'data-papel': a.papel, 'aria-hidden': 'true' }), h('span', { 'data-i18n-ignore': '' }, nomeDe(a.caminho))), nivel))];
       raiz.replaceChildren(...filhos(nos, '', 0));
       if (!raiz.children.length) raiz.append(h('p', { class: 'adm-vazio' }, tr('Nada encontrado.')));
@@ -131,7 +131,7 @@
     const busca = DS.busca({ id: 'adm-busca', placeholder: 'Procurar arquivo, função ou canal', rotulo: 'Procurar na documentação' });
     const telaSel = DS.selecao({ id: 'adm-tela', rotulo: 'Tela', opcoes: mapa.telas.map((t) => [t.id, tr(t.id)]), valor: 'agentes', aoMudar: (v) => { telaAtual = v; fx.desenhar(v, selecionado); } });
     let telaAtual = mapa.telas.some((t) => t.id === 'agentes') ? 'agentes' : mapa.telas[0]?.id, selecionado = null;
-    const escolher = (caminho) => { const a = arquivos.get(caminho); if (!a) return; if (busca.input.value && !normal(a.caminho + ' ' + (a.descricao || '') + ' ' + a.funcoes.join(' ')).includes(normal(busca.input.value))) { busca.input.value = ''; arv.filtrar(''); } selecionado = caminho; telaAtual = a.tela; telaSel.value = a.tela; arv.marcar(caminho); fx.desenhar(a.tela, caminho); lt.mostrar(caminho); };
+    const escolher = (caminho) => { const a = arquivos.get(caminho); if (!a) return; if (busca.input.value && !normal(a.caminho + ' ' + (a.descricao || '') + ' ' + a.funcoes.join(' ')).includes(normal(busca.input.value))) { busca.input.value = ''; arv.filtrar(''); } selecionado = caminho; telaAtual = a.tela; telaSel.value = a.tela; arv.marcar(caminho); fx.desenhar(a.tela, caminho); void lt.mostrar(caminho); };
     const arv = arvore(arquivos, escolher), fx = fluxo(mapa, arquivos, escolher), lt = leitor(mapa, arquivos);
     const alternar = DS.acao('Tela inteira', () => { const inteira = fx.alternar(); alternar.lastChild.textContent = tr(inteira ? 'Caminho do arquivo' : 'Tela inteira'); alternar.setAttribute('aria-pressed', String(inteira)); }, { id: 'adm-fluxo-modo', compacto: true });
     busca.input.addEventListener('input', () => arv.filtrar(busca.input.value));

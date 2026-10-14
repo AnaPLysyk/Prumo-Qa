@@ -53,10 +53,10 @@ window.PrumoAdministracaoAcessos = (() => {
     const [lista, papeis] = await Promise.all([chamar(() => api.usuariosListar()), chamar(() => api.papeisListar())]);
     if (!lista || !papeis) return area.replaceChildren(DS.falhaConsulta('administracao'));
     const recarregar = () => usuarios(area); const alterar = podeAlterar();
-    const agir = (fn, ok) => async () => { const r = await chamar(fn); if (r) { if (ok) avisar(tr(ok)); recarregar(); } };
+    const agir = (fn, ok) => async () => { const r = await chamar(fn); if (r) { if (ok) avisar(tr(ok)); void recarregar(); } };
     const linhas = lista.contas.map((c) => {
       const eu = c.id === lista.voce;
-      const papel = DS.selecao({ id: 'papel-' + c.login, rotulo: 'Papel de ' + c.login, opcoes: papeis.papeis.map((p) => [p.id, p.nome]), valor: c.papel, aoMudar: async (v) => { const r = await chamar(() => api.usuariosAlterar(c.id, { papel: v })); if (r) avisar(tr('Papel alterado.')); recarregar(); } });
+      const papel = DS.selecao({ id: 'papel-' + c.login, rotulo: 'Papel de ' + c.login, opcoes: papeis.papeis.map((p) => [p.id, p.nome]), valor: c.papel, aoMudar: async (v) => { const r = await chamar(() => api.usuariosAlterar(c.id, { papel: v })); if (r) avisar(tr('Papel alterado.')); void recarregar(); } });
       papel.disabled = !alterar || eu;
       const acoes = alterar ? [
         c.estado === 'PENDENTE' ? DS.acao('Aprovar', agir(() => api.usuariosAlterar(c.id, { estado: 'ATIVO' }), 'Cadastro aprovado.'), { compacto: true, primaria: true, id: 'aprovar-' + c.login }) : null,
@@ -86,7 +86,7 @@ window.PrumoAdministracaoAcessos = (() => {
     const alterar = podeAlterar(); const editados = new Map(d.papeis.map((p) => [p.id, { ...p.telas }]));
     const sujos = new Set(); const salvar = DS.acao('Salvar permissões', async () => {
       for (const id of sujos) { const p = d.papeis.find((x) => x.id === id); const r = await chamar(() => api.papeisSalvar({ id, nome: p.nome, descricao: p.descricao, telas: editados.get(id) })); if (!r) return; }
-      avisar(tr('Permissões salvas. Valem no próximo pedido de cada pessoa.')); permissoes(area);
+      avisar(tr('Permissões salvas. Valem no próximo pedido de cada pessoa.')); void permissoes(area);
     }, { primaria: true, id: 'perm-salvar', desabilitado: true });
     const celula = (p, m) => {
       if (p.fixo) return { no: DS.chip(ROTULO_NIVEL.USAR, 'ok') };
@@ -103,7 +103,7 @@ window.PrumoAdministracaoAcessos = (() => {
       h('div', { class: 'perm-caixa' }, tabela),
       DS.secao('Papéis', h('ul', { class: 'adm-lista perm-lista' }, d.papeis.map((p) => h('li', { class: 'adm-arquivo', 'data-papel': p.id }, h('strong', { 'data-i18n-ignore': '' }, p.nome), h('span', { class: 'adm-desc', 'data-i18n-ignore': '' }, p.descricao || '—'),
         h('span', { class: 'suave' }, p.fixo ? tr('Fixo: sempre pode tudo.') : tr('{n} conta(s)', { n: p.contas }) + (p.id === d.papelDoCadastro ? ' · ' + tr('papel de novos cadastros') : '')),
-        alterar && !p.fixo ? h('div', {}, DS.acao('Excluir papel', async () => { const r = await chamar(() => api.papeisExcluir(p.id)); if (r) { avisar(tr('Papel excluído.')); permissoes(area); } }, { compacto: true, classe: 'perigo', id: 'perm-excluir-' + p.id, desabilitado: p.contas > 0 || p.id === d.papelDoCadastro, titulo: p.contas > 0 ? 'Troque o papel das contas antes de excluir.' : null })) : null)))),
+        alterar && !p.fixo ? h('div', {}, DS.acao('Excluir papel', async () => { const r = await chamar(() => api.papeisExcluir(p.id)); if (r) { avisar(tr('Papel excluído.')); void permissoes(area); } }, { compacto: true, classe: 'perigo', id: 'perm-excluir-' + p.id, desabilitado: p.contas > 0 || p.id === d.papelDoCadastro, titulo: p.contas > 0 ? 'Troque o papel das contas antes de excluir.' : null })) : null)))),
       papeisEditaveis.length ? null : DS.texto(null, 'Nenhum papel editável.'));
   }
 
@@ -143,7 +143,7 @@ window.PrumoAdministracaoAcessos = (() => {
         alterar ? DS.rodape(DS.acao('Salvar regras dos agentes', async () => {
           const desligados = d.agentes.filter((a) => !a.fixo && !ligados.get(a.id).checked).map((a) => a.id);
           const r = await chamar(() => api.plataformaSalvar({ desligados, iaExterna: externa.checked, orquestracao: orquestracao.checked })); if (!r) return;
-          avisar(tr('Regras dos agentes salvas.')); agentes(area);
+          avisar(tr('Regras dos agentes salvas.')); void agentes(area);
         }, { primaria: true, id: 'plataforma-salvar' })) : DS.notaPermissao('Seu papel só permite consultar estas regras.')
       ], { id: 'plataforma-regras' }));
   }

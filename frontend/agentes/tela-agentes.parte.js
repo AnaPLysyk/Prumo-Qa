@@ -1,4 +1,6 @@
 /** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
+  /** Número entre 0 e 1 para os efeitos visuais (meteoros); vem do gerador do navegador, não de Math.random. */
+  const acaso = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
   const activityDetails = detalhesAtividade;
 
   // ---------------- Agentes: especializações fixas do núcleo; cadastros personalizados = prévias locais ----------------
@@ -37,7 +39,7 @@
       for (const s of estrelas) { const x = ((s.x * W - tt * .006 * s.z) % W + W) % W, y = s.y * H, brilho = .25 + .75 * Math.abs(Math.sin(tt * .0011 * (.4 + s.z) + s.f)), r = .35 + s.z * 1.35;
         ctx.fillStyle = claro ? (s.cor > .82 ? `rgba(110,80,200,${brilho * .7})` : s.cor > .65 ? `rgba(40,100,190,${brilho * .7})` : `rgba(30,50,90,${brilho * .55})`) : s.cor > .82 ? `rgba(190,170,255,${brilho})` : s.cor > .65 ? `rgba(150,205,255,${brilho})` : `rgba(235,242,255,${brilho * .9})`;
         if (s.z > .82) { ctx.shadowColor = claro ? 'rgba(60,110,200,.6)' : 'rgba(160,200,255,.9)'; ctx.shadowBlur = 8; } ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; }
-      if (!parado) { if (!meteoro && t > proximo) meteoro = { x: Math.random() * W * .8 + W * .2, y: Math.random() * H * .4, ini: t }; if (meteoro) { const k = (t - meteoro.ini) / 900; if (k > 1) { meteoro = null; proximo = t + 7000 + Math.random() * 9000; } else { const x = meteoro.x - k * 260, y = meteoro.y + k * 120, g = ctx.createLinearGradient(x, y, x + 90, y - 42); const mc = claro ? '40,90,180' : '220,235,255'; g.addColorStop(0, `rgba(${mc},${.85 * (1 - k)})`); g.addColorStop(1, `rgba(${mc},0)`); ctx.strokeStyle = g; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 90, y - 42); ctx.stroke(); } } }
+      if (!parado) { if (!meteoro && t > proximo) meteoro = { x: acaso() * W * .8 + W * .2, y: acaso() * H * .4, ini: t }; if (meteoro) { const k = (t - meteoro.ini) / 900; if (k > 1) { meteoro = null; proximo = t + 7000 + acaso() * 9000; } else { const x = meteoro.x - k * 260, y = meteoro.y + k * 120, g = ctx.createLinearGradient(x, y, x + 90, y - 42); const mc = claro ? '40,90,180' : '220,235,255'; g.addColorStop(0, `rgba(${mc},${.85 * (1 - k)})`); g.addColorStop(1, `rgba(${mc},0)`); ctx.strokeStyle = g; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 90, y - 42); ctx.stroke(); } } }
       if (!parado) requestAnimationFrame(quadro);
     }
     requestAnimationFrame(quadro);
@@ -55,7 +57,7 @@
     const habilitada = (id) => s.configuracao.especializacoes.includes(id);
     const capsDe = (x) => s.matriz.filter(c => x.capacidades?.includes(c.id));
     function saveDrafts(next) { try { localStorage.setItem('prumo-v36-drafts-' + e.id, JSON.stringify(next)); drafts = next; return true; } catch { avisar('Não foi possível persistir a prévia local.', true); return false; } }
-    function showTab(tab) { activeTab = tab; if (tab !== 'activity') painelVivo?.parar(); tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.agentTab === tab))); if (tab === 'agents') list(); else activity(); }
+    function showTab(tab) { activeTab = tab; if (tab !== 'activity') painelVivo?.parar(); tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.agentTab === tab))); if (tab === 'agents') void list(); else void activity(); }
     function resumoCaps(x) { const c = capsDe(x); const auth = c.filter(k => k.estado === 'EXIGE_AUTORIZACAO').length, bloq = c.filter(k => k.estado === 'BLOQUEADO').length;
       return [h('strong', {}, tr('{n} capacidades', { n: c.length })), auth ? h('small', {}, tr('{n} exige autorização', { n: auth })) : null, bloq ? h('small', { class: 'v36a-bloq' }, tr('{n} bloqueada(s)', { n: bloq })) : null]; }
     function list() {
@@ -68,7 +70,7 @@
         h('span', { class: 'v36a-astro-nome' }, 'Prumo Orchestrator'), h('span', { class: 'v36a-astro-sub' }, tr('Assistente local no Prumo')),
         h('span', { class: 'v36a-astro-estado' }, h('i', { class: 'ok' }), h('span', {}, tr('Sem modelo de IA'))));
       const clientesEl = []; let clientes = [];
-      if (estado.root) chamar(() => api.conexoes(estado.root)).then((r) => { if (!r || !lista.isConnected) return; clientes = r; render(); });
+      if (estado.root) void chamar(() => api.conexoes(estado.root)).then((r) => { if (!r || !lista.isConnected) return; clientes = r; render(); });
       function astroCliente(c) {
         const nome = c.client === 'claude' ? 'Claude Code' : c.client === 'codex' ? 'Codex' : c.client;
         const usado = c.lastObserved ? tr('Última chamada: {quando}', { quando: hora(c.lastObserved.at) }) : tr('Nenhuma chamada observada');
@@ -103,8 +105,8 @@
     // Matriz completa do projeto (mesmos seletores da tela 2.9), com confirmação nativa para salvar.
     function legacyPolicies() {
       const esp = new Set(s.configuracao.especializacoes), pol = { ...s.configuracao.politicas };
-      const save = h('button', { type: 'button', class: 'v36a-primario', id: 'ag-salvar', disabled: true, onclick: async () => { save.disabled = true; const r = await chamar(() => api.agentesSalvar(e.id, [...esp], pol)); if (r && !r.canceled) { avisar('Permissões salvas.'); mostrar('agentes'); } else dirty(); } }, tr('Salvar permissões…'));
-      function dirty() { save.disabled = JSON.stringify([...esp].sort()) === JSON.stringify([...s.configuracao.especializacoes].sort()) && JSON.stringify(pol) === JSON.stringify(s.configuracao.politicas); }
+      const save = h('button', { type: 'button', class: 'v36a-primario', id: 'ag-salvar', disabled: true, onclick: async () => { save.disabled = true; const r = await chamar(() => api.agentesSalvar(e.id, [...esp], pol)); if (r && !r.canceled) { avisar('Permissões salvas.'); void mostrar('agentes'); } else dirty(); } }, tr('Salvar permissões…'));
+      function dirty() { save.disabled = JSON.stringify([...esp].sort((a, b) => String(a).localeCompare(String(b)))) === JSON.stringify([...s.configuracao.especializacoes].sort((a, b) => String(a).localeCompare(String(b)))) && JSON.stringify(pol) === JSON.stringify(s.configuracao.politicas); }
       return h('details', { class: 'v36a-secao-extra', open: true }, h('summary', {}, tr('Políticas do projeto · confirmação nativa para salvar')),
         h('div', { id: 'ag-especializacoes', class: 'v36a-esps' }, s.especializacoes.map(x => h('label', { class: 'v36a-check' }, h('input', { type: 'checkbox', 'data-esp': x.id, checked: esp.has(x.id), onchange: ev => { ev.target.checked ? esp.add(x.id) : esp.delete(x.id); dirty(); } }), h('span', {}, x.rotulo)))),
         policyTable(pol, dirty), h('div', { class: 'v36a-salvar' }, save));
@@ -126,7 +128,7 @@
       const origemDe = (t) => t.origem === 'IMPORTADO' ? tr('Importado de {f} · {l}', { f: t.fonte, l: t.licenca }) : t.origem === 'IA' ? tr('Sugerido por IA') : t.origem === 'PESSOA' ? tr('Da equipe') : tr('Prumo');
       function item(t) {
         const acoes = [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']].filter(([st]) => st !== t.estado)
-          .map(([st, rot]) => button(tr(rot), async () => { if (await chamar(() => api.skillsDecidir(t.id, st))) carregar(); }, { 'data-skill-acao': st }));
+          .map(([st, rot]) => button(tr(rot), async () => { if (await chamar(() => api.skillsDecidir(t.id, st))) void carregar(); }, { 'data-skill-acao': st }));
         return h('article', { class: 'v36a-skill', 'data-skill': t.id }, h('strong', {}, t.titulo), h('small', {}, origemDe(t) + ' · ' + tr(t.estado)),
           h('p', {}, t.texto.length > 280 ? t.texto.slice(0, 280) + '…' : t.texto), h('div', { class: 'v36a-skill-acoes' }, ...acoes));
       }
@@ -141,13 +143,13 @@
       const acrescentar = button(tr('Acrescentar trecho'), async () => {
         if (titulo.value.trim().length < 2 || texto.value.trim().length < 2) { avisar(tr('Preencha título e texto do trecho.'), true); return; }
         const r = await chamar(() => api.skillsCriar({ especializacao: x.id, titulo: titulo.value, texto: texto.value })); if (!r) return;
-        avisar(r.duplicado ? tr('Esse trecho já existia.') : tr('Trecho acrescentado e aprovado.')); titulo.value = ''; texto.value = ''; carregar();
+        avisar(r.duplicado ? tr('Esse trecho já existia.') : tr('Trecho acrescentado e aprovado.')); titulo.value = ''; texto.value = ''; void carregar();
       }, { id: 'v36-skill-acrescentar' });
       const importar = button(tr('Importar pasta de Skill…'), async () => {
         const r = await chamar(() => api.skillsImportar(x.id, fonte.value.trim() || undefined)); if (!r || r.canceled) return;
-        avisar(tr('{n} trecho(s) importado(s) como rascunho ({l}). Aprove cada um antes de ir para a IA.', { n: r.importados, l: r.licenca })); carregar();
+        avisar(tr('{n} trecho(s) importado(s) como rascunho ({l}). Aprove cada um antes de ir para a IA.', { n: r.importados, l: r.licenca })); void carregar();
       }, { id: 'v36-skill-importar' });
-      carregar();
+      void carregar();
       return secao('Skills', 'Só os trechos aprovados vão para a IA externa, escolhidos pela pergunta (até 8 KB). A importação aceita apenas licença aberta e entra como rascunho.',
         lista, field(tr('Título do trecho'), titulo), field(tr('Texto'), texto), h('div', { class: 'v36a-skill-acoes' }, acrescentar),
         field(tr('Origem da pasta importada'), fonte), h('div', { class: 'v36a-skill-acoes' }, importar));
@@ -170,10 +172,10 @@
       form.addEventListener('input', sync);
       form.addEventListener('submit', async ev => { ev.preventDefault(); if (!changed()) return;
         if (x.preview) { let data; try { data = validateDraft(read()); } catch (err) { avisar(err.message, true); return; }
-          const d = h('dialog', { class: 'v36-dialog v36a-confirmar', 'aria-label': tr('Confirmar salvamento da prévia') }, h('div', { class: 'v36a-olho' }, tr('CONFIRMAR ALTERAÇÕES')), h('h2', {}, tr('Salvar prévia local?')), note(data.nome + ' · ' + previewNotice), h('div', { class: 'v36a-confirmar-acoes' }, button(tr('Cancelar'), () => d.close()), button(tr('Salvar prévia'), () => { const next = [...drafts.filter(a => a.id !== x.id), data]; if (next.length > 50) { avisar('Limite de 50 prévias por projeto.', true); return; } if (saveDrafts(next)) { const antes = linhasInstrucao(x.instrucoes); registrarMudanca(x.id, [...(data.nome !== x.nome || data.descricao !== (x.descricao || '') ? ['Identidade'] : []), ...(data.objetivo !== (x.objetivo || '') ? ['Objetivo'] : []), ...linhasInstrucao(data.instrucoes).map((l, i) => antes.includes(l) ? null : tr('Instrução {n}', { n: i + 1 })).filter(Boolean)]); d.close(); list(); } }, { class: 'acao primaria' }))); document.body.append(d); d.addEventListener('close', () => d.remove(), { once: true }); d.showModal();
-        } else { save.disabled = cancel.disabled = true; const r = await chamar(() => api.agentesSalvar(e.id, [...esp], pol)); if (r && !r.canceled) { registrarMudanca(x.id, [...(esp.has(x.id) !== habilitada(x.id) ? ['Disponibilidade'] : []), ...s.matriz.filter(c => x.capacidades.includes(c.id) && (pol[c.id] ?? null) !== (s.configuracao.politicas[c.id] ?? null)).map(c => c.rotulo)]); avisar('Permissões salvas.'); mostrar('agentes'); } else sync(); }
+          const d = h('dialog', { class: 'v36-dialog v36a-confirmar', 'aria-label': tr('Confirmar salvamento da prévia') }, h('div', { class: 'v36a-olho' }, tr('CONFIRMAR ALTERAÇÕES')), h('h2', {}, tr('Salvar prévia local?')), note(data.nome + ' · ' + previewNotice), h('div', { class: 'v36a-confirmar-acoes' }, button(tr('Cancelar'), () => d.close()), button(tr('Salvar prévia'), () => { const next = [...drafts.filter(a => a.id !== x.id), data]; if (next.length > 50) { avisar('Limite de 50 prévias por projeto.', true); return; } if (saveDrafts(next)) { const antes = linhasInstrucao(x.instrucoes); registrarMudanca(x.id, [...(data.nome !== x.nome || data.descricao !== (x.descricao || '') ? ['Identidade'] : []), ...(data.objetivo !== (x.objetivo || '') ? ['Objetivo'] : []), ...linhasInstrucao(data.instrucoes).map((l, i) => antes.includes(l) ? null : tr('Instrução {n}', { n: i + 1 })).filter(Boolean)]); d.close(); void list(); } }, { class: 'acao primaria' }))); document.body.append(d); d.addEventListener('close', () => d.remove(), { once: true }); d.showModal();
+        } else { save.disabled = cancel.disabled = true; const r = await chamar(() => api.agentesSalvar(e.id, [...esp], pol)); if (r && !r.canceled) { registrarMudanca(x.id, [...(esp.has(x.id) !== habilitada(x.id) ? ['Disponibilidade'] : []), ...s.matriz.filter(c => x.capacidades.includes(c.id) && (pol[c.id] ?? null) !== (s.configuracao.politicas[c.id] ?? null)).map(c => c.rotulo)]); avisar('Permissões salvas.'); void mostrar('agentes'); } else sync(); }
       });
-      const exportar = h('button', { type: 'button', class: 'v36a-quieto', onclick: () => { try { download('prumo-agente-' + x.id + '.json', JSON.stringify(x.preview ? validateDraft(read()) : { fonte: 'nucleo', especializacao: { id: x.id, rotulo: x.rotulo, skill: x.skill, capacidades: x.capacidades }, configuracao: s.configuracao }, null, 2)); } catch (err) { avisar('Exportação recusada: ' + err.message, true); } } }, tr('Exportar JSON'));
+      const exportar = h('button', { type: 'button', class: 'v36a-quieto', onclick: () => { try { void download('prumo-agente-' + x.id + '.json', JSON.stringify(x.preview ? validateDraft(read()) : { fonte: 'nucleo', especializacao: { id: x.id, rotulo: x.rotulo, skill: x.skill, capacidades: x.capacidades }, configuracao: s.configuracao }, null, 2)); } catch (err) { avisar('Exportação recusada: ' + err.message, true); } } }, tr('Exportar JSON'));
       const barra = h('div', { class: 'v36a-barra' }, h('button', { type: 'button', class: 'v36a-voltar', onclick: list }, '← ', tr('Agentes')), h('div', { class: 'v36a-barra-acoes' }));
       if (x.preview) { const file = h('input', { type: 'file', accept: '.json,application/json', id: 'v36-agent-import', class: 'v36-sr', onchange: async ev => { const f = ev.target.files[0]; if (!f) return; try { if (f.size > 32768) throw Error('Arquivo excede 32 KiB.'); const d = validateDraft(JSON.parse(await f.text())); name.value = d.nome; desc.value = d.descricao; goal.value = d.objetivo; instructions.value = d.instrucoes; sync(); avisar('Prévia importada. Revise e confirme antes de salvar.'); } catch (err) { avisar('Importação recusada: ' + err.message, true); } ev.target.value = ''; } });
         barra.lastChild.append(h('label', { class: 'v36a-quieto', title: tr('A importação só preenche o formulário; revise antes de salvar.') }, '↥ ', h('span', {}, tr('Importar prévia JSON')), file)); }
@@ -247,8 +249,8 @@
         b.style.left = (50 + Math.cos(a) * rx) + '%'; b.style.top = (50 + Math.sin(a) * ry) + '%'; b.style.setProperty('--cor', alterado ? corMudou : cor); b.style.setProperty('--atraso', (-i * .37) + 's');
         b.addEventListener('click', () => { anel.querySelectorAll('.v36-neuron').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
           inspect.replaceChildren(h('div', { class: 'v36a-insp-grupo' }, bolinha(cor), tr(GRUPOS[nr.g][0]), alterado ? h('span', { class: 'v36a-insp-mudou' }, tr('Alterado em {quando}', { quando: hora(mudou.em) })) : null), h('h3', {}, nr.t), h('pre', {}, typeof nr.v === 'string' ? nr.v : JSON.stringify(nr.v, null, 2)));
-          if (nr.g === 'saber') for (const [estado, rotulo] of [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']]) if (nr.v.estado !== estado) inspect.append(h('button', { type: 'button', class: 'v36c-fonte', onclick: async () => { const resultado = await chamar(() => api.conhecimentoDecidir(nr.v.id, estado)); if (resultado) brain(x); } }, rotulo));
-          if (nr.g === 'skill') for (const [estado, rotulo] of [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']]) if (nr.v.estado !== estado) inspect.append(h('button', { type: 'button', class: 'v36c-fonte', onclick: async () => { const resultado = await chamar(() => api.skillsDecidir(nr.v.id, estado)); if (resultado) brain(x); } }, rotulo));
+          if (nr.g === 'saber') for (const [estado, rotulo] of [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']]) if (nr.v.estado !== estado) inspect.append(h('button', { type: 'button', class: 'v36c-fonte', onclick: async () => { const resultado = await chamar(() => api.conhecimentoDecidir(nr.v.id, estado)); if (resultado) void brain(x); } }, rotulo));
+          if (nr.g === 'skill') for (const [estado, rotulo] of [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']]) if (nr.v.estado !== estado) inspect.append(h('button', { type: 'button', class: 'v36c-fonte', onclick: async () => { const resultado = await chamar(() => api.skillsDecidir(nr.v.id, estado)); if (resultado) void brain(x); } }, rotulo));
         });
         anel.append(b);
       });
@@ -320,12 +322,12 @@
         },
         abrirAtividade: activityDetails,
         abrirConversa: (c) => caixa((c.semTexto ? 'Atendimento · ' : 'Conversa · ') + (c.agenteNome || c.agente), [note(c.semTexto ? 'Registro local de metadados. A pergunta e a resposta não foram gravadas.' : tr('Gravada somente neste computador. Resposta {m}.', { m: c.modo === 'LOCAL' ? tr('local, sem modelo de IA') : c.modo })), h('pre', {}, JSON.stringify({ em: c.em, agente: c.agente, ...(c.semTexto ? { avaliacao: c.avaliacao } : { pergunta: c.pergunta, resposta: c.linhas }), fontes: c.fontes, modo: c.modo }, null, 2))]),
-        abrirExecucao: (x) => caixa(tr('Execução {r}', { r: x.rotina }), [note(tr('Registro da fila do worker. Evidência e logs completos ficam em Execuções.')), h('pre', {}, JSON.stringify(x, null, 2)), button(tr('Abrir Execuções'), () => { document.querySelector('.v36-dialog[open]')?.close(); mostrar('execucoes'); })]),
+        abrirExecucao: (x) => caixa(tr('Execução {r}', { r: x.rotina }), [note(tr('Registro da fila do worker. Evidência e logs completos ficam em Execuções.')), h('pre', {}, JSON.stringify(x, null, 2)), button(tr('Abrir Execuções'), () => { document.querySelector('.v36-dialog[open]')?.close(); void mostrar('execucoes'); })]),
         abrirTela: (aba) => mostrar(aba)
       });
       const vivo = painelVivo; mostrarOrquestracoes(orq, quieto).then((n) => { if (n && painelVivo === vivo) vivo.abrirLateral(true); }).catch(() => avisar(tr('Não foi possível mostrar as orquestrações.')));
     }
-    list();
+    void list();
   };
 
   // ---------------- Ajustes: Sistema (tema, idioma, cor) e Assistente (nome, estilo, voz, IA externa) ----------------
