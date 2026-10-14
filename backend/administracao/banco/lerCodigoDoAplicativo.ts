@@ -9,7 +9,7 @@ let cache: { chave: string; codigo: Map<string, string> } | null = null;
 
 /** O arquivo é do próprio aplicativo: sem atalho, com limite; o caminho pedido só serve de chave (nada é lido do disco por ele). */
 export function lerCodigoDoAplicativo(caminho: string, raiz: string = raizDoAplicativo): CodigoDoArquivo {
-  const alvo = path.join(raiz, 'app', 'documentacao', 'codigo.json');
+  const alvo = path.join(raiz, 'dist', 'documentacao', 'codigo.json');
   let st: fs.Stats;
   try { st = fs.lstatSync(alvo); } catch { falharCom('ARCHITECTURE_CODE_MISSING: o código é gerado no build (npm run build).'); }
   if (st.isSymbolicLink() || !st.isFile() || st.size > LIMITE_CODIGO_TOTAL) falharCom('ARCHITECTURE_CODE_INVALID');

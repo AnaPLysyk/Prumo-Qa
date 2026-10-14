@@ -12,6 +12,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | --- | --- |
 | `acessoConfiguracao.ts` | Canal acesso:configuracao: Ler as configurações gerais de acesso. |
 | `acessoSalvar.ts` | Canal acesso:salvar: Salvar as configurações gerais de acesso. |
+| `administracaoCodigo.ts` | Canal administracao:codigo: Mostrar o código de um arquivo do aplicativo na Documentação viva (somente leitura, só arquivos do mapa). |
 | `administracaoMapa.ts` | Canal administracao:mapa: Mostrar a documentação viva desta versão: tela, interface, canais, backend e testes. |
 | `contaCadastrar.ts` | Canal conta:cadastrar: Criar a própria conta pela tela de entrada (pode aguardar aprovação). |
 | `contaEntrar.ts` | Canal conta:entrar: Entrar com login e senha. |
@@ -42,6 +43,7 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `gravarAgentesDaPlataforma.ts` | Grava a configuração geral dos agentes da plataforma conferindo o formato antes. |
 | `gravarContas.ts` | Grava contas.json conferindo o formato antes (cópia temporária e troca, sem atalhos). |
 | `lerAgentesDaPlataforma.ts` | Lê a configuração geral dos agentes da plataforma (agentes-plataforma.json); sem arquivo vale o padrão. |
+| `lerCodigoDoAplicativo.ts` | Lê o código de um arquivo do aplicativo para a Documentação viva, do codigo.json gerado no build (só caminhos que existem nele). |
 | `lerContas.ts` | Lê as contas, os papéis e a configuração de acesso (contas.json); sem arquivo, o login está desligado. |
 | `lerMapaDoAplicativo.ts` | Lê o mapa da Documentação viva que o build gerou em dist/documentacao/mapa.json, com limite de tamanho e formato conferido. |
 

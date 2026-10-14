@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (126 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (148 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -70,6 +70,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:conhecimento:esquecer` | `agente`, `termo` | Remove o termo do vocabulário. |
 | `prumo:conhecimento:mostrar` | — | Abre o Explorer com o arquivo selecionado; nada é enviado. |
 | `prumo:administracao:mapa` | — | Consulta local de um arquivo do próprio aplicativo, gerado no build; não lê projetos vinculados nem dados da pessoa. |
+| `prumo:administracao:codigo` | `caminho` | Consulta local: lê dist/documentacao/codigo.json, gerado no build; nada do projeto da pessoa é lido. |
 | `prumo:agentes:orquestracoes` | `espacoId` | Consulta local de orquestracoes.jsonl; o registro guarda só metadados, sem a pergunta e sem a resposta. |
 | `prumo:agentes:rastrear` | `agente`, `espacoId`, `pergunta` | Consulta local: não chama IA e não grava conversa, atendimento nem aprendizado. |
 | `prumo:skills:listar` | `busca`, `especializacao`, `estados` | Consulta local (cria o banco e sincroniza os trechos que acompanham o aplicativo). |
@@ -137,6 +138,27 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:suporte:exportar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Grava um .md onde a pessoa escolher. Nenhum upload. |
 | `prumo:suporte:consultar` | `numero` | GET público ao GitHub oficial; sem credenciais, upload ou sincronização. |
 | `prumo:suporte:chamado` | `numero` | Abre somente o chamado no navegador; não publica comentário. |
+| `prumo:conta:sessao` | — | Consulta local; não renova a sessão. |
+| `prumo:conta:entrar` | `login`, `senha` | Abre a sessão na memória; conta tentativas erradas e bloqueia a conta no limite configurado. |
+| `prumo:conta:sair` | — | Esquece a sessão da memória. |
+| `prumo:conta:cadastrar` | `login`, `nome`, `senha` | Grava a conta com o papel de cadastro; com aprovação ligada, ela só entra depois que a Administração aprovar. |
+| `prumo:conta:recuperar` | `codigo`, `login`, `novaSenha` | Troca a senha e o código; tentativas erradas contam para o bloqueio. |
+| `prumo:conta:senha` | `atual`, `nova` | Grava o resumo da senha nova. |
+| `prumo:conta:perfil` | `nome` | Grava o nome na conta. |
+| `prumo:usuarios:ativar` | `login`, `nome`, `senha` | Cria contas.json; a partir daí a janela exige login e confere as permissões em cada canal. |
+| `prumo:usuarios:listar` | — | Consulta local. |
+| `prumo:usuarios:criar` | `login`, `nome`, `papel` | Grava a conta; a pessoa troca a senha no primeiro acesso. |
+| `prumo:usuarios:alterar` | `estado`, `id`, `nome`, `papel` | Grava a conta; vale no próximo pedido daquela pessoa. |
+| `prumo:usuarios:senha` | `id` | Troca a senha, exige troca no próximo acesso e desbloqueia a conta. |
+| `prumo:usuarios:desbloquear` | `id` | Zera as tentativas erradas. |
+| `prumo:usuarios:excluir` | `id` | Remove a conta de contas.json. |
+| `prumo:papeis:listar` | — | Consulta local. |
+| `prumo:papeis:salvar` | `descricao`, `id`, `nome`, `telas` | Grava o papel; o Administrador é fixo. |
+| `prumo:papeis:excluir` | `id` | Remove o papel. |
+| `prumo:acesso:configuracao` | — | Consulta local. |
+| `prumo:acesso:salvar` | `aprovarCadastros`, `cadastroAberto`, `minutosDeBloqueio`, `minutosDeInatividade`, `papelDoCadastro`, `tentativasAntesDoBloqueio` | Grava em contas.json; novos cadastros nunca entram como administrador. |
+| `prumo:plataforma:agentes` | — | Consulta local. |
+| `prumo:plataforma:salvar` | `desligados`, `iaExterna`, `orquestracao` | Grava agentes-plataforma.json; vale para o chat e para o servidor MCP. |
 
 ## MCP (agentes de IA)
 
@@ -833,7 +855,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Listar os agentes do chat, suas especializações, capacidades e a disponibilidade de Claude Code/Codex.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/agentes/api/assistenteAgentes.ts > agentesDoChat, executavelDaIa, localizarClienteDeIa, lerPreferencias
+- **Destino:** backend/agentes/api/assistenteAgentes.ts > agentesDoChat, executavelDaIa, localizarClienteDeIa, lerPreferencias, regrasDosAgentes
 - **Entrada:** Projeto
 - **Saída:** Agentes e provedores (encontrado, autorizado)
 - **Permissões:** Nenhuma
@@ -1038,6 +1060,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Nenhum
 
+### `prumo:administracao:codigo`
+
+- **Tipo:** IPC
+- **Finalidade:** Mostrar o código de um arquivo do aplicativo na Documentação viva, ao lado da explicação do que ele faz.
+- **Origem:** Interface > Administração (Documentação viva)
+- **Destino:** backend/administracao/api/administracaoCodigo.ts > lerCodigoDoAplicativo
+- **Entrada:** Caminho do arquivo (frontend/, backend/ ou testes/) que consta do mapa desta versão
+- **Saída:** Texto do arquivo, linhas, bytes e se foi encurtado (até 200 KB)
+- **Permissões:** Nenhuma
+- **Efeito:** Consulta local: lê dist/documentacao/codigo.json, gerado no build; nada do projeto da pessoa é lido.
+- **Arquivos consultados:** dist/documentacao/codigo.json (do próprio aplicativo)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
 ### `prumo:agentes:orquestracoes`
 
 - **Tipo:** IPC
@@ -1163,7 +1200,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Autorizar ou revogar a delegação do chat ao Claude Code ou Codex.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/agentes/api/iaDelegacao.ts > autorizarDelegacaoDeIa, lerPreferencias
+- **Destino:** backend/agentes/api/iaDelegacao.ts > autorizarDelegacaoDeIa, lerPreferencias, regrasDosAgentes
 - **Entrada:** Provedor e valor
 - **Saída:** Preferências atualizadas
 - **Permissões:** Confirmação nativa para autorizar
@@ -2042,6 +2079,321 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; URL reconstruída de número validado; Confirmação nativa
 - **Registro:** Diagnóstico IPC
+
+### `prumo:conta:sessao`
+
+- **Tipo:** IPC
+- **Finalidade:** Saber se o login está ligado, quem está na sessão e o nível de cada tela para o papel dessa pessoa.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/contaSessao.ts > sessaoParaJanela
+- **Entrada:** Nenhuma
+- **Saída:** loginAtivo, conta visível (sem resumos), telas e regras de cadastro
+- **Permissões:** Nenhuma (atende antes do login)
+- **Efeito:** Consulta local; não renova a sessão.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:entrar`
+
+- **Tipo:** IPC
+- **Finalidade:** Entrar com login e senha.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/contaEntrar.ts > entrarNaConta
+- **Entrada:** Login e senha
+- **Saída:** Sessão (conta e telas)
+- **Permissões:** Nenhuma (atende antes do login)
+- **Efeito:** Abre a sessão na memória; conta tentativas erradas e bloqueia a conta no limite configurado.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, LOGIN_INVALID, ACCOUNT_LOCKED, ACCOUNT_PENDING, ACCOUNT_DISABLED, LOGIN_RATE_LIMIT
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:sair`
+
+- **Tipo:** IPC
+- **Finalidade:** Encerrar a sessão.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/contaSair.ts > sairDaConta
+- **Entrada:** Nenhuma
+- **Saída:** Sessão vazia
+- **Permissões:** Sessão aberta
+- **Efeito:** Esquece a sessão da memória.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:cadastrar`
+
+- **Tipo:** IPC
+- **Finalidade:** Criar a própria conta pela tela de entrada.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/contaCadastrar.ts > cadastrarConta
+- **Entrada:** Login, nome e senha
+- **Saída:** Estado (PENDENTE ou ATIVO) e código de recuperação mostrado uma vez
+- **Permissões:** Login ligado e cadastro aberto na Administração
+- **Efeito:** Grava a conta com o papel de cadastro; com aprovação ligada, ela só entra depois que a Administração aprovar.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, SIGNUP_CLOSED, LOGIN_TAKEN, PASSWORD_WEAK, LOGIN_INVALID_FORMAT
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:recuperar`
+
+- **Tipo:** IPC
+- **Finalidade:** Definir senha nova com o código de recuperação.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/contaRecuperar.ts > recuperarConta
+- **Entrada:** Login, código de recuperação e senha nova
+- **Saída:** Código de recuperação novo (o anterior deixa de valer)
+- **Permissões:** Código de recuperação da própria conta
+- **Efeito:** Troca a senha e o código; tentativas erradas contam para o bloqueio.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, RECOVERY_INVALID, ACCOUNT_LOCKED, PASSWORD_WEAK
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:senha`
+
+- **Tipo:** IPC
+- **Finalidade:** Trocar a própria senha, inclusive a temporária dada pela Administração.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/contaSenha.ts > trocarMinhaSenha
+- **Entrada:** Senha atual e senha nova
+- **Saída:** Sessão e, quando a senha era temporária, código de recuperação novo
+- **Permissões:** Sessão aberta e senha atual
+- **Efeito:** Grava o resumo da senha nova.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, PASSWORD_INVALID, PASSWORD_WEAK
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:perfil`
+
+- **Tipo:** IPC
+- **Finalidade:** Trocar o próprio nome de exibição.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/contaPerfil.ts > alterarMeuNome
+- **Entrada:** Nome
+- **Saída:** Sessão atualizada
+- **Permissões:** Sessão aberta
+- **Efeito:** Grava o nome na conta.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:usuarios:ativar`
+
+- **Tipo:** IPC
+- **Finalidade:** Ligar o login criando a primeira conta, de administrador.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/usuariosAtivar.ts > ativarLogin
+- **Entrada:** Login, nome e senha
+- **Saída:** Conta criada e código de recuperação mostrado uma vez
+- **Permissões:** Só enquanto não existe nenhuma conta
+- **Efeito:** Cria contas.json; a partir daí a janela exige login e confere as permissões em cada canal.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, LOGIN_ALREADY_ACTIVE, PASSWORD_WEAK
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:usuarios:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar as contas com papel, estado, bloqueio e último acesso.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/usuariosListar.ts > listarContas
+- **Entrada:** Nenhuma
+- **Saída:** Contas visíveis (sem resumos) e qual é a sua
+- **Permissões:** Administração: VER
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:usuarios:criar`
+
+- **Tipo:** IPC
+- **Finalidade:** Criar conta para outra pessoa.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/usuariosCriar.ts > criarContaPelaAdministracao
+- **Entrada:** Login, nome e papel
+- **Saída:** Conta e senha temporária mostrada uma vez
+- **Permissões:** Administração: USAR
+- **Efeito:** Grava a conta; a pessoa troca a senha no primeiro acesso.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, LOGIN_TAKEN, ROLE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:usuarios:alterar`
+
+- **Tipo:** IPC
+- **Finalidade:** Aprovar cadastro, trocar papel ou nome, desativar ou reativar uma conta.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/usuariosAlterar.ts > alterarContaPelaAdministracao
+- **Entrada:** Id e campos alterados
+- **Saída:** Conta atualizada
+- **Permissões:** Administração: USAR
+- **Efeito:** Grava a conta; vale no próximo pedido daquela pessoa.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, LAST_ADMIN, SELF_DISABLE, SELF_DEMOTE, ROLE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:usuarios:senha`
+
+- **Tipo:** IPC
+- **Finalidade:** Redefinir a senha de outra pessoa.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/usuariosSenha.ts > redefinirSenhaPelaAdministracao
+- **Entrada:** Id da conta
+- **Saída:** Senha temporária mostrada uma vez
+- **Permissões:** Administração: USAR
+- **Efeito:** Troca a senha, exige troca no próximo acesso e desbloqueia a conta.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, USE_MY_ACCOUNT, ACCOUNT_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:usuarios:desbloquear`
+
+- **Tipo:** IPC
+- **Finalidade:** Desbloquear uma conta travada por tentativas erradas.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/usuariosDesbloquear.ts > desbloquearConta
+- **Entrada:** Id da conta
+- **Saída:** Conta atualizada
+- **Permissões:** Administração: USAR
+- **Efeito:** Zera as tentativas erradas.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:usuarios:excluir`
+
+- **Tipo:** IPC
+- **Finalidade:** Excluir uma conta pendente ou desativada.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/usuariosExcluir.ts > excluirConta
+- **Entrada:** Id da conta
+- **Saída:** Id excluído
+- **Permissões:** Administração: USAR
+- **Efeito:** Remove a conta de contas.json.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, ACCOUNT_ACTIVE, SELF_DELETE, LAST_ADMIN
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:papeis:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar os papéis e a matriz de permissões por tela.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/papeisListar.ts > listarPapeis
+- **Entrada:** Nenhuma
+- **Saída:** Papéis, telas, níveis e contas por papel
+- **Permissões:** Administração: VER
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:papeis:salvar`
+
+- **Tipo:** IPC
+- **Finalidade:** Criar ou alterar um papel e o nível de cada tela (NENHUM, VER, USAR).
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/papeisSalvar.ts > salvarPapel
+- **Entrada:** Id opcional, nome, descrição e telas
+- **Saída:** Papéis atualizados
+- **Permissões:** Administração: USAR
+- **Efeito:** Grava o papel; o Administrador é fixo.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, ROLE_FIXED, ROLE_NAME_TAKEN, ROLE_NAME_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:papeis:excluir`
+
+- **Tipo:** IPC
+- **Finalidade:** Excluir um papel que ninguém usa.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/papeisExcluir.ts > excluirPapel
+- **Entrada:** Id do papel
+- **Saída:** Papéis atualizados
+- **Permissões:** Administração: USAR
+- **Efeito:** Remove o papel.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, ROLE_IN_USE, ROLE_FIXED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:acesso:configuracao`
+
+- **Tipo:** IPC
+- **Finalidade:** Ler as configurações gerais de acesso.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/acessoConfiguracao.ts > configuracaoDeAcesso
+- **Entrada:** Nenhuma
+- **Saída:** Cadastro, aprovação, papel de cadastro, inatividade e bloqueio
+- **Permissões:** Administração: VER
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:acesso:salvar`
+
+- **Tipo:** IPC
+- **Finalidade:** Salvar as configurações gerais de acesso.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/acessoSalvar.ts > salvarConfiguracaoDeAcesso
+- **Entrada:** Cadastro aberto, aprovação, papel de cadastro, minutos de inatividade, tentativas e minutos de bloqueio
+- **Saída:** Configuração salva
+- **Permissões:** Administração: USAR
+- **Efeito:** Grava em contas.json; novos cadastros nunca entram como administrador.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\contas.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, SIGNUP_ROLE_FORBIDDEN, ROLE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:plataforma:agentes`
+
+- **Tipo:** IPC
+- **Finalidade:** Ler a configuração geral dos agentes da plataforma.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/plataformaAgentes.ts > agentesDaPlataformaParaJanela
+- **Entrada:** Nenhuma
+- **Saída:** Agentes com estado ligado, IA externa e orquestração
+- **Permissões:** Administração: VER
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agentes-plataforma.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:plataforma:salvar`
+
+- **Tipo:** IPC
+- **Finalidade:** Ligar ou desligar agentes, o uso de Claude Code/Codex e a orquestração em todos os projetos.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/administracao/api/plataformaSalvar.ts > salvarAgentesDaPlataforma
+- **Entrada:** Agentes desligados, iaExterna e orquestracao
+- **Saída:** Configuração salva
+- **Permissões:** Administração: USAR
+- **Efeito:** Grava agentes-plataforma.json; vale para o chat e para o servidor MCP.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agentes-plataforma.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOCAL_DATA_INVALID, AGENT_UNKNOWN
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha e código de recuperação só como resumo scrypt com sal próprio; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
 
 ### `contexto_projeto`
 

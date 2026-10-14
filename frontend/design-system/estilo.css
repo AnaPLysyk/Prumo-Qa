@@ -109,3 +109,6 @@ section.nota, section.nota pre { min-width: 0; overflow-wrap: anywhere; }
 input, select { max-width: 100%; }
 pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 520px) { header { padding: 10px; } main { padding: 10px; } .grade { grid-template-columns: 1fr; } label input:not([type=checkbox]), label select { min-width: 0; max-width: 100%; } }
+
+/* 2.12: item de menu ou grupo ocultado pelo papel da pessoa nunca aparece (o display do menu não pode vencer o atributo hidden). */
+#nav button[hidden], #nav .grupo-nav[hidden] { display: none; }
