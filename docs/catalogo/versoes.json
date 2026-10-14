@@ -48,8 +48,8 @@
     },
     {
       "version": "2.11.1",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-13",
       "title": "Download direto no site e na Ajuda, Cérebro com teste de pergunta e Painel de atividades em tela cheia",
       "objective": "Corrigir o caminho de download do instalador (o site no Render não oferecia o arquivo da versão atual) e acrescentar ao Cérebro dos agentes um teste de pergunta somente leitura. Inclui tudo da 2.11.0.",
       "features": [
@@ -85,7 +85,11 @@
       "afterUpdate": [
         "Abra Agentes, escolha um agente e veja a seção Skills: acrescente o que a sua equipe quer que ele siga ou importe uma pasta de Skill aberta e aprove os trechos."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.11.1",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.11.1.exe",
+        "sha256": "f089b017ce0bfa250a5816d088d757ec99aa2f9f15b3b1badd33792450bfa493"
+      }
     },
     {
       "version": "2.11.0",
