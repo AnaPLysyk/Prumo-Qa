@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (151 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (152 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -37,10 +37,11 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:escrita:estado` | `espacoId` | Consulta local. |
 | `prumo:escrita:habilitar` | `espacoId`, `habilitada`, `servico` | Grava permissoes-servicos.json. Habilitar não executa nada; cada operação ainda pede confirmação. |
 | `prumo:propostas:listar` | `espacoId` | Consulta local. |
-| `prumo:propostas:criar` | `dados`, `espacoId`, `requisito`, `risco`, `tipo` | Grava propostas.json. Não envia nada ao Qase ou Jira. |
+| `prumo:propostas:criar` | `dados`, `espacoId`, `falhaDeOrigem`, `requisito`, `risco`, `tipo` | Grava propostas.json. Não envia nada ao Qase ou Jira. |
 | `prumo:propostas:editar` | `dados`, `id`, `requisito`, `risco` | Grava propostas.json. |
 | `prumo:propostas:revisar` | `cobertura`, `duplicidade`, `id`, `requisito`, `risco` | Grava propostas.json com quem revisou e quando. Proposta de IA exige revisão completa e requisito informado. |
 | `prumo:propostas:descartar` | `id` | Grava propostas.json. |
+| `prumo:propostas:vincular` | `chave`, `id` | Grava propostas.json e, se a proposta veio de uma falha, registra a relação ticket ↔ caso. Não consulta nem escreve no Jira. |
 | `prumo:propostas:publicar` | `id`, `tipoId` | Cria o caso ou o ticket depois da confirmação nativa e registra o vínculo como REGISTRADO_PELO_PRUMO. |
 | `prumo:runs:listar` | `espacoId` | Consulta local. |
 | `prumo:runs:preparar` | `ambiente`, `casos`, `espacoId`, `planoId`, `titulo` | Grava runs-qase.json. Não cria nada no Qase. |
@@ -48,7 +49,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:runs:executar` | `id` | Executa processos locais; cada automação pede a autenticação nativa do Windows. Casos manuais ficam sem resultado. |
 | `prumo:runs:resultado` | `casoId`, `comentario`, `id`, `status` | Grava runs-qase.json marcando MANUAL e quem declarou. Nunca sobrescreve resultado de execução. |
 | `prumo:runs:publicar` | `anexarEvidencia`, `id` | Envia resultados (passed, failed, blocked) após confirmação nativa; NOT_RUN nunca é enviado; repetir não duplica. |
-| `prumo:runs:bugs` | `id` | Grava propostas.json. Não cria tickets. |
+| `prumo:runs:bugs` | `classificacao`, `id` | Grava propostas.json. Não cria tickets. |
 | `prumo:runs:politica` | `dias`, `espacoId`, `maxUsos`, `runId` | Grava autorizacoes.json. Sem política, rotina agendada não escreve no Qase. |
 | `prumo:runs:revogar` | `id` | Grava autorizacoes.json. |
 | `prumo:vinculos:mapa` | `espacoId` | Consulta local; não prova cobertura. |
@@ -628,6 +629,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Livro-razão local de operações externas e histórico do projeto
 
+### `prumo:propostas:vincular`
+
+- **Tipo:** IPC
+- **Finalidade:** Vincular uma proposta de bug a um ticket que já existe no Jira.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** backend/tickets/api/propostasVincular.ts > vincularPropostaATicket
+- **Entrada:** Id da proposta e chave do ticket
+- **Saída:** Proposta VINCULADA
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava propostas.json e, se a proposta veio de uma falha, registra a relação ticket ↔ caso. Não consulta nem escreve no Jira.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
 ### `prumo:propostas:publicar`
 
 - **Tipo:** IPC
@@ -739,7 +755,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Finalidade:** Preparar rascunhos de bug para as falhas da run.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
 - **Destino:** backend/testes/api/runsBugs.ts > propostasDeBugs
-- **Entrada:** Id da run local
+- **Entrada:** Id da run local e, se quiser, a classificação das falhas (bug de produto, outro bug ou melhoria)
 - **Saída:** Propostas de bug
 - **Permissões:** Ação explícita da pessoa
 - **Efeito:** Grava propostas.json. Não cria tickets.
@@ -1818,7 +1834,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Atualizar com um clique para a versão encontrada pela consulta (2.10.2).
 - **Origem:** Interface > Ajuda > Atualizações > Atualizar agora
-- **Destino:** backend/atualizacoes/api/atualizacaoInstalar.ts > workerDoAplicativo, estadoDoAplicativo, baixarAtualizacao, argumentosInstalador
+- **Destino:** backend/atualizacoes/api/atualizacaoInstalar.ts > workerDoAplicativo, estadoDoAplicativo, baixarAtualizacao, entregarInstalador, instrucaoDeInstalacao, plataformaDoInstalador, argumentosInstalador
 - **Entrada:** Nenhuma: versão e URLs vêm da consulta validada no processo principal
 - **Saída:** canceled, verificado, instalando, versao, sha256
 - **Permissões:** Confirmação nativa; recusa com execução em andamento
@@ -2028,7 +2044,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Alterar verificar ao iniciar, som, silenciar, tema, idioma, iniciar com o Windows e avisos de agenda.
 - **Origem:** Interface > Ajuda > Atualizações > Preferências
-- **Destino:** backend/configuracoes/api/preferenciasSalvar.ts > alterarPreferencias
+- **Destino:** backend/configuracoes/api/preferenciasSalvar.ts > alterarPreferencias, iniciarComOSistema
 - **Entrada:** Campos booleanos opcionais
 - **Saída:** preferencias
 - **Permissões:** Ação explícita da pessoa

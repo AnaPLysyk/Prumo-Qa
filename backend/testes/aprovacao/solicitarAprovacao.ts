@@ -1,12 +1,16 @@
-/** Abre a janela de senha do Windows (aprovar.exe) mostrando projeto, comando e hash; devolve quem aprovou ou nada. */
+/** Pede a aprovação humana no sistema da pessoa: janela de senha do Windows (aprovar.exe), autenticação do macOS ou polkit no Linux. */
 import { spawn } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { EscopoAprovacao } from '../tipos/aprovacao.js';
+import { Aprovacao, EscopoAprovacao } from '../tipos/aprovacao.js';
+import { aprovarNoLinux } from './aprovarNoLinux.js';
+import { aprovarNoMac } from './aprovarNoMac.js';
 
 /** Aprovação não recebe credencial, booleano, token ou variável de ambiente da IA. */
-export async function solicitarAprovacao(escopo:EscopoAprovacao):Promise<{ subject:string; method:string; scopeHash:string; at:string } | null> {
+export async function solicitarAprovacao(escopo:EscopoAprovacao):Promise<Aprovacao | null> {
+  if (process.platform === 'darwin') return await aprovarNoMac(escopo);
+  if (process.platform === 'linux') return await aprovarNoLinux(escopo);
   if (process.platform !== 'win32') return null;
   const sistema = process.env.SystemRoot;
   if (!sistema || !path.isAbsolute(sistema)) return null;

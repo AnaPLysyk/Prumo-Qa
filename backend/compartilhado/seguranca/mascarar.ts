@@ -6,6 +6,6 @@ export function mascarar(s: string, segredos: string[] = []) {
     // Bearer primeiro: em "Authorization: Bearer <token>" a regra genérica abaixo consumiria só a palavra "Bearer".
     .replace(/\bBearer\s+[\w.+/=-]+/gi, 'Bearer [REDACTED]')
     .replace(/((?:password|passwd|token|secret|api[_-]?key|authorization)\s*["']?\s*[:=]\s*["']?)([^\s,"'}]+)/gi, '$1[REDACTED]')
-    .replace(/\b(?:gh[pousr]_[\w]+|sk-[\w-]{15,}|eyJ[\w-]+\.[\w-]+\.[\w-]+)\b/g, '[REDACTED]')
+    .replace(/\b(?:gh[pousr]_[\w]+|github_pat_\w{20,}|ATATT[\w=-]{20,}|sk-[\w-]{15,}|eyJ[\w-]+\.[\w-]+\.[\w-]+)\b/g, '[REDACTED]')
     .replace(/(https?:\/\/)[^/\s:@]+:[^/\s@]+@/g, '$1[REDACTED]@');
 }

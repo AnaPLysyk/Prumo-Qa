@@ -59,6 +59,20 @@ test('Tickets: filtro, detalhe e comentário idempotente pela interface (única 
   assert.deepEqual(a.erros, []);
 });
 
+test('Tickets locais: criar sem Jira, classificar, vincular a ticket existente e a falha de run aparecer classificada; nada é escrito no Jira', async (t) => {
+  const { a, s, e } = await preparar(t);
+  await ir(a.page, 'tickets'); await a.page.click('#tk-novo-local'); await a.page.selectOption('#tkl-classificacao', 'MELHORIA'); await a.page.fill('#tkl-resumo', 'Mostrar total no cabeçalho da lista'); await a.page.click('#tkl-salvar');
+  await a.page.waitForSelector('#tk-tabela [data-origem="prumo"]'); assert.match(await a.page.textContent('#tk-tabela [data-origem="prumo"]'), /Melhoria/);
+  const base = await a.page.evaluate((id) => window.prumo.propostas(id), e.id); assert.equal(base.data.length, 1); assert.equal(base.data[0].estado, 'RASCUNHO'); assert.equal(base.data[0].remoto, null);
+  await a.page.locator('#tk-tabela [data-origem="prumo"]').getByRole('button', { name: 'Abrir' }).click(); await a.page.waitForSelector('#tkl-painel');
+  await a.page.selectOption('#tkl-nova-classificacao', 'OUTRO_BUG'); await a.page.click('#tkl-classificar'); await a.page.waitForSelector('#tk-tabela [data-origem="prumo"]'); assert.match(await a.page.textContent('#tk-tabela [data-origem="prumo"]'), /Outro bug/);
+  await a.page.locator('#tk-tabela [data-origem="prumo"]').getByRole('button', { name: 'Abrir' }).click(); await a.page.fill('#tkl-chave', 'smart-1'); await a.page.click('#tkl-vincular');
+  await a.page.waitForFunction(() => /Vinculada/.test(document.querySelector('#tk-tabela [data-origem="prumo"]')?.textContent || '')); assert.match(await a.page.textContent('#tk-tabela [data-origem="prumo"]'), /SMART-1/);
+  const depois = (await a.page.evaluate((id) => window.prumo.propostas(id), e.id)).data[0]; assert.equal(depois.estado, 'VINCULADA'); assert.equal(depois.remoto.chave, 'SMART-1');
+  assert.equal(s.pedidos.filter((p) => p.metodo !== 'GET').length, 0, 'criar, classificar e vincular não escrevem no Jira');
+  assert.deepEqual(a.erros, []);
+});
+
 test('Testes: proposta é rascunho, revisão exige os quatro itens e confirmação nativa, e nada sai sem escrita habilitada', async (t) => {
   const { a, s } = await preparar(t);
   await ir(a.page, 'testes'); await a.page.click('[data-sub=repositorio]'); await a.page.click('#pr-nova'); await a.page.fill('#pr-titulo', 'Login rejeita senha incorreta'); await a.page.fill('#pr-descricao', 'Valida a mensagem de erro.');

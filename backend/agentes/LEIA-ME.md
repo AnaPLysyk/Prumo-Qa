@@ -152,6 +152,7 @@ O servidor MCP que as IAs usam: ferramentas, roteiros e o registro de cada chama
 | `aprendizadosParaMcp.ts` | Junta os conhecimentos aprovados dos agentes para a IA, só se a pessoa permitiu enviar contextos. |
 | `contextoCompleto.ts` | Monta a resposta da ferramenta MCP contexto_projeto: contexto autorizado, frameworks detectados, contextos e aprendizados permitidos. |
 | `criarServidor.ts` | Cria o servidor MCP do Prumo ligado a um projeto: as oito ferramentas, os roteiros e a política conferida a cada chamada. |
+| `erroComCodigo.ts` | Preserva o código contratual do erro na resposta MCP, com a mensagem e os segredos mascarados. |
 | `projetoAindaVinculado.ts` | Reabre o contrato da pasta a cada chamada da IA e recusa (PROJECT_BINDING_CHANGED) se o projeto passou a ter outra identidade. |
 | `registrarConsultarEvidencias.ts` | Ferramenta MCP consultar_evidencias: devolve à IA as evidências reais do projeto com integridade conferida; sem evidência, NOT_RUN. |
 | `registrarContextoProjeto.ts` | Ferramenta MCP contexto_projeto: entrega à IA o contexto autorizado, os frameworks e, se permitido, os contextos e aprendizados; nada executa. |

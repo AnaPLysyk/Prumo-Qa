@@ -4,7 +4,7 @@ import { prepararConexao } from './prepararConexao.js';
 
 export function aplicarConexao(plano:ReturnType<typeof prepararConexao>,confirmacao:string) {
   if(confirmacao!==plano.confirmation)return {configured:false,reason:'Confirmação não recebida; nenhuma alteração.'};
-  if(!plano.executable||plano.manualOnly)return {configured:false,reason:'Use o comando exibido no PowerShell; cliente nativo não disponível.'};
+  if(!plano.executable||plano.manualOnly)return {configured:false,reason:'Use o comando exibido no terminal; cliente nativo não disponível.'};
   if(plano.client!=='codex')return {configured:false,reason:'Configuração automática disponível para Codex. Execute o comando Claude exibido após revisar o destino.'};
   const options={encoding:'utf8' as const,windowsHide:true,shell:false,timeout:15000,maxBuffer:1024*1024};
   // list falhando nunca equivale a configuração ausente. Não mostramos seu conteúdo (pode conter env).

@@ -153,8 +153,8 @@
       DS.resumo([[tot.telas, 'telas'], [tot.arquivosFrontend, 'arquivos de interface'], [tot.canais, 'canais da janela'], [tot.arquivosBackend, 'arquivos do backend'], [tot.testes, 'testes']], { id: 'adm-resumo' }),
       DS.secao('Versão', DS.meta([['Versão', mapa.versao], ['Commit do build', mapa.commit || tr('não registrado')], ['Mapa gerado em', new Date(mapa.geradoEm).toLocaleString()]])),
       DS.secao('Usuários e permissões', DS.alerta(window.PrumoConta?.sessao()?.loginAtivo
-        ? 'Login ligado: cada pessoa entra com a própria conta e cada tela respeita o papel dela (abas Usuários e Permissões). O worker de agendamentos, a bandeja e o servidor MCP continuam rodando com a conta do Windows deste computador.'
-        : 'Login desligado: o Prumo usa a conta do Windows deste computador e todas as telas ficam liberadas. Ative o login na aba Usuários. As políticas de cada projeto (Agentes) e a confirmação nativa do Windows para executar e publicar continuam valendo.', 'info')));
+        ? 'Login ligado: cada pessoa entra com a própria conta e cada tela respeita o papel dela (abas Usuários e Permissões). O worker de agendamentos, a bandeja e o servidor MCP continuam rodando com a conta deste computador.'
+        : 'Login desligado: o Prumo usa a conta deste computador e todas as telas ficam liberadas. Ative o login na aba Usuários. As políticas de cada projeto (Agentes) e a confirmação nativa do sistema para executar e publicar continuam valendo.', 'info')));
   }
 
   // 2.11: Usuários, Permissões, Agentes e Configurações gerais ficam em gerenciarAcessos.js.

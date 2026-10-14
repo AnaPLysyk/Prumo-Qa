@@ -1,0 +1,106 @@
+name: macOS e Linux — instaladores
+
+# Gera e confere os instaladores de macOS (.dmg, Apple Silicon e Intel) e de Linux (.AppImage e .deb), cada um na sua
+# máquina real. Em tags v*, espera o fluxo do Windows criar a release, anexa os arquivos com o SHA-256 e republica o site.
+# Instaladores NÃO ASSINADOS: o macOS mostra o aviso de desenvolvedor não identificado (docs/ajuda/03-instalar.md).
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - 'electron-builder.yml'
+      - '.github/workflows/multiplataforma.yml'
+      - 'backend/testes/aprovacao/**'
+      - 'backend/conexoes/regras/servicosDoAplicativo.ts'
+      - 'backend/atualizacoes/**'
+      - 'ferramentas/empacotamento/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  instalador:
+    name: ${{ matrix.nome }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      actions: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { nome: macOS, os: macos-latest, alvo: mac }
+          - { nome: Linux, os: ubuntu-latest, alvo: linux }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Dependências do Linux (janela sem tela, cofre de senhas, polkit e janelas de aprovação)
+        if: matrix.alvo == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libsecret-1-0 gnome-keyring zenity policykit-1 libfuse2 rpm fakeroot dpkg
+      - run: npm ci
+      - name: Tipos e compilação
+        run: |
+          npm run typecheck
+          npm run build
+      - name: Testes de plataforma (aprovação, cofre, atualização e nomes dos instaladores)
+        run: node --test --test-concurrency=1 testes/unitario/regras/multiplataforma.test.mjs testes/unitario/regras/aprovacao-multiplataforma.test.mjs
+      - name: Gerar instaladores
+        run: npm run dist:${{ matrix.alvo }}
+      - name: Conferir os arquivos gerados e gerar o SHA-256
+        run: |
+          cd release
+          ls -la
+          if [ "${{ matrix.alvo }}" = "mac" ]; then arquivos=$(ls Prumo-QA-*-mac-*.dmg); else arquivos=$(ls Prumo-QA-*-linux-*.AppImage Prumo-QA-*-linux-*.deb); fi
+          [ -n "$arquivos" ] || { echo "::error::Nenhum instalador gerado"; exit 1; }
+          for f in $arquivos; do
+            if command -v sha256sum >/dev/null; then h=$(sha256sum "$f" | cut -d' ' -f1); else h=$(shasum -a 256 "$f" | cut -d' ' -f1); fi
+            echo "$h *$f" > "$f.sha256"; echo "SHA-256 $f: $h"
+          done
+      - name: Abrir o programa empacotado e conferir janela, segurança e MCP (Linux, tela virtual)
+        if: matrix.alvo == 'linux'
+        run: |
+          pasta=$(ls -d release/linux-unpacked)
+          bin="$pasta/$(ls $pasta | grep -i '^prumo' | head -1)"
+          printf '#!/bin/sh\nexec "%s" --no-sandbox "$@"\n' "$PWD/$bin" > "$RUNNER_TEMP/prumo-ci.sh"; chmod +x "$RUNNER_TEMP/prumo-ci.sh"
+          export PRUMO_APP_EXE="$RUNNER_TEMP/prumo-ci.sh"
+          xvfb-run -a node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/e2e/ui/janela-e-seguranca.test.mjs
+      - name: Abrir o programa empacotado e conferir janela e segurança (macOS)
+        if: matrix.alvo == 'mac'
+        run: |
+          app=$(ls -d release/mac-arm64/*.app release/mac/*.app 2>/dev/null | head -1)
+          export PRUMO_APP_EXE="$PWD/$app/Contents/MacOS/Prumo QA"
+          node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/e2e/ui/janela-e-seguranca.test.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prumo-qa-${{ matrix.alvo }}
+          path: |
+            release/Prumo-QA-*-mac-*.dmg
+            release/Prumo-QA-*-linux-*.AppImage
+            release/Prumo-QA-*-linux-*.deb
+            release/Prumo-QA-*.sha256
+          if-no-files-found: error
+      - name: Esperar a release do Windows e anexar os instaladores
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=${GITHUB_REF_NAME}
+          for i in $(seq 1 120); do
+            if gh release view "$v" >/dev/null 2>&1; then break; fi
+            echo "Aguardando a release $v (fluxo do Windows)…"; sleep 30
+          done
+          gh release view "$v" >/dev/null 2>&1 || { echo "::error::Release $v não foi criada pelo fluxo do Windows em 60 minutos"; exit 1; }
+          if [ "${{ matrix.alvo }}" = "mac" ]; then gh release upload "$v" release/Prumo-QA-*-mac-*.dmg release/Prumo-QA-*-mac-*.dmg.sha256 --clobber; else gh release upload "$v" release/Prumo-QA-*-linux-*.AppImage release/Prumo-QA-*-linux-*.AppImage.sha256 release/Prumo-QA-*-linux-*.deb release/Prumo-QA-*-linux-*.deb.sha256 --clobber; fi
+          echo "::notice::Instaladores de ${{ matrix.nome }} anexados à release $v"
+      - name: Republicar o site com os novos instaladores
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run site.yml --ref main

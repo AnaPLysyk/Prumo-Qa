@@ -19,7 +19,7 @@ const PrumoOrbitas = (() => {
   function trilha(ctx, cx, cy, rx, ry, tilt, i, t, ini = 0, len = Math.PI * 2, passos = 140) {
     for (let j = 0; j <= passos; j++) { const p = flexao(cx, cy, rx, ry, ini + len * j / passos, tilt, i, t); if (j) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); }
   }
-  const claro = () => { const t = document.documentElement.dataset.tema; return t === 'claro' || (t !== 'escuro' && matchMedia('(prefers-color-scheme: light)').matches); };
+  const claro = () => { if (document.body.classList.contains('com-entrada')) return false; const t = document.documentElement.dataset.tema; return t === 'claro' || (t !== 'escuro' && matchMedia('(prefers-color-scheme: light)').matches); };
   const cor = (c, light) => { if (!light) return c; const [r, g, b] = c; if (r > 235 && g > 230 && b > 230) return [112, 128, 156]; if (r > 210 && r > g + 35) return [181, 70, 96]; return [43, 98, 184]; };
   function desenhar(n, t) {
     const rect = n.el.getBoundingClientRect(); if (rect.width < 4 || rect.height < 4) return;

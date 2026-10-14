@@ -34,8 +34,7 @@ const carregamentoPorTela=[
  ['telas/agendamentos/formularios/montarFormularioRotina.js','telas/agendamentos/mostrarAgendamentos.js'],
  ['telas/compartilhado/mostrarEstadoWorker.js','telas/inicio/mostrarInicio.js'],
  ['fluxos-v40.js','testes-v40.js'],
- ['telas/metricas/componentes/montarVisuaisMetricas.js','telas/metricas/mostrarMetricas.js'],
- ['telas/testes/formularios/montarFormularioProposta.js','telas/testes/mostrarPropostasTeste.js']
+ ['telas/metricas/componentes/montarVisuaisMetricas.js','telas/metricas/mostrarMetricas.js']
 ];
 for (const [a,b] of carregamentoPorTela) {
  if (scripts.indexOf(a)<0 || scripts.indexOf(b)<0 || scripts.indexOf(a)>=scripts.indexOf(b)) falhas.push('Ordem de tela inválida: '+a+' / '+b);
@@ -43,8 +42,6 @@ for (const [a,b] of carregamentoPorTela) {
 const anteriores=[
  ['telas/compartilhado/criarBotaoAcao.js','telas/projetos/mostrarProjetos.js'],
  ['telas/projetos/modais/criarEditarProjeto/abrirFormularioProjeto.js','telas/projetos/mostrarProjetos.js'],
- ['telas/compartilhado/consultarServicoRemoto.js','telas/tickets/mostrarTickets.js'],
- ['telas/compartilhado/consultarServicoRemoto.js','telas/testes/mostrarTestesRemotos.js'],
  ['telas/agentes/usarTelaAgentes.js','telas/conexoes/mostrarConexoes.js'],
  ['telas/ajuda/mostrarAjuda.js','telas/agentes/modais/contextos/abrirContextos.js']
 ];

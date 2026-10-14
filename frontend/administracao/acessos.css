@@ -1,7 +1,23 @@
 /* Entrada do Prumo (login), menu da conta e Administração › Usuários, Permissões, Agentes e Configurações gerais. Só tokens do Design System. */
-.entrada { border: 1px solid var(--linha); border-radius: 18px; padding: 0; background: var(--painel); color: var(--texto); width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; box-shadow: var(--ds-sombra, 0 24px 90px rgba(0, 0, 0, .5)); }
-.entrada::backdrop { background: var(--fundo); }
-.entrada-cartao { display: flex; flex-direction: column; gap: 12px; padding: 28px 28px 24px; }
+/* Entrada: noite com céu estrelado e vitrine, sempre escura como o site. O cartão do formulário segue o tema. Tokens --login-* só na vitrine. */
+.entrada { --login-texto: #eef2fa; --login-suave: #9aa8c2; --login-acento: #6ea8ff; border: 0; border-radius: 0; padding: 0; width: 100vw; max-width: none; height: 100dvh; max-height: none; overflow: auto; color: var(--login-texto); background: radial-gradient(60rem 36rem at 85% -8%, rgba(37, 99, 235, .16), transparent 62%), #060b18; }
+.entrada[open] { display: grid; place-items: center; }
+.entrada::backdrop { background: #060b18; }
+.entrada-ceu { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.entrada-palco { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 48px; align-items: center; width: min(1040px, 100%); padding: 32px 20px; box-sizing: border-box; }
+.entrada-vitrine { display: flex; flex-direction: column; align-items: flex-start; }
+.entrada-etiqueta { font-size: 12px; font-weight: 600; letter-spacing: .12em; color: var(--login-acento); }
+.entrada-lema { margin: 12px 0; font-size: clamp(2.2rem, 4.6vw, 3.5rem); font-weight: 650; line-height: 1.08; letter-spacing: -.025em; }
+.entrada-sub { max-width: 40ch; margin: 0; font-size: 1.05rem; line-height: 1.6; color: var(--login-suave); }
+.entrada-meta { margin: 14px 0 0; font-size: .9rem; color: var(--login-suave); opacity: .8; }
+.entrada-orbita { position: relative; display: grid; place-items: center; aspect-ratio: 310 / 181; width: min(100%, 460px); margin-top: 12px; }
+.entrada-orbe { position: relative; z-index: 2; width: 68.4%; animation: entrada-flutua 8.8s ease-in-out infinite; }
+.entrada-orbe img { display: block; width: 100%; height: auto; border-radius: 50%; }
+@keyframes entrada-flutua { 0%, 100% { translate: 0 0; } 32% { translate: 4px -6px; } 68% { translate: -3px 4px; } }
+.entrada-cartao { display: flex; flex-direction: column; gap: 12px; padding: 32px; border: 1px solid var(--linha); border-radius: 16px; background: var(--painel); color: var(--texto); box-shadow: 0 24px 48px -24px rgba(0, 0, 0, .6); animation: entrada-entra .5s ease both; }
+@keyframes entrada-entra { from { opacity: 0; transform: translateY(10px); } }
+@media (max-width: 860px) { .entrada-palco { grid-template-columns: 1fr; gap: 20px; } .entrada-vitrine { align-items: center; text-align: center; } .entrada-orbita { order: -1; width: min(70%, 280px); margin: 0; } .entrada-sub, .entrada-meta { display: none; } .entrada-lema { font-size: 1.6rem; margin: 0; } .entrada-cartao { padding: 22px; } }
+@media (prefers-reduced-motion: reduce) { .entrada-orbe, .entrada-cartao { animation: none; } }
 .entrada-marca { display: flex; align-items: center; gap: 10px; font-size: 16px; }
 .entrada h1 { font-size: 20px; margin: 4px 0 0; }
 .entrada-desc, .entrada-regra { margin: 0; color: var(--suave); }

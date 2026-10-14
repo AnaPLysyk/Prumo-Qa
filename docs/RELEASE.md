@@ -39,7 +39,17 @@ git push origin vX.Y.Z
 4. `node ferramentas/release/publicar-versao.mjs X.Y.Z <sha256> <data>`: o catálogo passa a `publicada` (data, link da release e SHA-256), num commit na `main`.
 5. Dispara `.github/workflows/site.yml`, que publica o site (Render) e espera o commit certo no ar (`build.txt`). O site passa a oferecer o download da versão com o SHA-256.
 
+### macOS e Linux (em paralelo ao Windows)
+
+`.github/workflows/multiplataforma.yml` roda na mesma tag, em máquinas macOS e Ubuntu: compila, roda os testes de plataforma (`testes/unitario/regras/multiplataforma.test.mjs` e `aprovacao-multiplataforma.test.mjs`), gera os instaladores (`npm run dist:mac` e `npm run dist:linux`: .dmg para Apple Silicon e Intel, .AppImage e .deb), gera o `.sha256` de cada um, abre o programa empacotado e confere janela e isolamento. Depois espera a release criada pelo fluxo do Windows, anexa os arquivos e dispara o `site.yml` de novo, para o site passar a oferecê-los. Os nomes dos arquivos vêm de `electron-builder.yml` e de `site/instaladores.mjs` e precisam coincidir com `nomeDoInstalador` do aplicativo (há teste).
+
+Se o fluxo de macOS ou Linux falhar, a versão continua publicada para Windows e o site omite os instaladores que não estão na release (nunca anuncia um arquivo ausente). Corrija e rode o fluxo de novo pelo `workflow_dispatch` na tag; os arquivos são anexados com `--clobber`.
+
 Depois disso, o aplicativo instalado (2.10.1 em diante) avisa sozinho: ao abrir e a cada 6 horas consulta a release mais recente e, uma vez por versão, acende o sino e mostra uma notificação do Windows que leva a Ajuda › Atualizações. Quem desligou o aviso continua podendo verificar pelo botão.
+
+## Instaladores no Render
+
+O build do site no Render roda `node site/construir-no-render.mjs` (`render.yaml`; o serviço atual ainda chama `node scripts/gerar-site.mjs`, que chama o mesmo arquivo): baixa da release os instaladores conferidos pelo SHA-256 e o site os serve do próprio Render (`/download/`). Se o GitHub não responder ou um SHA-256 divergir, o site sai com os botões apontando para a release (nunca com link quebrado) e o motivo fica no log; os de macOS e Linux entram quando já estiverem na release. Quem baixa não precisa passar pelo GitHub.
 
 ## Pré-requisito: publicação do site
 

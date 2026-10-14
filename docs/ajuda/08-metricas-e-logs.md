@@ -1,6 +1,6 @@
 # Como interpretar métricas e logs
 
-Tudo que aparece em Métricas, Logs e Histórico vem de registros reais feitos pelo Prumo a cada operação (um registro no início e outro no término).
+Tudo que aparece em Métricas e Logs vem do histórico de registros reais feitos pelo Prumo a cada operação (um registro no início e outro no término). Histórico não é uma tela separada.
 
 - **Interações registradas**: operações iniciadas, por MCP ou terminal.
 - **Revisões de cobertura**: análises estruturais concluídas. Não são execuções de teste.

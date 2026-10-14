@@ -26,11 +26,11 @@ test('agentes reais, prévia validada/persistida, descarte, confirmação nativa
   assert.equal(await a.page.locator('[data-agent-tab]').count(), 2);
   assert.equal(await a.page.locator('[data-agent]').count(), 8);
   await capture(a, 'agentes');
-  await a.page.locator('#v36-clients summary').click();
+  await a.page.locator('#v36-clients summary').first().click();
   await a.page.waitForFunction(() => /Claude Code/.test(document.querySelector('#v36-client-panel').textContent));
   assert.match(await a.page.textContent('#v36-client-panel'), /Codex/);
   assert.match(await a.page.textContent('#v36-client-panel'), /não comprova|não confirma|CONFIGURAVEL|NÃO CONFIGURADO|NAO_CONFIGURADO/i);
-  await a.page.locator('#v36-clients summary').click();
+  await a.page.locator('#v36-clients > summary').click();
   await a.page.click('[data-agent="qa-geral"]');
   assert.equal(await a.page.locator('#v36-agent-save').isDisabled(), true);
   await a.page.selectOption('[data-pol=propor_casos]', 'BLOQUEADO');

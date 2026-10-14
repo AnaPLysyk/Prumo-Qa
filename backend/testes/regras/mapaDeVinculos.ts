@@ -106,7 +106,7 @@ function ligarExecucoesDeTickets(g: GrafoDeVinculos, espacoId: string, b?: strin
 
 /** Põe no mapa os casos e bugs que o Prumo publicou a partir de propostas, e a falha de caso que originou cada bug. */
 function ligarPropostasPublicadas(g: GrafoDeVinculos, espacoId: string, prumo: string, b?: string) {
-  for (const p of listarPropostas(espacoId, b).filter(x => x.estado === 'PUBLICADA' && x.remoto?.chave)) {
+  for (const p of listarPropostas(espacoId, b).filter(x => (x.estado === 'PUBLICADA' || x.estado === 'VINCULADA') && x.remoto?.chave)) {
     const bug = p.tipo === 'bug';
     const rid = g.no({ id: `${bug ? 'jira-bug' : 'qase'}:${p.remoto!.chave}`, tipo: bug ? 'jira-bug' : 'qase', rotulo: bug ? `Bug ${p.remoto!.chave}` : `Caso ${p.remoto!.chave}`, detalhe: p.titulo });
     g.ar({ de: prumo, para: rid, tipo: 'publicado pelo Prumo', origem: 'REGISTRADO_PELO_PRUMO' });

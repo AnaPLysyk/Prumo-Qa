@@ -11,7 +11,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | Arquivo | O que faz |
 | --- | --- |
 | `preferenciasObter.ts` | Canal preferencias:obter: Ler as preferências de notificação e o aviso de atualização pendente. |
-| `preferenciasSalvar.ts` | Canal preferencias:salvar: Alterar verificar ao iniciar, som, silenciar, tema, idioma, iniciar com o Windows e avisos de agenda. |
+| `preferenciasSalvar.ts` | Canal preferencias:salvar: Alterar verificar ao iniciar, som, silenciar, tema, idioma, iniciar com o sistema e avisos de agenda. |
 
 ## banco/
 
@@ -31,6 +31,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | --- | --- |
 | `alterarPreferencias.ts` | Altera as preferências pedidas pela tela (tema, idioma, som, avisos...) sem mexer na autorização de IA. |
 | `idiomaAtual.ts` | Idioma escolhido pela pessoa (pt-BR ou en). |
+| `iniciarComOSistema.ts` | Liga ou desliga "iniciar com o sistema": item de login no Windows e no macOS, arquivo de autostart no Linux. |
 
 ## tipos/
 

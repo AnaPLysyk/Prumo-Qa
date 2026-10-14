@@ -13,14 +13,20 @@
         "IDE em tela cheia, sem títulos: árvore de arquivos de teste, código com realce de sintaxe (TypeScript, JavaScript, Python, Gherkin, YAML) e painel com o caso, os tickets, os resultados e as permissões dos agentes. Editar e Salvar (Ctrl+S) com confirmação nativa do Windows; Novo arquivo cria uma automação e, com o caso do Qase, grava a anotação \"Qase: CHAVE-ID\". No detalhe do caso, Criar automação na IDE.",
         "Repositório: todos os cenários (casos do Qase e testes do código, manuais e automatizados) numa lista só, com as propostas em revisão, as suites e os vínculos declarados.",
         "Pipelines CI/CD (modo da IDE): lista, edita e cria os workflows do GitHub Actions (.github/workflows) do mesmo repositório vinculado ao projeto.",
-        "Trazer o repositório do GitHub: quando o projeto só tem o GitHub vinculado, baixa uma cópia para este computador (git instalado, credenciais do próprio git) e a vincula ao projeto; Atualizar do GitHub avança a cópia sem sobrescrever o trabalho local."
+        "Trazer o repositório do GitHub: quando o projeto só tem o GitHub vinculado, baixa uma cópia para este computador (git instalado, credenciais do próprio git) e a vincula ao projeto; Atualizar do GitHub avança a cópia sem sobrescrever o trabalho local.",
+        "Login local com a identidade visual do site: céu estrelado, esfera e órbitas, com redução de movimento; cadastro e recuperação usam o mesmo diálogo.",
+        "Agentes e MCP: configuração e acompanhamento separados em passos curtos, com comandos e diagnósticos técnicos recolhidos.",
+        "Instaladores para macOS e Linux, atualização por sistema e cofre de credenciais; arquivos disponíveis no site conforme sua presença na release.",
+        "Tickets locais: bugs e melhorias podem ser revisados, vinculados a um ticket existente ou publicados no Jira com confirmação."
       ],
       "improvements": [
         "A IDE ocupa a largura toda da janela; o editor usa as cores do Design System nos temas claro e escuro.",
         "Código antigo da v39 (telas e arquivos que ninguém mais usava) removido."
       ],
       "fixes": [
-        "A Documentação viva não fica indisponível quando o app inclui bibliotecas de terceiros: vendor/ fica fora do mapa."
+        "A Documentação viva não fica indisponível quando o app inclui bibliotecas de terceiros: vendor/ fica fora do mapa.",
+        "Verificação do frontend alinhada aos bundles atuais, Contextos integrado ao modal de Agentes e implementações antigas de Histórico e Evidências removidas do runtime.",
+        "Auditoria consolidada: sincronização dos JSONs em disco, máscaras de tokens, códigos de erro MCP, oito ferramentas no histórico e limite de autorizações que preserva as vigentes."
       ],
       "differential": "Os agentes ficam mais fortes com o conhecimento da equipe e de Skills abertas, sempre com aprovação humana antes de chegar à IA.",
       "howItWorks": [
@@ -38,7 +44,8 @@
         "O pipeline que roda antes de subir ao GitHub (verificação local) ainda não existe; os pipelines são os do GitHub Actions.",
         "Trazer do GitHub foi validado com repositórios locais; um repositório real, e principalmente um privado, depende do Git Credential Manager da pessoa e ainda não foi exercitado.",
         "Contas online compartilhadas entre computadores ainda não existem; o login é local.",
-        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou."
+        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou.",
+        "Aprovação macOS/Linux depende da autorização administrativa do sistema, que pode usar cache; a identidade registrada é a conta do processo. Testes sintéticos não comprovam autenticação humana."
       ],
       "releaseUrl": null,
       "migration": "A instalação preserva os dados existentes; o banco de Skills é novo e não altera nenhum formato anterior.",
@@ -50,7 +57,7 @@
       "version": "2.12.0",
       "status": "repositorio",
       "date": null,
-      "title": "Contas locais com papéis e permissões, agentes da plataforma e Documentação viva com código",
+      "title": "Windows, macOS e Linux, contas locais com papéis e permissões, agentes da plataforma e Documentação viva com código",
       "objective": "Reunir numa só versão o que foi implementado desde a 2.11: login local com papéis e permissões por tela, administração dos agentes da plataforma, Documentação viva com o código de cada arquivo, melhorias de interface e a organização do repositório sem a pasta app/. Inclui tudo da 2.11.1.",
       "features": [
         "Administração › Usuários: ligar o login criando o primeiro administrador, criar contas, aprovar cadastros, trocar papel, desativar, redefinir senha, desbloquear e excluir. Senha e código de recuperação ficam só como resumo scrypt; a sessão vive na memória do processo principal e expira por inatividade.",
@@ -59,7 +66,10 @@
         "Tela de entrada: cadastro, entrar e recuperar senha com código de uso único, sem menu antes do login. Com o login desligado o Prumo continua usando a conta do Windows, como antes.",
         "Administração › Documentação viva: explorador com árvore de arquivos, fluxo tela → canal → API e o código do arquivo escolhido ao lado da explicação, gerado do código no build.",
         "Download: o site oferece o instalador da versão publicada com o SHA-256, e a Ajuda tem o botão para o site oficial.",
-        "Cérebro com teste de pergunta (somente leitura) e Painel de atividades em tela cheia."
+        "Cérebro com teste de pergunta (somente leitura) e Painel de atividades em tela cheia.",
+        "Instaladores para macOS (Apple Silicon e Intel, .dmg) e Linux (.AppImage e .deb), gerados e abertos no CI de cada sistema, com SHA-256 por arquivo. O site oferece um botão por sistema; Ajuda › Atualizações baixa e confere o instalador certo e o deixa em Downloads (no Windows continua instalando sozinho).",
+        "No macOS e no Linux, tokens do Jira, Qase e GitHub ficam no cofre do sistema (Keychain, gnome-keyring ou KWallet; sem cofre real o Prumo recusa guardar) e a aprovação de executar e publicar usa a autenticação do sistema (macOS) ou o polkit com a janela do escopo (Linux).",
+        "Tela de entrada com a identidade do site: céu estrelado, esfera e órbitas do Prumo; tela Agentes e MCP com passo a passo para ligar o Codex ou o Claude Code."
       ],
       "improvements": [
         "Aviso rápido embaixo, centralizado, que desvia do robô e do chat e não cobre controles.",
@@ -77,13 +87,15 @@
         "Contas só neste computador, em contas.json na pasta de dados; nenhum serviço online. Senhas e códigos nunca aparecem em respostas ou logs; tentativas erradas bloqueiam a conta; o último administrador não pode ser removido nem rebaixado."
       ],
       "compatibility": [
-        "Dados, projetos, preferências e contratos da 2.11 são preservados. Sem ativar o login nada muda."
+        "Dados, projetos, preferências e contratos da 2.11 são preservados. Sem ativar o login nada muda.",
+        "macOS 11 ou mais novo e Linux de 64 bits passam a ter instalador; os dados de quem já usa o Windows não mudam."
       ],
       "limitations": [
         "Contas online compartilhadas entre computadores ainda não existem; o login é local e não isola os dados de pessoas que usam a mesma conta do Windows.",
         "A orquestração é local e sequencial: os especialistas consultam os dados deste computador, um de cada vez; distribuir tarefas em paralelo para IAs externas ainda não existe.",
         "Python, Go, Java, .NET, Rust, PHP e Ruby continuam somente leitura: o executor aceita só node e npm.",
-        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou."
+        "Os instaladores continuam sem assinatura (Windows, macOS e Linux): o macOS mostra o aviso de desenvolvedor não identificado na primeira abertura; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou.",
+        "No macOS a aprovação exige usuário administrador; no Linux exige polkit e zenity (ou kdialog) e um cofre de senhas (gnome-keyring ou KWallet), e Linux em ARM não tem instalador."
       ],
       "migration": "A instalação preserva os dados existentes; o banco de Skills é novo e não altera nenhum formato anterior.",
       "afterUpdate": [

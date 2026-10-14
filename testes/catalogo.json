@@ -1405,6 +1405,73 @@
         "Minha conta existe nas três situações: sem login, como Administrador e como usuário comum"
       ],
       "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/aprovacao-multiplataforma.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "aprovacao",
+      "motivo": "Aprovação humana no macOS e no Linux com executor simulado; nenhum diálogo real nem comando executado",
+      "evidencias": [
+        "macOS: aprova só se o sistema autenticou",
+        "Texto malicioso vai só como dado",
+        "Linux: escopo antes do polkit; sem ferramentas recusa"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/multiplataforma.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "regressao"
+      ],
+      "funcionalidade": "multiplataforma",
+      "motivo": "Escolha do instalador por sistema, cofre de credenciais, pasta de dados, autostart e comando de conexão sem tocar no sistema real",
+      "evidencias": [
+        "Instalador certo por sistema",
+        "Cofre recusa basic_text no Linux",
+        "Nomes iguais no site e no aplicativo",
+        "Autostart do Linux gravado e removido"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/consolidacao-auditoria.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "seguranca",
+      "motivo": "Preserva correções da auditoria na arquitetura por tela, sem banco nem serviço externo.",
+      "evidencias": [
+        "Tokens sem rótulo mascarados",
+        "Código de erro MCP preservado",
+        "Limite de autorizações preserva registros vigentes"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/integracao/externa/instaladores-site.test.mjs",
+      "camada": "integracao",
+      "natureza": [
+        "contrato",
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "site",
+      "motivo": "Download de instaladores com fetch sintético, sem rede; verifica checksum, arquivos ausentes e recusa de corrupção.",
+      "evidencias": [
+        "Só arquivo conferido é gravado",
+        "Plataformas ausentes não são anunciadas",
+        "Instalador corrompido é recusado antes de gravar"
+      ],
+      "perfilReal": false
     }
   ]
 }

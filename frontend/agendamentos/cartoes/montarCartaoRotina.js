@@ -17,7 +17,7 @@ function cartaoRotina(r, espacos, recarregar) {
       botao('Editar', async () => { const el = $('#rotina-slot'); el.replaceChildren(formularioRotina(espacos, r, () => { el.replaceChildren(); recarregar(); })); el.scrollIntoView({ block: 'nearest' }); }),
       r.estado === 'ATIVA' ? botao('Pausar', async () => { if (await chamar(() => api.agendaEstado(r.id, 'pausar'))) recarregar(); }) : r.estado !== 'CONCLUIDA' ? botao('Retomar', async () => { if (await chamar(() => api.agendaEstado(r.id, 'retomar'))) recarregar(); }) : null,
       r.estado !== 'DESATIVADA' && r.estado !== 'CONCLUIDA' ? botao('Desativar', async () => { if (await chamar(() => api.agendaEstado(r.id, 'desativar'))) recarregar(); }) : null,
-      botao('Executar agora', async () => { const x = await chamar(() => api.agendaExecutar(r.id)); if (x) { avisar(tr('Rotina enfileirada. Testes pedem a sua autenticação do Windows.')); setTimeout(recarregar, 1500); } }),
+      botao('Executar agora', async () => { const x = await chamar(() => api.agendaExecutar(r.id)); if (x) { avisar(tr('Rotina enfileirada. Testes pedem a sua autenticação do sistema.')); setTimeout(recarregar, 1500); } }),
       botao('Histórico desta rotina', () => { estado.filtroExec = { rotinaId: r.id, selecionadoQuando: estado.espaco?.id ?? null }; mostrar('runs'); }),
       botao('Excluir', async () => { const x = await chamar(() => api.agendaExcluir(r.id)); if (x && !x.canceled) recarregar(); })),
     precisaAut ? h('div', { class: 'agenda-acoes' }, campoA('Validade (dias, 1–30)', dias, 'aut-dias-' + r.id), campoA('Máximo de execuções', usos, 'aut-usos-' + r.id),

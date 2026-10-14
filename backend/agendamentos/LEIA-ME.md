@@ -30,6 +30,7 @@ Autorizações prévias e políticas aprovadas pela pessoa, com validade e limit
 
 | Arquivo | O que faz |
 | --- | --- |
+| `abrirEspacoDeAutorizacoes.ts` | Libera espaço no limite de autorizações descartando apenas registros que já não autorizam ações, dos mais antigos aos mais novos. |
 | `autorizacaoDelegada.ts` | Cria a verificação que o worker usa: só executa se houver autorização vigente para exatamente o mesmo escopo, e gasta um uso. |
 | `autorizarEscopo.ts` | Pede a autenticação humana do Windows e grava a autorização para um escopo exato (projeto, comando por hash, ambiente). |
 | `autorizarExecucao.ts` | Autoriza execuções agendadas de uma capacidade do projeto. |

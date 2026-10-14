@@ -157,23 +157,30 @@ const abas = {
   async conexoes(el) {
     el.append(h('h1', {}, 'Agentes e MCP'), h('p', { class: 'suave' }, 'O servidor MCP é iniciado pelo próprio cliente de IA e continua funcionando mesmo com esta janela fechada. A configuração abaixo é uma proposta: nada é alterado sem sua confirmação.'));
     if (!estado.root) return el.append(semProjeto());
+    el.append(h('ol', { class: 'suave' }, h('li', {}, 'Escolha o cliente de IA que você usa (Codex ou Claude Code) e adicione a configuração do Prumo a ele.'), h('li', {}, 'Feche e reabra o cliente de IA para que ele leia a configuração.'), h('li', {}, 'Volte aqui e clique em "Testar integração" para confirmar que o servidor do Prumo responde.'), h('li', {}, 'No cliente, peça ao agente para usar o Prumo (por exemplo: "consulte o contexto do projeto"). A chamada aparece em "Última chamada observada".')));
     const r = await chamar(() => api.conexoes(estado.root)); if (!r) return;
     for (const c of r) {
       const diagnostico = h('div', { 'aria-live': 'polite' });
-      const mostrar = (d) => diagnostico.replaceChildren(...[h('p', {}, 'Estado: ', selo(d.state)),
-        h('p', {}, 'Projeto: ', d.project, ' · Configuração: ', d.inspection?.code||'diagnóstico indisponível'),
-        h('p', {}, 'Último teste de protocolo (SDK): ', d.lastProtocol ? `${hora(d.lastProtocol.at)} · ${d.lastProtocol.state} · ${ms(d.lastProtocol.durationMs)} · ${d.lastProtocol.code}${d.protocolCurrent ? '' : ' · escopo anterior'}` : 'não executado'),
-        d.lastProtocol ? h('p', {}, 'Evidência SDK: ', h('code', {}, d.lastProtocol.id), ' · handshake: ', String(d.lastProtocol.handshake), ' · ferramentas: ', d.lastProtocol.tools.join(', '), ' · leitura: ', String(d.lastProtocol.read)) : null,
-        h('p', {}, 'Última chamada observada do cliente (identidade declarada): ', d.lastObserved ? `${hora(d.lastObserved.at)} · ${d.lastObserved.tool} · ${ms(d.lastObserved.durationMs)} · ${d.lastObserved.id}` : 'nenhuma'),
+      const mostrar = (d) => diagnostico.replaceChildren(...[h('p', {}, 'Estado: ', selo(d.state), ' ', h('span', { class: 'suave' }, '· Projeto: ', d.project)),
+        h('p', {}, 'Último teste de protocolo (SDK): ', d.lastProtocol ? `${hora(d.lastProtocol.at)} · ${d.lastProtocol.state} · ${ms(d.lastProtocol.durationMs)}${d.protocolCurrent ? '' : ' · escopo anterior'}` : 'não executado'),
+        h('p', {}, 'Última chamada observada do cliente (identidade declarada): ', d.lastObserved ? `${hora(d.lastObserved.at)} · ${d.lastObserved.tool} · ${ms(d.lastObserved.durationMs)}` : 'nenhuma'),
         h('p', {}, 'Ferramentas utilizadas pelo cliente: ', d.toolsUsed.join(', ') || 'nenhuma'),
-        d.lastObserved?.contextReferences.length ? h('pre', {}, JSON.stringify(d.lastObserved.contextReferences, null, 2)) : null,
-        h('p', { class: 'suave' }, d.notice), d.problems ? h('p', { class: 'nota erro' }, 'Há registros inválidos: ', String(d.problems)) : null].filter(Boolean));
+        d.problems ? h('p', { class: 'nota erro' }, 'Há registros inválidos: ', String(d.problems)) : null,
+        h('details', {}, h('summary', {}, 'Detalhes técnicos'),
+          h('p', {}, 'Configuração: ', d.inspection?.code || 'diagnóstico indisponível', d.lastProtocol ? ' · ' + d.lastProtocol.code : ''),
+          d.lastProtocol ? h('p', {}, 'Evidência SDK: ', h('code', {}, d.lastProtocol.id), ' · handshake: ', String(d.lastProtocol.handshake), ' · ferramentas: ', d.lastProtocol.tools.join(', '), ' · leitura: ', String(d.lastProtocol.read)) : null,
+          d.lastObserved ? h('p', {}, 'Identificador da chamada: ', h('code', {}, d.lastObserved.id)) : null,
+          d.lastObserved?.contextReferences.length ? h('pre', {}, JSON.stringify(d.lastObserved.contextReferences, null, 2)) : null,
+          h('p', { class: 'suave' }, d.notice))].filter(Boolean));
       mostrar(c);
       el.append(h('h2', {}, c.client === 'codex' ? 'Codex' : 'Claude Code', ' ', h('span', { class: 'suave' }, c.installed ? '(cliente localizado)' : '(cliente não localizado)')),
-        diagnostico, h('button', { class: 'acao', onclick: async (e) => { const b=e.currentTarget; b.disabled=true; try { const x=await chamar(()=>api.testarIntegracao(estado.root,c.client)); if(x)mostrar(x); } finally { b.disabled=false; } } }, `Testar integração ${c.client}`),
-        h('p', { class: 'suave' }, 'Destino da configuração: ', h('code', {}, c.destination)), h('pre', {}, c.command),
+        h('h3', {}, '1. Adicionar a configuração'),
         c.automatic ? h('button', { class: 'acao', onclick: async () => { const x = await chamar(() => api.conectar(estado.root, 'codex')); if (x) avisar(x.configured ? 'Configuração adicionada. Reabra o cliente.' : x.reason, !x.configured); } }, 'Adicionar ao Codex…')
-          : h('p', { class: 'suave' }, 'Copie o comando acima e execute no PowerShell depois de revisar o destino.'));
+          : h('p', { class: 'suave' }, 'Copie o comando abaixo e execute no terminal (PowerShell no Windows) depois de revisar o destino.'),
+        h('details', {}, h('summary', {}, 'Ver o que será configurado'), h('p', { class: 'suave' }, 'Destino da configuração: ', h('code', {}, c.destination)), h('pre', {}, c.command)),
+        h('h3', {}, '2. Testar e acompanhar'),
+        h('button', { class: 'acao', onclick: async (e) => { const b=e.currentTarget; b.disabled=true; try { const x=await chamar(()=>api.testarIntegracao(estado.root,c.client)); if(x)mostrar(x); } finally { b.disabled=false; } } }, `Testar integração ${c.client}`),
+        diagnostico);
     }
   },
 
@@ -282,7 +289,7 @@ async function painelAtualizacoes() {
       if (!c || c.status !== 'ATUALIZACAO_DISPONIVEL') { b.disabled = false; return passo(c ? c.message : 'A consulta não foi concluída; tente de novo.'); }
       passo('Baixando o instalador e conferindo o SHA-256…'); const x = await chamar(api.instalarAtualizacao); b.disabled = false;
       if (!x || x.canceled) return prog?.replaceChildren();
-      prog?.replaceChildren(h('p', { class: 'nota', id: 'atualizacao-conferida' }, x.instalando ? 'Instalador da versão ' + x.versao + ' conferido (SHA-256 ' + x.sha256.slice(0, 12) + '…). O Prumo vai fechar, instalar e abrir de novo.' : 'Instalador da versão ' + x.versao + ' baixado e conferido (SHA-256 ' + x.sha256.slice(0, 12) + '…). Modo de desenvolvimento: nada foi instalado.'));
+      prog?.replaceChildren(h('p', { class: 'nota', id: 'atualizacao-conferida' }, x.instalando ? 'Instalador da versão ' + x.versao + ' conferido (SHA-256 ' + x.sha256.slice(0, 12) + '…). O Prumo vai fechar, instalar e abrir de novo.' : x.baixadoEm ? 'Instalador da versão ' + x.versao + ' baixado e conferido (SHA-256 ' + x.sha256.slice(0, 12) + '…) em ' + x.baixadoEm + '. ' + x.proximoPasso : 'Instalador da versão ' + x.versao + ' baixado e conferido (SHA-256 ' + x.sha256.slice(0, 12) + '…). Modo de desenvolvimento: nada foi instalado.'));
     } }, 'Atualizar agora');
     return b;
   }
@@ -301,7 +308,7 @@ async function painelAtualizacoes() {
   } }), ' ' + rotulo);
   const pendente = p && p.disponivel && info ? p.disponivel : null;
   return [h('h1', {}, 'Atualizações'), h('p', {}, 'Versão instalada: ', h('strong', {}, info ? info.version : '?')),
-    h('p', { class: 'suave' }, 'Com o aviso automático ligado (padrão), o Prumo consulta só a release mais recente do repositório oficial no GitHub ao abrir e a cada 6 horas, mesmo minimizado na bandeja, e avisa uma vez por versão: no sino e com uma notificação do Windows. Você também pode verificar a qualquer momento pelo botão acima. É enviada apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.'),
+    h('p', { class: 'suave' }, 'Com o aviso automático ligado (padrão), o Prumo consulta só a release mais recente do repositório oficial no GitHub ao abrir e a cada 6 horas, mesmo minimizado na bandeja, e avisa uma vez por versão: no sino e com uma notificação do sistema. Você também pode verificar a qualquer momento pelo botão acima. É enviada apenas uma requisição HTTPS comum (sem logs, projetos, caminhos ou identificadores); o servidor remoto vê, como em qualquer conexão, o seu endereço IP. Isto não é anonimato. Nada é baixado nem instalado automaticamente.'),
     botao, saida,
     pendente ? h('div', { id: 'ultima-conhecida' }, h('p', { class: 'nota' }, 'Última consulta' + (p.ultimaConsulta ? ' (' + hora(p.ultimaConsulta) + ')' : '') + ': a versão ' + pendente.versao + ' estava disponível.'), ...detalhes(pendente.versao, pendente.notas)) : null,
     h('h2', {}, 'Preferências de aviso'),

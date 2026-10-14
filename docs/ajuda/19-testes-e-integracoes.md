@@ -18,7 +18,9 @@ Se o projeto só tem o repositório do **GitHub** vinculado (sem pasta local), a
 
 ## Tickets
 
-Jira e defeitos do Qase ficam numa tabela única, com a origem em cada linha e filtros por texto, origem, tipo, status e período. O detalhe do ticket mostra descrição, critérios, relações, comentários, histórico, anexos e transições. Comentar, anexar, mudar status, editar e criar ticket pedem confirmação com prévia.
+Tickets do Jira, defeitos do Qase e tickets locais do Prumo ficam numa tabela única, com a origem em cada linha e filtros por texto, origem, tipo, status e período. O detalhe do ticket mostra descrição, critérios, relações, comentários, histórico, anexos e transições. Comentar, anexar, mudar status, editar e criar ticket pedem confirmação com prévia.
+
+Em Locais (Prumo), crie ou revise bugs e melhorias sem enviar nada a um serviço. Classifique a falha, vincule a um ticket existente ou publique no Jira após revisão e confirmação.
 
 Defeitos do Qase são somente leitura. Em um defeito, **Abrir ticket no Jira…** preenche um ticket novo e registra o vínculo defeito → ticket; com vínculo existente, o botão não aparece.
 

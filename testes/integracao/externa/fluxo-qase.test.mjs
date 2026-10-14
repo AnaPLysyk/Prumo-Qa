@@ -34,6 +34,7 @@ import { editarProposta } from '../../../dist/tickets/regras/editarProposta.js';
 import { marcarPublicada } from '../../../dist/tickets/regras/marcarPublicada.js';
 import { podePublicar } from '../../../dist/tickets/regras/podePublicar.js';
 import { revisarProposta } from '../../../dist/tickets/regras/revisarProposta.js';
+import { vincularPropostaATicket } from '../../../dist/tickets/regras/vincularPropostaATicket.js';
 import { MAX_IA_POR_HORA } from '../../../dist/tickets/tipos/proposta.js';
 
 const base = (t) => { const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo fluxo ')); t.after(() => fs.rmSync(b, { recursive: true, force: true })); return b; };
@@ -115,6 +116,20 @@ test('falha vira rascunho de bug com ticket de origem; publicar cria o ticket, r
   associarEspaco(c.e.id, { de: { tipo: 'jira-bug', id: r.remoto.chave, vinculoId: c.jv.id, origem: 'Jira' }, para: { tipo: 'qase', id: String(a), vinculoId: c.qv.id, origem: 'Qase SFQ' }, justificativa: 'Bug aberto pelo Prumo a partir da falha na run' }, c.b, true);
   const rel = obterEspaco(c.e.id, c.b).relacoes.at(-1); assert.equal(rel.origemRegistro, 'REGISTRADO_PELO_PRUMO'); assert.equal(rel.de.tipo, 'jira-bug'); assert.equal(obterProposta(bug.id, c.b).estado, 'PUBLICADA');
   assert.throws(() => associarEspaco(c.e.id, { de: { tipo: 'jira-bug', id: 'SMART-9', origem: 'x' }, para: { tipo: 'qase', id: '1', vinculoId: c.qv.id, origem: 'x' }, justificativa: 'sem vínculo' }, c.b), /TRACE_LINK_SCOPE/);
+});
+
+test('falha classificada vira ticket local; vincular a ticket existente registra a relação sem tocar no Jira; ticket manual não precisa de falha', async (t) => {
+  const c = await cenario(t); const a = await c.caso('Leitor é recusado'); c.ligar(a, 'unit#C2');
+  const run = prepararRunLocal(c.e.id, { titulo: 'Run com falha', ambiente: 'teste', casos: [{ casoId: a, titulo: 'Leitor é recusado' }] }, c.b); await criarRunNoQase(c.dep, run.id, { confirmado: true }); await executarRunLocal(c.dep, run.id, c.execucao);
+  const [melhoria] = propostasDeBugs(run.id, c.b, 'MELHORIA'); assert.equal(melhoria.dados.classificacao, 'MELHORIA'); assert.match(melhoria.titulo, /^\[Prumo QA\] Melhoria:/);
+  const jira = c.mundo.jira.issues.size; const v = vincularPropostaATicket(melhoria.id, ' smart-77 ', c.b);
+  assert.equal(v.estado, 'VINCULADA'); assert.equal(v.remoto.chave, 'SMART-77'); assert.equal(c.mundo.jira.issues.size, jira, 'vincular não cria nem altera ticket no Jira');
+  const rel = obterEspaco(c.e.id, c.b).relacoes.at(-1); assert.equal(rel.de.tipo, 'jira-bug'); assert.equal(rel.de.id, 'SMART-77'); assert.equal(rel.para.id, String(a)); assert.equal(rel.origemRegistro, 'REGISTRADO_PELO_PRUMO');
+  assert.throws(() => vincularPropostaATicket(melhoria.id, 'SMART-78', c.b), /PROPOSAL_CLOSED/); assert.throws(() => podePublicar(obterProposta(melhoria.id, c.b)), /PROPOSAL_CLOSED/); assert.throws(() => editarProposta(melhoria.id, melhoria.dados, {}, c.b), /PROPOSAL_CLOSED/);
+  const manual = criarProposta({ espacoId: c.e.id, tipo: 'bug', origem: 'PESSOA', dados: { classificacao: 'OUTRO_BUG', resumo: 'Ambiente de teste fora do ar', descricao: '' } }, c.b);
+  assert.equal(manual.estado, 'RASCUNHO'); assert.equal(manual.remoto, null); assert.throws(() => vincularPropostaATicket(manual.id, 'sem chave', c.b), /TICKET_KEY_INVALID/);
+  const solto = vincularPropostaATicket(manual.id, 'SMART-5', c.b); assert.equal(solto.estado, 'VINCULADA', 'sem falha de origem só a proposta guarda o vínculo'); assert.equal(obterEspaco(c.e.id, c.b).relacoes.filter((r) => r.de.id === 'SMART-5').length, 0);
+  assert.throws(() => criarProposta({ espacoId: c.e.id, tipo: 'bug', origem: 'PESSOA', dados: { classificacao: 'INVENTADA', resumo: 'Classe inexistente', descricao: '' } }, c.b));
 });
 
 test('propostas da IA: sem duplicata, limite por hora, revisão completa obrigatória e publicação só pela pessoa', async (t) => {

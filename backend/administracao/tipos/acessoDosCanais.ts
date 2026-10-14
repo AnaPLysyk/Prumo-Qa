@@ -32,7 +32,7 @@ export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
   'contextos:listar': ['agentes', 'VER'], 'contextos:obter': ['agentes', 'VER'], 'contextos:salvar': ['agentes', 'USAR'], 'contextos:aprovar': ['agentes', 'USAR'], 'contextos:desatualizar': ['agentes', 'USAR'],
   'contextos:conflito': ['agentes', 'USAR'], 'contextos:excluir': ['agentes', 'USAR'], 'contextos:mcp': ['agentes', 'USAR'], 'servicos:importar': ['agentes', 'USAR'],
   'espacos:automacoes': ['testes', 'VER'], 'testes:catalogo': ['testes', 'VER'], 'testes:arquivo': ['testes', 'VER'], 'testes:gravar': ['testes', 'USAR'], 'testes:pipelines': ['testes', 'VER'], 'propostas:listar': ['testes', 'VER'], 'runs:listar': ['testes', 'VER'],
-  'propostas:criar': ['testes', 'USAR'], 'propostas:editar': ['testes', 'USAR'], 'propostas:revisar': ['testes', 'USAR'], 'propostas:descartar': ['testes', 'USAR'], 'propostas:publicar': ['testes', 'USAR'],
+  'propostas:criar': ['testes', 'USAR'], 'propostas:editar': ['testes', 'USAR'], 'propostas:revisar': ['testes', 'USAR'], 'propostas:descartar': ['testes', 'USAR'], 'propostas:vincular': ['testes', 'USAR'], 'propostas:publicar': ['testes', 'USAR'],
   'runs:preparar': ['testes', 'USAR'], 'runs:criar': ['testes', 'USAR'], 'runs:executar': ['testes', 'USAR'], 'runs:resultado': ['testes', 'USAR'], 'runs:publicar': ['testes', 'USAR'], 'runs:bugs': ['testes', 'USAR'],
   'runs:politica': ['testes', 'USAR'], 'runs:revogar': ['testes', 'USAR'], 'operacoes:executar': ['testes', 'USAR'],
   'agenda:listar': ['agenda', 'VER'], 'agenda:permissoes': ['agenda', 'VER'], 'agenda:salvar': ['agenda', 'USAR'], 'agenda:estado': ['agenda', 'USAR'], 'agenda:excluir': ['agenda', 'USAR'], 'agenda:executar': ['agenda', 'USAR'],

@@ -93,10 +93,17 @@
     ]);
     DS.modal(r.titulo, [DS.meta([['Origem', DS.origem('prumo', 'Prumo')], ['Run no Qase', r.runIdRemoto ? '#' + r.runIdRemoto + (r.confirmadaNoQase ? ' · ' + tr('confirmada') : '') : tr('ainda não criada')], ['Ambiente', r.ambiente], ['Estado', selo(r.estado)], ['Casos', String(c.total)]], { linha: true }), saida, nav, painel,
       DS.rodape(h('span', { class: 'ds-form-msg' }, tr('Cada envio ao Qase pede confirmação nativa.')),
-        r.casos.some((x) => x.resultado?.status === 'FAIL') ? DS.acao('Preparar bugs das falhas', async () => { const x = await chamar(() => api.runBugs(r.id)); if (x) avisar(tr('{n} rascunho(s) de bug em Testes › Casos › Propostas.', { n: x.length })); }, { id: 'run-bugs-' + r.id, icone: 'alerta' }) : null,
+        r.casos.some((x) => x.resultado?.status === 'FAIL') ? DS.acao('Relacionar falhas a tickets…', () => relacionarFalhas(e, r), { id: 'run-bugs-' + r.id, icone: 'alerta' }) : null,
         !r.runIdRemoto ? DS.acao('Criar run no Qase…', () => passo(() => api.runCriar(r.id)), { id: 'run-criar-' + r.id, desabilitado: !esc }) : DS.acao('Conferir no Qase', async () => { const x = await chamar(() => api.servicoConsultar(e.id, 'qase', 'resultados', { limite: 100 }, String(r.runIdRemoto))); if (x) avisar(tr('O Qase retornou {n} resultado(s) para a run {id}.', { n: x.dados.length, id: r.runIdRemoto })); }, { id: 'run-conferir-' + r.id }),
         DS.acao('Executar automações…', () => passo(() => api.runExecutar(r.id), (x) => tr('Execução concluída: {r}', { r: x.executadas.map((z) => z.capability + '=' + z.status).join(', ') || '—' })), { id: 'run-exec-' + r.id, icone: 'play', desabilitado: !r.casos.some((x) => x.capability), titulo: r.casos.some((x) => x.capability) ? null : 'Nenhum caso desta run tem automação declarada.' }),
         DS.acao('Publicar resultados…', () => passo(() => api.runPublicar(r.id, false), (x) => (x.publicados ? tr('{n} resultado(s) publicado(s) e conferidos no Qase.', { n: x.publicados }) : tr('Nada pendente para publicar.'))), { id: 'run-pub-' + r.id, primaria: true, desabilitado: !r.runIdRemoto || !esc }))], { tamanho: 'lg', subtitulo: [DS.origem('prumo', 'Run preparada no Prumo'), selo(r.estado)] });
+  }
+  // Falhas da run viram tickets locais classificados; a pessoa vincula a um ticket existente ou publica no Jira na tela Tickets.
+  function relacionarFalhas(e, r) {
+    const n = r.casos.filter((x) => x.resultado?.status === 'FAIL').length; const cls = h('select', { id: 'run-bugs-classificacao' }, [['PRODUTO', 'Bug de produto'], ['OUTRO_BUG', 'Outro bug'], ['MELHORIA', 'Melhoria']].map(([v, t]) => h('option', { value: v }, tr(t))));
+    DS.modal('Relacionar falhas a tickets', [DS.info(tr('{n} falha(s) nesta run viram tickets locais em Tickets, só neste computador. Depois você vincula a um ticket existente ou publica no Jira.', { n })),
+      h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('O que são essas falhas?', cls, { inteiro: true, ajuda: 'Dá para ajustar caso a caso depois, na tela Tickets.' })),
+      DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar tickets locais', async () => { const x = await chamar(() => api.runBugs(r.id, cls.value)); if (!x) return; avisar(x.length ? tr('{n} ticket(s) local(is) criado(s) em Tickets.', { n: x.length }) : tr('Essas falhas já têm ticket local.')); DS.fecharModal(); mostrar('tickets'); }, { id: 'run-bugs-criar', primaria: true }))], { tamanho: 'md' });
   }
   async function abrirRunQase(e, x) {
     const vivo = DS.modal(tr('Run {id}', { id: x.id }), DS.carregando('Consultando o Qase…'), { tamanho: 'lg' });

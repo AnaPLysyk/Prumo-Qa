@@ -66,10 +66,10 @@ backend/projetos/regras/
 | Tela | Abra este arquivo | O que ele mostra |
 | --- | --- | --- |
 | Conexões | `frontend/conexoes/mostrarConexoes.js` | Formulário de serviço, credencial e seleção de recurso |
-| Tickets | `frontend/tickets/mostrarTickets.js` | Consulta de tickets Jira |
-| Testes | `frontend/testes/mostrarTestesRemotos.js` | Consulta de casos e planos Qase |
+| Tickets | `frontend/tickets/fluxos-v40-trecho-02.parte.js` | Tickets do Jira, defeitos do Qase e tickets locais criados a partir de falhas de runs |
+| Testes | `frontend/testes/fluxos-v40-trecho-03.parte.js` | Catálogo, casos, planos e runs |
 | Automações | `frontend/automacoes/mostrarAutomacoes.js` | Automações da pasta local e repositório |
-| Rastreabilidade | `frontend/rastreabilidade/mostrarRastreabilidade.js` | Liga um ticket a um caso com confirmação da pessoa |
+| Rastreabilidade | `frontend/rastreabilidade/fluxos-v40-trecho-05.parte.js` | Liga um ticket a um caso com confirmação da pessoa |
 | Histórico | `frontend/historico/mostrarHistorico.js` | Histórico dos vínculos, consultas e eventos |
 | Suporte | `frontend/suporte/mostrarSuporte.js` | Relatos revisáveis e informações de diagnóstico |
 | Ajuda | `frontend/ajuda/mostrarAjuda.js` | Guias, busca, versões e documentação |
@@ -136,15 +136,14 @@ frontend/
 │   ├── cartoes/montarCartaoRotina.js           cada rotina em cartão
 │   ├── permissoes/mostrarPermissoesRotina.js  permissões de execução
 │   └── datas/interpretarHorarios.js            datas e fusos
-├── execucoes/mostrarExecucoes.js               histórico e detalhes
+├── execucoes/operacao-v40.js                   histórico e detalhes
 ├── metricas/mostrarMetricas.js                 indicadores
-├── tickets/mostrarOperacoesJira.js            ações de ticket
+├── tickets/fluxos-v40-trecho-02.parte.js       tickets, detalhe, criação e tickets locais
 ├── testes/
 │   ├── formularios/montarFormularioProposta.js
 │   ├── cartoes/montarCartaoProposta.js
-│   ├── mostrarCatalogoCodigo.js
-│   └── mostrarTestesComSubabas.js
-├── runs/mostrarRunsQase.js                     runs Qase
+│   └── mostrarCatalogoCodigo.js
+├── runs/fluxos-v40-trecho-04.parte.js          runs locais e do Qase
 ├── rastreabilidade/mostrarVinculos.js          vínculos declarados
 ├── conexoes/mostrarEscritaExterna.js           autorizações por serviço
 ├── agentes/mostrarAgentesIntegrados.js         recursos do painel Agentes
@@ -155,7 +154,7 @@ Os arquivos `dist/renderer/agenda.js` e `dist/renderer/integracoes.js` agora sã
 
 ## Fluxos e Testes avançados: organização das funções sem mudar a janela
 
-As implementações grandes v40 usam funções no mesmo escopo. Para manter o código executado exatamente igual durante a migração, agora existem arquivos-fonte `.parte.js` por ação em `frontend/<nome-da-tela>/fluxos-fonte/` e `frontend/testes/avancados-fonte/`.
+As implementações grandes v40 usam funções no mesmo escopo. Para manter o código executado exatamente igual durante a migração, os arquivos-fonte `.parte.js` ficam na pasta da própria tela, em `frontend/<nome-da-tela>/`.
 
 Abra a pasta da tela, escolha o arquivo pelo nome da função e leia a frase inicial. Para alterar uma ação, edite **a parte-fonte** e depois rode `node ferramentas/frontend/gerar-telas-modulares.mjs`. Não edite diretamente `fluxos-v40.js` ou `testes-v40.js`, pois agora eles são arquivos gerados que o Electron carrega. A geração não substitui testes de comportamento.
 

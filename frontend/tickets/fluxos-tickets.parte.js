@@ -7,17 +7,16 @@
   abas.tickets = async (el) => {
     const e = estado.espaco; if (!e) return el.append(...semProjetoDS('Tickets'));
     const vj = vinc(e, 'jira'), vq = vinc(e, 'qase');
-    if (!vj && !vq) return el.append(DS.cabecalho({ titulo: 'Tickets' }), DS.estadoTela('vazio', 'Nenhuma fonte de tickets vinculada', tr('Vincule um projeto Jira ou Qase a {p} em Conexões.', { p: e.nome }), [DS.acao('Abrir Conexões', () => mostrar('conexoes'))]));
     const perm = await escritaDoProjeto(e); const escJira = !!perm.jira;
     const mem = memoria('tickets', e.id); const f = (mem.filtros ||= { q: '', origem: '', tipo: '', status: '', desde: '', ate: '' });
-    const fontesCab = [vj && DS.origem('jira', 'Jira · ' + vj.recurso.chave), vq && DS.origem('qase', 'Qase · ' + vq.recurso.chave),
+    const fontesCab = [vj && DS.origem('jira', 'Jira · ' + vj.recurso.chave), vq && DS.origem('qase', 'Qase · ' + vq.recurso.chave), DS.origem('prumo', tr('Locais (Prumo)')),
       vj && !escJira ? h('span', { class: 'ds-chip', 'data-escrita-desligada': 'jira', title: tr('Escrita no Jira desligada. Habilite em Conexões.') }, tr('Jira somente leitura')) : null].filter(Boolean);
     const contagem = h('span');
     const cab = DS.cabecalho({ titulo: 'Tickets', contagem: 0, idContagem: 'tk-contagem', descricao: fontesCab.some((x) => x.hasAttribute('data-escrita-desligada')) ? [h('span', { class: 'ds-chips' }, fontesCab.filter((x) => x.hasAttribute('data-escrita-desligada')))] : null,
-      acoes: [vj && DS.acao('Consulta avançada', () => avancada(e), { id: 'tk-avancada', icone: 'filtro' }), vj && DS.acao('Novo ticket', () => abrirCriar(e, {}), { id: 'tk-novo', primaria: true, icone: 'mais' })] });
+      acoes: [vj && DS.acao('Consulta avançada', () => avancada(e), { id: 'tk-avancada', icone: 'filtro' }), DS.acao('Novo ticket local', () => abrirLocalNovo(e, () => buscar()), { id: 'tk-novo-local', icone: 'mais', primaria: !vj }), vj && DS.acao('Novo ticket', () => abrirCriar(e, {}), { id: 'tk-novo', primaria: true, icone: 'mais' })] });
     void contagem;
     const q = DS.busca({ id: 'tk-q', placeholder: 'Buscar por chave ou texto', valor: f.q, aoEnter: () => buscar() });
-    const origem = vj && vq ? DS.selecao({ id: 'tk-origem', rotulo: 'Origem', opcoes: [['', 'Todas as origens'], ['jira', 'Jira'], ['qase', 'Defeitos Qase']], valor: f.origem, aoMudar: () => { tipo.disabled = origem.value === 'qase'; } }) : null;
+    const origem = DS.selecao({ id: 'tk-origem', rotulo: 'Origem', opcoes: [['', 'Todas as origens'], vj ? ['jira', 'Jira'] : null, vq ? ['qase', 'Defeitos Qase'] : null, ['prumo', 'Locais (Prumo)']].filter(Boolean), valor: f.origem, aoMudar: () => { tipo.disabled = origem.value === 'qase' || origem.value === 'prumo'; } });
     const tipo = DS.selecao({ id: 'tk-tipo', rotulo: 'Tipo', opcoes: [['', 'Todos os tipos']], valor: '' });
     const status = h('input', { id: 'tk-status', placeholder: tr('Status'), 'aria-label': tr('Status'), list: 'tk-status-opcoes', maxlength: 60, value: f.status, autocomplete: 'off' });
     const sugestoes = h('datalist', { id: 'tk-status-opcoes' });
@@ -25,10 +24,10 @@
     for (const c of [status, desde, ate]) c.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); void buscar(); } });
     const fontes = h('div', { class: 'ds-fontes', id: 'tk-fontes', 'aria-live': 'polite' }); const lista = h('div', { id: 'tk-lista' });
     el.append(cab, DS.barra(q.no, origem, vj ? tipo : null, status, sugestoes, h('span', { class: 'ds-periodo' }, tr('Atualizado'), desde, tr('até'), ate), DS.acao('Buscar', () => buscar(), { id: 'tk-buscar', icone: 'busca' })), fontes, lista);
-    if (origem) tipo.disabled = origem.value === 'qase';
+    if (origem) tipo.disabled = origem.value === 'qase' || origem.value === 'prumo';
     if (vj) void tiposJira(e).then((m) => { for (const t of m.tipos) tipo.append(h('option', { value: t.nome, selected: t.nome === f.tipo }, t.nome)); });
 
-    const lerFiltros = () => { f.q = q.input.value.trim(); f.origem = origem?.value || ''; f.tipo = tipo.value; f.status = status.value.trim(); f.desde = desde.value; f.ate = ate.value; };
+    const lerFiltros = () => { f.q = q.input.value.trim(); f.origem = origem.value || ''; f.tipo = tipo.value; f.status = status.value.trim(); f.desde = desde.value; f.ate = ate.value; };
     async function consultarJira(pagina) {
       const fj = {}; for (const k of ['q', 'tipo', 'status', 'desde', 'ate']) if (f[k]) fj[k] = f[k];
       const r = await api.servicoConsultar(e.id, 'jira', 'tickets', pagina, undefined, fj);
@@ -44,9 +43,9 @@
       if (desde.value && ate.value && desde.value > ate.value) { avisar(tr('A data inicial deve ser anterior à data final.'), true); return; }
       lerFiltros(); const versao = (mem.versao = (mem.versao || 0) + 1);
       lista.replaceChildren(DS.esqueleto(6)); lista.setAttribute('aria-busy', 'true'); fontes.replaceChildren(h('span', { role: 'status' }, h('span', { class: 'ds-giro' }), tr('Consultando…')));
-      const [jira, qase] = await Promise.all([vj && f.origem !== 'qase' ? consultarJira({ offset: 0, limite: 25 }) : null, vq && f.origem !== 'jira' ? consultarQase(0) : null]);
+      const [jira, qase, locais] = await Promise.all([vj && f.origem !== 'qase' && f.origem !== 'prumo' ? consultarJira({ offset: 0, limite: 25 }) : null, vq && f.origem !== 'jira' && f.origem !== 'prumo' ? consultarQase(0) : null, !f.origem || f.origem === 'prumo' ? carregarLocais(e) : null]);
       if (versao !== mem.versao) return;
-      mem.jira = jira; mem.qase = qase; mem.carregado = true; desenhar();
+      mem.jira = jira; mem.qase = qase; mem.locais = locais; mem.carregado = true; desenhar();
     }
     async function maisJira() { const r = await consultarJira(typeof mem.jira.proxima === 'string' ? { cursor: mem.jira.proxima, limite: 25 } : { offset: mem.jira.proxima, limite: 25 }); if (r.erro) return; mem.jira = { ...r, itens: mem.jira.itens.concat(r.itens) }; desenhar(); }
     async function maisQase() { const r = await consultarQase(mem.qase.proxima); if (r.erro) return; mem.qase = { ...r, itens: mem.qase.itens.concat(r.itens) }; desenhar(); }
@@ -55,6 +54,12 @@
       for (const i of mem.jira?.itens || []) { const x = i.fields || {}; const n = relacoesDe(e, ['jira', 'jira-bug'], i.key).length;
         L.push({ ordem: Date.parse(x.updated || 0) || 0, attrs: { 'data-ticket': i.key, 'data-origem': 'jira' }, abrir: () => abrirTicket(e, i.key), rotuloAcessivel: null,
           celulas: [DS.origem('jira'), { no: i.key, classe: 'ds-id' }, h('span', { class: 'ds-resumo-texto' }, x.summary || '—'), x.issuetype?.name ? DS.chip(x.issuetype.name) : '—', x.status?.name ? DS.chip(x.status.name, tomStatusJira(x.status)) : '—', x.priority?.name || '—', vj.recurso.chave, { no: quando(x.updated), classe: 'ds-nowrap' }, n ? DS.chip(tr('{n} vínculo(s)', { n }), 'info') : '—'] }); }
+      for (const p of mem.locais?.itens || []) {
+        const chave = p.remoto?.chave || ('LOCAL-' + p.id.slice(0, 6).toUpperCase()); const estadoTxt = p.estado === 'VINCULADA' ? tr('Vinculada') : p.estado === 'PUBLICADA' ? tr('Publicada') : tr('Local');
+        if (st && !estadoTxt.toLowerCase().includes(st)) continue; if (qq && !(chave + ' ' + p.titulo).toLowerCase().includes(qq)) continue;
+        L.push({ ordem: Date.parse(p.atualizadaEm || 0) || 0, attrs: { 'data-local': p.id, 'data-origem': 'prumo' }, abrir: () => abrirLocal(e, p, () => buscar()), rotuloAcessivel: null,
+          celulas: [h('span', { class: 'ds-chips' }, DS.origem('prumo', 'Prumo'), DS.chip(origemDoLocal(p))), { no: chave, classe: 'ds-id' }, h('span', { class: 'ds-resumo-texto' }, p.titulo), DS.chip(rotuloClassificacao(p.dados.classificacao)), DS.chip(estadoTxt, p.estado === 'RASCUNHO' || p.estado === 'REVISADA' ? 'aviso' : 'ok'), '—', '—', { no: quando(p.atualizadaEm), classe: 'ds-nowrap' }, p.falhaDeOrigem ? DS.chip(tr('Falha do caso {c}', { c: p.falhaDeOrigem.casoId }), 'info') : '—'] });
+      }
       for (const d of mem.qase?.itens || []) {
         if (st && !String(d.status ?? '').toLowerCase().includes(st)) continue; if (qq && !(String(d.id) + ' ' + (d.title || '')).toLowerCase().includes(qq)) continue;
         const n = relacoesDe(e, ['qase-defeito'], d.id).length;
@@ -70,16 +75,65 @@
     }
     function desenhar() {
       lista.setAttribute('aria-busy', 'false');
-      fontes.replaceChildren(...[linhaFonte('jira', mem.jira, maisJira), linhaFonte('qase', mem.qase, maisQase)].filter(Boolean));
+      fontes.replaceChildren(...[linhaFonte('jira', mem.jira, maisJira), linhaFonte('qase', mem.qase, maisQase), mem.locais ? h('span', { role: 'status', 'data-fonte': 'prumo' }, DS.origem('prumo', 'Prumo'), tr('{n} ticket(s) local(is) neste computador', { n: mem.locais.itens.length })) : null].filter(Boolean));
       sugestoes.replaceChildren(...[...new Set((mem.jira?.itens || []).map((i) => i.fields?.status?.name).filter(Boolean))].map((s) => h('option', { value: s })));
       const L = linhasTabela(); const n = cab.querySelector('#tk-contagem'); if (n) n.textContent = String(L.length);
       const erros = [mem.jira?.erro, mem.qase?.erro].filter(Boolean);
-      if (!L.length) { lista.replaceChildren(erros.length && erros.length === [mem.jira, mem.qase].filter(Boolean).length ? DS.estadoTela('erro', 'Não foi possível consultar as fontes', erros.join(' · '), [DS.acao('Tentar novamente', () => buscar())])
-        : DS.estadoTela('vazio', 'Nenhum ticket encontrado', mem.qase && !mem.qase.erro && !mem.qase.itens.length && !mem.jira ? 'Nenhum defeito retornado pelo Qase.' : 'Ajuste os filtros ou a origem e busque novamente.')); return; }
+      if (!L.length) { lista.replaceChildren(erros.length && erros.length === [mem.jira, mem.qase, mem.locais].filter(Boolean).length ? DS.estadoTela('erro', 'Não foi possível consultar as fontes', erros.join(' · '), [DS.acao('Tentar novamente', () => buscar())])
+        : DS.estadoTela('vazio', 'Nenhum ticket encontrado', mem.qase && !mem.qase.erro && !mem.qase.itens.length && !mem.jira ? 'Nenhum defeito retornado pelo Qase.' : 'Ajuste os filtros ou a origem e busque novamente. Falhas de runs e tickets criados à mão aparecem em Locais (Prumo).')); return; }
       lista.replaceChildren(DS.tabela({ id: 'tk-tabela', colunas: ['Origem', 'ID', 'Resumo', 'Tipo', 'Status', { t: 'Prioridade', classe: 'ds-opcional' }, { t: 'Projeto', classe: 'ds-opcional' }, 'Atualização', { t: 'Vínculos', classe: 'ds-opcional' }], linhas: L }));
     }
     if (mem.carregado) void desenhar(); else void buscar();
   };
+
+  // ======================= Tickets locais (Prumo) =======================
+  // Rascunho de bug/melhoria guardado só neste computador: nasce de uma falha de run ou é criado à mão, sem Jira. Pode ser vinculado a um ticket
+  // existente (o Prumo só guarda a chave) ou publicado no Jira com confirmação. Nada vai ao Jira sem a pessoa decidir.
+  const classificacoesFalha = [['PRODUTO', 'Bug de produto'], ['OUTRO_BUG', 'Outro bug'], ['MELHORIA', 'Melhoria']];
+  const rotuloClassificacao = (c) => tr((classificacoesFalha.find((x) => x[0] === c) || [0, 'Sem classificação'])[1]);
+  async function carregarLocais(e) {
+    const r = await api.propostas(e.id); if (!r.ok) return { erro: r.error, itens: [] };
+    return { itens: (r.data || []).filter((p) => p.tipo === 'bug' && p.estado !== 'DESCARTADA') };
+  }
+  // Como o ticket local nasceu: de uma falha de run, sugerido por IA ou criado à mão.
+  const origemDoLocal = (p) => (p.falhaDeOrigem ? tr('Falha de run') : p.origem === 'IA' ? tr('Sugerido por IA') : tr('Manual'));
+  function selecaoClassificacao(id, valor) { return h('select', { id }, classificacoesFalha.map(([v, t]) => h('option', { value: v, selected: v === valor }, tr(t)))); }
+  async function abrirLocalNovo(e, aoCriar) {
+    const rs = await api.runs(e.id); const falhas = [];
+    for (const r of rs.ok ? rs.data : []) for (const c of r.casos.filter((x) => x.resultado?.status === 'FAIL')) falhas.push({ runLocalId: r.id, casoId: c.casoId, rotulo: `${r.titulo} · ${c.casoId} · ${c.titulo}` });
+    const cls = selecaoClassificacao('tkl-classificacao', 'PRODUTO'); const res = h('input', { id: 'tkl-resumo', maxlength: 255 }); const desc = h('textarea', { id: 'tkl-descricao', rows: 7, maxlength: 8000 });
+    const falha = h('select', { id: 'tkl-falha' }, h('option', { value: '' }, tr('Sem falha de origem')), falhas.map((x, i) => h('option', { value: String(i) }, x.rotulo)));
+    const saida = h('div', { id: 'tkl-saida', 'aria-live': 'polite' });
+    DS.modal('Novo ticket local', [DS.info('Fica só neste computador, sem Jira. Depois você pode vinculá-lo a um ticket existente ou publicá-lo no Jira.'),
+      h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Classificação', cls), DS.campo('Resumo', res, { inteiro: true }), DS.campo('Descrição', desc, { inteiro: true }), DS.campo('Falha de origem (opcional)', falha, { inteiro: true })), saida,
+      DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Salvar ticket local', async () => {
+        const o = falha.value === '' ? undefined : falhas[Number(falha.value)]; const dados = { classificacao: cls.value, resumo: res.value, descricao: desc.value, rotulos: ['prumo-qa'] };
+        const r = await api.propostaCriar(e.id, 'bug', dados, '', '', o ? { runLocalId: o.runLocalId, casoId: o.casoId } : undefined);
+        if (!r.ok) { saida.replaceChildren(DS.alerta(r.error, 'falha')); return; } avisar(tr('Ticket local salvo. Nada foi enviado ao Jira.')); DS.fecharModal(); aoCriar();
+      }, { id: 'tkl-salvar', primaria: true }))], { tamanho: 'md' });
+    res.focus();
+  }
+  async function abrirLocal(e, p, aoMudar) {
+    const vj = vinc(e, 'jira'); const perm = await escritaDoProjeto(e); const aberta = p.estado === 'RASCUNHO' || p.estado === 'REVISADA';
+    const chave = h('input', { id: 'tkl-chave', maxlength: 40, placeholder: 'SMART-123', 'aria-label': tr('Ticket existente') }); const cls = selecaoClassificacao('tkl-nova-classificacao', p.dados.classificacao); const saida = h('div', { id: 'tkl-detalhe-saida', 'aria-live': 'polite' });
+    const fecharEMudar = () => { DS.fecharModal(); aoMudar(); };
+    const publicar = async () => {
+      let tipoId; if (!p.dados.tipoId) { const m = await tiposJira(e); const preferido = p.dados.classificacao === 'MELHORIA' ? m.tipos.find((t) => /melhoria|improvement|story|hist/i.test(t.nome)) : m.tipos.find((t) => /bug|defeito/i.test(t.nome)); tipoId = (preferido || m.tipos[0])?.id; }
+      const r = await api.propostaPublicar(p.id, tipoId); if (!r.ok) { saida.replaceChildren(DS.alerta(r.error, 'falha')); return; } if (r.data.canceled) return;
+      if (r.data.estado === 'CONFIRMADA') { avisar(tr('Ticket publicado no Jira.')); fecharEMudar(); } else saida.replaceChildren(DS.alerta(tr('Publicação não confirmada: {e}', { e: r.data.erro || r.data.estado }), 'falha'));
+    };
+    DS.modal(p.titulo, h('div', { class: 'ds-detalhe' }, h('section', { class: 'ds-detalhe-main', id: 'tkl-painel', 'data-local': p.id },
+      DS.bloco('Descrição', DS.texto(p.dados.descricao, 'Sem descrição.')),
+      p.falhaDeOrigem ? DS.bloco('Falha de origem', h('p', {}, tr('Caso {c} da run local {r}.', { c: p.falhaDeOrigem.casoId, r: p.falhaDeOrigem.runLocalId.slice(0, 8) }))) : null,
+      p.remoto?.chave ? DS.bloco(p.estado === 'VINCULADA' ? 'Ticket vinculado' : 'Ticket publicado', h('p', {}, p.remoto.chave, p.remoto.url ? ' · ' + p.remoto.url : '')) : null,
+      aberta ? DS.bloco('Vincular a um ticket que já existe', [h('p', { class: 'suave' }, tr('Informe a chave do ticket. O Prumo guarda o vínculo, sem consultar nem alterar o Jira.')), h('div', { class: 'ds-cab-acoes' }, chave, DS.acao('Vincular', async () => { const r = await api.propostaVincular(p.id, chave.value); if (!r.ok) { saida.replaceChildren(DS.alerta(r.error, 'falha')); return; } avisar(tr('Ticket local vinculado a {k}.', { k: r.data.remoto.chave })); await atualizarEspaco(e); fecharEMudar(); }, { id: 'tkl-vincular', primaria: true }))]) : null, saida),
+      h('aside', {}, DS.meta([['Origem', DS.origem('prumo', 'Prumo · neste computador')], ['Como nasceu', origemDoLocal(p)], ['Classificação', rotuloClassificacao(p.dados.classificacao)], ['Estado', p.estado === 'VINCULADA' ? tr('Vinculada') : p.estado === 'PUBLICADA' ? tr('Publicada') : tr('Local, sem integração')], ['Criado', quando(p.criadaEm)]]),
+        aberta ? h('div', { class: 'ds-acoes-col' }, h('h3', { class: 'ds-h' }, tr('Ações')), DS.campo('Classificação', cls),
+          DS.acao('Salvar classificação', async () => { const r = await api.propostaEditar(p.id, { ...p.dados, classificacao: cls.value }); if (!r.ok) { saida.replaceChildren(DS.alerta(r.error, 'falha')); return; } avisar(tr('Classificação atualizada.')); fecharEMudar(); }, { id: 'tkl-classificar' }),
+          DS.acao('Publicar no Jira…', publicar, { id: 'tkl-publicar', desabilitado: !vj || !perm.jira, titulo: !vj ? 'Vincule o Jira em Conexões para publicar.' : !perm.jira ? 'Escrita no Jira desligada.' : null }),
+          DS.acao('Descartar', async () => { const r = await api.propostaDescartar(p.id); if (!r.ok) { saida.replaceChildren(DS.alerta(r.error, 'falha')); return; } fecharEMudar(); }, { id: 'tkl-descartar' })) : null)),
+    { tamanho: 'lg', subtitulo: [DS.origem('prumo'), DS.chip(origemDoLocal(p)), DS.chip(rotuloClassificacao(p.dados.classificacao))] });
+  }
 
   async function avancada(e) {
     const caixa = h('div', { class: 'ds-avancada' }, DS.info('Consulta direta ao Jira vinculado: detalhe por chave, comentários e descoberta do campo de critérios de aceite.'));

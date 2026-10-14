@@ -1,7 +1,7 @@
 'use strict';
 /** Entrada do Prumo com o login ligado: entrar, criar conta, esqueci a senha, troca de senha temporária, menu da conta e telas por permissão. */
 window.PrumoConta = (() => {
-  let sessao = null; let dialogo = null; let vigia = null;
+  let sessao = null; let dialogo = null; let lugar = null; let vigia = null;
   const codigoDo = (erro) => /^([A-Z][A-Z0-9_]{2,63}):/.exec(String(erro || ''))?.[1] || null;
   const pode = (aba) => !sessao || !sessao.loginAtivo || (sessao.telas?.[aba] ?? 'NENHUM') !== 'NENHUM';
   const soVer = (aba) => !!sessao?.loginAtivo && sessao.telas?.[aba] === 'VER';
@@ -35,13 +35,15 @@ window.PrumoConta = (() => {
     if (!dialogo) {
       dialogo = h('dialog', { id: 'entrada', class: 'entrada', 'aria-labelledby': 'entrada-titulo' });
       dialogo.addEventListener('cancel', (e) => e.preventDefault()); // Esc não fecha: sem entrar não há o que usar.
+      lugar = h('div', { class: 'entrada-lugar' });
+      dialogo.append(PrumoVitrine.ceu(), h('div', { class: 'entrada-palco' }, PrumoVitrine.lema(), lugar));
       document.body.append(dialogo);
     }
     document.body.classList.add('com-entrada');
     if (!dialogo.open) dialogo.showModal();
     return dialogo;
   }
-  function trocarVista(...nos) { const d = abrirDialogo(); d.replaceChildren(h('div', { class: 'entrada-cartao' }, ...nos)); d.querySelector('input')?.focus(); }
+  function trocarVista(...nos) { const d = abrirDialogo(); lugar.replaceChildren(h('div', { class: 'entrada-cartao' }, ...nos)); d.querySelector('input')?.focus(); }
 
   function vistaEntrar(aviso) {
     const login = campo('entrada-login', 'Login', 'text', { autocomplete: 'username', maxlength: 60, autocapitalize: 'off' });
@@ -182,7 +184,7 @@ window.PrumoConta = (() => {
   /** Chamado pela inicialização da janela: true quando pode seguir (sem login ou com sessão válida). */
   async function iniciar() {
     const r = await api.contaSessao();
-    if (!r.ok) { trocarVista(...cartao('Não foi possível ler as contas', null), DS.alerta(textoErro(r.error), 'falha'), h('p', { class: 'entrada-regra' }, tr('O arquivo de contas deste computador está ilegível. Quem administra o Windows pode restaurá-lo de um backup.'))); return false; }
+    if (!r.ok) { trocarVista(...cartao('Não foi possível ler as contas', null), DS.alerta(textoErro(r.error), 'falha'), h('p', { class: 'entrada-regra' }, tr('O arquivo de contas deste computador está ilegível. Quem administra este computador pode restaurá-lo de um backup.'))); return false; }
     sessao = r.data;
     if (sessao.loginAtivo && !sessao.usuario) { vistaEntrar(sessao.expirou ? 'A sessão terminou por inatividade; entre de novo.' : null); return false; }
     if (sessao.usuario?.trocarSenha) { vistaTrocar(); return false; }

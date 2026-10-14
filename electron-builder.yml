@@ -52,3 +52,28 @@ nsis:
   installerIcon: assets/prumo-icon.ico
   uninstallerIcon: assets/prumo-icon.ico
 publish: null
+# macOS e Linux: gerados no CI (cada sistema compila o seu). Sem assinatura da Apple, o macOS mostra o aviso de
+# "desenvolvedor não identificado" na primeira abertura (veja docs/ajuda/03-instalar.md). O ícone vem de assets/prumo-icon-1024.png.
+mac:
+  icon: assets/prumo-icon-1024.png
+  category: public.app-category.developer-tools
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  artifactName: Prumo-QA-${version}-mac-${arch}.${ext}
+dmg:
+  title: Prumo QA ${version}
+linux:
+  icon: assets/prumo-icon-1024.png
+  category: Development
+  synopsis: Qualidade de software do ticket à evidência
+  maintainer: Ana P. Lysyk <paulalysyk1234@gmail.com>
+  target:
+    - target: AppImage
+      arch: x64
+    - target: deb
+      arch: x64
+  artifactName: Prumo-QA-${version}-linux-${arch}.${ext}

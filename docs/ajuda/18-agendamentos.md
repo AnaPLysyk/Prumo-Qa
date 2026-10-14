@@ -6,7 +6,7 @@ O Prumo executa uma rotina de QA sozinho, sem IA. Tudo abaixo funciona com Claud
 
 Em Agendamentos, clique em Nova rotina. Escolha o projeto Prumo, o tipo, a frequência e o fuso horário.
 
-Tipos disponíveis: consulta Jira (somente leitura), smoke e regressão (executam uma automação já declarada no contrato do projeto), validação por ticket (executa só automações que você associou ao ticket em Rastreabilidade), análise de mudanças (lê commits do GitHub e recomenda; nunca dispara testes sozinha) e desempenho com k6.
+Tipos disponíveis: consulta Jira (somente leitura), smoke e regressão (executam uma automação já declarada no contrato do projeto), validação por ticket (executa só automações que você associou ao ticket em Testes › Repositório), análise de mudanças (lê commits do GitHub e recomenda; nunca dispara testes sozinha) e desempenho com k6.
 
 Frequências: uma vez, a cada N minutos, todos os dias ou em dias da semana, sempre no fuso escolhido. A mudança de horário de verão é tratada: um horário que não existe avança para depois do salto e um horário repetido vale uma vez.
 

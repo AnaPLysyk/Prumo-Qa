@@ -1,5 +1,11 @@
 # Segurança e limites de confiança
 
+## Sistemas e consolidação 2.13
+
+O Windows mantém o broker CredUI/LogonUser. No macOS, o pedido usa autenticação administrativa do sistema via AppleScript, com o escopo passado como dado. No Linux, uma janela zenity/kdialog apresenta o escopo e pkexec/polkit autoriza a chamada; sem esses componentes o pedido é bloqueado. Esses mecanismos podem usar autorização administrativa em cache do sistema e não têm a garantia do broker Windows de exigir a senha da mesma conta em cada pedido. O nome registrado em macOS/Linux é o usuário do processo, não uma identidade autenticada retornada pelo sistema. Escopo inválido ou expirado é recusado antes e depois do diálogo. Testes usam executores sintéticos; não comprovam autenticação humana nesses sistemas.
+
+Credenciais usam o cofre do Electron (DPAPI, Keychain ou Secret Service/KWallet). O backend `basic_text` do Linux é recusado. A gravação JSON sincroniza o arquivo temporário em disco antes da substituição. Ao atingir o limite de autorizações, só registros sem poder vigente podem liberar espaço; autorizações vigentes não são descartadas. Tokens fine-grained do GitHub e tokens Atlassian são mascarados também sem rótulo, e respostas MCP preservam o código contratual do erro.
+
 ## Login local e permissões (2.12)
 
 - **Desligado por padrão.** Sem login ligado, o Prumo usa a conta do Windows e nada muda. Ligar o login cria `acessos.json` na pasta `plataforma` dos dados, separado de `contas.json` (contas de serviço Jira/Qase/GitHub).

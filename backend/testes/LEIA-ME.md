@@ -35,7 +35,11 @@ A janela de senha do Windows que autoriza uma execução.
 
 | Arquivo | O que faz |
 | --- | --- |
-| `solicitarAprovacao.ts` | Abre a janela de senha do Windows (aprovar.exe) mostrando projeto, comando e hash; devolve quem aprovou ou nada. |
+| `aprovarNoLinux.ts` | Aprovação humana no Linux: janela com o escopo (zenity ou kdialog) e, em seguida, a autenticação do sistema (polkit/pkexec). |
+| `aprovarNoMac.ts` | Aprovação humana no macOS: a janela de autenticação do próprio sistema (senha ou Touch ID), com o escopo no texto. |
+| `executarAprovador.ts` | Roda um programa de autenticação do sistema (osascript, zenity, pkexec) sem shell, com prazo, e devolve o código de saída. |
+| `solicitarAprovacao.ts` | Pede a aprovação humana no sistema da pessoa: janela de senha do Windows (aprovar.exe), autenticação do macOS ou polkit no Linux. |
+| `textoDaAprovacao.ts` | Texto curto, sem marcação, que a janela de autenticação do sistema mostra para a pessoa aprovar. |
 
 ## banco/
 

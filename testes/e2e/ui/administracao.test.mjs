@@ -28,6 +28,6 @@ test('Administração › Documentação viva: arquivo escolhido mostra o códig
   await a.page.screenshot({ path: path.join('tmp', 'evidencias', 'telas', 'administracao-documentacao.png') });
   await a.page.getByRole('tab', { name: 'Sistema' }).click();
   assert.match(await a.page.textContent('#adm-resumo'), /\d+telas/);
-  assert.match(await a.page.textContent('#adm-area'), /conta do Windows/);
+  assert.match(await a.page.textContent('#adm-area'), /conta deste computador/);
   assert.deepEqual(a.erros, []);
 });

@@ -13,7 +13,7 @@ abas.agenda = async (el) => {
   if (!lista.length) el.append(h('div', { class: 'vazio', id: 'agenda-vazia' }, tr('Nenhuma rotina criada ainda.')));
   for (const r of lista) el.append(cartaoRotina(r, espacos, recarregar));
   const perm = await chamar(() => api.agendaPermissoes(estado.espaco?.id)); if (perm) el.append(blocoPoliticas(espacos, perm, recarregar));
-  el.append(h('h2', {}, tr('Prumo residente')), h('div', { class: 'nota', id: 'residente' }, h('p', {}, tr('Ao fechar a janela, o Prumo continua na bandeja do Windows para executar as rotinas. Para parar tudo, use "Sair do Prumo" no menu do ícone da bandeja: isso encerra o worker e os processos filhos.')),
-    ...[['iniciarComWindows', 'Iniciar o Prumo com o Windows (desligado por padrão; só você pode ligar)'], ['notificarAgenda', 'Avisar quando uma rotina falhar, for bloqueada ou concluir']].map(([k, t]) => h('label', { class: 'opcao' }, h('input', { type: 'checkbox', id: 'pref-' + k, checked: !!estado.prefs?.[k], onchange: async (e) => { const r = await chamar(() => api.salvarPreferencias({ [k]: e.target.checked })); if (r) estado.prefs = r.preferencias; } }), tr(t)))));
+  el.append(h('h2', {}, tr('Prumo residente')), h('div', { class: 'nota', id: 'residente' }, h('p', {}, tr('Ao fechar a janela, o Prumo continua na bandeja do sistema para executar as rotinas. Para parar tudo, use "Sair do Prumo" no menu do ícone da bandeja: isso encerra o worker e os processos filhos.')),
+    ...[['iniciarComWindows', 'Iniciar o Prumo com o sistema (desligado por padrão; só você pode ligar)'], ['notificarAgenda', 'Avisar quando uma rotina falhar, for bloqueada ou concluir']].map(([k, t]) => h('label', { class: 'opcao' }, h('input', { type: 'checkbox', id: 'pref-' + k, checked: !!estado.prefs?.[k], onchange: async (e) => { const r = await chamar(() => api.salvarPreferencias({ [k]: e.target.checked })); if (r) estado.prefs = r.preferencias; } }), tr(t)))));
 };
 

@@ -1,4 +1,4 @@
-# Prumo QA 2.11 — Plataforma desktop de engenharia de qualidade
+# Prumo QA 2.13 — Plataforma desktop de engenharia de qualidade
 
 ## Onde fica cada coisa
 

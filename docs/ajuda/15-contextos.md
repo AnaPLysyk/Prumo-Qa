@@ -1,6 +1,6 @@
 # Contextos: requisitos e regras do projeto
 
-A aba **Contextos** guarda, para o projeto selecionado, os requisitos funcionais e não funcionais, regras de negócio, critérios de aceite, restrições técnicas e decisões que a IA e os testes devem respeitar. Tudo fica **somente neste computador**, em %LOCALAPPDATA%\PrumoQA\contextos, separado por projeto. O Prumo não altera o seu código nem o qa.project.json.
+Em **Agentes**, use o botão **Contextos** para abrir o modal do projeto selecionado. Ele guarda requisitos funcionais e não funcionais, regras de negócio, critérios de aceite, restrições técnicas e decisões que a IA e os testes devem respeitar. Tudo fica **somente neste computador**, em %LOCALAPPDATA%\PrumoQA\contextos, separado por projeto. O Prumo não altera o seu código nem o qa.project.json.
 
 ## Estados de confiança
 

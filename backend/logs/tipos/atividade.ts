@@ -1,7 +1,7 @@
 /** Formato de um registro do diário de operações, ferramentas conhecidas, orientações dos achados e limites do histórico. */
 import { z } from 'zod';
 
-export const ferramentas = ['contexto_projeto','revisar_cobertura','executar_validacao','consultar_evidencias','desconhecida'] as const;
+export const ferramentas = ['contexto_projeto','revisar_cobertura','executar_validacao','consultar_evidencias','listar_politicas','propor_caso','propor_bug','propor_aprendizado','desconhecida'] as const;
 
 export const estados = ['STARTED','OK','NOT_VERIFIED','PASS','FAIL','BLOCKED','NOT_RUN','ERROR'] as const;
 

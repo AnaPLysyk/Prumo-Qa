@@ -22,7 +22,7 @@ window.PrumoAdministracaoAcessos = (() => {
     const senha = h('input', { id: 'ativar-senha', type: 'password', maxlength: 200, autocomplete: 'new-password' });
     const confirma = h('input', { id: 'ativar-confirma', type: 'password', maxlength: 200, autocomplete: 'new-password' });
     area.replaceChildren(
-      DS.alerta(['O login está desligado: hoje o Prumo usa a conta do Windows deste computador e qualquer pessoa com acesso a ela usa todas as telas.', 'Ative o login criando a primeira conta, de administrador. A partir daí a janela pede login, cada tela respeita o papel da pessoa e você gerencia as contas aqui.'], 'info'),
+      DS.alerta(['O login está desligado: hoje o Prumo usa a conta deste computador e qualquer pessoa com acesso a ela usa todas as telas.', 'Ative o login criando a primeira conta, de administrador. A partir daí a janela pede login, cada tela respeita o papel da pessoa e você gerencia as contas aqui.'], 'info'),
       DS.secao('Ativar login', [
         h('div', { class: 'adm-form' }, DS.campo('Seu nome', nome), DS.campo('Login', login, { ajuda: '3 a 40 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.' }),
           DS.campo('Senha', senha, { ajuda: 'Pelo menos 10 caracteres, misturando letras e números.' }), DS.campo('Confirmar senha', confirma)),

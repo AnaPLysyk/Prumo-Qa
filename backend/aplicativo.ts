@@ -18,6 +18,8 @@ registrarCanaisIpc();
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance', () => mostrarJanela());
+  // macOS: clicar no ícone do Dock reabre a janela (o Prumo continua residente depois de fechá-la).
+  app.on('activate', () => mostrarJanela());
   // Encerramento controlado: para o worker (mata filhos, registra interrupção, libera a trava) antes de sair de verdade.
   let encerrando = false;
   app.on('before-quit', e => {
@@ -25,7 +27,8 @@ else {
     void workerDoAplicativo.parar().catch(() => undefined).finally(() => { estadoDoAplicativo.bandeja?.destroy(); estadoDoAplicativo.bandeja = null; app.quit(); });
   });
   void app.whenReady().then(() => {
-    Menu.setApplicationMenu(null);
+    // macOS precisa do menu padrão (copiar, colar, sair com ⌘Q); nos outros sistemas a janela não tem menu.
+    Menu.setApplicationMenu(process.platform === 'darwin' ? Menu.buildFromTemplate([{ role: 'appMenu' }, { role: 'editMenu' }, { role: 'windowMenu' }]) : null);
     // Nada de rede na janela: só file:// (a própria página) e devtools em desenvolvimento.
     session.defaultSession.webRequest.onBeforeRequest((d, cb) => cb({ cancel: !(d.url.startsWith('file:') || d.url.startsWith('devtools:')) }));
     session.defaultSession.setPermissionRequestHandler((_w, _p, cb) => cb(false));

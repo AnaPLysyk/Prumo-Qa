@@ -10,5 +10,5 @@ export function gravarLocal(nome:string,valor:unknown,base?:string) {
   if(fs.existsSync(alvo)){const st=fs.lstatSync(alvo);if(!st.isFile()||st.nlink!==1)throw new Error('LOCAL_FILE_INVALID');}
   fs.mkdirSync(path.dirname(alvo),{recursive:true,mode:0o700});semLinks(alvo);
   const tmp=alvo+'.'+randomUUID()+'.tmp';
-  try{fs.writeFileSync(tmp,texto,{flag:'wx',mode:0o600});fs.renameSync(tmp,alvo);}finally{if(fs.existsSync(tmp))fs.unlinkSync(tmp);}
+  try{const fd=fs.openSync(tmp,'wx',0o600);try{fs.writeFileSync(fd,texto);fs.fsyncSync(fd);}finally{fs.closeSync(fd);}fs.renameSync(tmp,alvo);}finally{if(fs.existsSync(tmp))fs.unlinkSync(tmp);}
 }

@@ -147,6 +147,7 @@ import { testesPipelines } from '../../testes/api/testesPipelines.js';
 import { testesCatalogo } from '../../testes/api/testesCatalogo.js';
 import { propostasCriar } from '../../tickets/api/propostasCriar.js';
 import { propostasDescartar } from '../../tickets/api/propostasDescartar.js';
+import { propostasVincular } from '../../tickets/api/propostasVincular.js';
 import { propostasEditar } from '../../tickets/api/propostasEditar.js';
 import { propostasListar } from '../../tickets/api/propostasListar.js';
 import { propostasPublicar } from '../../tickets/api/propostasPublicar.js';
@@ -222,6 +223,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('propostas:editar', propostasEditar);
   registrarCanal('propostas:revisar', propostasRevisar);
   registrarCanal('propostas:descartar', propostasDescartar);
+  registrarCanal('propostas:vincular', propostasVincular);
   registrarCanal('propostas:publicar', propostasPublicar);
   registrarCanal('runs:listar', runsListar);
   registrarCanal('runs:preparar', runsPreparar);

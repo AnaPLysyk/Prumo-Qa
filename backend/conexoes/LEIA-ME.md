@@ -101,6 +101,7 @@ Conexão do Codex e do Claude com o Prumo pelo MCP: proposta, configuração e t
 | `assinaturaDaConfiguracao.ts` | Impressão digital da configuração proposta, para saber se o teste foi com a mesma configuração. |
 | `caminhoNormalizado.ts` | Normaliza um caminho para comparação (minúsculas no Windows). |
 | `comandoEhNodeDoPrumo.ts` | Diz se o comando configurado no cliente de IA é o node deste computador ou o próprio Prumo. |
+| `comandoParaOTerminal.ts` | Monta o comando de conexão para colar no terminal: PowerShell no Windows, shell comum (aspas simples) no macOS e no Linux. |
 | `conferirServidores.ts` | Conta quantos servidores MCP configurados no cliente apontam para este Prumo e este projeto. |
 | `diagnosticarIntegracao.ts` | Junta configuração, teste de protocolo e uso observado num diagnóstico com níveis claros, sem afirmar mais do que foi visto. |
 | `inspecionarIntegracao.ts` | Lê a configuração do Codex ou do Claude (sem segredos) e diz se o Prumo está configurado para este projeto. |
@@ -178,8 +179,9 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `listarRecursosDaConta.ts` | Lista os projetos ou repositórios que uma conta enxerga no serviço, para escolher qual vincular. |
 | `nucleoServicos.ts` | Reúne tudo o que a tela Conexões faz com Jira, Qase e GitHub: adicionar e validar conta, listar recursos, vincular, consultar e escrever com a credencial protegida. |
 | `procurarComentarioNoJira.ts` | Procura no ticket do Jira um comentário que o Prumo já publicou (pelo marcador), para não publicar duas vezes. |
+| `protetorDoSistema.ts` | Protetor de credenciais do sistema (Windows DPAPI, Keychain do macOS, cofre de senhas do Linux) sobre o safeStorage do Electron. |
 | `removerConta.ts` | Desativa uma conta, apaga sua credencial e marca os vínculos que a usavam como "sem credencial"; nada é apagado no serviço. |
-| `servicosDoAplicativo.ts` | Núcleo de serviços (Jira, Qase, GitHub) do aplicativo, com as credenciais protegidas pelo Windows. |
+| `servicosDoAplicativo.ts` | Núcleo de serviços (Jira, Qase, GitHub) do aplicativo, com as credenciais protegidas pelo cofre do sistema (Windows, macOS ou Linux). |
 | `validarConta.ts` | Confere se a credencial de uma conta ainda funciona e é da mesma identidade; anota a data da validação. |
 | `validarVinculoDoServico.ts` | Confere de novo o vínculo do projeto com o serviço (aceitando mudança de chave do recurso) e devolve o projeto atualizado. |
 | `verificarVinculoDoServico.ts` | Antes de qualquer consulta ou escrita, confere de novo a conta, a identidade e o recurso vinculado; anota no projeto se o vínculo continua válido. |

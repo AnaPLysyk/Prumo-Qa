@@ -16,6 +16,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `propostasListar.ts` | Canal propostas:listar: Listar propostas de casos e bugs (da pessoa, do Prumo ou de uma IA). |
 | `propostasPublicar.ts` | Canal propostas:publicar: Publicar uma proposta (caso no Qase ou bug no Jira). |
 | `propostasRevisar.ts` | Canal propostas:revisar: Registrar a revisão (duplicidade, requisito, risco e cobertura) de uma proposta. |
+| `propostasVincular.ts` | Canal propostas:vincular: Vincular uma proposta de bug a um ticket que já existe no Jira. |
 
 ## banco/
 
@@ -73,6 +74,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `semelhancaEntrePalavras.ts` | Mede de 0 a 1 o quanto dois conjuntos de palavras se parecem, para achar propostas repetidas. |
 | `textoComparavel.ts` | Simplifica um texto (minúsculas, sem acentos e sem pontuação) para comparar propostas. |
 | `validarDadosDaProposta.ts` | Confere os dados de uma proposta: caso de teste no formato do Qase ou bug no formato do Jira. |
+| `vincularPropostaATicket.ts` | Vincula uma proposta de bug a um ticket que já existe no Jira, sem criar nada lá: guarda a chave e registra a ligação com o caso da falha. |
 
 ## tipos/
 

@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { aspasDoPowershell } from './aspasDoPowershell.js';
+import { comandoParaOTerminal } from './comandoParaOTerminal.js';
 import { localizarClienteDeIa } from './localizarClienteDeIa.js';
 import { pastaAtividades } from '../../logs/banco/pastaAtividades.js';
 
@@ -23,6 +23,6 @@ export function prepararConexao(p:Projeto,cliente:string,contrato?:string) {
   const instalado=localizarClienteDeIa(cliente);
   const destino=cliente==='codex'?path.join(process.env.CODEX_HOME||path.join(os.homedir(),'.codex'),'config.toml'):path.join(os.homedir(),'.claude.json');
   return {client:cliente,name:nome,installed:!!instalado,executable:instalado?.executable??null,manualOnly:instalado?.shim??true,destination:destino,
-    configuration:configuracao,args,command:`& ${aspasDoPowershell(instalado?.executable??cliente)} ${args.map(aspasDoPowershell).join(' ')}`,
+    configuration:configuracao,args,command:comandoParaOTerminal(instalado?.executable??cliente,args),
     confirmation:`CONECTAR ${nome}`,connected:false,notice:'Configuração proposta; não comprova sessão ativa. Nenhum arquivo foi alterado.'};
 }
