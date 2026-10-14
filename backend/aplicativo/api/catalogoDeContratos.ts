@@ -105,7 +105,7 @@ export const esquemasIpc = {
   'skills:decidir': z.object({id:z.string().regex(idTrecho),estado:z.enum(['APROVADO','DESCARTADO'])}).strict(),
   'skills:importar': z.object({especializacao:z.enum(especializacoes.map(e=>e.id) as [string,...string[]]),fonte:z.string().trim().max(300).optional()}).strict(),
   'perfil:obter': z.object({}).strict(),
-  'perfil:salvar': z.object({comoChamar:z.string().max(30).nullable().optional(),papel:z.enum(papeis as unknown as ['qa','dev','po','analista','outro']).nullable().optional()}).strict(),
+  'perfil:salvar': z.object({comoChamar:z.string().max(30).nullable().optional(),papel:z.enum(papeis as unknown as ['qa','dev','po','analista','outro']).nullable().optional(),experiencia:z.enum(['iniciante','intermediario','avancado']).nullable().optional(),foco:z.string().max(160).nullable().optional(),compartilharComIa:z.boolean().optional()}).strict(),
   'ia:delegacao': z.object({provedor:z.enum(['claude','codex']),valor:z.boolean()}).strict(),
   'agentes:estado': z.object({espacoId:z.string().uuid()}).strict(),
   'agentes:salvar': z.object({espacoId:z.string().uuid(),especializacoes:z.array(z.string().max(40)).max(16),politicas:z.record(z.string().max(30))}).strict(),

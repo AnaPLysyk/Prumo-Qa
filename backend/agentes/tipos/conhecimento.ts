@@ -1,5 +1,5 @@
 /** Formato de um conhecimento, perfil e atendimento, os limites e o conhecimento inicial do Prumo. */
-import { Papel, agentesChat } from './persona.js';
+import { Experiencia, Papel, agentesChat } from './persona.js';
 
 /**
  * Banco de conhecimento dos agentes (2.10): um arquivo SQLite por usuário do Windows (`conhecimento.db` na pasta de dados
@@ -28,7 +28,8 @@ export type OrigemConhecimento = 'PRUMO' | 'PESSOA' | 'CONVERSA' | 'IA';
 
 export type Conhecimento = { id: string; agente: string | null; espacoId: string | null; tipo: TipoConhecimento; titulo: string; texto: string; origem: OrigemConhecimento; estado: EstadoConhecimento; criadoEm: string; decididoEm: string | null; cliente: string | null };
 
-export type Perfil = { comoChamar: string | null; papel: Papel | null; atualizadoEm: string | null };
+/** O que o Prumo sabe da pessoa: como chamar, papel, experiência e foco. `compartilharComIa` autoriza enviar experiência, foco e papel de acesso à IA externa (Claude Code/Codex). */
+export type Perfil = { comoChamar: string | null; papel: Papel | null; experiencia: Experiencia | null; foco: string | null; compartilharComIa: boolean; atualizadoEm: string | null };
 
 export const limitesConhecimento = { titulo: 120, texto: 2000, itens: 5000, iaPorHora: 20, vocabulario: 3000, atendimentos: 5000, porConsulta: 200 } as const;
 

@@ -10,23 +10,46 @@ import { itensDoMenuDaBandeja as modeloMenuBandeja } from '../../../dist/aplicat
 import { resumoDoWorker as resumoEstado } from '../../../dist/aplicativo/bandeja/resumoDoWorker.js';
 import { textoNoIdioma as tm } from '../../../dist/aplicativo/bandeja/textoNoIdioma.js';
 
+const capturar = (page, nome) => { fs.mkdirSync('tmp/evidencias/telas', { recursive: true }); return page.screenshot({ path: 'tmp/evidencias/telas/' + nome + '.png' }); };
 const token = (page, nome) => page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), nome);
 
-test('Configuração começa fechada, mostra Meu perfil recolhido e fecha por Escape', async (t) => {
+test('Configurações começam fechadas, abrem em Meu perfil, têm três abas e fecham por Escape', async (t) => {
   const a = await abrir(t, novoDados(t), [], {}, { inicio: true });
   assert.equal(await a.page.isVisible('#controles'), false);
   await a.page.click('#ajustes');
   await a.page.waitForSelector('#controles', { state: 'visible' });
-  assert.equal(await a.page.locator('#controles details[open]').count(), 0);
-  const perfil = a.page.locator('#controles .v36-ajustes-perfil');
-  assert.equal(await perfil.locator('summary').textContent(), 'Meu perfil');
-  assert.equal(await a.page.isVisible('#ia-pessoa'), false);
-  await perfil.locator('summary').click();
-  assert.equal(await a.page.isVisible('#ia-pessoa'), true);
-  assert.equal(await a.page.isVisible('#ia-papel'), true);
+  assert.deepEqual(await a.page.locator('#ajustes-abas [role=tab]').allTextContents(), ['Meu perfil', 'Aparência', 'Assistente']);
+  assert.equal(await a.page.getAttribute('[data-ajustes-aba=perfil]', 'aria-selected'), 'true', 'abre em Meu perfil');
+  for (const id of ['#ia-pessoa', '#ia-papel', '#ia-experiencia', '#ia-foco', '#ia-compartilhar']) assert.equal(await a.page.isVisible(id), true, id);
+  assert.equal(await a.page.isVisible('#tema'), false, 'tema fica em Aparência');
+  await a.page.click('[data-ajustes-aba=aparencia]'); assert.equal(await a.page.isVisible('#tema'), true); assert.equal(await a.page.isVisible('#ia-pessoa'), false);
+  await a.page.click('[data-ajustes-aba=assistente]'); assert.equal(await a.page.isVisible('#ia-nome'), true);
   await a.page.keyboard.press('Escape');
   assert.equal(await a.page.isVisible('#controles'), false);
   assert.equal(await a.page.getAttribute('#ajustes', 'aria-expanded'), 'false');
+  assert.deepEqual(a.erros, []);
+});
+
+test('Meu perfil: salva nome, papel, experiência, foco e o compartilhamento; os agentes passam a conhecer a pessoa', async (t) => {
+  const a = await abrir(t, novoDados(t), [], {}, { inicio: true }); const p = a.page;
+  await p.click('#ajustes'); await p.waitForSelector('#ia-pessoa');
+  await p.fill('#ia-pessoa', 'Ana'); await p.selectOption('#ia-papel', 'qa'); await p.selectOption('#ia-experiencia', 'avancado');
+  await p.fill('#ia-foco', 'automação de API e regressão'); await p.locator('#ia-foco').blur();
+  assert.equal(await p.textContent('.ajuste-contador'), '28/160', 'contador de caracteres do foco');
+  await p.waitForFunction(() => /Perfil salvo/.test(document.querySelector('#ia-perfil-estado')?.textContent || ''));
+  await p.check('#ia-compartilhar'); await p.waitForTimeout(300);
+  const salvo = (await p.evaluate(() => window.prumo.perfilObter())).data;
+  assert.deepEqual({ ...salvo, atualizadoEm: null }, { comoChamar: 'Ana', papel: 'qa', experiencia: 'avancado', foco: 'automação de API e regressão', compartilharComIa: true, atualizadoEm: null });
+  // Conta: sem login o painel explica; o botão leva à explicação
+  assert.match(await p.textContent('#ia-conta'), /Sem login/); await p.click('#ia-abrir-conta'); await p.locator('#qualidade-dialog[open]').waitFor(); assert.match(await p.textContent('#qualidade-dialog'), /login está desligado/);
+  await p.keyboard.press('Escape');
+  // O assistente abre a conversa pelo nome e mostra o foco
+  const abertura = (await p.evaluate(() => window.prumo.assistenteAbertura(null))).data;
+  assert.match(abertura.linhas.join(' '), /Oi, Ana!/); assert.match(abertura.linhas.join(' '), /Vou priorizar automação de API e regressão/);
+  // Entrada inválida é recusada pelo contrato e o painel volta ao que está salvo
+  assert.equal((await p.evaluate(() => window.prumo.perfilSalvar({ experiencia: 'mestre' }))).ok, false);
+  assert.equal((await p.evaluate(() => window.prumo.perfilSalvar({ foco: 'x'.repeat(161) }))).ok, false);
+  await capturar(p, 'configuracoes-meu-perfil');
   assert.deepEqual(a.erros, []);
 });
 

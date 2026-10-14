@@ -31,3 +31,7 @@ Login controls what each person sees and changes **in the application**. The sch
 ## Platform agents
 
 In **Administration › Agents**, whoever has permission turns each agent on or off for all projects, the use of Claude Code or Codex, and orchestration. These rules apply on top of each project's policies (Agents screen).
+
+## My profile (Settings)
+
+In the gear panel, the **My profile** tab stores what Prumo should call you, your role on the team, your experience (beginner, intermediate or advanced) and your work focus (up to 160 characters). Prumo's agents use this data on this computer to greet you, adjust the level of explanations and prioritize your focus. Claude Code and Codex only receive experience, focus and your account's role if you check **Share experience, focus and account with the external AI** (unchecked by default); even then they arrive as data, never as instructions. **My account** (name and password change) is in the same panel and in the corner of the window.

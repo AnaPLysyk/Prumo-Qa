@@ -2,6 +2,8 @@
 import { randomUUID } from 'node:crypto';
 import { semAcentos } from '../../dist/compartilhado/texto/semAcentos.js';
 import { normalizarNome } from '../../dist/agentes/regras/normalizarNome.js';
+import { normalizarFoco } from '../../dist/agentes/regras/normalizarFoco.js';
+import { experiencias, papeis } from '../../dist/agentes/tipos/persona.js';
 import { termosDaFrase } from '../../dist/agentes/regras/termosDaFrase.js';
 import { sementeDasSkills } from '../../dist/agentes/banco/sementeDasSkills.js';
 import { validarEspecializacao } from '../../dist/agentes/regras/validarEspecializacao.js';
@@ -15,7 +17,7 @@ const itens = [];
 const vocabulario = [];
 const atendimentos = [];
 export const falhasConhecimento = { registrar: null };
-const lerPerfil = (base) => perfis.get(base) ?? { comoChamar: null, papel: null, atualizadoEm: null };
+const lerPerfil = (base) => perfis.get(base) ?? { comoChamar: null, papel: null, experiencia: null, foco: null, compartilharComIa: false, atualizadoEm: null };
 const listarConhecimentos = (f) => itens.filter(c => (!c.espacoId || c.espacoId === f.espacoId) && (!f.agente || c.agente === f.agente || (!f.somenteDoAgente && !c.agente)) && (!f.estados?.length || f.estados.includes(c.estado)) && (!f.busca || real.norm(c.titulo + ' ' + c.texto).includes(real.norm(f.busca)))).slice(0, f.limite ?? 200);
 const registrarConhecimento = (n) => {
   if (falhasConhecimento.registrar) throw new Error(falhasConhecimento.registrar);
@@ -38,7 +40,14 @@ const decidirTrechoDeSkill = (id, estado) => { const t = trechos.find(x => x.id 
 export const memoria = {
   listarTrechosDeSkill, registrarTrechosDeSkill, decidirTrechoDeSkill,
   lerPerfil, listarConhecimentos, registrarConhecimento,
-  salvarPerfil: (a, base) => { const p = { ...lerPerfil(base), ...a, atualizadoEm: new Date().toISOString() }; if (a.comoChamar) p.comoChamar = real.normalizarNome(a.comoChamar); perfis.set(base, p); return p; },
+  salvarPerfil: (a, base) => {
+    const p = { ...lerPerfil(base), ...a, atualizadoEm: new Date().toISOString() };
+    if (a.comoChamar) p.comoChamar = real.normalizarNome(a.comoChamar);
+    if (p.papel != null && !papeis.includes(p.papel)) throw new Error('PROFILE_ROLE_INVALID');
+    if (p.experiencia != null && !experiencias.includes(p.experiencia)) throw new Error('PROFILE_EXPERIENCE_INVALID');
+    if (typeof a.foco === 'string') p.foco = normalizarFoco(a.foco);
+    perfis.set(base, p); return p;
+  },
   decidirConhecimento: (id, estado) => { const c = itens.find(x => x.id === id); if (!c) throw new Error('KNOWLEDGE_NOT_FOUND'); c.estado = estado; return c; },
   apagarConhecimento: (id) => { const i = itens.findIndex(x => x.id === id); if (i < 0) throw new Error('KNOWLEDGE_NOT_FOUND'); itens.splice(i, 1); return { apagado: true }; },
   relevantes: (espacoId, agente, pergunta, limite = 2) => listarConhecimentos({ espacoId, agente, estados: ['APROVADO'] }).filter(c => real.termos(pergunta).some(t => real.norm(c.titulo + ' ' + c.texto).includes(t))).slice(0, limite),
@@ -50,6 +59,6 @@ export const memoria = {
   avaliarAtendimento: (id, avaliacao) => { const a = atendimentos.find(x => x.id === id); if (!a) throw new Error('ATTENDANCE_NOT_FOUND'); a.avaliacao = avaliacao; return { avaliado: true }; },
   listarAtendimentos: (espacoId, agente, limite = 40) => atendimentos.filter(x => x.espacoId === espacoId && (!agente || x.agente === agente)).slice(-limite).reverse(),
   estadoConhecimento: (espacoId, base) => ({ arquivo: '(memória do runner)', bytes: 0, esquema: 1, tabelas: ['perfil','agentes','conhecimentos','vocabulario','atendimentos'], vistas: [], perfil: lerPerfil(base), porAgente: Object.fromEntries(['orquestrador','qa-geral','requisitos','playwright','api-rest','acessibilidade','investigacao-bugs','regressao','monitoramento'].map(agente => [agente, { aprovados: listarConhecimentos({espacoId, agente, estados:['APROVADO']}).length, rascunhos: listarConhecimentos({espacoId, agente, estados:['RASCUNHO']}).length, atendimentos: atendimentos.filter(x => x.espacoId === espacoId && x.agente === agente).length, uteis: 0, naoUteis: 0 }])), gerais: itens.filter(x => !x.espacoId && !x.agente && x.estado === 'APROVADO').length }),
-  conhecimentoParaIA: (espacoId, base) => ({ perfil: lerPerfil(base), itens: listarConhecimentos({ espacoId, estados: ['APROVADO'] }) })
+  conhecimentoParaIA: (espacoId, base) => ({ perfil: ((p) => ({ comoChamar: p.comoChamar, papel: p.papel, ...(p.compartilharComIa ? { experiencia: p.experiencia, foco: p.foco } : {}) }))(lerPerfil(base)), itens: listarConhecimentos({ espacoId, estados: ['APROVADO'] }) })
 };
 

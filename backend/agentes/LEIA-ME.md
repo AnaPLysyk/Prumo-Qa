@@ -37,7 +37,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `conversasListar.ts` | Canal conversas:listar: Listar os atendimentos de um agente (sem texto, desde a 2.10) e as conversas gravadas até a 2.9, para o Cérebro e o Painel de atividades. |
 | `iaDelegacao.ts` | Canal ia:delegacao: Autorizar ou revogar a delegação do chat ao Claude Code ou Codex. |
 | `perfilObter.ts` | Canal perfil:obter: Ler como a pessoa quer ser chamada e o papel dela. |
-| `perfilSalvar.ts` | Canal perfil:salvar: Salvar como a pessoa quer ser chamada e o papel dela (QA, dev, PO, analista ou outro). |
+| `perfilSalvar.ts` | Canal perfil:salvar: Salvar o perfil da pessoa (como chamar, papel, experiência, foco e se pode ir para a IA externa). |
 | `servicosImportar.ts` | Canal servicos:importar: Importa a descrição de um ticket do Jira como contexto em rascunho, depois da confirmação. |
 | `skillsCriar.ts` | Canal skills:criar: Acrescentar um trecho escrito pela equipe à Skill de uma especialização. |
 | `skillsDecidir.ts` | Canal skills:decidir: Aprovar ou descartar um trecho de Skill (rascunho importado ou de IA, ou um trecho existente). |
@@ -79,7 +79,7 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `lerConfiguracaoDosAgentes.ts` | Lê as configurações de agentes por projeto (agentes.json). |
 | `lerConversas.ts` | Lê as conversas antigas gravadas de um projeto. |
 | `lerPastaDeSkill.ts` | Lê uma pasta de Skill (SKILL.md e references/*.md) sem seguir atalhos, sem binários e com limite de tamanho por arquivo. |
-| `lerPerfil.ts` | Lê como a pessoa quer ser chamada e o papel dela. |
+| `lerPerfil.ts` | Lê o perfil da pessoa: como chamar, papel, experiência, foco e se pode ser compartilhado com a IA externa. |
 | `lerPermissaoDeContextosNoMcp.ts` | Lê se a pessoa permitiu enviar os contextos à IA (padrão: não). |
 | `linhaParaConhecimento.ts` | Converte uma linha do banco num conhecimento. |
 | `listarAtendimentos.ts` | Lista os atendimentos de um projeto e agente. |
@@ -95,7 +95,7 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `registrarConversa.ts` | Grava uma conversa com segredos mascarados e limite de tamanho. |
 | `registrarOrquestracao.ts` | Guarda o registro de uma orquestração (só metadados) em orquestracoes.jsonl na pasta de dados, mantendo os 500 mais recentes. |
 | `registrarTrechosDeSkill.ts` | Acrescenta trechos a uma Skill: da equipe já aprovados; importados ou de IA em rascunho. Iguais não duplicam; vários numa única transação (se um falhar, nenhum é gravado). |
-| `salvarPerfil.ts` | Salva como a pessoa quer ser chamada e o papel dela. |
+| `salvarPerfil.ts` | Salva o perfil da pessoa: como chamar, papel, experiência, foco e a autorização de compartilhar com a IA externa. |
 | `sementeDasSkills.ts` | Trechos das Skills que acompanham o aplicativo (pasta backend/agentes/skills/), já divididos e com identificador estável pelo conteúdo. |
 | `validarAgenteDoConhecimento.ts` | Confere se o agente existe. |
 | `validarProjetoDoConhecimento.ts` | Confere o id do projeto de um conhecimento. |
@@ -115,6 +115,7 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `argumentosDoProvedorDeIa.ts` | Monta os argumentos do CLI do Claude ou do Codex com tudo bloqueado (sem ferramentas, sem edição, só leitura). |
 | `classificarFalha.ts` | Classifica o texto de uma falha de teste: automação, ambiente, produto ou inconclusiva, com o motivo. |
 | `consultarIaExterna.ts` | Usa Claude ou Codex somente após autorização; retorna ao chat local quando faltar permissão ou a IA falhar. |
+| `contaParaIa.ts` | Nome e papel de acesso da conta logada (login local), para a IA saber com quem fala; sem login, nada. |
 | `conversar.ts` | Atende uma pergunta do chat: entende intenções, escolhe o agente, responde localmente e, se autorizado, consulta Claude ou Codex. |
 | `escolherAgente.ts` | Escolhe o agente que responde: o escolhido pela pessoa, o da conversa anterior ou o de palavras mais parecidas. |
 | `executarCliDeIa.ts` | Executa o CLI do Claude/Codex numa pasta temporária vazia, sem shell, com tempo limite, e apaga a pasta no fim. |
@@ -204,6 +205,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `listarContextos.ts` | Lista os contextos do projeto com busca e filtro por tipo e estado. |
 | `listarContextosDaPasta.ts` | Lista os contextos de uma pasta vinculada para a tela Contextos. |
 | `marcarConflito.ts` | Marca que um contexto conflita com outro. |
+| `normalizarFoco.ts` | Texto livre curto do foco de trabalho: sem caracteres de controle, espaços normalizados e no máximo LIMITE_FOCO caracteres. |
 | `normalizarNome.ts` | Arruma o nome dito pela pessoa (iniciais maiúsculas), recusando textos que não parecem nome. |
 | `novaVersaoDoContexto.ts` | Cria a próxima versão do histórico de um contexto (quem, quando, ação, estado e selo). |
 | `obterContexto.ts` | Abre um contexto com todas as versões do histórico. |

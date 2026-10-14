@@ -31,3 +31,7 @@ O login controla o que cada pessoa vê e altera **no aplicativo**. O worker de a
 ## Agentes da plataforma
 
 Em **Administração › Agentes**, quem tem permissão liga ou desliga cada agente para todos os projetos, o uso de Claude Code ou Codex e a orquestração. Essas regras valem por cima das políticas de cada projeto (tela Agentes).
+
+## Meu perfil (Configurações)
+
+Na engrenagem, a aba **Meu perfil** guarda como o Prumo deve chamar você, seu papel no time, sua experiência (iniciante, intermediária ou avançada) e seu foco de trabalho (até 160 caracteres). Os agentes do Prumo usam esses dados neste computador para cumprimentar, ajustar o nível das explicações e priorizar o seu foco. Claude Code e Codex só recebem experiência, foco e o papel da sua conta se você marcar **Compartilhar experiência, foco e conta com a IA externa** (vem desmarcado); mesmo assim, chegam como dados, nunca como instrução. **Minha conta** (troca de nome e senha) fica no mesmo painel e no canto da janela.

@@ -1372,6 +1372,39 @@
         "../../../dist/agentes/chat/rastrearPergunta.js"
       ],
       "perfilReal": false
+    },
+    {
+      "arquivo": "testes/unitario/regras/perfil-da-pessoa.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "agentes",
+      "motivo": "Camada principal regra; outras responsabilidades podem coexistir no arquivo. Verifica: perfil da pessoa (experiência, foco, compartilhamento com IA externa) e como os agentes o usam",
+      "evidencias": [
+        "a IA externa só recebe experiência, foco e conta quando a pessoa autorizou; nome e papel seguem como antes",
+        "banco antigo (sem as colunas novas) é migrado sem perder o perfil já guardado",
+        "../dist/agentes/banco/salvarPerfil.js",
+        "../dist/agentes/chat/personalidadeParaIa.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/e2e/ui/perfil-e-acessos.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e",
+        "regressao",
+        "seguranca"
+      ],
+      "funcionalidade": "administracao",
+      "motivo": "Interage com janela Electron/Chromium pelo helper de janela; verifica: Minha conta existe sem login, como Administrador e como usuário comum",
+      "evidencias": [
+        "Minha conta existe nas três situações: sem login, como Administrador e como usuário comum"
+      ],
+      "perfilReal": false
     }
   ]
 }

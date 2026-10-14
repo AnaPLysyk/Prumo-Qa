@@ -13,6 +13,13 @@ export type Papel = 'qa' | 'dev' | 'po' | 'analista' | 'outro';
 
 export const papeis: readonly Papel[] = ['qa', 'dev', 'po', 'analista', 'outro'];
 
+export type Experiencia = 'iniciante' | 'intermediario' | 'avancado';
+
+export const experiencias: readonly Experiencia[] = ['iniciante', 'intermediario', 'avancado'];
+
+/** Como a pessoa quer ser acompanhada: dá o nível de detalhe das respostas e dos prompts. */
+export const rotuloExperiencia: Record<Experiencia, string> = { iniciante: 'Iniciante: explique os passos e os termos', intermediario: 'Intermediária: explique o que não for óbvio', avancado: 'Avançada: vá direto ao ponto técnico' };
+
 export const rotuloPapel: Record<Papel, string> = { qa: 'QA', dev: 'Desenvolvimento', po: 'Produto (PO)', analista: 'Análise de negócio/requisitos', outro: 'Outro' };
 
 export type AgenteChat = { id: string; nome: string; especializacao: string | null; dominio: string; palavras: string[]; aba: string; rotulo: string; profissao: string; especialidade: string };

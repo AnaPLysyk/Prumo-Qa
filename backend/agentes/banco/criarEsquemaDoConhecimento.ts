@@ -20,6 +20,11 @@ export function criarEsquemaDoConhecimento(db: DatabaseSync) {
     CREATE TABLE IF NOT EXISTS atendimentos (id INTEGER PRIMARY KEY AUTOINCREMENT, em TEXT NOT NULL, espaco_id TEXT, agente_id TEXT NOT NULL REFERENCES agentes(id),
       modo TEXT NOT NULL CHECK (modo IN ('LOCAL','CLAUDE','CODEX')), fontes TEXT NOT NULL, avaliacao TEXT CHECK (avaliacao IN ('UTIL','NAO_UTIL')));
     CREATE INDEX IF NOT EXISTS atendimentos_escopo ON atendimentos (espaco_id, agente_id, em);`);
+  // 2.13: o perfil ganhou experiência, foco e a autorização de compartilhar com a IA externa (bancos antigos recebem as colunas).
+  const colunas = (db.prepare('PRAGMA table_info(perfil)').all() as { name: string }[]).map((c) => c.name);
+  if (!colunas.includes('experiencia')) db.exec(`ALTER TABLE perfil ADD COLUMN experiencia TEXT CHECK (experiencia IN ('iniciante','intermediario','avancado'))`);
+  if (!colunas.includes('foco')) db.exec('ALTER TABLE perfil ADD COLUMN foco TEXT');
+  if (!colunas.includes('compartilhar_ia')) db.exec('ALTER TABLE perfil ADD COLUMN compartilhar_ia INTEGER NOT NULL DEFAULT 0');
   const versao = (db.prepare(`SELECT valor FROM meta WHERE chave = 'esquema'`).get() as { valor?: string } | undefined)?.valor;
   if (versao && Number(versao) > VERSAO_ESQUEMA) falharConhecimento('KNOWLEDGE_SCHEMA_NEWER');
   db.exec('BEGIN');

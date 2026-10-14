@@ -11,5 +11,6 @@ export function saudacao(espacoId: string | null, nomeAssistente = 'Prumo', base
   const linhas = [pessoa ? `Oi, ${pessoa}! Aqui é ${nome}.` : `Olá! Sou ${nome}, seu colega de qualidade neste computador.`, ...situacaoDoProjeto(espacoId, base)];
   if (!pessoa) return { linhas: [...linhas, 'Antes de começarmos: como você quer que eu te chame?'], pendente: 'nome', proximos: [], pessoa };
   if (!perfil?.papel) return { linhas: [...linhas, 'Qual é o seu papel no time: QA, desenvolvimento, produto (PO) ou análise? Assim eu ajusto a conversa.'], pendente: 'papel', proximos: [], pessoa };
-  return { linhas: [...linhas, 'Por onde começamos?'], pendente: null, proximos: proximosPassosSugeridos('orquestrador', [], perfil.papel, ''), pessoa };
+  const conheco = perfil.foco ? [`Vou priorizar ${perfil.foco} nas respostas.`] : [];
+  return { linhas: [...linhas, ...conheco, 'Por onde começamos?'], pendente: null, proximos: proximosPassosSugeridos('orquestrador', [], perfil.papel, ''), pessoa };
 }

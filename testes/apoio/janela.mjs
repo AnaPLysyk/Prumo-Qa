@@ -66,7 +66,7 @@ export async function abrirPadrao(t) {
 /** Abre o popover de ajustes (tema, idioma, cor) se ainda não estiver aberto. */
 export const ajustes = async (page) => {
   if (!(await page.isVisible('#controles'))) await page.click('#ajustes');
-  const sistema = page.locator('#controles .v36-ajustes-sistema');
-  if (await sistema.count() && await sistema.getAttribute('open') === null) await sistema.locator('summary').click();
+  // 2.13: as Configurações têm abas (Meu perfil, Aparência, Assistente); tema e idioma ficam em Aparência.
+  if (!(await page.isVisible('#tema'))) await page.click('[data-ajustes-aba=aparencia]');
   await page.waitForSelector('#tema', { state: 'visible' });
 };

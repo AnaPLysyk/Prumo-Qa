@@ -112,7 +112,7 @@ window.PrumoConta = (() => {
     for (const b of document.querySelectorAll('#nav button[data-aba]')) b.hidden = SEM_ITEM_NO_MENU.includes(b.dataset.aba) || !pode(b.dataset.aba);
     for (const g of document.querySelectorAll('#nav .grupo-nav')) g.hidden = ![...g.querySelectorAll('button[data-aba]')].some((b) => !b.hidden);
     document.querySelector('#conta-caixa')?.remove();
-    if (!sessao?.usuario) return;
+    if (!sessao?.usuario) { if (sessao && !sessao.loginAtivo) contaSemLogin(); return; }
     const u = sessao.usuario; const menu = h('div', { id: 'conta-menu', class: 'controles popover conta-menu', hidden: true, role: 'menu' });
     const botao = h('button', { id: 'conta-botao', class: 'conta-botao', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'conta-menu', title: tr('Minha conta') },
       h('span', { class: 'conta-iniciais', 'aria-hidden': 'true', 'data-i18n-ignore': '' }, DS.iniciais(u.nome)), h('span', { class: 'conta-nome', 'data-i18n-ignore': '' }, u.nome));
@@ -125,6 +125,19 @@ window.PrumoConta = (() => {
     document.querySelector('.topo-direita').prepend(h('div', { id: 'conta-caixa', class: 'ajustes-caixa' }, botao, menu));
   }
 
+  function explicarSemLogin() {
+    DS.modal('Minha conta', [DS.info('O login está desligado: o Prumo usa a conta do Windows deste computador e não há perfil, senha nem papel para trocar. Ligue o login para ter uma conta com nome, senha e permissões por tela.'),
+      DS.rodape(DS.acao('Fechar', () => DS.fecharModal()), pode('administracao') ? DS.acao('Ativar login', () => { DS.fecharModal(); (estado.sub ||= {}).administracao = 'usuarios'; void mostrar('administracao'); }, { id: 'conta-ativar-login', primaria: true }) : null)], { tamanho: 'sm' });
+  }
+
+  /** Com o login desligado ainda existe "Minha conta": explica que não há conta e leva a quem pode ligar o login. */
+  function contaSemLogin() {
+    const botao = h('button', { id: 'conta-botao', class: 'conta-botao', type: 'button', title: tr('Minha conta') },
+      h('span', { class: 'conta-iniciais', 'aria-hidden': 'true' }, '?'), h('span', { class: 'conta-nome' }, tr('Minha conta')));
+    botao.addEventListener('click', explicarSemLogin);
+    document.querySelector('.topo-direita').prepend(h('div', { id: 'conta-caixa', class: 'ajustes-caixa' }, botao));
+  }
+
   /** Minha conta: trocar o nome de exibição e a senha. A senha atual é sempre pedida. */
   function minhaConta() {
     const u = sessao.usuario;
@@ -134,17 +147,17 @@ window.PrumoConta = (() => {
     const confirma = h('input', { id: 'minha-confirma', type: 'password', autocomplete: 'new-password', maxlength: 200 });
     DS.modal('Minha conta', [
       DS.meta([['Login', h('span', { 'data-i18n-ignore': '' }, u.login)], ['Papel', h('span', { 'data-i18n-ignore': '' }, u.papelNome)], ['Último acesso', u.ultimoAcesso ? new Date(u.ultimoAcesso).toLocaleString() : '—']]),
-      DS.secao('Nome de exibição', [DS.campo('Nome', nome), DS.rodape(DS.acao('Salvar nome', async () => {
+      DS.secao('Nome de exibição', [DS.campo('Nome', nome), h('div', { class: 'ds-cab-acoes ds-mt' }, DS.acao('Salvar nome', async () => {
         const r = await chamar(() => api.contaPerfil(nome.value)); if (!r) return; sessao = r; aplicarMenu(); avisar(tr('Nome atualizado.'));
       }, { id: 'minha-salvar-nome' }))]),
       DS.secao('Trocar senha', [h('p', { class: 'suave' }, tr('Senha com pelo menos 10 caracteres, misturando letras e números.')), DS.campo('Senha atual', atual), DS.campo('Senha nova', nova), DS.campo('Confirmar senha nova', confirma),
-        DS.rodape(DS.acao('Trocar senha', async () => {
+        h('div', { class: 'ds-cab-acoes ds-mt' }, DS.acao('Trocar senha', async () => {
           if (nova.value !== confirma.value) { avisar(tr('A confirmação não é igual à senha.'), true); return; }
           const r = await chamar(() => api.contaSenha(atual.value, nova.value)); atual.value = nova.value = confirma.value = ''; if (!r) return;
           avisar(tr('Senha trocada.'));
           if (r.codigoRecuperacao) { DS.fecharModal(); vistaCodigo(r.codigoRecuperacao, 'Senha trocada.', () => { dialogo.close(); document.body.classList.remove('com-entrada'); }); }
         }, { id: 'minha-trocar-senha', primaria: true }))])
-    ], { tamanho: 'sm', subtitulo: u.nome });
+    ], { tamanho: 'md', subtitulo: u.nome });
   }
 
   /** Telas sem permissão ficam bloqueadas mesmo se alguém chamar mostrar() direto; telas só de consulta avisam no topo. */
@@ -189,5 +202,5 @@ window.PrumoConta = (() => {
     return false;
   }
 
-  return { iniciar, tratarErro, pode, soVer, sessao: () => sessao, recarregarSessao: async () => { const r = await api.contaSessao(); if (r.ok) { sessao = r.data; aplicarMenu(); } return sessao; } };
+  return { iniciar, tratarErro, pode, soVer, sessao: () => sessao, abrirMinhaConta: () => (sessao?.usuario ? minhaConta() : explicarSemLogin()), recarregarSessao: async () => { const r = await api.contaSessao(); if (r.ok) { sessao = r.data; aplicarMenu(); } return sessao; } };
 })();

@@ -81,7 +81,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:skills:decidir` | `estado`, `id` | Grava o estado e a data da decisão. Só trechos APROVADOS vão para o prompt. |
 | `prumo:skills:importar` | `especializacao`, `fonte` | Abre o seletor de pastas do sistema; recusa pasta sem licença aberta reconhecida (MIT, Apache-2.0, BSD, ISC, CC). Nada é baixado nem executado; scripts da pasta são ignorados. |
 | `prumo:perfil:obter` | — | Consulta local. |
-| `prumo:perfil:salvar` | `comoChamar`, `papel` | Grava a única linha da tabela perfil. |
+| `prumo:perfil:salvar` | `comoChamar`, `compartilharComIa`, `experiencia`, `foco`, `papel` | Grava a única linha da tabela perfil. |
 | `prumo:ia:delegacao` | `provedor`, `valor` | Grava preferencias.json. Autorizar exige confirmação nativa; revogar não. |
 | `prumo:agentes:estado` | `espacoId` | Consulta local. |
 | `prumo:agentes:salvar` | `espacoId`, `especializacoes`, `politicas` | Grava agentes.json. O bloqueio vale no servidor MCP a cada chamada. |

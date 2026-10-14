@@ -3,6 +3,7 @@ import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
 import { argumentosDoProvedorDeIa } from './argumentosDoProvedorDeIa.js';
 import { skillDoAgente } from './skillDoAgente.js';
 import { montarPrompt } from './montarPrompt.js';
+import { contaParaIa } from './contaParaIa.js';
 import { registrarSugestoesDaIa } from './registrarSugestoesDaIa.js';
 import { separarAprendizados } from './separarAprendizados.js';
 import { ContextoDelegacao } from '../tipos/ContextoDelegacao.js';
@@ -25,7 +26,7 @@ export async function consultarIaExterna({ o, agente, pergunta, local, estilo, n
   try { skill = skillDoAgente(agente.especializacao, pergunta, o.base); } catch (erro) { return voltar((erro as Error).message); }
   const avisoSkill = skill.origem === 'ARQUIVOS' ? 'Banco de Skills indisponível; usei as Skills que acompanham o aplicativo.' : null;
   try {
-    const x = await o.executor(exe, argumentosDoProvedorDeIa(provedor, montarPrompt(agente, pergunta, local, estilo, nome, { perfil, historico, conhecimentos, base: o.base, skill: skill.texto })), { timeoutMs: 120000, cwd });
+    const x = await o.executor(exe, argumentosDoProvedorDeIa(provedor, montarPrompt(agente, pergunta, local, estilo, nome, { perfil, conta: contaParaIa(o.base), historico, conhecimentos, base: o.base, skill: skill.texto })), { timeoutMs: 120000, cwd });
     const { texto: limpo, aprendizados } = separarAprendizados(mascarar(x.saida)); const texto = limpo.trim().slice(0, 6000);
     if (x.codigo !== 0 || !texto) return voltar(`${nomeP} não respondeu (código ${x.codigo ?? 'tempo esgotado'}); resposta local.`);
     const { acoes, sugeridos, naoRegistrados } = registrarSugestoesDaIa(o, agente, provedor, aprendizados);
