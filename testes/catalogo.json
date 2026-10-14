@@ -197,6 +197,19 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/e2e/ui/desktop-contas.test.mjs",
+      "camada": "ui",
+      "natureza": [
+        "e2e"
+      ],
+      "funcionalidade": "administracao",
+      "motivo": "Camada principal ui. Verifica: login, permissões por tela, cadastro e recuperação na janela real",
+      "evidencias": [
+        "login: ativar, criar conta com senha temporária, permissão por tela na janela e no backend, cadastro e recuperação"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/e2e/ui/desktop-contextos.test.mjs",
       "camada": "ui",
       "natureza": [
@@ -525,6 +538,20 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/estrutura/design-system-tema.test.mjs",
+      "camada": "estrutura",
+      "natureza": [
+        "contrato",
+        "regressao"
+      ],
+      "funcionalidade": "arquitetura",
+      "motivo": "Camada principal estrutura. Verifica: cores de tema só no Design System; telas sem ramos de tema nem paleta própria",
+      "evidencias": [
+        "design system: nenhuma tela tem ramo de tema (data-tema ou prefers-color-scheme) fora de frontend/design-system/"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/estrutura/estrutura-backend.test.mjs",
       "camada": "estrutura",
       "natureza": [
@@ -582,6 +609,19 @@
         "catálogo cobre exatamente todos os arquivos reais",
         "filtros combinam camada, natureza e funcionalidade com AND",
         "../../ferramentas/testes/executar.mjs"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/estrutura/sintaxe-interface.test.mjs",
+      "camada": "estrutura",
+      "natureza": [
+        "unidade"
+      ],
+      "funcionalidade": "arquitetura",
+      "motivo": "Camada principal estrutura. Verifica: todo script da interface gerada compila",
+      "evidencias": [
+        "interface: todo script da janela (dist/renderer/*.js) compila"
       ],
       "perfilReal": false
     },
@@ -1039,6 +1079,20 @@
       "perfilReal": false
     },
     {
+      "arquivo": "testes/seguranca/regras/agentes-da-plataforma.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "administracao",
+      "motivo": "Camada principal regra. Verifica: configuração geral dos agentes da plataforma",
+      "evidencias": [
+        "agentes da plataforma"
+      ],
+      "perfilReal": false
+    },
+    {
       "arquivo": "testes/seguranca/regras/banco-de-skills.test.mjs",
       "camada": "regra",
       "natureza": [
@@ -1052,6 +1106,20 @@
         "importar: sem licença aberta, com especialização inexistente ou sem licença registrada, nada é gravado",
         "../dist/agentes/regras/escolherTrechosDaSkill.js",
         "../dist/agentes/banco/importarPastaDeSkill.js"
+      ],
+      "perfilReal": false
+    },
+    {
+      "arquivo": "testes/seguranca/regras/contas-e-permissoes.test.mjs",
+      "camada": "regra",
+      "natureza": [
+        "unidade",
+        "seguranca"
+      ],
+      "funcionalidade": "administracao",
+      "motivo": "Camada principal regra. Verifica: contas locais, papéis e permissões por canal",
+      "evidencias": [
+        "contas e permissões"
       ],
       "perfilReal": false
     },
@@ -1260,20 +1328,6 @@
       "evidencias": [
         "rastro: o agente em foco usaria exatamente os trechos de Skill que o chat mandaria à IA",
         "../../../dist/agentes/chat/rastrearPergunta.js"
-      ],
-      "perfilReal": false
-    },
-    {
-      "arquivo": "testes/estrutura/design-system-tema.test.mjs",
-      "camada": "estrutura",
-      "natureza": [
-        "contrato",
-        "regressao"
-      ],
-      "funcionalidade": "arquitetura",
-      "motivo": "Camada principal estrutura. Verifica: cores de tema só no Design System; telas sem ramos de tema nem paleta própria",
-      "evidencias": [
-        "design system: nenhuma tela tem ramo de tema (data-tema ou prefers-color-scheme) fora de frontend/design-system/"
       ],
       "perfilReal": false
     }
