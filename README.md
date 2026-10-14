@@ -18,7 +18,7 @@ Procure pelo nome da tela que aparece no menu: a mesma pasta existe no frontend 
 
 Mapa completo: [Arquitetura modular por tela](docs/ARQUITETURA-MODULAR-ATUAL.md) · [índice do backend](backend/LEIA-ME.md) · [seleção de testes](docs/TESTES.md). `npm.cmd run check` confere dependências, tipos e a suíte inteira.
 
-Versão atual 2.12.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+Versão atual 2.12.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/historico/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/historico/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/historico/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
 
 ## Ciclo de qualidade e IA
 
@@ -120,6 +120,14 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 
 | Caminho | Responsabilidade |
 |---|---|
+| `backend/`, `frontend/` | O aplicativo: uma pasta por tela em cada um (regras e dados no backend; interface no frontend) |
+| `testes/` | Todos os testes automáticos, por tipo e depois por camada |
+| `docs/` | Documentação; `docs/ajuda/` é a Ajuda do app e do site, `docs/catalogo/` o histórico de versões e `docs/historico/` os registros de entregas antigas |
+| `ferramentas/` | Scripts do projeto (build, documentação, release, testes); não vão para o instalador |
+| `site/` | Gerador do site público (Render) |
+| `assets/` | Ícones e imagens compartilhados pelo app, pelo site e pelo instalador |
+| `.github/` | CI do Windows, publicação do site e triagem de chamados |
+| `scripts/` | Atalho temporário para o build antigo do Render; sai quando o comando do Render for corrigido |
 | `backend/aplicativo.ts` | Porta de entrada do aplicativo desktop (Electron): pasta de dados, canais da janela, janela, bandeja e worker |
 | `backend/cli.ts` | Porta de entrada do terminal (`prumo`); comandos em `backend/terminal/` |
 | `backend/mcp.ts` | Porta de entrada do servidor MCP (`dist/mcp.js`, mesmo caminho das versões anteriores); ferramentas em `backend/agentes/mcp/` |
@@ -235,7 +243,7 @@ Para Claude Desktop/cliente JSON:
   "mcpServers": {
     "prumo-qa-demo": {
       "command": "node",
-      "args": ["C:/projetos/Prumo-Qa/dist/mcp.js", "C:/projetos/Prumo-Qa/exemplos/projeto-demo"]
+      "args": ["C:/projetos/Prumo-Qa/dist/mcp.js", "C:/projetos/Prumo-Qa/backend/projetos/exemplos/projeto-demo"]
     }
   }
 }
@@ -317,6 +325,6 @@ Testes sintéticos cobrem PASS/FAIL/BLOCKED/NOT_RUN, paths, symlinks, manifesto,
 
 ## Estado e limites
 
-Implementados núcleo local, contrato, quatro tools, CLI/menu, atividades, métricas, Pino, conector Codex, aprovação Windows, Skill, exemplo, testes e, na 2.2, a janela desktop com instalador Windows (NSIS, não assinado). Fora desta versão: atualização automática, dashboard web, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas, sandbox forte, assinatura de código, atualização automática, Ink, OpenTelemetry e métricas de provedores. Sem transferência automática entre empresas. Detalhes da entrega atual em [docs/ENTREGA-2.2.md](docs/ENTREGA-2.2.md); relatórios 2.0 e 2.1 são históricos.
+Implementados núcleo local, contrato, quatro tools, CLI/menu, atividades, métricas, Pino, conector Codex, aprovação Windows, Skill, exemplo, testes e, na 2.2, a janela desktop com instalador Windows (NSIS, não assinado). Fora desta versão: atualização automática, dashboard web, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas, sandbox forte, assinatura de código, atualização automática, Ink, OpenTelemetry e métricas de provedores. Sem transferência automática entre empresas. Detalhes da entrega atual em [docs/historico/ENTREGA-2.2.md](docs/historico/ENTREGA-2.2.md); relatórios 2.0 e 2.1 são históricos.
 
-G3 é inspecionado por contrato externo readOnly e commands vazio, sem alterar seu repositório. E2E permanece bloqueado. Diagnóstico real e validações estão em docs/DIAGNOSTICO-G3.md e docs/VALIDACAO.md. Autenticação humana end-to-end e plataformas sem Windows podem exigir participação posterior, descrita no relatório de entrega. Nenhuma pendência é mascarada por PASS.
+G3 é inspecionado por contrato externo readOnly e commands vazio, sem alterar seu repositório. E2E permanece bloqueado. Diagnóstico real e validações estão em docs/historico/DIAGNOSTICO-G3.md e docs/VALIDACAO.md. Autenticação humana end-to-end e plataformas sem Windows podem exigir participação posterior, descrita no relatório de entrega. Nenhuma pendência é mascarada por PASS.

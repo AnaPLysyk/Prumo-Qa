@@ -12,7 +12,7 @@ Data: 10/10/2026. [Repositório oficial](https://github.com/AnaPLysyk/Prumo-Qa).
 - `testes/atividades.test.mjs` e `testes/conexoes.test.mjs`: 20 verificações novas. Fixtures passaram a manter dados de observabilidade fora dos projetos e do perfil real. Assertions dos 40 testes anteriores foram preservadas.
 - README e docs: instalação, arquitetura, métricas, privacidade, limites, integração, origem das referências e relatório real.
 
-`projeto.ts`, `qualidade.ts`, `aprovacao.ts`, `execucao.ts`, `evidencias.ts` e o broker `scripts/aprovar.cs` não foram alterados. A Skill existente foi lida e preservada. Não houve modificação no QA Orchestrator antigo ou no G3. As únicas ideias aproveitadas das referências e suas licenças estão em [ORIGEM.md](ORIGEM.md); nenhum trecho Quality/Sonar/Ink foi incorporado. Pino é a única dependência direta adicionada.
+`projeto.ts`, `qualidade.ts`, `aprovacao.ts`, `execucao.ts`, `evidencias.ts` e o broker `scripts/aprovar.cs` não foram alterados. A Skill existente foi lida e preservada. Não houve modificação no QA Orchestrator antigo ou no G3. As únicas ideias aproveitadas das referências e suas licenças estão em [ORIGEM.md](../ORIGEM.md); nenhum trecho Quality/Sonar/Ink foi incorporado. Pino é a única dependência direta adicionada.
 
 ## Verificações reais
 

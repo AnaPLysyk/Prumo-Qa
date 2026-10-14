@@ -93,9 +93,9 @@ A app/renderer/status.css
 A app/suporte-status.json
 M app/versoes.json
 M docs/APLICATIVO.md
-A docs/BASELINE-2.6.md
+A docs/historico/BASELINE-2.6.md
 M docs/CONTRATOS.md
-A docs/ENTREGA-2.6.md
+A docs/historico/ENTREGA-2.6.md
 M docs/SEGURANCA.md
 M docs/SUPORTE.md
 M package-lock.json
