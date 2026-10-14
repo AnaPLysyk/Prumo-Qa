@@ -7,7 +7,7 @@
     ['Fluxos de qualidade', ['15-contextos', '19-testes-e-integracoes', '18-agendamentos', '07-resultados', '08-metricas-e-logs']],
     ['IA e agentes', ['20-assistente-e-agentes', '05-conectar-ia', '06-sem-ia-e-com-ia']],
     ['Suporte', ['09-problemas', '10-perguntas', '16-suporte']],
-    ['Segurança e dados', ['12-seguranca', '11-privacidade', 'dados', '13-termos']],
+    ['Segurança e dados', ['21-acesso-e-permissoes', '12-seguranca', '11-privacidade', 'dados', '13-termos']],
     ['Referência técnica', ['versoes', 'atualizacoes', 'integracoes', '14-sobre']]
   ];
   const normal = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();

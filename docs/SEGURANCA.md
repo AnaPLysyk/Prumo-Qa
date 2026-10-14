@@ -1,5 +1,14 @@
 # Segurança e limites de confiança
 
+## Login local e permissões (2.12)
+
+- **Desligado por padrão.** Sem login ligado, o Prumo usa a conta do Windows e nada muda. Ligar o login cria `acessos.json` na pasta `plataforma` dos dados, separado de `contas.json` (contas de serviço Jira/Qase/GitHub).
+- **Senhas e códigos** nunca ficam em texto: só resumo scrypt com sal próprio. A senha temporária e o código de recuperação aparecem uma única vez. Respostas, logs e diagnóstico nunca os contêm; erro de login não diz se o usuário existe.
+- **Sessão** só na memória do processo principal, com expiração por inatividade e bloqueio da conta após tentativas erradas (ambos configuráveis). Nada de token no renderer.
+- **Autorização no backend:** `registrarCanal` confere, a cada pedido, a sessão e o nível (Sem acesso, Ver, Usar) do papel na tela do canal (`backend/administracao/tipos/acessoDosCanais.ts`). Esconder item de menu não é a autorização. Todo canal novo precisa de uma regra ali (o compilador recusa o contrário).
+- **Papéis:** o Administrador é fixo; o cadastro público nunca cria administrador; o último administrador não pode ser excluído nem rebaixado; alterar o papel ou desativar uma conta vale no próximo pedido da pessoa.
+- **Limites:** o worker, a bandeja e o servidor MCP seguem com a conta do Windows e as políticas de cada projeto; a confirmação nativa para executar e publicar continua obrigatória. O login não isola dados de quem compartilha a mesma conta do Windows.
+
 ## Refatoração da branch em desenvolvimento
 
 Os handlers IPC exigem o `webContents` da janela principal registrada, seu frame principal e a URL exata de `index.html`. Abrir uma cópia da mesma página em outra janela não concede acesso aos canais. Argumentos continuam sujeitos aos esquemas; esta alteração não concede capacidades novas.
