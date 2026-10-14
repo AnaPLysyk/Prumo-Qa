@@ -80,7 +80,7 @@
       const v = versao; const abertura = await chamar(() => api.assistenteAbertura(idAtual())); if (v !== versao || !abertura) return;
       pendente = abertura.pendente; void falar(abertura.linhas, null, abertura.proximos);
     }
-    function reiniciar() { versao++; primeira = true; fila = Promise.resolve(); historico = []; pendente = null; delete el.dataset.conversou; msgs.replaceChildren(); projeto = idAtual(); void sugerir(INICIAIS); saudar(); }
+    function reiniciar() { versao++; primeira = true; fila = Promise.resolve(); historico = []; pendente = null; delete el.dataset.conversou; msgs.replaceChildren(); projeto = idAtual(); void sugerir(INICIAIS); void saudar(); }
     function sincronizar() { if (!el) return; void carregarRoster(); entrada.setAttribute('aria-label', tr('Mensagem para o Prumo')); entrada.placeholder = tr('Pergunte alguma coisa ao Prumo…'); if (projeto !== idAtual()) void reiniciar(); }
     function ajustarAltura() { entrada.style.height = 'auto'; entrada.style.height = Math.min(125, entrada.scrollHeight) + 'px'; }
     async function perguntar(q, topico) {
