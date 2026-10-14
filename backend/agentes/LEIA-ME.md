@@ -1,6 +1,6 @@
 # agentes — backend
 
-Agentes: chat com agentes, banco de conhecimento, políticas da IA e o servidor MCP.
+Agentes: as especializações, o chat, o Cérebro, as Skills, o conhecimento e os contextos do projeto (requisitos, regras, critérios e decisões, com aprovação humana).
 
 Arquivo gerado por `npm run leia-me`. Não edite à mão.
 
@@ -25,11 +25,20 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `conhecimentoListar.ts` | Canal conhecimento:listar: Listar conhecimentos gerais e do projeto, por agente e estado. |
 | `conhecimentoMostrar.ts` | Canal conhecimento:mostrar: Mostrar o arquivo conhecimento.db no Explorer (para abrir no Beekeeper Studio ou outro gerenciador SQLite). |
 | `conhecimentoVocabulario.ts` | Canal conhecimento:vocabulario: Listar os termos que um agente aprendeu com as correções da pessoa. |
+| `contextosAprovar.ts` | Canal contextos:aprovar: Aprovar explicitamente o conteúdo atual de um contexto. |
+| `contextosConflito.ts` | Canal contextos:conflito: Marcar ou resolver explicitamente um conflito entre contextos. |
+| `contextosDesatualizar.ts` | Canal contextos:desatualizar: Marcar um contexto como desatualizado (sem validade atual). |
+| `contextosExcluir.ts` | Canal contextos:excluir: Excluir definitivamente um contexto. |
+| `contextosListar.ts` | Canal contextos:listar: Listar e pesquisar os contextos do projeto (requisitos, regras, critérios, restrições, decisões). |
+| `contextosMcp.ts` | Canal contextos:mcp: Escolher se os contextos do projeto são disponibilizados ao agente de IA conectado por MCP. |
+| `contextosObter.ts` | Canal contextos:obter: Ver um contexto com seu histórico completo de alterações. |
+| `contextosSalvar.ts` | Canal contextos:salvar: Criar um contexto, editá-lo (nova versão em rascunho) ou substituí-lo por uma versão posterior. |
 | `conversasApagar.ts` | Canal conversas:apagar: Apagar as conversas gravadas deste projeto neste computador. |
 | `conversasListar.ts` | Canal conversas:listar: Listar os atendimentos de um agente (sem texto, desde a 2.10) e as conversas gravadas até a 2.9, para o Cérebro e o Painel de atividades. |
 | `iaDelegacao.ts` | Canal ia:delegacao: Autorizar ou revogar a delegação do chat ao Claude Code ou Codex. |
 | `perfilObter.ts` | Canal perfil:obter: Ler como a pessoa quer ser chamada e o papel dela. |
 | `perfilSalvar.ts` | Canal perfil:salvar: Salvar como a pessoa quer ser chamada e o papel dela (QA, dev, PO, analista ou outro). |
+| `servicosImportar.ts` | Canal servicos:importar: Importa a descrição de um ticket do Jira como contexto em rascunho, depois da confirmação. |
 | `skillsCriar.ts` | Canal skills:criar: Acrescentar um trecho escrito pela equipe à Skill de uma especialização. |
 | `skillsDecidir.ts` | Canal skills:decidir: Aprovar ou descartar um trecho de Skill (rascunho importado ou de IA, ou um trecho existente). |
 | `skillsImportar.ts` | Canal skills:importar: Importar uma pasta de Skill aberta (com SKILL.md e licença) como rascunhos de uma especialização. |
@@ -48,6 +57,8 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `arquivoDeConversas.ts` | Arquivo de conversas de um projeto (ou geral). |
 | `avaliarAtendimento.ts` | Guarda se a resposta foi útil ou não. |
 | `caminhoConhecimento.ts` | Caminho do banco de conhecimento conhecimento.db na pasta de dados. |
+| `carregarContexto.ts` | Abre um contexto deste projeto pelo id, recusando contextos de outro projeto. |
+| `carregarTodosOsContextos.ts` | Lê todos os contextos do projeto e anota os arquivos com problema. |
 | `comBancoDeConhecimento.ts` | Abre o banco, faz a operação e fecha sempre. |
 | `comBancoDeSkills.ts` | Abre o banco de Skills (skills.db, separado do conhecimento), garante as tabelas e os trechos do Prumo, faz a operação e fecha sempre. |
 | `conhecimentosRelevantes.ts` | Busca os conhecimentos aprovados que mais combinam com a pergunta. |
@@ -57,18 +68,26 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `decidirTrechoDeSkill.ts` | Aprova ou descarta um trecho de Skill. Aprovar é sempre ato da pessoa; descartar vale também para os trechos do Prumo. |
 | `esquecerTermo.ts` | Faz um agente esquecer um termo. |
 | `estadoConhecimento.ts` | Resume o banco de conhecimento: arquivo, tamanho, tabelas, vistas e contagens por agente. |
+| `excluirContexto.ts` | Apaga um contexto e anota em excluidos.jsonl só o id, a data e o hash. |
+| `excluirTodosContextos.ts` | Apaga todos os contextos do projeto (Ajuda › Privacidade e dados), informando falhas. |
 | `falharConhecimento.ts` | Interrompe com um código de erro do conhecimento (ex.: KNOWLEDGE_NOT_FOUND). |
+| `gravarArquivoDeContexto.ts` | Grava um arquivo de contexto com segurança: cópia temporária e troca no final. |
+| `gravarPermissaoDeContextosNoMcp.ts` | Grava se a pessoa permitiu enviar os contextos à IA. |
 | `importarPastaDeSkill.ts` | Importa uma pasta de Skill aberta (por exemplo um repositório já clonado) como rascunhos de uma especialização, com fonte e licença. Nada é baixado da internet. |
 | `impressaoDoConhecimento.ts` | Impressão digital de um conhecimento para não guardar o mesmo duas vezes. |
+| `lerArquivoDeContexto.ts` | Lê o arquivo de um contexto e confere se o histórico está íntegro (nenhuma versão alterada fora do Prumo). |
 | `lerConfiguracaoDosAgentes.ts` | Lê as configurações de agentes por projeto (agentes.json). |
 | `lerConversas.ts` | Lê as conversas antigas gravadas de um projeto. |
 | `lerPastaDeSkill.ts` | Lê uma pasta de Skill (SKILL.md e references/*.md) sem seguir atalhos, sem binários e com limite de tamanho por arquivo. |
 | `lerPerfil.ts` | Lê como a pessoa quer ser chamada e o papel dela. |
+| `lerPermissaoDeContextosNoMcp.ts` | Lê se a pessoa permitiu enviar os contextos à IA (padrão: não). |
 | `linhaParaConhecimento.ts` | Converte uma linha do banco num conhecimento. |
 | `listarAtendimentos.ts` | Lista os atendimentos de um projeto e agente. |
 | `listarConhecimentos.ts` | Lista os conhecimentos por projeto, agente, estado e busca. |
 | `listarOrquestracoes.ts` | Lista as orquestrações mais recentes de um projeto (ou as gerais), ignorando e contando linhas inválidas. |
 | `listarTrechosDeSkill.ts` | Lista os trechos de Skill por especialização, estado e busca; rascunhos primeiro, depois na ordem de leitura. |
+| `mudarContexto.ts` | Aplica uma mudança a um contexto e grava a nova versão, recusando históricos adulterados ou cheios. |
+| `pastaContextos.ts` | Devolve a pasta onde ficam os contextos deste projeto (fora da pasta do projeto, na pasta de dados do usuário). |
 | `pastaDasConversas.ts` | Pasta das conversas antigas do chat. |
 | `pesosAprendidos.ts` | Soma, por agente, o peso dos termos aprendidos que aparecem na frase. |
 | `registrarAtendimento.ts` | Registra um atendimento do chat (agente, modo e fontes), sem a pergunta nem a resposta. |
@@ -165,14 +184,40 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 
 | Arquivo | O que faz |
 | --- | --- |
+| `aprovarContexto.ts` | Aprova um contexto: exige origem informada e grava quem aprovou. |
+| `aprovarContextoDaPasta.ts` | Aprova um contexto em nome da pessoa (depois da confirmação nativa). |
 | `autorizarDelegacaoDeIa.ts` | Autoriza ou revoga o chat de enviar perguntas ao Claude Code ou ao Codex. |
+| `conflitoDeContextoDaPasta.ts` | Marca um conflito entre dois contextos ou resolve o conflito marcado. |
 | `conhecimentoParaIA.ts` | Prepara o perfil e os conhecimentos aprovados para enviar à IA conectada. |
+| `contextoParaRevisao.ts` | Busca um contexto para a revisão de cobertura da IA, respeitando a permissão da pessoa. |
+| `contextosParaMcp.ts` | Prepara os contextos que podem ir para a IA (se permitido), com texto limitado, segredos mascarados e aviso de que são dados, não ordens. |
+| `criarContexto.ts` | Cria um contexto novo em rascunho. |
+| `desatualizarContexto.ts` | Marca um contexto como desatualizado. |
+| `desatualizarContextoDaPasta.ts` | Marca um contexto como desatualizado (deixa de valer). |
 | `dividirSkillEmTrechos.ts` | Divide um arquivo SKILL.md em trechos curtos (descrição, seções e parágrafos), sem cortar blocos de código. |
+| `editarContexto.ts` | Edita um contexto criando uma nova versão em rascunho (a aprovação anterior deixa de valer). |
 | `escolherTrechosDaSkill.ts` | Escolhe os trechos aprovados de uma Skill que vão para o prompt: o essencial sempre, depois os que combinam com a pergunta, até o limite de bytes. |
+| `excluirContextoDaPasta.ts` | Exclui um contexto de vez (fica só o registro de que existiu). |
+| `hashDoConteudoDoContexto.ts` | Calcula a impressão digital do conteúdo de um contexto (tipo, título, texto, chave e origem). |
+| `idDeContextoValido.ts` | Diz se o identificador de um contexto é um UUID válido. |
 | `licencaAberta.ts` | Reconhece a licença de uma Skill de terceiros e diz se ela permite reaproveitar o texto com crédito (MIT, Apache-2.0, BSD, ISC, CC-BY, CC0...). |
+| `listarContextos.ts` | Lista os contextos do projeto com busca e filtro por tipo e estado. |
+| `listarContextosDaPasta.ts` | Lista os contextos de uma pasta vinculada para a tela Contextos. |
+| `marcarConflito.ts` | Marca que um contexto conflita com outro. |
 | `normalizarNome.ts` | Arruma o nome dito pela pessoa (iniciais maiúsculas), recusando textos que não parecem nome. |
+| `novaVersaoDoContexto.ts` | Cria a próxima versão do histórico de um contexto (quem, quando, ação, estado e selo). |
+| `obterContexto.ts` | Abre um contexto com todas as versões do histórico. |
+| `obterContextoDaPasta.ts` | Abre um contexto com o histórico completo para a tela Contextos. |
+| `permitirContextosNoMcp.ts` | Liga ou desliga o envio dos contextos do projeto para a IA conectada por MCP. |
 | `raizDaPalavra.ts` | Encurta uma palavra para achar variações (ex.: testes → test). |
+| `resolverConflito.ts` | Resolve o conflito marcado, voltando o contexto para rascunho. |
+| `resumirContextos.ts` | Monta o resumo de cada contexto para a lista, apontando conflitos (mesma chave ou marcados pela pessoa) e alterações suspeitas. |
+| `salvarContextoDaPasta.ts` | Salva um contexto: cria, edita (nova versão em rascunho) ou substitui por outro. |
+| `seloDaVersaoDoContexto.ts` | Calcula o selo de uma versão do contexto, encadeado com a versão anterior, para detectar edições fora do Prumo. |
+| `substituirContexto.ts` | Cria um contexto novo que substitui o antigo, e marca o antigo como desatualizado. |
+| `suspeitaDeInstrucao.ts` | Avisa quando o texto de um contexto parece uma ordem para a IA (ex.: "ignore as instruções"), para não ser tratado como regra. |
 | `termosDaFrase.ts` | Separa os termos importantes de uma frase (mais de 3 letras, sem palavras comuns). |
+| `ultimaVersaoDoContexto.ts` | Devolve a versão mais recente de um contexto. |
 | `validarEspecializacao.ts` | Confere que a especialização existe no Prumo antes de ler ou gravar Skill dela. |
 
 ## skills/
@@ -190,6 +235,7 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | --- | --- |
 | `chat.ts` | Formato da conversa do chat (turnos, estilos, provedores, resposta) e o guia de respostas do orquestrador. |
 | `conhecimento.ts` | Formato de um conhecimento, perfil e atendimento, os limites e o conhecimento inicial do Prumo. |
+| `contexto.ts` | Formato de um contexto (requisito, regra, critério, restrição, decisão), seus estados, limites e histórico encadeado. |
 | `ContextoDelegacao.ts` | Descreve os dados já verificados usados somente na delegação do chat para IA externa. |
 | `conversas.ts` | Formato das conversas antigas do chat (até a 2.9) e seus limites. |
 | `mcp.ts` | O que cada ferramenta do servidor MCP recebe (servidor, projeto, projeto do Prumo, respostas padronizadas) e as marcas de leitura e rascunho. |

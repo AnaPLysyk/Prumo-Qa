@@ -105,7 +105,7 @@ import { projetoEvidencias } from '../../testes/api/projetoEvidencias.js';
 import { execucoesListar } from '../../testes/api/execucoesListar.js';
 import { jiraPrevia } from '../../testes/api/jiraPrevia.js';
 import { jiraPublicar } from '../../testes/api/jiraPublicar.js';
-import { projetoHistorico } from '../../historico/api/projetoHistorico.js';
+import { projetoHistorico } from '../../logs/api/projetoHistorico.js';
 import { assistenteAbertura } from '../../inicio/api/assistenteAbertura.js';
 import { assistentePerguntar } from '../../inicio/api/assistentePerguntar.js';
 import { assistenteSituacao } from '../../inicio/api/assistenteSituacao.js';

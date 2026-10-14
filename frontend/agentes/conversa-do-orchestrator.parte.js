@@ -4,7 +4,7 @@
     agents: { rot: 'Agentes', icone: 'agentes', texto: 'Os agentes são as especializações do núcleo. Em Agentes você consulta cada uma e ajusta as permissões do projeto.', aba: 'agentes', rota: 'Agentes' },
     logs: { rot: 'Investigar logs', icone: 'logs', pergunta: 'erros e falhas', aba: 'logs', rota: 'Logs' },
     metrics: { rot: 'Métricas', icone: 'metricas', situacao: true, aba: 'metricas', rota: 'Métricas' },
-    history: { rot: 'Histórico', icone: 'historico', texto: 'O histórico reúne as atividades observadas pelo núcleo, em linha do tempo ou em tabela.', aba: 'historico', rota: 'Histórico' }
+    history: { rot: 'Logs', icone: 'historico', texto: 'Os Logs reúnem as atividades observadas pelo núcleo, ao vivo e com filtros.', aba: 'logs', rota: 'Logs' }
   };
   const INICIAIS = ['tests', 'agents', 'logs', 'metrics'];
   const PROXIMOS = { tests: ['metrics', 'logs', 'agents'], agents: ['tests', 'logs', 'metrics'], logs: ['history', 'tests', 'metrics'], history: ['logs', 'metrics', 'tests'], metrics: ['tests', 'history', 'logs'] };

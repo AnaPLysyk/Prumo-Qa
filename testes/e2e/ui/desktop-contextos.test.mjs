@@ -109,7 +109,7 @@ test('excluir todos os contextos pela privacidade exige confirmação e preserva
 test('navegação rápida entre abas não mistura conteúdos nem duplica elementos (só a última renderização vale)', async (t) => {
   const { page, erros } = await preparar(t);
   // Cliques disparados DENTRO da página, de forma síncrona: as renderizações se sobrepõem de verdade (cliques do Playwright são lentos demais).
-  await page.evaluate(() => { for (let r = 0; r < 4; r++) for (const aba of ['metricas', 'logs', 'historico', 'conexoes', 'ajuda', 'agenda', 'projetos']) document.querySelector(`[data-aba=${aba}]`).click(); });
+  await page.evaluate(() => { for (let r = 0; r < 4; r++) for (const aba of ['metricas', 'logs', 'conexoes', 'ajuda', 'agenda', 'projetos']) document.querySelector(`[data-aba=${aba}]`).click(); });
   await page.waitForSelector('#espaco-novo'); await page.waitForTimeout(1500); // estado logo após a rajada, sem novo clique que limparia a tela
   const dentro = await page.evaluate(() => ({ novo: document.querySelectorAll('#espaco-novo').length, acompanhar: document.querySelectorAll('#acompanhar').length, ajuda: document.querySelectorAll('.ajuda').length, tabelasProjetos: document.querySelectorAll('#conteudo > table').length, h1: [...document.querySelectorAll('#conteudo h1')].map((h) => h.textContent.replace(/\d+$/, '').trim()), atual: document.querySelector('#nav [aria-current=page]').dataset.aba }));
   assert.deepEqual(dentro, { novo: 1, acompanhar: 0, ajuda: 0, tabelasProjetos: 1, h1: ['Projetos'], atual: 'projetos' });

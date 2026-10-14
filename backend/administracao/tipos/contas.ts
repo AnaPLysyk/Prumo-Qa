@@ -7,10 +7,9 @@ import { z } from 'zod';
  * o Prumo funciona como antes (a conta do Windows é a dona de tudo); criar o primeiro administrador liga o login.
  */
 export const modulosDoMenu = [
-  { id: 'inicio', rotulo: 'Início' }, { id: 'projetos', rotulo: 'Projetos' }, { id: 'contextos', rotulo: 'Contextos' },
+  { id: 'inicio', rotulo: 'Início' }, { id: 'projetos', rotulo: 'Projetos' },
   { id: 'tickets', rotulo: 'Tickets' }, { id: 'testes', rotulo: 'Testes' }, { id: 'agenda', rotulo: 'Agendamentos' },
-  { id: 'evidencias', rotulo: 'Evidências' },
-  { id: 'metricas', rotulo: 'Métricas' }, { id: 'historico', rotulo: 'Histórico' }, { id: 'logs', rotulo: 'Logs' },
+  { id: 'metricas', rotulo: 'Métricas' }, { id: 'logs', rotulo: 'Logs' },
   { id: 'conexoes', rotulo: 'Conexões' }, { id: 'agentes', rotulo: 'Agentes' }, { id: 'suporte', rotulo: 'Suporte' },
   { id: 'ajuda', rotulo: 'Ajuda' }, { id: 'administracao', rotulo: 'Administração' }
 ] as const;

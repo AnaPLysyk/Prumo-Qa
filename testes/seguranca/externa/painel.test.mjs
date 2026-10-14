@@ -9,7 +9,7 @@ import { carregarProjeto } from '../../../dist/compartilhado/projeto/carregarPro
 import { situacaoDasConexoesDeIa } from '../../../dist/conexoes/ia/situacaoDasConexoesDeIa.js';
 import { salvarEvidencia } from '../../../dist/testes/banco/salvarEvidencia.js';
 import { listarEvidenciasDoProjeto } from '../../../dist/testes/regras/listarEvidenciasDoProjeto.js';
-import { listarHistoricoDoProjeto } from '../../../dist/historico/regras/listarHistoricoDoProjeto.js';
+import { listarHistoricoDoProjeto } from '../../../dist/logs/regras/listarHistoricoDoProjeto.js';
 import { exportarLogs } from '../../../dist/logs/regras/exportarLogs.js';
 import { iniciarAtividade } from '../../../dist/logs/regras/iniciarAtividade.js';
 import { listarLogsDoProjeto } from '../../../dist/logs/regras/listarLogsDoProjeto.js';

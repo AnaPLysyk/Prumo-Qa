@@ -7,8 +7,8 @@
         "frontend/compartilhado/fluxos-abertura.parte.js",
         "frontend/tickets/fluxos-tickets.parte.js",
         "frontend/testes/fluxos-casos-qase.parte.js",
-        "frontend/runs/fluxos-planos-e-runs.parte.js",
-        "frontend/rastreabilidade/fluxos-rastreabilidade.parte.js",
+        "frontend/testes/fluxos-planos-e-runs.parte.js",
+        "frontend/testes/fluxos-vinculos.parte.js",
         "frontend/compartilhado/fluxos-fechamento.parte.js"
       ]
     },
@@ -29,7 +29,7 @@
         "frontend/agentes/orchestrator-flutuante.parte.js",
         "frontend/inicio/tela-inicio-v36.parte.js",
         "frontend/logs/tela-logs.parte.js",
-        "frontend/historico/tela-historico.parte.js",
+        "frontend/agentes/detalhes-da-atividade.parte.js",
         "frontend/metricas/tela-metricas.parte.js",
         "frontend/agentes/tela-agentes.parte.js",
         "frontend/configuracoes/ajustes-do-assistente.parte.js",
@@ -42,7 +42,6 @@
         "frontend/compartilhado/interfaces-base.parte.css",
         "frontend/agentes/conversa-do-orchestrator.parte.css",
         "frontend/logs/tela-logs.parte.css",
-        "frontend/historico/tela-historico.parte.css",
         "frontend/metricas/tela-metricas.parte.css",
         "frontend/agentes/tela-agentes.parte.css",
         "frontend/compartilhado/reflow-zoom-e-movimento.parte.css",

@@ -6,21 +6,21 @@
 
 | Você quer mudar | O que aparece para a pessoa | O que executa a ação |
 | --- | --- | --- |
+| Início | `frontend/inicio/` | `backend/inicio/` |
 | Projetos | `frontend/projetos/` | `backend/projetos/` |
 | Tickets Jira | `frontend/tickets/` | `backend/tickets/` |
-| Testes e casos Qase | `frontend/testes/` | `backend/testes/` |
-| Agentes, chat e Cérebro | `frontend/agentes/` | `backend/agentes/` |
-| Conexões e integrações | `frontend/conexoes/` | `backend/conexoes/` |
-| Agendamentos | `frontend/agendamentos/` | `backend/agendamentos/` |
-| Execuções (aparecem em Testes › Runs) | `frontend/execucoes/` | `backend/testes/` |
-| Vínculos (aparecem em Testes › Repositório) | `frontend/rastreabilidade/` | `backend/testes/` |
+| Testes (IDE, Repositório, Runs e Planos): casos, automações, execuções, evidências e vínculos | `frontend/testes/` | `backend/testes/` |
+| Agendamentos (e o detalhe das execuções que as rotinas geram) | `frontend/agendamentos/` | `backend/agendamentos/` |
 | Métricas | `frontend/metricas/` | `backend/metricas/` |
-| Histórico | `frontend/historico/` | `backend/historico/` |
-| Logs | `frontend/logs/` | `backend/logs/` |
-| Ajuda e suporte | `frontend/ajuda/`, `frontend/suporte/` | `backend/ajuda/`, `backend/suporte/` |
-| Configurações | `frontend/configuracoes/` | `backend/configuracoes/` |
+| Logs (e o histórico das operações usado pelo chat e pelas métricas) | `frontend/logs/` | `backend/logs/` |
+| Conexões e integrações | `frontend/conexoes/` | `backend/conexoes/` |
+| Agentes, chat, Cérebro, Skills e contextos do projeto | `frontend/agentes/` | `backend/agentes/` |
+| Suporte | `frontend/suporte/` | `backend/suporte/` |
+| Ajuda | `frontend/ajuda/` | `backend/ajuda/` |
+| Configurações (engrenagem) | `frontend/configuracoes/` | `backend/configuracoes/` |
+| Administração (usuários, permissões, contas, agentes da plataforma, Documentação viva) | `frontend/administracao/` | `backend/administracao/` |
 
-Outras pastas do backend, como `aplicativo/`, `atualizacoes/`, `contextos/`, `evidencias/` e `terminal/`, atendem funções transversais ou abas internas; **não são necessariamente telas independentes**.
+**Cada pasta é uma tela do aplicativo** (ou o sino de Atualizações). Não existem pastas de módulos que não sejam telas, exceto o que é transversal: `backend/aplicativo/` (janela, bandeja e registro dos canais), `backend/terminal/` (CLI), `backend/compartilhado/` e, no frontend, `design-system/` e `compartilhado/`.
 
 ## O percurso de uma ação
 

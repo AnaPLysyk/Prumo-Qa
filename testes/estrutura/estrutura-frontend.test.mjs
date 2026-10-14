@@ -38,7 +38,7 @@ test('frontend: recursos têm fonte única e preservam todos os caminhos distrib
   assert.deepEqual(recursos.filter(r => path.dirname(r.destino) === 'dist/renderer').map(r => path.basename(r.destino)).sort(), runtime, 'Todo recurso não gerado da raiz deve ter fonte oficial');
 });
 test('frontend: módulos de telas reconhecíveis pelo nome e backend correspondente', () => {
-  for (const mod of ['inicio','projetos','tickets','testes','agendamentos','execucoes','rastreabilidade','agentes','conexoes','metricas','historico','logs','suporte','ajuda','configuracoes']) {
+  for (const mod of ['inicio','projetos','tickets','testes','agendamentos','agentes','conexoes','metricas','logs','suporte','ajuda','configuracoes']) {
     assert.ok(fs.statSync(path.join(origem, mod)).isDirectory(), 'Falta tela frontend/'+mod);
     assert.ok(fs.statSync(path.join('backend', mod)).isDirectory(), 'Falta função backend/'+mod);
   }

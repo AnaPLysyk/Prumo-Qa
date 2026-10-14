@@ -78,7 +78,7 @@
       "destino": "dist/renderer/painel-atividades-v41.css"
     },
     {
-      "fonte": "frontend/execucoes/operacao-v40.js",
+      "fonte": "frontend/agendamentos/operacao-v40.js",
       "destino": "dist/renderer/operacao-v40.js"
     },
     {

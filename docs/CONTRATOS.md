@@ -1653,7 +1653,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Operações consolidadas com achados e recomendações padronizadas.
 - **Origem:** Interface > Histórico
-- **Destino:** backend/historico/api/projetoHistorico.ts > listarHistoricoDoProjeto
+- **Destino:** backend/logs/api/projetoHistorico.ts > listarHistoricoDoProjeto
 - **Entrada:** Projeto selecionado + filtros
 - **Saída:** Operações com estado final, achados e referência de evidência
 - **Permissões:** Projeto previamente vinculado (vinculos.json).

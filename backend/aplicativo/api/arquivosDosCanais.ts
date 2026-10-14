@@ -93,7 +93,7 @@ export const arquivosDosCanais: Record<string, string> = {
   'preferencias:visualizada': 'backend/atualizacoes/api/preferenciasVisualizada.ts > versao, avisoDeVersaoPendente, marcarVersaoVista',
   'projeto:conexoes': 'backend/conexoes/api/projetoConexoes.ts > situacaoDasConexoesDeIa',
   'projeto:evidencias': 'backend/testes/api/projetoEvidencias.ts > listarEvidenciasDoProjeto',
-  'projeto:historico': 'backend/historico/api/projetoHistorico.ts > listarHistoricoDoProjeto',
+  'projeto:historico': 'backend/logs/api/projetoHistorico.ts > listarHistoricoDoProjeto',
   'projeto:logs': 'backend/logs/api/projetoLogs.ts > listarLogsDoProjeto',
   'projeto:visao': 'backend/projetos/api/projetoVisao.ts > visaoGeralDoProjeto',
   'projetos:demo': 'backend/projetos/api/projetosDemo.ts > raizDoAplicativo, adicionarVinculo, copiarDemonstracao',

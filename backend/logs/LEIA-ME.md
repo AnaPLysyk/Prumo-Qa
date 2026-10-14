@@ -1,6 +1,6 @@
 # logs — backend
 
-Logs: diário de operações do CLI e do MCP e o diagnóstico técnico da janela.
+Logs: o que o aplicativo e as IAs fizeram, e o histórico das operações do projeto consolidado para o chat e as métricas.
 
 Arquivo gerado por `npm run leia-me`. Não edite à mão.
 
@@ -12,6 +12,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | --- | --- |
 | `diagnosticoListar.ts` | Canal diagnostico:listar: Listar o diagnóstico técnico das chamadas da interface. |
 | `logsExportar.ts` | Canal logs:exportar: Exportar o histórico bruto do projeto para um arquivo escolhido pela pessoa. |
+| `projetoHistorico.ts` | Canal projeto:historico: Operações consolidadas com achados e recomendações padronizadas. |
 | `projetoLogs.ts` | Canal projeto:logs: Eventos de início e término das operações, com filtros. |
 
 ## banco/
@@ -43,6 +44,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `exportarLogs.ts` | Gera o texto JSON com todos os registros do diário do projeto para salvar em arquivo. |
 | `filtrarRegistrosDoDiario.ts` | Filtra registros do diário por ferramenta, estado e período. |
 | `iniciarAtividade.ts` | Registra o início de uma operação (ferramenta, origem, contagens da entrada) e devolve como registrar o término. |
+| `listarHistoricoDoProjeto.ts` | Lista as operações do projeto já consolidadas (início + término) para a tela Histórico. |
 | `listarLogsDoProjeto.ts` | Lista os registros do diário de operações do projeto para a tela Logs, com filtro. |
 | `observar.ts` | Executa uma operação registrando início e término no diário, mesmo quando ela falha. |
 | `resumoVazio.ts` | Resumo vazio de achados (tudo zero). |

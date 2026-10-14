@@ -73,20 +73,10 @@ test('v36: agentes reais, prévia validada/persistida, descarte, confirmação n
   assert.match(await b.page.textContent('[data-agent^="previa-"]'), /Prévia de QA/); assert.deepEqual([...a.erros, ...b.erros], []);
 });
 
-test('v36: MCP/IPC reais alimentam terminal, filtros, gráficos, exportação, histórico e painel', async t => {
+test('v36: MCP/IPC reais alimentam terminal, filtros, gráficos, exportação e painel', async t => {
   const a = await prepare(t);
   const out = await mcp(a.e.raizContextos, a.dados, [['contexto_projeto', {}], ['consultar_evidencias', {}]]);
   assert.ok(out.every(r => !r.isError));
-  await ir(a.page, 'historico'); await a.page.waitForSelector('[data-operation]'); assert.equal(await a.page.locator('[data-operation]').count(), 2);
-  assert.doesNotMatch(await a.page.textContent('#conteudo'), /\bnull\b/, 'campo opcional ausente não vira texto na tela');
-  await capture(a, 'historico');
-  await a.page.getByRole('button', { name: 'Filtros', exact: true }).click();
-  await a.page.getByLabel('Buscar atividade', { exact: true }).fill('contexto_projeto'); assert.equal(await a.page.locator('[data-operation]').count(), 1);
-  await a.page.locator('.v36h-evento').first().click();
-  await a.page.getByRole('button', { name: 'Detalhes', exact: true }).click(); assert.match(await a.page.textContent('.v36-dialog[open]'), /operationId/); await a.page.getByRole('button', { name: 'Fechar', exact: true }).click();
-  await a.page.getByRole('button', { name: 'Limpar filtros', exact: true }).click();
-  const first = await a.page.locator('[data-operation]').first().getAttribute('data-operation'); await a.page.selectOption('#v36-history-sort', 'asc'); assert.notEqual(await a.page.locator('[data-operation]').first().getAttribute('data-operation'), first);
-  await a.page.getByRole('tab', { name: 'Tabela' }).click(); assert.equal(await a.page.locator('#v36-history-table tbody [data-operation]').count(), 2);
   await ir(a.page, 'logs'); await a.page.waitForSelector('.v36-log-line'); assert.equal(await a.page.locator('.v36-log-line').count(), 4); await capture(a, 'logs');
   await a.page.fill('#v36-logs-busca', 'NOT_VERIFIED'); assert.equal(await a.page.locator('.v36-log-line').count(), 1);
   await a.page.locator('.v36-log-line').first().click(); assert.match(await a.page.textContent('.v36l-detalhe'), /contexto_projeto/);
@@ -125,13 +115,13 @@ test('v36: Home, robô original, chat lateral e flutuante, reflow/zoom e reduç�
   await a.page.fill('#v36-float-panel #chat-input', 'Qual a situação?'); await a.page.locator('#v36-float-panel button[type=submit]').click();
   await a.page.waitForFunction(n => document.querySelectorAll('#v36-float-panel .msg.prumo').length > n, antes); await capture(a, 'chat-flutuante');
   await a.page.click('#v36-chat-dock'); assert.equal(await a.page.evaluate(() => document.body.classList.contains('v36-encaixado')), true); await capture(a, 'chat-lateral');
-  await ir(a.page, 'historico'); assert.equal(await a.page.locator('#v36-float-panel').isVisible(), true, 'lateral encaixada acompanha a navegação');
+  await ir(a.page, 'logs'); assert.equal(await a.page.locator('#v36-float-panel').isVisible(), true, 'lateral encaixada acompanha a navegação');
   await a.page.getByRole('button', { name: 'Fechar chat', exact: true }).click(); assert.equal(await a.page.locator('#v36-float-panel').isVisible(), false);
   assert.equal(await a.page.evaluate(() => document.body.classList.contains('v36-encaixado')), false);
   await ir(a.page, 'inicio'); assert.equal(await a.page.locator('#conteudo #chat-msgs').count(), 1, 'conversa volta ao Início');
   for (const zoom of [1, 2, 4]) {
     await a.app.evaluate(({ BrowserWindow }, z) => { const w = BrowserWindow.getAllWindows()[0]; w.setSize(1280, 900); w.webContents.setZoomFactor(z); }, zoom);
-    for (const aba of ['inicio', 'metricas', 'historico', 'logs', 'agentes']) { await ir(a.page, aba); assert.equal(await a.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${aba} zoom ${zoom}`); }
+    for (const aba of ['inicio', 'metricas', 'logs', 'agentes']) { await ir(a.page, aba); assert.equal(await a.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${aba} zoom ${zoom}`); }
     await a.page.click('[data-agent=qa-geral]'); assert.equal(await a.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, 'configuração sem overflow global');
     assert.equal(await a.page.locator('.v36-agent-form').evaluate(el => getComputedStyle(el).overflowY), 'auto'); assert.equal(await a.page.evaluate(() => { const r = document.querySelector('.v36a-perfil .v36-robo'); if (r) return r.dataset.movimento; const p = document.querySelector('.v36a-perfil .v36-portrait'); return p && getComputedStyle(p).animationName === 'none' ? 'parado' : 'vivo'; }), 'parado', 'movimento reduzido para o rosto 3D');
     await a.page.click('#v36-brain-open'); assert.equal(await a.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, 'Cérebro sem overflow global');
