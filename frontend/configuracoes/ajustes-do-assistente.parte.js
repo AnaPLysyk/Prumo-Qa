@@ -6,7 +6,7 @@
     const nome = h('input', { id: 'ia-nome', maxlength: 40, value: ia().nome, 'aria-label': tr('Nome do assistente'), autocomplete: 'off' });
     const pessoa = h('input', { id: 'ia-pessoa', maxlength: 30, 'aria-label': 'Como chamar você', autocomplete: 'off' });
     const papel = h('select', { id: 'ia-papel', 'aria-label': 'Seu papel no time' }, [['', 'Não informado'], ['qa', 'QA'], ['dev', 'Desenvolvimento'], ['po', 'Produto (PO)'], ['analista', 'Análise'], ['outro', 'Outro']].map(([value, rotulo]) => h('option', { value }, rotulo)));
-    async function carregarPerfil() { if (window.PrumoContas && !await PrumoContas.podeIniciar()) return; const r = await chamar(() => api.perfilObter()); if (r) { pessoa.value = r.comoChamar || ''; papel.value = r.papel || ''; } }
+    async function carregarPerfil() { const r = await chamar(() => api.perfilObter()); if (r) { pessoa.value = r.comoChamar || ''; papel.value = r.papel || ''; } }
     pessoa.addEventListener('change', () => chamar(() => api.perfilSalvar({ comoChamar: pessoa.value.trim() || null })));
     papel.addEventListener('change', () => chamar(() => api.perfilSalvar({ papel: papel.value || null })));
     nome.addEventListener('change', async () => { const v = nome.value.trim(); if (!v || !/^[\p{L}\p{N} ._-]+$/u.test(v)) { nome.value = ia().nome; avisar(tr('Use letras, números, espaço, ponto, hífen ou sublinhado.'), true); return; } await salvar({ nome: v }); });
@@ -20,7 +20,6 @@
     voz.addEventListener('change', () => salvar({ voz: voz.value || null }));
     const externos = h('div', { class: 'v36-ajustes-externos' });
     async function desenharExternos() {
-      if (window.PrumoContas && !await PrumoContas.podeIniciar()) return;
       const r = await chamar(() => api.assistenteAgentes(estado.espaco?.id ?? null)); if (!r) return;
       externos.replaceChildren(...r.provedores.map((p) => {
         const nomeP = p.id === 'claude' ? 'Claude Code' : 'Codex';
@@ -32,9 +31,7 @@
     }
     const linha = (rotulo, no) => h('label', { class: 'ajuste' }, h('span', {}, tr(rotulo)), no);
     const sistema = h('details', { class: 'v36-ajustes-sistema' }, h('summary', { class: 'v36-ajustes-titulo' }, tr('Sistema')), h('div', { class: 'v36-ajustes-conteudo' }, ...caixa.children));
-    const contaOnline = h('div', { id: 'perfil-conta-online' });
-    const perfil = h('details', { class: 'v36-ajustes-perfil' }, h('summary', { class: 'v36-ajustes-titulo' }, tr('Meu perfil')), h('div', { class: 'v36-ajustes-conteudo' }, contaOnline, linha('Como chamar você', pessoa), linha('Seu papel no time', papel)));
-    perfil.addEventListener('toggle', () => { if (perfil.open) window.PrumoContas?.montar(contaOnline); });
+    const perfil = h('details', { class: 'v36-ajustes-perfil' }, h('summary', { class: 'v36-ajustes-titulo' }, tr('Meu perfil')), h('div', { class: 'v36-ajustes-conteudo' }, linha('Como chamar você', pessoa), linha('Seu papel no time', papel)));
     const assistente = h('details', { class: 'v36-ajustes-ia' }, h('summary', { class: 'v36-ajustes-titulo' }, tr('Assistente')), h('div', { class: 'v36-ajustes-conteudo' },
       linha('Nome do assistente', nome), linha('Estilo das respostas', estilo), linha('Voz do assistente', voz),
       h('label', { class: 'v36-ajustes-linha' }, ler, h('span', {}, tr('Ler respostas em voz alta'))),

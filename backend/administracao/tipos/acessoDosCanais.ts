@@ -19,7 +19,7 @@ export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
   'papeis:listar': ['administracao', 'VER'], 'papeis:salvar': ['administracao', 'USAR'], 'papeis:excluir': ['administracao', 'USAR'],
   'acesso:configuracao': ['administracao', 'VER'], 'acesso:salvar': ['administracao', 'USAR'],
   'plataforma:agentes': ['administracao', 'VER'], 'plataforma:salvar': ['administracao', 'USAR'],
-  'administracao:mapa': ['administracao', 'VER'], 'atualizacao:instalar': ['administracao', 'USAR'], 'dados:excluir': ['administracao', 'USAR'],
+  'administracao:mapa': ['administracao', 'VER'], 'administracao:codigo': ['administracao', 'VER'], 'atualizacao:instalar': ['administracao', 'USAR'], 'dados:excluir': ['administracao', 'USAR'],
   'agentes:salvar': ['administracao', 'USAR'], 'skills:decidir': ['administracao', 'USAR'], 'skills:importar': ['administracao', 'USAR'],
   'interface:exportar': 'base', 'espacos:listar': 'base', 'espacos:obter': 'base', 'projetos:listar': 'base', 'projeto:visao': 'base', 'projeto:historico': 'base',
   'projeto:conexoes': 'base', 'servicos:listar': 'base', 'servicos:consultar': 'base', 'servicos:aceite': 'base', 'operacoes:previa': 'base', 'operacoes:listar': 'base',
