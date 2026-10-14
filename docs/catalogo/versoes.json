@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.14.0",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-14",
       "title": "O Prumo abre no login, entra com GitHub ou Google e funciona com ou sem conexões",
       "objective": "Fazer o Prumo funcionar do jeito que a pessoa trabalha: abrir sempre na tela de entrada e não deixar usar nada sem entrar, entrar pelo GitHub ou pelo Google num clique, escolher o repositório do GitHub direto em Projetos e usar Testes e Tickets mesmo sem Qase ou Jira, publicando depois, quando conectar. Inclui tudo da 2.13.0, que não chegou a ter release própria.",
       "features": [
@@ -48,12 +48,16 @@
         "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou.",
         "O login por provedor no primeiro acesso depende do OAuth App já configurado neste computador (por variável de ambiente); sem isso, a primeira conta é criada com senha e o botão do provedor aparece só depois de configurado em Administração."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.14.0",
       "migration": "A instalação preserva os dados existentes. Contas, papéis e a configuração de acesso ganham campos novos com valor vazio; nada é reescrito. Instalações sem nenhuma conta passam a pedir a criação do Administrador no primeiro acesso.",
       "afterUpdate": [
         "Ao abrir pela primeira vez depois de atualizar, crie a conta de Administrador (se ainda não existir) ou entre com a sua conta.",
         "Em Administração › Configurações gerais, configure o login pelo GitHub ou pelo Google se quiser o botão na tela de entrada."
-      ]
+      ],
+      "installer": {
+        "file": "Prumo-QA-Setup-2.14.0.exe",
+        "sha256": "ede42ebaede3d6cbf339d22fc63b8a285ae995b17a85bf162d058b982404bd04"
+      }
     },
     {
       "version": "2.13.0",
