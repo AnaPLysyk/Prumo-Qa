@@ -14,7 +14,8 @@ const raizRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const pastasLidas = /^(frontend|backend|src|app|scripts|ferramentas|site|skills|testes)\//;
 const extensoes = /\.(ts|mjs|cjs|js|html|css|json|md)$/;
 // dist/renderer/ e dist/documentacao/ são gerados no build: a fonte da interface é frontend/.
-const ignorar = /^(dist\/|docs\/ajuda\/|site\/public\/|.*\.min\.js$)/;
+// Bibliotecas de terceiros (vendor/) não são código do Prumo: ficam fora do mapa e da Documentação viva.
+const ignorar = /^(dist\/|docs\/ajuda\/|site\/public\/|.*\.min\.js$|(?:.*\/)?vendor\/)/;
 const git = (...args) => execFileSync('git', args, { cwd: raizRepo, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
 
 /** Primeira linha de explicação: /** ... *\/ (depois de shebang ou 'use strict') ou o título de um Markdown. */
