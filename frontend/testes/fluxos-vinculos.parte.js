@@ -30,7 +30,7 @@
     corpo.append(DS.secao('Operações externas recentes', m.operacoesRecentes.length ? h('ul', { id: 'vinc-operacoes', class: 'ds-lista' }, m.operacoesRecentes.map((o) => h('li', {}, seloOp(o.estado), ' ', o.resumo, h('span', { class: 'ds-sub' }, hora(o.em) + (o.remoto?.chave ? ' · ' + o.remoto.chave : ''))))) : h('p', { class: 'suave' }, tr('Nenhuma operação externa registrada.'))));
   }
   function declarar(e) {
-    const vj = vinc(e, 'jira'), vq = vinc(e, 'qase'); const recarregar = () => { DS.fecharModal(); void mostrar('rastreabilidade'); };
+    const vj = vinc(e, 'jira'), vq = vinc(e, 'qase'); const recarregar = () => { DS.fecharModal(); (estado.sub ||= {}).testes = 'repositorio'; void mostrar('testes'); };
     const ticket = h('input', { id: 'rastro-ticket', placeholder: 'SMART-1', maxlength: 40 }), caso = h('input', { id: 'rastro-caso', placeholder: '31', maxlength: 20 }), porque = h('input', { id: 'rastro-justificativa', maxlength: 1000 });
     const vcaso = h('input', { id: 'vinc-caso', type: 'number', min: 1 }), vcap = h('input', { id: 'vinc-cap', maxlength: 100, placeholder: 'unit ou unit#C1' }), vjust = h('input', { id: 'vinc-just', maxlength: 500, value: tr('Declarado pela pessoa') });
     const [nav, painel] = DS.abasModal([

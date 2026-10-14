@@ -74,5 +74,3 @@
     seguir.addEventListener('change', () => { acompanhar(); if (seguir.checked) desenhar(); });
     await carregar(); if (!eventos.length) desenhar(); acompanhar();
   };
-
-  // ---------------- Histórico: linha do tempo e tabela das atividades observadas ----------------

@@ -1,5 +1,5 @@
 /** Reúne trecho visual da função compartilhado para o bundle interfaces-v36. */
-/* Apresentação v36: telas Início, Logs, Histórico, Métricas, Agentes e o Orchestrator flutuante.
+/* Apresentação v36: telas Início, Logs, Métricas, Agentes e o Orchestrator flutuante.
    Medidas e cores conferidas contra o protótipo aprovado (prumo_qa_v36_fundo_neural_e_formulario.html). */
 .v36-sr{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
 .v36-icone{display:block;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -13,7 +13,6 @@
 
 /* ---------- Casca: as telas aprovadas usam a largura toda ---------- */
 body[data-tela=inicio] main#conteudo,body[data-tela=logs] main#conteudo{max-width:none;width:100%;padding:0;height:100vh;height:100dvh;overflow:hidden}
-body[data-tela=historico] main#conteudo{max-width:none;width:100%;padding:17px clamp(14px,2vw,26px) 24px}
 body[data-tela=metricas] main#conteudo{max-width:none;width:100%;padding:16px clamp(18px,2.4vw,34px) 40px}
 body[data-tela=inicio] main#conteudo>*,body[data-tela=logs] main#conteudo>*{height:100%;animation:none}
 body[data-tela=inicio] .topo-direita{top:22px}

@@ -1,6 +1,8 @@
 'use strict';
 // Traduções do painel de atividades v41; registros (ferramentas, estados, perguntas) não são traduzidos.
 Object.assign(window.PRUMO_EN, {
+  'Registro da fila do worker. Evidência e logs completos ficam em Testes › Runs.': 'Worker queue record. Full evidence and logs are in Tests › Runs.',
+  'Abrir Runs': 'Open Runs',
   'Configurações': 'Settings',
   'Ajustes deste computador': 'Settings for this computer',
   'Aparência': 'Appearance',

@@ -1,9 +1,9 @@
 # Testes
 
-**Para que serve esta tela/pasta:** Combina catálogo do repositório, casos Qase, propostas, automações e runs.
+**Para que serve esta tela/pasta:** Testes reúne IDE, Repositório, Runs e Planos. Execuções, evidências e vínculos fazem parte desses fluxos, sem telas ou módulos separados.
 
-**Onde encontrar os arquivos:** mostrarTestesRemotos.js; guardarTelaTestesAnterior.js; formularios/montarFormularioProposta.js; cartoes/montarCartaoProposta.js; mostrarPropostasTeste.js; componentes/organizarSubabasTestes.js; mostrarCatalogoCodigo.js; mostrarTestesComSubabas.js; classificarCasoQase.js.
+**Onde encontrar os arquivos:** visao-geral-dos-testes.parte.js; fluxos-casos-qase.parte.js; fluxos-planos-e-runs.parte.js; fluxos-vinculos.parte.js; componentes/organizarSubabasTestes.js; formularios/montarFormularioProposta.js; classificarCasoQase.js.
 
-**Atenção:** Outras implementações aprovadas continuam em testes-v40.js e fluxos-v40.js; estas pastas ainda não são exclusivas.
+**Build:** testes-v40.js e fluxos-v40.js são gerados em dist/renderer a partir das partes-fonte por tela. Não editar os bundles.
 
-**Como funciona:** a interface chama operações permitidas de `backend/aplicativo/preload.cjs`; `src/contratos.ts` valida entradas e `src/desktop/main.ts` encaminha ao backend. Ainda são canais IPC, não endpoints HTTP.
+**Como funciona:** a interface usa `backend/aplicativo/preload.cjs`; os canais em `backend/aplicativo/api/` validam as entradas e encaminham aos handlers em `backend/testes/api/`. Ainda são canais IPC, não endpoints HTTP.

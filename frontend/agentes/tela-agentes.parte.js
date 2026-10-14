@@ -322,7 +322,7 @@
         },
         abrirAtividade: activityDetails,
         abrirConversa: (c) => caixa((c.semTexto ? 'Atendimento · ' : 'Conversa · ') + (c.agenteNome || c.agente), [note(c.semTexto ? 'Registro local de metadados. A pergunta e a resposta não foram gravadas.' : tr('Gravada somente neste computador. Resposta {m}.', { m: c.modo === 'LOCAL' ? tr('local, sem modelo de IA') : c.modo })), h('pre', {}, JSON.stringify({ em: c.em, agente: c.agente, ...(c.semTexto ? { avaliacao: c.avaliacao } : { pergunta: c.pergunta, resposta: c.linhas }), fontes: c.fontes, modo: c.modo }, null, 2))]),
-        abrirExecucao: (x) => caixa(tr('Execução {r}', { r: x.rotina }), [note(tr('Registro da fila do worker. Evidência e logs completos ficam em Execuções.')), h('pre', {}, JSON.stringify(x, null, 2)), button(tr('Abrir Execuções'), () => { document.querySelector('.v36-dialog[open]')?.close(); void mostrar('execucoes'); })]),
+        abrirExecucao: (x) => caixa(tr('Execução {r}', { r: x.rotina }), [note(tr('Registro da fila do worker. Evidência e logs completos ficam em Testes › Runs.')), h('pre', {}, JSON.stringify(x, null, 2)), button(tr('Abrir Runs'), () => { document.querySelector('.v36-dialog[open]')?.close(); void mostrar('runs'); })]),
         abrirTela: (aba) => mostrar(aba)
       });
       const vivo = painelVivo; mostrarOrquestracoes(orq, quieto).then((n) => { if (n && painelVivo === vivo) vivo.abrirLateral(true); }).catch(() => avisar(tr('Não foi possível mostrar as orquestrações.')));

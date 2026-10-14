@@ -33,7 +33,7 @@ const idx=(p)=>scripts.indexOf(p);
 const carregamentoPorTela=[
  ['telas/agendamentos/formularios/montarFormularioRotina.js','telas/agendamentos/mostrarAgendamentos.js'],
  ['telas/compartilhado/mostrarEstadoWorker.js','telas/inicio/mostrarInicio.js'],
- ['telas/runs/mostrarRunsQase.js','telas/testes/mostrarTestesComSubabas.js'],
+ ['fluxos-v40.js','testes-v40.js'],
  ['telas/metricas/componentes/montarVisuaisMetricas.js','telas/metricas/mostrarMetricas.js'],
  ['telas/testes/formularios/montarFormularioProposta.js','telas/testes/mostrarPropostasTeste.js']
 ];
@@ -46,7 +46,7 @@ const anteriores=[
  ['telas/compartilhado/consultarServicoRemoto.js','telas/tickets/mostrarTickets.js'],
  ['telas/compartilhado/consultarServicoRemoto.js','telas/testes/mostrarTestesRemotos.js'],
  ['telas/agentes/usarTelaAgentes.js','telas/conexoes/mostrarConexoes.js'],
- ['telas/ajuda/mostrarAjuda.js','telas/agentes/abrirModalContextos.js']
+ ['telas/ajuda/mostrarAjuda.js','telas/agentes/modais/contextos/abrirContextos.js']
 ];
 for (const [primeiro,segundo] of anteriores) if (idx(primeiro)<0 || idx(segundo)<0 || idx(primeiro)>=idx(segundo)) falhas.push('Ordem de carregamento: '+primeiro+' deve vir antes de '+segundo);
 if (falhas.length) {

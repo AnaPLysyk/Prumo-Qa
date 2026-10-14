@@ -1,5 +1,5 @@
 'use strict';
-// Grupo B (v40): Agendamentos (orquestração de rotinas de QA) e Execuções (histórico com etapas, logs e evidências).
+// Agendamentos: rotinas de QA e modais dos resultados compartilhados com Testes › Runs.
 // Usa os mesmos canais da agenda e da fila; nenhum resultado é calculado aqui. Horário perdido nunca vira executado.
 (() => {
   const quando = (iso) => (iso ? hora(iso) : '—');
@@ -149,7 +149,7 @@
       }, { id: 'exec-bug', icone: 'alerta' }) : null)],
     { tamanho: 'lg', subtitulo: [selo(r?.status || x.estado), DS.chip(rotuloTipo(x.tipo)), x.capability ? DS.chip(x.capability) : null, DS.origem(x.origem === 'AGENDA' ? 'prumo' : 'manual', tr(ORIGENS[x.origem] || x.origem || '—'))] });
   }
-  // Evidências CLI/MCP do projeto (rota "evidencias", sempre em modal dentro de Execuções).
+  // Evidências CLI/MCP do projeto, consultadas em modal dentro de Testes › Runs.
   abas.evidencias = async (el) => {
     const e = estado.espaco; const raiz = e?.pastaLocal || estado.root; const alvo = estado.jobId; estado.jobId = undefined;
     if (!raiz) { el.append(DS.estadoTela('vazio', 'Nenhuma pasta de projeto vinculada', 'Vincule a pasta do repositório em Projetos para consultar evidências locais.', [], { compacto: true })); return; }

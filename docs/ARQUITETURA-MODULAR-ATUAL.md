@@ -22,6 +22,8 @@
 
 **Cada pasta é uma tela do aplicativo** (ou o sino de Atualizações). Não existem pastas de módulos que não sejam telas, exceto o que é transversal: `backend/aplicativo/` (janela, bandeja e registro dos canais), `backend/terminal/` (CLI), `backend/compartilhado/` e, no frontend, `design-system/` e `compartilhado/`.
 
+Execuções, Rastreabilidade, Contextos e Histórico não têm implementações de tela separadas. O modal de Contextos fica em `frontend/agentes/modais/contextos/abrirContextos.js`; sua API, regras e persistência ficam em `backend/agentes/`. Resultados e vínculos ficam em Testes, e o histórico operacional é consultado por Logs. Os nomes de canais e os redirecionamentos antigos podem permanecer para compatibilidade, sem recriar módulos.
+
 ## O percurso de uma ação
 
 Exemplo: a pessoa abre Projetos e clica em Salvar.

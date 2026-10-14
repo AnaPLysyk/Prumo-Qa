@@ -1,9 +1,7 @@
 /** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
   const DICAS = {
     metricas: ['Quer explorar um gráfico ou comparar períodos?', 'Posso te ajudar a interpretar estas métricas.'],
-    historico: ['Quer descobrir o que aconteceu em uma operação?', 'Posso te ajudar a entender um evento do histórico.'],
     logs: ['Precisa investigar uma falha nos logs?', 'Posso te ajudar a localizar a etapa com problema.'],
-    execucoes: ['Quer revisar uma execução de teste?', 'Posso te orientar a encontrar os resultados.'],
     testes: ['Quer entender os testes deste projeto?', 'Posso te orientar pelos cenários.'],
     agentes: ['Quer conhecer os agentes disponíveis?', 'Posso te explicar como configurá-los.'],
     conexoes: ['Quer revisar suas integrações?', 'Posso te orientar nas configurações de conexão.'],
