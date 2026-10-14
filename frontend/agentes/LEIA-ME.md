@@ -14,6 +14,8 @@
 | `mostrarAgentesIntegrados.js` | Lista de agentes integrados com profissão, especialidade e permissão efetiva. |
 | `modais/contextos/abrirContextos.js` | Modal de Contextos aberto a partir desta tela. |
 
+A tela está sempre disponível: sem projeto, ou se o estado do projeto falhar, continuam o Prumo Orchestrator local e os atalhos para Projetos e Conexões. O botão Integrações leva a Conexões, onde Claude Code, Codex, Qase e Jira são conectados.
+
 Os arquivos `.parte.js/.css` são juntados, na ordem de `ferramentas/frontend/telas-modulares.json`, em `dist/renderer/interfaces-v36.js` e `.css` durante o build. Edite só aqui; `dist/renderer/` é gerado.
 
 **De onde vêm os dados:** a tela chama `window.prumo` (`backend/aplicativo/preload.cjs`), cujos canais IPC são validados em `backend/aplicativo/api/catalogoDeContratos.ts` e atendidos em `backend/agentes/api/` (por exemplo `skillsListar.ts`, `skillsCriar.ts`, `skillsDecidir.ts`, `skillsImportar.ts`). São canais IPC da janela, não endpoints HTTP.

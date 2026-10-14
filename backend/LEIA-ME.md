@@ -16,7 +16,7 @@ As pastas correspondentes a telas visíveis também existem em `frontend/`; mód
 
 | Pasta | Para que serve |
 | --- | --- |
-| [`administracao/`](administracao/LEIA-ME.md) | Administração: configurações gerais, usuários, permissões, monitoramento e documentação técnica. |
+| [`administracao/`](administracao/LEIA-ME.md) | Administração: configurações gerais, usuários, papéis e permissões, agentes da plataforma, monitoramento e documentação técnica. |
 | [`agendamentos/`](agendamentos/LEIA-ME.md) | Agendamentos: rotinas, fila de trabalhos, worker residente, autorizações prévias e k6. |
 | [`agentes/`](agentes/LEIA-ME.md) | Agentes: as especializações, o chat, o Cérebro, as Skills, o conhecimento e os contextos do projeto (requisitos, regras, critérios e decisões, com aprovação humana). |
 | [`ajuda/`](ajuda/LEIA-ME.md) | Ajuda: documentos, versões, integrações técnicas e privacidade dos dados. |
@@ -26,6 +26,7 @@ As pastas correspondentes a telas visíveis também existem em `frontend/`; mód
 | [`conexoes/`](conexoes/LEIA-ME.md) | Conexões: contas de Jira, Qase e GitHub, leitura e escrita controlada nesses serviços e a conexão das IAs pelo MCP. |
 | [`configuracoes/`](configuracoes/LEIA-ME.md) | Configurações (Ajustes): preferências da pessoa — tema, idioma, avisos e som. |
 | [`inicio/`](inicio/LEIA-ME.md) | Início: o painel do projeto e o assistente local que responde com os dados deste computador, sem IA. |
+| [`login/`](login/LEIA-ME.md) | Login: entrar, sair, cadastrar, recuperar e trocar a senha, a sessão e a conferência de acesso de cada canal da janela. |
 | [`logs/`](logs/LEIA-ME.md) | Logs: o que o aplicativo e as IAs fizeram, e o histórico das operações do projeto consolidado para o chat e as métricas. |
 | [`metricas/`](metricas/LEIA-ME.md) | Métricas: números reais calculados das execuções e do diário de operações. |
 | [`projetos/`](projetos/LEIA-ME.md) | Projetos: projetos do Prumo, pastas de código vinculadas e o contrato qa.project.json. |

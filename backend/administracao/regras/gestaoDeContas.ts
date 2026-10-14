@@ -1,10 +1,10 @@
 /** Gestão de contas pela Administração: listar, criar com senha temporária, aprovar, trocar papel, desativar, redefinir senha, desbloquear e excluir. */
 import { randomUUID } from 'node:crypto';
-import { gerarSenhaTemporaria, resumirSegredo } from './senhas.js';
-import { contaParaJanela, situacaoDaSessao } from './sessao.js';
-import { gravarContas } from '../banco/gravarContas.js';
-import { lerContas } from '../banco/lerContas.js';
-import { ContaVisivel, RegistroDeContas, Usuario, estadosDaConta, loginSchema, nomeDaPessoaSchema } from '../tipos/contas.js';
+import { gerarSenhaTemporaria, resumirSegredo } from '../../login/regras/senhas.js';
+import { contaParaJanela, situacaoDaSessao } from '../../login/regras/sessao.js';
+import { gravarContas } from '../../login/banco/gravarContas.js';
+import { lerContas } from '../../login/banco/lerContas.js';
+import { ContaVisivel, RegistroDeContas, Usuario, estadosDaConta, loginSchema, nomeDaPessoaSchema } from '../../login/tipos/contas.js';
 
 function quemAdministra(b?: string): Usuario {
   const s = situacaoDaSessao(b);
@@ -38,7 +38,7 @@ export async function criarContaPelaAdministracao(d: { login: string; nome: stri
   if (!r.papeis.some((p) => p.id === d.papel)) throw new Error('ROLE_NOT_FOUND: papel inexistente.');
   if (r.usuarios.some((u) => u.login === login.data)) throw new Error('LOGIN_TAKEN: esse login já está em uso; escolha outro.');
   const quando = agora.toISOString();
-  const u: Usuario = { id: randomUUID(), login: login.data, nome: nome.data, papel: d.papel, estado: 'ATIVO', senha, recuperacao: null, trocarSenha: true, falhas: 0, bloqueadoAte: null, criadoEm: quando, atualizadoEm: quando, ultimoAcesso: null, origem: 'ADMINISTRACAO' };
+  const u: Usuario = { id: randomUUID(), login: login.data, nome: nome.data, papel: d.papel, estado: 'ATIVO', senha, recuperacao: null, identidades: [], trocarSenha: true, falhas: 0, bloqueadoAte: null, criadoEm: quando, atualizadoEm: quando, ultimoAcesso: null, origem: 'ADMINISTRACAO' };
   r.usuarios.push(u); gravarContas(r, b);
   return { conta: contaParaJanela(r, u, agora.getTime()), senhaTemporaria: temporaria };
 }

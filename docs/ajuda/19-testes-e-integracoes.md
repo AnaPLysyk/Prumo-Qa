@@ -16,6 +16,14 @@ Se o projeto só tem o repositório do **GitHub** vinculado (sem pasta local), a
 
 **Planos** lista e cria os planos de teste do Qase, quando vinculado.
 
+## Com e sem conexões
+
+Testes e Tickets funcionam **sem nenhuma conexão**: os testes vêm da pasta do repositório, e propostas, runs e tickets locais ficam neste computador. Conectar enriquece as telas: o **Qase** traz casos e suites para **Repositório**, runs para **Runs** e planos para **Planos**; o **Jira** traz os tickets para **Tickets**; o **GitHub** traz o repositório e os pipelines. Depois de conectar, o que você já tinha feito localmente pode ser publicado.
+
+Sem o Qase, **Preparar run** usa os testes do código da pasta vinculada. Essa run fica só neste computador e aceita resultados manuais. O Prumo não deixa criá-la no Qase, porque esses casos não existem lá: crie os casos no Qase e prepare outra run para publicar.
+
+Em **Projetos**, **Escolher repositório do GitHub…** lista os repositórios da conta GitHub conectada. **Vincular** só associa o repositório ao projeto; **Vincular e trazer para este computador** também baixa uma cópia, depois da sua confirmação.
+
 ## Tickets
 
 Tickets do Jira, defeitos do Qase e tickets locais do Prumo ficam numa tabela única, com a origem em cada linha e filtros por texto, origem, tipo, status e período. O detalhe do ticket mostra descrição, critérios, relações, comentários, histórico, anexos e transições. Comentar, anexar, mudar status, editar e criar ticket pedem confirmação com prévia.

@@ -1,4 +1,4 @@
-# Prumo QA 2.13 — Plataforma desktop de engenharia de qualidade
+# Prumo QA 2.14 — Plataforma desktop de engenharia de qualidade
 
 ## Onde fica cada coisa
 
@@ -10,7 +10,7 @@ Procure pelo nome da tela que aparece no menu: a mesma pasta existe no frontend 
 | O que a tela faz por trás (canais, regras, dados, integrações) | `backend/<tela>/` com `api/`, `regras/`, `banco/`, `integracoes/`, `tipos/` |
 | Componentes e estilos comuns | `frontend/design-system/` e `frontend/compartilhado/` |
 | Skills dos agentes | `backend/agentes/skills/` (arquivos do aplicativo) e o banco `skills.db` ([docs/SKILLS.md](docs/SKILLS.md)) |
-| Testes | `testes/<tipo>/<camada>/` ([testes/LEIA-ME.md](testes/LEIA-ME.md)) |
+| Testes | `testes/<natureza>/<camada>/<módulo>/` ([testes/LEIA-ME.md](testes/LEIA-ME.md)) |
 | Build, empacotamento, release, documentação gerada | `ferramentas/<finalidade>/` |
 | Site público | `site/gerar.mjs`, `site/componentes/`, `site/estilos/` |
 | Ajuda do aplicativo e do site | `docs/ajuda/*.md` |
@@ -18,7 +18,7 @@ Procure pelo nome da tela que aparece no menu: a mesma pasta existe no frontend 
 
 Mapa completo: [Arquitetura modular por tela](docs/ARQUITETURA-MODULAR-ATUAL.md) · [índice do backend](backend/LEIA-ME.md) · [seleção de testes](docs/TESTES.md). `npm.cmd run check` confere dependências, tipos e a suíte inteira.
 
-Versão atual 2.13.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/historico/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/historico/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/historico/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+Versão atual 2.14.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/historico/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/historico/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/historico/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
 
 ## Ciclo de qualidade e IA
 
@@ -121,7 +121,7 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 | Caminho | Responsabilidade |
 |---|---|
 | `backend/`, `frontend/` | O aplicativo: uma pasta por tela em cada um (regras e dados no backend; interface no frontend) |
-| `testes/` | Todos os testes automáticos, por tipo e depois por camada |
+| `testes/` | Todos os testes automáticos: unitário, smoke e regressão, por camada (backend/frontend) e por módulo |
 | `docs/` | Documentação; `docs/ajuda/` é a Ajuda do app e do site, `docs/catalogo/` o histórico de versões e `docs/historico/` os registros de entregas antigas |
 | `ferramentas/` | Scripts do projeto (build, documentação, release, testes); não vão para o instalador |
 | `site/` | Gerador do site público (Render) |
@@ -146,7 +146,7 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 | `electron-builder.yml`, `assets/` | Instalador NSIS e ícone substituível |
 | `.github/workflows/windows.yml` | Testes, instalador, instalação em pasta com espaços e release por tag |
 | `backend/agentes/skills/qa/SKILL.md` | Método de qualidade aplicável do ISTQB, sem meta fixa de cenários |
-| `testes/<tipo>/<camada>/` | Unitários, contratos (IPC, MCP), integração, segurança, E2E na janela real e migração; regras do repositório em `testes/estrutura/` |
+| `testes/<natureza>/<camada>/<módulo>/` | `unitario` (regras isoladas e regras do repositório), `smoke` (o app sobe) e `regressao` (contratos, integração, segurança, janela real e migração) |
 | `ferramentas/` | Ferramentas por finalidade: arquitetura, documentação, frontend, empacotamento, release, migração, site, qa, skills e testes |
 | `backend/projetos/exemplos/projeto-demo` | Produto fictício de publicações, dados em memória e testes reais |
 | `backend/projetos/exemplos/plano-demo.json` | Revisão rastreável com cenário duplicado |

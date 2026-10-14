@@ -6,7 +6,7 @@ import { tiposConhecimento } from '../../agentes/tipos/conhecimento.js';
 import { papeis } from '../../agentes/tipos/persona.js';
 import { especializacoes } from '../../agentes/tipos/politicas.js';
 import { estadosTrecho, idTrecho } from '../../agentes/tipos/skills.js';
-import { configuracaoDeAcessoSchema, idPapelSchema, niveisDeAcesso } from '../../administracao/tipos/contas.js';
+import { configuracaoDeAcessoSchema, idPapelSchema, niveisDeAcesso } from '../../login/tipos/contas.js';
 import { arquivosDosCanais } from './arquivosDosCanais.js';
 import { operacoesServico } from '../../conexoes/tipos/adaptador.js';
 import { conexaoEntrada } from '../../conexoes/tipos/contaDeServico.js';
@@ -176,6 +176,10 @@ export const esquemasIpc = {
   'conta:sair': vazio,
   'conta:cadastrar': z.object({ login: textoCurto, nome: textoNome, senha: textoSenha }).strict(),
   'conta:recuperar': z.object({ login: textoCurto, codigo: z.string().min(1).max(40), novaSenha: textoSenha }).strict(),
+  'conta:githubiniciar': z.object({ ativar: z.boolean().optional() }).strict(),
+  'conta:githubestado': z.object({ cancelar: z.boolean().optional() }).strict(),
+  'conta:googleiniciar': z.object({ ativar: z.boolean().optional() }).strict(),
+  'conta:googleestado': z.object({ cancelar: z.boolean().optional() }).strict(),
   'conta:senha': z.object({ atual: textoSenha, nova: textoSenha }).strict(),
   'conta:perfil': z.object({ nome: textoNome }).strict(),
   'usuarios:ativar': z.object({ login: textoCurto, nome: textoNome, senha: textoSenha }).strict(),
@@ -189,7 +193,9 @@ export const esquemasIpc = {
   'papeis:salvar': z.object({ id: idPapelSchema.optional(), nome: z.string().min(1).max(40), descricao: z.string().max(200).optional(), telas: z.record(z.enum(niveisDeAcesso)).refine((t) => Object.keys(t).length <= 40) }).strict(),
   'papeis:excluir': z.object({ id: idPapelSchema }).strict(),
   'acesso:configuracao': vazio,
-  'acesso:salvar': configuracaoDeAcessoSchema,
+  'acesso:salvar': configuracaoDeAcessoSchema.omit({ githubClientId: true, googleClientId: true }),
+  'acesso:google': z.object({ clientId: z.string().trim().max(120), clientSecret: z.string().max(200) }).strict(),
+  'acesso:github': z.object({ clientId: z.string().trim().max(60), clientSecret: z.string().max(200) }).strict(),
   'plataforma:agentes': vazio,
   'plataforma:salvar': z.object({ desligados: z.array(z.string().min(1).max(40)).max(16), iaExterna: z.boolean(), orquestracao: z.boolean() }).strict()
 } as const;
@@ -347,14 +353,20 @@ Object.assign(ipc, {
   'worker:eventos': agendaDesc('Receber avisos do worker e pedidos de navegação da bandeja desde o último número visto.', 'Último número de evento recebido', 'Eventos (iniciado, concluído, falhou, bloqueado, publicação falhou, worker interrompido, navegar) e último número', 'Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte).', 'Nenhuma', { origem: 'Interface > avisos e navegação pela bandeja', destino: 'main.ts > worker.ts' }),
   'worker:pausa': agendaDesc('Pausar ou retomar todos os agendamentos.', 'pausado (true/false)', 'Estado do worker', 'Grava a pausa global; trabalho em andamento termina sem ser corrompido.', 'Ação explícita da pessoa', { origem: 'Interface > Agendamentos ou menu da bandeja' })
 });
-const contaErros = [...ipcErros, 'SESSION_REQUIRED', 'SESSION_EXPIRED', 'PERMISSION_DENIED', 'LOGIN_NOT_ACTIVE', 'LOCAL_DATA_INVALID'];
-const contaProt = [...ipcProtecoes, 'Senha e código de recuperação só como resumo scrypt com sal próprio', 'Sessão só na memória do processo principal, com expiração por inatividade', 'Permissão por tela conferida no backend a cada canal (administracao/tipos/acessoDosCanais.ts)'];
+const contaErros = [...ipcErros, 'SESSION_REQUIRED', 'SESSION_EXPIRED', 'PERMISSION_DENIED', 'LOGIN_NOT_ACTIVE', 'LOGIN_SETUP_REQUIRED', 'LOCAL_DATA_INVALID'];
+const contaProt = [...ipcProtecoes, 'Senha e código de recuperação só como resumo scrypt com sal próprio', 'Sessão só na memória do processo principal, com expiração por inatividade', 'Permissão por tela conferida no backend a cada canal (login/tipos/acessoDosCanais.ts)'];
 const contaDesc = (finalidade: string, entrada: string, saida: string, efeito: string, permissoes: string, extra: Partial<Descricao> = {}): Descricao => ({ finalidade, origem: 'Interface > Entrada do Prumo, Minha conta ou Administração', destino: 'backend/administracao/regras', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\acessos.json', erros: contaErros, protecoes: contaProt, registro: 'Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)', ...extra });
 Object.assign(ipc, {
   'conta:sessao': contaDesc('Saber se o login está ligado, quem está na sessão e o nível de cada tela para o papel dessa pessoa.', 'Nenhuma', 'loginAtivo, conta visível (sem resumos), telas e regras de cadastro', 'Consulta local; não renova a sessão.', 'Nenhuma (atende antes do login)'),
   'conta:entrar': contaDesc('Entrar com login e senha.', 'Login e senha', 'Sessão (conta e telas)', 'Abre a sessão na memória; conta tentativas erradas e bloqueia a conta no limite configurado.', 'Nenhuma (atende antes do login)', { erros: [...contaErros, 'LOGIN_INVALID', 'ACCOUNT_LOCKED', 'ACCOUNT_PENDING', 'ACCOUNT_DISABLED', 'LOGIN_RATE_LIMIT'] }),
   'conta:sair': contaDesc('Encerrar a sessão.', 'Nenhuma', 'Sessão vazia', 'Esquece a sessão da memória.', 'Sessão aberta'),
   'conta:cadastrar': contaDesc('Criar a própria conta pela tela de entrada.', 'Login, nome e senha', 'Estado (PENDENTE ou ATIVO) e código de recuperação mostrado uma vez', 'Grava a conta com o papel de cadastro; com aprovação ligada, ela só entra depois que a Administração aprovar.', 'Login ligado e cadastro aberto na Administração', { erros: [...contaErros, 'SIGNUP_CLOSED', 'LOGIN_TAKEN', 'PASSWORD_WEAK', 'LOGIN_INVALID_FORMAT'] }),
+  'conta:githubiniciar': contaDesc('Entrar ou se cadastrar pelo GitHub: abre o navegador na autorização e a pessoa volta já com o acesso. Com ativar, e sem nenhuma conta, a primeira conta (administradora) nasce da autorização.', 'Opcional: ativar', 'iniciado', 'Abre um endereço local temporário, só neste computador e por 5 minutos, que só aceita a volta do GitHub com o state e o PKCE desta tentativa; conta existente entra e ganha a conexão do GitHub, conta nova fica PENDENTE.', 'Nenhuma (atende antes do login); exige login ligado e o OAuth App configurado', { erros: [...contaErros, 'GITHUB_LOGIN_NOT_CONFIGURED', 'GITHUB_LOGIN_FAILED'] }),
+  'conta:googleiniciar': contaDesc('Entrar ou se cadastrar pelo Google: abre o navegador na autorização e a pessoa volta já com o acesso. Com ativar, e sem nenhuma conta, a primeira conta (administradora) nasce da autorização.', 'Opcional: ativar', 'iniciado', 'Abre um endereço local temporário, só neste computador e por 5 minutos, que só aceita a volta do Google com o state e o PKCE desta tentativa; conta existente entra, conta nova fica PENDENTE. O Google serve só para entrar: nenhuma conexão é criada.', 'Nenhuma (atende antes do login); exige login ligado e o aplicativo do Google configurado', { erros: [...contaErros, 'GOOGLE_LOGIN_NOT_CONFIGURED', 'GOOGLE_LOGIN_FAILED'] }),
+  'conta:googleestado': contaDesc('Ver como está a entrada pelo Google (aguardando, concluída, pendente de aprovação ou com erro) ou desistir dela.', 'Opcional: cancelar', 'estado, mensagem e, quando concluída, a sessão', 'Consulta a tentativa em andamento; cancelar fecha o endereço local.', 'Nenhuma (atende antes do login)'),
+  'acesso:google': contaDesc('Guardar o Client ID e o Client Secret do aplicativo do Google usado no login.', 'Client ID e Client Secret (vazio no Client ID remove)', 'configurado e Client ID', 'O Client ID vai para acessos.json; o segredo só para o cofre do sistema e nunca volta para a janela.', 'Administração: USAR', { erros: [...contaErros, 'GOOGLE_CLIENT_INVALID', 'GOOGLE_SECRET_REQUIRED', 'CREDENTIAL_PROTECTION_UNAVAILABLE'] }),
+  'conta:githubestado': contaDesc('Ver como está a entrada pelo GitHub (aguardando, concluída, pendente de aprovação ou com erro) ou desistir dela.', 'Opcional: cancelar', 'estado, mensagem e, quando concluída, a sessão', 'Consulta a tentativa em andamento; cancelar fecha o endereço local.', 'Nenhuma (atende antes do login)'),
+  'acesso:github': contaDesc('Guardar o Client ID e o Client Secret do OAuth App do GitHub usado no login.', 'Client ID e Client Secret (vazio no Client ID remove)', 'configurado e Client ID', 'O Client ID vai para acessos.json; o segredo só para o cofre do sistema e nunca volta para a janela.', 'Administração: USAR', { erros: [...contaErros, 'GITHUB_CLIENT_INVALID', 'GITHUB_SECRET_REQUIRED', 'CREDENTIAL_PROTECTION_UNAVAILABLE'] }),
   'conta:recuperar': contaDesc('Definir senha nova com o código de recuperação.', 'Login, código de recuperação e senha nova', 'Código de recuperação novo (o anterior deixa de valer)', 'Troca a senha e o código; tentativas erradas contam para o bloqueio.', 'Código de recuperação da própria conta', { erros: [...contaErros, 'RECOVERY_INVALID', 'ACCOUNT_LOCKED', 'PASSWORD_WEAK'] }),
   'conta:senha': contaDesc('Trocar a própria senha, inclusive a temporária dada pela Administração.', 'Senha atual e senha nova', 'Sessão e, quando a senha era temporária, código de recuperação novo', 'Grava o resumo da senha nova.', 'Sessão aberta e senha atual', { erros: [...contaErros, 'PASSWORD_INVALID', 'PASSWORD_WEAK'] }),
   'conta:perfil': contaDesc('Trocar o próprio nome de exibição.', 'Nome', 'Sessão atualizada', 'Grava o nome na conta.', 'Sessão aberta'),

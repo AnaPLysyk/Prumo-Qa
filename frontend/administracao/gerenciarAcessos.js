@@ -16,24 +16,6 @@ window.PrumoAdministracaoAcessos = (() => {
   }
 
   /* ---------- Usuários ---------- */
-  function ativacao(area) {
-    const nome = h('input', { id: 'ativar-nome', type: 'text', maxlength: 80, autocomplete: 'name' });
-    const login = h('input', { id: 'ativar-login', type: 'text', maxlength: 40, autocomplete: 'username', autocapitalize: 'off', spellcheck: 'false' });
-    const senha = h('input', { id: 'ativar-senha', type: 'password', maxlength: 200, autocomplete: 'new-password' });
-    const confirma = h('input', { id: 'ativar-confirma', type: 'password', maxlength: 200, autocomplete: 'new-password' });
-    area.replaceChildren(
-      DS.alerta(['O login está desligado: hoje o Prumo usa a conta deste computador e qualquer pessoa com acesso a ela usa todas as telas.', 'Ative o login criando a primeira conta, de administrador. A partir daí a janela pede login, cada tela respeita o papel da pessoa e você gerencia as contas aqui.'], 'info'),
-      DS.secao('Ativar login', [
-        h('div', { class: 'adm-form' }, DS.campo('Seu nome', nome), DS.campo('Login', login, { ajuda: '3 a 40 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado.' }),
-          DS.campo('Senha', senha, { ajuda: 'Pelo menos 10 caracteres, misturando letras e números.' }), DS.campo('Confirmar senha', confirma)),
-        DS.rodape(DS.acao('Ativar login', async () => {
-          if (senha.value !== confirma.value) return avisar(tr('A confirmação não é igual à senha.'), true);
-          const r = await chamar(() => api.usuariosAtivar(login.value, nome.value, senha.value)); senha.value = confirma.value = ''; if (!r) return;
-          segredoUmaVez('Login ativado', 'Guarde este código de recuperação fora deste computador. Ele aparece só agora e permite definir uma senha nova se você esquecer a atual.', r.codigoRecuperacao, () => location.reload());
-        }, { primaria: true, id: 'ativar-login-botao' }))
-      ], { id: 'adm-ativar' }));
-  }
-
   function novaConta(papeis, recarregar) {
     const nome = h('input', { id: 'nova-nome', type: 'text', maxlength: 80 });
     const login = h('input', { id: 'nova-login', type: 'text', maxlength: 40, autocapitalize: 'off', spellcheck: 'false' });
@@ -48,8 +30,6 @@ window.PrumoAdministracaoAcessos = (() => {
 
   async function usuarios(area) {
     area.replaceChildren(DS.carregando());
-    const s = window.PrumoConta?.sessao();
-    if (s && !s.loginAtivo) return ativacao(area);
     const [lista, papeis] = await Promise.all([chamar(() => api.usuariosListar()), chamar(() => api.papeisListar())]);
     if (!lista || !papeis) return area.replaceChildren(DS.falhaConsulta('administracao'));
     const recarregar = () => usuarios(area); const alterar = podeAlterar();
@@ -159,9 +139,17 @@ window.PrumoAdministracaoAcessos = (() => {
     const aberto = caixa('geral-cadastro', c.cadastroAberto); const aprovar = caixa('geral-aprovar', c.aprovarCadastros);
     const papel = DS.selecao({ id: 'geral-papel', rotulo: 'Papel de novos cadastros', opcoes: d.papeis.filter((p) => p.id !== 'administrador').map((p) => [p.id, p.nome]), valor: c.papelDoCadastro }); papel.disabled = !alterar;
     const inatividade = numero('geral-inatividade', c.minutosDeInatividade, 5, 720); const tentativas = numero('geral-tentativas', c.tentativasAntesDoBloqueio, 3, 20); const bloqueio = numero('geral-bloqueio', c.minutosDeBloqueio, 1, 240);
+    const ghId = h('input', { id: 'geral-github-id', type: 'text', value: c.githubClientId || '', maxlength: 60, autocomplete: 'off', spellcheck: 'false', disabled: !alterar });
+    const ghSegredo = h('input', { id: 'geral-github-segredo', type: 'password', maxlength: 200, autocomplete: 'off', placeholder: c.githubClientId ? tr('(já guardado; deixe vazio para manter)') : '', disabled: !alterar });
+    const ghSalvar = DS.acao('Salvar login pelo GitHub', async () => { const r = await chamar(() => api.acessoGithub(ghId.value, ghSegredo.value)); ghSegredo.value = ''; if (r) { avisar(r.configurado ? tr('Login pelo GitHub configurado. O botão aparece na tela de entrada.') : tr('Login pelo GitHub desligado.')); void geral(area); } }, { id: 'geral-github-salvar', compacto: true });
+    const goId = h('input', { id: 'geral-google-id', type: 'text', value: c.googleClientId || '', maxlength: 120, autocomplete: 'off', spellcheck: 'false', disabled: !alterar });
+    const goSegredo = h('input', { id: 'geral-google-segredo', type: 'password', maxlength: 200, autocomplete: 'off', placeholder: c.googleClientId ? tr('(já guardado; deixe vazio para manter)') : '', disabled: !alterar });
+    const goSalvar = DS.acao('Salvar login pelo Google', async () => { const r = await chamar(() => api.acessoGoogle(goId.value, goSegredo.value)); goSegredo.value = ''; if (r) { avisar(r.configurado ? tr('Login pelo Google configurado. O botão aparece na tela de entrada.') : tr('Login pelo Google desligado.')); void geral(area); } }, { id: 'geral-google-salvar', compacto: true });
     area.replaceChildren(
       DS.secao('Cadastro pela tela de entrada', [h('label', { class: 'opcao', for: 'geral-cadastro' }, aberto, tr('Permitir que a pessoa crie a própria conta')), h('label', { class: 'opcao', for: 'geral-aprovar' }, aprovar, tr('Novos cadastros precisam de aprovação da Administração')), DS.campo('Papel de novos cadastros', papel, { ajuda: 'Nunca administrador: esse papel só a Administração dá.' })]),
       DS.secao('Sessão e bloqueio', [h('div', { class: 'adm-form' }, DS.campo('Minutos sem uso até pedir login de novo', inatividade), DS.campo('Tentativas erradas antes de bloquear a conta', tentativas), DS.campo('Minutos de bloqueio', bloqueio))]),
+      DS.secao('Entrar e se cadastrar com o GitHub', [DS.info('Registre um OAuth App em github.com/settings/developers com a Authorization callback URL http://127.0.0.1/callback e cole aqui o Client ID e o Client Secret. O segredo fica no cofre do sistema. Quem se cadastra pelo GitHub nasce PENDENTE até a Administração aprovar; ao entrar, a conexão do GitHub é criada sozinha.', { rotulo: 'Sobre o login pelo GitHub' }), h('div', { class: 'adm-form' }, DS.campo('Client ID', ghId), DS.campo('Client Secret', ghSegredo)), alterar ? ghSalvar : null]),
+      DS.secao('Entrar e se cadastrar com o Google', [DS.info('No Google Cloud Console crie uma credencial OAuth do tipo "Aplicativo para computador" e cole aqui o Client ID e o Client Secret. O segredo fica no cofre do sistema. Quem se cadastra pelo Google nasce PENDENTE até a Administração aprovar. O Google serve só para entrar: nenhuma conexão é criada.', { rotulo: 'Sobre o login pelo Google' }), h('div', { class: 'adm-form' }, DS.campo('Client ID', goId), DS.campo('Client Secret', goSegredo)), alterar ? goSalvar : null]),
       alterar ? DS.rodape(DS.acao('Salvar configurações', async () => {
         const r = await chamar(() => api.acessoSalvar({ cadastroAberto: aberto.checked, aprovarCadastros: aprovar.checked, papelDoCadastro: papel.value, minutosDeInatividade: Number(inatividade.value), tentativasAntesDoBloqueio: Number(tentativas.value), minutosDeBloqueio: Number(bloqueio.value) }));
         if (r) avisar(tr('Configurações salvas.'));

@@ -99,13 +99,13 @@ jobs:
         env:
           PRUMO_MIGRACAO: '1'
         run: |
-          node --test --test-concurrency=1 testes/migracao/ui/migracao.test.mjs *> migracao.txt
+          node --test --test-concurrency=1 testes/regressao/frontend/aplicativo/migracao.test.mjs *> migracao.txt
           $codigo = $LASTEXITCODE
           Get-Content migracao.txt | Select-String '^(✔|✖|﹣|ℹ (tests|pass|fail|skipped))'
           if ($codigo -ne 0) { exit $codigo }
           if ((Select-String -Path migracao.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Testes de migração foram ignorados: etapa inválida' }
       - name: Janela e MCP do programa instalado (sem Node.js dedicado ao app)
-        run: node --test --test-concurrency=1 testes/e2e/ui/janela-e-seguranca.test.mjs testes/e2e/ui/ajuda.test.mjs testes/e2e/ui/conexoes-e-acessibilidade.test.mjs testes/e2e/ui/contextos.test.mjs testes/e2e/ui/plataforma-dois-projetos.test.mjs testes/e2e/ui/agenda.test.mjs testes/e2e/ui/jira.test.mjs testes/e2e/ui/i18n.test.mjs testes/e2e/ui/agenda-e-bandeja-ponta-a-ponta.test.mjs
+        run: node --test --test-concurrency=1 testes/regressao/frontend/aplicativo/janela-e-seguranca.test.mjs testes/regressao/frontend/ajuda/ajuda.test.mjs testes/regressao/frontend/conexoes/conexoes-e-acessibilidade.test.mjs testes/regressao/frontend/agentes/contextos.test.mjs testes/regressao/frontend/projetos/plataforma-dois-projetos.test.mjs testes/regressao/frontend/inicio/agenda.test.mjs testes/regressao/frontend/tickets/jira.test.mjs testes/regressao/frontend/compartilhado/i18n.test.mjs testes/regressao/frontend/agendamentos/agenda-e-bandeja-ponta-a-ponta.test.mjs
       - name: Instalar a 2.6 publicada, criar dados com ela e atualizar para a atual
         shell: pwsh
         run: |
@@ -125,7 +125,7 @@ jobs:
         env:
           PRUMO_MIGRACAO_26: '1'
         run: |
-          node --test --test-concurrency=1 testes/migracao/ui/migracao-26.test.mjs *> migracao-26.txt
+          node --test --test-concurrency=1 testes/regressao/frontend/aplicativo/migracao-26.test.mjs *> migracao-26.txt
           $codigo = $LASTEXITCODE
           Get-Content migracao-26.txt
           if ($codigo -ne 0) { exit $codigo }
@@ -149,7 +149,7 @@ jobs:
         env:
           PRUMO_MIGRACAO_27: '1'
         run: |
-          node --test --test-concurrency=1 testes/migracao/ui/migracao-27.test.mjs *> migracao-27.txt
+          node --test --test-concurrency=1 testes/regressao/frontend/aplicativo/migracao-27.test.mjs *> migracao-27.txt
           $codigo = $LASTEXITCODE
           Get-Content migracao-27.txt
           if ($codigo -ne 0) { exit $codigo }

@@ -69,7 +69,7 @@
         ...(vq ? [DS.acao('Consulta avançada', () => F.avancadaQase(e), { id: 'testes-avancada', icone: 'filtro' }), DS.acao('Nova suite', () => F.novaSuite(e, esc), { id: 'su-nova', icone: 'mais' })] : []),
         DS.acao('Nova proposta de caso', () => F.novaProposta(e), { id: 'pr-nova', primaria: true, icone: 'mais' })],
       planos: [DS.acao('Novo plano', () => F.novoPlano(e, esc), { id: 'plano-novo', primaria: true, icone: 'mais' })],
-      runs: vq ? [DS.acao('Preparar run', () => F.prepararRun(e), { id: 'run-nova', primaria: true, icone: 'mais' })] : [] }[sub] || [];
+      runs: [DS.acao('Preparar run', () => F.prepararRun(e), { id: 'run-nova', primaria: true, icone: 'mais' })] }[sub] || [];
     const origem = e.pastaLocal ? DS.origem('local', tr('Repositório local')) : vg ? DS.origem('github', 'GitHub · ' + vg.recurso.chave) : h('span', { class: 'ds-chip', 'data-tom': 'aviso' }, tr('Sem repositório vinculado'));
     // A IDE usa a tela inteira: sem título nem subtítulo, só a barra de seções.
     if (aba !== 'ide') el.append(DS.cabecalho({ titulo: 'Testes', descricao: [h('span', { class: 'ds-chips', id: 'testes-fontes' }, origem, vq ? DS.origem('qase', 'Qase · ' + vq.recurso.chave) : null, vq && !esc ? h('span', { class: 'ds-chip', 'data-escrita-desligada': 'qase', title: tr('Escrita no Qase desligada. Habilite em Conexões.') }, tr('Qase somente leitura')) : null)], acoes }));

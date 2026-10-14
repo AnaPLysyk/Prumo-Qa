@@ -67,7 +67,7 @@ body { display: grid; grid-template-columns: 244px minmax(0, 1fr); align-items: 
 header#lateral { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; flex-wrap: nowrap; gap: 14px; padding: 18px 12px 12px; border-right: 1px solid var(--linha); border-bottom: 0; background: var(--painel); overflow-y: auto; overflow-x: hidden; }
 header#lateral .marca, header#lateral .projeto, header#lateral #worker-estado, header#lateral #controles, header#lateral .sino-caixa, header#lateral nav { order: 0; flex-basis: auto; }
 header#lateral .marca { padding: 0 6px; font-size: 15px; }
-header#lateral .projeto { padding: 8px 10px; border: 1px solid var(--linha); border-radius: 10px; background: rgba(var(--qc-azul), .06); display: flex; flex-direction: column; gap: 1px; white-space: normal; flex: none; }
+header#lateral .projeto { padding: 8px 10px; border: 0; border-radius: 10px; background: none; display: flex; flex-direction: column; gap: 1px; white-space: normal; flex: none; }
 header#lateral .projeto .suave { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
 header#lateral nav { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 12px; flex: 1; min-height: 0; }
 header#lateral .grupo-nav { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 1px; padding: 0; margin: 0; border: 0; }
@@ -212,8 +212,8 @@ body[data-menu="fechado"] header#lateral nav button { padding: 5px 0; }
 
 /* seletor de projeto (lateral) e lista de projetos em linhas */
 .seletor-projeto { display: flex; flex-direction: column; gap: 4px; flex: none; }
-header#lateral button.projeto { position: relative; width: 100%; text-align: left; font: inherit; color: var(--texto); cursor: pointer; padding: 8px 30px 8px 12px; border-radius: 12px; border: 1px solid var(--linha); background: rgba(var(--qc-azul), .06); transition: border-color .2s, background .2s; }
-header#lateral button.projeto:hover, header#lateral button.projeto[aria-expanded="true"] { border-color: var(--acento); background: rgba(var(--qc-azul), .1); }
+header#lateral button.projeto { position: relative; width: 100%; text-align: left; font: inherit; color: var(--texto); cursor: pointer; padding: 8px 30px 8px 25px; border-radius: 12px; border: 0; background: none; transition: background .2s; }
+header#lateral button.projeto:hover, header#lateral button.projeto[aria-expanded="true"] { background: rgba(var(--qc-azul), .08); }
 header#lateral button.projeto strong { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
 header#lateral button.projeto .seta { position: absolute; right: 10px; top: 50%; margin-top: -8px; color: var(--suave); transition: transform .25s; }
 header#lateral button.projeto[aria-expanded="true"] .seta { transform: rotate(180deg); }

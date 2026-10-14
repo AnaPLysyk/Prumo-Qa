@@ -5,6 +5,7 @@
   const resultadosLocais = (runs, casoId) => runs.flatMap((r) => r.casos.filter((c) => c.casoId === Number(casoId) && c.resultado).map((c) => ({ run: r, ...c.resultado })));
   const ticketsExternos = (c) => (Array.isArray(c.external_issues) ? c.external_issues.flatMap((x) => (x.issues || []).map((i) => i.id)) : []);
   async function abrirCaso(e, id) {
+    if (id >= 1e9) { avisar(tr('Caso local: existe só neste computador, não no Qase.')); return; }
     const vq = vinc(e, 'qase'); if (!vq) { avisar(tr('Qase não vinculado a este projeto.'), true); return; }
     const carregando = DS.modal(tr('Caso {id}', { id }), DS.carregando('Consultando o Qase…'), { tamanho: 'lg' });
     const [r, runs, perm, aut] = await Promise.all([api.servicoConsultar(e.id, 'qase', 'caso', {}, String(id)), api.runs(e.id), escritaDoProjeto(e), api.espacoAutomacoes(e.id)]);

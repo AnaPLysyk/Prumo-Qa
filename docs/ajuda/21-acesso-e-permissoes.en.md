@@ -1,14 +1,15 @@
 # Access, users and permissions
 
-Prumo works with this computer's Windows account. If several people share the computer, or you want to limit what each one does, turn **login** on in **Administration › Users**.
+Prumo **always opens on the sign-in screen** and does not let you use anything without signing in. Each person has their own account and role; whoever administers the computer controls who gets in and what each one sees.
 
-## Turn login on
+## First access
 
-1. Open **Administration › Users** and click **Turn on login**.
-2. Create the first account: it is always an **Administrator**. The username has 3 to 40 characters (lowercase letters, numbers, dot, hyphen or underscore) and the password at least 10 characters, mixing letters and numbers.
-3. Keep the **recovery code**, shown only once, outside this computer.
+The first time Prumo opens on a computer, no account exists yet. The screen asks you to create the **Administrator** account, which is always the first one:
 
-From then on the window asks for login before showing any screen. With login off nothing changes: every screen stays open, as before.
+1. Enter your name, username (3 to 40 characters: lowercase letters, numbers, dot, hyphen or underscore) and a password of at least 10 characters, mixing letters and numbers. If GitHub or Google is already configured, **Create account with GitHub** (or **with Google**) does the same through the provider's authorization.
+2. Keep the **recovery code**, shown only once, outside this computer.
+
+Until that account is created no screen opens and no request is served. After it, Prumo always opens on sign-in and asks for login.
 
 ## Roles and permissions
 
@@ -23,6 +24,18 @@ Checks run in the main process on every request, not only in the window: hiding 
 - Whoever forgets the password uses the recovery code; without it, Administration resets the password.
 - The last administrator cannot be deleted or demoted, and nobody becomes an administrator by registering.
 - Each person can change their own name and password in **My account**, in the window corner.
+
+## Sign in and sign up with GitHub or Google
+
+When the Administration has configured it, the sign-in and **Create account** screens show **Sign in with GitHub** and **Sign in with Google**. Clicking opens the provider in your browser; you authorize there and return to Prumo already signed in, with no code or password to type.
+
+- **People with an active account** sign in directly. With GitHub, the GitHub connection is also created automatically (read-only; writing stays off until you enable it). Google is only used to sign in: no connection is created.
+- **People without an account** are registered as **pending**, with the role given to new sign-ups, and **nothing is enabled** until the Administration approves. Once approved, just sign in again through the provider.
+- **First access, no account yet:** **Create account with GitHub** (or **with Google**) creates the first account, an Administrator, from the provider authorization. This needs the provider's app to be configured on this computer already.
+- The account is recognized by the provider's number, never by name or e-mail. Accounts created this way have no Prumo password.
+- Cancelling, denying the authorization or letting 5 minutes pass creates no account, session or connection.
+
+**How to set it up (Administration › General settings).** On GitHub, register an OAuth App at github.com/settings/developers with the callback `http://127.0.0.1/callback`; in the Google Cloud Console, create an OAuth credential of type **Desktop app**. Paste the **Client ID** and **Client Secret** in the provider's section. The secret stays in the system vault and never returns to the screen. Without this setup the button does not appear. GitHub asks for `read:user repo` access (to list private repositories) and Google for `openid email profile`.
 
 ## What login does not do
 

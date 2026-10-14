@@ -2,6 +2,60 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.14.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "O Prumo abre no login, entra com GitHub ou Google e funciona com ou sem conexões",
+      "objective": "Fazer o Prumo funcionar do jeito que a pessoa trabalha: abrir sempre na tela de entrada e não deixar usar nada sem entrar, entrar pelo GitHub ou pelo Google num clique, escolher o repositório do GitHub direto em Projetos e usar Testes e Tickets mesmo sem Qase ou Jira, publicando depois, quando conectar. Inclui tudo da 2.13.0, que não chegou a ter release própria.",
+      "features": [
+        "O Prumo abre direto na tela de entrada e não deixa usar nada sem entrar. Na primeira vez, sem nenhuma conta, a tela pede para criar a conta de Administrador (com senha, ou pelo GitHub/Google quando configurado); até lá nenhuma tela abre e nenhum pedido é atendido.",
+        "Entrar e se cadastrar com o GitHub ou o Google: o Prumo abre o navegador, você autoriza lá e volta já autenticado, sem digitar código. Quem já tem conta ativa entra direto; quem é novo fica pendente até a Administração aprovar, e nada é habilitado antes disso.",
+        "Com o GitHub, a conta que entra ganha a conexão do GitHub sozinha (só leitura; a escrita continua desligada até você habilitar). O Google serve só para entrar e não cria conexão.",
+        "Primeiro acesso: Criar conta com o GitHub (ou com o Google) cria a primeira conta, de Administrador, pela autorização do provedor, quando o aplicativo do provedor já está configurado neste computador.",
+        "Administração › Configurações gerais ganha a configuração do login pelo GitHub e pelo Google (Client ID e Client Secret). O botão só aparece quando o provedor está configurado.",
+        "Projetos › Escolher repositório do GitHub…: lista os repositórios da conta conectada; Vincular associa ao projeto e Vincular e trazer para este computador também baixa uma cópia.",
+        "Testes sem Qase: Preparar run usa os testes do código da pasta vinculada, com resultado manual e rascunho de bug locais. Criar essa run no Qase é recusado, porque os casos locais não existem lá.",
+        "Qase, Jira e GitHub conectados alimentam Testes (Repositório, Runs e Planos), Tickets e Projetos; sem as conexões, as abas seguem usáveis com dados locais.",
+        "O chat acha o Claude Code instalado pela extensão do VS Code, além do Codex Desktop e do PATH."
+      ],
+      "improvements": [
+        "A barra do topo ficou uniforme: o botão da conta, o estado do worker e a engrenagem têm a mesma altura, e sem login o avatar é um ícone de pessoa em vez de um ponto de interrogação.",
+        "O seletor de projeto da lateral não tem mais o cartão atrás: só o texto, alinhado com o menu, e um fundo leve ao passar o mouse.",
+        "A Ajuda ganhou as seções sobre o login por provedor, sobre Testes com e sem conexões e sobre o Claude Code e o Codex no chat."
+      ],
+      "fixes": [
+        "Salvar as regras gerais de acesso não apaga os Client IDs do GitHub e do Google.",
+        "A resposta da página de retorno do login não é cortada: o endereço local espera terminar a resposta antes de fechar."
+      ],
+      "differential": "Entrar com a conta que a pessoa já tem, trabalhar com ou sem as integrações e publicar só depois, sempre com a confirmação dela.",
+      "howItWorks": [
+        "O login por provedor usa autorização com retorno local (127.0.0.1) e PKCE. O Prumo escuta um endereço temporário, só neste computador e por 5 minutos, que aceita apenas a volta do provedor com o state certo; cancelar, negar ou esgotar o tempo não cria nada.",
+        "A conta é reconhecida pelo número do provedor, nunca pelo nome ou e-mail. Contas criadas assim não têm senha do Prumo."
+      ],
+      "security": [
+        "O Client Secret fica só no cofre do sistema e nunca volta para a janela, para log ou para o acesso.json. O token do provedor é descartado quando a conta não está ativa.",
+        "O GitHub é pedido com read:user e repo (para listar repositórios privados); o Prumo só escreve com a escrita habilitada e confirmação humana. O Google é pedido só com openid, email e profile.",
+        "Cadastro pelo provedor nasce pendente, com o papel de novos cadastros; ninguém vira administrador por esse caminho, exceto a primeira conta de uma instalação sem nenhuma conta.",
+        "Sem nenhuma conta, o Prumo recusa todos os pedidos da janela (LOGIN_SETUP_REQUIRED), exceto criar a primeira conta e entrar pelo provedor. O servidor MCP, a bandeja e o worker seguem com a conta do Windows e as políticas de cada projeto."
+      ],
+      "compatibility": [
+        "Dados, projetos, preferências e contratos da 2.13 são preservados. Quem já tem contas continua com elas e passa a entrar sempre pela tela de login; quem nunca criou conta vê o primeiro acesso ao abrir e cria o Administrador antes de usar qualquer tela."
+      ],
+      "limitations": [
+        "O login por GitHub e por Google foi validado com provedores simulados e retorno local real; contas reais, o cofre do sistema e o OAuth App registrado ainda não foram exercitados.",
+        "A run sem Qase fica só neste computador: para publicar, crie os casos no Qase e prepare outra run.",
+        "O Google não cria conexão: não é um serviço do Prumo.",
+        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou.",
+        "O login por provedor no primeiro acesso depende do OAuth App já configurado neste computador (por variável de ambiente); sem isso, a primeira conta é criada com senha e o botão do provedor aparece só depois de configurado em Administração."
+      ],
+      "releaseUrl": null,
+      "migration": "A instalação preserva os dados existentes. Contas, papéis e a configuração de acesso ganham campos novos com valor vazio; nada é reescrito. Instalações sem nenhuma conta passam a pedir a criação do Administrador no primeiro acesso.",
+      "afterUpdate": [
+        "Ao abrir pela primeira vez depois de atualizar, crie a conta de Administrador (se ainda não existir) ou entre com a sua conta.",
+        "Em Administração › Configurações gerais, configure o login pelo GitHub ou pelo Google se quiser o botão na tela de entrada."
+      ]
+    },
+    {
       "version": "2.13.0",
       "status": "repositorio",
       "date": null,

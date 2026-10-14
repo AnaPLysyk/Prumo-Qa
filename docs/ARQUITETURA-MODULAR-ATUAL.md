@@ -1,6 +1,6 @@
 # Arquitetura modular do Prumo QA — branch em revisão
 
-**Situação:** descreve a estrutura atual do repositório (2.13): uma pasta por tela em `backend/` e em `frontend/`, a interface do Electron gerada em `dist/renderer/` no build e os testes em `testes/`, por tipo e depois por camada. Registros de decisões e de versões anteriores ficam em `docs/historico/`.
+**Situação:** descreve a estrutura atual do repositório (2.14): uma pasta por tela em `backend/` e em `frontend/`, a interface do Electron gerada em `dist/renderer/` no build e os testes em `testes/`, por tipo e depois por camada. Registros de decisões e de versões anteriores ficam em `docs/historico/`.
 
 ## Primeiro, escolha o nome da tela
 
@@ -33,6 +33,8 @@ frontend/projetos/
   mostrarProjetos.js                     mostra a tela
   modais/criarEditarProjeto/
     abrirFormularioProjeto.js            mostra o formulário
+  modais/escolherRepositorioGithub/
+    abrirRepositoriosGithub.js           lista os repositórios do GitHub conectado e vincula
                   ↓
 backend/aplicativo/preload.cjs                          oferece a chamada permitida
                   ↓ IPC prumo:espacos:criar
@@ -117,13 +119,13 @@ O sistema não transforma automaticamente o texto de uma IA em conhecimento apro
 
 O fluxo começa em `backend/testes/regras/executarValidacao.ts`, que chama `criarEvidenciaInicial.ts` para montar o registro inicial `BLOCKED`. Nesse momento ainda não existe execução, aprovação ou resultado. Em seguida, `executarValidacao.ts` valida contrato e escopo, solicita a confirmação humana e somente então inicia um processo, respeitando os limites de tempo e de saída. O resultado final é armazenado pelo módulo Evidências.
 
-`testes/unitario/regras/evidencia-inicial.test.mjs` verifica especificamente que uma evidência nova não simula execução ou aprovação. O fluxo completo de autorização continua sendo testado pela suíte geral; **não houve alteração das permissões humanas nesta etapa**.
+`testes/unitario/backend/testes/evidencia-inicial.test.mjs` verifica especificamente que uma evidência nova não simula execução ou aprovação. O fluxo completo de autorização continua sendo testado pela suíte geral; **não houve alteração das permissões humanas nesta etapa**.
 
 ### Logs e relatórios da execução
 
 Depois de executar o processo com aprovação, `backend/testes/regras/mascararLogsDaExecucao.ts` remove segredos da saída para a interface e para as evidências. `gravarRelatorioRedigido.ts` mantém somente o relatório de casos redigido, substituindo o conteúdo bruto do runner antes do registro da evidência. Ambos são chamados por `executarValidacao.ts` e não podem alterar a aprovação, o comando, o timeout nem a classificação dos resultados.
 
-Os testes de regressão usam pastas temporárias e dados fictícios. `testes/seguranca/regras/logs-e-relatorios-execucao.test.mjs` confirma o mascaramento e a substituição ou exclusão de artefatos brutos. A operação ainda precisa passar no CI Windows.
+Os testes de regressão usam pastas temporárias e dados fictícios. `testes/unitario/backend/testes/logs-e-relatorios-execucao.test.mjs` confirma o mascaramento e a substituição ou exclusão de artefatos brutos. A operação ainda precisa passar no CI Windows.
 
 ## Documentação viva dentro do aplicativo
 

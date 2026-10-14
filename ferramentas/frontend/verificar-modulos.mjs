@@ -1,4 +1,4 @@
-/** Confere que as telas do frontend existem, são carregadas na ordem certa e têm descrição inicial (o backend é conferido por testes/estrutura/estrutura-backend.test.mjs). */
+/** Confere que as telas do frontend existem, são carregadas na ordem certa e têm descrição inicial (o backend é conferido por testes/unitario/backend/compartilhado/estrutura-backend.test.mjs). */
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -50,6 +50,6 @@ if (falhas.length) {
  for (const erro of falhas) console.error('ERRO: '+erro);
  process.exitCode=1;
 } else {
- console.log('OK: '+localScripts.length+' scripts de telas do frontend. O backend é conferido por testes/estrutura/estrutura-backend.test.mjs.');
+ console.log('OK: '+localScripts.length+' scripts de telas do frontend. O backend é conferido por testes/unitario/backend/compartilhado/estrutura-backend.test.mjs.');
  console.log('Verificação estrutural apenas; execute npm run check e testes do Electron/MCP.');
 }

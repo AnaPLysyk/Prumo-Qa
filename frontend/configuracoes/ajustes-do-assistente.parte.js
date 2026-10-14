@@ -41,8 +41,7 @@
       contaResumo.replaceChildren(u
         ? h('div', { class: 'ajuste-conta-linha' }, h('span', { class: 'conta-iniciais', 'aria-hidden': 'true', 'data-i18n-ignore': '' }, DS.iniciais(u.nome)), h('div', { class: 'ajuste-conta-nome' }, h('strong', { 'data-i18n-ignore': '' }, u.nome), h('span', { class: 'suave', 'data-i18n-ignore': '' }, u.login + ' · ' + u.papelNome)),
           DS.acao('Minha conta', () => window.PrumoConta.abrirMinhaConta(), { id: 'ia-abrir-conta', compacto: true }))
-        : h('div', { class: 'ajuste-conta-linha' }, h('div', { class: 'ajuste-conta-nome' }, h('strong', {}, tr('Sem login')), h('span', { class: 'suave' }, tr('O Prumo usa a conta do Windows deste computador.'))),
-          DS.acao('Entenda', () => window.PrumoConta?.abrirMinhaConta(), { id: 'ia-abrir-conta', compacto: true })));
+        : h('span'));
     }
     const painelPerfil = h('div', { class: 'ajuste-painel', 'data-painel': 'perfil' },
       secao('Conta', contaResumo),

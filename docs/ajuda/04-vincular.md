@@ -12,6 +12,10 @@ Em **Projetos › Vincular pasta**, escolha a pasta do repositório no seletor d
 - **Ainda não tem qa.project.json**: o Prumo detecta a stack pelos arquivos da raiz (package.json, pyproject.toml, go.mod, pom.xml, build.gradle, .csproj, Cargo.toml, composer.json, Gemfile) e mostra o contrato proposto: pastas de documentação, testes e código, comandos e observações. Só se você clicar em **Criar contrato e vincular** o arquivo é criado e a pasta vinculada.
 - **qa.project.json inválido**: nada é vinculado. A mensagem explica o problema; corrija o arquivo, ou apague-o para o Prumo propor um novo.
 
+## Vincular um repositório do GitHub
+
+Com uma conexão GitHub ativa (Conexões), **Projetos › Escolher repositório do GitHub…** lista os repositórios da sua conta. **Vincular** associa o repositório ao projeto; **Vincular e trazer para este computador** também baixa uma cópia, com o git instalado e as credenciais dele, e a vincula como pasta do projeto.
+
 ## O que entra no contrato proposto
 
 - **Node.js (npm)**: comandos `npm run` para os scripts de teste, build, lint ou typecheck que existem no package.json. Scripts de e2e, integração, deploy, publicação, migração ou banco ficam bloqueados até você revisar.

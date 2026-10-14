@@ -40,7 +40,7 @@ para a escolha por janela em Logs).
 
 **Regra:** as cores de tema moram só em `frontend/design-system/` (`estilo.css`, `qc.css`, `ds.css`). Nenhuma tela tem
 `data-tema` ou `prefers-color-scheme` nem redefine `--fundo`, `--painel`, `--linha`, `--texto`, `--suave`, `--acento` ou
-os estados; trocar uma cor é trocar um arquivo. `testes/estrutura/design-system-tema.test.mjs` garante a regra.
+os estados; trocar uma cor é trocar um arquivo. `testes/unitario/frontend/compartilhado/design-system-tema.test.mjs` garante a regra.
 
 ### Espaço, raio e tipo
 

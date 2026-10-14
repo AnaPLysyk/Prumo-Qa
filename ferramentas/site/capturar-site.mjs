@@ -32,7 +32,12 @@ try {
   page.setDefaultTimeout(15000);
   await page.setViewportSize({ width: 1280, height: 800 });
   await app.evaluate(({ BrowserWindow }) => { const w = BrowserWindow.getAllWindows()[0]; w.setContentSize(1280, 800); });
-  await page.waitForSelector('#nav button');
+  await page.waitForSelector('#nav button', { state: 'attached' });
+  // O Prumo abre na entrada: cria a conta de Administrador sintética (primeiro acesso) e recarrega já dentro.
+  await page.waitForSelector('dialog#entrada[open]');
+  const primeiro = await page.evaluate(() => window.prumo.usuariosAtivar('conta-demo', 'Conta Demo', 'Prumo-captura-2026'));
+  if (!primeiro.ok) throw new Error('Não foi possível criar a conta de demonstração: ' + JSON.stringify(primeiro.error));
+  await page.reload();
   await page.waitForSelector('[data-aba=inicio][aria-current=page]');
   const api = (fn, ...a) => page.evaluate(([f, args]) => window.prumo[f](...args), [fn, a]);
   const ir = async (aba) => { await page.click(`[data-aba=${aba}]`); await page.waitForFunction((x) => document.querySelector(`[data-aba=${x}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(500); };

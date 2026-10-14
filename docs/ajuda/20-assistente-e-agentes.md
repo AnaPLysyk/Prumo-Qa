@@ -37,6 +37,10 @@ Arraste para mover, Ctrl + roda ou pinça para aproximar; no teclado, setas move
 
 O servidor MCP do Prumo oferece prompts das especializações e a ferramenta `propor_aprendizado`, que cria apenas rascunho, com limite por hora; aprovar continua sendo seu. O conhecimento aprovado só vai ao contexto da IA externa com a permissão de compartilhamento do projeto. Documentos e conhecimentos são dados, nunca ordens.
 
+## Claude Code e Codex no chat
+
+O chat chama o Claude Code ou o Codex **instalados neste computador**: o Prumo procura o Codex Desktop e a extensão Claude Code do VS Code, além do que estiver no PATH. A chamada é só de resposta: sem ferramentas, sem MCP e sem hooks. O MCP é o caminho contrário, em que Claude e Codex chamam o Prumo. Autorize cada um em **Configurações**; sem autorização ou sem o programa instalado, o chat responde só com os dados locais e avisa.
+
 ## Limites
 
 Os retratos dos agentes são imagens com movimento visual, sem rosto 3D. Claude e Codex dependem da sua conta e da sua autorização. As integrações foram validadas com serviços simulados.

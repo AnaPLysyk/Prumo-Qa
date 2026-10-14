@@ -36,4 +36,6 @@ export type Dep = { executor: Executor; base?: string; agora?: () => Date };
 
 export type Execucao = { executar: typeof executarValidacao; modo: 'MANUAL' | 'AGENDADO'; delegada?: (espacoId: string, ambiente: string) => Delegada; signal?: AbortSignal };
 
+/** Casos que só existem neste computador (testes do código, sem Qase) usam ids a partir daqui; o Qase nunca chega perto disso. */
+export const CASO_LOCAL_MIN = 1_000_000_000;
 export const paraQase = { PASS: 'passed', FAIL: 'failed', BLOCKED: 'blocked' } as const;

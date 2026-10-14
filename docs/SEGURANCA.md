@@ -8,12 +8,24 @@ Credenciais usam o cofre do Electron (DPAPI, Keychain ou Secret Service/KWallet)
 
 ## Login local e permissões (2.12)
 
-- **Desligado por padrão.** Sem login ligado, o Prumo usa a conta do Windows e nada muda. Ligar o login cria `acessos.json` na pasta `plataforma` dos dados, separado de `contas.json` (contas de serviço Jira/Qase/GitHub).
+- **O Prumo não abre sem entrar (2.14).** Sem nenhuma conta, o único pedido atendido é criar a primeira conta, de Administrador; todos os outros canais recusam com `LOGIN_SETUP_REQUIRED` e a janela mostra só o primeiro acesso. Criar a conta cria `acessos.json` na pasta `plataforma` dos dados, separado de `contas.json` (contas de serviço Jira/Qase/GitHub).
 - **Senhas e códigos** nunca ficam em texto: só resumo scrypt com sal próprio. A senha temporária e o código de recuperação aparecem uma única vez. Respostas, logs e diagnóstico nunca os contêm; erro de login não diz se o usuário existe.
 - **Sessão** só na memória do processo principal, com expiração por inatividade e bloqueio da conta após tentativas erradas (ambos configuráveis). Nada de token no renderer.
-- **Autorização no backend:** `registrarCanal` confere, a cada pedido, a sessão e o nível (Sem acesso, Ver, Usar) do papel na tela do canal (`backend/administracao/tipos/acessoDosCanais.ts`). Esconder item de menu não é a autorização. Todo canal novo precisa de uma regra ali (o compilador recusa o contrário).
+- **Autorização no backend:** `registrarCanal` confere, a cada pedido, a sessão e o nível (Sem acesso, Ver, Usar) do papel na tela do canal (`backend/login/tipos/acessoDosCanais.ts`). Esconder item de menu não é a autorização. Todo canal novo precisa de uma regra ali (o compilador recusa o contrário).
 - **Papéis:** o Administrador é fixo; o cadastro público nunca cria administrador; o último administrador não pode ser excluído nem rebaixado; alterar o papel ou desativar uma conta vale no próximo pedido da pessoa.
 - **Limites:** o worker, a bandeja e o servidor MCP seguem com a conta do Windows e as políticas de cada projeto; a confirmação nativa para executar e publicar continua obrigatória. O login não isola dados de quem compartilha a mesma conta do Windows.
+
+## Entrar e se cadastrar pelo GitHub
+- **Quando existe:** só com o aplicativo do provedor configurado (a primeira conta de uma instalação nasce com senha ou, se o provedor já estiver configurado por variável de ambiente, por ele) e o OAuth App configurado pela Administração (Client ID em `acessos.json`; Client Secret apenas no cofre do sistema, nunca na janela, em log ou no arquivo). Sem isso o botão não aparece e o canal recusa (`GITHUB_LOGIN_NOT_CONFIGURED`).
+- **Fluxo:** o Prumo abre o navegador na autorização do GitHub (PKCE S256 e `state` aleatório) e escuta um endereço local temporário em 127.0.0.1, porta aleatória, por 5 minutos. Esse endereço só atende `GET /callback` com o Host exato e o `state` certo; qualquer outro pedido é recusado sem derrubar a tentativa. Cancelar, negar ou esgotar o tempo fecha o endereço.
+- **Nada habilitado sem concluir:** pessoa nova nasce PENDENTE (sem senha, papel de cadastro, sem sessão); conta pendente, desativada ou bloqueada não ganha sessão nem conexão, e o token é descartado. Só conta ATIVA, existente, entra e recebe a conexão do GitHub (somente leitura; escrita continua desligada até a pessoa habilitar).
+- **Identidade:** vale o id numérico do GitHub, nunca o login ou o e-mail; outro id com o mesmo login nunca assume a conta. Conta criada pelo GitHub não tem senha do Prumo.
+- **Escopos pedidos:** `read:user repo` (o `repo` permite listar repositórios privados; o Prumo só escreve com a escrita habilitada e confirmação humana).
+
+## Entrar e se cadastrar pelo Google
+- Mesma lógica e mesmas travas do GitHub (retorno local em 127.0.0.1 com PKCE e `state`, cadastro novo PENDENTE, nada habilitado sem concluir), com o aplicativo do tipo "computador" do Google Cloud; Client ID em `acessos.json` e segredo só no cofre do sistema.
+- Escopos: `openid email profile`, só para identificar a pessoa. O Google não é um serviço do Prumo: **nenhuma conexão é criada** e o token é descartado depois de ler o perfil.
+- Identidade: `sub` do Google junto com o provedor; o mesmo número vindo do GitHub é outra pessoa, e o e-mail nunca identifica a conta.
 
 ## IDE de Testes: escrita de arquivos (2.13)
 

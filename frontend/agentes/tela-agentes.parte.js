@@ -46,8 +46,22 @@
   }
   abas.agentes = async el => {
     el.classList.add('v36a'); espaco(el); el.append(h('h1', { class: 'v36-sr' }, 'Agentes'));
-    const e = estado.espaco; if (!e) { el.append(h('div', { class: 'v36a-sem' }, note(tr('Selecione um projeto para consultar as especializações e configurar permissões.')))); const legacy = h('div'); await agentesLegado(legacy); legacy.querySelector('h1')?.remove(); el.append(legacy); return; }
-    const s = await chamar(() => api.agentesEstado(e.id)); if (!s) return;
+    // A tela nunca fica vazia: sem projeto, ou se o estado do projeto falhar, o Orchestrator local e o caminho para Projetos e Conexões continuam à mão.
+    function disponivel(motivo) {
+      const orbe = h('span', { class: 'v36a-orbe' }, h('img', { src: asset('robo-original.png'), alt: '' })); PrumoOrbitas.anexar(orbe);
+      const orq = h('button', { type: 'button', class: 'v36a-astro v36a-astro-orq', role: 'listitem', id: 'v36-orquestrador-sempre', 'aria-label': tr('Conversar com o Prumo Orchestrator'), onclick: () => flutuante?.abrir() },
+        h('span', { class: 'v36a-astro-figura' }, orbe), h('span', { class: 'v36a-astro-nome' }, 'Prumo Orchestrator'), h('span', { class: 'v36a-astro-sub' }, tr('Assistente local no Prumo')),
+        h('span', { class: 'v36a-astro-estado' }, h('i', { class: 'ok' }), h('span', {}, tr('Sem modelo de IA'))));
+      el.append(h('div', { class: 'v36a-constelacao', role: 'list' }, orq), h('div', { class: 'v36a-sem' }, note(motivo)),
+        h('div', { class: 'v36a-acoes' }, button(tr('Escolher projeto'), () => void mostrar('projetos'), { id: 'v36-agentes-projetos' }), button(tr('Abrir Conexões'), () => void mostrar('conexoes'), { id: 'v36-agentes-conexoes' })));
+    }
+    const e = estado.espaco; if (!e) {
+      disponivel(tr('Selecione um projeto para consultar as especializações e configurar permissões. Claude Code, Codex, Qase e Jira se conectam em Conexões.'));
+      // Pasta vinculada sem projeto selecionado: o diagnóstico e a configuração do MCP continuam aqui.
+      if (estado.root) { const legacy = h('div'); await agentesLegado(legacy); legacy.querySelector('h1')?.remove(); el.append(legacy); }
+      return;
+    }
+    const s = await chamar(() => api.agentesEstado(e.id)); if (!s) { disponivel(tr('Não foi possível ler os agentes deste projeto agora. O Orchestrator local segue disponível; tente de novo em instantes.')); return; }
     let drafts = readDrafts(e.id); let activeTab = 'agents', painelVivo = null;
     const body = h('div', { id: 'v36-agents-body', class: 'v36a-corpo' });
     const tabs = h('div', { class: 'v36a-abas', role: 'group', 'aria-label': tr('Áreas de agentes') },
@@ -97,7 +111,7 @@
       const clients = h('details', { class: 'v36a-secao-extra', id: 'v36-clients', ontoggle: async ev => { if (!ev.currentTarget.open || loaded) return; loaded = true; await agentesLegado(clientContent); clientContent.querySelector('h1')?.remove(); } }, h('summary', {}, tr('Clientes MCP · diagnóstico e configuração')), clientContent);
       body.replaceChildren(
         h('div', { class: 'v36a-topo' }, h('div', {}, h('h2', { class: 'v36a-titulo' }, tr('Agentes'), ' ', conta, DS.info(['Especializações do núcleo e prévias locais deste projeto.', 'Especializações reais do núcleo. Habilitação não comprova sessão nem execução ativa. Retratos com movimento visual, sem articulação facial 3D.'], { id: 'v36a-sobre' }))),
-          h('div', { class: 'v36a-acoes' }, h('label', { class: 'v36a-busca' }, iconeBusca(), search), novo)),
+          h('div', { class: 'v36a-acoes' }, h('label', { class: 'v36a-busca' }, iconeBusca(), search), h('button', { type: 'button', class: 'v36a-quieto', id: 'v36-agentes-integracoes', title: tr('Claude Code, Codex, Qase e Jira'), onclick: () => void mostrar('conexoes') }, tr('Integrações')), novo)),
         lista,
         legacyPolicies(), clients);
       render();

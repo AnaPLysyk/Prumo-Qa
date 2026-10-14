@@ -1,8 +1,8 @@
 /** Papéis e permissões por tela, e a configuração geral de acesso (cadastro, inatividade e bloqueio), decididos na Administração. */
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
-import { gravarContas } from '../banco/gravarContas.js';
-import { lerContas } from '../banco/lerContas.js';
-import { ConfiguracaoDeAcesso, IdModulo, NivelDeAcesso, Papel, configuracaoDeAcessoSchema, modulosDoMenu, niveisDeAcesso } from '../tipos/contas.js';
+import { gravarContas } from '../../login/banco/gravarContas.js';
+import { lerContas } from '../../login/banco/lerContas.js';
+import { ConfiguracaoDeAcesso, IdModulo, NivelDeAcesso, Papel, configuracaoDeAcessoSchema, modulosDoMenu, niveisDeAcesso } from '../../login/tipos/contas.js';
 
 export function listarPapeis(b?: string) {
   const r = lerContas(b);
@@ -40,8 +40,9 @@ export function excluirPapel(id: string, b?: string) {
 export const configuracaoDeAcesso = (b?: string): ConfiguracaoDeAcesso => lerContas(b).acesso;
 
 /** Novos cadastros nunca entram como administrador: esse papel só a Administração dá. */
-export function salvarConfiguracaoDeAcesso(d: ConfiguracaoDeAcesso, b?: string): ConfiguracaoDeAcesso {
-  const r = lerContas(b); const acesso = configuracaoDeAcessoSchema.parse(d);
+export function salvarConfiguracaoDeAcesso(d: Omit<ConfiguracaoDeAcesso, 'githubClientId' | 'googleClientId'>, b?: string): ConfiguracaoDeAcesso {
+  // Os Client IDs do GitHub e do Google têm canal próprio (junto com o segredo): salvar as regras gerais nunca o apaga.
+  const r = lerContas(b); const acesso = configuracaoDeAcessoSchema.parse({ ...d, githubClientId: r.acesso.githubClientId, googleClientId: r.acesso.googleClientId });
   if (!r.papeis.some((p) => p.id === acesso.papelDoCadastro)) throw new Error('ROLE_NOT_FOUND: papel inexistente.');
   if (acesso.papelDoCadastro === 'administrador') throw new Error('SIGNUP_ROLE_FORBIDDEN: novos cadastros não podem entrar como administrador.');
   r.acesso = acesso; gravarContas(r, b); return acesso;

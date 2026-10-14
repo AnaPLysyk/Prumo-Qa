@@ -37,6 +37,10 @@ Drag to move, Ctrl + wheel or pinch to zoom; on the keyboard, arrows move, `+` a
 
 Prumo's MCP server offers prompts for the specializations and the `propor_aprendizado` tool, which only creates a draft, with an hourly limit; approving is still up to you. Approved knowledge only goes to the external AI context with the project's sharing permission. Documents and knowledge are data, never orders.
 
+## Claude Code and Codex in the chat
+
+The chat calls Claude Code or Codex **installed on this computer**: Prumo looks for Codex Desktop and the Claude Code extension for VS Code, besides what is on the PATH. The call only answers: no tools, no MCP and no hooks. MCP is the opposite path, where Claude and Codex call Prumo. Authorize each one in **Settings**; without authorization or the program installed, the chat answers with local data only and says so.
+
 ## Limits
 
 The agent portraits are images with visual motion, without a 3D face. Claude and Codex depend on your account and your authorization. The integrations were validated with simulated services.

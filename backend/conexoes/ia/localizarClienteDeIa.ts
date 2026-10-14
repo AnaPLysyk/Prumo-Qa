@@ -10,6 +10,11 @@ export function localizarClienteDeIa(cliente:'codex'|'claude') {
     const pasta=path.join(process.env.LOCALAPPDATA,'OpenAI','Codex','bin');
     try { for(const d of fs.readdirSync(pasta).sort().reverse())pastas.push(path.join(pasta,d)); } catch { /* Não instalado aqui. */ }
   }
+  // A extensão Claude Code do VS Code traz o claude.exe dentro da própria pasta, fora do PATH (usa a versão mais nova instalada).
+  if(cliente==='claude'&&process.platform==='win32') {
+    const extensoes=path.join(process.env.USERPROFILE??os.homedir(),'.vscode','extensions');
+    try { for(const d of fs.readdirSync(extensoes).filter(n=>n.startsWith('anthropic.claude-code-')).sort((a,b)=>b.localeCompare(a,undefined,{numeric:true})))pastas.push(path.join(extensoes,d,'resources','native-binary')); } catch { /* VS Code não instalado aqui. */ }
+  }
   // macOS e Linux: aplicativos abertos pelo Dock ou pelo menu recebem um PATH mínimo; procura também onde os CLIs costumam ficar.
   if(process.platform!=='win32') for(const d of ['.local/bin','.claude/local','.npm-global/bin','.bun/bin','.volta/bin'])pastas.push(path.join(os.homedir(),d));
   if(process.platform!=='win32') pastas.push('/usr/local/bin','/opt/homebrew/bin','/usr/bin','/snap/bin');

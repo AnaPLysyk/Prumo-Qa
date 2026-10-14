@@ -10,10 +10,11 @@ abas.projetos=async el=>{
   el.append(botao('Novo projeto Prumo',()=>editar(), 'espaco-novo'),formulario);
   const lista=await chamar(api.espacos);if(!lista)return;
   for(const e of lista){
-    const acoes=h('div',{class:'barra-acoes'},botao(estado.espaco?.id===e.id?'Projeto selecionado':'Selecionar projeto',()=>escolherEspaco(e)),botao('Editar projeto',()=>editar(e)),botao('Vincular pasta de automação…',async()=>{const r=await chamar(()=>api.espacoPasta(e.id));if(r&&!r.canceled)mostrar('projetos');}));
+    const painelGithub=h('div',{class:'repos-github'});
+    const acoes=h('div',{class:'barra-acoes'},botao(estado.espaco?.id===e.id?'Projeto selecionado':'Selecionar projeto',()=>escolherEspaco(e)),botao('Editar projeto',()=>editar(e)),botao('Escolher repositório do GitHub…',()=>abrirRepositoriosGithub(painelGithub,e),'espaco-github-'+e.id),botao('Vincular pasta de automação…',async()=>{const r=await chamar(()=>api.espacoPasta(e.id));if(r&&!r.canceled)mostrar('projetos');}));
     // v40: cada vínculo mantém a identidade própria (serviço, chave, ID e instância) e as ações dele na mesma linha.
     const chips=h('ul',{class:'ds-lista proj-vinculos'},e.vinculos.map(v=>h('li',{class:'proj-vinculo','data-servico':v.servico},DS.origem(v.servico,DS.nomesServico[v.servico]+' · '+v.recurso.chave),h('span',{class:'ds-sub'},'ID '+v.recurso.id+' · '+v.recurso.instancia+' · '+tr('validado {q}',{q:hora(v.validadoEm)})),selo(v.estado),h('span',{class:'proj-vinculo-acoes'},DS.link('Validar',async()=>{if(await chamar(()=>api.servicoConferir(e.id,v.servico)))mostrar('projetos');},{rotulo:'Validar vínculo '+v.servico,seta:false}),DS.link('Remover',async()=>{const r=await chamar(()=>api.servicoDesvincular(e.id,v.servico));if(r&&!r.canceled)mostrar('projetos');},{rotulo:'Remover vínculo '+v.servico,seta:false})))),h('li',{class:'proj-vinculo','data-servico':'local'},DS.origem(e.pastaLocal?'local':'ausente',e.pastaLocal?tr('Pasta vinculada'):tr('Sem pasta local')),h('span',{class:'ds-sub'},e.pastaLocal||DS.info('Opcional: necessária para catálogo, automações e evidências locais.'))));
-    el.append(h('section',{class:'nota','data-espaco':e.id},h('h2',{},e.nome),e.descricao?h('p',{class:'suave'},e.descricao):null,chips,acoes,h('p',{class:'suave'},'ID Prumo: '+e.id)));
+    el.append(h('section',{class:'nota','data-espaco':e.id},h('h2',{},e.nome),e.descricao?h('p',{class:'suave'},e.descricao):null,chips,acoes,painelGithub,h('p',{class:'suave'},'ID Prumo: '+e.id)));
   }
   await projetosLocais(el);
 };

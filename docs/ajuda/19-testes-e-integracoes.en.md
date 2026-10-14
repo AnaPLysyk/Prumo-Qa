@@ -16,6 +16,14 @@ If the project only has the **GitHub** repository linked (no local folder), the 
 
 **Plans** lists and creates the Qase test plans, when linked.
 
+## With and without connections
+
+Tests and Tickets work **with no connection at all**: tests come from the repository folder, and proposals, runs and tickets stay local on this computer. Connecting enriches the screens: **Qase** brings cases and suites to **Repository**, runs to **Runs** and plans to **Plans**; **Jira** brings tickets to **Tickets**; **GitHub** brings the repository and the pipelines. After connecting, what you already did locally can be published.
+
+Without Qase, **Prepare run** uses the tests from the linked folder's code. That run stays only on this computer and accepts manual results. Prumo does not let you create it in Qase, because those cases do not exist there: create the cases in Qase and prepare another run to publish.
+
+In **Projects**, **Choose a GitHub repository…** lists the repositories of the connected GitHub account. **Link** only associates the repository with the project; **Link and bring to this computer** also downloads a copy, after your confirmation.
+
 ## Tickets
 
 Jira tickets and Qase defects are in a single table, with the source on each row and filters by text, source, type, status and period. The ticket detail shows description, criteria, relations, comments, history, attachments and transitions. Commenting, attaching, changing status, editing and creating a ticket ask for confirmation with a preview.

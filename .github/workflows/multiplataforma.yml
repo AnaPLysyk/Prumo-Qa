@@ -54,7 +54,7 @@ jobs:
           npm run typecheck
           npm run build
       - name: Testes de plataforma (aprovação, cofre, atualização e nomes dos instaladores)
-        run: node --test --test-concurrency=1 testes/unitario/regras/multiplataforma.test.mjs testes/unitario/regras/aprovacao-multiplataforma.test.mjs
+        run: node --test --test-concurrency=1 testes/unitario/backend/aplicativo/multiplataforma.test.mjs testes/unitario/backend/testes/aprovacao-multiplataforma.test.mjs
       - name: Gerar instaladores
         run: npm run dist:${{ matrix.alvo }}
       - name: Conferir os arquivos gerados e gerar o SHA-256
@@ -74,13 +74,13 @@ jobs:
           bin="$pasta/$(ls $pasta | grep -i '^prumo' | head -1)"
           printf '#!/bin/sh\nexec "%s" --no-sandbox "$@"\n' "$PWD/$bin" > "$RUNNER_TEMP/prumo-ci.sh"; chmod +x "$RUNNER_TEMP/prumo-ci.sh"
           export PRUMO_APP_EXE="$RUNNER_TEMP/prumo-ci.sh"
-          xvfb-run -a node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/e2e/ui/janela-e-seguranca.test.mjs
+          xvfb-run -a node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/regressao/frontend/aplicativo/janela-e-seguranca.test.mjs
       - name: Abrir o programa empacotado e conferir janela e segurança (macOS)
         if: matrix.alvo == 'mac'
         run: |
           app=$(ls -d release/mac-arm64/*.app release/mac/*.app 2>/dev/null | head -1)
           export PRUMO_APP_EXE="$PWD/$app/Contents/MacOS/Prumo QA"
-          node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/e2e/ui/janela-e-seguranca.test.mjs
+          node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/regressao/frontend/aplicativo/janela-e-seguranca.test.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: prumo-qa-${{ matrix.alvo }}
