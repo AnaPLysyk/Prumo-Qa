@@ -2,6 +2,51 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.13.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "Testes com IDE, Repositório, Runs e Planos; editor de código, pipelines e repositório do GitHub no computador",
+      "objective": "Reorganizar Testes no fluxo caso de teste → automação → execução com evidências, com uma IDE de verdade para criar e editar automações ligadas aos casos. Inclui tudo da 2.12.0 (contas locais, papéis, Documentação viva com código e a reorganização das pastas), que não chegou a ter release própria.",
+      "features": [
+        "Testes tem quatro seções: IDE, Repositório, Runs e Planos. Execuções e Rastreabilidade deixaram de ser telas do menu; os atalhos antigos abrem o lugar novo.",
+        "Runs: uma lista só com as execuções locais (manuais e agendadas, com evidências e comentário no Jira), as runs preparadas no Prumo e as runs do Qase, com filtros de origem e de situação (em andamento, concluídas, com falha).",
+        "IDE em tela cheia, sem títulos: árvore de arquivos de teste, código com realce de sintaxe (TypeScript, JavaScript, Python, Gherkin, YAML) e painel com o caso, os tickets, os resultados e as permissões dos agentes. Editar e Salvar (Ctrl+S) com confirmação nativa do Windows; Novo arquivo cria uma automação e, com o caso do Qase, grava a anotação \"Qase: CHAVE-ID\". No detalhe do caso, Criar automação na IDE.",
+        "Repositório: todos os cenários (casos do Qase e testes do código, manuais e automatizados) numa lista só, com as propostas em revisão, as suites e os vínculos declarados.",
+        "Pipelines CI/CD (modo da IDE): lista, edita e cria os workflows do GitHub Actions (.github/workflows) do mesmo repositório vinculado ao projeto.",
+        "Trazer o repositório do GitHub: quando o projeto só tem o GitHub vinculado, baixa uma cópia para este computador (git instalado, credenciais do próprio git) e a vincula ao projeto; Atualizar do GitHub avança a cópia sem sobrescrever o trabalho local."
+      ],
+      "improvements": [
+        "A IDE ocupa a largura toda da janela; o editor usa as cores do Design System nos temas claro e escuro.",
+        "Código antigo da v39 (telas e arquivos que ninguém mais usava) removido."
+      ],
+      "fixes": [
+        "A Documentação viva não fica indisponível quando o app inclui bibliotecas de terceiros: vendor/ fica fora do mapa."
+      ],
+      "differential": "Os agentes ficam mais fortes com o conhecimento da equipe e de Skills abertas, sempre com aprovação humana antes de chegar à IA.",
+      "howItWorks": [
+        "O editor (CodeMirror 5) vem embutido, sem rede. Salvar leva o SHA-256 do que foi lido e é recusado se o arquivo mudou fora do Prumo; a troca é atômica e o fim de linha original é preservado."
+      ],
+      "security": [
+        "Um único canal de escrita (testes:gravar): só arquivos de teste e pipelines, só dentro da pasta vinculada, sem link simbólico, até 300 KB, com confirmação nativa do Windows; arquivo com o que parece um segredo não é aberto para edição.",
+        "Trazer do GitHub: só https do github.com, git com hooks e links simbólicos desligados, sem submódulos, sem herdar credenciais do ambiente e com atualização só por avanço."
+      ],
+      "compatibility": [
+        "Dados, projetos, preferências e contratos da 2.11 são preservados. Execuções e runs continuam nos mesmos arquivos; só a tela mudou de lugar."
+      ],
+      "limitations": [
+        "Casos manuais ainda não ficam guardados num repositório próprio com sincronização com o Qase; sem o Qase vinculado o Repositório mostra o que existe no código.",
+        "O pipeline que roda antes de subir ao GitHub (verificação local) ainda não existe; os pipelines são os do GitHub Actions.",
+        "Trazer do GitHub foi validado com repositórios locais; um repositório real, e principalmente um privado, depende do Git Credential Manager da pessoa e ainda não foi exercitado.",
+        "Contas online compartilhadas entre computadores ainda não existem; o login é local.",
+        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou."
+      ],
+      "releaseUrl": null,
+      "migration": "A instalação preserva os dados existentes; o banco de Skills é novo e não altera nenhum formato anterior.",
+      "afterUpdate": [
+        "Abra Agentes, escolha um agente e veja a seção Skills: acrescente o que a sua equipe quer que ele siga ou importe uma pasta de Skill aberta e aprove os trechos."
+      ]
+    },
+    {
       "version": "2.12.0",
       "status": "repositorio",
       "date": null,

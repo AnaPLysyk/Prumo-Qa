@@ -53,10 +53,10 @@ try {
   if (process.argv.includes('--todas')) {
     const todas = path.join(repo, '.prumo', 'telas'); fs.mkdirSync(todas, { recursive: true });
     // 2.10: Contextos e Evidências saíram do menu (abrem em modal a partir de Agentes e Execuções).
-    const virt = { codigo: ['testes', 'codigo'], runs: ['testes', 'runs'], automacoes: ['testes', 'automacao'], vinculos: ['rastreabilidade', 'vinculos'] };
+    const virt = { ide: ['testes', 'ide'], repositorio: ['testes', 'repositorio'], runs: ['testes', 'runs'], planos: ['testes', 'planos'] };
     for (const tema of ['escuro', 'claro']) {
       await page.evaluate((t) => { document.documentElement.dataset.tema = t; }, tema);
-      for (const aba of ['inicio', 'projetos', 'tickets', 'testes', 'codigo', 'runs', 'automacoes', 'agenda', 'execucoes', 'rastreabilidade', 'vinculos', 'metricas', 'historico', 'logs', 'conexoes', 'agentes', 'suporte', 'ajuda']) {
+      for (const aba of ['inicio', 'projetos', 'tickets', 'testes', 'ide', 'repositorio', 'runs', 'planos', 'agenda', 'metricas', 'historico', 'logs', 'conexoes', 'agentes', 'suporte', 'ajuda']) {
         const [pai, sub] = virt[aba] || [aba, null]; await ir(pai); if (sub) { await page.click('[data-sub=' + sub + ']'); await page.waitForTimeout(500); }
         await page.waitForTimeout(400); await page.screenshot({ path: path.join(todas, tema + '-' + aba + '.png') });
       }
@@ -81,11 +81,10 @@ try {
     .catch(async (erro) => { await page.screenshot({ path: path.join(repo, '.prumo', 'captura-falha.png') }); throw erro; });
   const sub = async (k) => { await page.click(`[data-sub=${k}]`); await page.waitForTimeout(600); };
   await ir('inicio'); await page.waitForTimeout(6500); await tirar('inicio');
-  await ir('testes'); await sub('catalogo'); await texto('aplica desconto progressivo'); await tirar('testes');
-  await sub('codigo'); await page.click('.ds-ide-arquivo[data-arquivo="tests/e2e/checkout.spec.ts"]'); await page.waitForSelector('.ds-ide-linhas'); await tirar('codigo');
+  await ir('testes'); await sub('repositorio'); await texto('aplica desconto progressivo'); await tirar('testes');
+  await sub('ide'); await page.click('.ds-ide-arquivo[data-arquivo="tests/e2e/checkout.spec.ts"]'); await page.waitForSelector('.ds-ide-linhas'); await page.click('#ide-editar'); await page.waitForSelector('.ds-ide-cm .CodeMirror'); await page.waitForTimeout(500); await tirar('codigo');
   await sub('runs'); await texto('Regressão da sprint 42'); await tirar('runs');
   await ir('tickets'); await texto('SMART-1'); await tirar('tickets');
-  await ir('rastreabilidade'); await texto('Caso Qase 31'); await tirar('rastreabilidade');
   await ir('agentes'); await page.waitForTimeout(1200); await tirar('agentes');
   await tema('claro'); await ir('inicio'); await page.waitForTimeout(6500); await tirar('inicio-claro');
   }

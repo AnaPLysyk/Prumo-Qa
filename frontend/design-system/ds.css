@@ -429,3 +429,5 @@ main#conteudo:has(.ds-ide-cheio) { max-width: none; padding: 14px 18px 12px; }
 .cm-s-prumo .cm-number, .cm-s-prumo .cm-def, .cm-s-prumo .cm-tag, .cm-s-prumo .cm-qualifier { color: var(--aviso); }
 .cm-s-prumo .cm-property, .cm-s-prumo .cm-variable-2, .cm-s-prumo .cm-meta { color: var(--texto); }
 .cm-s-prumo .cm-error { color: var(--falha); }
+.ds-ide-aba button { white-space: nowrap; flex: none; }
+.ds-ide-aba .ds-sub { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
