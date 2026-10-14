@@ -101,7 +101,7 @@ jobs:
           if ($codigo -ne 0) { exit $codigo }
           if ((Select-String -Path migracao.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Testes de migração foram ignorados: etapa inválida' }
       - name: Janela e MCP do programa instalado (sem Node.js dedicado ao app)
-        run: node --test --test-concurrency=1 testes/e2e/ui/desktop.test.mjs testes/e2e/ui/desktop-ajuda.test.mjs testes/e2e/ui/desktop-integracoes.test.mjs testes/e2e/ui/desktop-contextos.test.mjs testes/e2e/ui/desktop-plataforma.test.mjs testes/e2e/ui/desktop-agenda.test.mjs testes/e2e/ui/desktop-jira.test.mjs testes/e2e/ui/desktop-i18n.test.mjs testes/e2e/ui/demonstracao-28.test.mjs
+        run: node --test --test-concurrency=1 testes/e2e/ui/janela-e-seguranca.test.mjs testes/e2e/ui/ajuda.test.mjs testes/e2e/ui/conexoes-e-acessibilidade.test.mjs testes/e2e/ui/contextos.test.mjs testes/e2e/ui/plataforma-dois-projetos.test.mjs testes/e2e/ui/agenda.test.mjs testes/e2e/ui/jira.test.mjs testes/e2e/ui/i18n.test.mjs testes/e2e/ui/agenda-e-bandeja-ponta-a-ponta.test.mjs
       - name: Instalar a 2.6 publicada, criar dados com ela e atualizar para a atual
         shell: pwsh
         run: |

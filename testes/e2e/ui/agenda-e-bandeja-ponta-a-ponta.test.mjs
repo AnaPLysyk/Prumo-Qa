@@ -25,7 +25,7 @@ const instrumentar = (app, port) => app.evaluate((_, p) => {
 const solicitador = async (esc) => ({ subject: 'pessoa-simulada-pelo-runner', method: 'Windows-CredUI-LogonUser', scopeHash: esc.scopeHash, at: new Date().toISOString() });
 const esperar = async (fn, ms, msg) => { const fim = Date.now() + ms; for (;;) { const v = await fn(); if (v) return v; if (Date.now() > fim) throw new Error('tempo esgotado: ' + msg); await new Promise((r) => setTimeout(r, 500)); } };
 
-test('demonstração 2.8: agenda real no laboratório, bandeja, evidência, Jira simulado, isolamento, pausa e saída', { timeout: 240000 }, async (t) => {
+test('demonstração: agenda real no laboratório, bandeja, evidência, Jira simulado, isolamento, pausa e saída', { timeout: 240000 }, async (t) => {
   const passos = []; const passo = (n, d, extra = {}) => passos.push({ numero: n, descricao: d, estado: 'PASS', ...extra });
   const dados = novoDados(t); const s = await servidorFixture(t);
   const laboratorio = await fixture(t, { id: 'laboratorio-sintetico', name: 'Laboratório sintético' });

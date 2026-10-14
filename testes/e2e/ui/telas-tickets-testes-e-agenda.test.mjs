@@ -38,7 +38,7 @@ async function captura(a, nome) { if (!process.env.PRUMO_V40_CAPTURAS) return; c
 const semRolagemHorizontal = async (page) => { const r = await page.evaluate(() => { const W = innerWidth; if (document.documentElement.scrollWidth <= W + 1) return true; return [...document.querySelectorAll('#conteudo *, header *')].filter((el) => el.getBoundingClientRect().right > W + 1).slice(0, 6).map((el) => el.tagName + '#' + el.id + '.' + String(el.className).slice(0, 30) + ':' + Math.round(el.getBoundingClientRect().right) + '/' + W).join(' | '); }); if (r !== true) console.log('overflow:', r); return r === true; };
 const naoGet = (s) => s.pedidos.filter((p) => p.metodo !== 'GET');
 
-test('v40: navegação completa, Design System no Grupo B, Evidências só dentro de Execuções e sem rolagem horizontal', async (t) => {
+test('navegação completa, Design System no Grupo B, Evidências só dentro de Execuções e sem rolagem horizontal', async (t) => {
   const a = await preparar(t);
   assert.equal(await a.page.locator('#nav [data-aba="evidencias"]:visible').count(), 0, 'Evidências não volta como menu');
   for (const tamanho of [[1440, 900], [1024, 768], [860, 900]]) {
@@ -58,7 +58,7 @@ test('v40: navegação completa, Design System no Grupo B, Evidências só dentr
   assert.deepEqual(a.erros, [], 'console sem erros (inclui CSP: nenhum atributo style inline)');
 });
 
-test('v40: Tickets consolida Jira e Qase, modal preserva filtros e foco, rolagem só dentro do modal e escrita desligada fica indisponível', async (t) => {
+test('Tickets consolida Jira e Qase, modal preserva filtros e foco, rolagem só dentro do modal e escrita desligada fica indisponível', async (t) => {
   const a = await preparar(t); await ir(a.page, 'tickets');
   await a.page.waitForSelector('#tk-tabela [data-ticket="SMART-1"]'); await a.page.waitForSelector('#tk-tabela [data-defeito="91"]');
   assert.match(await a.page.textContent('#tk-fontes'), /Jira[\s\S]*1 ticket\(s\)[\s\S]*Qase[\s\S]*1 defeito\(s\)/);
@@ -83,7 +83,7 @@ test('v40: Tickets consolida Jira e Qase, modal preserva filtros e foco, rolagem
   assert.deepEqual(a.erros, []);
 });
 
-test('v40: defeito Qase → ticket Jira com confirmação nativa, vínculo registrado uma vez e visível na rastreabilidade', async (t) => {
+test('defeito Qase → ticket Jira com confirmação nativa, vínculo registrado uma vez e visível na rastreabilidade', async (t) => {
   const a = await preparar(t); a.s.controle.aceitarCriacao = true;
   await ir(a.page, 'tickets'); await a.page.waitForSelector('#tk-tabela [data-defeito="91"]');
   await a.page.locator('#tk-tabela [data-defeito="91"]').getByRole('button', { name: 'Abrir', exact: true }).click(); await modal(a.page).locator('#def-detalhe').waitFor();
@@ -110,7 +110,7 @@ test('v40: defeito Qase → ticket Jira com confirmação nativa, vínculo regis
   assert.deepEqual(a.erros, []);
 });
 
-test('v40: Agendamentos orquestra rotinas em modal (grupos, regras, autorização e execuções) e pausa/retoma sem inventar resultado', async (t) => {
+test('Agendamentos orquestra rotinas em modal (grupos, regras, autorização e execuções) e pausa/retoma sem inventar resultado', async (t) => {
   const a = await preparar(t);
   criarRotina({ nome: 'Regressão sem autorização', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, a.dados);
   await ir(a.page, 'agenda'); await a.page.click('#rotina-nova'); await modal(a.page).locator('#rotina-form').waitFor();
@@ -136,7 +136,7 @@ test('v40: Agendamentos orquestra rotinas em modal (grupos, regras, autorizaçã
   assert.deepEqual(a.erros, []);
 });
 
-test('v40: Execução em modal com Resumo, Etapas, Logs e Evidências reais; falha vira rascunho de bug sem envio', async (t) => {
+test('Execução em modal com Resumo, Etapas, Logs e Evidências reais; falha vira rascunho de bug sem envio', async (t) => {
   const a = await preparar(t, { pasta: true });
   const r = criarRotina({ nome: 'Regressão V40', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, a.dados);
   const { trabalho } = enfileirar({ chave: 'v40-fail', rotinaId: r.id, espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', origem: 'MANUAL', slot: null }, a.dados);
@@ -162,7 +162,7 @@ test('v40: Execução em modal com Resumo, Etapas, Logs e Evidências reais; fal
   assert.deepEqual(a.erros, []);
 });
 
-test('v40: Testes organiza casos, suites, planos e runs com dados consultados; tipo de execução explícito e estados vazios', async (t) => {
+test('Testes organiza casos, suites, planos e runs com dados consultados; tipo de execução explícito e estados vazios', async (t) => {
   const a = await preparar(t); await ir(a.page, 'testes');
   const subs = await a.page.locator('[data-sub]').allTextContents(); assert.deepEqual(subs, ['IDE', 'Repositório', 'Runs', 'Planos']);
   await a.page.click('[data-sub=repositorio]'); await a.page.waitForSelector('#cat-lista [data-caso="31"]'); assert.match(await a.page.textContent('#cat-lista [data-caso="31"]'), /Manual/);
@@ -177,7 +177,7 @@ test('v40: Testes organiza casos, suites, planos e runs com dados consultados; t
   assert.deepEqual(a.erros, []);
 });
 
-test('v40: Suporte com etapas e diagnóstico local; Ajuda pesquisável e agrupada, sem envio automático', async (t) => {
+test('Suporte com etapas e diagnóstico local; Ajuda pesquisável e agrupada, sem envio automático', async (t) => {
   const a = await preparar(t);
   await ir(a.page, 'suporte'); await a.page.waitForFunction(() => /v\d+\.\d+\.\d+/.test(document.querySelector('#sup-diagnostico-local')?.textContent || ''));
   assert.match(await a.page.textContent('#sup-diagnostico-local'), /Qualidade V40/); assert.equal(await a.page.isVisible('#sup-passos'), true);
@@ -191,7 +191,7 @@ test('v40: Suporte com etapas e diagnóstico local; Ajuda pesquisável e agrupad
   assert.equal(naoGet(a.s).length, 0); assert.deepEqual(a.erros, []);
 });
 
-test('v40: Testes representa Qase e código: ligação só por anotação, tags, visão de código, conexões e permissões dos agentes', async (t) => {
+test('Testes representa Qase e código: ligação só por anotação, tags, visão de código, conexões e permissões dos agentes', async (t) => {
   const f = await fixture(t);
   await f.write('tests/login.spec.ts', "import { qase } from 'playwright-qase-reporter';\ntest.describe('Login @auth', () => {\n  test(qase(31, 'editor grava @smoke'), async () => {\n    await test.step('Entrar como editor', async () => {});\n  });\n  test('rejeita senha @regression', async () => {\n    // Qase: SFQ-32\n  });\n  test('Caso fictício SFQ sem anotação', async () => {});\n});\n");
   const dados = novoDados(t), s = await servidorFixture(t), a = await abrir(t, dados);
@@ -223,7 +223,7 @@ test('v40: Testes representa Qase e código: ligação só por anotação, tags,
   assert.equal(naoGet(s).length, 0); assert.deepEqual(a.erros, []);
 });
 
-test('v40: vínculos lidos do código mostram feature e cenário sem Qase e não inventam execução', async (t) => {
+test('vínculos lidos do código mostram feature e cenário sem Qase e não inventam execução', async (t) => {
   const a = await preparar(t, { pasta: true });
   await a.f.write('tests/login.spec.ts', "describe('Login sintético', () => {\ntest('entra como editor', () => {});\n});\n");
   const removido = await a.page.evaluate((id) => window.prumo.servicoDesvincular(id, 'qase'), a.e.id);

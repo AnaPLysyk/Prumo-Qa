@@ -68,7 +68,7 @@ ditos uma vez, perto da ação afetada.
 
 ## 3. Componentes (`frontend/design-system/ds.js` + `ds.css`)
 
-Estas são as fontes oficiais. `frontend:sync` gera os recursos em `dist/renderer/`, preservando os caminhos do instalador. As abas oferecem foco único com Tab, setas com retorno nas extremidades e Home/End; os painéis dos modais têm vínculos ARIA estáveis e a montagem assíncrona conserva a seleção atual. O teste `desktop-design-system.test.mjs` verifica foco e respostas fora de ordem em Electron com conteúdo sintético.
+Estas são as fontes oficiais. `frontend:sync` gera os recursos em `dist/renderer/`, preservando os caminhos do instalador. As abas oferecem foco único com Tab, setas com retorno nas extremidades e Home/End; os painéis dos modais têm vínculos ARIA estáveis e a montagem assíncrona conserva a seleção atual. O teste `design-system.test.mjs` verifica foco e respostas fora de ordem em Electron com conteúdo sintético.
 
 | Componente | API | Notas |
 |---|---|---|
@@ -114,9 +114,9 @@ não são redefinidas.
 ## 6. Acessibilidade e responsividade
 
 Foco visível com `--acento`; navegação por teclado em abas e tabelas; contraste
-herdado dos tokens (testado em `desktop.test.mjs`); movimento reduzido desliga
+herdado dos tokens (testado em `janela-e-seguranca.test.mjs`); movimento reduzido desliga
 brilhos e giros. Sem rolagem horizontal da página em 1440, 1024 e 860 px nem com
-zoom de 200% e 400% (`desktop-v40.test.mjs`): tabelas rolam dentro da própria
+zoom de 200% e 400% (`telas-tickets-testes-e-agenda.test.mjs`): tabelas rolam dentro da própria
 caixa e colunas opcionais somem em larguras menores.
 
 ## 7. Aplicação

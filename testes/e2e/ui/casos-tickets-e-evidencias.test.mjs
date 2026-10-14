@@ -42,7 +42,7 @@ async function captura(a, nome) {
 const modal = page => page.locator('#qualidade-dialog[open]');
 async function fechar(page) { await page.keyboard.press('Escape'); await page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' }); }
 
-test('v39: evidência BLOCKED real é consultada e exportada dentro de Execuções', async t => {
+test('evidência BLOCKED real é consultada e exportada dentro de Execuções', async t => {
   const a = await preparar(t), f = await fixture(t);
   await escolherPasta(a.app, f.root); assert.equal((await a.page.evaluate(id => window.prumo.espacoPasta(id), a.e.id)).ok, true);
   await ir(a.page, 'projetos'); await a.page.locator(`[data-espaco="${a.e.id}"]`).getByRole('button', { name: /Selecionar projeto|Projeto selecionado/ }).click();
@@ -59,7 +59,7 @@ test('v39: evidência BLOCKED real é consultada e exportada dentro de Execuçõ
   assert.equal(await a.page.getAttribute('[data-aba=testes]', 'aria-current'), 'page'); assert.deepEqual(a.erros, []);
 });
 
-test('v39: casos e defeitos Qase usam dados consultados e modais; falha e vazio são explícitos', async t => {
+test('casos e defeitos Qase usam dados consultados e modais; falha e vazio são explícitos', async t => {
   // v40: Casos é uma tabela consultada ao abrir a aba; o detalhe abre em modal e a lista fica intacta.
   const a = await preparar(t); await ir(a.page, 'testes'); await a.page.click('[data-sub=repositorio]');
   const abrirCaso31 = () => a.page.locator('#cat-lista tr[data-caso="31"]').first().getByRole('button', { name: /^Abrir / });
@@ -80,7 +80,7 @@ test('v39: casos e defeitos Qase usam dados consultados e modais; falha e vazio 
   assert.deepEqual(a.erros, []);
 });
 
-test('v39: ticket em modal preserva filtro e foco; estados API e permissões permanecem verificáveis', async t => {
+test('ticket em modal preserva filtro e foco; estados API e permissões permanecem verificáveis', async t => {
   const a = await preparar(t); await ir(a.page, 'tickets');
   await a.page.fill('#tk-q', 'SMART'); await a.page.click('#tk-buscar');
   const abrirTicket = a.page.locator('#tk-tabela [data-ticket="SMART-1"]').getByRole('button', { name: 'Abrir', exact: true });
@@ -97,7 +97,7 @@ test('v39: ticket em modal preserva filtro e foco; estados API e permissões per
   assert.deepEqual(a.erros, []);
 });
 
-test('v39: rastreabilidade consulta vínculo declarado e bloqueia recurso desvinculado', async t => {
+test('rastreabilidade consulta vínculo declarado e bloqueia recurso desvinculado', async t => {
   const a = await preparar(t);
   const e = (await a.page.evaluate(id => window.prumo.espacoObter(id), a.e.id)).data;
   const j = e.vinculos.find(v => v.servico === 'jira'), q = e.vinculos.find(v => v.servico === 'qase');
@@ -112,7 +112,7 @@ test('v39: rastreabilidade consulta vínculo declarado e bloqueia recurso desvin
   assert.deepEqual(a.erros, []);
 });
 
-test('v39: rotina configurada no modal, pausa/retomada e execução detalhada sem resultado inventado', async t => {
+test('rotina configurada no modal, pausa/retomada e execução detalhada sem resultado inventado', async t => {
   const a = await preparar(t); await ir(a.page, 'agenda'); await a.page.click('#rotina-nova');
   await modal(a.page).locator('#rotina-form').waitFor();
   await a.page.fill('#rotina-nome', 'Consulta isolada'); await a.page.selectOption('#rotina-tipo', 'consulta-jira');

@@ -11,7 +11,7 @@ const instrumentar=(app,port)=>app.evaluate((_,p)=>{
   https.request=(url,opcoes,callback)=>http.request({hostname:'127.0.0.1',port:p,path:url.pathname+url.search,method:opcoes.method,headers:{...opcoes.headers,'x-fixture-host':url.hostname}},callback);
   process.getBuiltinModule('node:module').syncBuiltinESMExports();
 },port);
-test('demonstração 2.7: vinte verificações na janela real, dois projetos e APIs controladas, sem IA',async t=>{
+test('demonstração: vinte verificações na janela real, dois projetos e APIs controladas, sem IA',async t=>{
   const dados=novoDados(t),s=await servidorFixture(t),evidencias=[];
   let a=await abrir(t,dados);await instrumentar(a.app,s.port);await confirmar(a.app);
   const passo=(numero,descricao)=>evidencias.push({numero,descricao,estado:'PASS',tipo:'FIXTURE_CONTROLADA'});

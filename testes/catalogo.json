@@ -99,7 +99,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/demonstracao-28.test.mjs",
+      "arquivo": "testes/e2e/ui/agenda-e-bandeja-ponta-a-ponta.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -108,7 +108,7 @@
       "funcionalidade": "ciclo-qa",
       "motivo": "Fluxo Electron pelo helper de janela, com dados legados quando aplicável. Verifica: demonstração 2.8: agenda real no laboratório, bandeja, evidência, Jira simulado, isolamento, pausa e saída",
       "evidencias": [
-        "demonstração 2.8: agenda real no laboratório, bandeja, evidência, Jira simulado, isolamento, pausa e saída",
+        "demonstração: agenda real no laboratório, bandeja, evidência, Jira simulado, isolamento, pausa e saída",
         "permissão ",
         "./janela.mjs",
         "../dist/agendamentos/autorizacoes/autorizarExecucao.js"
@@ -116,7 +116,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-administracao.test.mjs",
+      "arquivo": "testes/e2e/ui/administracao.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e"
@@ -130,7 +130,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-agenda.test.mjs",
+      "arquivo": "testes/e2e/ui/agenda.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -149,7 +149,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-ajuda.test.mjs",
+      "arquivo": "testes/e2e/ui/ajuda.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -166,7 +166,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-atualizacao.test.mjs",
+      "arquivo": "testes/e2e/ui/atualizacao.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -181,7 +181,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-ciclo-ia.test.mjs",
+      "arquivo": "testes/e2e/ui/ciclo-ia.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -197,7 +197,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-contas.test.mjs",
+      "arquivo": "testes/e2e/ui/contas.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e"
@@ -210,7 +210,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-contextos.test.mjs",
+      "arquivo": "testes/e2e/ui/contextos.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -226,7 +226,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-design-system.test.mjs",
+      "arquivo": "testes/e2e/ui/design-system.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -242,7 +242,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-fluxos-2-10-2.test.mjs",
+      "arquivo": "testes/e2e/ui/projetos-vinculo-e-ajuda.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -258,7 +258,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-i18n.test.mjs",
+      "arquivo": "testes/e2e/ui/i18n.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -274,7 +274,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-ide.test.mjs",
+      "arquivo": "testes/e2e/ui/ide.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e"
@@ -287,7 +287,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-integracoes.test.mjs",
+      "arquivo": "testes/e2e/ui/conexoes-e-acessibilidade.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -304,7 +304,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-integracoes29.test.mjs",
+      "arquivo": "testes/e2e/ui/integracoes-jira-qase-github.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -313,14 +313,14 @@
       "funcionalidade": "integracoes29",
       "motivo": "Interage com janela Electron/Chromium pelo helper de janela; verifica: navegação 2.9: telas novas abrem sem erro e sem botão decorativo (cada controle chama o backend ou explica por que está indisponível)",
       "evidencias": [
-        "navegação 2.9: telas novas abrem sem erro e sem botão decorativo (cada controle chama o backend ou explica por que está indisponível)",
+        "navegação: telas novas abrem sem erro e sem botão decorativo (cada controle chama o backend ou explica por que está indisponível)",
         "Conexões: habilitar escrita exige confirmação nativa; recusar mantém somente leitura",
         "./janela.mjs"
       ],
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-interfaces-v36.test.mjs",
+      "arquivo": "testes/e2e/ui/agentes-logs-metricas-e-chat.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -331,14 +331,14 @@
       "funcionalidade": "interfaces-v36",
       "motivo": "Interage com janela Electron/Chromium pelo helper de janela; verifica: v36: agentes reais, prévia validada/persistida, descarte, confirmação nativa e Cérebro",
       "evidencias": [
-        "v36: agentes reais, prévia validada/persistida, descarte, confirmação nativa e Cérebro",
-        "v36: MCP/IPC reais alimentam terminal, filtros, gráficos, exportação, histórico e painel",
+        "agentes reais, prévia validada/persistida, descarte, confirmação nativa e Cérebro",
+        "MCP/IPC reais alimentam terminal, filtros, gráficos, exportação, histórico e painel",
         "./janela.mjs"
       ],
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-jira.test.mjs",
+      "arquivo": "testes/e2e/ui/jira.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -355,7 +355,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-orquestracao.test.mjs",
+      "arquivo": "testes/e2e/ui/orquestracao.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e"
@@ -369,7 +369,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-plataforma.test.mjs",
+      "arquivo": "testes/e2e/ui/plataforma-dois-projetos.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -378,13 +378,13 @@
       "funcionalidade": "plataforma",
       "motivo": "Interage com janela Electron/Chromium pelo helper de janela; verifica: demonstração 2.7: vinte verificações na janela real, dois projetos e APIs controladas, sem IA",
       "evidencias": [
-        "demonstração 2.7: vinte verificações na janela real, dois projetos e APIs controladas, sem IA",
+        "demonstração: vinte verificações na janela real, dois projetos e APIs controladas, sem IA",
         "./janela.mjs"
       ],
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-qualidade-v39.test.mjs",
+      "arquivo": "testes/e2e/ui/casos-tickets-e-evidencias.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -395,15 +395,15 @@
       "funcionalidade": "qualidade-v39",
       "motivo": "Interage com janela Electron/Chromium pelo helper de janela; verifica: v39: evidência BLOCKED real é consultada e exportada dentro de Execuções",
       "evidencias": [
-        "v39: evidência BLOCKED real é consultada e exportada dentro de Execuções",
-        "v39: casos e defeitos Qase usam dados consultados e modais; falha e vazio são explícitos",
+        "evidência BLOCKED real é consultada e exportada dentro de Execuções",
+        "casos e defeitos Qase usam dados consultados e modais; falha e vazio são explícitos",
         "./janela.mjs",
         "../dist/agendamentos/banco/concluirTrabalho.js"
       ],
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-skills.test.mjs",
+      "arquivo": "testes/e2e/ui/skills.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -418,7 +418,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-suporte.test.mjs",
+      "arquivo": "testes/e2e/ui/suporte.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -435,7 +435,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-ux.test.mjs",
+      "arquivo": "testes/e2e/ui/ux.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -451,7 +451,7 @@
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop-v40.test.mjs",
+      "arquivo": "testes/e2e/ui/telas-tickets-testes-e-agenda.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -461,15 +461,15 @@
       "funcionalidade": "v40",
       "motivo": "Interage com janela Electron/Chromium pelo helper de janela; verifica: v40: navegação completa, Design System no Grupo B, Evidências só dentro de Execuções e sem rolagem horizontal",
       "evidencias": [
-        "v40: navegação completa, Design System no Grupo B, Evidências só dentro de Execuções e sem rolagem horizontal",
-        "v40: Tickets consolida Jira e Qase, modal preserva filtros e foco, rolagem só dentro do modal e escrita desligada fica indisponível",
+        "navegação completa, Design System no Grupo B, Evidências só dentro de Execuções e sem rolagem horizontal",
+        "Tickets consolida Jira e Qase, modal preserva filtros e foco, rolagem só dentro do modal e escrita desligada fica indisponível",
         "./janela.mjs",
         "../dist/agendamentos/banco/concluirTrabalho.js"
       ],
       "perfilReal": false
     },
     {
-      "arquivo": "testes/e2e/ui/desktop.test.mjs",
+      "arquivo": "testes/e2e/ui/janela-e-seguranca.test.mjs",
       "camada": "ui",
       "natureza": [
         "e2e",
@@ -820,7 +820,7 @@
       "funcionalidade": "testes",
       "motivo": "Camada principal integracao; outras responsabilidades podem coexistir no arquivo. Verifica: v39: trocar vínculo Qase não reutiliza automação declarada nem funde nós históricos",
       "evidencias": [
-        "v39: trocar vínculo Qase não reutiliza automação declarada nem funde nós históricos",
+        "trocar vínculo Qase não reutiliza automação declarada nem funde nós históricos",
         "fluxo completo: casos -> run -> execução autorizada -> resultados por cenário e manual -> publicação -> releitura; sem PASS inventado",
         "../dist/agendamentos/autorizacoes/autorizacaoDelegada.js",
         "../dist/agendamentos/autorizacoes/autorizarExecucao.js"

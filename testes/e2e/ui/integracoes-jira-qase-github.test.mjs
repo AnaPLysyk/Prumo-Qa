@@ -25,7 +25,7 @@ async function preparar(t) {
   return { dados, s, a, e };
 }
 
-test('navegação 2.9: telas novas abrem sem erro e sem botão decorativo (cada controle chama o backend ou explica por que está indisponível)', async (t) => {
+test('navegação: telas novas abrem sem erro e sem botão decorativo (cada controle chama o backend ou explica por que está indisponível)', async (t) => {
   const { a } = await preparar(t);
   for (const aba of ['runs', 'vinculos', 'agentes', 'conexoes', 'tickets', 'testes', 'automacoes']) { await ir(a.page, aba); assert.ok((await a.page.textContent('#conteudo')).length > 40, aba); }
   await ir(a.page, 'conexoes'); assert.equal(await a.page.locator('[data-escrita]').count(), 3);

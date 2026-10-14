@@ -21,7 +21,7 @@ async function capture(a, nome) {
   await a.page.screenshot({ path: path.join(folder, nome + '.png'), fullPage: true });
 }
 
-test('v36: agentes reais, prévia validada/persistida, descarte, confirmação nativa e Cérebro', async t => {
+test('agentes reais, prévia validada/persistida, descarte, confirmação nativa e Cérebro', async t => {
   const a = await prepare(t); await ir(a.page, 'agentes'); await a.page.waitForSelector('[data-agent="qa-geral"]');
   assert.equal(await a.page.locator('[data-agent-tab]').count(), 2);
   assert.equal(await a.page.locator('[data-agent]').count(), 8);
@@ -73,7 +73,7 @@ test('v36: agentes reais, prévia validada/persistida, descarte, confirmação n
   assert.match(await b.page.textContent('[data-agent^="previa-"]'), /Prévia de QA/); assert.deepEqual([...a.erros, ...b.erros], []);
 });
 
-test('v36: MCP/IPC reais alimentam terminal, filtros, gráficos, exportação e painel', async t => {
+test('MCP/IPC reais alimentam terminal, filtros, gráficos, exportação e painel', async t => {
   const a = await prepare(t);
   const out = await mcp(a.e.raizContextos, a.dados, [['contexto_projeto', {}], ['consultar_evidencias', {}]]);
   assert.ok(out.every(r => !r.isError));
@@ -102,7 +102,7 @@ test('v36: MCP/IPC reais alimentam terminal, filtros, gráficos, exportação e 
   assert.deepEqual(a.erros, []);
 });
 
-test('v36: Home, robô original, chat lateral e flutuante, reflow/zoom e redução de movimento', async t => {
+test('Home, robô original, chat lateral e flutuante, reflow/zoom e redução de movimento', async t => {
   const a = await prepare(t); await ir(a.page, 'inicio'); await a.page.waitForSelector('#chat-input'); await capture(a, 'inicio');
   await a.page.emulateMedia({ reducedMotion: 'reduce' });
   await a.page.fill('#chat-input', 'Qual a situação do projeto?'); await a.page.locator('#chat-form button').click();
@@ -129,7 +129,7 @@ test('v36: Home, robô original, chat lateral e flutuante, reflow/zoom e reduç�
   assert.deepEqual(a.erros, []);
 });
 
-test('v36: exportação nativa recusa tipo, tamanho e extensão arbitrários; cancelar não grava', async t => {
+test('exportação nativa recusa tipo, tamanho e extensão arbitrários; cancelar não grava', async t => {
   const a = await prepare(t); const target = path.join(a.dados, 'recusado.exe');
   assert.match((await a.page.evaluate(() => window.prumo.exportarTela('executavel', '{}'))).error, /INVALID_ARGUMENTS/);
   assert.match((await a.page.evaluate(() => window.prumo.exportarTela('agente', 'x'.repeat(2 * 1024 * 1024 + 1)))).error, /INVALID_ARGUMENTS/);
