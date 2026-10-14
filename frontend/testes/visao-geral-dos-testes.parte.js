@@ -49,28 +49,49 @@
   };
 
   // ======================= Tela =======================
-  const ABAS = (vq) => [['catalogo', 'Visão geral'], ['codigo', 'Código'], ...(vq ? [['casos', 'Casos Qase'], ['suites', 'Suites'], ['planos', 'Planos']] : []), ['runs', 'Runs'], ['automacao', 'CI e GitHub']];
+  // 2.13: Testes tem quatro seções. IDE (código dos testes e das automações), Repositório (casos e suites, no estilo do Qase),
+  // Runs (execuções e runs numa lista só) e Planos. Os nomes antigos das subabas continuam abrindo o lugar novo.
+  const ABAS = () => [['ide', 'IDE'], ['repositorio', 'Repositório'], ['runs', 'Runs'], ['planos', 'Planos']];
+  const SUBABA_ANTIGA = { catalogo: 'repositorio', casos: 'repositorio', suites: 'repositorio', vinculos: 'repositorio', codigo: 'ide', automacao: 'pipelines' };
+  const modosIde = (sub) => h('div', { class: 'segmentos sub ds-ide-modos', role: 'group', 'aria-label': 'Modo da IDE' }, [['ide', 'Código'], ['pipelines', 'Pipelines CI/CD']].map(([k, t]) => h('button', { type: 'button', 'data-ide-modo': k, 'aria-pressed': String(k === sub), onclick: () => { (estado.sub ||= {}).testes = k; mostrar('testes'); } }, t)));
   abas.testes = async (el) => {
-    const e = estado.espaco;
-    if (!e) { const sub0 = ['runs', 'automacao'].includes(estado.sub?.testes) ? estado.sub.testes : 'catalogo'; el.append(DS.cabecalho({ titulo: 'Testes' }), barraSub('testes', [['catalogo', 'Visão geral'], ['runs', 'Runs'], ['automacao', 'CI e GitHub']], sub0), h('div', { id: 'sub-conteudo' }, DS.estadoTela('vazio', 'Nenhum projeto selecionado', 'Selecione ou crie um projeto para continuar.', [DS.acao('Ir para Projetos', () => mostrar('projetos'))]))); return; }
-    const vq = vinc(e, 'qase'), vg = vinc(e, 'github'); const itens = ABAS(vq); const mem = memoria('testes', e.id);
-    let sub = estado.sub?.testes || 'catalogo'; if (!itens.some(([k]) => k === sub)) sub = 'catalogo';
+    const e = estado.espaco; const itens = ABAS();
+    let sub = SUBABA_ANTIGA[estado.sub?.testes] || estado.sub?.testes || 'repositorio'; if (!itens.some(([k]) => k === sub) && sub !== 'pipelines') sub = 'repositorio';
+    const aba = sub === 'pipelines' ? 'ide' : sub; // 'pipelines' é o modo CI/CD dentro da aba IDE
+    if (!e) {
+      el.append(DS.cabecalho({ titulo: 'Testes' }), barraSub('testes', itens, aba), aba === 'ide' ? modosIde(sub) : null, h('div', { id: 'sub-conteudo' }, sub === 'runs' ? null : DS.estadoTela('vazio', 'Nenhum projeto selecionado', 'Selecione ou crie um projeto para continuar.', [DS.acao('Ir para Projetos', () => mostrar('projetos'))])));
+      if (sub === 'runs') await F.telaRuns(null, memoria('testes', 'todos'), el.querySelector('#sub-conteudo'), false);
+      return;
+    }
+    const vq = vinc(e, 'qase'), vg = vinc(e, 'github'); const mem = memoria('testes', e.id);
     const perm = vq ? await escritaDoProjeto(e) : {}; const esc = !!perm.qase;
-    const acoes = { catalogo: [DS.acao('Atualizar', async () => { await fontes(e, { forcar: true }); mostrar('testes'); }, { id: 'testes-atualizar', icone: 'atualizar' })],
-      casos: [DS.acao('Consulta avançada', () => F.avancadaQase(e), { id: 'testes-avancada', icone: 'filtro' }), DS.acao('Nova proposta de caso', () => F.novaProposta(e), { id: 'pr-nova', primaria: true, icone: 'mais' })],
-      suites: [DS.acao('Nova suite', () => F.novaSuite(e, esc), { id: 'su-nova', primaria: true, icone: 'mais' })], planos: [DS.acao('Novo plano', () => F.novoPlano(e, esc), { id: 'plano-novo', primaria: true, icone: 'mais' })],
+    const acoes = { repositorio: [DS.acao('Atualizar', async () => { await fontes(e, { forcar: true }); delete mem.casos; mostrar('testes'); }, { id: 'testes-atualizar', icone: 'atualizar' }),
+        ...(vq ? [DS.acao('Consulta avançada', () => F.avancadaQase(e), { id: 'testes-avancada', icone: 'filtro' }), DS.acao('Nova suite', () => F.novaSuite(e, esc), { id: 'su-nova', icone: 'mais' })] : []),
+        DS.acao('Nova proposta de caso', () => F.novaProposta(e), { id: 'pr-nova', primaria: true, icone: 'mais' })],
+      planos: [DS.acao('Novo plano', () => F.novoPlano(e, esc), { id: 'plano-novo', primaria: true, icone: 'mais' })],
       runs: vq ? [DS.acao('Preparar run', () => F.prepararRun(e), { id: 'run-nova', primaria: true, icone: 'mais' })] : [] }[sub] || [];
     const origem = e.pastaLocal ? DS.origem('local', tr('Repositório local')) : vg ? DS.origem('github', 'GitHub · ' + vg.recurso.chave) : h('span', { class: 'ds-chip', 'data-tom': 'aviso' }, tr('Sem repositório vinculado'));
-    el.append(DS.cabecalho({ titulo: 'Testes', descricao: [h('span', { class: 'ds-chips', id: 'testes-fontes' }, origem, vq ? DS.origem('qase', 'Qase · ' + vq.recurso.chave) : null, vq && !esc ? h('span', { class: 'ds-chip', 'data-escrita-desligada': 'qase', title: tr('Escrita no Qase desligada. Habilite em Conexões.') }, tr('Qase somente leitura')) : null)], acoes }), barraSub('testes', itens, sub));
-    const corpo = h('div', { id: 'sub-conteudo' }); el.append(corpo);
-    if (sub === 'catalogo') await visaoGeral(e, mem, corpo);
-    else if (sub === 'codigo') await telaCodigo(e, mem, corpo);
-    else if (sub === 'casos') await F.telaCasos(e, mem, corpo);
-    else if (sub === 'suites') await F.telaSuites(e, mem, corpo);
+    // A IDE usa a tela inteira: sem título nem subtítulo, só a barra de seções.
+    if (aba !== 'ide') el.append(DS.cabecalho({ titulo: 'Testes', descricao: [h('span', { class: 'ds-chips', id: 'testes-fontes' }, origem, vq ? DS.origem('qase', 'Qase · ' + vq.recurso.chave) : null, vq && !esc ? h('span', { class: 'ds-chip', 'data-escrita-desligada': 'qase', title: tr('Escrita no Qase desligada. Habilite em Conexões.') }, tr('Qase somente leitura')) : null)], acoes }));
+    el.append(barraSub('testes', itens, aba));
+    // IDE: arquivos de teste e automação (Código) ou os pipelines de CI/CD (Pipelines); os dois usam a tela inteira.
+    if (aba === 'ide') el.append(modosIde(sub));
+    const corpo = h('div', { id: 'sub-conteudo', class: aba === 'ide' ? 'ds-ide-cheio' : null }); el.append(corpo);
+    if (sub === 'pipelines') { await abaAutomacao(corpo); semTitulo(corpo); }
+    else if (sub === 'ide') await telaCodigo(e, mem, corpo);
+    else if (sub === 'repositorio') await repositorio(e, mem, corpo, vq);
     else if (sub === 'planos') await F.telaPlanos(e, mem, corpo);
-    else if (sub === 'runs') await F.telaRuns(e, mem, corpo, esc);
-    else { await abaAutomacao(corpo); semTitulo(corpo); }
+    else await F.telaRuns(e, mem, corpo, esc);
   };
+
+  // Repositório: todos os cenários numa lista só (casos do Qase, quando vinculado, e testes do código, manuais e automatizados),
+  // as propostas em revisão (rascunhos locais que seguem para o Qase depois de revisados), as suites e os vínculos declarados.
+  async function repositorio(e, mem, corpo, vq) {
+    await visaoGeral(e, mem, corpo);
+    await F.telaPropostas(e, mem, corpo);
+    if (vq) { const suites = h('div', { id: 'repo-suites' }); await F.telaSuites(e, mem, suites); corpo.append(DS.secao('Suites', suites)); }
+    const vinculos = h('div', { id: 'repo-vinculos' }); await F.telaVinculos(e, mem, vinculos); corpo.append(DS.secao('Vínculos declarados', vinculos));
+  }
 
   // ======================= Visão geral =======================
   async function visaoGeral(e, mem, corpo) {

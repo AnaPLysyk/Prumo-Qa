@@ -56,12 +56,12 @@ test('v39: evidência BLOCKED real é consultada e exportada dentro de Execuçõ
   const json = JSON.parse(fs.readFileSync(arquivo, 'utf8')); assert.match(JSON.stringify(json), /BLOCKED/);
   assert.ok(JSON.stringify(json).includes(resultado.jobId), 'exportação conserva jobId original');
   await captura(a, 'evidencia-blocked'); await fechar(a.page);
-  assert.equal(await a.page.getAttribute('[data-aba=execucoes]', 'aria-current'), 'page'); assert.deepEqual(a.erros, []);
+  assert.equal(await a.page.getAttribute('[data-aba=testes]', 'aria-current'), 'page'); assert.deepEqual(a.erros, []);
 });
 
 test('v39: casos e defeitos Qase usam dados consultados e modais; falha e vazio são explícitos', async t => {
   // v40: Casos é uma tabela consultada ao abrir a aba; o detalhe abre em modal e a lista fica intacta.
-  const a = await preparar(t); await ir(a.page, 'testes'); await a.page.click('[data-sub=casos]');
+  const a = await preparar(t); await ir(a.page, 'testes'); await a.page.click('[data-sub=repositorio]');
   await a.page.getByRole('button', { name: 'Abrir caso 31', exact: true }).click();
   await modal(a.page).waitFor(); await modal(a.page).locator('#caso-detalhe').waitFor(); assert.match(await modal(a.page).textContent(), /Entrar como Editor fictício|expected_result/);
   assert.match(await modal(a.page).textContent(), /Manual/, 'tipo de execução explícito'); assert.match(await modal(a.page).textContent(), /Não executado no Prumo/, 'automação/execução não presumidas');
@@ -129,7 +129,7 @@ test('v39: rotina configurada no modal, pausa/retomada e execução detalhada se
   assert.equal(await a.page.locator('#nav [data-aba="evidencias"]:visible').count(), 0);
   for (const zoom of [1, 2, 4]) {
     await a.app.evaluate(({ BrowserWindow }, z) => { const w = BrowserWindow.getAllWindows()[0]; w.setSize(1280, 900); w.webContents.setZoomFactor(z); }, zoom);
-    for (const aba of ['tickets', 'testes', 'agenda', 'execucoes', 'rastreabilidade']) { await ir(a.page, aba); assert.equal(await a.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${aba}, zoom ${zoom}`); }
+    for (const aba of ['tickets', 'testes', 'agenda', 'runs', 'vinculos']) { await ir(a.page, aba); assert.equal(await a.page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${aba}, zoom ${zoom}`); }
   }
   assert.deepEqual(a.erros, []);
 });

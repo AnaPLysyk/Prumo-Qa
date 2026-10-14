@@ -407,3 +407,6 @@ nav.ds-ide-arvore, .ds-doc nav.indice { display: block; }
 .ds-info-botao:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
 .ds-info-texto { position: absolute; top: calc(100% + 6px); left: -8px; z-index: 60; display: none; width: max-content; max-width: min(380px, 80vw); padding: 10px 12px; border: 1px solid var(--linha); border-radius: var(--ds-r2); background: var(--painel); color: var(--texto); box-shadow: var(--ds-sombra-curta); font: 400 12.5px/1.5 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; letter-spacing: 0; text-transform: none; white-space: normal; }
 .ds-info:hover .ds-info-texto, .ds-info:focus-within .ds-info-texto, .ds-info[data-aberto] .ds-info-texto { display: block; }
+
+/* 2.13: IDE de Testes usa a tela inteira, como um editor: sem moldura de título, altura da janela. */
+.ds-ide-cheio .ds-ide { min-height: calc(100vh - 150px); }

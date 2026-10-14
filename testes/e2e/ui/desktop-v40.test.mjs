@@ -45,14 +45,14 @@ test('v40: navegação completa, Design System no Grupo B, Evidências só dentr
     await a.app.evaluate(({ BrowserWindow }, [w, hh]) => BrowserWindow.getAllWindows()[0].setSize(w, hh), tamanho);
     for (const aba of abas.filter((x) => x !== 'evidencias')) {
       await ir(a.page, aba); assert.ok((await a.page.textContent('#conteudo')).trim().length > 30, aba);
-      if (['tickets', 'testes', 'agenda', 'execucoes', 'rastreabilidade', 'suporte', 'ajuda', 'runs', 'automacoes', 'vinculos'].includes(aba)) assert.equal(await a.page.locator('#conteudo .ds-cab h1').count(), 1, 'cabeçalho padrão em ' + aba);
+      if (['tickets', 'testes', 'agenda', 'suporte', 'ajuda', 'runs', 'vinculos'].includes(aba)) assert.equal(await a.page.locator('#conteudo .ds-cab h1').count(), 1, 'cabeçalho padrão em ' + aba);
       assert.equal(await semRolagemHorizontal(a.page), true, `${aba} ${tamanho.join('x')}`);
     }
   }
   await a.app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1280, 900));
   for (const zoom of [2, 4]) {
     await a.app.evaluate(({ BrowserWindow }, z) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(z), zoom);
-    for (const aba of ['tickets', 'testes', 'agenda', 'execucoes', 'rastreabilidade', 'suporte', 'ajuda']) { await ir(a.page, aba); assert.equal(await semRolagemHorizontal(a.page), true, `${aba} zoom ${zoom}`); }
+    for (const aba of ['tickets', 'testes', 'agenda', 'runs', 'vinculos', 'suporte', 'ajuda']) { await ir(a.page, aba); assert.equal(await semRolagemHorizontal(a.page), true, `${aba} zoom ${zoom}`); }
   }
   await a.app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1));
   assert.deepEqual(a.erros, [], 'console sem erros (inclui CSP: nenhum atributo style inline)');
@@ -105,8 +105,8 @@ test('v40: defeito Qase → ticket Jira com confirmação nativa, vínculo regis
   await fecharModal(a.page); await a.page.locator('#tk-tabela [data-defeito="91"]').getByRole('button', { name: 'Abrir', exact: true }).click(); await modal(a.page).locator('#def-detalhe').waitFor();
   assert.equal(await a.page.locator('#def-jira').count(), 0); await modal(a.page).getByRole('button', { name: 'Abrir jira-bug SMART-99', exact: true }).first().waitFor();
   await fecharModal(a.page); await ir(a.page, 'rastreabilidade');
-  await a.page.getByRole('button', { name: 'Abrir qase-defeito 91', exact: true }).waitFor(); assert.match(await a.page.textContent('#rastro-tabela'), /SMART-99/);
-  await captura(a, 'rastreabilidade-defeito'); assert.equal(a.s.criados.length, 1, 'nenhum ticket duplicado');
+  await a.page.getByRole('button', { name: 'Abrir qase-defeito 91', exact: true }).waitFor(); assert.match(await a.page.textContent('#vinc-tabela'), /SMART-99/);
+  await captura(a, 'vinculos-defeito'); assert.equal(a.s.criados.length, 1, 'nenhum ticket duplicado');
   assert.deepEqual(a.erros, []);
 });
 
@@ -141,7 +141,7 @@ test('v40: Execução em modal com Resumo, Etapas, Logs e Evidências reais; fal
   const r = criarRotina({ nome: 'Regressão V40', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, a.dados);
   const { trabalho } = enfileirar({ chave: 'v40-fail', rotinaId: r.id, espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', origem: 'MANUAL', slot: null }, a.dados);
   reivindicar(a.dados); concluir(trabalho.id, { status: 'FAIL', motivo: 'Falha do processo', contagem: { pass: 1, fail: 1, blocked: 0, notRun: 0 }, detalhes: 'C2: valor esperado não persistiu' }, a.dados);
-  await ir(a.page, 'execucoes'); const linha = a.page.locator(`#tabela-exec [data-exec="${trabalho.id}"]`); await linha.waitFor();
+  await ir(a.page, 'execucoes'); const linha = a.page.locator(`#runs-tabela [data-exec="${trabalho.id}"]`); await linha.waitFor();
   assert.match(await linha.textContent(), /1 PASS · 1 FAIL/); assert.match(await a.page.textContent('#metricas-exec'), /1\s*FAIL/);
   await linha.getByRole('button', { name: 'Abrir execução Regressão V40', exact: true }).click(); await modal(a.page).waitFor();
   for (const aba of ['Resumo', 'Etapas', 'Logs', 'Evidências']) assert.equal(await modal(a.page).getByRole('tab', { name: new RegExp('^' + aba) }).count(), 1, aba);
@@ -154,7 +154,7 @@ test('v40: Execução em modal com Resumo, Etapas, Logs e Evidências reais; fal
   await a.page.click('#exec-bug'); await modal(a.page).getByText(/Rascunho de bug criado/).waitFor();
   const ps = (await a.page.evaluate((id) => window.prumo.propostas(id), a.e.id)).data; assert.equal(ps.length, 1); assert.equal(ps[0].tipo, 'bug'); assert.equal(ps[0].estado, 'RASCUNHO'); assert.equal(ps[0].dados.origem, 'SMART-1');
   assert.equal(naoGet(a.s).length, 0, 'rascunho não envia nada ao Jira');
-  await fecharModal(a.page); assert.equal(await a.page.getAttribute('[data-aba=execucoes]', 'aria-current'), 'page');
+  await fecharModal(a.page); assert.equal(await a.page.getAttribute('[data-aba=testes]', 'aria-current'), 'page');
   // Evidências CLI/MCP continuam acessíveis apenas como modal de Execuções.
   // O modal abre com "Consultando…": espera o conteúdo real antes de conferir (no CI a consulta é mais lenta).
   await a.page.click('#exec-evidencias'); await modal(a.page).waitFor();
@@ -164,10 +164,9 @@ test('v40: Execução em modal com Resumo, Etapas, Logs e Evidências reais; fal
 
 test('v40: Testes organiza casos, suites, planos e runs com dados consultados; tipo de execução explícito e estados vazios', async (t) => {
   const a = await preparar(t); await ir(a.page, 'testes');
-  const subs = await a.page.locator('[data-sub]').allTextContents(); assert.deepEqual(subs, ['Visão geral', 'Código', 'Casos Qase', 'Suites', 'Planos', 'Runs', 'CI e GitHub']);
-  await a.page.click('[data-sub=casos]'); await a.page.waitForSelector('#casos-tabela [data-caso="31"]'); assert.match(await a.page.textContent('#casos-tabela'), /Manual[\s\S]*não declarada[\s\S]*SMART-1[\s\S]*sem resultado/);
-  await a.page.selectOption('#caso-tipo', 'automatizado'); await a.page.getByText('Nenhum caso para estes filtros').waitFor(); await a.page.selectOption('#caso-tipo', '');
-  await a.page.click('[data-sub=suites]'); await a.page.waitForSelector('#suites-tabela [data-suite="1"]');
+  const subs = await a.page.locator('[data-sub]').allTextContents(); assert.deepEqual(subs, ['IDE', 'Repositório', 'Runs', 'Planos']);
+  await a.page.click('[data-sub=repositorio]'); await a.page.waitForSelector('#cat-lista [data-caso="31"]'); assert.match(await a.page.textContent('#cat-lista [data-caso="31"]'), /Manual/);
+  await a.page.waitForSelector('#suites-tabela [data-suite="1"]');
   await a.page.click('[data-sub=planos]'); await a.page.waitForSelector('#planos-tabela [data-plano="61"]');
   await a.page.click('[data-sub=runs]'); await a.page.waitForSelector('#runs-tabela [data-run-qase="71"]');
   await a.page.click('#run-nova'); await modal(a.page).locator('#run-casos input[data-caso="31"]').check(); await a.page.fill('#run-titulo', 'Run V40'); await a.page.click('#run-preparar'); await a.page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' });
@@ -213,7 +212,7 @@ test('v40: Testes representa Qase e código: ligação só por anotação, tags,
   // Modal do caso mostra o código que o implementa e leva à visão de código na linha certa.
   await caso.getByRole('button', { name: /^Abrir / }).click(); await modal(a.page).getByText('Código que implementa').waitFor();
   await modal(a.page).getByRole('button', { name: 'tests/login.spec.ts:3' }).click(); await a.page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' });
-  await a.page.waitForSelector('.ds-ide-linhas [data-linha="3"][aria-current="true"]'); assert.equal(await a.page.getAttribute('[data-sub=codigo]', 'aria-pressed'), 'true');
+  await a.page.waitForSelector('.ds-ide-linhas [data-linha="3"][aria-current="true"]'); assert.equal(await a.page.getAttribute('[data-sub=ide]', 'aria-pressed'), 'true');
   assert.match(await a.page.textContent('.ds-ide-painel'), /Caso 31/); assert.match(await a.page.textContent('.ds-ide-painel'), /Entrar como Editor fictício|Entrar como editor/i);
   await a.page.waitForFunction(() => /executar testes: exige autorização/.test(document.querySelector('#ide-agentes')?.textContent || ''));
   assert.match(await a.page.textContent('#ide-agentes'), /branch, commit e PR: somente pessoa/, 'escrita no repositório continua sendo da pessoa');
@@ -224,21 +223,18 @@ test('v40: Testes representa Qase e código: ligação só por anotação, tags,
   assert.equal(naoGet(s).length, 0); assert.deepEqual(a.erros, []);
 });
 
-test('v40: rastreabilidade estática mostra feature e cenário sem Qase e não inventa execução', async (t) => {
+test('v40: vínculos lidos do código mostram feature e cenário sem Qase e não inventam execução', async (t) => {
   const a = await preparar(t, { pasta: true });
   await a.f.write('tests/login.spec.ts', "describe('Login sintético', () => {\ntest('entra como editor', () => {});\n});\n");
   const removido = await a.page.evaluate((id) => window.prumo.servicoDesvincular(id, 'qase'), a.e.id);
   assert.equal(removido.ok, true);
-  await ir(a.page, 'rastreabilidade');
-  await a.page.waitForSelector('#rastro-tabela');
-  const tabela = await a.page.textContent('#rastro-tabela');
+  await ir(a.page, 'vinculos');
+  await a.page.waitForSelector('#vinc-tabela');
+  const tabela = await a.page.textContent('#vinc-tabela');
   assert.match(tabela, /Login sintético/); assert.match(tabela, /entra como editor/);
   assert.match(tabela, /Lido no código · sem execução/); assert.doesNotMatch(tabela, /Resultado observado/);
   const mapa = (await a.page.evaluate((id) => window.prumo.vinculosMapa(id), a.e.id)).data;
   assert.ok(mapa.arestas.some(x => x.origem === 'OBSERVADO_NO_CODIGO'));
   assert.ok(!mapa.arestas.some(x => x.origem === 'OBSERVADO'));
-  await a.page.selectOption('#rastro-filtro', 'observado');
-  await a.page.getByText('Nenhuma trilha para estes filtros', { exact: true }).waitFor();
-  assert.equal(await a.page.locator('#rastro-tabela').count(), 0);
   assert.deepEqual(a.erros, []);
 });

@@ -3,6 +3,7 @@
 // Usa os mesmos canais da agenda e da fila; nenhum resultado é calculado aqui. Horário perdido nunca vira executado.
 (() => {
   const quando = (iso) => (iso ? hora(iso) : '—');
+  const duracao = (n) => (n === null || n === undefined ? '—' : n < 1000 ? n + ' ms' : Math.round(n / 100) / 10 + ' s');
   const memoria = (tela, id) => ((estado.ds ||= {})[tela + ':' + id] ||= {});
   const PRECISA_AUT = ['smoke', 'regressao', 'validacao-ticket', 'k6', 'run-qase'];
   const ESTADOS_ROTINA = { ATIVA: 'Ativa', PAUSADA: 'Pausada', DESATIVADA: 'Desativada', CONCLUIDA: 'Concluída' };
@@ -97,38 +98,8 @@
       p.estado === 'VIGENTE' ? { no: DS.acao('Revogar', async () => { if (await chamar(() => api.runRevogarPolitica(p.id))) { avisar(tr('Política revogada.')); recarregar(); } }, { compacto: true }), classe: 'ds-acao' } : ''] })) });
   }
 
-  // ======================= Execuções =======================
   const ORIGENS = { MANUAL: 'Manual', AGENDA: 'Agenda' };
   const cenarios = (x) => { const c = x.resultado?.contagem; if (!c || !(c.pass + c.fail + c.blocked + c.notRun)) return null; return c; };
-  abas.execucoes = async (el) => {
-    const espacos = (await chamar(api.espacos)) || []; const f = estado.filtroExec || (estado.filtroExec = {});
-    if (f.selecionadoQuando !== (estado.espaco?.id ?? null)) { for (const k of Object.keys(f)) delete f[k]; f.selecionadoQuando = estado.espaco?.id ?? null; }
-    if (!f.espacoId && estado.espaco && f.todos !== true) f.espacoId = estado.espaco.id;
-    const aplicar = (extra = {}) => { if (desde.value && ate.value && desde.value > ate.value) { avisar(tr('A data inicial deve ser anterior à data final.'), true); return; } estado.filtroExec = { espacoId: proj.value || undefined, todos: !proj.value, ticket: tk.value.trim().toUpperCase() || undefined, resultado: res.value || undefined, desde: desde.value, ate: ate.value, tipo: tipo.value, origem: org.value, rotinaId: f.rotinaId, selecionadoQuando: f.selecionadoQuando, ...extra }; mostrar('execucoes'); };
-    const proj = DS.selecao({ id: 'f-projeto', rotulo: 'Projeto', opcoes: [['', 'Todos os projetos'], ...espacos.map((e) => [e.id, e.nome])], valor: f.espacoId || '', aoMudar: () => aplicar() });
-    const tk = h('input', { id: 'f-ticket', placeholder: tr('Ticket'), 'aria-label': tr('Ticket'), value: f.ticket || '', maxlength: 40, class: 'ds-w-sm' }); tk.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') aplicar(); });
-    const res = DS.selecao({ id: 'f-resultado', rotulo: 'Resultado', opcoes: [['', 'Qualquer resultado'], ...['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'ERRO_INFRA', 'INFO'].map((v) => [v, v])], valor: f.resultado || '', aoMudar: () => aplicar() });
-    const tipo = DS.selecao({ id: 'f-tipo', rotulo: 'Fluxo', opcoes: [['', 'Qualquer fluxo'], ...Object.entries(TIPOS)], valor: f.tipo || '', aoMudar: () => aplicar() });
-    const org = DS.selecao({ id: 'f-origem', rotulo: 'Origem', opcoes: [['', 'Qualquer origem'], ...Object.entries(ORIGENS)], valor: f.origem || '', aoMudar: () => aplicar() });
-    const desde = h('input', { id: 'f-desde', type: 'date', 'aria-label': tr('Desde'), value: f.desde || '' }); const ate = h('input', { id: 'f-ate', type: 'date', 'aria-label': tr('Até'), value: f.ate || '' });
-    const periodo = {}; if (f.desde) periodo.since = new Date(f.desde + 'T00:00:00').toISOString(); if (f.ate) periodo.until = new Date(f.ate + 'T23:59:59.999').toISOString();
-    const [m, lista] = await Promise.all([chamar(() => api.metricasExecucoes(f.espacoId)), chamar(() => api.execucoes({ espacoId: f.espacoId, rotinaId: f.rotinaId, ticket: f.ticket, resultado: f.resultado, ...periodo, limite: 100 }))]); if (!lista) return el.append(DS.cabecalho({ titulo: 'Execuções' }), DS.falhaConsulta('execucoes'));
-    const itens = lista.execucoes.filter((x) => (!f.tipo || x.tipo === f.tipo) && (!f.origem || x.origem === f.origem));
-    el.append(DS.cabecalho({ titulo: 'Execuções', contagem: itens.length, info: 'Histórico das execuções do Prumo. As evidências ficam dentro de cada execução.',
-      acoes: [DS.acao('Runs do Qase', () => mostrar('runs'), { id: 'exec-runs', icone: 'externo' }), DS.acao('Evidências CLI/MCP', () => { estado.jobId = undefined; mostrar('evidencias'); }, { id: 'exec-evidencias', icone: 'escudo', titulo: 'Evidências de validações solicitadas por agentes (MCP) ou pela linha de comando' })] }));
-    if (m) el.append(DS.resumo([[m.execucoes, 'execuções'], [m.pass, 'PASS', 'ok'], [m.fail, 'FAIL', 'falha'], [m.blocked, 'BLOCKED', 'aviso'], [m.notRun, 'NOT_RUN'], [m.consultas, 'consultas (INFO)'], [m.falhasDeAgendamento, 'falhas de agendamento', m.falhasDeAgendamento ? 'falha' : null], [m.comentariosPendentes, 'comentários pendentes', m.comentariosPendentes ? 'aviso' : null]], { id: 'metricas-exec' }));
-    el.append(DS.barra(proj, tk, res, tipo, org, h('span', { class: 'ds-periodo' }, tr('Período'), desde, tr('até'), ate), DS.acao('Filtrar', () => { if (!desde.reportValidity() || !ate.reportValidity()) return; aplicar(); }, { id: 'f-aplicar', icone: 'filtro' }),
-      f.rotinaId ? DS.acao('Limpar filtro de rotina', () => { delete estado.filtroExec.rotinaId; mostrar('execucoes'); }, { compacto: true }) : null,
-      h('span', { class: 'ds-meta-barra', title: tr('Até 100 registros por consulta. Fluxo e origem filtram os registros carregados. O período usa o horário deste computador.') }, tr('{n} de {t} registro(s)', { n: itens.length, t: lista.total }))));
-    if (!itens.length) { el.append(DS.estadoTela('vazio', 'Nenhuma execução registrada para este filtro.', 'Execuções aparecem aqui quando uma rotina roda ou é executada agora.', [DS.acao('Abrir Agendamentos', () => mostrar('agenda'))], { id: 'exec-vazia' })); return; }
-    el.append(DS.tabela({ id: 'tabela-exec', colunas: ['Execução', { t: 'Projeto', classe: 'ds-opcional' }, 'Fluxo', { t: 'Origem', classe: 'ds-opcional' }, 'Iniciada em', { t: 'Duração', classe: 'ds-opcional' }, 'Cenários', 'Resultado', 'Jira'], linhas: itens.map((x) => { const r = x.resultado; const c = cenarios(x);
-      return { attrs: { 'data-exec': x.id }, abrir: () => abrirExecucao(x), rotuloAcessivel: tr('Abrir execução {n}', { n: x.rotina }),
-        celulas: [h('div', {}, h('strong', {}, x.rotina), h('span', { class: 'ds-sub' }, [x.ticket, x.id.slice(0, 8)].filter(Boolean).join(' · '))), x.projeto, h('div', {}, rotuloTipo(x.tipo), x.capability ? h('span', { class: 'ds-sub' }, x.capability) : null), DS.origem(x.origem === 'AGENDA' ? 'prumo' : 'manual', tr(ORIGENS[x.origem] || x.origem || '—')),
-          { no: h('div', {}, hora(x.inicio || x.criadoEm), x.estado === 'PERDIDO' ? h('span', { class: 'ds-sub' }, tr('horário planejado: {q}', { q: hora(x.slot) })) : null), classe: 'ds-nowrap' }, duracao(x.duracaoMs),
-          c ? h('div', { class: 'ds-sub ds-m0' }, `${c.pass} PASS · ${c.fail} FAIL · ${c.blocked} BLOCKED · ${c.notRun} NOT_RUN`) : r && ['PASS', 'FAIL'].includes(r.status) ? h('span', { class: 'ds-falta' }, tr('sem cenários individuais')) : '—',
-          h('div', {}, selo(r?.status || x.estado), r?.motivo ? h('span', { class: 'ds-sub' }, r.motivo) : x.erro ? h('span', { class: 'ds-sub' }, x.erro) : null),
-          x.jira.estado === 'NAO_APLICAVEL' ? '—' : h('div', {}, selo(x.jira.estado), x.jira.comentarioId ? h('span', { class: 'ds-sub' }, '#' + x.jira.comentarioId) : null)] }; }) }));
-  };
   // Evidência de uma execução: consultada uma vez e compartilhada pelas abas Logs e Evidências.
   function evidenciaDe(x) { if (!x.evidenciaId || !x.pastaLocal) return Promise.resolve(null); return (x._ev ||= api.evidencias(x.pastaLocal, x.evidenciaId).then((r) => (r.ok ? r.data : { erro: r.error }))); }
   function cartaoArquivo(ic, titulo, sub, ...acoes) { return h('div', { class: 'ds-arquivo' }, h('span', { class: 'ds-arquivo-ic' }, DS.icone(ic)), h('div', { class: 'ds-flex1' }, h('strong', {}, titulo), sub ? h('span', { class: 'ds-sub' }, sub) : null, acoes.length ? h('div', { class: 'ds-cab-acoes ds-mt' }, acoes) : null)); }

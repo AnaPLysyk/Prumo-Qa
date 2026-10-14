@@ -13,7 +13,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 export const repo = path.resolve('.');
 export const versao = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
 export const exe = process.env.PRUMO_APP_EXE;
-export const abas = ['inicio', 'projetos', 'contextos', 'tickets', 'testes', 'automacoes', 'runs', 'vinculos', 'agenda', 'execucoes', 'rastreabilidade', 'metricas', 'logs', 'historico', 'evidencias', 'conexoes', 'agentes', 'suporte', 'ajuda', 'administracao'];
+export const abas = ['inicio', 'projetos', 'contextos', 'tickets', 'testes', 'automacoes', 'runs', 'vinculos', 'agenda', 'metricas', 'logs', 'historico', 'evidencias', 'conexoes', 'agentes', 'suporte', 'ajuda', 'administracao'];
 
 // Cada teste tem seu diretório de dados; ao final os aplicativos abertos são fechados ANTES de apagá-lo.
 const abertos = new Map();
@@ -38,14 +38,14 @@ export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   if (!opcoes.inicio) await ir(page, 'projetos');
   return { app, page, erros, fechar };
 }
-const virtuais = { runs: ['testes', 'runs'], automacoes: ['testes', 'automacao'], vinculos: ['rastreabilidade', 'vinculos'] };
+const virtuais = { runs: ['testes', 'runs'], execucoes: ['testes', 'runs'], automacoes: ['testes', 'pipelines'], vinculos: ['testes', 'repositorio'], rastreabilidade: ['testes', 'repositorio'] };
 export const ir = async (page, aba) => {
   // Detalhes abrem em modal (v39/v40): fecha-o como a pessoa faria antes de usar o menu.
   if (await page.locator('#qualidade-dialog[open]').count()) { await page.keyboard.press('Escape'); await page.waitForSelector('#qualidade-dialog[open]', { state: 'hidden' }); }
   // v40: Contextos fica dentro de Agentes (modal), como Evidências fica dentro de Execuções.
   if (aba === 'contextos') { await ir(page, 'agentes'); await page.click('#agentes-contextos'); await page.waitForSelector('#qualidade-dialog[open] .ds-contextos > :not(.ds-estado)'); return; }
   if (aba === 'evidencias') { await ir(page, 'execucoes'); await page.click('#exec-evidencias'); await page.waitForSelector('#qualidade-dialog[open]'); return; }
-  if (virtuais[aba]) { const [pai, sub] = virtuais[aba]; await ir(page, pai); await page.click(`[data-sub=${sub}]`); await page.waitForFunction((s) => document.querySelector(`[data-sub=${s}]`)?.getAttribute('aria-pressed') === 'true', sub); await page.waitForTimeout(150); return; } await page.click(`[data-aba=${aba}]`); await page.waitForFunction((a) => document.querySelector(`[data-aba=${a}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(150); };
+  if (virtuais[aba]) { const [pai, sub] = virtuais[aba]; await ir(page, pai); if (sub === 'pipelines') { await page.click('[data-sub=ide]'); await page.click('[data-ide-modo=pipelines]'); await page.waitForFunction(() => document.querySelector('[data-ide-modo=pipelines]')?.getAttribute('aria-pressed') === 'true'); await page.waitForTimeout(150); return; } await page.click(`[data-sub=${sub}]`); await page.waitForFunction((s) => document.querySelector(`[data-sub=${s}]`)?.getAttribute('aria-pressed') === 'true', sub); await page.waitForTimeout(150); return; } await page.click(`[data-aba=${aba}]`); await page.waitForFunction((a) => document.querySelector(`[data-aba=${a}]`)?.getAttribute('aria-current') === 'page', aba); await page.waitForTimeout(150); };
 export const escolherPasta = (app, pasta) => app.evaluate(({ dialog }, p) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [p] }); }, pasta);
 export async function mcp(root, dados, chamadas) {
   const client = new Client({ name: 'codex-desktop-test', version: '1.0.0' });

@@ -61,62 +61,18 @@
     return { itens: Array.isArray(r.data.dados) ? r.data.dados : [], proxima: r.data.proxima, em: r.data.consultadoEm };
   }
   const fonteQase = (r, rotulo, mais) => h('div', { class: 'ds-fontes', 'aria-live': 'polite' }, r.erro ? h('span', { role: 'status' }, DS.origem('qase', 'Qase'), ' ', DS.chip(r.erro, 'falha')) : h('span', { role: 'status' }, DS.origem('qase', 'Qase'), tr('{n} {r} · consultado {q}', { n: r.itens.length, r: tr(rotulo), q: quando(r.em) }), r.proxima != null && mais ? DS.link('Carregar mais', mais, { seta: false }) : null));
-  abas.testes = async (el) => {
-    const e = estado.espaco;
-    if (!e) { const sub0 = ['runs', 'automacao'].includes(estado.sub?.testes) ? estado.sub.testes : 'catalogo'; el.append(DS.cabecalho({ titulo: 'Testes' }), barraSub('testes', [['catalogo', 'Catálogo'], ['runs', 'Runs'], ['automacao', 'Automação']], sub0), h('div', { id: 'sub-conteudo' }, DS.estadoTela('vazio', 'Nenhum projeto selecionado', 'Selecione ou crie um projeto para continuar.', [DS.acao('Ir para Projetos', () => mostrar('projetos'))]))); return; }
-    const vq = vinc(e, 'qase'); const mem = memoria('testes', e.id);
-    const itens = [['catalogo', 'Catálogo'], ...(vq ? [['casos', 'Casos'], ['suites', 'Suites'], ['planos', 'Planos']] : []), ['runs', 'Runs'], ['automacao', 'Automação']];
-    let sub = estado.sub?.testes || 'catalogo'; if (!itens.some(([k]) => k === sub)) sub = 'catalogo';
-    const perm = vq ? await escritaDoProjeto(e) : {}; const esc = !!perm.qase;
-    const acoes = { casos: [DS.acao('Consulta avançada', () => avancadaQase(e), { id: 'testes-avancada', icone: 'filtro' }), DS.acao('Nova proposta de caso', () => novaProposta(e), { id: 'pr-nova', primaria: true, icone: 'mais' })], suites: [DS.acao('Nova suite', () => novaSuite(e, esc), { id: 'su-nova', primaria: true, icone: 'mais' })], planos: [DS.acao('Novo plano', () => novoPlano(e, esc), { id: 'plano-novo', primaria: true, icone: 'mais' })], runs: vq ? [DS.acao('Preparar run', () => prepararRun(e), { id: 'run-nova', primaria: true, icone: 'mais' })] : [] }[sub] || [];
-    el.append(DS.cabecalho({ titulo: 'Testes', descricao: [h('span', { class: 'ds-chips' }, DS.origem(e.pastaLocal ? 'local' : 'ausente', e.pastaLocal ? tr('Repositório local') : tr('Sem pasta local')), vq ? DS.origem('qase', 'Qase · ' + vq.recurso.chave) : null, vq && !esc ? h('span', { class: 'ds-chip', 'data-escrita-desligada': 'qase', title: tr('Escrita no Qase desligada. Habilite em Conexões.') }, tr('Qase somente leitura')) : null)], acoes }), barraSub('testes', itens, sub));
-    const corpo = h('div', { id: 'sub-conteudo' }); el.append(corpo);
-    if (sub === 'catalogo') await catalogoRepo(corpo);
-    else if (sub === 'casos') await telaCasos(e, mem, corpo);
-    else if (sub === 'suites') await telaSuites(e, mem, corpo);
-    else if (sub === 'planos') await telaPlanos(e, mem, corpo);
-    else if (sub === 'runs') await telaRuns(e, mem, corpo, esc);
-    else { await abaAutomacao(corpo); semTitulo(corpo); }
-  };
   async function avancadaQase(e) {
     const caixa = h('div', { class: 'ds-avancada' }, DS.info('Consulta direta ao Qase vinculado: suites, casos, detalhe com passos e planos, com os dados retornados.'));
     DS.modal('Consulta avançada · Qase', caixa, { tamanho: 'lg' }); await consultaManual(caixa, 'qase', { suites: 'Suites', casos: 'Casos manuais e automatizados', caso: 'Detalhe e passos do caso', planos: 'Planos' });
   }
   function novaProposta(e) { DS.modal('Nova proposta de caso', formularioProposta(e, null, () => { DS.fecharModal(); mostrar('testes'); }), { tamanho: 'md' }); }
-  async function telaCasos(e, mem, corpo) {
-    const f = (mem.fCasos ||= { q: '', tipo: '', suite: '' });
-    const q = DS.busca({ id: 'caso-busca', placeholder: 'Buscar por ID, título ou tag', valor: f.q });
-    const tipo = DS.selecao({ id: 'caso-tipo', rotulo: 'Tipo de execução', opcoes: [['', 'Todos os tipos'], ['manual', 'Manual'], ['automatizado', 'Automatizado'], ['planejado', 'Automação planejada']], valor: f.tipo });
-    const suite = DS.selecao({ id: 'caso-suite', rotulo: 'Suite', opcoes: [['', 'Todas as suites']], valor: '' });
-    const area = h('div', { id: 'casos-area' }, DS.esqueleto(6)); const fonte = h('div');
-    corpo.append(DS.barra(q.no, tipo, suite, DS.acao('Atualizar', async () => { delete mem.casos; await carregar(); }, { id: 'casos-atualizar', icone: 'atualizar' })), fonte, area);
+  // Propostas em revisão: rascunhos locais de casos e bugs. Com o Qase vinculado e a escrita habilitada, depois de revisadas podem ser enviadas para lá;
+  // sem o Qase, continuam como casos manuais deste computador.
+  async function telaPropostas(e, mem, corpo) {
     const slot = h('div', { id: 'pr-slot' }); const propostas = h('div', { id: 'pr-lista' });
     corpo.append(DS.secao('Propostas em revisão', [DS.info('Rascunhos locais de casos e bugs. Nada é publicado sem revisão e confirmação.'), slot, propostas]));
-    const [runs] = await Promise.all([api.runs(e.id)]); const rl = runs.ok ? runs.data : [];
-    const desenhar = () => {
-      f.q = q.input.value.trim(); f.tipo = tipo.value; f.suite = suite.value; const qq = f.q.toLowerCase();
-      const casos = (mem.casos?.itens || []).filter((c) => (!f.tipo || tipoCaso(c) === f.tipo) && (!f.suite || String(c.suite_id) === f.suite) && (!qq || (c.id + ' ' + (c.title || '') + ' ' + (c.tags || []).map((x) => x.title || x).join(' ')).toLowerCase().includes(qq)));
-      if (mem.casos?.erro && !mem.casos.itens.length) { area.replaceChildren(DS.estadoTela('erro', 'Não foi possível consultar os casos', mem.casos.erro, [DS.acao('Tentar novamente', async () => { delete mem.casos; await carregar(); })])); return; }
-      if (!casos.length) { area.replaceChildren(DS.estadoTela('vazio', mem.casos?.itens.length ? 'Nenhum caso para estes filtros' : 'Nenhum caso retornado pelo Qase', mem.casos?.itens.length ? 'Ajuste a busca, o tipo ou a suite.' : null)); return; }
-      const nomeSuite = (sid) => (mem.suites?.itens || []).find((s) => s.id === sid)?.title;
-      area.replaceChildren(DS.tabela({ id: 'casos-tabela', colunas: ['ID', 'Caso', 'Tipo', { t: 'Automação no Prumo', classe: 'ds-opcional' }, 'Ticket', 'Resultado no Prumo'], linhas: casos.map((c) => {
-        const autos = relacoesDe(e, ['qase'], c.id).map((x) => outroLado(x, ['qase'], c.id)).filter((x) => x.tipo === 'automacao'); const tk = [...new Set([...ticketsExternos(c), ...relacoesDe(e, ['qase'], c.id).map((x) => outroLado(x, ['qase'], c.id)).filter((x) => x.tipo === 'jira').map((x) => x.id)])];
-        const ult = resultadosLocais(rl, c.id).sort((a, b) => Date.parse(b.em) - Date.parse(a.em))[0];
-        return { attrs: { 'data-caso': String(c.id) }, abrir: () => abrirCaso(e, c.id), rotuloAcessivel: tr('Abrir caso {id}', { id: c.id }),
-          celulas: [{ no: String(c.id), classe: 'ds-id' }, h('div', {}, h('span', { class: 'ds-resumo-texto' }, c.title || '—'), nomeSuite(c.suite_id) ? h('span', { class: 'ds-sub' }, nomeSuite(c.suite_id)) : null), chipTipoCaso(c), autos.length ? h('span', { class: 'ds-celula-nos' }, autos.map((a) => h('span', { class: 'ds-no', 'data-servico': 'local' }, h('i'), a.id))) : h('span', { class: 'ds-falta' }, tr('não declarada')), tk.length ? tk.join(', ') : '—', ult ? selo(ult.status) : h('span', { class: 'ds-falta' }, tr('sem resultado'))] };
-      }) }));
-    };
-    async function carregar() {
-      area.replaceChildren(DS.esqueleto(6));
-      const [casos, suites] = await Promise.all([mem.casos ? mem.casos : carregarQase(e, mem, 'casos'), mem.suites ? mem.suites : carregarQase(e, mem, 'suites')]);
-      mem.casos = casos; mem.suites = suites; fonte.replaceChildren(fonteQase(casos, 'caso(s)', casos.proxima != null ? async () => { const r = await carregarQase(e, mem, 'casos', { offset: casos.proxima, limite: 100 }); if (!r.erro) { mem.casos = { ...r, itens: mem.casos.itens.concat(r.itens) }; fonte.replaceChildren(fonteQase(mem.casos, 'caso(s)')); desenhar(); } } : null));
-      suite.replaceChildren(h('option', { value: '' }, tr('Todas as suites')), ...suites.itens.map((s) => h('option', { value: String(s.id), selected: String(s.id) === f.suite }, s.title)));
-      desenhar();
-    }
-    q.input.addEventListener('input', desenhar); tipo.addEventListener('change', desenhar); suite.addEventListener('change', desenhar);
     const perm = await escritaDoProjeto(e); const ps = await chamar(() => api.propostas(e.id)); const vivas = (ps || []).filter((p) => p.estado !== 'DESCARTADA');
     if (!vivas.length) propostas.append(DS.estadoTela('vazio', 'Nenhuma proposta em revisão', null, [], { id: 'pr-vazia', compacto: true })); for (const p of vivas) propostas.append(cartaoProposta(e, p, perm, () => mostrar('testes')));
-    await carregar();
   }
   function novaSuite(e, esc) {
     const titulo = h('input', { id: 'su-titulo', maxlength: 255 }); const saida = h('div', { id: 'ts-saida' });

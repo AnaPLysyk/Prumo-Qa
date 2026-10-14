@@ -61,7 +61,7 @@ test('Tickets: filtro, detalhe e comentário idempotente pela interface (única 
 
 test('Testes: proposta é rascunho, revisão exige os quatro itens e confirmação nativa, e nada sai sem escrita habilitada', async (t) => {
   const { a, s } = await preparar(t);
-  await ir(a.page, 'testes'); await a.page.click('[data-sub=casos]'); await a.page.click('#pr-nova'); await a.page.fill('#pr-titulo', 'Login rejeita senha incorreta'); await a.page.fill('#pr-descricao', 'Valida a mensagem de erro.');
+  await ir(a.page, 'testes'); await a.page.click('[data-sub=repositorio]'); await a.page.click('#pr-nova'); await a.page.fill('#pr-titulo', 'Login rejeita senha incorreta'); await a.page.fill('#pr-descricao', 'Valida a mensagem de erro.');
   await a.page.fill('.passo-acao', 'Informar usuário válido e senha errada'); await a.page.fill('.passo-esperado', 'Mensagem de credenciais inválidas'); await a.page.fill('#pr-requisito', 'RQ-12'); await a.page.fill('#pr-risco', 'Acesso indevido');
   await a.page.click('#pr-salvar'); await a.page.waitForSelector('[data-proposta]');
   assert.match(await a.page.textContent('[data-proposta]'), /RASCUNHO/);
@@ -96,7 +96,7 @@ test('Testes: sem integração aparecem só os testes do repositório, agrupados
   await a.page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'REPO-LAB');
   // v40: Visão geral agrupa por tag/feature/nível; filtro por tag e por nível sobre a leitura estática do repositório.
   await ir(a.page, 'testes'); await a.page.waitForSelector('#cat-resumo');
-  assert.equal(await a.page.locator('[data-sub=casos]').count(), 0, 'sem Qase vinculado não há "Casos Qase"');
+  assert.equal(await a.page.locator('#casos-tabela').count(), 0, 'sem Qase vinculado não há a tabela de casos do Qase');
   await a.page.selectOption('#cat-agrupar', 'feature'); await a.page.waitForSelector('#cat-lista [data-feature="Login"]');
   assert.deepEqual((await a.page.locator('#cat-lista [data-feature]').evaluateAll((n) => n.map((x) => x.dataset.feature))).sort(), ['Login', 'Soma']);
   assert.match(await a.page.textContent('#cat-resumo'), /3\s*testes no código/); assert.match(await a.page.textContent('#cat-aviso'), /leitura estática/);

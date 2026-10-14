@@ -173,8 +173,8 @@ const DS = (() => {
 })();
 // Telas que usam o layout do Design System (largura útil maior e barras sem caixa).
 (() => {
-  const telas = new Set(['tickets', 'testes', 'agenda', 'execucoes', 'rastreabilidade', 'suporte', 'ajuda']);
-  const virtuais = { runs: 'testes', automacoes: 'testes', vinculos: 'rastreabilidade' };
+  const telas = new Set(['tickets', 'testes', 'agenda', 'suporte', 'ajuda']);
+  const virtuais = { runs: 'testes', execucoes: 'testes', automacoes: 'testes', vinculos: 'testes', rastreabilidade: 'testes' };
   const marcar = (aba) => { const c = document.querySelector('#conteudo'); if (!c) return; if (telas.has(aba)) c.dataset.dsTela = aba; else delete c.dataset.dsTela; };
   const base = mostrar;
   mostrar = async function (aba) { if (aba !== 'evidencias') marcar(virtuais[aba] || aba); const r = await base(aba); if (aba !== 'evidencias') marcar(estado.aba); return r; };

@@ -7,6 +7,7 @@
   const vinc = (e, s) => e?.vinculos.find((v) => v.servico === s) || null;
   const memoria = (tela, id) => ((estado.ds ||= {})[tela + ':' + id] ||= {});
   const quando = (iso) => (iso ? hora(iso) : '—');
+  const duracao = (n) => (n === null || n === undefined ? '—' : n < 1000 ? n + ' ms' : Math.round(n / 100) / 10 + ' s');
   const semProjetoDS = (titulo) => [DS.cabecalho({ titulo }), DS.estadoTela('vazio', 'Nenhum projeto selecionado', 'Selecione ou crie um projeto para continuar.', [DS.acao('Ir para Projetos', () => mostrar('projetos'))])];
   const relacoesDe = (e, tipos, id) => (e?.relacoes || []).filter((r) => [r.de, r.para].some((x) => tipos.includes(x.tipo) && String(x.id) === String(id)));
   const outroLado = (r, tipos, id) => ([r.de, r.para].find((x) => !(tipos.includes(x.tipo) && String(x.id) === String(id))) || r.para);
@@ -29,7 +30,7 @@
   function blocoRelacoes(e, tipos, id) {
     const rels = relacoesDe(e, tipos, id);
     return DS.bloco('Vínculos no Prumo', rels.length ? h('div', { class: 'ds-celula-nos' }, rels.map((r) => { const o = outroLado(r, tipos, id); return noRef(e, o, ({ qase: 'Caso ', 'qase-defeito': 'Defeito ', automacao: '', 'jira-bug': 'Bug ' }[o.tipo] ?? '') + o.id); }))
-      : h('p', { class: 'suave' }, tr('Nenhum vínculo declarado.')), DS.link('Ver na rastreabilidade', () => { DS.fecharModal(); (estado.ds ||= {}).rastroBusca = String(id); mostrar('rastreabilidade'); }));
+      : h('p', { class: 'suave' }, tr('Nenhum vínculo declarado.')), DS.link('Ver em Testes › Repositório', () => { DS.fecharModal(); mostrar('vinculos'); }));
   }
 
   // ======================= Tickets =======================

@@ -19,7 +19,7 @@ async function consultarEventos() {
       const erro = ['EXECUCAO_FALHOU', 'EXECUCAO_BLOQUEADA', 'PUBLICACAO_JIRA_FALHOU', 'WORKER_INTERROMPIDO'].includes(e.tipo);
       avisar(`${e.titulo}: ${e.detalhe}`, erro);
       if (e.tipo !== 'AGENDAMENTO_INICIADO' && estado.prefs && estado.prefs.notificarAgenda !== false && estado.prefs.som && !estado.prefs.silenciar) tocarSom();
-      if (['agenda', 'execucoes', 'inicio'].includes(estado.aba)) setTimeout(recarregarSemFecharModal, 300);
+      if (['agenda', 'inicio'].includes(estado.aba) || (estado.aba === 'testes' && estado.sub?.testes === 'runs')) setTimeout(recarregarSemFecharModal, 300);
     }
     await atualizarWorker();
   } catch { /* a janela pode estar fechando */ }

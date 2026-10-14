@@ -73,18 +73,17 @@
   });
   observar.observe(document.querySelector('#conteudo'), { childList: true, subtree: true });
   observar.observe(corpo, { childList: true, subtree: true });
-  // Detalhes da execução e das rotinas mantêm as ações originais.
+  // Detalhes das rotinas mantêm as ações originais.
   document.addEventListener('click', (e) => {
     const summary = e.target.closest('summary');
     const details = summary?.parentElement;
     if (!details || dialog.contains(details)) return;
-    const exec = details.closest('#tabela-exec');
     const rotina = details.closest('[data-rotina]');
-    if (!exec && !rotina) return;
+    if (!rotina) return;
     e.preventDefault();
     const nodes = [...details.childNodes].filter(n => n !== summary);
     const container = h('div', { class: 'qualidade-detalhe' }, nodes);
-    abrir(exec ? 'Detalhes da execução' : summary.textContent, container, () => details.append(...nodes));
+    abrir(summary.textContent, container, () => details.append(...nodes));
   });
   // Evidência contextual: o listener existente define raiz/job antes de chamar mostrar.
   const mostrarBase = mostrar;
