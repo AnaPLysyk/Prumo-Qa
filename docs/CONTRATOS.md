@@ -811,7 +811,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Gravar ou criar um arquivo de teste na pasta vinculada, pela IDE de Testes.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** undefined
+- **Destino:** backend/testes/api/testesGravar.ts > confirmarNoWindows, obterEspaco, escreverArquivoDeTeste
 - **Entrada:** Projeto, caminho relativo, conteúdo e SHA-256 do conteúdo lido (nulo para arquivo novo)
 - **Saída:** Caminho, número de linhas, novo SHA-256 e se o arquivo foi criado
 - **Permissões:** Testes: USAR
