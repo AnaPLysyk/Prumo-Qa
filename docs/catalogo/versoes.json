@@ -2,9 +2,95 @@
   "schemaVersion": 1,
   "versions": [
     {
-      "version": "2.11.0",
+      "version": "2.12.0",
       "status": "repositorio",
       "date": null,
+      "title": "Contas locais com papéis e permissões, agentes da plataforma e Documentação viva com código",
+      "objective": "Reunir numa só versão o que foi implementado desde a 2.11: login local com papéis e permissões por tela, administração dos agentes da plataforma, Documentação viva com o código de cada arquivo, melhorias de interface e a organização do repositório sem a pasta app/. Inclui tudo da 2.11.1.",
+      "features": [
+        "Administração › Usuários: ligar o login criando o primeiro administrador, criar contas, aprovar cadastros, trocar papel, desativar, redefinir senha, desbloquear e excluir. Senha e código de recuperação ficam só como resumo scrypt; a sessão vive na memória do processo principal e expira por inatividade.",
+        "Administração › Permissões: papéis com nível por tela (nenhum, ver ou usar). O Administrador é fixo; cada canal da janela confere sessão e papel no backend, não só esconde botões.",
+        "Administração › Agentes e Configurações gerais: ligar ou desligar agentes em todos os projetos, o uso de Claude Code ou Codex e a orquestração; regras de cadastro, aprovação, inatividade e bloqueio por tentativas erradas.",
+        "Tela de entrada: cadastro, entrar e recuperar senha com código de uso único, sem menu antes do login. Com o login desligado o Prumo continua usando a conta do Windows, como antes.",
+        "Administração › Documentação viva: explorador com árvore de arquivos, fluxo tela → canal → API e o código do arquivo escolhido ao lado da explicação, gerado do código no build.",
+        "Download: o site oferece o instalador da versão publicada com o SHA-256, e a Ajuda tem o botão para o site oficial.",
+        "Cérebro com teste de pergunta (somente leitura) e Painel de atividades em tela cheia."
+      ],
+      "improvements": [
+        "Aviso rápido embaixo, centralizado, que desvia do robô e do chat e não cobre controles.",
+        "Repositório sem a pasta app/: preload no backend, ajuda e catálogo em docs/, interface gerada em dist/ e arquivos de tela com nomes que dizem o que fazem."
+      ],
+      "fixes": [
+        "A promise das orquestrações no Cérebro passa a ter tratamento de erro, com aviso quando falha.",
+        "O build do site no Render funciona também com o caminho antigo scripts/gerar-site.mjs."
+      ],
+      "differential": "Os agentes ficam mais fortes com o conhecimento da equipe e de Skills abertas, sempre com aprovação humana antes de chegar à IA.",
+      "howItWorks": [
+        "Com o login ligado, cada canal exige sessão e o nível da tela no papel da pessoa. O worker, a bandeja e o servidor MCP continuam rodando com a conta do Windows e as políticas de cada projeto."
+      ],
+      "security": [
+        "Contas só neste computador, em contas.json na pasta de dados; nenhum serviço online. Senhas e códigos nunca aparecem em respostas ou logs; tentativas erradas bloqueiam a conta; o último administrador não pode ser removido nem rebaixado."
+      ],
+      "compatibility": [
+        "Dados, projetos, preferências e contratos da 2.11 são preservados. Sem ativar o login nada muda."
+      ],
+      "limitations": [
+        "Contas online compartilhadas entre computadores ainda não existem; o login é local e não isola os dados de pessoas que usam a mesma conta do Windows.",
+        "A orquestração é local e sequencial: os especialistas consultam os dados deste computador, um de cada vez; distribuir tarefas em paralelo para IAs externas ainda não existe.",
+        "Python, Go, Java, .NET, Rust, PHP e Ruby continuam somente leitura: o executor aceita só node e npm.",
+        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou."
+      ],
+      "migration": "A instalação preserva os dados existentes; o banco de Skills é novo e não altera nenhum formato anterior.",
+      "afterUpdate": [
+        "Abra Agentes, escolha um agente e veja a seção Skills: acrescente o que a sua equipe quer que ele siga ou importe uma pasta de Skill aberta e aprove os trechos."
+      ],
+      "releaseUrl": null
+    },
+    {
+      "version": "2.11.1",
+      "status": "repositorio",
+      "date": null,
+      "title": "Download direto no site e na Ajuda, Cérebro com teste de pergunta e Painel de atividades em tela cheia",
+      "objective": "Corrigir o caminho de download do instalador (o site no Render não oferecia o arquivo da versão atual) e acrescentar ao Cérebro dos agentes um teste de pergunta somente leitura. Inclui tudo da 2.11.0.",
+      "features": [
+        "Site › Versões e download: botão \"Baixar instalador X.Y.Z (.exe)\" que leva ao arquivo da release oficial no GitHub, com o SHA-256 para conferência. O instalador continua hospedado só no GitHub; o Render hospeda o site.",
+        "Ajuda: botão \"Baixar instalador no site oficial\", que abre o site depois da confirmação do Windows.",
+        "Cérebro › Testar uma pergunta: simula o caminho que o chat faria (canal agentes:rastrear, somente leitura) e acende os neurônios usados, sem chamar IA."
+      ],
+      "improvements": [
+        "Painel de atividades ocupa a altura da janela, com as orquestrações numa coluna ao lado.",
+        "Cores de tema ficam só em frontend/design-system (tokens --ds-*); as telas respeitam a cor de destaque escolhida, e um teste de estrutura impede paleta própria nas telas."
+      ],
+      "fixes": [
+        "O build do site no Render falhava quando o serviço ainda usava o caminho antigo scripts/gerar-site.mjs; um atalho com esse nome chama o gerador atual.",
+        "Textos \"null\" deixam de aparecer em Testes › CI e Rastreabilidade › Relações; contador de Tickets corrigido."
+      ],
+      "differential": "Os agentes ficam mais fortes com o conhecimento da equipe e de Skills abertas, sempre com aprovação humana antes de chegar à IA.",
+      "howItWorks": [
+        "O site é gerado por site/gerar.mjs a partir do catálogo de versões; o link de download só aparece para uma versão marcada como publicada, com arquivo e SHA-256 registrados."
+      ],
+      "security": [
+        "O botão da Ajuda abre uma URL fixa do site oficial, só após confirmação nativa. O teste de pergunta do Cérebro só lê dados locais e não chama IA externa."
+      ],
+      "compatibility": [
+        "Dados, projetos, preferências, conhecimentos e contratos da 2.11.0 são preservados."
+      ],
+      "limitations": [
+        "Login, usuários, administração multiusuário e banco central (PostgreSQL) ainda não existem: o Prumo continua local por conta do Windows, e o papel do perfil personaliza respostas, não autoriza nada.",
+        "A orquestração é local e sequencial: os especialistas consultam os dados deste computador, um de cada vez; distribuir tarefas em paralelo para IAs externas ainda não existe.",
+        "Python, Go, Java, .NET, Rust, PHP e Ruby continuam somente leitura: o executor aceita só node e npm.",
+        "O instalador continua sem assinatura de código; o SHA-256 confirma que o arquivo é o publicado, não quem o publicou."
+      ],
+      "migration": "A instalação preserva os dados existentes; o banco de Skills é novo e não altera nenhum formato anterior.",
+      "afterUpdate": [
+        "Abra Agentes, escolha um agente e veja a seção Skills: acrescente o que a sua equipe quer que ele siga ou importe uma pasta de Skill aberta e aprove os trechos."
+      ],
+      "releaseUrl": null
+    },
+    {
+      "version": "2.11.0",
+      "status": "publicada",
+      "date": "2026-10-13",
       "title": "Skills em banco próprio, Administração com documentação viva e código organizado pelo caminho de quem usa",
       "objective": "Dar a cada agente um banco de Skills que a equipe consegue alimentar e organizar o código para que cada tela, ferramenta e teste esteja num lugar previsível. Inclui tudo da 2.10.2, que não chegou a ser publicada: quem está na 2.10.1 recebe as duas de uma vez.",
       "features": [
@@ -47,7 +133,11 @@
       "afterUpdate": [
         "Abra Agentes, escolha um agente e veja a seção Skills: acrescente o que a sua equipe quer que ele siga ou importe uma pasta de Skill aberta e aprove os trechos."
       ],
-      "releaseUrl": null
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.11.0",
+      "installer": {
+        "file": "Prumo-QA-Setup-2.11.0.exe",
+        "sha256": "8f142a791a245d22bf7edbf14bf17fb58036079459e448505ae9b77b298db655"
+      }
     },
     {
       "version": "2.10.2",

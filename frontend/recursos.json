@@ -3,83 +3,91 @@
   "recursos": [
     {
       "fonte": "frontend/compartilhado/runtime/app.js",
-      "destino": "app/renderer/app.js"
+      "destino": "dist/renderer/app.js"
     },
     {
       "fonte": "frontend/compartilhado/runtime/index.html",
-      "destino": "app/renderer/index.html"
+      "destino": "dist/renderer/index.html"
     },
     {
       "fonte": "frontend/compartilhado/runtime/i18n.js",
-      "destino": "app/renderer/i18n.js"
+      "destino": "dist/renderer/i18n.js"
     },
     {
       "fonte": "frontend/compartilhado/runtime/i18n-en.js",
-      "destino": "app/renderer/i18n-en.js"
+      "destino": "dist/renderer/i18n-en.js"
     },
     {
       "fonte": "frontend/compartilhado/runtime/i18n-en-29.js",
-      "destino": "app/renderer/i18n-en-29.js"
+      "destino": "dist/renderer/i18n-en-29.js"
     },
     {
       "fonte": "frontend/compartilhado/runtime/i18n-en-v36.js",
-      "destino": "app/renderer/i18n-en-v36.js"
+      "destino": "dist/renderer/i18n-en-v36.js"
     },
     {
       "fonte": "frontend/compartilhado/runtime/i18n-en-v40.js",
-      "destino": "app/renderer/i18n-en-v40.js"
+      "destino": "dist/renderer/i18n-en-v40.js"
     },
     {
       "fonte": "frontend/compartilhado/runtime/i18n-en-v41.js",
-      "destino": "app/renderer/i18n-en-v41.js"
+      "destino": "dist/renderer/i18n-en-v41.js"
     },
     {
       "fonte": "frontend/design-system/ds.js",
-      "destino": "app/renderer/ds.js"
+      "destino": "dist/renderer/ds.js"
     },
     {
       "fonte": "frontend/design-system/ds.css",
-      "destino": "app/renderer/ds.css"
+      "destino": "dist/renderer/ds.css"
     },
     {
       "fonte": "frontend/design-system/qc.css",
-      "destino": "app/renderer/qc.css"
+      "destino": "dist/renderer/qc.css"
     },
     {
       "fonte": "frontend/design-system/estilo.css",
-      "destino": "app/renderer/estilo.css"
+      "destino": "dist/renderer/estilo.css"
     },
     {
       "fonte": "frontend/design-system/qualidade-v39.css",
-      "destino": "app/renderer/qualidade-v39.css"
+      "destino": "dist/renderer/qualidade-v39.css"
     },
     {
       "fonte": "frontend/design-system/qualidade-v39.js",
-      "destino": "app/renderer/qualidade-v39.js"
+      "destino": "dist/renderer/qualidade-v39.js"
     },
     {
       "fonte": "frontend/inicio/identidade/qc.js",
-      "destino": "app/renderer/qc.js"
+      "destino": "dist/renderer/qc.js"
     },
     {
       "fonte": "frontend/inicio/identidade/orbitas-v36.js",
-      "destino": "app/renderer/orbitas-v36.js"
+      "destino": "dist/renderer/orbitas-v36.js"
     },
     {
       "fonte": "frontend/inicio/identidade/robos-v36.js",
-      "destino": "app/renderer/robos-v36.js"
+      "destino": "dist/renderer/robos-v36.js"
     },
     {
       "fonte": "frontend/agentes/atividades/painel-atividades-v41.js",
-      "destino": "app/renderer/painel-atividades-v41.js"
+      "destino": "dist/renderer/painel-atividades-v41.js"
     },
     {
       "fonte": "frontend/agentes/atividades/painel-atividades-v41.css",
-      "destino": "app/renderer/painel-atividades-v41.css"
+      "destino": "dist/renderer/painel-atividades-v41.css"
     },
     {
       "fonte": "frontend/execucoes/operacao-v40.js",
-      "destino": "app/renderer/operacao-v40.js"
+      "destino": "dist/renderer/operacao-v40.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/three-0.159.0.min.js",
+      "destino": "dist/renderer/vendor/three-0.159.0.min.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/THREE-LICENSE.txt",
+      "destino": "dist/renderer/vendor/THREE-LICENSE.txt"
     }
   ]
 }

@@ -76,7 +76,7 @@ test('esfera só anima com trabalho real e respeita redução de movimento; foco
 });
 
 test('contraste dos tokens (claro e escuro) atende 4,5:1 nos pares de texto', () => {
-  const css = fs.readFileSync('app/renderer/estilo.css', 'utf8');
+  const css = fs.readFileSync('dist/renderer/estilo.css', 'utf8');
   const bloco = (re) => Object.fromEntries([...re.exec(css)[1].matchAll(/--([a-z0-9-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]));
   const escuro = bloco(/:root \{([^}]*)\}/); const claro = bloco(/:root\[data-tema="claro"\] \{([^}]*)\}/);
   const lum = (h) => { const [r, g, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };

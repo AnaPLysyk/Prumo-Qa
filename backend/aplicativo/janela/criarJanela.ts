@@ -11,7 +11,7 @@ export function criarJanela(): BrowserWindow {
   const janela = new BrowserWindow({
     width: 1080, height: 720, minWidth: 820, minHeight: 560, show: false, backgroundColor: '#0b1020', title: 'Prumo QA',
     icon: path.join(raizDoAplicativo, 'assets', 'prumo-icon.png'),
-    webPreferences: { preload: path.join(raizDoAplicativo, 'app', 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, devTools: !app.isPackaged }
+    webPreferences: { preload: path.join(raizDoAplicativo, 'backend', 'aplicativo', 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, devTools: !app.isPackaged }
   });
   janela.once('ready-to-show', () => janela.show());
   janela.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));

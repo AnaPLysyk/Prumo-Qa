@@ -9,10 +9,10 @@ comuns para que as telas tenham a mesma estrutura.
 
 | Arquivo | Papel |
 |---|---|
-| `app/renderer/estilo.css`, `qc.css` | Tokens de cor e tema (escuro, claro, sistema), cor de destaque, tipografia, menu lateral, fundo vivo. **Fonte das cores.** |
-| `app/renderer/ds.css` | Escala de espaço/raio, superfícies, componentes e utilitários (v40). Carregado por último. |
-| `app/renderer/ds.js` | Construtores dos componentes (`DS.*`). Só cria nós com `h()`/`textContent`; não chama o núcleo. |
-| `app/renderer/qualidade-v39.js` | `<dialog>` único dos detalhes (`#qualidade-dialog`), com foco, Escape e retorno de foco. O DS só o estende (tamanho e subtítulo). |
+| `dist/renderer/estilo.css`, `qc.css` | Tokens de cor e tema (escuro, claro, sistema), cor de destaque, tipografia, menu lateral, fundo vivo. **Fonte das cores.** |
+| `dist/renderer/ds.css` | Escala de espaço/raio, superfícies, componentes e utilitários (v40). Carregado por último. |
+| `dist/renderer/ds.js` | Construtores dos componentes (`DS.*`). Só cria nós com `h()`/`textContent`; não chama o núcleo. |
+| `dist/renderer/qualidade-v39.js` | `<dialog>` único dos detalhes (`#qualidade-dialog`), com foco, Escape e retorno de foco. O DS só o estende (tamanho e subtítulo). |
 
 ## 1. Fundamentos
 
@@ -68,7 +68,7 @@ ditos uma vez, perto da ação afetada.
 
 ## 3. Componentes (`frontend/design-system/ds.js` + `ds.css`)
 
-Estas são as fontes oficiais. `frontend:sync` gera os recursos em `app/renderer/`, preservando os caminhos do instalador. As abas oferecem foco único com Tab, setas com retorno nas extremidades e Home/End; os painéis dos modais têm vínculos ARIA estáveis e a montagem assíncrona conserva a seleção atual. O teste `desktop-design-system.test.mjs` verifica foco e respostas fora de ordem em Electron com conteúdo sintético.
+Estas são as fontes oficiais. `frontend:sync` gera os recursos em `dist/renderer/`, preservando os caminhos do instalador. As abas oferecem foco único com Tab, setas com retorno nas extremidades e Home/End; os painéis dos modais têm vínculos ARIA estáveis e a montagem assíncrona conserva a seleção atual. O teste `desktop-design-system.test.mjs` verifica foco e respostas fora de ordem em Electron com conteúdo sintético.
 
 | Componente | API | Notas |
 |---|---|---|

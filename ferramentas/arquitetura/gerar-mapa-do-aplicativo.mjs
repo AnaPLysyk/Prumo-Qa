@@ -1,7 +1,7 @@
 // Gera o mapa que a tela Administração › Documentação mostra: para cada tela, os arquivos da interface, os canais IPC,
 // o backend (api, regras, banco, integrações, tipos) e os testes que a exercitam. Lido do código desta versão no build,
-// sem o código-fonte (só caminhos, descrições, funções e ligações). Saída: app/documentacao/mapa.json (não versionado);
-// o código de cada arquivo listado vai para app/documentacao/codigo.json, lido um arquivo por pedido (canal administracao:codigo).
+// sem o código-fonte (só caminhos, descrições, funções e ligações). Saída: dist/documentacao/mapa.json (não versionado);
+// o código de cada arquivo listado vai para dist/documentacao/codigo.json, lido um arquivo por pedido (canal administracao:codigo).
 // Uso: node ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs [--check]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +11,7 @@ import { lerCopiaDeTrabalho, montarInstantaneo } from './gerar-arquitetura.mjs';
 import { telas as frasesDasTelas, papeis } from '../documentacao/gerar-leia-me-backend.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const destino = path.join(raiz, 'app', 'documentacao', 'mapa.json');
+const destino = path.join(raiz, 'dist', 'documentacao', 'mapa.json');
 const PAPEIS = ['api', 'regras', 'banco', 'integracoes', 'tipos'];
 
 export function gerarMapaDoAplicativo() {

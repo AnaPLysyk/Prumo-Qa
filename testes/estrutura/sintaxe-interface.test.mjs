@@ -1,5 +1,5 @@
 // Um parêntese a mais numa parte de tela derruba o bundle inteiro e a janela volta às telas antigas sem erro visível.
-// Aqui cada script carregado pela janela (app/renderer, gerado no build) precisa compilar.
+// Aqui cada script carregado pela janela (dist/renderer, gerado no build) precisa compilar.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const renderer = path.join(raiz, 'app', 'renderer');
 
-test('interface: todo script da janela (app/renderer/*.js) compila', () => {
+test('interface: todo script da janela (dist/renderer/*.js) compila', () => {
   const scripts = fs.readdirSync(renderer).filter((n) => n.endsWith('.js'));
   assert.ok(scripts.includes('interfaces-v36.js') && scripts.includes('ds.js'), 'os bundles foram gerados pelo build');
   const falhas = [];

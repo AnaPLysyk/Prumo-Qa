@@ -13,8 +13,8 @@ import { telas, papeis } from '../documentacao/gerar-leia-me-backend.mjs';
 const raizRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const pastasLidas = /^(frontend|backend|src|app|scripts|ferramentas|site|skills|testes)\//;
 const extensoes = /\.(ts|mjs|cjs|js|html|css|json|md)$/;
-// app/renderer/ e app/documentacao/ são gerados no build: a fonte da interface é frontend/.
-const ignorar = /^(app\/renderer\/|app\/documentacao\/|app\/ajuda\/|site\/public\/|.*\.min\.js$)/;
+// dist/renderer/ e dist/documentacao/ são gerados no build: a fonte da interface é frontend/.
+const ignorar = /^(dist\/|docs\/ajuda\/|site\/public\/|.*\.min\.js$)/;
 const git = (...args) => execFileSync('git', args, { cwd: raizRepo, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
 
 /** Primeira linha de explicação: /** ... *\/ (depois de shebang ou 'use strict') ou o título de um Markdown. */
@@ -65,7 +65,7 @@ function lerRevisao(ref) {
 
 export function lerCopiaDeTrabalho() {
   const arquivos = new Map();
-  for (const raiz of ['frontend', 'backend', 'src', 'app', 'scripts', 'ferramentas', 'site', 'skills', 'testes']) {
+  for (const raiz of ['frontend', 'backend', 'src', 'scripts', 'ferramentas', 'site', 'skills', 'testes']) {
     const dir = path.join(raizRepo, raiz); if (!fs.existsSync(dir)) continue;
     for (const rel of fs.readdirSync(dir, { recursive: true }).map(String)) {
       const nome = (raiz + '/' + rel).split(path.sep).join('/');
@@ -78,10 +78,10 @@ export function lerCopiaDeTrabalho() {
 
 /** Fluxos do usuário: botão da tela -> função da ponte (preload) -> canal IPC -> arquivo api/ -> funções que ele chama. */
 function fluxosDeUso(arquivos) {
-  const preload = arquivos.get('app/preload.cjs') ?? '';
+  const preload = arquivos.get('backend/aplicativo/preload.cjs') ?? '';
   const ponte = new Map();
   for (const m of preload.matchAll(/([A-Za-z_$][\w$]*)\s*:\s*\([^)]*\)\s*=>\s*chamar\('([a-z]+:[a-z]+)'/g)) ponte.set(m[2], m[1]);
-  const telasQueChamam = (fn) => [...arquivos].filter(([n, t]) => (n.startsWith('frontend/') || (n.startsWith('app/renderer/') && !n.startsWith('app/renderer/telas/'))) && n.endsWith('.js') && new RegExp(`\\b(?:api|prumo)\\.${fn}\\(`).test(t)).map(([n]) => n);
+  const telasQueChamam = (fn) => [...arquivos].filter(([n, t]) => (n.startsWith('frontend/') || (n.startsWith('dist/renderer/') && !n.startsWith('dist/renderer/telas/'))) && n.endsWith('.js') && new RegExp(`\\b(?:api|prumo)\\.${fn}\\(`).test(t)).map(([n]) => n);
   const fluxos = [];
   const mapa = arquivos.get('backend/aplicativo/api/arquivosDosCanais.ts');
   if (mapa) {
@@ -101,7 +101,7 @@ export function montarInstantaneo(arquivos) {
   const existe = (c) => arquivos.has(c);
   const recursos = JSON.parse(arquivos.get('frontend/recursos.json') ?? '{"recursos":[]}').recursos;
   const fontesRuntime = new Map(recursos.map(r => [r.destino, r.fonte]));
-  const fonteOficial = caminho => fontesRuntime.get(caminho) ?? (caminho.startsWith('app/renderer/telas/') && arquivos.has(caminho.replace('app/renderer/telas/', 'frontend/')) ? caminho.replace('app/renderer/telas/', 'frontend/') : null);
+  const fonteOficial = caminho => fontesRuntime.get(caminho) ?? (caminho.startsWith('dist/renderer/telas/') && arquivos.has(caminho.replace('dist/renderer/telas/', 'frontend/')) ? caminho.replace('dist/renderer/telas/', 'frontend/') : null);
   const lista = [...arquivos].sort((a, b) => a[0].localeCompare(b[0])).map(([caminho, texto]) => ({
     caminho, fonteOficial: fonteOficial(caminho), descricao: fonteOficial(caminho) ? 'Cópia gerada da interface; para editar, abra ' + fonteOficial(caminho) : descricaoDoArquivo(texto, caminho), linhas: texto.split(/\r?\n/).length,
     sha256: createHash('sha256').update(texto).digest('hex'), funcoes: /\.(ts|mjs|cjs|js)$/.test(caminho) ? funcoesDoArquivo(texto) : [],
@@ -113,13 +113,13 @@ export function montarInstantaneo(arquivos) {
   const pastas = {};
   for (const [tela, frase] of Object.entries(telas)) { pastas['backend/' + tela] = frase; pastas['frontend/' + tela] = frase; }
   for (const a of lista) { const m = /^backend\/[^/]+\/([^/]+)\/[^/]+$/.exec(a.caminho); if (m && papeis[m[1]]) pastas[path.posix.dirname(a.caminho)] = papeis[m[1]]; }
-  Object.assign(pastas, { frontend: 'O que a pessoa vê: telas e funções da interface, a fonte oficial para o Electron.', backend: 'Tudo o que roda fora da tela: canais da janela, regras, dados deste computador e integrações.', src: 'Código do backend antes da organização por tela.', app: 'A janela: ponte segura (preload), telas, estilos e ajuda.', 'app/renderer': 'Gerado no build a partir de frontend/; não editar.', scripts: 'Ferramentas de build, geração de documentos e release (até a 2.10.2; depois em ferramentas/).', ferramentas: 'Ferramentas por finalidade: arquitetura, documentação, frontend, empacotamento, release, migração, site, qa, skills e testes.', testes: 'Testes automáticos (unidade, integração, janela real e MCP).' });
+  Object.assign(pastas, { frontend: 'O que a pessoa vê: telas e funções da interface, a fonte oficial para o Electron.', backend: 'Tudo o que roda fora da tela: canais da janela, regras, dados deste computador e integrações.', src: 'Código do backend antes da organização por tela.', app: 'A janela: ponte segura (preload), telas, estilos e ajuda.', 'dist/renderer': 'Gerado no build a partir de frontend/; não editar.', scripts: 'Ferramentas de build, geração de documentos e release (até a 2.10.2; depois em ferramentas/).', ferramentas: 'Ferramentas por finalidade: arquitetura, documentação, frontend, empacotamento, release, migração, site, qa, skills e testes.', testes: 'Testes automáticos (unidade, integração, janela real e MCP).' });
   return { arquivos: lista, pastas, fluxos: fluxosDeUso(arquivos) };
 }
 
 export function gerarArquitetura({ atual = 'origin/main' } = {}) {
   const head = git('rev-parse', '--short', 'HEAD').trim(); const ramo = git('rev-parse', '--abbrev-ref', 'HEAD').trim();
-  const local = git('status', '--porcelain', '--', 'frontend', 'backend', 'src', 'app', 'scripts', 'ferramentas', 'site', 'skills', 'testes').trim();
+  const local = git('status', '--porcelain', '--', 'frontend', 'backend', 'src', 'scripts', 'ferramentas', 'site', 'skills', 'testes').trim();
   const refAtual = git('rev-parse', '--short', atual).trim(); const dataAtual = git('log', '-1', '--format=%cI', atual).trim();
   return {
     geradoEm: new Date().toISOString(),

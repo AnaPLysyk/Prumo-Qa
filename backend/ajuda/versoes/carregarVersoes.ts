@@ -1,4 +1,4 @@
-/** Lê e valida o histórico de versões (app/versoes.json). */
+/** Lê e valida o histórico de versões (docs/catalogo/versoes.json). */
 import fs from 'node:fs';
 import { Versao } from '../tipos/versoes.js';
 import { validarVersoes } from './validarVersoes.js';

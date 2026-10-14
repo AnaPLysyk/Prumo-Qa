@@ -4,7 +4,7 @@
 
 **Arquivos desta pasta:** mostrarProjetos.js, selecionarProjeto.js e modais/criarEditarProjeto/abrirFormularioProjeto.js.
 
-**Como conversa com o sistema:** api.espacos, api.espacoCriar, api.espacoEditar e api.espacoPasta → `app/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
+**Como conversa com o sistema:** api.espacos, api.espacoCriar, api.espacoEditar e api.espacoPasta → `backend/aplicativo/preload.cjs` → `src/contratos.ts` → `src/desktop/main.ts`.
 
 **Quem executa a lógica:** `src/modulos/projetos/espacos/`.
 

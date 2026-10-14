@@ -32,7 +32,7 @@ frontend/projetos/
   modais/criarEditarProjeto/
     abrirFormularioProjeto.js            mostra o formulário
                   ↓
-app/preload.cjs                          oferece a chamada permitida
+backend/aplicativo/preload.cjs                          oferece a chamada permitida
                   ↓ IPC prumo:espacos:criar
 backend/aplicativo/api/                  identifica e valida o pedido
                   ↓
@@ -48,11 +48,11 @@ backend/projetos/banco/gravarEspacos.ts  grava os dados locais
 ## Onde editar sem criar duas versões da mesma tela
 
 - `frontend/<tela>/` é a **fonte oficial da interface**.
-- `frontend/design-system/ds.js` e `ds.css` são as fontes oficiais dos componentes compartilhados; o gerador preserva os caminhos `app/renderer/ds.js` e `ds.css`.
+- `frontend/design-system/ds.js` e `ds.css` são as fontes oficiais dos componentes compartilhados; o gerador preserva os caminhos `dist/renderer/ds.js` e `ds.css`.
 - `frontend/recursos.json` mapeia os 20 recursos transversais da interface, incluindo entrada, traduções, identidade e painel de atividades, para os caminhos distribuídos existentes. Markdown de desenvolvimento não é copiado para o renderer.
 - `backend/<tela>/` é a **fonte oficial das funções executadas fora da interface**.
-- `app/renderer/` é **gerado no build** a partir de `frontend/` (fonte única) e não é versionado; só `app/renderer/vendor/` (biblioteca de terceiros) fica no git. Não editar `app/renderer/`.
-- `app/renderer/fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-v36.css` são bundles gerados das partes-fonte organizadas no `frontend/`. Ainda existem componentes antigos não migrados na raiz `app/renderer/`.
+- `dist/renderer/` é **gerado no build** a partir de `frontend/` (fonte única) e não é versionado; só `dist/renderer/vendor/` (biblioteca de terceiros) fica no git. Não editar `dist/renderer/`.
+- `dist/renderer/fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-v36.css` são bundles gerados das partes-fonte organizadas no `frontend/`. Ainda existem componentes antigos não migrados na raiz `dist/renderer/`.
 
 Para validar no Windows:
 
@@ -125,4 +125,4 @@ Os testes de regressão usam pastas temporárias e dados fictícios. `testes/seg
 
 ## Documentação viva dentro do aplicativo
 
-O build gera `app/documentacao/mapa.json` (`ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs`, não versionado) a partir do código desta versão: para cada pasta de `frontend/` e `backend/`, os arquivos com a descrição da primeira linha e as funções, os canais IPC (ponte, arquivo `api/`, funções chamadas) e os testes que importam arquivos daquela tela. A tela **Administração › Documentação viva** (`frontend/administracao/`) mostra esse mapa pelo canal `administracao:mapa` (`backend/administracao/`). O mapa não leva código-fonte nem dados da pessoa. A visão Atual (main) × Proposta (cópia de trabalho) continua disponível para desenvolvimento com `npm run arquitetura`.
+O build gera `dist/documentacao/mapa.json` (`ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs`, não versionado) a partir do código desta versão: para cada pasta de `frontend/` e `backend/`, os arquivos com a descrição da primeira linha e as funções, os canais IPC (ponte, arquivo `api/`, funções chamadas) e os testes que importam arquivos daquela tela. A tela **Administração › Documentação viva** (`frontend/administracao/`) mostra esse mapa pelo canal `administracao:mapa` (`backend/administracao/`). O mapa não leva código-fonte nem dados da pessoa. A visão Atual (main) × Proposta (cópia de trabalho) continua disponível para desenvolvimento com `npm run arquitetura`.

@@ -4,13 +4,13 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';
 
-export const rendererDir = path.join(raizDoAplicativo, 'app', 'renderer');
+export const rendererDir = path.join(raizDoAplicativo, 'dist', 'renderer');
 
 export const origemPermitida = pathToFileURL(path.join(rendererDir, 'index.html')).href;
 
 export const versao = app.getVersion();
 
-export const arquivoVersoes = path.join(raizDoAplicativo, 'app', 'versoes.json');
+export const arquivoVersoes = path.join(raizDoAplicativo, 'docs', 'catalogo', 'versoes.json');
 
 export type Resposta = { ok: true; data: unknown } | { ok: false; error: string };
 

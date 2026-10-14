@@ -5,4 +5,4 @@ import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { versao } from '../../aplicativo/tipos/aplicativo.js';
 import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';
 
-export const ajudaDocumentos: TratadorDoCanal<'ajuda:documentos'> = () => lerDocumentosDaAjuda(path.join(raizDoAplicativo, 'app', 'ajuda'), versao);
+export const ajudaDocumentos: TratadorDoCanal<'ajuda:documentos'> = () => lerDocumentosDaAjuda(path.join(raizDoAplicativo, 'docs', 'ajuda'), versao);

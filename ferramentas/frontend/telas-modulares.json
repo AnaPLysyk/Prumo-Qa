@@ -2,54 +2,54 @@
   "schemaVersion": 1,
   "bundles": [
     {
-      "destino": "app/renderer/fluxos-v40.js",
+      "destino": "dist/renderer/fluxos-v40.js",
       "origens": [
-        "frontend/compartilhado/fluxos-v40-trecho-01.parte.js",
-        "frontend/tickets/fluxos-v40-trecho-02.parte.js",
-        "frontend/testes/fluxos-v40-trecho-03.parte.js",
-        "frontend/runs/fluxos-v40-trecho-04.parte.js",
-        "frontend/rastreabilidade/fluxos-v40-trecho-05.parte.js",
-        "frontend/compartilhado/fluxos-v40-trecho-06.parte.js"
+        "frontend/compartilhado/fluxos-abertura.parte.js",
+        "frontend/tickets/fluxos-tickets.parte.js",
+        "frontend/testes/fluxos-casos-qase.parte.js",
+        "frontend/runs/fluxos-planos-e-runs.parte.js",
+        "frontend/rastreabilidade/fluxos-rastreabilidade.parte.js",
+        "frontend/compartilhado/fluxos-fechamento.parte.js"
       ]
     },
     {
-      "destino": "app/renderer/testes-v40.js",
+      "destino": "dist/renderer/testes-v40.js",
       "origens": [
-        "frontend/testes/testes-v40-trecho-01.parte.js"
+        "frontend/testes/visao-geral-dos-testes.parte.js"
       ]
     },
     {
-      "destino": "app/renderer/interfaces-v36.js",
+      "destino": "dist/renderer/interfaces-v36.js",
       "origens": [
-        "frontend/compartilhado/interfaces-v36-trecho-01.parte.js",
-        "frontend/agentes/interfaces-v36-trecho-02.parte.js",
-        "frontend/compartilhado/interfaces-v36-trecho-03.parte.js",
-        "frontend/agentes/interfaces-v36-trecho-04.parte.js",
-        "frontend/compartilhado/interfaces-v36-trecho-05.parte.js",
-        "frontend/agentes/interfaces-v36-trecho-06.parte.js",
-        "frontend/inicio/interfaces-v36-trecho-07.parte.js",
-        "frontend/logs/interfaces-v36-trecho-08.parte.js",
-        "frontend/historico/interfaces-v36-trecho-09.parte.js",
-        "frontend/metricas/interfaces-v36-trecho-10.parte.js",
-        "frontend/agentes/interfaces-v36-trecho-11.parte.js",
-        "frontend/configuracoes/interfaces-v36-trecho-12.parte.js",
-        "frontend/compartilhado/interfaces-v36-trecho-13.parte.js"
+        "frontend/compartilhado/interfaces-abertura.parte.js",
+        "frontend/agentes/retratos-dos-agentes.parte.js",
+        "frontend/compartilhado/exportar-e-icones.parte.js",
+        "frontend/agentes/conversa-do-orchestrator.parte.js",
+        "frontend/compartilhado/abrir-tela-pelo-orchestrator.parte.js",
+        "frontend/agentes/orchestrator-flutuante.parte.js",
+        "frontend/inicio/tela-inicio-v36.parte.js",
+        "frontend/logs/tela-logs.parte.js",
+        "frontend/historico/tela-historico.parte.js",
+        "frontend/metricas/tela-metricas.parte.js",
+        "frontend/agentes/tela-agentes.parte.js",
+        "frontend/configuracoes/ajustes-do-assistente.parte.js",
+        "frontend/compartilhado/interfaces-fechamento.parte.js"
       ]
     },
     {
-      "destino": "app/renderer/interfaces-v36.css",
+      "destino": "dist/renderer/interfaces-v36.css",
       "origens": [
-        "frontend/compartilhado/interfaces-v36-trecho-01.parte.css",
-        "frontend/agentes/interfaces-v36-trecho-02.parte.css",
-        "frontend/logs/interfaces-v36-trecho-03.parte.css",
-        "frontend/historico/interfaces-v36-trecho-04.parte.css",
-        "frontend/metricas/interfaces-v36-trecho-05.parte.css",
-        "frontend/agentes/interfaces-v36-trecho-06.parte.css",
-        "frontend/compartilhado/interfaces-v36-trecho-07.parte.css",
-        "frontend/agentes/interfaces-v36-trecho-08.parte.css",
-        "frontend/configuracoes/interfaces-v36-trecho-09.parte.css",
-        "frontend/agentes/interfaces-v36-trecho-10.parte.css",
-        "frontend/configuracoes/interfaces-v36-trecho-11.parte.css"
+        "frontend/compartilhado/interfaces-base.parte.css",
+        "frontend/agentes/conversa-do-orchestrator.parte.css",
+        "frontend/logs/tela-logs.parte.css",
+        "frontend/historico/tela-historico.parte.css",
+        "frontend/metricas/tela-metricas.parte.css",
+        "frontend/agentes/tela-agentes.parte.css",
+        "frontend/compartilhado/reflow-zoom-e-movimento.parte.css",
+        "frontend/agentes/espaco-profundo.parte.css",
+        "frontend/configuracoes/menu-lateral-ceu.parte.css",
+        "frontend/agentes/seletor-de-agente.parte.css",
+        "frontend/configuracoes/ajustes-em-secoes.parte.css"
       ]
     }
   ]

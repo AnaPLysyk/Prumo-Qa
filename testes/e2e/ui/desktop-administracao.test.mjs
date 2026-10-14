@@ -22,8 +22,8 @@ test('Administração › Documentação viva: arquivo escolhido mostra o códig
   const noCaminho = await a.page.locator('.adm-bolinha').count();
   await a.page.click('#adm-fluxo-modo');
   assert.ok(await a.page.locator('.adm-bolinha').count() > noCaminho, 'Tela inteira mostra mais do que o caminho do arquivo');
-  await a.page.click('.adm-bolinha[data-no="frontend/agentes/interfaces-v36-trecho-11.parte.js"]');
-  await a.page.waitForFunction(() => document.querySelector('.adm-arquivo-no.ativo')?.dataset.caminho === 'frontend/agentes/interfaces-v36-trecho-11.parte.js');
+  await a.page.click('.adm-bolinha[data-no="frontend/agentes/tela-agentes.parte.js"]');
+  await a.page.waitForFunction(() => document.querySelector('.adm-arquivo-no.ativo')?.dataset.caminho === 'frontend/agentes/tela-agentes.parte.js');
   fs.mkdirSync(path.join('tmp', 'evidencias', 'telas'), { recursive: true });
   await a.page.screenshot({ path: path.join('tmp', 'evidencias', 'telas', 'administracao-documentacao.png') });
   await a.page.getByRole('tab', { name: 'Sistema' }).click();

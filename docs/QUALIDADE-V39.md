@@ -34,11 +34,11 @@ usadas para escolher a automação de um caso no vínculo atual.
 
 ## Arquivos desta implementação
 
-- `app/renderer/qualidade-v39.js/.css`: modal nativo, retorno de foco, preservação
+- `dist/renderer/qualidade-v39.js/.css`: modal nativo, retorno de foco, preservação
   dos nós/listeners, apresentação contextual de evidências e estilos por tela.
-- `app/renderer/qualidade-fontes-v39.js` (removido na v40, substituído por `fluxos-v40.js`/`operacao-v40.js`; ver INTERFACES-V40.md): defeitos Qase, navegação de relações e
+- `dist/renderer/qualidade-fontes-v39.js` (removido na v40, substituído por `fluxos-v40.js`/`operacao-v40.js`; ver INTERFACES-V40.md): defeitos Qase, navegação de relações e
   exportação de evidência consultada.
-- `app/renderer/index.html`, `plataforma.js`, `integracoes.js`, `agenda.js`:
+- `dist/renderer/index.html`, `plataforma.js`, `integracoes.js`, `agenda.js`:
   carregamento e adaptação dos fluxos existentes, filtros e resumo de execução.
 - `src/adaptadoresServicos.ts`: leitura fechada de defeitos Qase.
 - `src/operacoesExternas.ts`: conferência do escopo antes de reutilização.

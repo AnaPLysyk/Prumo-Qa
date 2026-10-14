@@ -12,7 +12,7 @@ import { notasDaVersao } from '../../dist/ajuda/versoes/notasDaVersao.js';
 import { validarVersoes } from '../../dist/ajuda/versoes/validarVersoes.js';
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-const bruto = () => JSON.parse(fs.readFileSync('app/versoes.json', 'utf8'));
+const bruto = () => JSON.parse(fs.readFileSync('docs/catalogo/versoes.json', 'utf8'));
 
 test('comparação semântica usa números, não texto', () => {
   assert.ok(compararVersoes('2.10.0', '2.9.0') > 0);
@@ -25,7 +25,7 @@ test('comparação semântica usa números, não texto', () => {
 });
 
 test('fonte de versões é válida, ordenada e coerente com package.json, tag e instalador', () => {
-  const versoes = carregarVersoes('app/versoes.json');
+  const versoes = carregarVersoes('docs/catalogo/versoes.json');
   assert.deepEqual(versoes.map((v) => v.version).slice(-4), ['2.3.0', '2.2.0', '2.1.0', '2.0.0'], 'as versões históricas permanecem');
   conferirInstalada(versoes, pkg.version);
   assert.equal(versoes[0].version, pkg.version, 'a versão mais nova do histórico é a do package.json');
@@ -34,7 +34,7 @@ test('fonte de versões é válida, ordenada e coerente com package.json, tag e 
 });
 
 test('cada versão explica funcionalidades, diferencial, segurança, compatibilidade, limitações e migração', () => {
-  for (const v of carregarVersoes('app/versoes.json')) {
+  for (const v of carregarVersoes('docs/catalogo/versoes.json')) {
     assert.ok(v.objective.length > 30 && v.differential.length > 20 && v.migration.length > 0, v.version);
     assert.ok(v.features.length > 0 && v.limitations.length > 0 && v.compatibility.length > 0 && v.security.length > 0, v.version);
   }
@@ -42,7 +42,7 @@ test('cada versão explica funcionalidades, diferencial, segurança, compatibili
 
 test('histórico confere com o Git: tag e release só existem para versões marcadas como publicadas', () => {
   const tags = execFileSync('git', ['tag'], { encoding: 'utf8' }).split(/\s+/).filter(Boolean);
-  for (const v of carregarVersoes('app/versoes.json')) {
+  for (const v of carregarVersoes('docs/catalogo/versoes.json')) {
     if (v.status === 'publicada' && process.env.CI !== 'true' && tags.length) assert.ok(tags.includes('v' + v.version), `tag v${v.version} ausente`);
     // Uma versão planejada só pode ter tag enquanto a própria release está sendo construída (a tag aponta para o HEAD);
     // depois de publicada, a fonte passa a "publicada". Tag antiga apontando para outro commit com a versão ainda planejada é inconsistência.
@@ -54,7 +54,7 @@ test('histórico confere com o Git: tag e release só existem para versões marc
 });
 
 test('2.0 a 2.2 não inventam datas nem releases; 2.3 não é publicada sem release real', () => {
-  const v = Object.fromEntries(carregarVersoes('app/versoes.json').map((x) => [x.version, x]));
+  const v = Object.fromEntries(carregarVersoes('docs/catalogo/versoes.json').map((x) => [x.version, x]));
   assert.equal(v['2.0.0'].releaseUrl, null); assert.equal(v['2.1.0'].releaseUrl, null);
   assert.equal(v['2.2.0'].status, 'publicada'); assert.equal(v['2.2.0'].date, '2026-10-10');
   if (v['2.3.0'].status === 'planejada') assert.equal(v['2.3.0'].date, null);
@@ -73,19 +73,19 @@ test('validação rejeita inconsistências', () => {
   assert.throws(faz((b) => { b.versions[0].extra = 1; }));
   assert.throws(faz((b) => { b.versions[0].version = '2.3'; }));
   assert.throws(faz((b) => { b.schemaVersion = 2; }));
-  assert.throws(() => conferirInstalada(carregarVersoes('app/versoes.json'), '9.9.9'), /VERSIONS_MISSING/);
+  assert.throws(() => conferirInstalada(carregarVersoes('docs/catalogo/versoes.json'), '9.9.9'), /VERSIONS_MISSING/);
 });
 
 test('versão em execução vira "instalada"; as demais mantêm o estado da fonte', () => {
-  const r = apresentarVersoes(carregarVersoes('app/versoes.json'), '2.2.0');
+  const r = apresentarVersoes(carregarVersoes('docs/catalogo/versoes.json'), '2.2.0');
   assert.equal(r.find((v) => v.version === '2.2.0').state, 'instalada');
   assert.equal(r.find((v) => v.version === '2.3.0').state, 'publicada');
-  assert.equal(apresentarVersoes(carregarVersoes('app/versoes.json'), '2.3.0').find((v) => v.version === '2.3.0').state, 'instalada');
+  assert.equal(apresentarVersoes(carregarVersoes('docs/catalogo/versoes.json'), '2.3.0').find((v) => v.version === '2.3.0').state, 'instalada');
   assert.equal(r.find((v) => v.version === '2.1.0').state, 'repositorio');
 });
 
 test('notas de release saem da mesma fonte, sem copiar texto à mão', () => {
-  const v = carregarVersoes('app/versoes.json')[0];
+  const v = carregarVersoes('docs/catalogo/versoes.json')[0];
   const notas = notasDaVersao(v);
   assert.match(notas, new RegExp(`## Prumo QA ${v.version.replaceAll('.', '\\.')}`));
   for (const f of v.features.slice(0, 2)) assert.ok(notas.includes(f));
@@ -109,7 +109,7 @@ test('notas de release só afirmam "assinado" quando o pipeline confirmou (PRUMO
 test('catálogo: toda versão com tag publicada no Git está marcada como publicada, com o link oficial (exceto a versão em preparação)', async () => {
   const { execFileSync } = await import('node:child_process'); const fs = await import('node:fs');
   let tags = []; try { tags = execFileSync('git', ['tag', '--list', 'v[0-9]*.[0-9]*.[0-9]*'], { encoding: 'utf8' }).split(/\r?\n/).filter(Boolean); } catch { /* sem Git: nada a conferir */ }
-  const pacote = JSON.parse(fs.readFileSync('package.json', 'utf8')).version; const catalogo = JSON.parse(fs.readFileSync('app/versoes.json', 'utf8')).versions;
+  const pacote = JSON.parse(fs.readFileSync('package.json', 'utf8')).version; const catalogo = JSON.parse(fs.readFileSync('docs/catalogo/versoes.json', 'utf8')).versions;
   for (const tag of tags) {
     const versao = tag.slice(1); if (versao === pacote) continue; const v = catalogo.find((x) => x.version === versao); if (!v) continue;
     assert.equal(v.status, 'publicada', `${versao} tem tag ${tag} e não pode ficar como "${v.status}": o site e o aplicativo anunciariam a versão errada`);

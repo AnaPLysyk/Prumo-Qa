@@ -6,4 +6,4 @@
 
 **Atenção:** Outras implementações aprovadas continuam em testes-v40.js e fluxos-v40.js; estas pastas ainda não são exclusivas.
 
-**Como funciona:** a interface chama operações permitidas de `app/preload.cjs`; `src/contratos.ts` valida entradas e `src/desktop/main.ts` encaminha ao backend. Ainda são canais IPC, não endpoints HTTP.
+**Como funciona:** a interface chama operações permitidas de `backend/aplicativo/preload.cjs`; `src/contratos.ts` valida entradas e `src/desktop/main.ts` encaminha ao backend. Ainda são canais IPC, não endpoints HTTP.

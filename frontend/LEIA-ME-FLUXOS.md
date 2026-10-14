@@ -1,6 +1,6 @@
 # Fluxos de Tickets, Testes, Runs e Rastreabilidade
 
-O arquivo `app/renderer/fluxos-v40.js` **continua sendo o script carregado no Electron** para não quebrar o estado compartilhado, os canais IPC e o visual.
+O arquivo `dist/renderer/fluxos-v40.js` **continua sendo o script carregado no Electron** para não quebrar o estado compartilhado, os canais IPC e o visual.
 
 Agora ele é gerado a partir de `35 partes` distribuídas entre `telas/tickets/fluxos-fonte/`, `telas/testes/fluxos-fonte/`, `telas/runs/fluxos-fonte/`, `telas/rastreabilidade/fluxos-fonte/` e `telas/compartilhado/fluxos-fonte/`.
 

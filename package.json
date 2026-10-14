@@ -1,6 +1,6 @@
 {
   "name": "prumo-qa",
-  "version": "2.11.0",
+  "version": "2.12.0",
   "description": "Engenharia de qualidade local: contexto, contratos, MCP, evidências e aplicativo desktop Windows",
   "private": true,
   "license": "UNLICENSED",
@@ -15,7 +15,7 @@
     "dist",
     "skills",
     "docs",
-    "app",
+    "backend/aplicativo/preload.cjs",
     "assets",
     "ferramentas/empacotamento/aprovar.cs",
     "README.md"

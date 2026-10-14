@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const origem = 'frontend';
-const copia = 'app/renderer/telas';
+const copia = 'dist/renderer/telas';
 const recursos = JSON.parse(fs.readFileSync('frontend/recursos.json', 'utf8')).recursos;
 const mapeadas = new Set(recursos.map(r => r.fonte.slice('frontend/'.length)));
 const lista = (base) => {
@@ -34,8 +34,8 @@ test('frontend: recursos têm fonte única e preservam todos os caminhos distrib
   }
   const bundles = JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json', 'utf8')).bundles.map(b => path.basename(b.destino));
   const excluidos = new Set([...bundles, 'agenda.js', 'apoio-v40.js', 'integracoes.js', 'plataforma.js', 'status.css']);
-  const runtime = fs.readdirSync('app/renderer').filter(arq => /\.(js|css|html)$/.test(arq) && !excluidos.has(arq)).sort();
-  assert.deepEqual(recursos.map(r => path.basename(r.destino)).sort(), runtime, 'Todo recurso não gerado da raiz deve ter fonte oficial');
+  const runtime = fs.readdirSync('dist/renderer').filter(arq => /\.(js|css|html)$/.test(arq) && !excluidos.has(arq)).sort();
+  assert.deepEqual(recursos.filter(r => path.dirname(r.destino) === 'dist/renderer').map(r => path.basename(r.destino)).sort(), runtime, 'Todo recurso não gerado da raiz deve ter fonte oficial');
 });
 test('frontend: módulos de telas reconhecíveis pelo nome e backend correspondente', () => {
   for (const mod of ['inicio','projetos','tickets','testes','agendamentos','execucoes','rastreabilidade','agentes','conexoes','metricas','historico','logs','suporte','ajuda','configuracoes']) {

@@ -7,16 +7,16 @@ Toda versão nova segue os mesmos passos. Do passo 1 ao 4 o trabalho é no repos
 - `package.json` e `package-lock.json` (dois lugares no lock).
 - `README.md`: título e linha "Versão atual".
 
-## 2. Catálogo de versões (`app/versoes.json`)
+## 2. Catálogo de versões (`docs/catalogo/versoes.json`)
 
 Entrada nova no topo com `status: "repositorio"`, `date: null`, `releaseUrl: null` e sem `installer`. Descreva só o que existe no código e nos documentos; limitações reais entram em `limitations`. As notas da release, a tela Ajuda › Versões e o site saem desta entrada.
 
 ## 3. Ajuda e site
 
-- Páginas de ajuda em `app/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `backend/projetos/tipos/painel.ts` (`documentosAjuda`) e no índice da fonte `frontend/ajuda/mostrarAjuda.js`; sincronizar a cópia Electron.
+- Páginas de ajuda em `docs/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `backend/projetos/tipos/painel.ts` (`documentosAjuda`) e no índice da fonte `frontend/ajuda/mostrarAjuda.js`; sincronizar a cópia Electron.
 - Textos novos da interface com tradução em `frontend/compartilhado/runtime/i18n-en-*.js`; sincronizar as cópias distribuídas com `npm run frontend:sync`.
 - Capturas do site: `node ferramentas/site/capturar-site.mjs` (aplicativo real, dados sintéticos). Textos do site: `site/gerar.mjs`.
-- `npm run site` e conferir `site/public` (escuro, claro e celular). O site e a ajuda do aplicativo leem os mesmos arquivos de `app/ajuda`.
+- `npm run site` e conferir `site/public` (escuro, claro e celular). O site e a ajuda do aplicativo leem os mesmos arquivos de `docs/ajuda`.
 
 ## 4. Verificação e main
 

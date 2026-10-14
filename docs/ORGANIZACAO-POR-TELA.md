@@ -1,6 +1,6 @@
 # Organização didática por tela — migração em andamento
 
-> **Situação:** esta branch já contém `backend/<tela>/` e `frontend/<tela>/`. O Electron carrega `app/renderer/`, gerado no build a partir de `frontend/` e não versionado. Consulte [o guia atual](ARQUITETURA-MODULAR-ATUAL.md) antes das notas históricas abaixo. A `main` não mudou.
+> **Situação:** esta branch já contém `backend/<tela>/` e `frontend/<tela>/`. O Electron carrega `dist/renderer/`, gerado no build a partir de `frontend/` e não versionado. Consulte [o guia atual](ARQUITETURA-MODULAR-ATUAL.md) antes das notas históricas abaixo. A `main` não mudou.
 
 ## Objetivo
 
@@ -87,7 +87,7 @@ Exceção registrada: `backend/aplicativo/api/catalogoDeContratos.ts` continua u
 
 ## Segunda etapa: arquivos existentes na branch, separados por tela
 
-Agora os scripts de interface estão dentro de `frontend/`, carregados explicitamente por `app/renderer/index.html`. Projetos tem seu formulário em `telas/projetos/modais/criarEditarProjeto/`. Suporte e Ajuda já possuem arquivos separados; Contextos é um modal em Agentes. Os scripts genéricos `plataforma.js` e `apoio-v40.js` foram deixados apenas como marcadores de migração, **não executados** na página.
+Agora os scripts de interface estão dentro de `frontend/`, carregados explicitamente por `dist/renderer/index.html`. Projetos tem seu formulário em `telas/projetos/modais/criarEditarProjeto/`. Suporte e Ajuda já possuem arquivos separados; Contextos é um modal em Agentes. Os scripts genéricos `plataforma.js` e `apoio-v40.js` foram deixados apenas como marcadores de migração, **não executados** na página.
 
 
 **Leia `docs/GUIA-CODIGO-POR-TELA.md`** para acompanhar a lógica da tela Projetos, incluindo os canais IPC, a regra e o armazenamento.
@@ -97,13 +97,13 @@ Há etapas posteriores obrigatórias: migrar arquivos grandes `fluxos-v40.js`, `
 
 ## Atualização: telas separadas nesta branch
 
-Também foram decompostos `app/renderer/agenda.js` (Início, Agendamentos, Execuções, controles da janela e worker) e `app/renderer/integracoes.js` (Tickets, Testes, Runs, Conexões, Automações, Agentes, Rastreabilidade e Métricas). `app/renderer/index.html` passou a listar os novos scripts por tela na ordem de execução original. Os dois arquivos antigos são apenas marcadores de transição. Documentação em `docs/GUIA-CODIGO-POR-TELA.md`.
+Também foram decompostos `dist/renderer/agenda.js` (Início, Agendamentos, Execuções, controles da janela e worker) e `dist/renderer/integracoes.js` (Tickets, Testes, Runs, Conexões, Automações, Agentes, Rastreabilidade e Métricas). `dist/renderer/index.html` passou a listar os novos scripts por tela na ordem de execução original. Os dois arquivos antigos são apenas marcadores de transição. Documentação em `docs/GUIA-CODIGO-POR-TELA.md`.
 
-**Atenção:** ainda há código de interface concentrado em `app/renderer/fluxos-v40.js`, `app/renderer/testes-v40.js`, `app/renderer/interfaces-v36.js` e outros. A interface modularizada ainda não é a arquitetura final `frontend/`.
+**Atenção:** ainda há código de interface concentrado em `dist/renderer/fluxos-v40.js`, `dist/renderer/testes-v40.js`, `dist/renderer/interfaces-v36.js` e outros. A interface modularizada ainda não é a arquitetura final `frontend/`.
 
 ## O que **não** foi migrado
 
-No frontend, os arquivos de `app/renderer/` fora das telas listadas continuam nos caminhos originais. O backend inteiro já está em `backend/`. Login, cadastro, permissões por usuário, API HTTPS e PostgreSQL pertencem à **proposta**, não são funcionalidades já implementadas. Não copiar o HTML da documentação viva como se fosse uma aplicação operacional.
+No frontend, os arquivos de `dist/renderer/` fora das telas listadas continuam nos caminhos originais. O backend inteiro já está em `backend/`. Login, cadastro, permissões por usuário, API HTTPS e PostgreSQL pertencem à **proposta**, não são funcionalidades já implementadas. Não copiar o HTML da documentação viva como se fosse uma aplicação operacional.
 
 ## Migração seguinte, módulo por módulo
 
@@ -125,4 +125,4 @@ Os arquivos `fluxos-v40.js`, `testes-v40.js`, `interfaces-v36.js` e `interfaces-
 
 **Total nesta etapa:** 35 partes de Fluxos, 17 de Testes v40, 77 do visual v36 JavaScript e 27 de estilos v36 CSS. As fontes não devem ser carregadas isoladamente porque mantêm relações de escopo e ordem de execução. O CSS preserva a ordem da cascata.
 
-**Realizado:** as cópias do Electron deixaram de ser versionadas; `app/renderer/` é gerado no build. **Ainda não realizado:** migração total dos scripts legados e adaptação completa do empacotamento; divisão restante do núcleo desktop; implementação das novas telas de autenticação e administração; PostgreSQL e API HTTPS. A Documentação Viva Proposta não equivale a código já implementado.
+**Realizado:** as cópias do Electron deixaram de ser versionadas; `dist/renderer/` é gerado no build. **Ainda não realizado:** migração total dos scripts legados e adaptação completa do empacotamento; divisão restante do núcleo desktop; implementação das novas telas de autenticação e administração; PostgreSQL e API HTTPS. A Documentação Viva Proposta não equivale a código já implementado.
