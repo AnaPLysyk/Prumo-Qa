@@ -33,7 +33,7 @@ body[data-tela=agentes] main#conteudo{--v36a-gutter:clamp(18px,2.6vw,42px);max-w
 .v36a-aba:hover{color:var(--texto)}
 .v36a-aba[aria-pressed=true]{color:var(--texto);font-weight:650;border-bottom-color:var(--acento)}
 .v36a-topo{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px 24px;margin:28px 0 22px}
-main .v36a-titulo{margin:0;font:700 26px/1.15 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;letter-spacing:-.02em;text-transform:none;color:var(--texto)}
+main .v36a-titulo{margin:0;font:700 26px/1.15 var(--fonte-ui);letter-spacing:-.02em;text-transform:none;color:var(--texto)}
 .v36a-conta{font-size:13px;font-weight:400;color:var(--suave);vertical-align:3px}
 .v36a-topo p{margin:7px 0 0;font-size:12.5px;color:var(--suave);max-width:60ch}
 .v36a-acoes{display:flex;align-items:center;gap:10px}
@@ -98,7 +98,7 @@ main .v36a-titulo{margin:0;font:700 26px/1.15 "Segoe UI Variable Display","Segoe
 :root .v36a-perfil .v36-portrait .v36-retrato-3d img,:root .v36a-cerebro .v36-portrait .v36-retrato-3d img{mix-blend-mode:var(--ds-mistura-retrato);-webkit-mask-image:linear-gradient(180deg,#000 72%,transparent 99%);mask-image:linear-gradient(180deg,#000 72%,transparent 99%)}
 .v36a-perfil-info{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding:0 24px 26px;text-align:center;background:linear-gradient(180deg,transparent,var(--fundo) 38%)}
 .v36a-olho{font-size:10px;font-weight:600;letter-spacing:.24em;color:color-mix(in srgb,var(--face-color,#7abaff) 75%,var(--texto))}
-main .v36a-perfil-info h2{margin:9px 0 4px;font:700 clamp(22px,2.4vw,32px)/1.12 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;letter-spacing:-.02em;text-transform:none;color:var(--texto)}
+main .v36a-perfil-info h2{margin:9px 0 4px;font:700 clamp(22px,2.4vw,32px)/1.12 var(--fonte-ui);letter-spacing:-.02em;text-transform:none;color:var(--texto)}
 .v36a-perfil-info p{margin:0 0 18px;max-width:none;font-size:12px;color:var(--suave)}
 .v36a-perfil-info p strong{font-weight:500}
 .v36a-cerebro-btn{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;border:1px solid color-mix(in srgb,var(--face-color) 65%,transparent);background:color-mix(in srgb,var(--fundo) 78%,transparent);color:var(--texto);cursor:pointer;animation:v36-brilho 2.8s ease-in-out infinite;transition:transform .2s,background .2s}
@@ -156,12 +156,12 @@ main .v36-brain-inspect h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;te
 .v36a-grafo-caixa{position:relative;z-index:1}
 .v36a-grafo{display:block;width:100%;height:auto;max-height:420px}
 .v36a-no rect{fill:rgba(10,20,42,.86);stroke:rgba(140,180,255,.35);stroke-width:1}
-.v36a-no-nome{fill:#dbe7fb;font:12px "Segoe UI",system-ui,sans-serif}
-.v36a-no-n{fill:#8fb4ff;font:700 12px "Segoe UI",system-ui,sans-serif}
+.v36a-no-nome{fill:#dbe7fb;font:12px var(--fonte-ui)}
+.v36a-no-n{fill:#8fb4ff;font:700 12px var(--fonte-ui)}
 .v36a-nucleo{fill:#0c1c3c;stroke:#6ea8ff;stroke-width:1.5}
 .v36a-nucleo-halo{fill:none;stroke:rgba(110,168,255,.35);stroke-dasharray:3 6;transform-box:fill-box;transform-origin:center;animation:v36-gira 22s linear infinite}
-.v36a-nucleo-nome{fill:#eef4ff;font:600 12.5px "Segoe UI",system-ui,sans-serif}
-.v36a-nucleo-n{fill:#8fb4ff;font:11px "Segoe UI",system-ui,sans-serif}
+.v36a-nucleo-nome{fill:#eef4ff;font:600 12.5px var(--fonte-ui)}
+.v36a-nucleo-n{fill:#8fb4ff;font:11px var(--fonte-ui)}
 .v36a-grafo-legenda{display:flex;justify-content:space-between;padding:0 26px 16px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7f9bc8}
 .v36a-subtitulo{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px;margin:26px 0 12px}
 .v36a-subtitulo span{font-size:13.5px;font-weight:650}

@@ -69,7 +69,7 @@ test('projetos com e sem manifesto: diagnóstico sem alterar a pasta e vínculo 
   const vazia = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo sem manifesto '));
   t.after(() => fs.rmSync(vazia, { recursive: true, force: true }));
   const { app, page } = await abrir(t, dados);
-  assert.match(await page.textContent('#conteudo'), /Nenhum projeto vinculado/);
+  assert.match(await page.textContent('#conteudo'), /Nenhuma pasta vinculada/);
   await ir(page, 'metricas'); assert.match(await page.textContent('#conteudo'), /Nenhum projeto selecionado/);
   await ir(page, 'projetos');
   // 2.10.2: sem manifesto, o Prumo propõe o contrato numa confirmação nativa; cancelar não grava nada na pasta.
@@ -78,7 +78,7 @@ test('projetos com e sem manifesto: diagnóstico sem alterar a pasta e vínculo 
   for (let i = 0; i < 50 && !(await app.evaluate(() => globalThis.__propostas)); i++) await page.waitForTimeout(100);
   assert.equal(await app.evaluate(() => globalThis.__propostas), 1, 'proposta de contrato mostrada');
   assert.deepEqual(fs.readdirSync(vazia), []);
-  assert.match(await page.textContent('#conteudo'), /Nenhum projeto vinculado/);
+  assert.match(await page.textContent('#conteudo'), /Nenhuma pasta vinculada/);
   // Manifesto inválido continua só com diagnóstico, sem alterar o arquivo.
   fs.writeFileSync(path.join(vazia, 'qa.project.json'), '{"schemaVersion":1}');
   await page.click('text=Vincular pasta…'); await page.waitForSelector('.nota');

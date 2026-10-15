@@ -18,6 +18,8 @@ Ferramentas de build (electron-builder, playwright-core, typescript) são depend
 
 Dois arquivos de terceiros são distribuídos como estão, com a licença junto: **Three.js 0.159.0** (MIT, `frontend/compartilhado/vendor/THREE-LICENSE.txt`) e **CodeMirror 5.65.20** (MIT, `frontend/compartilhado/vendor/CODEMIRROR-LICENSE.txt`), o editor da IDE de Testes, com os modos JavaScript/TypeScript, Python, Gherkin e YAML. Foram obtidos do pacote oficial `codemirror` no npm, sem alteração e sem acesso à rede em tempo de execução.
 
+As fontes **Inter** (`assets/fontes/INTER-LICENSE.txt`) e **JetBrains Mono** (`assets/fontes/JETBRAINS-MONO-LICENSE.txt`) são distribuídas sob a SIL Open Font License 1.1, no subconjunto latino, obtidas dos pacotes `@fontsource-variable/inter` e `@fontsource-variable/jetbrains-mono` sem alteração. A janela só carrega fontes do próprio aplicativo (`font-src 'self'`).
+
 Nenhum código de projetos terceiros foi copiado para o repositório. As referências conceituais ao QA Orchestrator anterior estão em `docs/ORIGEM.md`.
 
 ## Assinatura de código

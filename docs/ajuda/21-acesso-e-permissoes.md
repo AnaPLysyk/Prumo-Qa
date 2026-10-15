@@ -1,15 +1,12 @@
 # Acesso, usuários e permissões
 
-O Prumo **abre sempre na tela de entrada** e não deixa usar nada sem entrar. Cada pessoa tem a sua conta e o seu papel; quem administra o computador controla quem entra e o que cada um vê.
+O Prumo abre sempre na tela de entrada. Cada pessoa tem uma conta e um papel; quem administra o computador controla quem entra e o que cada um vê.
 
 ## Primeiro acesso
 
-Na primeira vez que o Prumo abre num computador, ainda não existe nenhuma conta. A tela pede para criar a conta de **Administrador**, que é sempre a primeira:
+Num computador sem contas, a entrada traz **Criar conta**, que cria a conta de **Administrador**, sempre a primeira. Informe nome, usuário (3 a 40 caracteres: minúsculas, números, ponto, hífen ou sublinhado) e senha (mínimo de 10 caracteres, com letras e números). Com o GitHub ou o Google já configurado, **Criar conta com o GitHub** (ou **com o Google**) faz o mesmo pela autorização do provedor.
 
-1. Informe nome, usuário (3 a 40 caracteres: letras minúsculas, números, ponto, hífen ou sublinhado) e uma senha com pelo menos 10 caracteres, misturando letras e números. Se o GitHub ou o Google já estiver configurado, **Criar conta com o GitHub** (ou **com o Google**) faz o mesmo pela autorização do provedor.
-2. Guarde o **código de recuperação** que aparece uma única vez, fora deste computador.
-
-Até criar essa conta, nenhuma tela abre e nenhum pedido é atendido. Depois dela, o Prumo sempre abre na entrada e pede login.
+Guarde o **código de recuperação**: ele aparece uma só vez, e deve ficar fora deste computador. Até a conta existir, nenhuma tela abre.
 
 ## Papéis e permissões
 
@@ -25,17 +22,16 @@ A conferência é feita no processo principal a cada pedido, não só na janela:
 - O último administrador não pode ser excluído nem rebaixado, e ninguém vira administrador pelo cadastro.
 - Cada pessoa pode trocar o próprio nome e a senha em **Minha conta**, no canto da janela.
 
-## Entrar e se cadastrar com o GitHub ou o Google
+## Entrar com o GitHub ou o Google
 
-Se a Administração configurou, a tela de entrada e a de **Criar conta** ganham **Entrar com o GitHub** e **Entrar com o Google**. Ao clicar, o Prumo abre o provedor no seu navegador; você autoriza lá e volta ao Prumo já autenticado, sem digitar código nem senha.
+Com o provedor configurado, a entrada e a criação de conta ganham **Entrar com o GitHub** e **Entrar com o Google**. O Prumo abre o navegador; você autoriza e volta já autenticado.
 
-- **Quem já tem conta ativa** entra direto. Com o GitHub, a conexão do GitHub também é criada sozinha (só leitura; a escrita continua desligada até você habilitar). O Google serve só para entrar: nenhuma conexão é criada.
-- **Quem ainda não tem conta** é cadastrado como **pendente**, com o papel de novos cadastros, e **nada fica habilitado** até a Administração aprovar. Depois de aprovada, é só entrar de novo pelo provedor.
-- **Primeiro acesso, sem nenhuma conta:** **Criar conta com o GitHub** (ou **com o Google**) cria a primeira conta, de Administrador, pela autorização do provedor. Isso exige o aplicativo do provedor já configurado neste computador.
-- A conta é reconhecida pelo número do provedor, nunca pelo nome ou e-mail. Contas criadas assim não têm senha do Prumo.
-- Cancelar, negar a autorização ou deixar passar 5 minutos não cria conta, sessão nem conexão.
+- Conta ativa: entra direto. Com o GitHub, a conexão do GitHub é criada junto (só leitura; a escrita segue desligada). O token tem, tecnicamente, permissão de escrita (escopo `repo`); o Prumo só a usa depois que você habilita a escrita e confirma. O Google só identifica e não cria conexão.
+- Pessoa nova: o cadastro fica **pendente**, com o papel de novos cadastros, e nada é habilitado até a Administração aprovar. Depois, é só entrar de novo.
+- A conta é reconhecida pelo número do provedor, não pelo nome nem pelo e-mail, e não tem senha do Prumo.
+- Cancelar, negar ou esperar 5 minutos não cria conta, sessão nem conexão.
 
-**Como configurar (Administração › Configurações gerais).** No GitHub, registre um OAuth App em github.com/settings/developers com a callback `http://127.0.0.1/callback`; no Google Cloud Console, crie uma credencial OAuth do tipo **Aplicativo para computador**. Cole o **Client ID** e o **Client Secret** na seção do provedor. O segredo fica no cofre do sistema e nunca volta para a tela. Sem essa configuração, o botão não aparece. O GitHub pede o acesso `read:user repo` (para listar repositórios privados) e o Google, `openid email profile`.
+Para configurar, em **Administração › Configurações gerais**: no GitHub, registre um OAuth App com a callback `http://127.0.0.1/callback`; no Google Cloud Console, crie uma credencial OAuth do tipo **Aplicativo para computador**. Cole o Client ID e o Client Secret na seção do provedor. O segredo fica no cofre do sistema e nunca volta para a tela. O GitHub pede `read:user repo` (para listar repositórios privados); o Google, `openid email profile`.
 
 ## O que o login não faz
 
@@ -43,7 +39,7 @@ O login controla o que cada pessoa vê e altera **no aplicativo**. O worker de a
 
 ## Agentes da plataforma
 
-Em **Administração › Agentes**, quem tem permissão liga ou desliga cada agente para todos os projetos, o uso de Claude Code ou Codex e a orquestração. Essas regras valem por cima das políticas de cada projeto (tela Agentes).
+Em **Administração › Agentes**, quem tem permissão liga ou desliga cada agente para todos os projetos, o uso de Claude Code ou Codex e a orquestração. Essas regras valem para todos os projetos: um projeto pode restringir mais, mas não liberar o que está desligado aqui.
 
 ## Meu perfil (Configurações)
 

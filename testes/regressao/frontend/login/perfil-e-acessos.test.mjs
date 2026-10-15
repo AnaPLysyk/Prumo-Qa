@@ -19,7 +19,7 @@ test('Minha conta: primeiro acesso sem nada liberado, como Administrador e como 
   await p.emulateMedia({ reducedMotion: 'reduce' });
 
   // 1. Primeiro acesso: o Prumo não abre sem conta; nada responde até criar o Administrador.
-  await p.waitForSelector('#entrada[open] #primeiro-nome');
+  await p.waitForSelector('#entrada[open] #entrada-login');
   assert.match(String((await p.evaluate(() => window.prumo.espacos())).error), /^LOGIN_SETUP_REQUIRED/);
   await capturar(p, 'perfil-primeiro-acesso');
 

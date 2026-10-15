@@ -29,7 +29,7 @@ test('GitHub conectado em Conexões lista os repositórios em Projetos, vincula 
   const e = (await a.page.evaluate(() => window.prumo.espacoCriar({ nome: 'Repos Lab', descricao: 'sintético' }))).data;
   await ir(a.page, 'projetos');
   await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: /Escolher repositório do GitHub/ }).click();
-  await a.page.getByText('Nenhuma conexão GitHub ativa').waitFor();
+  await a.page.getByText('Nenhuma conexão do GitHub ativa').waitFor();
   await conectar(a.page, 'github', 'GitHub simulado');
   await ir(a.page, 'projetos');
   await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: /Escolher repositório do GitHub/ }).click();

@@ -5,7 +5,7 @@
   --pa-ponto:color-mix(in srgb,var(--texto) 10%,transparent);--pa-brilho:rgba(var(--qc-azul),.06);--pa-sombra:rgba(0,0,0,.35);--pa-vazio:var(--ds-rotulo);
   --pa-pulso:var(--acento);--pa-destaque:var(--acento);--pa-luz:color-mix(in srgb,var(--suave) 40%,transparent);--pa-caret:var(--texto);--pa-mini:var(--ds-rotulo);--pa-secao:var(--suave);
   --pa-ok:var(--ok);--pa-falha:var(--falha);--pa-aviso:var(--aviso);
-  --pa-mono:"Cascadia Mono","Cascadia Code",Consolas,"SFMono-Regular",Menlo,"Liberation Mono",monospace;
+  --pa-mono:var(--fonte-mono);
   display:flex;flex-direction:column;gap:8px;min-width:0;color:var(--texto)}
 .pa-barra{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
 .pa-barra-info{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;min-width:0}
@@ -38,7 +38,7 @@
 .pa-mundo{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 .pa-arestas{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .pa-nos{position:absolute;inset:0}
-.pa-secao-titulo{fill:var(--pa-secao);font:600 13px "Segoe UI",system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.pa-secao-titulo{fill:var(--pa-secao);font:600 13px var(--fonte-ui);letter-spacing:.16em;text-transform:uppercase}
 .pa-aresta{fill:none;stroke:var(--pa-linha);stroke-width:1px;transition:stroke .18s,opacity .18s}
 .pa-aresta-folha{stroke:var(--pa-linha-folha)}
 .pa-aresta-folha.falha{stroke:color-mix(in srgb,var(--pa-falha) 55%,transparent)}

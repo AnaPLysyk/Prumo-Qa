@@ -15,7 +15,7 @@ function h(tag, attrs, ...filhos) {
   for (const f of filhos.flat()) if (f != null && f !== false) el.append(f.nodeType ? f : document.createTextNode(String(f)));
   return el;
 }
-const rotulosSelo = { NAO_CONFIGURADO: 'NÃO CONFIGURADO', NAO_APLICAVEL: 'NÃO APLICÁVEL', ERRO_INFRA: 'ERRO DE INFRAESTRUTURA', EXECUTANDO: 'EXECUTANDO', INDISPONIVEL: 'CONSULTA NÃO CONCLUÍDA', LIMITE_DE_TAXA: 'LIMITE DE CONSULTAS', RESPOSTA_INVALIDA: 'RESPOSTA INVÁLIDA', SEM_RELEASE: 'SEM RELEASE', ATUALIZADO: 'ATUALIZADO', ATUALIZACAO_DISPONIVEL: 'ATUALIZAÇÃO DISPONÍVEL' };
+const rotulosSelo = { VALIDO: 'VÁLIDO', NAO_CONFIGURADO: 'NÃO CONFIGURADO', NAO_APLICAVEL: 'NÃO APLICÁVEL', ERRO_INFRA: 'ERRO DE INFRAESTRUTURA', EXECUTANDO: 'EXECUTANDO', INDISPONIVEL: 'CONSULTA NÃO CONCLUÍDA', LIMITE_DE_TAXA: 'LIMITE DE CONSULTAS', RESPOSTA_INVALIDA: 'RESPOSTA INVÁLIDA', SEM_RELEASE: 'SEM RELEASE', ATUALIZADO: 'ATUALIZADO', ATUALIZACAO_DISPONIVEL: 'ATUALIZAÇÃO DISPONÍVEL' };
 const selo = (s) => h('span', { class: 'estado ' + s }, rotulosSelo[s] || s.replaceAll('_', ' '));
 const hora = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR') : '—');
 const ms = (n) => (n === null || n === undefined ? 'indisponível' : Math.round(n * 10) / 10 + ' ms');
@@ -87,7 +87,7 @@ const abas = {
       } }, 'Adicionar projeto de demonstração')), caixa);
     const todas = await chamar(api.projetos); if (!todas) return;
     const gerenciados = await chamar(api.espacos); const lista = todas.filter(p => !gerenciados?.some(e => e.raizContextos === p.root));
-    if (!lista.length) { el.append(h('div', { class: 'vazio' }, 'Nenhum projeto vinculado ainda.')); return; }
+    if (!lista.length) { el.append(h('div', { class: 'vazio' }, 'Nenhuma pasta vinculada ainda.')); return; }
     el.append(h('table', {}, h('thead', {}, h('tr', {}, ['Projeto', 'Situação', 'Capacidades', 'Pasta', ''].map((t) => h('th', {}, t)))),
       h('tbody', {}, lista.map((p) => h('tr', {},
         h('td', {}, h('strong', {}, p.name || p.id || '—'), h('div', { class: 'suave' }, p.id || '')),

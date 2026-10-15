@@ -4,7 +4,7 @@ Em Projetos, escolha Novo projeto Prumo. Nome e descrição bastam: pasta local 
 
 ## Conectar um serviço
 
-Em Conexões, configure Jira, Qase ou GitHub com sua própria credencial de leitura. Uma conexão do ChatGPT não autentica o desktop. Jira exige instância Cloud, e-mail e token de API sem escopos; Qase exige token v1; GitHub exige token de leitura dos recursos necessários. O Windows protege a credencial; sem proteção, o Prumo recusa salvar.
+Em Conexões, configure Jira, Qase ou GitHub com a sua credencial (a escrita é opcional e fica desligada por padrão). Uma conexão do ChatGPT não autentica o desktop. Jira exige instância Cloud, e-mail e token de API sem escopos; Qase exige token v1; GitHub exige token de leitura dos recursos necessários. O Windows protege a credencial; sem proteção, o Prumo recusa salvar.
 
 Selecione um projeto Prumo. Use Listar recursos disponíveis na conexão, confira chave, ID, instância e conta e clique Vincular. A seleção vem da API, com paginação. O diálogo nativo confirma o destino. Não há associação por nomes iguais. Para trocar o recurso, remova o vínculo anterior em Projetos e selecione novamente. Para trocar o token, remova a conexão, configure outra e selecione novamente; o histórico continua identificado.
 
@@ -22,4 +22,4 @@ Importar descrição de ticket exige prévia e confirmação nativa. O contexto 
 
 Jira com token com escopos/OAuth gateway não está implementado. Qase v1 não informa identidade da conta: o projeto é identificado por código dentro da conexão validada. No laboratório, CID-QA é título e CQA é código. GitHub mostra check runs; status legados de commit não estão incluídos. Autenticação de produção depende de credenciais configuradas pela pessoa e não é comprovada pelas simulações.
 
-As três integrações são de leitura. Desde a 2.8 existe uma única escrita: o comentário de resultado de QA em um ticket Jira (veja Agendamentos, bandeja e execuções), com prévia e confirmação ou política aprovada, sem mudar o status. Não há publicação de casos Qase, edição de tickets, mudança de status, clone privado ou transferência automática de resposta para a IA. Consulte [os contratos e endpoints](../../docs/SERVICOS.md) para os detalhes técnicos.
+As integrações são de leitura por padrão. A escrita fica desligada até você habilitar, por projeto e serviço, em Conexões: comentar, criar, editar e mudar o status de tickets no Jira; criar casos, suites, planos e runs e publicar resultados no Qase; criar branches `prumo/…`, gravar arquivos de teste e abrir Pull Request em rascunho no GitHub. Cada operação mostra a prévia e pede a confirmação do Windows, e o Prumo não apaga nada. Veja [Testes, tickets e integrações](19-testes-e-integracoes.md). Consulte [os contratos e endpoints](../../docs/SERVICOS.md) para os detalhes técnicos.

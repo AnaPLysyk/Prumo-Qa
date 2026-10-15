@@ -67,7 +67,7 @@
       for (const b of indice.querySelectorAll('button')) b.setAttribute('aria-current', 'false');
       resultados.hidden = true; corpo.hidden = false; trilhaNav.hidden = true; corpo.classList.remove('ds-faq');
       const destaques = [['01-o-que-e', 'Visão geral do produto e do que ele não faz.'], ['04-vincular', 'Projetos, pastas e serviços vinculados.'], ['19-testes-e-integracoes', 'Tickets, casos, runs e escrita autorizada.'], ['18-agendamentos', 'Rotinas, bandeja, horários perdidos e execuções.'], ['07-resultados', 'PASS, FAIL, BLOCKED e NOT_RUN sem atalhos.'], ['09-problemas', 'Diagnóstico de conexões, MCP e execução.']].map(([id, d]) => [itens.get(id), d]).filter(([i]) => i);
-      corpo.replaceChildren(h('h1', {}, tr('Documentação do Prumo QA')), h('p', {}, tr('Guias de uso, fluxos de qualidade, integrações e referência técnica. Todo o conteúdo está neste computador.')),
+      corpo.replaceChildren(h('p', {}, tr('Guias de uso, fluxos de qualidade, integrações e referência técnica. Todo o conteúdo está neste computador.')),
         h('div', { class: 'ds-doc-cartoes' }, destaques.map(([it, d]) => h('button', { type: 'button', onclick: () => abrir(it) }, h('strong', {}, it.title), h('span', {}, tr(d))))));
     };
     busca.input.addEventListener('input', () => {
@@ -77,7 +77,7 @@
       resultados.hidden = false; corpo.hidden = true; trilhaNav.hidden = true;
     });
     el.append(DS.cabecalho({ titulo: 'Ajuda', info: 'Documentação, versões, integrações técnicas e dados deste computador.' }),
-      h('div', { class: 'ds-barra' }, h('button', { type: 'button', id: 'ajuda-download', onclick: () => chamar(() => api.abrirSite()) }, tr('Baixar instalador no site oficial'))),
+      h('div', { class: 'ds-barra' }, DS.acao('Baixar instalador no site oficial', () => chamar(() => api.abrirSite()), { id: 'ajuda-download', icone: 'externo' })),
       h('div', { class: 'ds-doc ajuda' }, h('div', { class: 'ds-min0' }, h('div', { class: 'ds-barra ds-barra-solta' }, busca.no), trilhaNav, resultados, corpo), h('aside', {}, indice)));
     const alvo = itens.get(estado.ajudaAlvo); estado.ajudaAlvo = null;
     if (alvo) await abrir(alvo); else inicio();

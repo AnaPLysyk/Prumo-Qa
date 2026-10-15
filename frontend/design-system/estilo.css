@@ -1,9 +1,13 @@
+/* Fontes embutidas (SIL Open Font License; textos em assets/fontes): o app não depende da fonte do sistema nem da rede. */
+@font-face { font-family: "Inter Variable"; font-style: normal; font-display: swap; font-weight: 100 900; src: url("../../assets/fontes/inter-latin-wght-normal.woff2") format("woff2-variations"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "JetBrains Mono Variable"; font-style: normal; font-display: swap; font-weight: 100 800; src: url("../../assets/fontes/jetbrains-mono-latin-wght-normal.woff2") format("woff2-variations"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+html { --fonte-ui: "Inter Variable", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; --fonte-mono: "JetBrains Mono Variable", "Cascadia Mono", Consolas, monospace; }
 /* Tokens de tema (2.8). Escuro e claro vêm do Quality Control do portfólio; "sistema" segue prefers-color-scheme. */
 :root {
   --fundo: #040712; --fundo2: #070d1d; --painel: #0a1122; --linha: #1c2742; --texto: #f3f6fc; --suave: #9aa8c2;
   --acento: #6ea8ff; --acento-texto: #04101f; --ok: #54d39b; --falha: #ff7b8c; --aviso: #e8b84a; --neutro: #9aa8c2;
   --qc-azul: 116,173,255; --qc-branco: 244,247,255; --qc-vermelho: 255,82,108; --halo: rgba(37,99,235,.14);
-  --raio: 8px; font-family: "Segoe UI", system-ui, sans-serif; font-size: 14px; color-scheme: dark;
+  --raio: 8px; font-family: var(--fonte-ui); font-size: 14px; color-scheme: dark;
 }
 :root[data-tema="claro"] {
   --fundo: #f5f8fc; --fundo2: #eef3fb; --painel: #ffffff; --linha: #cfd9ea; --texto: #14233d; --suave: #465875;
@@ -46,7 +50,7 @@ table { width: 100%; border-collapse: collapse; margin-top: 8px; }
 th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--linha); vertical-align: top; }
 th { font-size: 12px; font-weight: 600; color: var(--suave); }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-code, pre { font-family: Consolas, "Cascadia Mono", monospace; font-size: 12.5px; }
+code, pre { font-family: var(--fonte-mono); font-size: 12.5px; }
 pre { background: var(--painel); border: 1px solid var(--linha); border-radius: var(--raio); padding: 10px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
 .estado { font-size: 12px; font-weight: 600; padding: 1px 7px; border: 1px solid currentColor; border-radius: 10px; white-space: nowrap; }
 .PASS, .OK, .INTEGRADO { color: var(--ok); } .FAIL, .ERROR, .MANIFESTO_INVALIDO { color: var(--falha); }
@@ -104,8 +108,8 @@ label.opcao { display: flex; flex-direction: row; align-items: center; gap: 8px;
 label.opcao input[type=checkbox] { flex: none; margin: 0; }
 .nota.erro { border-color: var(--falha); }
 .VALIDADO, .UTILIZADO { color: var(--ok); } .CONFIGURADO, .NAO_CONFIGURADO { color: var(--neutro); } .ERRO { color: var(--falha); }
-main, .ajuda article, .formulario { min-width: 0; overflow-wrap: anywhere; }
-section.nota, section.nota pre { min-width: 0; overflow-wrap: anywhere; }
+main, .ajuda article, .formulario { min-width: 0; overflow-wrap: break-word; }
+section.nota, section.nota pre { min-width: 0; overflow-wrap: break-word; }
 input, select { max-width: 100%; }
 pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 520px) { header { padding: 10px; } main { padding: 10px; } .grade { grid-template-columns: 1fr; } label input:not([type=checkbox]), label select { min-width: 0; max-width: 100%; } }

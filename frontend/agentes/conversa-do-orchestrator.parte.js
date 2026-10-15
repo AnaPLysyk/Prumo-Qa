@@ -120,7 +120,7 @@
         h('h1', { class: 'v36-sr' }, 'Prumo QA'),
         h('div', { class: 'v36c-topo' }, orbita), msgs,
         h('div', { class: 'v36c-interacao' }, h('div', { class: 'v36c-sugestoes' }, h('span', { class: 'v36c-faisca', 'aria-hidden': 'true' }, icone('faisca', 15)), h('span', {}, tr('O que vamos explorar?'))), chips),
-        h('div', { class: 'v36c-compor-caixa' }, h('div', { class: 'v36c-opcoes' }, seletorAgente, seletorProvedor), form, h('div', { class: 'v36c-rodape' }, rodapeTexto = h('span', {}, tr('Respostas com os dados deste computador, sem modelo de IA.')), h('span', {}, 'Enter ↵ · Shift+Enter'))));
+        h('div', { class: 'v36c-compor-caixa' }, h('div', { class: 'v36c-opcoes' }, seletorAgente, seletorProvedor), form, h('div', { class: 'v36c-rodape' }, rodapeTexto = h('span', {}, tr('Respostas com os dados deste computador, sem modelo de IA.')), h('span', {}, 'Enter envia · Shift+Enter quebra linha'))));
       form.addEventListener('submit', (e) => { e.preventDefault(); void perguntar(entrada.value); });
       entrada.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); } });
       entrada.addEventListener('input', ajustarAltura);

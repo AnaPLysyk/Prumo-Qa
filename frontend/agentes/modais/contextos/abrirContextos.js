@@ -13,14 +13,16 @@
     const painel = h('div', { id: 'painel-contexto' });
     const recarregar = () => mostrar('contextos');
     const opcoes = (obj, atual) => Object.entries(obj).map(([k, v]) => h('option', { value: k, selected: atual === k }, v));
-    el.append(h('div', { class: 'nota' }, h('label', { class: 'linha' }, h('input', { type: 'checkbox', id: 'ctx-mcp', checked: lista.disponibilizarAoMcp, onchange: async (e) => {
-      const r = await chamar(() => api.contextosMcp(estado.root, e.target.checked)); if (!r || r.canceled) { e.target.checked = !e.target.checked; return; } avisar(r.disponibilizarAoMcp ? 'Contextos disponibilizados ao agente de IA deste projeto.' : 'Contextos não serão mais enviados ao agente de IA.'); } }), ' Disponibilizar os contextos deste projeto ao agente de IA conectado (MCP)'),
-      h('div', { class: 'suave' }, 'Desabilitado por padrão. Habilitado, o texto dos contextos (com segredos mascarados) pode ser lido pelo agente conectado e processado pelo provedor da IA. Contextos de outros projetos nunca são enviados.')));
-    el.append(h('div', { class: 'barra' },
-      h('label', {}, 'Tipo', h('select', { id: 'ctx-f-tipo', onchange: (e) => { f.tipo = e.target.value || undefined; recarregar(); } }, h('option', { value: '' }, 'Todos'), opcoes(rotuloTipo, f.tipo))),
-      h('label', {}, 'Estado', h('select', { id: 'ctx-f-estado', onchange: (e) => { f.estado = e.target.value || undefined; recarregar(); } }, h('option', { value: '' }, 'Todos'), ['RASCUNHO', 'APROVADO', 'CONFLITANTE', 'DESATUALIZADO'].map((s) => h('option', { value: s, selected: f.estado === s }, s)))),
-      h('label', {}, 'Buscar', h('input', { id: 'ctx-f-busca', type: 'search', value: f.busca || '', onchange: (e) => { f.busca = e.target.value || undefined; recarregar(); } })),
-      h('button', { class: 'acao primaria', id: 'ctx-novo', onclick: () => formulario() }, 'Novo contexto')), painel);
+    const marcaMcp = h('input', { type: 'checkbox', id: 'ctx-mcp', checked: lista.disponibilizarAoMcp, onchange: async (e) => {
+      const r = await chamar(() => api.contextosMcp(estado.root, e.target.checked)); if (!r || r.canceled) { e.target.checked = !e.target.checked; return; } avisar(r.disponibilizarAoMcp ? 'Contextos disponibilizados ao agente de IA deste projeto.' : 'Contextos não serão mais enviados ao agente de IA.'); } });
+    el.append(h('div', { class: 'ds-mcp-chave' }, h('label', { class: 'opcao', for: 'ctx-mcp' }, marcaMcp, tr('Disponibilizar os contextos deste projeto ao agente de IA conectado (MCP)')),
+      DS.info(tr('Desabilitado por padrão. Habilitado, o texto dos contextos (com segredos mascarados) pode ser lido pelo agente conectado e processado pelo provedor da IA. Contextos de outros projetos nunca são enviados.'), { rotulo: 'Sobre o compartilhamento' })));
+    const campoBusca = DS.busca({ id: 'ctx-f-busca', placeholder: 'Buscar contexto', valor: f.busca || '', aoEnter: () => { f.busca = campoBusca.input.value || undefined; recarregar(); } });
+    campoBusca.input.addEventListener('change', () => { f.busca = campoBusca.input.value || undefined; recarregar(); });
+    el.append(DS.barra(campoBusca.no,
+      DS.selecao({ id: 'ctx-f-tipo', rotulo: 'Tipo', opcoes: [['', 'Todos os tipos'], ...Object.entries(rotuloTipo)], valor: f.tipo || '', aoMudar: (v) => { f.tipo = v || undefined; recarregar(); } }),
+      DS.selecao({ id: 'ctx-f-estado', rotulo: 'Estado', opcoes: [['', 'Todos os estados'], ...['RASCUNHO', 'APROVADO', 'CONFLITANTE', 'DESATUALIZADO'].map((x) => [x, x])], valor: f.estado || '', aoMudar: (v) => { f.estado = v || undefined; recarregar(); } }),
+      DS.acao('Novo contexto', () => formulario(), { id: 'ctx-novo', primaria: true, icone: 'mais' })), painel);
     el.append(lista.contextos.length ? h('table', { id: 'ctx-tabela' }, h('thead', {}, h('tr', {}, ['Contexto', 'Tipo', 'Estado', 'Versão', 'Origem', 'Atualizado'].map((t) => h('th', {}, t)))),
       h('tbody', {}, lista.contextos.map((c) => h('tr', {}, h('td', {}, h('button', { class: 'acao', 'data-id': c.id, onclick: () => detalhe(c.id) }, c.titulo), c.chave ? h('div', { class: 'suave' }, c.chave) : null, c.alertaDeInstrucao ? h('div', { class: 'suave' }, 'contém texto que parece instrução') : null),
         h('td', {}, rotuloTipo[c.tipo]), h('td', {}, selo(c.estado), c.integridade === 'ADULTERADO' ? h('div', { class: 'suave' }, 'ADULTERADO') : null), h('td', { class: 'num' }, 'v' + c.versao), h('td', {}, c.origem.referencia || '— sem origem —'), h('td', {}, hora(c.atualizadoEm))))))

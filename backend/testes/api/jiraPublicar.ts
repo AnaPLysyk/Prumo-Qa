@@ -1,4 +1,4 @@
-/** Canal jira:publicar: Publicar o comentário de resultado em um ticket do projeto vinculado (única escrita remota do produto). */
+/** Canal jira:publicar: Publicar o comentário de resultado em um ticket do projeto vinculado (escrita remota, sempre com prévia e confirmação ou política). */
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { textoNoIdioma } from '../../aplicativo/bandeja/textoNoIdioma.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';

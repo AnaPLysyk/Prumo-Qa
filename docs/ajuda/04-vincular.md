@@ -14,7 +14,7 @@ Em **Projetos › Vincular pasta**, escolha a pasta do repositório no seletor d
 
 ## Vincular um repositório do GitHub
 
-Com uma conexão GitHub ativa (Conexões), **Projetos › Escolher repositório do GitHub…** lista os repositórios da sua conta. **Vincular** associa o repositório ao projeto; **Vincular e trazer para este computador** também baixa uma cópia, com o git instalado e as credenciais dele, e a vincula como pasta do projeto.
+Com uma conexão do GitHub ativa, **Projetos › Escolher repositório do GitHub…** lista os repositórios da conta. **Vincular** associa o repositório ao projeto; **Vincular e trazer para este computador** também baixa uma cópia, com o git instalado e as credenciais dele, e a vincula como pasta do projeto.
 
 ## O que entra no contrato proposto
 
@@ -26,4 +26,4 @@ Você pode editar o qa.project.json depois, como qualquer arquivo do repositóri
 
 ## O que o Prumo nunca faz
 
-Criar o contrato aprovado é a **única** escrita do Prumo na pasta do projeto, e ele nunca sobrescreve um contrato existente. Fora isso, só lê o que o contrato autoriza, sem sair da raiz, sem seguir links simbólicos e sem tocar em arquivos de credenciais. **Desvincular** remove apenas o item da lista; o qa.project.json continua na pasta.
+O Prumo escreve na pasta do projeto em dois casos: o contrato aprovado, ao vincular (nunca sobrescreve um existente), e, na IDE de Testes, arquivos de teste e pipelines, um por vez, com a confirmação do Windows. Fora isso, só lê o que o contrato autoriza, sem sair da raiz, sem seguir links simbólicos e sem tocar em arquivos de credenciais. **Desvincular** remove apenas o item da lista; o qa.project.json continua na pasta.

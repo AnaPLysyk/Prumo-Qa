@@ -12,7 +12,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | --- | --- |
 | `execucoesListar.ts` | Canal execucoes:listar: Histórico centralizado de execuções por projeto, repositório, ticket, rotina, estado e período. |
 | `jiraPrevia.ts` | Canal jira:previa: Mostrar o comentário de resultado que seria publicado no Jira. |
-| `jiraPublicar.ts` | Canal jira:publicar: Publicar o comentário de resultado em um ticket do projeto vinculado (única escrita remota do produto). |
+| `jiraPublicar.ts` | Canal jira:publicar: Publicar o comentário de resultado em um ticket do projeto vinculado (escrita remota, sempre com prévia e confirmação ou política). |
 | `projetoEvidencias.ts` | Canal projeto:evidencias: Resultados e logs de execuções reais, preservando PASS, FAIL, BLOCKED e NOT_RUN. |
 | `runsBugs.ts` | Canal runs:bugs: Preparar rascunhos de bug para as falhas da run. |
 | `runsCriar.ts` | Canal runs:criar: Criar a run no Qase com os casos escolhidos. |

@@ -1508,7 +1508,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 ### `prumo:jira:publicar`
 
 - **Tipo:** IPC
-- **Finalidade:** Publicar o comentário de resultado em um ticket do projeto vinculado (única escrita remota do produto).
+- **Finalidade:** Publicar o comentário de resultado em um ticket do projeto vinculado (escrita remota, sempre com prévia e confirmação ou política).
 - **Origem:** Interface > Execuções > Publicar no Jira
 - **Destino:** backend/testes/api/jiraPublicar.ts > textoNoIdioma, confirmarNoWindows, servicosDoAplicativo, idiomaAtual, publicarComentarioDeResultado, prepararPublicacao
 - **Entrada:** Id da execução

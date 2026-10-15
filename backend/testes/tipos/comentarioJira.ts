@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 /**
- * Comentário de resultado de QA no Jira (2.8). A única escrita remota do produto.
+ * Comentário de resultado de QA no Jira (2.8). Uma das escritas remotas do produto.
  * - Texto estruturado montado SOMENTE de dados locais da execução (contagens, motivo, referência da evidência);
  * - nunca afirma aprovação do ticket inteiro nem altera status/workflow;
  * - manual: prévia + confirmação nativa feitas pelo processo principal; agendada: política prévia (ticket+tipo+validade+limite);

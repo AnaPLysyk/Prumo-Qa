@@ -102,7 +102,7 @@
     const m = modelo(e, src); const c = src.cat?.catalogo;
     const f = (mem.fVisao ||= { q: '', fonte: '', nivel: '', execucao: '', tags: [], agrupar: 'tag' }); const tagsAtivas = new Set(f.tags);
     const todasTags = [...m.linhas.reduce((acc, l) => { for (const t of l.tags) acc.set(t, (acc.get(t) || 0) + 1); return acc; }, new Map()).entries()].sort((a, b) => b[1] - a[1]);
-    const busca = DS.busca({ id: 'cat-busca', placeholder: 'Buscar caso, teste, arquivo ou ID', valor: f.q });
+    const busca = DS.busca({ id: 'cat-busca', placeholder: 'Buscar caso ou teste', rotulo: 'Buscar caso, teste ou arquivo', valor: f.q });
     const fonte = DS.selecao({ id: 'cat-fonte', rotulo: 'Fonte', opcoes: [['', 'Todas as fontes'], ['ligados', 'Caso com código'], ['qase', 'Só no Qase'], ['codigo', 'Só no código']], valor: f.fonte });
     const nivel = DS.selecao({ id: 'cat-nivel', rotulo: 'Nível', opcoes: [['', 'Todos os níveis'], ...Object.entries(nomesNivel).filter(([k]) => m.linhas.some((l) => l.niveis.includes(k)))], valor: f.nivel });
     const execucao = DS.selecao({ id: 'cat-execucao', rotulo: 'Execução', opcoes: [['', 'Manual e automatizado'], ['manual', 'Manual'], ['automatizado', 'Automatizado'], ['planejado', 'Automação planejada']], valor: f.execucao });

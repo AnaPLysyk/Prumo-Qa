@@ -13,7 +13,7 @@ function abrirRepositoriosGithub(painel,e) {
     return (async()=>{
       const contas=await chamar(api.servicos);if(!contas)return;
       const github=contas.filter(c=>c.ativa&&c.servico==='github');
-      if(!github.length){painel.replaceChildren(h('p',{class:'nota'},'Nenhuma conexão GitHub ativa. Configure uma em Conexões para listar os seus repositórios.'),botao('Abrir Conexões',()=>mostrar('conexoes')),botao('Cancelar',fechar));return;}
+      if(!github.length){painel.replaceChildren(h('p',{class:'nota'},'Nenhuma conexão do GitHub ativa. Configure uma em Conexões.'),botao('Abrir Conexões',()=>mostrar('conexoes')),botao('Cancelar',fechar));return;}
       if(github.length===1){await mostrarPagina(github[0],{offset:0,limite:50});return;}
       painel.replaceChildren(h('h2',{},'Escolha a conexão GitHub'),...github.map(c=>botao(c.nome,()=>mostrarPagina(c,{offset:0,limite:50}))),botao('Cancelar',fechar));
     })();

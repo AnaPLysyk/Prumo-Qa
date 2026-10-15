@@ -35,7 +35,8 @@ test('com o OAuth App configurado: botão em Entrar e em Criar conta, abre a aut
 test('primeiro acesso: sem nenhuma conta o Prumo não abre; Criar conta com o GitHub abre a autorização e Cancelar volta ao primeiro acesso', { timeout: 120000 }, async (t) => {
   const a = await abrir(t, novoDados(t), [], ENV, { semLogin: true });
   await a.app.evaluate(({ shell }) => { globalThis.__abertas = []; shell.openExternal = async (u) => { globalThis.__abertas.push(u); }; });
-  await a.page.waitForSelector('#primeiro-nome'); assert.equal(await a.page.locator('#entrada-login').count(), 0);
+  await a.page.waitForSelector('#entrada-login'); assert.equal(await a.page.locator('#entrada-github').count(), 0, 'sem contas, entrar por provedor não faz sentido');
+  await a.page.click('#entrada-ir-cadastro'); await a.page.waitForSelector('#primeiro-nome');
   await a.page.click('#entrada-github'); await a.page.locator('#entrada-github-espera').waitFor();
   const abertas = await a.app.evaluate(() => globalThis.__abertas); assert.equal(abertas.length, 1); assert.match(abertas[0], /^https:\/\/github\.com\/login\/oauth\/authorize\?/);
   await a.page.click('#entrada-github-cancelar'); await a.page.waitForSelector('#primeiro-nome');

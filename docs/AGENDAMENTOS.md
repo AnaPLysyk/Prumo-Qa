@@ -77,7 +77,7 @@ Adaptador do executável oficial (nenhum código do k6 é copiado; licença AGPL
 
 ## Comentário no Jira
 
-É a **única escrita remota do produto**. Conteúdo montado só de dados locais da execução (ticket, projeto Prumo, tipo, ambiente, cenários, PASS/FAIL, resumo das falhas mascarado, referência local da evidência) e marcador `Prumo-Execução: <id>`. Só execuções reais com resultado PASS ou FAIL geram comentário; BLOCKED, NOT_RUN, INFO e erro de infraestrutura não. O comentário nunca afirma aprovação do ticket inteiro e nunca altera status.
+É uma das escritas remotas do produto (as demais estão em Testes, tickets e integrações). Conteúdo montado só de dados locais da execução (ticket, projeto Prumo, tipo, ambiente, cenários, PASS/FAIL, resumo das falhas mascarado, referência local da evidência) e marcador `Prumo-Execução: <id>`. Só execuções reais com resultado PASS ou FAIL geram comentário; BLOCKED, NOT_RUN, INFO e erro de infraestrutura não. O comentário nunca afirma aprovação do ticket inteiro e nunca altera status.
 
 - **Manual**: prévia, confirmação nativa que mostra o texto, publicação.
 - **Agendado**: exige política de publicação aprovada (tickets, tipos, validade, quantidade); sem política nada é publicado.

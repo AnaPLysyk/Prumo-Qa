@@ -1,15 +1,12 @@
 # Access, users and permissions
 
-Prumo **always opens on the sign-in screen** and does not let you use anything without signing in. Each person has their own account and role; whoever administers the computer controls who gets in and what each one sees.
+Prumo always opens on the sign-in screen. Each person has an account and a role; whoever administers the computer controls who gets in and what each one sees.
 
 ## First access
 
-The first time Prumo opens on a computer, no account exists yet. The screen asks you to create the **Administrator** account, which is always the first one:
+On a computer with no accounts, the sign-in screen offers **Create account**, which creates the **Administrator** account, always the first one. Enter your name, username (3 to 40 characters: lowercase letters, numbers, dot, hyphen or underscore) and password (at least 10 characters, with letters and numbers). With GitHub or Google already configured, **Create account with GitHub** (or **with Google**) does the same through the provider's authorization.
 
-1. Enter your name, username (3 to 40 characters: lowercase letters, numbers, dot, hyphen or underscore) and a password of at least 10 characters, mixing letters and numbers. If GitHub or Google is already configured, **Create account with GitHub** (or **with Google**) does the same through the provider's authorization.
-2. Keep the **recovery code**, shown only once, outside this computer.
-
-Until that account is created no screen opens and no request is served. After it, Prumo always opens on sign-in and asks for login.
+Keep the **recovery code**: it is shown only once, and should be kept outside this computer. No screen opens until the account exists.
 
 ## Roles and permissions
 
@@ -25,17 +22,16 @@ Checks run in the main process on every request, not only in the window: hiding 
 - The last administrator cannot be deleted or demoted, and nobody becomes an administrator by registering.
 - Each person can change their own name and password in **My account**, in the window corner.
 
-## Sign in and sign up with GitHub or Google
+## Sign in with GitHub or Google
 
-When the Administration has configured it, the sign-in and **Create account** screens show **Sign in with GitHub** and **Sign in with Google**. Clicking opens the provider in your browser; you authorize there and return to Prumo already signed in, with no code or password to type.
+With the provider configured, the sign-in and create-account screens show **Sign in with GitHub** and **Sign in with Google**. Prumo opens the browser; you authorize and return already signed in.
 
-- **People with an active account** sign in directly. With GitHub, the GitHub connection is also created automatically (read-only; writing stays off until you enable it). Google is only used to sign in: no connection is created.
-- **People without an account** are registered as **pending**, with the role given to new sign-ups, and **nothing is enabled** until the Administration approves. Once approved, just sign in again through the provider.
-- **First access, no account yet:** **Create account with GitHub** (or **with Google**) creates the first account, an Administrator, from the provider authorization. This needs the provider's app to be configured on this computer already.
-- The account is recognized by the provider's number, never by name or e-mail. Accounts created this way have no Prumo password.
-- Cancelling, denying the authorization or letting 5 minutes pass creates no account, session or connection.
+- Active account: signs in directly. With GitHub, the GitHub connection is created too (read-only; writing stays off). The token technically has write permission (`repo` scope); Prumo only uses it after you enable writing and confirm. Google only identifies you and creates no connection.
+- New person: the sign-up stays **pending**, with the role given to new sign-ups, and nothing is enabled until the Administration approves. After that, just sign in again.
+- The account is recognized by the provider's number, not by name or e-mail, and has no Prumo password.
+- Cancelling, denying or waiting 5 minutes creates no account, session or connection.
 
-**How to set it up (Administration › General settings).** On GitHub, register an OAuth App at github.com/settings/developers with the callback `http://127.0.0.1/callback`; in the Google Cloud Console, create an OAuth credential of type **Desktop app**. Paste the **Client ID** and **Client Secret** in the provider's section. The secret stays in the system vault and never returns to the screen. Without this setup the button does not appear. GitHub asks for `read:user repo` access (to list private repositories) and Google for `openid email profile`.
+To set it up, in **Administration › General settings**: on GitHub, register an OAuth App with the callback `http://127.0.0.1/callback`; in the Google Cloud Console, create an OAuth credential of type **Desktop app**. Paste the Client ID and Client Secret in the provider's section. The secret stays in the system vault and never returns to the screen. GitHub asks for `read:user repo` (to list private repositories); Google asks for `openid email profile`.
 
 ## What login does not do
 
@@ -43,7 +39,7 @@ Login controls what each person sees and changes **in the application**. The sch
 
 ## Platform agents
 
-In **Administration › Agents**, whoever has permission turns each agent on or off for all projects, the use of Claude Code or Codex, and orchestration. These rules apply on top of each project's policies (Agents screen).
+In **Administration › Agents**, whoever has permission turns each agent on or off for all projects, the use of Claude Code or Codex, and orchestration. These rules apply to all projects: a project can restrict more, but cannot enable what is turned off here.
 
 ## My profile (Settings)
 

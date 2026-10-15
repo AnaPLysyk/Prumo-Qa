@@ -44,5 +44,13 @@ const PrumoI18n = (() => {
 /** Texto de interface com variáveis: tr('A cada {n} min', { n: 5 }). Em português devolve a própria chave. */
 function tr(pt, vars) {
   const base = PrumoI18n.idioma === 'en' ? (PrumoI18n.traduzir(pt) || pt) : pt;
-  return vars ? base.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? String(vars[k]) : '{' + k + '}')) : base;
+  return vars ? concordar(base.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? String(vars[k]) : '{' + k + '}'))) : base;
+}
+/** Concordância com o número que vem antes: "1 ticket(s)" vira "1 ticket", "3 ticket(s)" vira "3 tickets"; vale para (s), (ões) e (is), e para a palavra seguinte, como em "2 ticket(s) local(is)". */
+function concordar(texto) {
+  return texto.replace(/(\d+)(\s+[^\s()]+)\((ões|is|s)\)((?:\s+[^\s()]+\((?:is|s)\))?)/gu, (_, n, palavra, sufixo, resto) => {
+    const um = Number(n) === 1;
+    const flexionar = (w, s) => (um ? w : s === 'ões' ? w.replace(/ão$/u, 'ões') : s === 'is' ? w.replace(/l$/u, 'is') : w + 's');
+    return n + flexionar(palavra, sufixo) + (resto ? resto.replace(/^(\s+)([^\s()]+)\((is|s)\)$/u, (__, espaco, w, s2) => espaco + flexionar(w, s2)) : '');
+  });
 }

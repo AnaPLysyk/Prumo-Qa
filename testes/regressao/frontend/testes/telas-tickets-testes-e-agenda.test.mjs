@@ -61,7 +61,7 @@ test('navegação completa, Design System no Grupo B, Evidências só dentro de 
 test('Tickets consolida Jira e Qase, modal preserva filtros e foco, rolagem só dentro do modal e escrita desligada fica indisponível', async (t) => {
   const a = await preparar(t); await ir(a.page, 'tickets');
   await a.page.waitForSelector('#tk-tabela [data-ticket="SMART-1"]'); await a.page.waitForSelector('#tk-tabela [data-defeito="91"]');
-  assert.match(await a.page.textContent('#tk-fontes'), /Jira[\s\S]*1 ticket\(s\)[\s\S]*Qase[\s\S]*1 defeito\(s\)/);
+  assert.match(await a.page.textContent('#tk-fontes'), /Jira[\s\S]*1 ticket\b[\s\S]*Qase[\s\S]*1 defeito\b/);
   assert.equal(await a.page.textContent('#tk-contagem'), '2');
   await a.page.selectOption('#tk-origem', 'jira'); await a.page.fill('#tk-q', 'SMART'); await a.page.click('#tk-buscar');
   await a.page.waitForFunction(() => !document.querySelector('#tk-tabela [data-defeito]') && document.querySelector('#tk-tabela [data-ticket="SMART-1"]'));

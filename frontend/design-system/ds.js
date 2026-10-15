@@ -129,7 +129,7 @@ const DS = (() => {
   function bloco(titulo, ...conteudo) { return h('div', { class: 'ds-bloco' }, h('h3', { class: 'ds-h' }, tr(titulo)), ...conteudo.flat().filter(Boolean)); }
   function texto(valor, vazio = 'Sem conteúdo informado.') { const v = (valor ?? '').toString().trim(); return h('p', { class: 'ds-texto' + (v ? '' : ' vazio-txt') }, v || tr(vazio)); }
   function recolher(titulo, conteudo, { aberto, id } = {}) { return h('details', { class: 'ds-recolher', open: !!aberto, id: id || null }, h('summary', {}, tr(titulo)), ...[].concat(conteudo).filter(Boolean)); }
-  function resumo(itens, { id } = {}) { return h('div', { class: 'ds-resumo', id: id || null }, itens.filter(Boolean).map(([n, rot, tom]) => h('div', { 'data-tom': tom || null }, h('b', {}, String(n ?? 0)), h('span', {}, tr(rot))))); }
+  function resumo(itens, { id } = {}) { return h('div', { class: 'ds-resumo', id: id || null }, itens.filter(Boolean).map(([n, rot, tom]) => h('div', { 'data-tom': tom || null, 'data-zero': Number(n ?? 0) === 0 ? '' : null, 'data-texto': Number.isNaN(Number(String(n ?? 0).replace(',', '.'))) ? '' : null }, h('b', {}, String(n ?? 0)), h('span', {}, tr(rot))))); }
   function tempo(eventos) { return h('ol', { class: 'ds-tempo' }, eventos.map((e) => h('li', { 'data-tom': e.tom || null }, e.titulo, e.sub ? h('span', { class: 'ds-sub' }, e.sub) : null))); }
   function modal(titulo, conteudo, { tamanho = 'md', subtitulo, restaurar } = {}) {
     if (!window.PrumoQualidadeV39) return null;

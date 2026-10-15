@@ -1,7 +1,7 @@
 /** Reúne trecho visual da função logs para o bundle interfaces-v36. */
 /* ---------- Logs: terminal de ponta a ponta ---------- */
 .v36l{height:100%;min-height:0}
-.v36l-janela{--t-bg:var(--ds-terminal-fundo);--t-bg2:var(--ds-terminal-fundo2);--t-line:var(--ds-terminal-linha);--t-text:var(--ds-terminal-texto);--t-muted:var(--ds-terminal-suave);--t-info:var(--ds-terminal-info);--t-ok:var(--ds-terminal-ok);--t-error:var(--ds-terminal-erro);--t-warn:var(--ds-terminal-aviso);display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;color:var(--t-text);font-family:"Cascadia Code",Consolas,ui-monospace,SFMono-Regular,monospace;font-size:12px}
+.v36l-janela{--t-bg:var(--ds-terminal-fundo);--t-bg2:var(--ds-terminal-fundo2);--t-line:var(--ds-terminal-linha);--t-text:var(--ds-terminal-texto);--t-muted:var(--ds-terminal-suave);--t-info:var(--ds-terminal-info);--t-ok:var(--ds-terminal-ok);--t-error:var(--ds-terminal-erro);--t-warn:var(--ds-terminal-aviso);display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;color:var(--t-text);font-family:var(--fonte-mono);font-size:12px}
 .v36l-janela.claro{--t-bg:var(--ds-terminal-claro-fundo);--t-bg2:var(--ds-terminal-claro-fundo2);--t-line:var(--ds-terminal-claro-linha);--t-text:var(--ds-terminal-claro-texto);--t-muted:var(--ds-terminal-claro-suave);--t-info:var(--ds-terminal-claro-info);--t-ok:var(--ds-terminal-claro-ok);--t-error:var(--ds-terminal-claro-erro);--t-warn:var(--ds-terminal-claro-aviso)}
 .v36l-janela.escuro{--t-bg:var(--ds-terminal-escuro-fundo);--t-bg2:var(--ds-terminal-escuro-fundo2);--t-line:var(--ds-terminal-escuro-linha);--t-text:var(--ds-terminal-escuro-texto);--t-muted:var(--ds-terminal-escuro-suave);--t-info:var(--ds-terminal-escuro-info);--t-ok:var(--ds-terminal-escuro-ok);--t-error:var(--ds-terminal-escuro-erro);--t-warn:var(--ds-terminal-escuro-aviso);background:var(--t-bg)}
 .v36l-janela.claro{background:var(--t-bg)}
@@ -27,7 +27,7 @@
 .v36l-destaque{color:var(--t-info);font-weight:700}
 .v36l-sub{color:var(--t-muted);font-size:11px}
 .v36l-vazio{padding:15px 12px;color:var(--t-muted)}
-.v36l-vazio .vazio{font-family:"Segoe UI",system-ui,sans-serif;border:0;padding:0;background:none;color:var(--t-muted)}
+.v36l-vazio .vazio{font-family:var(--fonte-ui);border:0;padding:0;background:none;color:var(--t-muted)}
 .v36l-linha{display:grid;grid-template-columns:82px 57px 92px 150px minmax(0,1fr) 18px;align-items:baseline;gap:10px;width:100%;padding:6px 9px;border:0;border-left:2px solid transparent;border-radius:4px;background:transparent;color:var(--t-text);font:inherit;font-size:11.5px;line-height:1.75;text-align:left;cursor:pointer}
 .v36l-linha:hover,.v36l-linha[aria-expanded=true]{background:color-mix(in srgb,var(--t-info) 6%,transparent);border-left-color:var(--t-info)}
 .v36l-hora{color:var(--t-muted);white-space:nowrap}
@@ -43,7 +43,7 @@
 .v36l-detalhe dl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px 17px;margin:0 0 13px}
 .v36l-detalhe dt{margin-bottom:5px;font-size:10px;color:var(--t-muted)}
 .v36l-detalhe dd{margin:0;font-size:11px;overflow-wrap:anywhere;color:var(--t-text)}
-.v36l-detalhe pre{max-height:230px;overflow:auto;margin:0 0 9px;padding:14px;border:0;border-top:1px solid var(--t-line);border-radius:0;background:none;color:var(--t-text);font:11px/1.55 Consolas,monospace;white-space:pre-wrap}
+.v36l-detalhe pre{max-height:230px;overflow:auto;margin:0 0 9px;padding:14px;border:0;border-top:1px solid var(--t-line);border-radius:0;background:none;color:var(--t-text);font:11px/1.55 var(--fonte-mono);white-space:pre-wrap}
 .v36l-detalhe small{font-size:10px;color:var(--t-muted)}
 .v36l-detalhe .v36l-mini{margin-left:10px}
 .v36l-rodape{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 70px 11px 18px;border-top:1px solid var(--t-line);color:var(--t-muted);font-size:11px}

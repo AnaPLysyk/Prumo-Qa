@@ -2,6 +2,49 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.14.1",
+      "status": "repositorio",
+      "date": null,
+      "title": "Interface refinada: fonte própria, tabelas, estatísticas e filtros; entrada e Conexões corrigidas",
+      "objective": "Refinar o formato da interface com um Design System único (fonte própria, tabelas, estatísticas, filtros e selos), corrigir o fluxo de entrada e arrumar Conexões, Ajuda e Configurações, sem mudar o comportamento da 2.14.0.",
+      "features": [
+        "Fonte própria embutida (Inter e JetBrains Mono): o aplicativo tem a mesma tipografia em Windows, macOS e Linux, sem depender da rede.",
+        "Num computador sem contas, o Prumo abre na tela de Entrar, com Criar conta, e não direto no cadastro. Criar conta leva à conta de Administrador, com caminho de volta para Entrar.",
+        "Conexões: uma linha por integração (nome, para que serve, situação e ação), sem cartão em volta e sem título repetido.",
+        "O primeiro acesso e as telas de entrada por GitHub e Google têm textos mais curtos, e a regra de senha aparece no próprio campo."
+      ],
+      "improvements": [
+        "Estatísticas em células de largura igual, com zeros apagados e valores em texto no tamanho certo; filtros numa linha com seletores no visual do aplicativo; selos num formato só; tabelas mais compactas, com cabeçalho discreto e referências de arquivo em fonte monoespaçada.",
+        "Títulos de seção em caixa normal; a caixa alta ficou só nos rótulos do menu.",
+        "Plurais corretos em toda a interface (\"1 ticket\", \"2 tickets\", \"1 execução\").",
+        "Métricas e Contextos passam pelos componentes do Design System.",
+        "A Ajuda de Testes, Assistente e Acesso foi reescrita sem repetir títulos, sem número de versão no título e com listas no lugar de blocos longos.",
+        "A Administração mostra GitHub e Google com uma linha de ajuda cada."
+      ],
+      "fixes": [
+        "Palavras não quebram mais no meio nas tabelas (por exemplo, \"SMART\" aparecia como \"SMAR/T\").",
+        "A tela de Permissões não diz mais que, com o login desligado, todas as telas ficam liberadas.",
+        "A Ajuda não mostra mais duas barras de rolagem: o índice da direita rola junto com a página. Configurações também não mostra barra no painel.",
+        "O botão \"Baixar instalador no site oficial\" da Ajuda usa o estilo padrão da interface.",
+        "O caminho da cópia baixada do GitHub aparece certo na Ajuda (%LOCALAPPDATA%\\PrumoQA\\repositorios)."
+      ],
+      "differential": "Menos texto na interface e na Ajuda, sem repetir o que o título já diz.",
+      "howItWorks": [],
+      "security": [
+        "Sem mudança de segurança: o comportamento da 2.14.0 é mantido.",
+        "A política de segurança da janela passa a permitir fontes apenas do próprio aplicativo (font-src 'self')."
+      ],
+      "compatibility": [
+        "Sem mudança em dados, projetos, preferências ou contratos."
+      ],
+      "limitations": [
+        "As limitações da 2.14.0 continuam valendo."
+      ],
+      "releaseUrl": null,
+      "migration": "Nada a migrar.",
+      "afterUpdate": []
+    },
+    {
       "version": "2.14.0",
       "status": "publicada",
       "date": "2026-10-14",

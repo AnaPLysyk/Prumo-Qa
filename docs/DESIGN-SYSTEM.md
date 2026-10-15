@@ -47,9 +47,10 @@ os estados; trocar uma cor é trocar um arquivo. `testes/unitario/frontend/compa
 - Espaço: `--ds-1`…`--ds-8` = 4, 8, 12, 16, 20, 24, 32, 40 px.
 - Raio: `--ds-r1` 8 (controles e cartões pequenos), `--ds-r2` 12 (blocos), `--ds-r3` 16 (modal), `--ds-rp` pílula (botões e chips de navegação).
 - Controle: `--ds-controle` 34 px de altura (input, select, botão de barra).
-- Tipo: Segoe UI Variable (texto/título). Título da tela 24/600; título do modal 18/600;
-  rótulos de seção 11,5 px em caixa alta com espaçamento 0,08em; corpo 13,5 px; secundário 12–12,5 px.
-  Números sempre com `tabular-nums`.
+- Tipo: Inter (texto e título) e JetBrains Mono (código, ids, referências de arquivo), embutidas em `assets/fontes` (variáveis, subconjunto latino, SIL OFL). Tokens `--fonte-ui` e `--fonte-mono`; as telas nunca declaram família de fonte.
+  Corpo 14 px; título da tela 24/650; título de seção 15/600 em caixa normal; título do modal 18/600; secundário 12–12,5 px. Caixa alta só nos rótulos do menu lateral.
+  `tabular-nums` só onde há número (tabelas, estatísticas, contagens), nunca no texto corrido.
+- Componentes: selos num formato só (6 px, sem borda, fundo na cor do texto); estatísticas em células de largura igual (`.ds-resumo`), com valor em texto menor que valor numérico e zero apagado; filtros numa linha (`.ds-barra`) com seletores sem o visual nativo; plurais por `tr()` ("1 ticket(s)" vira "1 ticket").
 
 ## 2. Estrutura de uma tela
 

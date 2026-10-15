@@ -27,9 +27,11 @@ No contrato do próprio Prumo, `nucleo` executa arquivos sem janela, incluindo c
 
 O adaptador `backend/testes/reporters/prumo-node-reporter.mjs` transforma eventos de cada caso em resultados Prumo.  Skip e TODO viram `NOT_RUN`, suites agregadas não duplicam casos, e o processo com falha permanece `FAIL`. Um teste com subprocesso sintético confere eventos reais de PASS, FAIL, skip e TODO; isso não representa execução autorizada da capability do próprio Prumo.
 
-## Conexões, login por provedor e jornada manual
+## Conexões, login e jornada manual
 
-- `testes/regressao/frontend/projetos/conexoes-aparecem-nos-modulos.test.mjs` e `testes/regressao/frontend/testes/conexoes-alimentam-testes-e-tickets.test.mjs`: GitHub, Qase e Jira conectados alimentam Projetos, Testes (Repositório, Runs, Planos) e Tickets; sem Qase e sem Jira as abas seguem usáveis, e a run sem Qase usa casos locais.
-- `testes/regressao/backend/testes/jornada-manual-e-publicacao.test.mjs`: primeiro sem nenhuma conexão (run local, resultado manual, rascunho de bug) e só depois, conectando Jira, Qase e GitHub, a publicação; run com caso local nunca vai ao Qase.
-- `testes/unitario/backend/login/entrada-pelo-github.test.mjs` e `testes/regressao/frontend/login/entrada-pelo-github.test.mjs`: login pelo GitHub e pelo Google com servidor de retorno real em 127.0.0.1 e provedor simulado; cadastro novo pendente, nada habilitado sem concluir, identidade por provedor e id. O navegador é um double: nada é aberto nem enviado.
-- `testes/unitario/backend/agentes/chat-claude-codex.test.mjs`, `testes/regressao/frontend/agentes/chat-claude-codex.test.mjs` e `testes/unitario/backend/conexoes/localizar-cliente-de-ia.test.mjs`: chat com Claude e Codex usando executor falso, travas dos argumentos e busca do CLI. Nenhum CLI real roda.
+- `conexoes-aparecem-nos-modulos` e `conexoes-alimentam-testes-e-tickets`: GitHub, Qase e Jira alimentam Projetos, Testes e Tickets; sem Qase e sem Jira as abas seguem usáveis, e a run sem Qase usa casos locais.
+- `jornada-manual-e-publicacao`: tudo local sem conexão (run, resultado manual, rascunho de bug); depois de conectar, publicação no Qase, no Jira e no GitHub. Run com caso local nunca vai ao Qase.
+- `entrada-pelo-github` (unitário e de tela) e `abre-na-entrada`: login por GitHub e Google com retorno local real e provedor simulado, primeiro acesso, nada habilitado sem concluir. O navegador é um double.
+- `chat-claude-codex` e `localizar-cliente-de-ia`: chat com executor falso, travas dos argumentos e busca do CLI. Nenhum CLI real roda.
+
+Os arquivos ficam em `testes/<natureza>/<camada>/<módulo>/`. Os testes de janela usam `abrir()`, que faz o primeiro acesso com a conta de teste; `{ semLogin: true }` testa a própria entrada.

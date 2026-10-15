@@ -7,9 +7,9 @@ window.PrumoConta = (() => {
   const soVer = (aba) => !!sessao?.loginAtivo && sessao.telas?.[aba] === 'VER';
 
   /** Campo de formulário com rótulo visível; senha nunca é preenchida de volta. */
-  function campo(id, rotulo, tipo, extra = {}) {
+  function campo(id, rotulo, tipo, extra = {}, ajuda = null) {
     const input = h('input', { id, type: tipo, required: true, spellcheck: 'false', ...extra });
-    return { input, no: DS.campo(rotulo, input, { id }) };
+    return { input, no: DS.campo(rotulo, input, { id, ...(ajuda ? { ajuda } : {}) }) };
   }
   function cartao(titulo, descricao, ...conteudo) {
     return [h('div', { class: 'entrada-marca' }, h('img', { src: '../../assets/prumo-icon.png', alt: '', width: 40, height: 40 }), h('strong', { 'data-i18n-ignore': '' }, 'Prumo QA')),
@@ -45,24 +45,25 @@ window.PrumoConta = (() => {
   }
   function trocarVista(...nos) { const d = abrirDialogo(); lugar.replaceChildren(h('div', { class: 'entrada-cartao' }, ...nos)); d.querySelector('input')?.focus(); }
 
+  /** Sem nenhuma conta neste computador: a entrada continua sendo a primeira tela, e Criar conta leva à conta de Administrador. */
+  const semContas = () => !!sessao && !sessao.loginAtivo;
   function vistaEntrar(aviso) {
     const login = campo('entrada-login', 'Login', 'text', { autocomplete: 'username', maxlength: 60, autocapitalize: 'off' });
     const senha = campo('entrada-senha', 'Senha', 'password', { autocomplete: 'current-password', maxlength: 200 });
-    const rodape = [sessao?.cadastroAberto ? link('Criar conta', () => vistaCadastrar(), 'entrada-ir-cadastro') : null, link('Esqueci a senha', () => vistaRecuperar(), 'entrada-ir-recuperar')].filter(Boolean);
-    trocarVista(...cartao('Entrar no Prumo QA', 'Use a conta que a Administração criou para você.'), aviso ? DS.alerta(aviso, 'aviso') : null,
+    const rodape = [semContas() || sessao?.cadastroAberto ? link('Criar conta', () => (semContas() ? vistaPrimeiroAcesso() : vistaCadastrar()), 'entrada-ir-cadastro') : null, semContas() ? null : link('Esqueci a senha', () => vistaRecuperar(), 'entrada-ir-recuperar')].filter(Boolean);
+    trocarVista(...cartao('Entrar', semContas() ? 'Este computador ainda não tem contas.' : 'Use a conta que a Administração criou para você.'), aviso ? DS.alerta(aviso, 'aviso') : null,
       formulario([login, senha], 'Entrar', async (form) => {
         const r = await api.contaEntrar(login.input.value, senha.input.value);
         if (!r.ok) { senha.input.value = ''; mostrarErro(form, r.error); return; }
         sessao = r.data; if (sessao.usuario?.trocarSenha) vistaTrocar(); else location.reload();
-      }, rodape), botoesExternos('entrar'));
+      }, rodape), semContas() ? null : botoesExternos('entrar'));
   }
   function vistaCadastrar() {
     const nome = campo('cadastro-nome', 'Nome', 'text', { autocomplete: 'name', maxlength: 80 });
     const login = campo('cadastro-login', 'Login', 'text', { autocomplete: 'username', maxlength: 40, autocapitalize: 'off' });
-    const senha = campo('cadastro-senha', 'Senha', 'password', { autocomplete: 'new-password', maxlength: 200 });
+    const senha = campo('cadastro-senha', 'Senha', 'password', { autocomplete: 'new-password', maxlength: 200 }, 'Mínimo de 10 caracteres, com letras e números.');
     const confirma = campo('cadastro-confirma', 'Confirmar senha', 'password', { autocomplete: 'new-password', maxlength: 200 });
     trocarVista(...cartao('Criar conta', sessao?.aprovarCadastros ? 'A conta só funciona depois que a Administração aprovar.' : 'A conta entra com o papel definido pela Administração.'),
-      h('p', { class: 'entrada-regra' }, tr('Senha com pelo menos 10 caracteres, misturando letras e números.')),
       formulario([nome, login, senha, confirma], 'Criar conta', async (form) => {
         if (!iguais(form, senha, confirma)) return;
         const r = await api.contaCadastrar(login.input.value, nome.input.value, senha.input.value);
@@ -87,10 +88,9 @@ window.PrumoConta = (() => {
   /** Senha temporária (dada pela Administração) precisa ser trocada antes de usar qualquer tela. */
   function vistaTrocar() {
     const atual = campo('trocar-atual', 'Senha temporária', 'password', { autocomplete: 'current-password', maxlength: 200 });
-    const nova = campo('trocar-nova', 'Senha nova', 'password', { autocomplete: 'new-password', maxlength: 200 });
+    const nova = campo('trocar-nova', 'Senha nova', 'password', { autocomplete: 'new-password', maxlength: 200 }, 'Mínimo de 10 caracteres, com letras e números.');
     const confirma = campo('trocar-confirma', 'Confirmar senha nova', 'password', { autocomplete: 'new-password', maxlength: 200 });
     trocarVista(...cartao('Troque a senha temporária', 'Por segurança, escolha uma senha só sua antes de continuar.'),
-      h('p', { class: 'entrada-regra' }, tr('Senha com pelo menos 10 caracteres, misturando letras e números.')),
       formulario([atual, nova, confirma], 'Trocar senha', async (form) => {
         if (!iguais(form, nova, confirma)) return;
         const r = await api.contaSenha(atual.input.value, nova.input.value);
@@ -109,8 +109,8 @@ window.PrumoConta = (() => {
 
   /** Provedores externos: o botão só aparece quando a Administração configurou o aplicativo do provedor. Serve para entrar e para se cadastrar. */
   const PROVEDORES = {
-    github: { nome: 'GitHub', ativo: () => sessao?.entradaGithub, iniciar: (a) => api.contaGithubIniciar(a), estado: (c) => api.contaGithubEstado(c), titulo: 'Autorize no GitHub', texto: 'Abrimos o GitHub no seu navegador. Autorize o acesso e volte: você entra automaticamente.', entrar: 'Entrar com o GitHub', cadastrar: 'Cadastrar com o GitHub', ativar: 'Criar conta com o GitHub' },
-    google: { nome: 'Google', ativo: () => sessao?.entradaGoogle, iniciar: (a) => api.contaGoogleIniciar(a), estado: (c) => api.contaGoogleEstado(c), titulo: 'Autorize no Google', texto: 'Abrimos o Google no seu navegador. Autorize o acesso e volte: você entra automaticamente.', entrar: 'Entrar com o Google', cadastrar: 'Cadastrar com o Google', ativar: 'Criar conta com o Google' }
+    github: { nome: 'GitHub', ativo: () => sessao?.entradaGithub, iniciar: (a) => api.contaGithubIniciar(a), estado: (c) => api.contaGithubEstado(c), titulo: 'Autorize no GitHub', texto: 'Autorize no navegador; você volta já autenticado.', entrar: 'Entrar com o GitHub', cadastrar: 'Cadastrar com o GitHub', ativar: 'Criar conta com o GitHub' },
+    google: { nome: 'Google', ativo: () => sessao?.entradaGoogle, iniciar: (a) => api.contaGoogleIniciar(a), estado: (c) => api.contaGoogleEstado(c), titulo: 'Autorize no Google', texto: 'Autorize no navegador; você volta já autenticado.', entrar: 'Entrar com o Google', cadastrar: 'Cadastrar com o Google', ativar: 'Criar conta com o Google' }
   };
   const botoesExternos = (verbo) => {
     const ativos = Object.entries(PROVEDORES).filter(([, p]) => p.ativo());
@@ -139,16 +139,15 @@ window.PrumoConta = (() => {
   function vistaPrimeiroAcesso(aviso) {
     const nome = campo('primeiro-nome', 'Nome', 'text', { autocomplete: 'name', maxlength: 80 });
     const login = campo('primeiro-login', 'Login', 'text', { autocomplete: 'username', maxlength: 40, autocapitalize: 'off' });
-    const senha = campo('primeiro-senha', 'Senha', 'password', { autocomplete: 'new-password', maxlength: 200 });
+    const senha = campo('primeiro-senha', 'Senha', 'password', { autocomplete: 'new-password', maxlength: 200 }, 'Mínimo de 10 caracteres, com letras e números.');
     const confirma = campo('primeiro-confirma', 'Confirmar senha', 'password', { autocomplete: 'new-password', maxlength: 200 });
-    trocarVista(...cartao('Bem-vindo ao Prumo QA', 'Para começar, crie a conta de Administrador deste computador. Ela é a primeira conta e controla quem mais entra.'), aviso ? DS.alerta(aviso, 'aviso') : null,
-      h('p', { class: 'entrada-regra' }, tr('Senha com pelo menos 10 caracteres, misturando letras e números.')),
-      formulario([nome, login, senha, confirma], 'Criar conta de Administrador', async (form) => {
+    trocarVista(...cartao('Criar conta de Administrador', 'Primeiro acesso neste computador.'), aviso ? DS.alerta(aviso, 'aviso') : null,
+      formulario([nome, login, senha, confirma], 'Criar conta', async (form) => {
         if (!iguais(form, senha, confirma)) return;
         const r = await api.usuariosAtivar(login.input.value, nome.input.value, senha.input.value);
         if (!r.ok) { mostrarErro(form, r.error); return; }
         vistaCodigo(r.data.codigoRecuperacao, 'Conta criada. Você já está dentro.', () => location.reload());
-      }), botoesExternos('ativar'));
+      }, [link('Voltar para entrar', () => vistaEntrar(), 'entrada-voltar')]), botoesExternos('ativar'));
   }
 
   /** Esconde do menu o que o papel não permite (e o grupo que ficar vazio) e mostra quem está na sessão. */
@@ -218,7 +217,7 @@ window.PrumoConta = (() => {
     const r = await api.contaSessao();
     if (!r.ok) { trocarVista(...cartao('Não foi possível ler as contas', null), DS.alerta(textoErro(r.error), 'falha'), h('p', { class: 'entrada-regra' }, tr('O arquivo de contas deste computador está ilegível. Quem administra este computador pode restaurá-lo de um backup.'))); return false; }
     sessao = r.data;
-    if (!sessao.loginAtivo) { vistaPrimeiroAcesso(); return false; }
+    if (!sessao.loginAtivo) { vistaEntrar(); return false; }
     if (sessao.loginAtivo && !sessao.usuario) { vistaEntrar(sessao.expirou ? 'A sessão terminou por inatividade; entre de novo.' : null); return false; }
     if (sessao.usuario?.trocarSenha) { vistaTrocar(); return false; }
     aplicarMenu(); protegerTelas();
@@ -233,7 +232,7 @@ window.PrumoConta = (() => {
   function tratarErro(erro) {
     const c = codigoDo(erro);
     if (c === 'SESSION_REQUIRED' || c === 'SESSION_EXPIRED') { if (!dialogo?.open) { clearInterval(vigia); vistaEntrar(c === 'SESSION_EXPIRED' ? 'A sessão terminou por inatividade; entre de novo.' : null); } return true; }
-    if (c === 'LOGIN_SETUP_REQUIRED') { if (!dialogo?.open) vistaPrimeiroAcesso(); return true; }
+    if (c === 'LOGIN_SETUP_REQUIRED') { if (!dialogo?.open) vistaEntrar(); return true; }
     if (c === 'PASSWORD_CHANGE_REQUIRED') { if (!dialogo?.open) vistaTrocar(); return true; }
     return false;
   }

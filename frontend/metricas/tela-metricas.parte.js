@@ -141,7 +141,7 @@
     const imprimir = h('button', { type: 'button', class: 'v36-btn-icone', 'aria-label': tr('Imprimir ou salvar em PDF'), title: tr('Imprimir ou salvar em PDF'), onclick: () => window.print() }, icone('documento', 17));
     const grade = h('div', { class: 'v36m-grade', id: 'v36-met-graficos' });
     const totais = [[m.totalOperations, 'interações registradas'], [m.mcpCalls, 'chamadas via MCP'], [m.coverageReviews, 'revisões de cobertura'], [m.contextAnalyses, 'análises de contexto'], [m.executions.PASS, 'PASS'], [m.executions.FAIL, 'FAIL'], [m.executions.BLOCKED, 'BLOCKED'], [m.executions.NOT_RUN, 'NOT_RUN']];
-    el.append(h('div', { class: 'v36m-barra' }, periodo, h('div', { class: 'v36m-periodo-caixa' }, botaoCal, calendario), h('span', { class: 'v36m-divisor', 'aria-hidden': 'true' }), botaoFiltros,
+    el.append(DS.cabecalho({ titulo: 'Métricas' }), h('div', { class: 'v36m-barra' }, periodo, h('div', { class: 'v36m-periodo-caixa' }, botaoCal, calendario), h('span', { class: 'v36m-divisor', 'aria-hidden': 'true' }), botaoFiltros,
       h('div', { class: 'v36-direita' }, botaoEditor, botaoExportar, imprimir, menu)), filtros, editor,
       ...(m.complete ? [] : [h('div', { class: 'v36m-aviso' }, tr('Histórico parcial: registros inválidos ou truncados foram excluídos; os números são parciais.'))]),
       grade,

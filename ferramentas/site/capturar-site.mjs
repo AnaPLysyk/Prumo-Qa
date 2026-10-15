@@ -61,9 +61,9 @@ try {
     const virt = { ide: ['testes', 'ide'], repositorio: ['testes', 'repositorio'], runs: ['testes', 'runs'], planos: ['testes', 'planos'] };
     for (const tema of ['escuro', 'claro']) {
       await page.evaluate((t) => { document.documentElement.dataset.tema = t; }, tema);
-      for (const aba of ['inicio', 'projetos', 'tickets', 'testes', 'ide', 'repositorio', 'runs', 'planos', 'agenda', 'metricas', 'historico', 'logs', 'conexoes', 'agentes', 'suporte', 'ajuda']) {
+      for (const aba of ['inicio', 'projetos', 'tickets', 'testes', 'ide', 'repositorio', 'runs', 'planos', 'agenda', 'metricas', 'logs', 'conexoes', 'agentes', 'suporte', 'ajuda']) {
         const [pai, sub] = virt[aba] || [aba, null]; await ir(pai); if (sub) { await page.click('[data-sub=' + sub + ']'); await page.waitForTimeout(500); }
-        await page.waitForTimeout(400); await page.screenshot({ path: path.join(todas, tema + '-' + aba + '.png') });
+        await page.waitForTimeout(1200); await page.screenshot({ path: path.join(todas, tema + '-' + aba + '.png') });
       }
     }
     console.log('telas capturadas');

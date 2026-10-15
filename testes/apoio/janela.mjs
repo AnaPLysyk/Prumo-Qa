@@ -27,7 +27,9 @@ export const novoDados = (t) => {
 export const CONTA_DE_TESTE = { login: 'admin-teste', nome: 'Admin Teste', senha: 'Senha-de-teste-2026' };
 /** Primeiro acesso pela tela, como a pessoa faria: cria a conta de Administrador e entra. Devolve o código de recuperação. */
 export async function primeiroAcesso(page, conta = CONTA_DE_TESTE) {
-  await page.waitForSelector('#entrada[open] #primeiro-nome');
+  await page.waitForSelector('#entrada[open]');
+  if (!(await page.locator('#primeiro-nome').count())) await page.click('#entrada-ir-cadastro');
+  await page.waitForSelector('#primeiro-nome');
   await page.fill('#primeiro-nome', conta.nome); await page.fill('#primeiro-login', conta.login); await page.fill('#primeiro-senha', conta.senha); await page.fill('#primeiro-confirma', conta.senha);
   await page.click('#entrada-enviar'); await page.waitForSelector('#entrada-codigo'); const codigo = (await page.textContent('#entrada-codigo')).trim();
   await Promise.all([page.waitForEvent('load'), page.click('#entrada-continuar')]); await page.waitForSelector('#conta-botao');

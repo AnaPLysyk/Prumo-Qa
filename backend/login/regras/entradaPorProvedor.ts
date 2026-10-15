@@ -75,7 +75,7 @@ async function ativarPeloProvedor(d: DependenciasDeEntrada, provedor: Provedor, 
 async function resolverConta(d: DependenciasDeEntrada, provedor: Provedor, token: string, modo: ModoDaEntrada): Promise<EstadoDaEntrada> {
   const perfil = await d.lerPerfil(token); const agora = (d.agora ?? (() => new Date()))(); const r = lerContas(d.base); const p = PROVEDORES[provedor];
   if (modo === 'ativar') return ativarPeloProvedor(d, provedor, r, token, perfil, agora);
-  if (!loginLigado(r)) throw new Error('LOGIN_NOT_ACTIVE: o login ainda não foi ativado neste computador.');
+  if (!loginLigado(r)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
   let u: Usuario | undefined = r.usuarios.find((x) => x.identidades.some((i) => i.provedor === provedor && i.id === perfil.id));
   if (!u) {
     if (!r.acesso.cadastroAberto) throw new Error('SIGNUP_CLOSED: o cadastro está fechado; peça uma conta à Administração.');
@@ -97,7 +97,7 @@ const pagina = (titulo: string, texto: string) => `<!doctype html><meta charset=
 /** Começa a entrada: abre o navegador na página de autorização do provedor e espera a volta em http://127.0.0.1:porta/callback. */
 export async function iniciarEntrada(provedor: Provedor, d: DependenciasDeEntrada, modo: ModoDaEntrada = 'entrar'): Promise<{ iniciado: true }> {
   const p = PROVEDORES[provedor]; const ligado = loginLigado(lerContas(d.base));
-  if (modo === 'entrar' && !ligado) throw new Error('LOGIN_NOT_ACTIVE: o login ainda não foi ativado neste computador.');
+  if (modo === 'entrar' && !ligado) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
   if (modo === 'ativar' && ligado) throw new Error('LOGIN_ALREADY_ACTIVE: o login já está ligado; entre pela tela de entrada.');
   const cfg = d.configuracao(); if (!cfg) throw new Error(provedor.toUpperCase() + '_LOGIN_NOT_CONFIGURED: a Administração ainda não configurou o login pelo ' + p.nome + '.');
   encerrar(); situacao = { estado: 'AGUARDANDO' };

@@ -52,7 +52,7 @@ export async function ativarLogin(d: { login: string; nome: string; senha: strin
 /** Entrar: mensagem igual para login inexistente e senha errada; bloqueio por conta depois de várias tentativas erradas. */
 export async function entrarNaConta(d: { login: string; senha: string }, b?: string, agora = new Date()) {
   frearTentativas(agora.getTime());
-  const antes = lerContas(b); if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: o login ainda não foi ativado neste computador.');
+  const antes = lerContas(b); if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
   const login = String(d.login ?? '').trim().toLowerCase(); const u = antes.usuarios.find((x) => x.login === login) ?? null;
   if (u) conferirBloqueio(u, agora);
   if (!(await conferirSegredo(d.senha, u?.senha ?? null))) {
@@ -71,7 +71,7 @@ export function sairDaConta(b?: string) { encerrarSessao(); return sessaoParaJan
 /** Cadastro pela tela de entrada: só com o login ligado e o cadastro aberto; nasce PENDENTE quando a Administração aprova cadastros. */
 export async function cadastrarConta(d: { login: string; nome: string; senha: string }, b?: string, agora = new Date()) {
   const antes = lerContas(b);
-  if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: o login ainda não foi ativado neste computador.');
+  if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
   if (!antes.acesso.cadastroAberto) throw new Error('SIGNUP_CLOSED: o cadastro está fechado; peça uma conta à Administração.');
   const dados = dadosDaConta(d); const codigo = gerarCodigoDeRecuperacao();
   const senha = await resumirSegredo(d.senha); const recuperacao = await resumirSegredo(normalizarCodigoDeRecuperacao(codigo));
@@ -84,7 +84,7 @@ export async function cadastrarConta(d: { login: string; nome: string; senha: st
 /** Esqueci a senha: o código de recuperação (mostrado uma vez no cadastro) define uma senha nova e é trocado por outro. */
 export async function recuperarConta(d: { login: string; codigo: string; novaSenha: string }, b?: string, agora = new Date()) {
   frearTentativas(agora.getTime());
-  const antes = lerContas(b); if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: o login ainda não foi ativado neste computador.');
+  const antes = lerContas(b); if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
   const login = String(d.login ?? '').trim().toLowerCase(); const u = antes.usuarios.find((x) => x.login === login) ?? null;
   if (u) conferirBloqueio(u, agora);
   const formato = codigoDeRecuperacaoSchema.safeParse(d.codigo);

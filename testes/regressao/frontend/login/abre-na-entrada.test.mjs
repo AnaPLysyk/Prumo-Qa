@@ -7,7 +7,10 @@ const recusado = (r, codigo) => { assert.equal(r.ok, false); assert.match(String
 
 test('instalação nova: abre no primeiro acesso, nada responde e nenhuma tela aparece até criar a conta de Administrador', { timeout: 120000 }, async (t) => {
   const a = await abrir(t, novoDados(t), [], {}, { semLogin: true }); const p = a.page;
-  assert.equal(await p.locator('dialog#entrada[open]').count(), 1); await p.waitForSelector('#primeiro-nome');
+  assert.equal(await p.locator('dialog#entrada[open]').count(), 1); await p.waitForSelector('#entrada-login');
+  assert.equal(await p.locator('#primeiro-nome').count(), 0, 'abre em Entrar, não direto no cadastro'); assert.equal(await p.locator('#entrada-ir-recuperar').count(), 0, 'sem contas não há senha para recuperar');
+  await p.fill('#entrada-login', 'alguem'); await p.fill('#entrada-senha', 'qualquer-senha-123'); await p.click('#entrada-enviar'); await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /não existe conta/i);
+  await p.click('#entrada-ir-cadastro'); await p.waitForSelector('#primeiro-nome'); await p.click('#entrada-voltar'); await p.waitForSelector('#entrada-login'); await p.click('#entrada-ir-cadastro'); await p.waitForSelector('#primeiro-nome');
   assert.equal(await p.isVisible('#nav'), false, 'o menu fica escondido atrás da entrada'); assert.equal(await p.locator('#entrada-fechar').count(), 0);
   await p.keyboard.press('Escape'); assert.equal(await p.locator('dialog#entrada[open]').count(), 1, 'Esc não fecha a entrada');
   const canais = await p.evaluate(async () => [await window.prumo.espacos(), await window.prumo.servicos(), await window.prumo.usuariosListar(), await window.prumo.papeisListar(), await window.prumo.acessoConfiguracao(), await window.prumo.workerEstado()].map((r) => ({ ok: r.ok, error: String(r.error ?? '') })));

@@ -17,7 +17,7 @@ function formularioRotina(espacos, existente, aoSalvar) {
   const tol = h('input', { id: 'rotina-tolerancia', type: 'number', min: 0, max: 1440, value: r?.toleranciaMinutos ?? 10 });
   const k6s = h('input', { id: 'k6-script', value: r?.k6?.script || '', placeholder: 'carga/script.js' }); const k6a = h('input', { id: 'k6-alvo', value: r?.k6?.alvo || 'http://127.0.0.1:8080' });
   const k6u = h('input', { id: 'k6-usuarios', type: 'number', min: 1, max: 50, value: r?.k6?.usuarios ?? 5 }); const k6d = h('input', { id: 'k6-duracao', type: 'number', min: 1, max: 600, value: r?.k6?.duracaoSegundos ?? 30 });
-  const gCap = campoA('Automação declarada (capability)', cap, 'rotina-capability'); const gTicket = campoA('Ticket Jira (opcional)', ticket, 'rotina-ticket');
+  const gCap = campoA('Automação', cap, 'rotina-capability'); const gTicket = campoA('Ticket Jira (opcional)', ticket, 'rotina-ticket');
   const gEm = campoA('Data e hora (no fuso informado)', em, 'rotina-em'); const gMin = campoA('Intervalo (minutos)', min, 'rotina-minutos'); const gHr = campoA('Horário', hr, 'rotina-hora'); const gDias = h('div', { class: 'ds-campo inteiro' }, h('span', {}, tr('Dias da semana')), dias);
   const gK6 = h('div', { id: 'bloco-k6', class: 'ds-form inteiro' }, h('p', { class: 'suave inteiro' }, tr('k6 usa o executável oficial instalado. Limites obrigatórios: até 50 usuários virtuais e 600 s. Produção é bloqueada.')), campoA('Script k6 (dentro do projeto)', k6s, 'k6-script'), campoA('Destino (em ambiente local: localhost)', k6a, 'k6-alvo'), campoA('Usuários virtuais (1–50)', k6u, 'k6-usuarios'), campoA('Duração em segundos (1–600)', k6d, 'k6-duracao'));
   const runSel = h('select', { id: 'rotina-run' }); const gRun = campoA('Run do Qase (já criada)', runSel, 'rotina-run');
@@ -49,7 +49,7 @@ function formularioRotina(espacos, existente, aoSalvar) {
   const nomeC = campoA('Nome', nome, 'rotina-nome'); nomeC.classList.add('inteiro');
   return h('form', { class: 'ds-form', id: 'rotina-form', onsubmit: (ev) => ev.preventDefault() },
     DS.grupo('Fluxo', nomeC, campoA('Projeto Prumo', proj, 'rotina-projeto'), campoA('Tipo de rotina', tipo, 'rotina-tipo'), gCap, gRun, gTicket, campoA('Ambiente', amb, 'rotina-ambiente'), gK6),
-    DS.grupo('Quando', campoA('Frequência', freq, 'rotina-freq'), gEm, gMin, gHr, campoA('Fuso horário (nome IANA, ex.: America/Sao_Paulo)', fuso, 'rotina-fuso'), gDias),
+    DS.grupo('Quando', campoA('Frequência', freq, 'rotina-freq'), gEm, gMin, gHr, campoA('Fuso horário (ex.: America/Sao_Paulo)', fuso, 'rotina-fuso'), gDias),
     DS.grupo('Se o horário for perdido', campoA('Se o Prumo estiver fechado no horário', perd, 'rotina-perdido'), campoA('Tolerância de atraso (min)', tol, 'rotina-tolerancia'), h('p', { class: 'suave inteiro' }, tr('Computador desligado ou suspenso: o horário vira “perdido”, nunca “executado”.'))),
     msg, h('div', { class: 'ds-form-acoes' }, h('span', { class: 'ds-form-msg suave' }, tr('Testes agendados só executam com autorização vigente.')), botao('Cancelar', aoSalvar, 'rotina-cancelar'), salvar));
 }
