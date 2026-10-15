@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.14.1",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-15",
       "title": "Interface refinada: fonte própria, tabelas, estatísticas e filtros; entrada e Conexões corrigidas",
       "objective": "Refinar o formato da interface com um Design System único (fonte própria, tabelas, estatísticas, filtros e selos), corrigir o fluxo de entrada e arrumar Conexões, Ajuda e Configurações, sem mudar o comportamento da 2.14.0.",
       "features": [
@@ -40,9 +40,13 @@
       "limitations": [
         "As limitações da 2.14.0 continuam valendo."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.14.1",
       "migration": "Nada a migrar.",
-      "afterUpdate": []
+      "afterUpdate": [],
+      "installer": {
+        "file": "Prumo-QA-Setup-2.14.1.exe",
+        "sha256": "807cf8d2b9be9ece46aac9b41ea927b124164412d90f62c6d5b38a67bd82101e"
+      }
     },
     {
       "version": "2.14.0",
