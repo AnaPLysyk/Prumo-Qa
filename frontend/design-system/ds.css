@@ -454,3 +454,5 @@ main#conteudo:has(.ds-ide-cheio) { max-width: none; padding: 14px 18px 12px; }
 /* Controles de barra: sem a margem herdada de input e select, todos com a mesma altura; datas no mesmo formato. */
 .ds-barra input, .ds-barra select, .ds-busca input { margin: 0; }
 input[type="date"] { height: var(--ds-controle); padding: 5px 10px; font: inherit; font-size: var(--ds-fs-md); color: var(--texto); background-color: var(--ds-superficie); border: 1px solid var(--ds-linha-suave); border-radius: var(--raio); }
+/* Nas tabelas do Design System a palavra não quebra no meio (a caixa da tabela rola por dentro); no resto da página um caminho longo ainda pode quebrar. */
+.ds-tabela th, .ds-tabela td { overflow-wrap: normal; }
