@@ -18,7 +18,7 @@ jobs:
   classificar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           script: |
             // Fonte pública de estados; somente dados validados, nunca eval ou comando de shell.

@@ -20,16 +20,20 @@ on:
 permissions:
   contents: read
 
+# 2.17.1: uma publicação por vez, em fila. A tag dispara o site duas vezes (Windows marca o catálogo; macOS/Linux anexam os
+# instaladores) e cada rodada precisa terminar verde, em vez de uma cancelar a outra.
 concurrency:
   group: site
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   site:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
       - name: Gerar o site (mesmo comando do Render)
@@ -48,22 +52,24 @@ jobs:
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
+          # 2.17.1: sem o segredo nada publica o site; falha já, com o caminho da correção, em vez de esperar 15 minutos.
           if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
-            echo "::notice::Sem RENDER_DEPLOY_HOOK_URL: aguardando deploy manual no Render. A etapa seguinte exige este commit no ar; sem publicação, o fluxo falha."
-            exit 0
+            echo "::error::Falta o segredo RENDER_DEPLOY_HOOK_URL (Render › prumo-qa-docs › Settings › Deploy Hook; GitHub › Settings › Secrets and variables › Actions). Sem ele, publique à mão: Manual Deploy › Deploy latest commit."
+            exit 1
           fi
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$RENDER_DEPLOY_HOOK_URL")
           echo "Render respondeu HTTP $code"
           [ "$code" -ge 200 ] && [ "$code" -lt 300 ]
       - name: Conferir o site publicado
-        env:
-          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
           esperado=$(node -e "const v=JSON.parse(require('fs').readFileSync('docs/catalogo/versoes.json','utf8')).versions.find(x=>x.status==='publicada');console.log(v.version)")
           # 2.10.1: espera o site gerado DESTE commit (build.txt), não só a versão anunciada, que pode não ter mudado.
           for i in $(seq 1 45); do
             no_ar=$(curl -s https://prumo-qa-docs.onrender.com/build.txt | tr -d '[:space:]')
-            if [ "$no_ar" = "$GITHUB_SHA" ] && curl -s https://prumo-qa-docs.onrender.com/versoes.html | grep -q "<strong>$esperado</strong>"; then echo "site no ar: commit $GITHUB_SHA, versão $esperado"; exit 0; fi
+            # 2.17.1: um commit mais novo da main no ar também serve, desde que contenha este (outra publicação passou na frente).
+            contem=nao
+            if [ -n "$no_ar" ] && [ "$no_ar" != "$GITHUB_SHA" ]; then git fetch -q origin main && git merge-base --is-ancestor "$GITHUB_SHA" "$no_ar" 2>/dev/null && contem=sim; fi
+            if { [ "$no_ar" = "$GITHUB_SHA" ] || [ "$contem" = sim ]; } && curl -s https://prumo-qa-docs.onrender.com/versoes.html | grep -q "<strong>$esperado</strong>"; then echo "site no ar: commit $no_ar (contém $GITHUB_SHA), versão $esperado"; exit 0; fi
             sleep 20
           done
           echo "::error::O site no ar não passou ao commit $GITHUB_SHA (versão $esperado) em 15 minutos (no ar: ${no_ar:-desconhecido})."

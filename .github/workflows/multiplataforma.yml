@@ -38,8 +38,8 @@ jobs:
           - { nome: macOS, os: macos-latest, alvo: mac }
           - { nome: Linux, os: ubuntu-latest, alvo: linux }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -81,7 +81,7 @@ jobs:
           app=$(ls -d release/mac-arm64/*.app release/mac/*.app 2>/dev/null | head -1)
           export PRUMO_APP_EXE="$PWD/$app/Contents/MacOS/Prumo QA"
           node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/regressao/frontend/aplicativo/janela-e-seguranca.test.mjs
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: prumo-qa-${{ matrix.alvo }}
           path: |
@@ -103,8 +103,17 @@ jobs:
           gh release view "$v" >/dev/null 2>&1 || { echo "::error::Release $v não foi criada pelo fluxo do Windows em 60 minutos"; exit 1; }
           if [ "${{ matrix.alvo }}" = "mac" ]; then gh release upload "$v" release/Prumo-QA-*-mac-*.dmg release/Prumo-QA-*-mac-*.dmg.sha256 --clobber; else gh release upload "$v" release/Prumo-QA-*-linux-*.AppImage release/Prumo-QA-*-linux-*.AppImage.sha256 release/Prumo-QA-*-linux-*.deb release/Prumo-QA-*-linux-*.deb.sha256 --clobber; fi
           echo "::notice::Instaladores de ${{ matrix.nome }} anexados à release $v"
-      - name: Republicar o site com os novos instaladores
-        if: startsWith(github.ref, 'refs/tags/v')
-        env:
+
+  # 2.17.1: uma só republicação do site, depois de macOS e Linux (antes cada plataforma disparava a sua e uma cancelava a outra).
+  # Roda mesmo se uma plataforma falhar: o site omite instalador ausente da release.
+  site:
+    name: Republicar o site com os novos instaladores
+    needs: instalador
+    if: startsWith(github.ref, 'refs/tags/v') && !cancelled()
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run site.yml --ref main
+        run: gh workflow run site.yml --ref main --repo "$GITHUB_REPOSITORY"

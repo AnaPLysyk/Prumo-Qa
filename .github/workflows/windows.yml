@@ -30,13 +30,13 @@ jobs:
       # Prumo QA Lab público, fixado por commit: a demonstração 2.8 usa uma CÓPIA dele; o laboratório não é alterado nem entra no instalador.
       PRUMO_LAB_DIR: ${{ github.workspace }}\.lab
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
         with:
           repository: AnaPLysyk/Prumo-QA-Lab
           ref: 8808e57c5c997975f6588af00d4bb52fe642861a
           path: .lab
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -56,7 +56,7 @@ jobs:
           exit $codigo
       - name: Preservar o resultado da verificação, inclusive quando falhar
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: prumo-qa-verificacao
           path: |
@@ -178,7 +178,7 @@ jobs:
           "Assinatura do instalador: $($ass.Status)"
           $assinado = ($ass.Status -eq 'Valid')
           "PRUMO_ASSINADO=$($assinado.ToString().ToLower())" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: prumo-qa-instalador
           path: |

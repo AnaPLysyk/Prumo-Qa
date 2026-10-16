@@ -41,7 +41,7 @@ git push origin vX.Y.Z
 
 ### macOS e Linux (em paralelo ao Windows)
 
-`.github/workflows/multiplataforma.yml` roda na mesma tag, em máquinas macOS e Ubuntu: compila, roda os testes de plataforma (`testes/unitario/backend/aplicativo/multiplataforma.test.mjs` e `aprovacao-multiplataforma.test.mjs`), gera os instaladores (`npm run dist:mac` e `npm run dist:linux`: .dmg para Apple Silicon e Intel, .AppImage e .deb), gera o `.sha256` de cada um, abre o programa empacotado e confere janela e isolamento. Depois espera a release criada pelo fluxo do Windows, anexa os arquivos e dispara o `site.yml` de novo, para o site passar a oferecê-los. Os nomes dos arquivos vêm de `electron-builder.yml` e de `site/instaladores.mjs` e precisam coincidir com `nomeDoInstalador` do aplicativo (há teste).
+`.github/workflows/multiplataforma.yml` roda na mesma tag, em máquinas macOS e Ubuntu: compila, roda os testes de plataforma (`testes/unitario/backend/aplicativo/multiplataforma.test.mjs` e `aprovacao-multiplataforma.test.mjs`), gera os instaladores (`npm run dist:mac` e `npm run dist:linux`: .dmg para Apple Silicon e Intel, .AppImage e .deb), gera o `.sha256` de cada um, abre o programa empacotado e confere janela e isolamento. Depois espera a release criada pelo fluxo do Windows e anexa os arquivos. Quando as duas plataformas terminam (mesmo que uma falhe), um único job dispara o `site.yml` de novo, para o site passar a oferecê-los. Os nomes dos arquivos vêm de `electron-builder.yml` e de `site/instaladores.mjs` e precisam coincidir com `nomeDoInstalador` do aplicativo (há teste).
 
 Se o fluxo de macOS ou Linux falhar, a versão continua publicada para Windows e o site omite os instaladores que não estão na release (nunca anuncia um arquivo ausente). Corrija e rode o fluxo de novo pelo `workflow_dispatch` na tag; os arquivos são anexados com `--clobber`.
 
@@ -53,7 +53,9 @@ O build do site no Render roda `node site/construir-no-render.mjs` (`render.yaml
 
 ## Pré-requisito: publicação do site
 
-O fluxo do site publica no Render pelo **Deploy Hook**, guardado no segredo `RENDER_DEPLOY_HOOK_URL` do repositório (Render › `prumo-qa-docs` › Settings › Deploy Hook; GitHub › Settings › Secrets and variables › Actions). Sem ele, publique pelo Render em Manual Deploy › Deploy latest commit (ou pelo conector do Render). O fluxo aguarda e exige o commit exato no `build.txt` e a versão publicada no site; sem essa prova fica vermelho. Gerar as páginas não comprova publicação.
+O fluxo do site publica no Render pelo **Deploy Hook**, guardado no segredo `RENDER_DEPLOY_HOOK_URL` do repositório (Render › `prumo-qa-docs` › Settings › Deploy Hook; GitHub › Settings › Secrets and variables › Actions). Cadastrado em 16/10/2026. Sem ele, o fluxo falha na hora com a explicação; publique pelo Render em Manual Deploy › Deploy latest commit (ou pelo conector do Render). O fluxo aguarda no `build.txt` este commit (ou um mais novo da `main` que o contenha) e a versão publicada no site; sem essa prova fica vermelho. Gerar as páginas não comprova publicação.
+
+As publicações do site rodam em fila, uma por vez (`concurrency` sem cancelamento): o push do commit da versão, o disparo do Windows depois do catálogo e o de macOS/Linux depois dos instaladores terminam cada um verde, sem um cancelar o outro.
 
 ## Conferência final
 

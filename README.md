@@ -4,7 +4,7 @@ Eu sou a Ana Paula Lysyk, trabalho com QA e criei o Prumo para juntar num lugar 
 
 Eu preferi que nada saísse do seu computador sem você ver. Qase, Jira e GitHub conectam só para leitura. A escrita é ligada por projeto e por serviço, e cada envio mostra uma prévia e pede a confirmação nativa do sistema. A IA (Claude Code ou Codex, por MCP) lê o contexto e propõe casos, bugs e aprendizados como rascunho. Executar um teste sempre passa pela sua aprovação.
 
-Versão atual 2.17.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases). O instalador não é assinado: confira o SHA-256 publicado junto. [Site e documentação pública](https://prumo-qa-docs.onrender.com) · [catálogo de versões](docs/catalogo/versoes.json) · [registros antigos](docs/historico/).
+Versão atual 2.17.1; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases). O instalador não é assinado: confira o SHA-256 publicado junto. [Site e documentação pública](https://prumo-qa-docs.onrender.com) · [catálogo de versões](docs/catalogo/versoes.json) · [registros antigos](docs/historico/).
 
 ## Estado atual
 

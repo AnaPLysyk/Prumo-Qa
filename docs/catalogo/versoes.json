@@ -2,6 +2,46 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.17.1",
+      "status": "repositorio",
+      "date": null,
+      "title": "Publicação do site sem falhas nem cancelamentos",
+      "objective": "Fazer cada versão nova chegar ao site sozinha, com todos os passos do CI verdes, sem depender de deploy manual no Render.",
+      "features": [
+        "O site passa a ser publicado pelo próprio CI, com o Deploy Hook do Render guardado como segredo no GitHub."
+      ],
+      "improvements": [
+        "As publicações do site rodam em fila, uma de cada vez: o push da versão, o disparo do Windows depois do catálogo e o de macOS/Linux depois dos instaladores terminam cada um verde, sem um cancelar o outro.",
+        "macOS e Linux disparam o site uma única vez, depois que as duas plataformas terminam (antes cada uma disparava a sua).",
+        "As ações do CI passam a usar Node 24 (checkout, setup-node, upload-artifact e github-script), antes do fim do Node 20 no GitHub Actions."
+      ],
+      "fixes": [
+        "Sem o segredo do Render, o fluxo do site esperava 15 minutos para então falhar; agora falha na hora e diz o que configurar.",
+        "A conferência do site falhava se outra publicação mais nova chegasse ao ar antes; agora aceita um commit mais novo da main que contenha o esperado."
+      ],
+      "differential": "Da tag ao site, a versão nova fica disponível para todo mundo sem nenhum passo manual.",
+      "howItWorks": [
+        "A tag gera os instaladores e a release; o CI marca a versão como publicada no catálogo e chama o Deploy Hook do Render.",
+        "O fluxo do site só fica verde quando o build.txt no ar mostra o commit publicado e a página de versões cita a versão com o SHA-256."
+      ],
+      "security": [
+        "O endereço do Deploy Hook fica só nos segredos do GitHub e nunca aparece no registro do CI."
+      ],
+      "compatibility": [
+        "Nada muda no aplicativo instalado: esta versão mexe só na rotina de publicação."
+      ],
+      "limitations": [
+        "Cadastro por e-mail, Esqueci a senha, duas etapas e o envio de chamados continuam dependendo do serviço do Prumo no Render, que ainda não está no ar.",
+        "Entrar ou criar conta com GitHub e Google ainda exige configurar o OAuth App em cada computador.",
+        "O login não isola pessoas que usam o mesmo usuário do sistema operacional."
+      ],
+      "releaseUrl": null,
+      "migration": "Nada a migrar.",
+      "afterUpdate": [
+        "Nada a fazer: o aplicativo continua como na 2.17.0."
+      ]
+    },
+    {
       "version": "2.17.0",
       "status": "publicada",
       "date": "2026-10-16",
