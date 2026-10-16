@@ -60,7 +60,7 @@ test('login: primeiro acesso, criar conta com senha temporária, permissão por 
   assert.equal(await p.isVisible('[data-aba=agentes]'), true);
   assert.equal(await p.isHidden('[data-aba=contextos]'), true, 'Contextos fica dentro de Agentes, não no menu'); assert.equal(await p.isHidden('[data-aba=evidencias]'), true);
   const recusas = await p.evaluate(async () => [(await window.prumo.usuariosListar()).error, (await window.prumo.espacoCriar({ nome: 'X', descricao: '' })).error, (await window.prumo.testesCatalogo('11111111-1111-4111-8111-111111111111')).error]);
-  assert.match(recusas[0], /^PERMISSION_DENIED: o papel Leitor não permite consultar em Administração/);
+  assert.match(recusas[0], /^PERMISSION_DENIED: a tela Administração é só para contas marcadas como admin/);
   assert.match(recusas[1], /^PERMISSION_DENIED: o papel Leitor não permite alterar em Projetos/);
   assert.match(recusas[2], /^PERMISSION_DENIED: .*consultar em Testes/);
   await p.evaluate(() => mostrar('administracao')); await p.waitForSelector('#tela-sem-acesso');

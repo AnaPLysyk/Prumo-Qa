@@ -11,3 +11,6 @@
 #perm-matriz select[data-nivel="USAR"] { border-color: color-mix(in srgb, var(--ok) 55%, var(--linha)); }
 #perm-matriz select[data-nivel="VER"] { border-color: color-mix(in srgb, var(--acento) 55%, var(--linha)); }
 .perm-lista li { gap: 4px; }
+
+/* Marca admin (só ela libera a tela Administração). */
+.adm-admin { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; cursor: pointer; }

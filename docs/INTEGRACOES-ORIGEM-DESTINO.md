@@ -1,6 +1,6 @@
 # Prumo QA: origem dos projetos e destino de publicação
 
-15/10/2026 — arquitetura pretendida e evidências, não homologação dos serviços reais.
+15–16/10/2026 — arquitetura e evidências. Homologado com contas reais da autora (Qase PQ, Jira KAN, GitHub Prumo-QA-Lab) em 15–16/10/2026; cada conta tem plano e permissões próprios.
 
 ## Projeto Prumo é a identidade central
 
@@ -46,9 +46,9 @@ A lista de Tickets mostra lado a lado tickets do Jira, defeitos do Qase, issues 
 ## Estado de implementação
 
 - Projeto manual: Projetos › **Criar projeto manual** (nome e descrição), sem Qase, Jira ou GitHub. Pasta local e repositório GitHub podem ser vinculados depois; o repositório local funciona sozinho.
-- Importação Qase via token, consulta paginada, escolha, vinculação e proteção da credencial: implementada, ainda sem homologação com a conta real.
-- **Defeitos Qase** (`qase.criar_defeito`): implementado com teste sintético; conta Qase real ainda não homologada.
-- **GitHub Issues** (`github.criar_issue` e leitura `issues`): implementado com teste sintético (`testes/regressao/backend/conexoes/publicacao-issue-github.test.mjs`); repositório real ainda não homologado. Edição, comentário e fechamento de issue não têm contrato.
+- Importação Qase via token, consulta paginada, escolha, vinculação e proteção da credencial: homologada com a conta real (projetos AP e PQ).
+- **Defeitos Qase** (`qase.criar_defeito`, `qase.status_defeito`): homologados com a conta real (defeito criado, severidade conferida, status alterado). Campos personalizados: ver a observação na seção do Qase.
+- **GitHub Issues** (`github.criar_issue` e leitura `issues`): homologado com repositório real (issue criada e conferida); sem a permissão Issues: Read and write, o GitHub descarta os rótulos. Edição, comentário e fechamento de issue não têm contrato.
 - A troca global de projeto usa os vínculos por UUID e a tela Projetos mostra a origem; testes E2E da janela continuam pendentes.
 
 ## Qase: mapa da API v1 e uso no Prumo

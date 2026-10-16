@@ -48,7 +48,9 @@ export const usuarioSchema = z.object({
   senha: resumoDeSegredoSchema.nullable(), recuperacao: resumoDeSegredoSchema.nullable(), trocarSenha: z.boolean(),
   identidades: z.array(z.object({ provedor: z.enum(['github', 'google']), id: z.string().regex(/^[0-9]{1,30}$/), login: z.string().min(1).max(60) }).strict()).max(5).default([]),
   falhas: z.number().int().min(0).max(1000), bloqueadoAte: quando.nullable(),
-  criadoEm: quando, atualizadoEm: quando, ultimoAcesso: quando.nullable(), origem: z.enum(['ATIVACAO', 'ADMINISTRACAO', 'CADASTRO', 'GITHUB', 'GOOGLE'])
+  criadoEm: quando, atualizadoEm: quando, ultimoAcesso: quando.nullable(), origem: z.enum(['ATIVACAO', 'ADMINISTRACAO', 'CADASTRO', 'GITHUB', 'GOOGLE']),
+  // Marca admin: só ela libera a tela Administração. Conta antiga sem a marca gravada herda do papel Administrador (ver ehAdmin).
+  admin: z.boolean().optional()
 }).strict();
 
 export type Usuario = z.infer<typeof usuarioSchema>;
@@ -80,8 +82,8 @@ const tudoVer = Object.fromEntries(modulosDoMenu.map((m) => [m.id, 'VER'])) as R
 
 /** Papéis que já vêm prontos. O administrador é fixo (tudo liberado); os outros a administração pode ajustar. */
 export const papeisPadrao: Papel[] = [
-  { id: 'administrador', nome: 'Administrador', descricao: 'Tudo, inclusive usuários, permissões e agentes da plataforma.', fixo: true, telas: { ...tudoUsar } },
-  { id: 'qa', nome: 'Analista de QA', descricao: 'Usa todas as telas de trabalho; não entra na Administração.', fixo: false, telas: { ...tudoUsar, administracao: 'NENHUM' } },
+  { id: 'administrador', nome: 'Administrador', descricao: 'Usa todas as telas de trabalho. A tela Administração depende da marca Admin na conta.', fixo: true, telas: { ...tudoUsar } },
+  { id: 'qa', nome: 'Analista de QA', descricao: 'Usa todas as telas de trabalho.', fixo: false, telas: { ...tudoUsar, administracao: 'NENHUM' } },
   { id: 'leitor', nome: 'Leitor', descricao: 'Consulta as telas de trabalho sem alterar nada.', fixo: false, telas: { ...tudoVer, administracao: 'NENHUM' } }
 ];
 
@@ -90,4 +92,4 @@ export const acessoPadrao: ConfiguracaoDeAcesso = { cadastroAberto: true, aprova
 export const registroDeContasVazio: RegistroDeContas = { version: 1, usuarios: [], papeis: papeisPadrao, acesso: acessoPadrao };
 
 /** Campos que a janela pode ver de uma conta: nunca resumo de senha nem de código de recuperação. */
-export type ContaVisivel = Pick<Usuario, 'id' | 'login' | 'nome' | 'papel' | 'estado' | 'trocarSenha' | 'criadoEm' | 'ultimoAcesso' | 'origem'> & { bloqueada: boolean; temRecuperacao: boolean; papelNome: string };
+export type ContaVisivel = Pick<Usuario, 'id' | 'login' | 'nome' | 'papel' | 'estado' | 'trocarSenha' | 'criadoEm' | 'ultimoAcesso' | 'origem'> & { bloqueada: boolean; temRecuperacao: boolean; papelNome: string; admin: boolean };

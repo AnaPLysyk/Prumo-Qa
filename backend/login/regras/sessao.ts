@@ -22,9 +22,20 @@ export function nivelNaTela(papel: Papel | null, tela: IdModulo): NivelDeAcesso 
 
 export const telasDoPapel = (papel: Papel | null) => Object.fromEntries(modulosDoMenu.map((m) => [m.id, nivelNaTela(papel, m.id)])) as Record<IdModulo, NivelDeAcesso>;
 
+/** Tem a marca admin? Conta gravada antes da 2.15.1 (sem o campo) segue o papel Administrador, para ninguém perder o acesso. */
+export const ehAdmin = (u: Pick<Usuario, 'admin' | 'papel'>) => u.admin ?? u.papel === 'administrador';
+
+/** Nível da conta numa tela: a Administração só para quem tem a marca admin; as demais seguem o papel. */
+export function nivelDaConta(u: Pick<Usuario, 'admin' | 'papel'>, papel: Papel | null, tela: IdModulo): NivelDeAcesso {
+  if (tela === 'administracao') return ehAdmin(u) ? 'USAR' : 'NENHUM';
+  return nivelNaTela(papel, tela);
+}
+
+export const telasDaConta = (u: Pick<Usuario, 'admin' | 'papel'>, papel: Papel | null) => Object.fromEntries(modulosDoMenu.map((m) => [m.id, nivelDaConta(u, papel, m.id)])) as Record<IdModulo, NivelDeAcesso>;
+
 export function contaParaJanela(r: RegistroDeContas, u: Usuario, agora = Date.now()): ContaVisivel {
   return { id: u.id, login: u.login, nome: u.nome, papel: u.papel, papelNome: papelDaConta(r, u)?.nome ?? u.papel, estado: u.estado, trocarSenha: u.trocarSenha, criadoEm: u.criadoEm, ultimoAcesso: u.ultimoAcesso, origem: u.origem,
-    bloqueada: !!u.bloqueadoAte && Date.parse(u.bloqueadoAte) > agora, temRecuperacao: !!u.recuperacao };
+    bloqueada: !!u.bloqueadoAte && Date.parse(u.bloqueadoAte) > agora, temRecuperacao: !!u.recuperacao, admin: ehAdmin(u) };
 }
 
 export type SituacaoDaSessao =
@@ -54,7 +65,7 @@ export function sessaoParaJanela(b?: string, agora = Date.now()) {
   // Sem nenhuma conta o Prumo não libera tela alguma: a janela mostra só a criação da conta de Administrador.
   if (s.tipo === 'SEM_LOGIN') return { loginAtivo: false, usuario: null, expirou: false, telas: telasDoPapel(null), ...geral };
   if (s.tipo !== 'ATIVA') return { loginAtivo: true, usuario: null, expirou: s.tipo === 'EXPIRADA', telas: telasDoPapel(null), ...geral };
-  return { loginAtivo: true, usuario: contaParaJanela(s.registro, s.usuario, agora), expirou: false, telas: telasDoPapel(s.papel), ...geral };
+  return { loginAtivo: true, usuario: contaParaJanela(s.registro, s.usuario, agora), expirou: false, telas: telasDaConta(s.usuario, s.papel), ...geral };
 }
 
 /** Id de quem está na sessão agora (sem renovar o prazo), para registrar autoria; null sem login ou sem sessão. */

@@ -1,179 +1,110 @@
 # Prumo QA 2.15 — Plataforma desktop de engenharia de qualidade
 
+Eu sou a Ana Paula Lysyk, trabalho com QA e criei o Prumo para juntar num lugar só o que faço todo dia: projeto, requisitos, casos, runs, evidências e tickets, com ou sem IA. Ele roda no seu computador (Windows, macOS e Linux) e abre na tela de login. No primeiro acesso você cria a conta de Administrador.
+
+Eu preferi que nada saísse do seu computador sem você ver. Qase, Jira e GitHub conectam só para leitura. A escrita é ligada por projeto e por serviço, e cada envio mostra uma prévia e pede a confirmação nativa do sistema. A IA (Claude Code ou Codex, por MCP) lê o contexto e propõe casos, bugs e aprendizados como rascunho. Executar um teste sempre passa pela sua aprovação.
+
+Versão atual 2.15.1; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases). O instalador não é assinado: confira o SHA-256 publicado junto. [Site e documentação pública](https://prumo-qa-docs.onrender.com) · [catálogo de versões](docs/catalogo/versoes.json) · [registros antigos](docs/historico/).
+
+## Estado atual
+
+- Integrações homologadas com contas reais do Qase, do Jira e do GitHub em 15 e 16/10/2026: caso, defeito, run e resultado no Qase, bug e comentário no Jira e issue no GitHub, conferidos direto no serviço.
+- Limites conhecidos: o plano gratuito do Qase não libera o vínculo caso-ticket do Jira; campos personalizados obrigatórios de defeito só foram homologados em projetos sem esses campos; sem Issues: Read and write, o GitHub descarta os rótulos (o Prumo avisa); editar ou fechar issue, editar defeito e excluir qualquer item não existem.
+- O que cada serviço lê e recebe: [origem e destino das integrações](docs/INTEGRACOES-ORIGEM-DESTINO.md). Regras de confiança: [segurança](docs/SEGURANCA.md). Ciclo de trabalho: [ciclo de qualidade](docs/CICLO-QUALIDADE.md).
+
 ## Onde fica cada coisa
 
-Procure pelo nome da tela que aparece no menu: a mesma pasta existe no frontend e no backend.
+Procure pelo nome da tela no menu: a mesma pasta existe no frontend e no backend.
 
 | Quero mexer em… | Vá para |
 | --- | --- |
-| O que aparece numa tela | `frontend/<tela>/` (fonte única; `dist/renderer/` é gerado no build) |
-| O que a tela faz por trás (canais, regras, dados, integrações) | `backend/<tela>/` com `api/`, `regras/`, `banco/`, `integracoes/`, `tipos/` |
+| O que aparece numa tela | `frontend/<tela>/` (HTML/CSS/JS sem framework; `dist/renderer/` é gerado no build) |
+| O que a tela faz por trás | `backend/<tela>/`: `api/` (um arquivo por canal IPC), `regras/`, `banco/`, `integracoes/`, `tipos/` |
 | Componentes e estilos comuns | `frontend/design-system/` e `frontend/compartilhado/` |
-| Skills dos agentes | `backend/agentes/skills/` (arquivos do aplicativo) e o banco `skills.db` ([docs/SKILLS.md](docs/SKILLS.md)) |
-| Testes | `testes/<natureza>/<camada>/<módulo>/` ([testes/LEIA-ME.md](testes/LEIA-ME.md)) |
-| Build, empacotamento, release, documentação gerada | `ferramentas/<finalidade>/` |
-| Site público | `site/gerar.mjs`, `site/componentes/`, `site/estilos/` |
+| O que várias telas usam | `backend/compartilhado/`: contrato `qa.project.json` (`projeto/`, `tipos/projeto.ts`), leitura segura e máscara de segredos (`seguranca/`), erros e pasta de dados |
+| Portas de entrada | `backend/aplicativo.ts` (Electron), `backend/cli.ts` (terminal, comandos em `backend/terminal/`), `backend/mcp.ts` (servidor MCP, ferramentas em `backend/agentes/mcp/`) |
+| Ponte janela ↔ canais | `backend/aplicativo/preload.cjs` (`window.prumo`) e `backend/aplicativo/api/catalogoDeContratos.ts` (esquemas IPC e MCP; [catálogo gerado](docs/CONTRATOS.md)) |
+| Testes, runs e execução com aprovação humana | `backend/testes/` (aprovação em `aprovacao/`, broker Windows em `ferramentas/empacotamento/aprovar.cs`) |
+| Agendamentos, worker e k6 | `backend/agendamentos/` ([agendamentos](docs/AGENDAMENTOS.md)) |
+| Contas de serviço e escrita externa | `backend/conexoes/` e `backend/tickets/` |
+| Agentes, conhecimento e Skills | `backend/agentes/` e `backend/agentes/skills/` ([Skills](docs/SKILLS.md)) |
+| Testes | `testes/<natureza>/<camada>/<módulo>/` ([testes/LEIA-ME.md](testes/LEIA-ME.md), [seleção](docs/TESTES.md)) |
+| Build, empacotamento, release e documentação gerada | `ferramentas/<finalidade>/` (não vão para o instalador) |
+| Instaladores | `electron-builder.yml` (NSIS no Windows, .dmg no macOS, AppImage e .deb no Linux) e `assets/` |
+| CI | `.github/workflows/`: `windows.yml` (suíte, instalador, atualização, release), `multiplataforma.yml` (macOS e Linux), `site.yml`, `triagem.yml` |
+| Site público | `site/gerar.mjs`, `site/componentes/`, `site/estilos/`; `scripts/gerar-site.mjs` só repassa para `site/construir-no-render.mjs` enquanto o Render usar o comando antigo |
 | Ajuda do aplicativo e do site | `docs/ajuda/*.md` |
-| Ver tudo isso dentro do aplicativo | Administração › Documentação viva (gerada do código no build) |
+| Exemplos | `backend/projetos/exemplos/` (`projeto-demo`, `plano-demo.json`, `g3-somente-leitura.json`) |
 
-Mapa completo: [Arquitetura modular por tela](docs/ARQUITETURA-MODULAR-ATUAL.md) · [índice do backend](backend/LEIA-ME.md) · [seleção de testes](docs/TESTES.md). `npm.cmd run check` confere dependências, tipos e a suíte inteira.
+Mapa completo: [arquitetura por tela](docs/ARQUITETURA-MODULAR-ATUAL.md) e [índice do backend](backend/LEIA-ME.md), gerado do código (cada `backend/<tela>/` tem o seu `LEIA-ME.md`). Dentro do aplicativo: Administração › Documentação viva.
 
-Versão atual 2.15.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/historico/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/historico/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/historico/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+## Rodar a partir do código
 
-## Ciclo de qualidade e IA
-
-[Guia do ciclo](docs/CICLO-QUALIDADE.md): projeto → requisitos → casos e cenários → execução manual/automatizada → evidências → revisão → aprendizado. Início, chat flutuante e Agentes compartilham o orquestrador, perfil local, memória da sessão e revisão de conhecimentos. Aprendizados de IA permanecem rascunhos até decisão da pessoa.
-
-## Instalar no Windows PowerShell
-
-Node **24 LTS** recomendado. Produção requer Node 22 ou superior; suíte usa module mocks experimentais do Node. Git para obter o projeto. Sem Docker, banco, frontend ou servidor remoto.
+Node 24 (o CI usa 24; o mínimo declarado é 22) e Git. Não precisa de Docker, banco ou servidor.
 
 ```powershell
 git clone https://github.com/AnaPLysyk/Prumo-Qa.git
 Set-Location .\Prumo-Qa
 npm.cmd ci
-npm.cmd run build
-npm.cmd run check
+npm.cmd run app      # build e abre o aplicativo
 ```
 
-Para instalar o comando localmente a partir deste código, sem publicar no npm:
+Para ter o comando `prumo` sem publicar no npm:
 
 ```powershell
-npm.cmd pack                  # prepack compila TypeScript e broker
-npm.cmd install --global '.\prumo-qa-2.2.0.tgz'
+$pacote = npm.cmd pack | Select-Object -Last 1   # o prepack compila
+npm.cmd install --global ".\$pacote"
 prumo.cmd help
-$demo = Join-Path (Get-Location) 'exemplos\projeto-demo'
-prumo.cmd --root "$demo"
 ```
 
-Use `prumo` quando a política do PowerShell permitir; `prumo.cmd` evita selecionar o shim `.ps1`. O único binário npm registrado agora é **prumo**: a instalação não cria nem substitui `qa`. Não usamos `force`. Se já existir outro programa chamado prumo, escolha `npm.cmd install --global --prefix '<pasta própria>' '<pacote.tgz>'` e execute seu `prumo.cmd` por caminho absoluto. Node deve estar no PATH.
+O único binário registrado é `prumo` (não cria nem substitui `qa`). Se já existir outro `prumo`, instale com `--prefix '<pasta própria>'` e chame pelo caminho absoluto. `prumo.cmd` evita o shim `.ps1` quando a política do PowerShell bloqueia scripts. Sem instalar, use `node .\dist\cli.js` ou `npm.cmd run prumo --`. O pacote é `private` e `UNLICENSED`; a licença para terceiros ainda está para decidir ([licenças](docs/LICENCAS.md)).
 
-O pacote contém dist (incluindo o broker Windows quando compilado no Windows), Skill, documentação e fonte do broker. Não inclui projetos analisados, histórico, prompts, testes privados, dependências instaladas ou anexos. `private: true` e `UNLICENSED` foram preservados; a titular ainda precisa decidir uma licença para distribuição a terceiros. Este fluxo comprova instalação local, sem npm publish ou instalador desktop. Em outra máquina Windows, prefira clonar e empacotar nela; políticas de Controle de Aplicativo podem bloquear o broker não assinado. Nunca desative políticas para liberar uma rodada.
-
-## Terminal e acompanhamento
+## Terminal
 
 ```powershell
-prumo.cmd doctor --root "$demo"
-prumo.cmd --root "$demo"                 # menu em terminal interativo
-prumo.cmd atividade --root "$demo"
-prumo.cmd logs --follow --root "$demo"   # Ctrl+C encerra; sem daemon
-prumo.cmd metricas --root "$demo"
+$demo = Join-Path (Get-Location) 'backend\projetos\exemplos\projeto-demo'
+prumo.cmd doctor --root "$demo"              # explica problemas do contrato
+prumo.cmd --root "$demo"                     # menu interativo
+prumo.cmd context --root "$demo"
+prumo.cmd review '.\backend\projetos\exemplos\plano-demo.json' --root "$demo"
+prumo.cmd run unit --root "$demo"            # BLOCKED: sem aprovação
+prumo.cmd approve unit --root "$demo"        # pede a aprovação do sistema e roda uma vez
 prumo.cmd evidencias --root "$demo"
-prumo.cmd atividade --json --root "$demo"
-prumo.cmd metricas --json --root "$demo"
-prumo.cmd logs --json --root "$demo"     # JSONL, uma linha por evento
+prumo.cmd atividade --root "$demo"           # --json em atividade, metricas e logs
+prumo.cmd metricas --root "$demo"
+prumo.cmd logs --follow --root "$demo"       # Ctrl+C encerra
+npm.cmd run demo                             # demonstração CLI/MCP com logs reais
 ```
 
-Sem `--root`, usa o diretório atual, sem busca por projetos vizinhos. Se não houver contrato válido, o menu interativo solicita uma raiz absoluta; não cria manifesto nem altera o projeto. `doctor` explica problemas de contrato. Fora de TTY, o painel termina após imprimir; não fica esperando entrada. Os comandos antigos `context`, `review`, `run`, `approve`, `evidence` continuam disponíveis via prumo/node e preservam saída JSON. Consultar atividade/logs/métricas não gera novas operações; consultar evidências usa o núcleo e é registrado.
+- Sem `--root`, vale a pasta atual. O CLI nunca cria `qa.project.json`; fora de um terminal interativo, o menu imprime e termina.
+- `approve` autentica a pessoa e executa uma única rodada; não deixa autorização guardada. Windows: CredUI com a senha da conta atual (conta só com PIN/Hello precisa de senha compatível). macOS e Linux: autenticação do sistema, com as ressalvas de [segurança](docs/SEGURANCA.md). Cancelar, errar a senha, mudar o escopo ou expirar bloqueia. Nunca deixe uma IA preencher a credencial.
+- Saída: 0 consulta/PASS, 1 FAIL, 2 BLOCKED/NOT_RUN/entrada inválida, 3 histórico incompleto ou falha ao registrar, sem falha do núcleo.
 
-O painel informa a **última chamada MCP observada**, com identidade declarada pelo cliente. Não anuncia conexão ativa ou acesso a conversas externas. Histórico vazio mostra zero operações, nenhuma atividade e duração indisponível.
+### Histórico e métricas
 
-### Logs e métricas verificáveis
+O histórico fica em `%LOCALAPPDATA%\PrumoQA\projects\<hash>\<operação>.jsonl` (macOS: `~/Library/Application Support/PrumoQA`; Linux: `~/.local/share/prumo-qa`). `PRUMO_DATA_DIR` (caminho absoluto) troca a pasta; use o mesmo valor no terminal e no servidor MCP. Pastas com links ou dentro do projeto analisado são recusadas.
 
-No Windows, histórico em `%LOCALAPPDATA%\PrumoQA\projects\<hash-da-raiz-e-id>\<operação-UUID>.jsonl`. Em outros sistemas, `~/.local/share/prumo-qa/projects/…`. Pode escolher um diretório absoluto externo com `$env:PRUMO_DATA_DIR = 'C:\dados\PrumoQA'`; configure o mesmo ambiente para servidor e terminal. Raízes/diretórios com links e destinos dentro do projeto analisado são recusados.
+Cada operação guarda início, término, duração, origem (CLI/MCP), ferramenta, estado e contagens. Texto de requisito, código, credencial ou resposta não é copiado. Limites: 10.000 arquivos, 32 KiB por operação, 32 MiB por leitura; nada é apagado por rotação, você arquiva à mão. Arquivo inválido sai das métricas com aviso `HISTORY_INCOMPLETE`, nunca em silêncio. Falha ao gravar gera `PRUMO_OBSERVABILITY_ERROR` no stderr e não muda o resultado do núcleo.
 
-O assistente `conectar` inclui somente PRUMO_DATA_DIR na proposta quando essa variável foi definida; não copia outras variáveis do processo para a configuração. O terminal precisa usar o mesmo valor nas sessões seguintes.
-
-Cada operação tem início e término, timestamps UTC, duração monotônica, origem CLI/MCP, ferramenta, estado e resumo. Projeto e raiz são identificados por hashes; nomes/caminhos completos são resolvidos localmente pelo contrato. Entradas de revisão armazenam somente quantidades e presença de requisito/origem. Saídas armazenam tipos/contagens e recomendações genéricas do catálogo público, sem copiar texto de requisito, cenário, conflito, credencial, código ou resposta extensa. `evidenceJobId` referencia a evidência existente; seu conteúdo não é duplicado. Pino emite JSON e severidades info/warn/error, com redação defensiva e sem stdout do MCP.
-
-`manifestHash` identifica o vínculo carregado ao iniciar o CLI/servidor. Tools revalidam o contrato; evidências de execução preservam seu próprio hash/escopo efetivo. Alterar o id do projeto durante uma sessão MCP exige reiniciar o servidor e não transfere histórico para a nova identidade.
-
-| Indicador | Definição |
+| Indicador | O que conta |
 |---|---|
-| Chamadas MCP | Operações tools/call observadas, incluindo erros; handshake/tools/list não são análises |
-| Contextos e revisões | Términos NOT_VERIFIED dessas ferramentas; rejeição de entrada não conta como análise feita |
-| Achados/recomendações | Ocorrências retornadas; repetir revisão soma ocorrências, não mede problemas únicos ou mudanças aplicadas |
-| Lacunas | Achados MISSING_*, UNVERIFIED_*, TRACEABILITY_GAP, COVERAGE_GAP e CONTRADICTORY_REQUIREMENT |
-| Redundâncias candidatas | Ocorrências POTENTIAL_REDUNDANCY, sem declarar equivalência semântica comprovada |
-| Execuções solicitadas | Chamadas à ferramenta de execução, inclusive inválidas/incompletas |
-| PASS/FAIL/BLOCKED/NOT_RUN | Somente estados retornados pela execução; consultas/revisões não incrementam PASS |
-| Duração média | Términos válidos; início sem término não recebe duração inventada |
-| Tokens, custos, alterações aplicadas | Indisponíveis; não recebemos comprovação do cliente/provedor |
-
-Histórico usa arquivo exclusivo por operação e fsync, schema estrito, checksum e vínculo de projeto. Limites: 10.000 arquivos, 32 KiB por operação e 32 MiB por leitura. Não apaga dados por rotação automática; ao atingir limite, arquive manualmente a pasta fora de `projects` com processos parados. Métricas abrangem os registros presentes. Uma linha final parcial é sinalizada; arquivo inválido é excluído das métricas com aviso **HISTORY_INCOMPLETE**, nunca silenciosamente. Início sem término aparece como “sem término observado”, não PASS/NOT_RUN. Hashes detectam corrupção, não adulteração por quem pode reescrevê-los.
-
-Falha ao gravar gera `PRUMO_OBSERVABILITY_ERROR` em stderr com UUID/fase, sem texto privado de erro. O resultado original do núcleo é preservado; CLI mantém exit 1/2 de FAIL/BLOCKED e usa 3 quando uma consulta bem-sucedida perde observabilidade. MCP preserva o contrato de resposta e comunica o problema por stderr do processo, que o cliente deve capturar. Sem acesso ao disco, o evento não pode ser persistido: contadores não representam operações perdidas. Logs de teste permanecem isolados do perfil real.
-
-## Assistente de conexão
-
-```powershell
-prumo.cmd conectar codex --root "$demo"
-prumo.cmd conectar codex --json --root "$demo"   # só proposta, nenhuma escrita
-prumo.cmd conectar claude --root "$demo"         # comando manual revisável
-```
-
-O assistente valida o contrato, localiza o cliente e apresenta raiz, destino, nome único e comando PowerShell com caminhos escapados. No Codex nativo, exige digitar a confirmação exibida em TTY antes de chamar o configurador oficial. Consulta configurações existentes e recusa sobrescrever o mesmo nome; falha de inspeção impede escrita. Não há `--yes`. Fora de TTY/JSON ou com cliente ausente/shim .cmd, mostra a proposta para execução posterior. Execute o comando proposto somente após revisar o destino e verificar que o nome não existe. Configuração não comprova sessão ativa; reabra o cliente e peça uma chamada `contexto_projeto`. Claude Code está documentado, mas não foi executado neste ambiente.
-
-Para usar os nomes `qa` sem alterar uma instalação anterior do QA Orchestrator, crie uma função só nesta sessão:
-
-```powershell
-$prumoEntry = Join-Path (Get-Location) 'dist\cli.js'
-function qa { & node $prumoEntry @args }
-qa help
-```
-
-Também pode usar `node .\dist\cli.js`, `npm.cmd run prumo --` ou o script compatível `npm.cmd run qa --`. A função qa acima só existe na sessão; o pacote 2.1 registra exclusivamente prumo.
-
-## Estrutura
-
-O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a tela tem no frontend. Dentro de cada tela, `api/` atende os pedidos da janela (um arquivo por canal IPC, com o nome do canal), `regras/` decide, `banco/` lê e grava os dados deste computador, `integracoes/` fala com Jira, Qase, GitHub ou IA e `tipos/` descreve o formato dos dados. Cada arquivo começa com uma frase dizendo o que faz; os canais de `api/` têm um arquivo por canal e as regras reúnem suas funções auxiliares privadas no mesmo arquivo. O índice completo, gerado do código, está em [backend/LEIA-ME.md](backend/LEIA-ME.md) e em cada `backend/<tela>/LEIA-ME.md`.
-
-| Caminho | Responsabilidade |
-|---|---|
-| `backend/`, `frontend/` | O aplicativo: uma pasta por tela em cada um (regras e dados no backend; interface no frontend) |
-| `testes/` | Todos os testes automáticos: unitário, smoke e regressão, por camada (backend/frontend) e por módulo |
-| `docs/` | Documentação; `docs/ajuda/` é a Ajuda do app e do site, `docs/catalogo/` o histórico de versões e `docs/historico/` os registros de entregas antigas |
-| `ferramentas/` | Scripts do projeto (build, documentação, release, testes); não vão para o instalador |
-| `site/` | Gerador do site público (Render) |
-| `assets/` | Ícones e imagens compartilhados pelo app, pelo site e pelo instalador |
-| `.github/` | CI do Windows, publicação do site e triagem de chamados |
-| `scripts/` | Atalho temporário para o build antigo do Render; sai quando o comando do Render for corrigido |
-| `backend/aplicativo.ts` | Porta de entrada do aplicativo desktop (Electron): pasta de dados, canais da janela, janela, bandeja e worker |
-| `backend/cli.ts` | Porta de entrada do terminal (`prumo`); comandos em `backend/terminal/` |
-| `backend/mcp.ts` | Porta de entrada do servidor MCP (`dist/mcp.js`, mesmo caminho das versões anteriores); ferramentas em `backend/agentes/mcp/` |
-| `backend/aplicativo/api/catalogoDeContratos.ts` | Fonte única dos esquemas IPC e do catálogo técnico (IPC + MCP); `registrarCanaisIpc.ts` liga cada canal ao arquivo `api/` da tela |
-| `backend/compartilhado/` | Só o que várias telas usam: contrato `qa.project.json` (`projeto/`), leitura segura e máscara de segredos (`seguranca/`), erros, textos e pasta de dados |
-| `backend/testes/` + `ferramentas/empacotamento/aprovar.cs` | Executar capacidade com aprovação humana do Windows (`dist/aprovar.exe`), histórico de execuções e comentário de resultado no Jira |
-| `backend/agendamentos/` | Rotinas, fila, worker residente, autorizações prévias e k6 |
-| `backend/testes/` | Catálogo de testes, frameworks e análise Playwright, revisão de cobertura, runs e escrita no Qase |
-| `backend/tickets/` | Propostas de caso/bug e escrita no Jira |
-| `backend/conexoes/` | Contas de serviço com credencial protegida, transporte HTTPS, escrita externa controlada, GitHub e conexão das IAs pelo MCP |
-| `backend/agentes/` | Chat com agentes, bancos de conhecimento e de Skills (SQLite local), políticas da IA e servidor MCP |
-| `backend/agentes/`, `backend/testes/`, `backend/logs/`, `backend/projetos/` … | Uma pasta por tela, cada uma com seu `LEIA-ME.md` |
-| `backend/aplicativo/preload.cjs` | Ponte mínima (`window.prumo`) entre a janela e os canais IPC |
-| `frontend/<tela>/` → `dist/renderer/` | Interface HTML/CSS/JS sem frameworks; `dist/renderer/` é gerado no build e não é versionado |
-| `docs/ajuda/*.md` | Documentos da aba Ajuda (inclui privacidade e termos em rascunho) |
-| `electron-builder.yml`, `assets/` | Instalador NSIS e ícone substituível |
-| `.github/workflows/windows.yml` | Testes, instalador, instalação em pasta com espaços e release por tag |
-| `backend/agentes/skills/qa/SKILL.md` | Método de qualidade aplicável do ISTQB, sem meta fixa de cenários |
-| `testes/<natureza>/<camada>/<módulo>/` | `unitario` (regras isoladas e regras do repositório), `smoke` (o app sobe) e `regressao` (contratos, integração, segurança, janela real e migração) |
-| `ferramentas/` | Ferramentas por finalidade: arquitetura, documentação, frontend, empacotamento, release, migração, site, qa, skills e testes |
-| `backend/projetos/exemplos/projeto-demo` | Produto fictício de publicações, dados em memória e testes reais |
-| `backend/projetos/exemplos/plano-demo.json` | Revisão rastreável com cenário duplicado |
-| `backend/projetos/exemplos/g3-somente-leitura.json` | Contrato externo restrito, sem comandos, para G3 |
-| `ferramentas/demonstracao/demonstrar.mjs` | Demonstração CLI/MCP com logs reais; sem simular aprovação humana |
-| `docs/` | Segurança, proveniência, validação, diagnóstico e entrega |
-
-## Validar sem abrir o Electron
-
-Em uma máquina sem homologação de navegador/banco autorizada, use `npm run check:isolado`. Ele confere dependências, TypeScript, build e executa os testes elegíveis com proteção adicional contra inicialização de Electron/Chromium, SQLite por `require` e TCP fora de localhost. Registra os arquivos que dependem da janela ou de migração como `NOT_RUN`, sem tratá-los como PASS. Para inspecionar a seleção sem rodar testes: `npm run test:selecionar -- --isolado --listar`.
-
-**Este modo não substitui `npm run check` nem é uma sandbox de segurança**: a seleção é conservadora por dependências conhecidas e a proteção em runtime não prova ausência de todos os efeitos de outros processos. E2E visual, login real, permissões nativas e integrações externas continuam pendentes até homologação específica e autorizada. Falha em qualquer teste selecionado faz o comando falhar.
+| Chamadas MCP | `tools/call` observadas, inclusive com erro; handshake e `tools/list` não contam |
+| Achados e recomendações | Ocorrências retornadas; repetir a revisão soma de novo |
+| Lacunas | `MISSING_*`, `UNVERIFIED_*`, `TRACEABILITY_GAP`, `COVERAGE_GAP`, `CONTRADICTORY_REQUIREMENT` |
+| Redundâncias candidatas | `POTENTIAL_REDUNDANCY`, sem afirmar equivalência |
+| PASS/FAIL/BLOCKED/NOT_RUN | Só estados devolvidos pela execução; consulta não vira PASS |
+| Tokens, custo, mudanças aplicadas | Indisponíveis: o cliente não comprova |
 
 ## Vincular um projeto
 
-Na raiz autorizada, crie `qa.project.json`. Não existe cadastro global duplicado: a raiz vem do terminal ou da configuração MCP. A IA não pode trocá-la por argumento de tool.
+Na raiz do projeto, um `qa.project.json` define o que o Prumo pode ler e executar. A raiz vem do terminal ou da configuração MCP; a IA não consegue trocá-la. No aplicativo, ao vincular uma pasta sem contrato, o Prumo propõe um e só grava depois da sua confirmação.
 
 ```json
 {
   "schemaVersion": 2,
   "id": "minha-api",
   "name": "Minha API",
-  "context": {
-    "documentation": ["README.md", "package.json"],
-    "tests": ["tests/"],
-    "code": ["src/"]
-  },
+  "context": { "documentation": ["README.md", "package.json"], "tests": ["tests/"], "code": ["src/"] },
   "commands": {
     "unit": {
       "executable": "node",
@@ -186,151 +117,94 @@ Na raiz autorizada, crie `qa.project.json`. Não existe cadastro global duplicad
       "maxOutputBytes": 65536
     }
   },
-  "execution": {
-    "requireApproval": true,
-    "blockedByDefault": [],
-    "environment": "host",
-    "envAllowlist": ["TEST_MODE"],
-    "readOnly": false
-  }
+  "execution": { "requireApproval": true, "blockedByDefault": [], "environment": "host", "envAllowlist": ["TEST_MODE"], "readOnly": false }
 }
 ```
 
-Paths são relativos; os diretórios/arquivos de contexto, cwd e entrypoints precisam existir. Pré-condições ausentes bloqueiam a execução, mas permitem inspecionar contexto. Campos desconhecidos/tipos incorretos são recusados. v1 não é convertido silenciosamente. Schema runtime é `manifestoSchema` em `backend/compartilhado/tipos/projeto.ts`.
+- Caminhos relativos e existentes; campo desconhecido ou tipo errado é recusado. O esquema é `manifestoSchema` em `backend/compartilhado/tipos/projeto.ts`.
+- Executável só `node` ou `npm`. A forma curta (`"unit": "npm run test:unit"`) aceita apenas `node <arquivos locais>`, `node --test <arquivos locais>` e `npm run <script existente>`; nada de `&&`, pipe, redirecionamento ou glob.
+- `blockedByDefault` bloqueia mesmo com aprovação. `readOnly: true` bloqueia execução e gravação de evidência. Variáveis de segredo não entram nem pela allowlist.
 
-O formato simples do HTML v2 (`"unit": "npm run test:unit"`) funciona pela gramática restrita. Só `node <arquivos locais>` / `node --test <arquivos locais>` e `npm run <script>` são aceitos. Nenhum `&&`, pipe, redirecionamento, eval, loader, glob ou parâmetro de prompt entra no shell. Para caminhos com espaços use objeto com args separados. Script npm precisa existir em package.json do cwd. Revise scripts antes de autorizá-los.
+## Conectar uma IA por MCP
 
-`blockedByDefault` é bloqueio efetivo: aprovação não o remove. `readOnly: true` bloqueia todas as execuções e escritas de evidência. Variáveis de segredo e reconfiguração do runtime não são aceitas, mesmo na allowlist.
-
-## Usar CLI e aprovação
+Cada configuração vincula uma raiz; use outro nome de servidor para outro projeto. O assistente monta o comando e confere se o nome já existe:
 
 ```powershell
-$demo = Join-Path (Get-Location) 'exemplos\projeto-demo'
-qa doctor --root "$demo"
-qa context --root "$demo"
-qa review '.\exemplos\plano-demo.json' --root "$demo"
-qa run unit --root "$demo"       # BLOCKED: sem consentimento
-qa approve unit --root "$demo"   # CredUI nativo; senha Windows da conta atual
-qa evidence --root "$demo"
-# qa evidence '<UUID devolvido pela execução>' --root "$demo"
-npm.cmd run demo
+prumo.cmd conectar codex --root "$demo"          # pede confirmação digitada e chama o configurador do Codex
+prumo.cmd conectar codex --json --root "$demo"   # só a proposta
+prumo.cmd conectar claude --root "$demo"         # mostra o comando para você revisar e executar
 ```
 
-`approve` autentica a pessoa e executa uma única rodada no mesmo processo; não cria uma autorização reutilizável. A janela mostra projeto, raiz, capability, comando e SHA256. Cancelamento, senha inválida, alteração do escopo e expiração bloqueiam. Não aceite uma IA preencher credenciais. Conta só com PIN/Hello precisa de uma senha Windows compatível com LogonUser; outros sistemas permanecem bloqueados para execução. CLI funciona para contexto/revisão/evidências em outras plataformas, ainda sem aprovação nativa implementada.
-
-Exit do CLI: 0 para consulta/PASS, 1 para FAIL, 2 para BLOCKED/NOT_RUN/entrada inválida, 3 para histórico parcial/falha de observabilidade quando não há falha do núcleo. `doctor` valida contrato e informa o provedor; não comprova autenticação nem liberação pelo Windows.
-
-## Conectar MCP local
-
-Cada configuração vincula **uma raiz**. Use outro nome de servidor para outro projeto. Nenhum serviço remoto do ChatGPT recebe acesso automático a arquivos locais.
-
-PowerShell, a partir do Prumo compilado:
+À mão, a partir do Prumo compilado:
 
 ```powershell
 $server = Join-Path (Get-Location) 'dist\mcp.js'
-$demo = Join-Path (Get-Location) 'exemplos\projeto-demo'
 codex mcp add prumo-qa-demo -- node "$server" "$demo"
-codex mcp get prumo-qa-demo
-# Abra nova sessão Codex para carregar o servidor.
+claude mcp add --transport stdio --scope user prumo-qa-demo -- node "$server" "$demo"
 ```
 
-Claude Code, instalado separadamente:
+Cliente com JSON (Claude Desktop e outros): `"command": "node"`, `"args": ["<caminho>/dist/mcp.js", "<raiz do projeto>"]`, com caminhos absolutos. Abra uma sessão nova e peça `contexto_projeto` para confirmar. Rodar `node "$server" "$demo"` direto fica em silêncio esperando o protocolo; é normal.
+
+| Ferramenta | O que faz |
+|---|---|
+| `contexto_projeto` | Stack, scripts e fontes lidas com hash; lacunas e omitidos |
+| `revisar_cobertura` | Fatos, hipóteses, lacunas e seleção sugerida para um requisito; não executa |
+| `executar_validacao` | Roda uma capability do contrato com aprovação humana |
+| `consultar_evidencias` | Evidências locais verificadas, ou NOT_RUN |
+| `listar_politicas` | O que a IA pode e não pode pedir neste projeto |
+| `propor_caso`, `propor_bug` | Caso ou bug como rascunho local; não publica no Qase nem no Jira |
+| `propor_aprendizado` | Aprendizado em rascunho para o conhecimento dos agentes; só você aprova |
+
+O plano `backend/projetos/exemplos/plano-demo.json` é uma entrada completa de `revisar_cobertura`. Para inspecionar sem instalar nada: `npx.cmd @modelcontextprotocol/inspector --cli node "$server" "$demo" --method tools/list`.
+
+### Skill de qualidade
+
+A Skill `backend/agentes/skills/qa/SKILL.md` orienta o método da IA. O Codex lê `.agents/skills` e o Claude Code lê `.claude/skills`; copie para o projeto sem sobrescrever uma existente:
 
 ```powershell
-claude mcp add --transport stdio --scope user prumo-qa-demo -- node "$server" "$demo"
-claude mcp get prumo-qa-demo
-# Dentro do Claude Code: /mcp
-```
-
-Para Claude Desktop/cliente JSON:
-
-```json
-{
-  "mcpServers": {
-    "prumo-qa-demo": {
-      "command": "node",
-      "args": ["C:/projetos/Prumo-Qa/dist/mcp.js", "C:/projetos/Prumo-Qa/backend/projetos/exemplos/projeto-demo"]
-    }
-  }
+foreach ($pasta in '.agents\skills\qa', '.claude\skills\qa') {
+  $dest = Join-Path (Get-Location) $pasta
+  if (Test-Path "$dest") { throw "Skill existente em ${dest}: escolha outro destino" }
+  New-Item -ItemType Directory -Path "$dest" -Force | Out-Null
+  Copy-Item '.\backend\agentes\skills\qa\SKILL.md' "$dest\SKILL.md"
 }
 ```
 
-Use caminhos absolutos reais da máquina; se Node não estiver no PATH do cliente, informe o caminho absoluto de node.exe. Início manual `node "$server" "$demo"` espera stdin do protocolo; tela silenciosa é normal. Logs internos somente stderr.
+Invoque explicitamente (`$qa` no Codex, `/qa` no Claude Code). Se o cliente vai usá-la sozinho depende dele; o MCP não obriga.
 
-Entradas/saídas das tools:
+## Resultados e evidências
 
-| Tool | Entrada | Resultado |
-|---|---|---|
-| contexto_projeto | `{}` | Tipo/stack inferidos, scripts, fontes consultadas com hashes, omitidos/lacunas; NOT_VERIFIED |
-| revisar_cobertura | requirement, source, sourcePath opcional, existingTests, candidates, contradictions opcional | Fatos de leitura, hipóteses, lacunas, findings e seleção estrutural sugerida; executed=false |
-| executar_validacao | capability, solicitarAprovacao opcional | Job, comando efetivo, exit, status, logs e casos reais se disponíveis |
-| consultar_evidencias | jobId e/ou criterio opcionais | Registros locais verificados, ou NOT_RUN sem evidência |
+Evidência em `<raiz>/.prumo/evidencias/<job>.json` (integridade, logs mascarados, origem, escopo, horários) e resultado em `.prumo/resultados/<job>.json`. Coloque `.prumo/` no `.gitignore` do projeto e não traga evidências de empresas para este repositório.
 
-O plano de exemplo é entrada completa de revisar_cobertura. Cenários têm id, behavior, source, risk, expected, oracle, technique e, quando aplicáveis, partition/conditions/boundary/testPath/blockedReason. Contradições semânticas são informadas pela IA; o núcleo não finge compreendê-las sozinho.
-
-O SDK Client faz handshake e tools/list/tools/call reais nos testes. Inspector opcional, sem instalação global:
-
-```powershell
-npx.cmd @modelcontextprotocol/inspector --cli node "$server" "$demo" --method tools/list
-```
-
-## Disponibilizar a Skill
-
-Codex reconhece `.agents/skills` no projeto e no perfil; Claude Code reconhece `.claude/skills`. A pasta `backend/agentes/skills/qa` deste pacote é fonte portátil e não é carregada universalmente por todos os hosts. Instale em um projeto autorizado, sem sobrescrever uma Skill existente:
-
-```powershell
-$destCodex = Join-Path (Get-Location) '.agents\skills\qa'
-if (Test-Path "$destCodex") { throw 'Skill existente: escolha outro destino' }
-New-Item -ItemType Directory -Path "$destCodex" -Force | Out-Null
-Copy-Item '.\skills\qa\SKILL.md' "$destCodex\SKILL.md"
-# Em nova sessão Codex, invoque $qa explicitamente.
-
-$destClaude = Join-Path (Get-Location) '.claude\skills\qa'
-if (Test-Path "$destClaude") { throw 'Skill existente: escolha outro destino' }
-New-Item -ItemType Directory -Path "$destClaude" -Force | Out-Null
-Copy-Item '.\skills\qa\SKILL.md' "$destClaude\SKILL.md"
-# Claude Code: /qa
-```
-
-Seleção automática é comportamento do cliente/modelo, sem garantia universal. Para repetir uma avaliação, invoque a Skill e solicite as tools explicitamente. MCP sozinho não obriga uso da metodologia.
-
-Referências oficiais: [Codex MCP](https://learn.chatgpt.com/docs/extend/mcp?surface=cli), [Skills Codex](https://learn.chatgpt.com/docs/build-skills), [MCP Claude Code](https://code.claude.com/docs/en/mcp), [Skills Claude Code](https://code.claude.com/docs/en/skills), [SDK MCP](https://github.com/modelcontextprotocol/typescript-sdk), [Agent Skills](https://agentskills.io/specification).
-
-## Resultados e runner
-
-Evidências ficam em `<raiz>/.prumo/evidencias/<job>.json`, com envelope de integridade, logs redigidos, origem, escopo e timestamps. Artefato individual: `.prumo/resultados/<job>.json`. Acrescente `.prumo/` ao .gitignore do projeto vinculado. Não copie evidências de empresas para este repositório.
-
-Um runner pode gravar no arquivo recebido em `PRUMO_RESULT_FILE`:
+O runner pode gravar os casos no arquivo indicado por `PRUMO_RESULT_FILE`:
 
 ```json
-{ "jobId": "UUID recebido em PRUMO_JOB_ID", "cases": [{ "id": "R1-editor", "status": "PASS", "evidence": "assertions executadas: retorno 200 e leitura persistida" }] }
+{ "jobId": "UUID de PRUMO_JOB_ID", "cases": [{ "id": "R1-editor", "status": "PASS", "evidence": "retorno 200 e leitura persistida" }] }
 ```
 
-Sem esse relatório, exit 0 vale apenas para a rodada. FAIL de processo não vira PASS por relatório. Não há parser universal de Playwright/JUnit neste MVP; adapte o runner existente ou use somente classificação da rodada. Consulte docs/SEGURANCA.md para confiança, limites e isolamento.
+Há adaptadores para `node:test` e Playwright em `backend/testes/reporters/`. Sem relatório, exit 0 vale só para a rodada; um FAIL do processo nunca vira PASS.
 
-## Testar e diagnosticar
+## Testar
 
 ```powershell
-npm.cmd run typecheck
-npm.cmd run build
-npm.cmd test
-npm.cmd audit
-npm.cmd run demo
+npm.cmd run check            # dependências, tipos, build e a suíte inteira
+npm.cmd run check:isolado    # sem Electron, SQLite nem rede externa; o que depende disso sai NOT_RUN
+npm.cmd run test:selecionar -- --isolado --listar
 ```
 
-Testes sintéticos cobrem PASS/FAIL/BLOCKED/NOT_RUN, paths, symlinks, manifesto, segredo, timeout, pré-condições, autorização, MCP e CLI. Broker humano é double apenas na suíte; execução de subprocessos e assertions é real. Demonstração padrão comprova consultas e bloqueio sem consentimento; para comprovar a rodada autorizada use `qa approve unit` pessoalmente. Não afirmamos que isso já aconteceu sem registro de autenticação.
+Também há `test:unitarios`, `test:smoke`, `test:regressao`, `test:backend` e `test:frontend`. Nenhum teste toca banco ou projeto externo; os serviços e o broker humano são sintéticos na suíte. `check:isolado` não substitui o `check` nem é sandbox de segurança. Instalador e migração rodam no CI.
 
-- INVALID_MANIFEST: confira versão/tipos/campos, requireApproval=true e caminhos reais.
-- PATH_FORBIDDEN/SECRET_FORBIDDEN/SYMLINK_FORBIDDEN: ajuste contrato para arquivos locais não sensíveis sem links.
-- HUMAN_APPROVAL_REQUIRED: use approve e autenticação Windows; nenhuma flag ignora esse gate.
-- POLICY_BLOCKED: capability readonly/bloqueada não será executada, inclusive com consentimento.
-- RUNTIME_MISSING: npm-cli.js precisa estar junto à instalação Node; prefira entrypoint node explícito.
-- CONTEXT_LIMIT: declare caminhos menores. Arquivos omitidos não contam como consultados.
-- TIMEOUT/OUTPUT_LIMIT/INVALID_RESULT: consulte logs; preserve BLOCKED e corrija causa/runner.
-- EVIDENCE_TAMPERED/PROJECT_MISMATCH: não confie em arquivo corrompido/copied; não reescreva hashes para fabricar sucesso.
+| Código | O que fazer |
+|---|---|
+| `INVALID_MANIFEST` | Confira versão, tipos, campos, `requireApproval: true` e caminhos |
+| `PATH_FORBIDDEN`, `SECRET_FORBIDDEN`, `SYMLINK_FORBIDDEN` | Aponte para arquivos locais, não sensíveis, sem links |
+| `HUMAN_APPROVAL_REQUIRED` | Use `approve`; nenhuma flag pula a aprovação |
+| `POLICY_BLOCKED` | Capability bloqueada ou `readOnly` não roda, nem com aprovação |
+| `RUNTIME_MISSING` | Falta o `npm-cli.js` junto ao Node; prefira `node` explícito |
+| `CONTEXT_LIMIT` | Declare caminhos menores; o omitido não conta como lido |
+| `TIMEOUT`, `OUTPUT_LIMIT`, `INVALID_RESULT` | Veja os logs e corrija a causa ou o runner |
+| `EVIDENCE_TAMPERED`, `PROJECT_MISMATCH` | Não confie no arquivo nem reescreva hashes |
 
-## Estado e limites
+## Publicar uma versão
 
-Implementados núcleo local, contrato, quatro tools, CLI/menu, atividades, métricas, Pino, conector Codex, aprovação Windows, Skill, exemplo, testes e, na 2.2, a janela desktop com instalador Windows (NSIS, não assinado). Fora desta versão: atualização automática, dashboard web, Docker, Kubernetes, daemon, filas, servidor remoto, banco central, treinamento de modelo, integrações corporativas, sandbox forte, assinatura de código, atualização automática, Ink, OpenTelemetry e métricas de provedores. Sem transferência automática entre empresas. Detalhes da entrega atual em [docs/historico/ENTREGA-2.2.md](docs/historico/ENTREGA-2.2.md); relatórios 2.0 e 2.1 são históricos.
-
-G3 é inspecionado por contrato externo readOnly e commands vazio, sem alterar seu repositório. E2E permanece bloqueado. Diagnóstico real e validações estão em docs/historico/DIAGNOSTICO-G3.md e docs/VALIDACAO.md. Autenticação humana end-to-end e plataformas sem Windows podem exigir participação posterior, descrita no relatório de entrega. Nenhuma pendência é mascarada por PASS.
+Siga [docs/RELEASE.md](docs/RELEASE.md) até o fim: número, catálogo, ajuda e site, `npm run check`, `main` e tag. O CI gera os instaladores, cria a release, marca o catálogo como publicado e republica o site; o aplicativo instalado avisa sozinho. Assinatura: [docs/ASSINATURA.md](docs/ASSINATURA.md).

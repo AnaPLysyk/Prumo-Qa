@@ -22,12 +22,12 @@ Quatro seções, na ordem do fluxo: caso de teste → automação → execução
 
 Tela inteira, sem títulos. À esquerda a árvore dos arquivos de teste; no meio o código, com marcadores de nível, tags e caso do Qase; à direita o caso, os tickets, os resultados e as permissões dos agentes.
 
-- **Editar** abre um editor com realce de sintaxe (TypeScript, JavaScript, Python, Gherkin). **Salvar** (Ctrl+S) pede a confirmação do Windows e só grava se o arquivo não mudou fora do Prumo.
+- **Editar** abre um editor com realce de sintaxe (TypeScript, JavaScript, Python, Gherkin). **Salvar** (Ctrl+S) pede a confirmação do sistema e só grava se o arquivo não mudou fora do Prumo.
 - **Novo arquivo** cria uma automação. Com o caso do Qase informado, grava a anotação `Qase: CHAVE-ID` que liga os dois.
 - Só grava arquivos de teste (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`) dentro da pasta vinculada, sem link simbólico e até 300 KB. Arquivo com aparência de segredo não abre para edição. Nada é executado.
 - **Pipelines CI/CD** lista, edita e cria (**Novo pipeline**) os workflows do GitHub Actions (`.github/workflows`) do repositório vinculado. Salvar altera só o arquivo local; o pipeline vale no GitHub quando você enviar o repositório. **Execuções no GitHub** mostra as execuções do Actions. O Prumo só escreve em branches `prumo/...`, nunca na principal, e abre o Pull Request como rascunho.
 
-Com só o GitHub vinculado, sem pasta local, a IDE é somente leitura e oferece **Trazer o repositório do GitHub**. O Prumo baixa uma cópia para `%LOCALAPPDATA%\PrumoQA\repositorios`, com o git instalado e as credenciais dele, e a vincula ao projeto. **Atualizar do GitHub** só avança a cópia, sem sobrescrever o seu trabalho. Hooks e links simbólicos ficam desligados.
+Com só o GitHub vinculado, sem pasta local, a IDE é somente leitura e oferece **Trazer o repositório do GitHub**. O Prumo baixa uma cópia para a pasta repositorios dos dados do Prumo, com o git instalado e as credenciais dele, e a vincula ao projeto. **Atualizar do GitHub** só avança a cópia, sem sobrescrever o seu trabalho. Hooks e links simbólicos ficam desligados.
 
 ### Repositório
 
@@ -39,7 +39,7 @@ Cada linha mostra a situação (caso com código, manual, automação planejada,
 
 Lista única com as execuções locais (manuais e agendadas, com evidências e comentário no Jira), as runs preparadas no Prumo e as runs do Qase, com filtro por origem e situação.
 
-Uma run local registra resultados manuais, roda as automações associadas (cada uma pede a autenticação do Windows) e publica no Qase conferindo a run. Sem o Qase, **Preparar run** usa os testes do código: a run fica só neste computador e não pode ser criada no Qase, porque esses casos não existem lá. Para publicar, crie os casos no Qase e prepare outra run.
+Uma run local registra resultados manuais, roda as automações associadas (cada uma pede a autenticação do sistema) e publica no Qase conferindo a run. Sem o Qase, **Preparar run** usa os testes do código: a run fica só neste computador e não pode ser criada no Qase, porque esses casos não existem lá. Para publicar, crie os casos no Qase e prepare outra run.
 
 **Evidências CLI/MCP** abre as evidências gravadas na pasta do projeto.
 
@@ -64,7 +64,7 @@ No detalhe de um defeito do Qase dá para mudar o status (em andamento, resolvid
 
 ## Escrita externa
 
-Desligada por padrão; habilite por projeto e serviço em Conexões. Cada operação mostra a prévia, pede a confirmação do Windows, usa uma chave que impede duplicar e confere o resultado relendo o serviço. Se a resposta se perder, repetir não cria outro item. O Prumo não apaga nada.
+Desligada por padrão; habilite por projeto e serviço em Conexões. Cada operação mostra a prévia, pede a confirmação do sistema, usa uma chave que impede duplicar e confere o resultado relendo o serviço. Se a resposta se perder, repetir não cria outro item. O Prumo não apaga nada.
 
 ## Atalhos
 
@@ -74,4 +74,4 @@ F5 ou Ctrl+R atualiza a tela. A engrenagem abre Meu perfil, Aparência (tema, id
 
 As escritas foram homologadas com contas reais do Qase, do Jira e do GitHub (caso, defeito, run e resultado; bug e comentário; issue), mas cada conta tem plano e permissões próprios: o plano gratuito do Qase não libera os vínculos caso-ticket do Jira. Editar ou fechar issue, editar título ou resultado de defeito e excluir itens não têm contrato. A classificação dos testes é uma inferência. O instalador não é assinado: confira o SHA-256 antes de executar.
 
-Sobre agentes e o chat, veja [Assistente, agentes e conhecimento](20-assistente-e-agentes.md).
+Sobre agentes e o chat, veja **Ajuda › Assistente, agentes e conhecimento**.

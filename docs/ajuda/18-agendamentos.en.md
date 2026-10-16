@@ -1,49 +1,60 @@
 # Schedules, tray and runs
 
-Prumo runs a QA routine by itself, without AI. Everything below works with Claude and Codex turned off. They can help interpret results, but they do not run commands, create schedules or publish anything outside the permissions you approved.
+I wanted the QA routine to run by itself, without depending on AI. Everything on this page works with Claude and Codex turned off: they can help you read a result, but they do not run, schedule or publish anything.
 
-## How to create a routine
+## Create a routine
 
-In Schedules, click New routine. Choose the Prumo project, the type, the frequency and the time zone.
+In Schedules, click **New routine** and choose the project, type, environment, frequency and time zone.
 
-Available types: Jira query (read-only), smoke and regression (run an automation already declared in the project contract), validation by ticket (runs only automations you associated with the ticket in Traceability), change analysis (reads GitHub commits and recommends; it never triggers tests by itself) and performance with k6.
+- **Jira query**: reads up to 50 tickets and shows what is new or changed. It runs nothing.
+- **Smoke** and **Regression**: run an automation already declared in the project's `qa.project.json`.
+- **Validation by ticket**: runs only the automations associated with the ticket in the declared links (Tests › Repository). With no link, it is BLOCKED.
+- **Change analysis**: reads the linked GitHub commits and says how many are new. It never triggers tests.
+- **Performance (k6)**: uses the official k6 installed, up to 50 virtual users and 600 s, never in production. Without k6, it is NOT_RUN.
+- **Qase run**: runs the automations of the cases in a run already created in Qase.
 
-Frequencies: once, every N minutes, every day or on days of the week, always in the chosen time zone. Daylight saving changes are handled: a time that does not exist moves to just after the jump, and a repeated time counts once.
+Frequency: once, every N minutes, every day or weekly, always in the chosen time zone. Daylight saving is handled: a time that does not exist moves to just after the jump; a repeated time counts once.
 
-A routine never receives a free-form command. It only picks a capability that the project already declared in qa.project.json. Ticket or description text is always data, never an order.
+A routine never receives a free-form command, only a capability the project declared. Ticket text is data, never an order.
 
-## How to authorize tests
+## Authorize tests
 
-Running tests is a protected action. In each routine, use Authorize scheduled runs. Prumo shows what the routine can do, asks for your confirmation and then for your Windows authentication. The authorization is valid only for that exact project, environment and command, for up to 30 days and up to a maximum number of runs. If the command, the contract or the test files change, it stops being valid and the run becomes BLOCKED until you authorize again. You can revoke it at any time.
+Running tests is a protected action. Open the routine, **Authorization** tab, choose the validity (1 to 30 days) and the maximum number of runs and click **Authorize scheduled runs…**. Prumo shows what the routine can do, asks for your confirmation and then for your system authentication.
 
-Run now, done by you, asks for Windows authentication every time.
+- It is valid only for that exact project, environment and command.
+- If the command, the contract or the test files change, it stops being valid and the run is BLOCKED until you authorize again.
+- You can revoke it at any time.
 
-## Prumo in the Windows tray
+**Run now** is done by you and asks for authentication every time.
 
-When you close the window, Prumo stays in the tray so routines keep going. The icon menu lets you open, view schedules, view runs, pause or resume, see the worker state and Quit Prumo. Quit stops the worker and the processes it started. Prumo only starts with Windows if you turn that option on in Schedules; it is off by default.
+## Tray and missed times
 
-Pausing prevents new runs; what is already running finishes without being corrupted. If the computer is off, suspended or Prumo is closed at that time, nothing runs: the time shows as MISSED and never as run.
+When you close the window, Prumo stays in the tray so routines keep going. The icon menu opens Prumo, shows schedules and runs, pauses or resumes, shows the worker state and has **Quit Prumo**, which stops the worker and the processes it started.
 
-## How to read PASS, FAIL, BLOCKED and NOT_RUN
+In **Policies and preferences › Resident Prumo** you turn on **Start Prumo with the system**. It is off by default.
 
-PASS: the run finished and the reported scenarios passed. FAIL: a test failed. BLOCKED: it could not run because of a rule (approval, expired authorization, changed project, missing tool); this is not a product defect. NOT_RUN: nothing was run. A network or service failure appears as an infrastructure error and may be retried automatically; a test failure is never silently repeated.
+Pausing prevents new runs; what is already running finishes without being corrupted. If the computer is off or suspended, or Prumo is closed, nothing runs: the time shows as MISSED, never as run. In the routine, **If Prumo is closed at that time** lets you switch to **Run once when back**.
 
-PASS without individual scenarios only means the process finished successfully: there is no per-scenario result.
+## PASS, FAIL, BLOCKED and NOT_RUN
 
-## Look up an old run
+- **PASS**: it finished and the reported scenarios passed. With no individual scenarios, PASS only says the process finished successfully.
+- **FAIL**: a test failed. A test failure is never silently repeated.
+- **BLOCKED**: a rule prevented the run (missing or expired authorization, changed project, missing tool). It is not a product defect.
+- **NOT_RUN**: nothing was run.
 
-In Runs you see the history of all projects or of one project, filtered by ticket and result. Each row shows who ran it (schedule or manual), attempts, duration, scenarios and the state of the Jira comment. View evidence opens the real result stored in the project folder. Viewing the screen does not count as a QA run.
+A network or service failure shows as an infrastructure error and may be retried automatically.
 
-## Relate a run to a ticket
+## Look up runs
 
-Enter the ticket in the routine. For validation by ticket, the automations come from the associations declared in Traceability (Jira to automation). Without an association, the routine is BLOCKED and nothing is run.
+**Tests › Runs** lists manual and scheduled runs, with filters by source and status. Open a row to see the summary, steps (attempts), logs and the evidence stored in the project folder.
 
-## Jira comments
+## Jira comment
 
-Prumo can record the result on the ticket as a comment: ticket, type, environment, scenarios, PASS and FAIL, a summary of failures and the local evidence reference. It does not say the ticket was approved and never changes the ticket status.
+Enter the ticket in the routine. Prumo can comment the result on the ticket: type, environment, scenarios, a summary of failures and the local evidence reference. The comment does not approve the ticket and never changes its status.
 
-Manual: in Runs, open Jira comment, read the preview and confirm. Scheduled: first create a publishing policy limited to tickets, routine types, validity and quantity. Without a policy, no scheduled routine comments. Repeating or retrying does not create a duplicate comment. If publishing fails, the local record stays as a pending item.
+- **Manual**: open the run (PASS or FAIL) in Tests › Runs, click **Jira comment**, read the preview and use **Publish to Jira…**.
+- **Scheduled**: first approve a policy in **Policies and preferences › Jira comments**, limited to tickets, routine types, validity and quantity. Without a policy, no routine comments.
 
-## What depends on AI
+Repeating does not duplicate the comment. If publishing fails, the record stays as a local pending item.
 
-Nothing here depends on AI. AI is optional and only assists: it analyzes tickets, suggests coverage, interprets logs and proposes texts. Decisions, authorizations and records stay with Prumo.
+The **Qase run** routine follows the same idea: it only publishes to Qase with the policy approved in the run's **Publishing** tab (Tests › Runs). You revoke these policies in **Policies and preferences › Results in Qase**.

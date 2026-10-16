@@ -1,7 +1,7 @@
 /** Gestão de contas pela Administração: listar, criar com senha temporária, aprovar, trocar papel, desativar, redefinir senha, desbloquear e excluir. */
 import { randomUUID } from 'node:crypto';
 import { gerarSenhaTemporaria, resumirSegredo } from '../../login/regras/senhas.js';
-import { contaParaJanela, situacaoDaSessao } from '../../login/regras/sessao.js';
+import { contaParaJanela, ehAdmin, situacaoDaSessao } from '../../login/regras/sessao.js';
 import { gravarContas } from '../../login/banco/gravarContas.js';
 import { lerContas } from '../../login/banco/lerContas.js';
 import { ContaVisivel, RegistroDeContas, Usuario, estadosDaConta, loginSchema, nomeDaPessoaSchema } from '../../login/tipos/contas.js';
@@ -17,9 +17,9 @@ function contaPeloId(r: RegistroDeContas, id: string): Usuario {
   const u = r.usuarios.find((x) => x.id === id); if (!u) throw new Error('ACCOUNT_NOT_FOUND: conta não encontrada; atualize a lista.'); return u;
 }
 
-/** Sempre sobra ao menos um administrador ativo: sem ele ninguém mais gerencia contas pela janela. */
+/** Sempre sobra ao menos uma conta admin ativa: sem ela ninguém mais entra na Administração. */
 function garantirAdministrador(r: RegistroDeContas): void {
-  if (!r.usuarios.some((u) => u.papel === 'administrador' && u.estado === 'ATIVO')) throw new Error('LAST_ADMIN: precisa existir ao menos um administrador ativo.');
+  if (!r.usuarios.some((u) => ehAdmin(u) && u.estado === 'ATIVO')) throw new Error('LAST_ADMIN: precisa existir ao menos uma conta admin ativa.');
 }
 
 export function listarContasDeAcesso(b?: string): { contas: ContaVisivel[]; voce: string | null } {
@@ -29,7 +29,7 @@ export function listarContasDeAcesso(b?: string): { contas: ContaVisivel[]; voce
 }
 
 /** Conta criada pela Administração: senha temporária mostrada uma vez e troca obrigatória no primeiro acesso. */
-export async function criarContaPelaAdministracao(d: { login: string; nome: string; papel: string }, b?: string, agora = new Date()) {
+export async function criarContaPelaAdministracao(d: { login: string; nome: string; papel: string; admin?: boolean }, b?: string, agora = new Date()) {
   quemAdministra(b);
   const login = loginSchema.safeParse(d.login); if (!login.success) throw new Error('LOGIN_INVALID_FORMAT: ' + login.error.issues[0]!.message);
   const nome = nomeDaPessoaSchema.safeParse(d.nome); if (!nome.success) throw new Error('NAME_INVALID: o nome precisa ter de 2 a 80 caracteres.');
@@ -38,14 +38,14 @@ export async function criarContaPelaAdministracao(d: { login: string; nome: stri
   if (!r.papeis.some((p) => p.id === d.papel)) throw new Error('ROLE_NOT_FOUND: papel inexistente.');
   if (r.usuarios.some((u) => u.login === login.data)) throw new Error('LOGIN_TAKEN: esse login já está em uso; escolha outro.');
   const quando = agora.toISOString();
-  const u: Usuario = { id: randomUUID(), login: login.data, nome: nome.data, papel: d.papel, estado: 'ATIVO', senha, recuperacao: null, identidades: [], trocarSenha: true, falhas: 0, bloqueadoAte: null, criadoEm: quando, atualizadoEm: quando, ultimoAcesso: null, origem: 'ADMINISTRACAO' };
+  const u: Usuario = { id: randomUUID(), login: login.data, nome: nome.data, papel: d.papel, estado: 'ATIVO', senha, recuperacao: null, identidades: [], trocarSenha: true, falhas: 0, bloqueadoAte: null, criadoEm: quando, atualizadoEm: quando, ultimoAcesso: null, origem: 'ADMINISTRACAO', admin: d.admin === true };
   r.usuarios.push(u); gravarContas(r, b);
   return { conta: contaParaJanela(r, u, agora.getTime()), senhaTemporaria: temporaria };
 }
 
-/** Aprovar (PENDENTE → ATIVO), desativar, reativar, trocar papel ou nome. Ninguém desativa a si mesmo nem tira o último administrador. */
-export function alterarContaPelaAdministracao(d: { id: string; nome?: string; papel?: string; estado?: string }, b?: string, agora = new Date()) {
-  const eu = quemAdministra(b); const r = lerContas(b); const u = contaPeloId(r, d.id);
+/** Aprovar (PENDENTE → ATIVO), desativar, reativar, trocar papel, nome ou a marca admin. Ninguém desativa a si mesmo, tira a própria marca ou o último admin. */
+export function alterarContaPelaAdministracao(d: { id: string; nome?: string; papel?: string; estado?: string; admin?: boolean }, b?: string, agora = new Date()) {
+  const eu = quemAdministra(b); const r = lerContas(b); const u = contaPeloId(r, d.id); const eraAdmin = ehAdmin(u);
   if (d.papel !== undefined) { if (!r.papeis.some((p) => p.id === d.papel)) throw new Error('ROLE_NOT_FOUND: papel inexistente.'); u.papel = d.papel; }
   if (d.nome !== undefined) { const n = nomeDaPessoaSchema.safeParse(d.nome); if (!n.success) throw new Error('NAME_INVALID: o nome precisa ter de 2 a 80 caracteres.'); u.nome = n.data; }
   if (d.estado !== undefined) {
@@ -53,7 +53,9 @@ export function alterarContaPelaAdministracao(d: { id: string; nome?: string; pa
     if (u.id === eu.id && d.estado !== 'ATIVO') throw new Error('SELF_DISABLE: você não pode desativar a própria conta.');
     u.estado = d.estado as Usuario['estado'];
   }
-  if (u.id === eu.id && u.papel !== 'administrador') throw new Error('SELF_DEMOTE: você não pode tirar o próprio papel de administrador; peça a outro administrador.');
+  if (d.admin !== undefined) { if (u.id === eu.id && !d.admin) throw new Error('SELF_DEMOTE: você não pode tirar a própria marca de admin; peça a outra conta admin.'); }
+  // A marca é gravada sempre que a conta muda: conta antiga deixa de depender do papel (trocar papel não muda quem é admin).
+  u.admin = d.admin ?? eraAdmin;
   garantirAdministrador(r); u.atualizadoEm = agora.toISOString(); gravarContas(r, b);
   return contaParaJanela(r, u, agora.getTime());
 }

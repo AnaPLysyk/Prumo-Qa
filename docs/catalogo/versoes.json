@@ -2,6 +2,45 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.15.1",
+      "status": "repositorio",
+      "date": null,
+      "title": "Marca admin e documentação revisada",
+      "objective": "Separar quem cuida do sistema de quem usa o Prumo no dia a dia e deixar site, Ajuda e README coerentes com o que o aplicativo faz.",
+      "features": [
+        "Marca admin na conta: só ela libera a tela Administração. O papel continua definindo as telas de trabalho (Sem acesso, Ver, Usar).",
+        "Administração › Usuários ganha a coluna Admin, e a criação de conta ganha a caixa \"Admin: vê a tela Administração\", desmarcada por padrão."
+      ],
+      "improvements": [
+        "Site, Ajuda (PT e EN) e README revisados contra o código e reescritos em primeira pessoa, com menos texto.",
+        "A Ajuda passa a descrever macOS e Linux onde antes citava só o Windows (pastas de dados, cofre de tokens, autenticação e atualização).",
+        "prumo doctor descreve a aprovação de cada sistema operacional."
+      ],
+      "fixes": [
+        "A Ajuda ainda dizia que as integrações só tinham sido validadas com serviços simulados e que a execução protegida só existia no Windows.",
+        "Páginas da Ajuda com links em Markdown apareciam com o link cru dentro do aplicativo."
+      ],
+      "differential": "A Administração deixa de depender do papel: um papel Administrador sem a marca não entra lá, e um papel comum com a marca entra.",
+      "howItWorks": [
+        "A primeira conta nasce com a marca. Cadastro pela tela de entrada ou por GitHub/Google nunca recebe a marca.",
+        "Ninguém tira a própria marca, e sempre sobra pelo menos uma conta admin ativa."
+      ],
+      "security": [
+        "A conferência da marca acontece no processo principal a cada pedido, não só na janela."
+      ],
+      "compatibility": [
+        "Contas gravadas antes desta versão com o papel Administrador continuam admin; as demais continuam sem a marca."
+      ],
+      "limitations": [
+        "O login não isola pessoas que usam o mesmo usuário do sistema operacional."
+      ],
+      "releaseUrl": null,
+      "migration": "Nada a migrar: a marca é gravada na primeira alteração de cada conta.",
+      "afterUpdate": [
+        "Confira em Administração › Usuários quem deve ter a marca Admin."
+      ]
+    },
+    {
       "version": "2.15.0",
       "status": "publicada",
       "date": "2026-10-16",

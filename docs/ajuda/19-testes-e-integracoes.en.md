@@ -22,12 +22,12 @@ Four sections, in the order of the flow: test case → automation → execution 
 
 Full screen, no titles. The tree of test files is on the left; the code is in the middle, with level, tag and Qase case markers; on the right are the case, the tickets, the results and the agents' permissions.
 
-- **Edit** opens an editor with syntax highlighting (TypeScript, JavaScript, Python, Gherkin). **Save** (Ctrl+S) asks for the Windows confirmation and only writes if the file did not change outside Prumo.
+- **Edit** opens an editor with syntax highlighting (TypeScript, JavaScript, Python, Gherkin). **Save** (Ctrl+S) asks for the system confirmation and only writes if the file did not change outside Prumo.
 - **New file** creates an automation. With the Qase case filled in, it writes the `Qase: KEY-ID` annotation that links the two.
 - It only writes test files (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`) inside the linked folder, with no symbolic links and up to 300 KB. A file that looks like a secret does not open for editing. Nothing is executed.
 - **CI/CD pipelines** lists, edits and creates (**New pipeline**) the GitHub Actions workflows (`.github/workflows`) of the linked repository. Saving changes only the local file; the pipeline takes effect on GitHub when you push the repository. **GitHub runs** shows the Actions runs. Prumo only writes to `prumo/...` branches, never to the main one, and opens the Pull Request as a draft.
 
-With only GitHub linked and no local folder, the IDE is read-only and offers **Bring the GitHub repository**. Prumo downloads a copy to `%LOCALAPPDATA%\PrumoQA\repositorios`, using the installed git and its credentials, and links it to the project. **Update from GitHub** only fast-forwards the copy, without overwriting your work. Hooks and symbolic links stay off.
+With only GitHub linked and no local folder, the IDE is read-only and offers **Bring the GitHub repository**. Prumo downloads a copy to the repositorios folder in Prumo data, using the installed git and its credentials, and links it to the project. **Update from GitHub** only fast-forwards the copy, without overwriting your work. Hooks and symbolic links stay off.
 
 ### Repository
 
@@ -39,7 +39,7 @@ Each row shows the status (case with code, manual, planned automation, automated
 
 A single list with local executions (manual and scheduled, with evidence and the Jira comment), runs prepared in Prumo and Qase runs, with filters by origin and status.
 
-A local run records manual results, runs the associated automations (each asks for Windows authentication) and publishes to Qase, checking the run. Without Qase, **Prepare run** uses the code's tests: the run stays only on this computer and cannot be created in Qase, because those cases do not exist there. To publish, create the cases in Qase and prepare another run.
+A local run records manual results, runs the associated automations (each asks for system authentication) and publishes to Qase, checking the run. Without Qase, **Prepare run** uses the code's tests: the run stays only on this computer and cannot be created in Qase, because those cases do not exist there. To publish, create the cases in Qase and prepare another run.
 
 **CLI/MCP evidence** opens the evidence recorded in the project folder.
 
@@ -64,7 +64,7 @@ In a Qase defect's detail you can change the status (in progress, resolved or in
 
 ## External writes
 
-Off by default; enable per project and service in Connections. Each operation shows a preview, asks for the Windows confirmation, uses a key that prevents duplicates and checks the result by re-reading the service. If the response is lost, repeating does not create another item. Prumo deletes nothing.
+Off by default; enable per project and service in Connections. Each operation shows a preview, asks for the system confirmation, uses a key that prevents duplicates and checks the result by re-reading the service. If the response is lost, repeating does not create another item. Prumo deletes nothing.
 
 ## Shortcuts
 
@@ -74,4 +74,4 @@ F5 or Ctrl+R refreshes the screen. The gear opens My profile, Appearance (theme,
 
 Writes were verified with real Qase, Jira and GitHub accounts (case, defect, run and result; bug and comment; issue), but each account has its own plan and permissions: Qase's free plan does not include case-to-Jira links. Editing or closing issues, editing a defect's title or result and deleting items have no contract. Test classification is an inference. The installer is not signed: check the SHA-256 before running it.
 
-For agents and the chat, see [Assistant, agents and knowledge](20-assistente-e-agentes.md).
+For agents and the chat, see **Help › Assistant, agents and knowledge**.

@@ -457,6 +457,11 @@ window.PRUMO_EN_REGRAS.unshift([/^(.*) não tem caso Qase ou local associado no 
 // Conexões redesenhada: uma linha por serviço, painel sob a linha e lista de projetos do token.
 Object.assign(window.PRUMO_EN, {
   'Nova conexão': 'New connection',
+  'Criar conta de Administrador': 'Create Administrator account',
+  'Admin: vê a tela Administração': 'Admin: sees the Administration screen', 'Admin': 'Admin', 'Você não pode tirar a própria marca de admin.': 'You cannot remove your own admin mark.', 'Conta marcada como admin.': 'Account marked as admin.', 'Marca de admin retirada.': 'Admin mark removed.',
+  'O papel define as telas de trabalho (aba Permissões). A tela Administração só aparece para quem tem a marca Admin.': 'The role defines the work screens (Permissions tab). The Administration screen only appears for accounts marked Admin.',
+  'Sem acesso: a tela some do menu. Ver: só consulta. Usar: consulta e altera. A regra vale no servidor, não só na tela. A Administração não está aqui: ela depende da marca Admin na aba Usuários.': 'No access: the screen disappears from the menu. View: read only. Use: read and change. The rule is enforced on the server, not only on screen. Administration is not here: it depends on the Admin mark in the Users tab.',
+  'Fixo: todas as telas de trabalho.': 'Fixed: all work screens.',
   'Permissões do token': 'Token permissions', 'O que a sua conta precisa poder fazer': 'What your account must be allowed to do',
   'GitHub › Settings › Developer settings › Personal access tokens › Fine-grained tokens › Generate new token. Em Repository access, escolha só os repositórios que o Prumo vai usar.': 'GitHub › Settings › Developer settings › Personal access tokens › Fine-grained tokens › Generate new token. Under Repository access, pick only the repositories Prumo will use.',
   'listar issues e publicar bug ou melhoria (sem escrita, o GitHub descarta os rótulos)': 'list issues and publish bugs or improvements (without write, GitHub drops the labels)',
@@ -498,3 +503,4 @@ Object.assign(window.PRUMO_EN, {
   'Selecione primeiro um projeto Prumo.': 'Select a Prumo project first.'
 });
 window.PRUMO_EN_REGRAS.unshift([/^(\d+) de (\d+) selecionado\(s\)$/, '$1 of $2 selected'], [/^(\d+) contas$/, '$1 accounts'], [/^Conectar (Qase|Jira|GitHub)$/, 'Connect $1'], [/^Recursos de (.*)$/, 'Resources of $1']);
+

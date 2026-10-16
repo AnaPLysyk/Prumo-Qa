@@ -38,7 +38,9 @@ mock.module('../../../../dist/login/regras/sessao.js', { namedExports: {
       usuario: { papel: 'qa-teste', trocarSenha },
       papel: { id: 'qa-teste', nome: 'QA Teste', telas: { testes: nivel } } };
   },
-  nivelNaTela: (papel, tela) => papel?.telas[tela] ?? 'NENHUM'
+  nivelNaTela: (papel, tela) => papel?.telas[tela] ?? 'NENHUM',
+  // 2.15.1: o acesso passa pela conta (marca admin só na Administração); aqui a tela é Testes, então vale o papel.
+  nivelDaConta: (_usuario, papel, tela) => papel?.telas[tela] ?? 'NENHUM'
 } });
 mock.module('../../../../dist/projetos/banco/obterEspaco.js', { namedExports: {
   obterEspaco: id => { if (id !== a) throw new Error('WORKSPACE_NOT_FOUND'); return projeto; }

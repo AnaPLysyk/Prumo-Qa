@@ -65,7 +65,7 @@ async function conectarServico(d: DependenciasDeEntrada, provedor: Provedor, tok
 async function ativarPeloProvedor(d: DependenciasDeEntrada, provedor: Provedor, r: RegistroDeContas, token: string, perfil: Perfil, agora: Date): Promise<EstadoDaEntrada> {
   if (loginLigado(r)) throw new Error('LOGIN_ALREADY_ACTIVE: o login já está ligado; entre pela tela de entrada.');
   const p = PROVEDORES[provedor];
-  const u = contaNova(r, { login: loginLivre(r, p.prefixo, perfil.login), nome: nomeDaPessoa(perfil) }, { papel: 'administrador', estado: 'ATIVO', senha: null, recuperacao: null, trocarSenha: false, origem: p.origem, identidades: [{ provedor, id: perfil.id, login: perfil.login }] }, agora);
+  const u = contaNova(r, { login: loginLivre(r, p.prefixo, perfil.login), nome: nomeDaPessoa(perfil) }, { papel: 'administrador', estado: 'ATIVO', senha: null, recuperacao: null, trocarSenha: false, origem: p.origem, admin: true, identidades: [{ provedor, id: perfil.id, login: perfil.login }] }, agora);
   u.ultimoAcesso = agora.toISOString(); r.usuarios.push(u); gravarContas(r, d.base); iniciarSessao(u.id, agora.getTime());
   const aviso = await conectarServico(d, provedor, token, perfil);
   return { estado: 'CONCLUIDO', ...(aviso ? { mensagem: aviso } : {}), sessao: sessaoParaJanela(d.base, agora.getTime()) };

@@ -20,10 +20,12 @@ window.PrumoAdministracaoAcessos = (() => {
     const nome = h('input', { id: 'nova-nome', type: 'text', maxlength: 80 });
     const login = h('input', { id: 'nova-login', type: 'text', maxlength: 40, autocapitalize: 'off', spellcheck: 'false' });
     const papel = DS.selecao({ id: 'nova-papel', rotulo: 'Papel', opcoes: papeis.map((p) => [p.id, p.nome]), valor: 'qa' });
+    const admin = h('input', { id: 'nova-admin', type: 'checkbox' });
     DS.modal('Nova conta', [h('p', { class: 'suave' }, tr('O Prumo gera uma senha temporária. Entregue-a à pessoa: ela troca a senha no primeiro acesso.')),
       DS.campo('Nome', nome), DS.campo('Login', login), DS.campo('Papel', papel),
+      h('label', { class: 'adm-admin' }, admin, ' ', tr('Admin: vê a tela Administração')),
       DS.rodape(DS.acao('Criar conta', async () => {
-        const r = await chamar(() => api.usuariosCriar(login.value, nome.value, papel.value)); if (!r) return;
+        const r = await chamar(() => api.usuariosCriar(login.value, nome.value, papel.value, admin.checked)); if (!r) return;
         DS.fecharModal(); segredoUmaVez('Senha temporária de ' + r.conta.nome, 'Entregue esta senha à pessoa por um canal seguro. Ela aparece só agora; no primeiro acesso a pessoa define a própria senha.', r.senhaTemporaria, recarregar);
       }, { primaria: true, id: 'nova-criar' }))], { tamanho: 'sm' });
   }
@@ -38,6 +40,10 @@ window.PrumoAdministracaoAcessos = (() => {
       const eu = c.id === lista.voce;
       const papel = DS.selecao({ id: 'papel-' + c.login, rotulo: 'Papel de ' + c.login, opcoes: papeis.papeis.map((p) => [p.id, p.nome]), valor: c.papel, aoMudar: async (v) => { const r = await chamar(() => api.usuariosAlterar(c.id, { papel: v })); if (r) avisar(tr('Papel alterado.')); void recarregar(); } });
       papel.disabled = !alterar || eu;
+      // Marca admin: só ela libera a tela Administração; o papel cuida das telas de trabalho.
+      const admin = h('input', { type: 'checkbox', id: 'admin-' + c.login, 'aria-label': tr('Admin: {n}', { n: c.login }), title: eu ? tr('Você não pode tirar a própria marca de admin.') : null });
+      admin.checked = !!c.admin; admin.disabled = !alterar || eu || c.estado !== 'ATIVO';
+      admin.addEventListener('change', async () => { const r = await chamar(() => api.usuariosAlterar(c.id, { admin: admin.checked })); if (r) avisar(tr(admin.checked ? 'Conta marcada como admin.' : 'Marca de admin retirada.')); void recarregar(); });
       const acoes = alterar ? [
         c.estado === 'PENDENTE' ? DS.acao('Aprovar', agir(() => api.usuariosAlterar(c.id, { estado: 'ATIVO' }), 'Cadastro aprovado.'), { compacto: true, primaria: true, id: 'aprovar-' + c.login }) : null,
         !eu ? DS.acao('Redefinir senha', async () => { const r = await chamar(() => api.usuariosSenha(c.id)); if (r) segredoUmaVez('Senha temporária de ' + c.nome, 'Entregue esta senha à pessoa por um canal seguro. Ela aparece só agora; no próximo acesso a pessoa define a própria senha.', r.senhaTemporaria, recarregar); }, { compacto: true, id: 'redefinir-' + c.login }) : null,
@@ -48,15 +54,15 @@ window.PrumoAdministracaoAcessos = (() => {
       ].filter(Boolean) : [];
       return { attrs: { 'data-conta': c.login }, celulas: [
         h('div', {}, h('strong', { 'data-i18n-ignore': '' }, c.nome), eu ? [' ', DS.chip('você', 'info')] : null, h('div', { class: 'suave' }, dado(c.login))),
-        { no: papel }, { no: h('div', { class: 'adm-estado' }, DS.chip(ROTULO_ESTADO[c.estado], TOM_ESTADO[c.estado]), c.bloqueada ? DS.chip('Bloqueada', 'falha') : null, c.trocarSenha ? DS.chip('Senha temporária', 'aviso') : null) },
+        { no: papel }, { no: h('label', { class: 'adm-admin' }, admin) }, { no: h('div', { class: 'adm-estado' }, DS.chip(ROTULO_ESTADO[c.estado], TOM_ESTADO[c.estado]), c.bloqueada ? DS.chip('Bloqueada', 'falha') : null, c.trocarSenha ? DS.chip('Senha temporária', 'aviso') : null) },
         quando(c.ultimoAcesso), { no: h('div', { class: 'adm-acoes' }, ...acoes), classe: 'ds-acao' }] };
     });
     const conta = (e) => lista.contas.filter((c) => c.estado === e).length;
     area.replaceChildren(
       DS.resumo([[conta('ATIVO'), 'ativas', 'ok'], [conta('PENDENTE'), 'aguardam aprovação', 'info'], [conta('DESATIVADO'), 'desativadas'], [lista.contas.filter((c) => c.bloqueada).length, 'bloqueadas', 'falha']], { id: 'adm-usuarios-resumo' }),
-      h('div', { class: 'adm-barra' }, h('p', { class: 'suave' }, tr('Cada conta tem um papel; o papel define o que a pessoa vê e altera em cada tela (aba Permissões).')),
+      h('div', { class: 'adm-barra' }, h('p', { class: 'suave' }, tr('O papel define as telas de trabalho (aba Permissões). A tela Administração só aparece para quem tem a marca Admin.')),
         alterar ? DS.acao('Nova conta', () => novaConta(papeis.papeis, recarregar), { primaria: true, icone: 'mais', id: 'adm-nova-conta' }) : null),
-      DS.tabela({ id: 'adm-usuarios', colunas: ['Pessoa', 'Papel', 'Situação', 'Último acesso', 'Ações'], linhas }));
+      DS.tabela({ id: 'adm-usuarios', colunas: ['Pessoa', 'Papel', 'Admin', 'Situação', 'Último acesso', 'Ações'], linhas }));
   }
 
   /* ---------- Permissões ---------- */
@@ -75,14 +81,14 @@ window.PrumoAdministracaoAcessos = (() => {
       s.dataset.nivel = s.value; s.disabled = !alterar; return { no: s };
     };
     const cabecalho = d.papeis.map((p) => ({ t: h('span', { class: 'perm-papel' }, h('span', { 'data-i18n-ignore': '' }, p.nome), h('span', { class: 'suave' }, tr('{n} conta(s)', { n: p.contas }))) }));
-    const tabela = DS.tabela({ id: 'perm-matriz', colunas: ['Tela', ...cabecalho], linhas: d.modulos.map((m) => ({ attrs: { 'data-tela': m.id }, celulas: [h('strong', {}, tr(m.rotulo)), ...d.papeis.map((p) => celula(p, m))] })) });
+    const tabela = DS.tabela({ id: 'perm-matriz', colunas: ['Tela', ...cabecalho], linhas: d.modulos.filter((m) => m.id !== 'administracao').map((m) => ({ attrs: { 'data-tela': m.id }, celulas: [h('strong', {}, tr(m.rotulo)), ...d.papeis.map((p) => celula(p, m))] })) });
     const papeisEditaveis = d.papeis.filter((p) => !p.fixo);
     area.replaceChildren(
-      DS.alerta('Sem acesso: a tela some do menu. Ver: só consulta. Usar: consulta e altera. A regra vale no servidor, não só na tela.', 'info'),
+      DS.alerta('Sem acesso: a tela some do menu. Ver: só consulta. Usar: consulta e altera. A regra vale no servidor, não só na tela. A Administração não está aqui: ela depende da marca Admin na aba Usuários.', 'info'),
       h('div', { class: 'adm-barra' }, alterar ? [DS.acao('Novo papel', () => novoPapel(d, () => permissoes(area)), { icone: 'mais', id: 'perm-novo' }), salvar] : DS.notaPermissao('Seu papel só permite consultar as permissões.')),
       h('div', { class: 'perm-caixa' }, tabela),
       DS.secao('Papéis', h('ul', { class: 'adm-lista perm-lista' }, d.papeis.map((p) => h('li', { class: 'adm-arquivo', 'data-papel': p.id }, h('strong', { 'data-i18n-ignore': '' }, p.nome), h('span', { class: 'adm-desc', 'data-i18n-ignore': '' }, p.descricao || '—'),
-        h('span', { class: 'suave' }, p.fixo ? tr('Fixo: sempre pode tudo.') : tr('{n} conta(s)', { n: p.contas }) + (p.id === d.papelDoCadastro ? ' · ' + tr('papel de novos cadastros') : '')),
+        h('span', { class: 'suave' }, p.fixo ? tr('Fixo: todas as telas de trabalho.') : tr('{n} conta(s)', { n: p.contas }) + (p.id === d.papelDoCadastro ? ' · ' + tr('papel de novos cadastros') : '')),
         alterar && !p.fixo ? h('div', {}, DS.acao('Excluir papel', async () => { const r = await chamar(() => api.papeisExcluir(p.id)); if (r) { avisar(tr('Papel excluído.')); void permissoes(area); } }, { compacto: true, classe: 'perigo', id: 'perm-excluir-' + p.id, desabilitado: p.contas > 0 || p.id === d.papelDoCadastro, titulo: p.contas > 0 ? 'Troque o papel das contas antes de excluir.' : null })) : null)))),
       papeisEditaveis.length ? null : DS.texto(null, 'Nenhum papel editável.'));
   }

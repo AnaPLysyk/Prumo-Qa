@@ -1,25 +1,51 @@
 # Plataforma manual, Jira, Qase e GitHub
 
-Em Projetos, escolha Novo projeto Prumo. Nome e descrição bastam: pasta local e IA são opcionais. O projeto recebe identidade própria e contextos separados. Pastas antigas continuam disponíveis; Vincular pasta de automação exige contrato v2 existente e mantém os arquivos como estão.
+Eu quis que o projeto existisse no Prumo antes de qualquer integração. Você escolhe depois o que ligar.
+
+## Criar o projeto
+
+Em **Projetos**:
+
+- **Criar projeto manual**: nome e descrição bastam. Pasta, serviços e IA são opcionais.
+- **Importar projetos do Qase**: pelo token, você escolhe os projetos da conta e eles já nascem vinculados.
+
+Depois, no projeto, **Vincular repositório local…** liga uma pasta de código e **Escolher repositório do GitHub…** liga um repositório. Dá para ficar só no local.
 
 ## Conectar um serviço
 
-Em Conexões, configure Jira, Qase ou GitHub com a sua credencial (a escrita é opcional e fica desligada por padrão). Uma conexão do ChatGPT não autentica o desktop. Jira exige instância Cloud, e-mail e token de API sem escopos; Qase exige token v1; GitHub exige token de leitura dos recursos necessários. O Windows protege a credencial; sem proteção, o Prumo recusa salvar.
+Em **Conexões**, cada serviço tem uma linha com **Conectar**. O formulário diz o que o token precisa:
 
-Selecione um projeto Prumo. Use Listar recursos disponíveis na conexão, confira chave, ID, instância e conta e clique Vincular. A seleção vem da API, com paginação. O diálogo nativo confirma o destino. Não há associação por nomes iguais. Para trocar o recurso, remova o vínculo anterior em Projetos e selecione novamente. Para trocar o token, remova a conexão, configure outra e selecione novamente; o histórico continua identificado.
+- **Jira**: endereço Cloud (*.atlassian.net), e-mail e token de API sem escopos.
+- **Qase**: token da API v1.
+- **GitHub**: token fine-grained com Issues Read and write; Contents, Pull requests e Actions Read-only; Metadata, que o GitHub marca sozinho.
 
-## Consultas manuais
+O token fica no cofre do sistema; sem cofre, o Prumo não salva.
 
-Tickets consulta Jira; Testes mostra suites, casos e planos Qase; Testes › Runs mostra execuções, runs preparadas e runs do Qase; Automações apresenta o contrato local opcional e consultas GitHub. Escolha a operação e clique Consultar API. IDs exigidos devem vir dos dados consultados. Cada resposta mostra fonte e data, sem cache persistido. Erro é exibido como erro, nunca como lista vazia bem-sucedida.
+Para ligar um projeto que já existe, use **Listar recursos disponíveis** na conta, confira chave, ID e conta e clique **Vincular**. A lista vem da API, nunca por nome parecido. Para trocar o recurso, remova o vínculo em Projetos e vincule de novo; para trocar o token, remova a conexão e conecte outra.
 
-Para critérios de aceite Jira, escolha Descobrir campos e selecione um customfield retornado. Não há campo deduzido automaticamente. Detalhes mostram estados, passos e relações tal como o serviço retornou. Sem relação disponível, aparece Vínculo ainda não definido. Resultado de run externo não é evidência local ou cobertura verificada. Dados extras ficam no detalhe expansível.
+## Consultar
 
-Em Testes › Repositório (vínculos declarados), informe ticket, ID do caso e justificativa. O Prumo consulta os dois no projeto selecionado antes de registrar sua associação como DECLARADO PELO USUÁRIO. Isso não comprova cobertura. Remover um vínculo conserva a relação anterior como desatualizada; não transfere para o recurso novo.
+- **Tickets**: tickets do Jira, defeitos do Qase, issues do GitHub e rascunhos locais na mesma lista.
+- **Testes**: suites, casos, planos e runs do Qase, testes do repositório e pipelines.
 
-Importar descrição de ticket exige prévia e confirmação nativa. O contexto entra como RASCUNHO. Aprovação e disponibilização ao MCP continuam decisões separadas. Agentes mantém configuração e teste das ferramentas MCP existentes; a IA não é necessária para usar estas telas.
+Cada resposta mostra fonte e data. Erro aparece como erro, nunca como lista vazia. Para critérios de aceite do Jira, **Descobrir campos** e escolha o campo; nada é deduzido. Resultado de run externa não vira evidência local.
 
-## Limites da versão
+Em **Testes › Repositório**, você declara um vínculo entre ticket e caso com justificativa. O Prumo confere os dois no serviço antes de registrar, mas um vínculo declarado não comprova cobertura.
 
-Jira com token com escopos/OAuth gateway não está implementado. Qase v1 não informa identidade da conta: o projeto é identificado por código dentro da conexão validada. No laboratório, CID-QA é título e CQA é código. GitHub mostra check runs; status legados de commit não estão incluídos. Autenticação de produção depende de credenciais configuradas pela pessoa e não é comprovada pelas simulações.
+## Escrever nos serviços
 
-As integrações são de leitura por padrão. A escrita fica desligada até você habilitar, por projeto e serviço, em Conexões: comentar, criar, editar e mudar o status de tickets no Jira; criar casos, suites, planos e runs e publicar resultados no Qase; criar branches `prumo/…`, gravar arquivos de teste e abrir Pull Request em rascunho no GitHub. Cada operação mostra a prévia e pede a confirmação do Windows, e o Prumo não apaga nada. Veja [Testes, tickets e integrações](19-testes-e-integracoes.md). Consulte [os contratos e endpoints](../../docs/SERVICOS.md) para os detalhes técnicos.
+A escrita nasce desligada. Você liga por projeto e serviço, em **Habilitar escrita…**:
+
+- **Jira**: criar, comentar, editar, anexar, mudar status e vincular tickets.
+- **Qase**: criar casos, suites, planos, runs e defeitos, publicar resultados e mudar o status de um defeito.
+- **GitHub**: criar issues, branches prumo/…, gravar arquivos de teste e abrir Pull Request em rascunho.
+
+Cada envio mostra a prévia, pede a confirmação do sistema, evita duplicata e relê no serviço para confirmar. O Prumo não apaga nada.
+
+## Limites
+
+- Jira com token com escopos ou OAuth não está implementado.
+- A API v1 do Qase não informa a identidade da conta; o projeto é identificado pelo código dentro da conexão.
+- No plano gratuito do Qase, o vínculo caso–ticket do Jira não é liberado, e na conta que testei os campos personalizados de defeito não foram gravados.
+- Sem Issues Read and write, o GitHub cria a issue mas descarta os rótulos; o Prumo avisa.
+- Status antigos de commit do GitHub não aparecem, só check runs.

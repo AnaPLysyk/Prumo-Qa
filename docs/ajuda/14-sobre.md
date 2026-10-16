@@ -1,11 +1,15 @@
 # Sobre
 
-Prumo QA, versão {{VERSAO}}.
+Prumo QA, versão {{VERSAO}}. Feito por mim, Ana P. Lysyk (AnaPLysyk).
 
-Autoria: Ana P. Lysyk (AnaPLysyk). Código-fonte e canal de suporte: repositório AnaPLysyk/Prumo-Qa no GitHub (abra uma issue). O aplicativo só abre a página oficial de uma release se você pedir e confirmar.
-
-Documentação completa: README e pasta docs do repositório.
+O código-fonte e o suporte ficam no repositório AnaPLysyk/Prumo-Qa no GitHub: para pedir ajuda, abra uma issue. A documentação completa está no README e na pasta docs.
 
 ## Administração › Documentação viva
 
-Em **Administração › Documentação viva** você explora o código desta versão do Prumo, gerado do próprio código no build. À esquerda, a árvore de arquivos; no meio, o **fluxo da tela** (tela → canal da janela → API → regras → dados), com a opção de ver o caminho de um arquivo ou a tela inteira; à direita, o **código do arquivo escolhido** com a explicação do que ele faz, o papel na arquitetura, as funções, os canais e quem o usa. Procure pelo nome de uma tela, de um arquivo, de uma função ou de um canal. A mesma pasta existe em `frontend/<tela>` e `backend/<tela>`. Nada é executado e nada sai deste computador: o código mostrado é o que foi gravado no build.
+Para quem tem a marca admin, **Administração › Documentação viva** mostra o código desta versão, gerado no build:
+
+- à esquerda, a árvore de arquivos;
+- no meio, o fluxo da tela (tela → canal → API → regras → dados);
+- à direita, o código do arquivo com a explicação, as funções, os canais e quem o usa.
+
+Procure por tela, arquivo, função ou canal. Nada é executado e nada sai deste computador.

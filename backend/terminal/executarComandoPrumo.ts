@@ -53,7 +53,7 @@ export async function executarComandoPrumo() {
   if(cmd==='metricas'){comandoMetricas(p,json);return;}
   if(cmd==='logs'){await comandoLogs(p,json,resto[0]==='--follow');return;}
   if(cmd==='conectar'){await comandoConectar(p,resto[0]??'codex',contrato,json);return;}
-  if(cmd==='doctor'){const h=consultarAtividades(p);avisarHistoricoIncompleto(h.problems);imprimirJson({ok:true,node:process.version,root:p.raiz,projectId:p.manifesto.id,schemaVersion:2,commands:Object.keys(p.manifesto.commands),readOnly:p.manifesto.execution.readOnly,approval:{required:true,provider:process.platform==='win32'?'Windows CredUI + LogonUser (senha da conta atual)':'indisponível: execução bloqueada',maxMs:120000},observability:calcularMetricas(h)});return;}
+  if(cmd==='doctor'){const h=consultarAtividades(p);avisarHistoricoIncompleto(h.problems);imprimirJson({ok:true,node:process.version,root:p.raiz,projectId:p.manifesto.id,schemaVersion:2,commands:Object.keys(p.manifesto.commands),readOnly:p.manifesto.execution.readOnly,approval:{required:true,provider:process.platform==='win32'?'Windows CredUI + LogonUser (senha da conta atual)':process.platform==='darwin'?'macOS: autenticação do sistema (senha ou Touch ID)':process.platform==='linux'?'Linux: zenity/kdialog + polkit (pkexec)':'indisponível: execução bloqueada',maxMs:120000},observability:calcularMetricas(h)});return;}
   if(cmd==='context'){imprimirJson(await chamadaRegistrada(p,'contexto_projeto',{},()=>contextoCompleto(p)));return;}
   if(cmd==='evidence'||cmd==='evidencias'){await comandoEvidencias(p,resto[0],json||cmd==='evidence');return;}
   if(!resto[0])throw new Error('Informe capability ou arquivo do plano.');

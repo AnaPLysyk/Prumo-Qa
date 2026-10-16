@@ -82,7 +82,7 @@ test('permissão por canal: qa não entra na Administração; leitor consulta ma
   for (const canal of ['conta:sessao', 'conta:entrar', 'conta:cadastrar', 'conta:recuperar', 'conta:githubestado', 'app:info']) assert.doesNotThrow(() => conferirAcessoAoCanal(canal, b));
   const entrarCom = async (login, temporaria, nova) => { await entrarNaConta({ login, senha: temporaria }, b); await trocarMinhaSenha({ atual: temporaria, nova }, b); };
   await entrarCom('bruno', qa.senhaTemporaria, 'Chave-nova-2026');
-  for (const canal of ['usuarios:listar', 'usuarios:criar', 'papeis:salvar', 'plataforma:salvar', 'agentes:salvar', 'dados:excluir', 'administracao:mapa']) assert.throws(() => conferirAcessoAoCanal(canal, b), /PERMISSION_DENIED: o papel Analista de QA não permite/);
+  for (const canal of ['usuarios:listar', 'usuarios:criar', 'papeis:salvar', 'plataforma:salvar', 'agentes:salvar', 'dados:excluir', 'administracao:mapa']) assert.throws(() => conferirAcessoAoCanal(canal, b), /PERMISSION_DENIED: a tela Administração é só para contas marcadas como admin/);
   for (const canal of ['espacos:criar', 'contextos:salvar', 'runs:executar', 'conhecimento:criar']) assert.doesNotThrow(() => conferirAcessoAoCanal(canal, b));
   sairDaConta(b); await entrarCom('carla', leitor.senhaTemporaria, 'Leitura-firme-26');
   for (const canal of ['contextos:listar', 'runs:listar', 'projeto:logs']) assert.doesNotThrow(() => conferirAcessoAoCanal(canal, b));
@@ -133,7 +133,7 @@ test('cadastro: fechado, pendente até aprovar, nunca como administrador; recupe
 test('Administração: sempre sobra um administrador ativo e ninguém se desativa, se rebaixa ou se exclui', async (t) => {
   const b = pasta(t); const { conta: eu } = await ativarLogin(ADMIN, b);
   await codigo(async () => alterarContaPelaAdministracao({ id: eu.id, estado: 'DESATIVADO' }, b), /^SELF_DISABLE/);
-  await codigo(async () => alterarContaPelaAdministracao({ id: eu.id, papel: 'qa' }, b), /^SELF_DEMOTE/);
+  await codigo(async () => alterarContaPelaAdministracao({ id: eu.id, admin: false }, b), /^SELF_DEMOTE/); // 2.15.1: a Administração vem da marca admin, não do papel
   await codigo(async () => excluirConta(eu.id, b), /^SELF_DELETE/);
   await codigo(() => redefinirSenhaPelaAdministracao(eu.id, b), /^USE_MY_ACCOUNT/);
   const outro = await criarContaPelaAdministracao({ login: 'bia', nome: 'Bia', papel: 'qa' }, b);

@@ -1,19 +1,24 @@
 # Como interpretar métricas e logs
 
-Tudo que aparece em Métricas e Logs vem do histórico de registros reais feitos pelo Prumo a cada operação (um registro no início e outro no término). Histórico não é uma tela separada.
+Aqui eu só mostro número que vem de registro real feito neste computador; nada é estimado.
 
-- **Interações registradas**: operações iniciadas, por MCP ou terminal.
-- **Revisões de cobertura**: análises estruturais concluídas. Não são execuções de teste.
-- **Achados e recomendações**: orientações padronizadas do Prumo. O Prumo não observa se a IA as aplicou.
+## Métricas
+
+Os dados vêm das operações registradas pelo Prumo (MCP e terminal) e das execuções do projeto (agendadas ou manuais).
+
+- **Totais do núcleo**: interações registradas, chamadas via MCP, revisões de cobertura, análises de contexto e execuções em PASS, FAIL, BLOCKED e NOT_RUN, de todo o período.
+- **Gráficos**: seguem o período e os **Filtros** (fonte, resultado, tipo de rotina, ambiente, execução, ticket). Em **Editar gráficos** você escolhe, muda o formato e ordena. Dá para exportar CSV ou JSON e imprimir ou salvar em PDF.
+- **Achados e recomendações**: orientações padronizadas; o Prumo não observa se a IA as aplicou.
 - **Lacunas**: requisito, fonte, oráculo ou rastreabilidade ausentes.
-- **Redundâncias candidatas**: cenários estruturalmente equivalentes; ainda dependem de julgamento humano ou da IA.
-- **Sem término observado**: a operação começou, mas nenhum término foi registrado (por exemplo, o cliente desconectou).
-- **Duração**: tempo medido pelo Prumo para a operação.
+- **Redundâncias**: cenários estruturalmente equivalentes; ainda pedem julgamento seu ou da IA.
+- **INFO** é uma consulta e não conta como PASS; **ERRO_INFRA** é falha da própria operação ou da infraestrutura.
+- **Tokens e custos** aparecem como indisponíveis: não há dados verificáveis. Conversas de Codex ou Claude Code não são capturadas.
 
-Tokens e custos de IA não aparecem porque o Prumo não tem dados verificáveis sobre eles. Conversas privadas de Codex ou Claude Code não são capturadas.
+Se houver registro inválido ou truncado, a tela avisa que o histórico é parcial; o registro fica fora do cálculo e nunca é corrigido.
 
-Se algum registro estiver corrompido, a tela avisa que as métricas são parciais; o registro inválido é excluído, não corrigido.
+## Logs
 
-## Diagnóstico da interface
-
-A aba Logs também oferece o diagnóstico técnico das chamadas da própria janela (canal, estado, duração, código). Ele é separado do histórico de QA: atualizar uma tela **não** conta como análise do Prumo e não altera as métricas.
+- Cada operação gera um registro no início e outro no término.
+- **Sem término observado**: começou, mas nenhum término foi registrado (por exemplo, o cliente desconectou). Não prova que ainda está rodando.
+- **Duração**: tempo medido pelo Prumo.
+- **Diagnóstico da interface**: chamadas da própria janela (canal, estado, duração, código), separadas do histórico de QA. Atualizar uma tela não conta como análise e não muda as métricas.

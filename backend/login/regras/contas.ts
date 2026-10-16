@@ -20,10 +20,11 @@ function dadosDaConta(d: { login: string; nome: string; senha: string }) {
   conferirForcaDaSenha(d.senha, login.data); return { login: login.data, nome: nome.data };
 }
 
-export function contaNova(r: RegistroDeContas, d: { login: string; nome: string }, extra: Pick<Usuario, 'papel' | 'estado' | 'senha' | 'recuperacao' | 'trocarSenha' | 'origem'> & { identidades?: Usuario['identidades'] }, agora: Date): Usuario {
+export function contaNova(r: RegistroDeContas, d: { login: string; nome: string }, extra: Pick<Usuario, 'papel' | 'estado' | 'senha' | 'recuperacao' | 'trocarSenha' | 'origem'> & { identidades?: Usuario['identidades']; admin?: boolean }, agora: Date): Usuario {
   if (r.usuarios.some((u) => u.login === d.login)) throw new Error('LOGIN_TAKEN: esse login já está em uso; escolha outro.');
   const quando = agora.toISOString();
-  return { id: randomUUID(), login: d.login, nome: d.nome, identidades: [], falhas: 0, bloqueadoAte: null, criadoEm: quando, atualizadoEm: quando, ultimoAcesso: null, ...extra };
+  // Conta nova nasce sem a marca admin (cadastro e provedor); só a primeira conta e a Administração a dão.
+  return { id: randomUUID(), login: d.login, nome: d.nome, identidades: [], falhas: 0, bloqueadoAte: null, criadoEm: quando, atualizadoEm: quando, ultimoAcesso: null, admin: false, ...extra };
 }
 
 /** Registra uma tentativa errada: conta o erro e, ao chegar no limite, bloqueia a conta pelo tempo configurado. */
@@ -44,7 +45,7 @@ export async function ativarLogin(d: { login: string; nome: string; senha: strin
   const dados = dadosDaConta(d); const codigo = gerarCodigoDeRecuperacao();
   const senha = await resumirSegredo(d.senha); const recuperacao = await resumirSegredo(normalizarCodigoDeRecuperacao(codigo));
   const r = lerContas(b); if (loginLigado(r)) throw new Error('LOGIN_ALREADY_ACTIVE: o login já está ligado; use Usuários para criar outras contas.');
-  const u = contaNova(r, dados, { papel: 'administrador', estado: 'ATIVO', senha, recuperacao, trocarSenha: false, origem: 'ATIVACAO' }, agora);
+  const u = contaNova(r, dados, { papel: 'administrador', estado: 'ATIVO', senha, recuperacao, trocarSenha: false, origem: 'ATIVACAO', admin: true }, agora);
   u.ultimoAcesso = agora.toISOString(); r.usuarios.push(u); gravarContas(r, b); iniciarSessao(u.id, agora.getTime());
   return { conta: contaParaJanela(r, u, agora.getTime()), codigoRecuperacao: codigo };
 }

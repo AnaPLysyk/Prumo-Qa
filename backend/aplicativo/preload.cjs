@@ -86,7 +86,7 @@ contextBridge.exposeInMainWorld('prumo', Object.freeze({
   contaPerfil: (nome) => chamar('conta:perfil', { nome }),
   usuariosAtivar: (login, nome, senha) => chamar('usuarios:ativar', { login, nome, senha }),
   usuariosListar: () => chamar('usuarios:listar', {}),
-  usuariosCriar: (login, nome, papel) => chamar('usuarios:criar', { login, nome, papel }),
+  usuariosCriar: (login, nome, papel, admin) => chamar('usuarios:criar', { login, nome, papel, admin }),
   usuariosAlterar: (id, dados) => chamar('usuarios:alterar', { id, ...dados }),
   usuariosSenha: (id) => chamar('usuarios:senha', { id }),
   usuariosDesbloquear: (id) => chamar('usuarios:desbloquear', { id }),

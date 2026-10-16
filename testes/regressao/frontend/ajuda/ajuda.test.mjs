@@ -24,13 +24,13 @@ test('central de ajuda: guia completo, perguntas frequentes expansíveis e tudo 
   for (const t of ['O que é o Prumo QA', 'Como funciona', 'Como instalar', 'Como vincular um projeto', 'Como conectar uma IA', 'O que o Prumo faz sem IA e o que depende dela', 'Como interpretar os resultados', 'Problemas comuns', 'Perguntas frequentes', 'Versões', 'Atualizações', 'Integrações técnicas', 'Privacidade e dados', 'Política de privacidade (rascunho)', 'Segurança e limitações'])
     assert.ok(indice.includes(t), 'índice sem: ' + t);
   await page.click('.indice button:has-text("Como funciona")');
-  assert.match(await page.textContent('article'), /Projeto \(qa\.project\.json\) → IA .* → MCP → núcleo QA/);
+  assert.match(await page.textContent('article'), /Projeto \(qa\.project\.json\) → IA .* → MCP → núcleo do Prumo/);
   await page.click('.indice button:has-text("Perguntas frequentes")');
   assert.ok((await page.locator('details.faq').count()) >= 8);
   const primeira = page.locator('details.faq').first();
   assert.equal(await primeira.getAttribute('open'), null, 'perguntas começam recolhidas');
   await primeira.locator('summary').click();
-  assert.notEqual(await primeira.getAttribute('open'), null); assert.match(await primeira.textContent(), /Não\. É um conjunto de verificações/);
+  assert.notEqual(await primeira.getAttribute('open'), null); assert.match(await primeira.textContent(), /Não\. Eu fiz o Prumo como um conjunto de verificações/);
   await page.click('.indice button:has-text("Problemas comuns")');
   const problemas = await page.textContent('article');
   for (const termo of ['Conexão MCP não detectada', 'Projeto sem contrato', 'Não aparecem logs', 'BLOCKED', 'Windows bloqueou']) assert.match(problemas, new RegExp(termo));

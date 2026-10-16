@@ -61,7 +61,7 @@ test('Minha conta: primeiro acesso sem nada liberado, como Administrador e como 
   await capturar(p, 'perfil-usuario-comum-minha-conta');
   await p.keyboard.press('Escape');
   const recusa = await p.evaluate(async () => (await window.prumo.usuariosListar()).error);
-  assert.match(recusa, /^PERMISSION_DENIED: o papel Analista de QA não permite consultar em Administração/);
+  assert.match(recusa, /^PERMISSION_DENIED: a tela Administração é só para contas marcadas como admin/);
   await p.evaluate(() => { void mostrar('administracao'); }); await p.waitForSelector('#tela-sem-acesso');
   assert.deepEqual(a.erros, []);
 });

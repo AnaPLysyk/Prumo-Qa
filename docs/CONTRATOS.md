@@ -162,8 +162,8 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:conta:perfil` | `nome` | Grava o nome na conta. |
 | `prumo:usuarios:ativar` | `login`, `nome`, `senha` | Cria acessos.json; a partir daí a janela exige login e confere as permissões em cada canal. |
 | `prumo:usuarios:listar` | — | Consulta local. |
-| `prumo:usuarios:criar` | `login`, `nome`, `papel` | Grava a conta; a pessoa troca a senha no primeiro acesso. |
-| `prumo:usuarios:alterar` | `estado`, `id`, `nome`, `papel` | Grava a conta; vale no próximo pedido daquela pessoa. |
+| `prumo:usuarios:criar` | `admin`, `login`, `nome`, `papel` | Grava a conta; a pessoa troca a senha no primeiro acesso. |
+| `prumo:usuarios:alterar` | `admin`, `estado`, `id`, `nome`, `papel` | Grava a conta; vale no próximo pedido daquela pessoa. |
 | `prumo:usuarios:senha` | `id` | Troca a senha, exige troca no próximo acesso e desbloqueia a conta. |
 | `prumo:usuarios:desbloquear` | `id` | Zera as tentativas erradas. |
 | `prumo:usuarios:excluir` | `id` | Remove a conta de acessos.json. |

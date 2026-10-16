@@ -1,39 +1,37 @@
 # Política de privacidade (rascunho)
 
-Rascunho técnico consistente com o funcionamento atual. Requer revisão humana e jurídica antes de qualquer distribuição ampla. Não afirma conformidade com leis ou certificações.
+Eu escrevi este rascunho a partir do que o Prumo faz hoje. Ele ainda precisa de revisão jurídica antes de distribuição ampla e não afirma conformidade com leis ou certificações.
 
-## O que é armazenado, e onde
+## Onde ficam os dados
 
-- **Histórico de operações**: %LOCALAPPDATA%\PrumoQA\projects. Identificadores com hash, ferramenta, cliente declarado, estado, duração, contagens de achados e referências a evidências. Não guarda o texto de requisitos nem respostas completas.
-- **Diagnóstico da interface**: %LOCALAPPDATA%\PrumoQA\diagnostico. Somente canal, estado, duração, código e correlação das chamadas da janela; nunca argumentos, caminhos ou conteúdo. Não entra nas métricas.
-- **Testes de protocolo**: %LOCALAPPDATA%\PrumoQA\integracoes. UUID, cliente selecionado, hashes de projeto/configuração, horários e resultado de handshake/listagem/leitura. Não armazenam conteúdo das evidências consultadas nem credenciais. Sem retenção automática; limite de 1000 registros por projeto. A exclusão de histórico operacional não apaga esses registros separados; arquivamento é manual com os processos parados.
-- **Contextos**: %LOCALAPPDATA%\PrumoQA\contextos. Requisitos e regras que você cadastra, por projeto, com histórico verificável. Só vão ao agente de IA se você habilitar essa opção para o projeto, e então o provedor da IA conectada pode processar o texto.
-- **Projetos vinculados**: %LOCALAPPDATA%\PrumoQA\vinculos.json (caminhos locais que você escolheu).
-- **Evidências de execução**: pasta .prumo/evidencias dentro de cada projeto, com logs mascarados.
-- **Dados internos da janela**: %LOCALAPPDATA%\PrumoQA\app.
-- **Agenda e execuções (2.8)**: %LOCALAPPDATA%\PrumoQA\plataforma (agenda.json, fila.json, autorizacoes.json, publicacoes-jira.json e worker-trava.json). Rotinas, resultados, autorizações (com validade e hash do escopo, nunca senha) e o texto dos comentários preparados para o Jira. Não guardam credenciais nem respostas remotas.
-- **Preferências**: %LOCALAPPDATA%\PrumoQA\preferencias.json, por usuário do Windows: tema, idioma, avisos e se o Prumo inicia com o Windows (desligado por padrão).
+Tudo fica na pasta de dados do Prumo neste computador:
 
-## Retenção
+- Windows: %LOCALAPPDATA%\PrumoQA
+- macOS: ~/Library/Application Support/PrumoQA
+- Linux: ~/.local/share/prumo-qa
 
-Sem retenção automática: nada é apagado sozinho. Você exclui quando quiser, em Privacidade e dados.
+Dentro dela:
 
-## O que é enviado a terceiros
+- **projects**: histórico de operações (identificadores com hash, ferramenta, cliente declarado, estado, duração, contagens). Não guarda o texto de requisitos nem respostas completas.
+- **diagnostico**: canal, estado, duração e código das chamadas da janela; nunca argumentos, caminhos ou conteúdo.
+- **integracoes**: testes de protocolo MCP (cliente, hashes, horários, resultado). Até 1000 registros por projeto; não guarda credenciais.
+- **contextos**: requisitos e regras que você cadastra, com histórico.
+- **plataforma**: contas de login (só resumos de senha, nunca a senha), projetos, conexões e vínculos, tokens protegidos pelo cofre do sistema (DPAPI no Windows, Keychain no macOS, gnome-keyring ou KWallet no Linux), agenda, fila, autorizações (validade e hash do escopo, nunca senha), rascunhos locais e registro das operações externas.
+- **preferencias.json**: tema, idioma, avisos e se o Prumo inicia com o sistema (desligado por padrão).
 
-Nas consultas explícitas Jira/Qase/GitHub, o processo principal envia a credencial ao host oficial do serviço, junto dos IDs, filtros e parâmetros de paginação escolhidos. Nenhum documento, código ou log local é anexado. Respostas não são persistidas como cache nem transferidas automaticamente para IA. Tokens ficam protegidos pelo Windows em plataforma/credenciais.json; metadados de conexões/vínculos ficam em plataforma, com contextos de projetos manuais na estrutura própria espacos. Remover conexão elimina a credencial; remover vínculo preserva histórico.
+Na pasta de cada projeto, **.prumo** guarda evidências e relatórios das execuções, com logs mascarados.
 
-Ao publicar um comentário de resultado no Jira (manual, depois da sua confirmação, ou agendado com uma política aprovada por você), o processo principal envia ao Jira Cloud do projeto vinculado, com a sua credencial, o texto do comentário: ticket, tipo, ambiente, contagem de cenários, resumo das falhas e a referência local da evidência. Nenhum arquivo, log completo ou caminho é anexado. As rotinas de k6 enviam tráfego de teste somente ao destino que você declarou.
+Nada é apagado sozinho. Você exclui quando quiser, em **Ajuda › Privacidade e dados**. Desinstalar mantém os dados.
 
-O servidor MCP responde ao cliente de IA que o iniciou. O que ele devolve (contexto autorizado, análises, evidências) passa a ser tratado por esse cliente e por seu provedor. O Prumo não recebe as conversas da IA.
+## O que sai deste computador
 
-Para avisar de versões novas, o aplicativo consulta a release mais recente no GitHub ao abrir e a cada 6 horas (aviso automático, ligado por padrão e desligável em Ajuda › Atualizações) e quando você clica em verificar. É uma requisição HTTPS sem enviar logs, projetos, caminhos ou identificadores. Como em qualquer conexão, o servidor remoto vê o seu endereço IP e dados normais de rede; isso não é anonimato.
-
-A preferência de verificar ao abrir é opcional. Consultar chamado faz GET público ao GitHub oficial usando somente o número informado, sem autenticação, upload ou sincronização de dados. Preparar suporte é local; abrir o formulário ou o chamado usa o navegador após confirmação nativa. Quem publica relatos e comentários é você.
+- **Jira, Qase e GitHub**: só quando você consulta ou publica. Vai a sua credencial ao endereço oficial do serviço, com os filtros escolhidos ou o conteúdo que você revisou e confirmou (ticket, defeito, issue, comentário, caso, run, resultado). Nenhum código, log completo ou caminho local é anexado sem você escolher o arquivo.
+- **IA por MCP**: o servidor responde ao cliente de IA que o iniciou. O que ele devolve passa a ser tratado por esse cliente e pelo provedor dele. Contextos só vão se você habilitar para o projeto.
+- **IA externa no chat** (opcional): se você autorizar, a pergunta e os fatos locais usados na resposta vão ao Claude ou Codex instalado, com a sua conta.
+- **k6**: tráfego de teste só para o destino que você declarou.
+- **Atualizações**: consulta HTTPS à release mais recente no GitHub (ao abrir, a cada 6 horas e quando você clica), sem enviar dados seus. O servidor vê o seu IP, como em qualquer conexão.
+- **Suporte**: consultar um chamado faz GET público ao GitHub pelo número. Abrir formulário ou chamado usa o navegador, depois da sua confirmação; quem publica é você.
 
 ## O que não é coletado
 
-Nenhuma telemetria, rastreamento, upload de logs ou sincronização. Exportar logs é ação sua e grava apenas onde você escolher.
-
-## Desinstalação
-
-Desinstalar remove o programa, mas mantém seus dados e evidências.
+Nenhuma telemetria, rastreamento, upload de logs ou sincronização. Exportar logs é ação sua e grava só onde você escolher.

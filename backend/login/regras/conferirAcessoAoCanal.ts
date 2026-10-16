@@ -1,5 +1,5 @@
 /** Confere, antes de atender um canal da janela, se há sessão válida e se o papel da pessoa permite aquela tela e nível. */
-import { nivelNaTela, situacaoDaSessao } from './sessao.js';
+import { nivelDaConta, situacaoDaSessao } from './sessao.js';
 import { acessoDosCanais } from '../tipos/acessoDosCanais.js';
 import { modulosDoMenu } from '../tipos/contas.js';
 import type { CanalIpc } from '../../aplicativo/api/catalogoDeContratos.js';
@@ -19,8 +19,9 @@ export function conferirAcessoAoCanal(canal: CanalIpc, b?: string, agora = Date.
   if (regra === 'conta') return;
   if (s.usuario.trocarSenha) throw new Error('PASSWORD_CHANGE_REQUIRED: troque a senha temporária para continuar.');
   if (regra === 'base') return;
-  const [tela, precisa] = regra; const nivel = nivelNaTela(s.papel, tela);
+  const [tela, precisa] = regra; const nivel = nivelDaConta(s.usuario, s.papel, tela);
   if (nivel === 'USAR' || (nivel === 'VER' && precisa === 'VER')) return;
   const rotulo = modulosDoMenu.find((m) => m.id === tela)!.rotulo;
+  if (tela === 'administracao') throw new Error('PERMISSION_DENIED: a tela Administração é só para contas marcadas como admin.');
   throw new Error('PERMISSION_DENIED: o papel ' + (s.papel?.nome ?? s.usuario.papel) + ' não permite ' + (precisa === 'VER' ? 'consultar' : 'alterar') + ' em ' + rotulo + '. Peça acesso à Administração.');
 }
