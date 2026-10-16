@@ -2,14 +2,23 @@
 
 ## Pedir ajuda ou reportar um problema
 
-O suporte oficial é feito pelo GitHub Issues do Prumo. Não há atendimento por e-mail. Na tela **Suporte**, você pode relatar um bug, pedir uma melhoria ou enviar uma sugestão:
+Na tela **Suporte** você relata um bug, pede uma melhoria ou envia uma sugestão. O chamado vai direto para a equipe do Prumo QA: não precisa de conta no GitHub.
 
 1. Preencha o tipo, o título e a descrição. Para um bug, inclua os passos para reproduzi-lo.
-2. Escolha se quer incluir a versão, o sistema operacional ou os eventos recentes de diagnóstico. Só serão incluídos os itens que você marcar. Logs, evidências, caminhos, contextos e código não são anexados.
-3. Lembre-se de que o chamado (issue) será público e clique em **Revisar**. O Prumo mostra o texto final, bloqueia o que parece ser um segredo (token, senha ou chave) e avisa se encontrar e-mail, telefone, CPF ou caminhos locais.
-4. Escolha **Abrir formulário no GitHub** para revisar o formulário no navegador. O chamado só será publicado quando você o enviar pelo GitHub. Ou escolha **Exportar para arquivo** para guardar o relato no computador.
+2. Se quiser, use **Anexar imagem ou vídeo**: até 3 imagens (PNG, JPEG ou WebP, 5 MB cada) e 1 vídeo (MP4 ou WebM, até 25 MB). O Prumo confere o arquivo pelo conteúdo, não só pela extensão.
+3. Escolha se quer incluir a versão, o sistema operacional ou os eventos recentes de diagnóstico. Só vai o que você marcar. Logs, evidências, caminhos, contextos e código do projeto não são anexados sozinhos.
+4. Marque que entende para onde o relato vai e clique em **Revisar**. O Prumo mostra o texto final, bloqueia o que parece segredo (token, senha ou chave) e avisa se encontrar e-mail, telefone, CPF ou caminhos locais.
+5. Clique em **Enviar chamado**. Junto vão o seu nome e o e-mail da sua conta, para a equipe responder.
 
-Issues são públicas: não inclua senhas, tokens, código confidencial ou dados pessoais. Falha de segurança vai pelo canal privado de vulnerabilidades do GitHub.
+Em **Meus chamados**, ao lado, você vê os chamados que abriu, o estado (Novo, Em análise, Resolvido ou Fechado) e as respostas da equipe. Cada pessoa vê só os próprios chamados.
+
+Prefere uma issue pública? Na revisão, **Abrir no GitHub (público)** abre o formulário do GitHub Issues já preenchido; e **Exportar para arquivo** guarda o relato no computador. Falha de segurança vai pelo canal privado de vulnerabilidades do GitHub.
+
+O envio precisa de internet: o chamado passa pelo serviço do Prumo e fica guardado num repositório privado da equipe.
+
+## Chamados na Administração
+
+Quem tem a marca admin vê todos os chamados em **Administração › Chamados**: o texto, quem abriu, as imagens e o vídeo, as respostas. Dali dá para responder e mudar o estado. Na primeira vez, informe a **chave de administração do suporte** (a mesma configurada no serviço do Prumo); ela fica só no cofre do sistema deste computador.
 
 ## Aviso de versão nova
 

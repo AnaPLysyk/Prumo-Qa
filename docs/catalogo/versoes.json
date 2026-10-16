@@ -2,6 +2,66 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.17.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "Suporte sem GitHub, duas etapas e dados de cada conta",
+      "objective": "Deixar pedir suporte tão simples quanto mandar uma mensagem, com imagem e vídeo e sem conta no GitHub; proteger a entrada com um código por e-mail; e garantir que perfil, histórico e agentes criados por alguém sejam só dessa pessoa.",
+      "features": [
+        "Suporte: Enviar chamado manda o relato direto para a equipe do Prumo QA, sem conta no GitHub, com até 3 imagens (PNG, JPEG ou WebP) e 1 vídeo (MP4 ou WebM).",
+        "Suporte › Meus chamados: os chamados que você abriu, com o estado (Novo, Em análise, Resolvido, Fechado) e as respostas da equipe.",
+        "Administração › Chamados: todos os chamados numa tela só, com texto, quem abriu, imagens e vídeo; dá para responder e mudar o estado.",
+        "Serviço do Prumo (servico-do-prumo/, antes servico-de-email/): além dos códigos por e-mail, recebe os chamados e os guarda num repositório privado da equipe.",
+        "Verificação em duas etapas: depois da senha, um código vai ao e-mail da conta. Cada pessoa liga em Minha conta, e a Administração pode exigir de todas as contas com e-mail.",
+        "Agentes criados pela pessoa: só ela vê, edita e exclui; marcados como públicos, as outras contas veem só para leitura. Os agentes fixos continuam com a Administração."
+      ],
+      "improvements": [
+        "Esqueci a senha sempre na tela de entrada.",
+        "Os agentes chamam a pessoa pelo nome assim que ela entra: o do Meu perfil ou, sem ele, o primeiro nome da conta.",
+        "Configurações › Meu perfil ganha Redefinir senha (pelo e-mail) e Sair.",
+        "Meu perfil e o histórico de atendimentos dos agentes passam a ser de cada conta.",
+        "A issue pública no GitHub e Exportar para arquivo continuam como alternativas na revisão do chamado.",
+        "Telas de entrada, Suporte e Administração › Chamados com tradução para o inglês."
+      ],
+      "fixes": [
+        "Outra conta no mesmo computador via e usava o Meu perfil de quem tinha entrado antes, e o histórico de atendimentos era do projeto, não da pessoa.",
+        "As prévias de agentes ficavam no armazenamento da janela e todas as contas do computador viam as de todo mundo."
+      ],
+      "differential": "Quem pede ajuda não precisa de conta em lugar nenhum além do Prumo, e a equipe vê tudo, inclusive o vídeo do problema, sem sair do aplicativo.",
+      "howItWorks": [
+        "O relato passa pela revisão de sempre (algo que parece senha ou token bloqueia o envio). Vão o texto, o nome e o e-mail da conta, só o que a pessoa marcou (versão, sistema, diagnóstico) e os anexos.",
+        "O serviço do Prumo grava cada chamado como issue num repositório privado e os anexos como arquivos nele. Quem abriu recebe uma chave aleatória, guardada no cofre do sistema, para mandar os anexos e acompanhar as respostas.",
+        "A Administração lê e responde com a chave de administração do suporte, guardada só no cofre do sistema do computador de quem administra."
+      ],
+      "security": [
+        "Anexos conferidos pela assinatura do arquivo no aplicativo e de novo no serviço: extensão trocada ou HTML disfarçado de imagem não passa. Tamanho e quantidade limitados.",
+        "A chave do chamado é aleatória (256 bits); o serviço guarda só o resumo. Chave errada e chamado inexistente respondem igual, e cada conta só vê os próprios chamados.",
+        "A chave de administração é conferida em tempo constante, e erros seguidos de um mesmo endereço bloqueiam por uma hora. Administração › Chamados exige a marca admin.",
+        "O texto da pessoa vai para o chamado sem efeito de menção, link ou HTML, e os registros do serviço não mostram texto, nome, e-mail nem chaves.",
+        "Sem sessão (worker, bandeja, MCP, linha de comando), nada pessoal do perfil é lido nem gravado; a IA conectada por MCP não recebe nome nem papel de ninguém.",
+        "Na entrada em duas etapas, a senha certa não abre a sessão: só o código do e-mail abre, uma vez, e código errado conta para o bloqueio da conta.",
+        "Agentes privados de uma pessoa não aparecem para ninguém mais, nem para a Administração; a janela não escolhe o dono."
+      ],
+      "compatibility": [
+        "O perfil gravado antes desta versão (um por computador), os atendimentos sem dono e as conversas com texto de até a 2.9 continuam no disco, mas não aparecem para nenhuma conta: cada pessoa preenche o próprio perfil de novo.",
+        "As prévias de agentes guardadas na janela até a 2.16 passam a ser agentes privados de quem abrir a tela Agentes primeiro neste computador."
+      ],
+      "limitations": [
+        "Enviar chamado, acompanhar respostas e Administração › Chamados precisam de internet e do serviço do Prumo no ar, com o repositório privado e o token configurados. Na publicação desta versão o serviço ainda não estava no ar; até lá, use Abrir no GitHub (público) ou Exportar para arquivo.",
+        "Com a verificação em duas etapas ligada, entrar também depende do serviço do Prumo no ar; contas sem e-mail entram só com a senha.",
+        "Nome e e-mail de quem abriu são os da conta no aplicativo; o serviço não os confirma.",
+        "Entrar ou criar conta com GitHub e Google ainda exige configurar o OAuth App em cada computador.",
+        "O login não isola pessoas que usam o mesmo usuário do sistema operacional."
+      ],
+      "releaseUrl": null,
+      "migration": "Nada a migrar. O banco de conhecimento ganha a tabela de perfis por conta e a coluna de dono nos atendimentos na primeira abertura.",
+      "afterUpdate": [
+        "Preencha de novo o Meu perfil (como chamar, papel, experiência e foco).",
+        "Quem administra: informe a chave de administração do suporte em Administração › Chamados.",
+        "Se quiser, ligue a verificação em duas etapas em Minha conta."
+      ]
+    },
+    {
       "version": "2.16.0",
       "status": "publicada",
       "date": "2026-10-16",

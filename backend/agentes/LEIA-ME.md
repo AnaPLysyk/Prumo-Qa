@@ -12,6 +12,10 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | --- | --- |
 | `agentesEstado.ts` | Canal agentes:estado: Especializações, políticas e propostas de IA do projeto. |
 | `agentesOrquestracoes.ts` | Canal agentes:orquestracoes: Listar as orquestrações recentes do projeto: agentes, ordem, etapas, tempos, fontes e falhas. |
+| `agentesPessoais.ts` | Canal agentes:pessoais: Listar os agentes do projeto que a pessoa da sessão pode ver: os dela e os públicos das outras contas. |
+| `agentesPessoaisimportar.ts` | Canal agentes:pessoaisimportar: Trazer as prévias antigas guardadas na janela como agentes privados da pessoa da sessão. |
+| `agentesPessoalexcluir.ts` | Canal agentes:pessoalexcluir: Excluir um agente da pessoa da sessão. |
+| `agentesPessoalsalvar.ts` | Canal agentes:pessoalsalvar: Criar ou atualizar um agente da pessoa da sessão (privado ou público). |
 | `agentesRastrear.ts` | Canal agentes:rastrear: Simular o caminho de uma pergunta no chat (agente escolhido, pontuação, orquestração, conhecimentos e trechos de Skill), sem responder nem gravar. |
 | `agentesSalvar.ts` | Canal agentes:salvar: Habilitar especializações e bloquear capacidades da IA conectada neste projeto. |
 | `assistenteAgentes.ts` | Canal assistente:agentes: Listar os agentes do chat, suas especializações, capacidades e a disponibilidade de Claude Code/Codex. |
@@ -34,7 +38,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `contextosObter.ts` | Canal contextos:obter: Ver um contexto com seu histórico completo de alterações. |
 | `contextosSalvar.ts` | Canal contextos:salvar: Criar um contexto, editá-lo (nova versão em rascunho) ou substituí-lo por uma versão posterior. |
 | `conversasApagar.ts` | Canal conversas:apagar: Apagar as conversas gravadas deste projeto neste computador. |
-| `conversasListar.ts` | Canal conversas:listar: Listar os atendimentos de um agente (sem texto, desde a 2.10) e as conversas gravadas até a 2.9, para o Cérebro e o Painel de atividades. |
+| `conversasListar.ts` | Canal conversas:listar: Listar os atendimentos da pessoa da sessão com um agente (sem texto), para o Cérebro e o Painel de atividades. |
 | `iaDelegacao.ts` | Canal ia:delegacao: Autorizar ou revogar a delegação do chat ao Claude Code ou Codex. |
 | `perfilObter.ts` | Canal perfil:obter: Ler como a pessoa quer ser chamada e o papel dela. |
 | `perfilSalvar.ts` | Canal perfil:salvar: Salvar o perfil da pessoa (como chamar, papel, experiência, foco e se pode ir para a IA externa). |
@@ -55,7 +59,7 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `apagarConversas.ts` | Apaga as conversas antigas gravadas de um projeto. |
 | `aprenderTermos.ts` | Ensina a um agente os termos de uma pergunta que deveria ter ido para ele. |
 | `arquivoDeConversas.ts` | Arquivo de conversas de um projeto (ou geral). |
-| `avaliarAtendimento.ts` | Guarda se a resposta foi útil ou não. |
+| `avaliarAtendimento.ts` | Guarda se a resposta foi útil ou não; só a pessoa que foi atendida avalia. |
 | `caminhoConhecimento.ts` | Caminho do banco de conhecimento conhecimento.db na pasta de dados. |
 | `carregarContexto.ts` | Abre um contexto deste projeto pelo id, recusando contextos de outro projeto. |
 | `carregarTodosOsContextos.ts` | Lê todos os contextos do projeto e anota os arquivos com problema. |
@@ -79,10 +83,10 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `lerConfiguracaoDosAgentes.ts` | Lê as configurações de agentes por projeto (agentes.json). |
 | `lerConversas.ts` | Lê as conversas antigas gravadas de um projeto. |
 | `lerPastaDeSkill.ts` | Lê uma pasta de Skill (SKILL.md e references/*.md) sem seguir atalhos, sem binários e com limite de tamanho por arquivo. |
-| `lerPerfil.ts` | Lê o perfil da pessoa: como chamar, papel, experiência, foco e se pode ser compartilhado com a IA externa. |
+| `lerPerfil.ts` | Lê o perfil da pessoa da sessão: como chamar, papel, experiência, foco e se pode ser compartilhado com a IA externa. |
 | `lerPermissaoDeContextosNoMcp.ts` | Lê se a pessoa permitiu enviar os contextos à IA (padrão: não). |
 | `linhaParaConhecimento.ts` | Converte uma linha do banco num conhecimento. |
-| `listarAtendimentos.ts` | Lista os atendimentos de um projeto e agente. |
+| `listarAtendimentos.ts` | Lista os atendimentos da pessoa da sessão num projeto e agente; sem sessão, nenhum. |
 | `listarConhecimentos.ts` | Lista os conhecimentos por projeto, agente, estado e busca. |
 | `listarOrquestracoes.ts` | Lista as orquestrações mais recentes de um projeto (ou as gerais), ignorando e contando linhas inválidas. |
 | `listarTrechosDeSkill.ts` | Lista os trechos de Skill por especialização, estado e busca; rascunhos primeiro, depois na ordem de leitura. |
@@ -90,12 +94,13 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `pastaContextos.ts` | Devolve a pasta onde ficam os contextos deste projeto (fora da pasta do projeto, na pasta de dados do usuário). |
 | `pastaDasConversas.ts` | Pasta das conversas antigas do chat. |
 | `pesosAprendidos.ts` | Soma, por agente, o peso dos termos aprendidos que aparecem na frase. |
-| `registrarAtendimento.ts` | Registra um atendimento do chat (agente, modo e fontes), sem a pergunta nem a resposta. |
+| `pessoaDoConhecimento.ts` | De quem é o perfil e o histórico de atendimentos: a conta da sessão do Prumo. Sem sessão (MCP, worker, linha de comando), ninguém: nada pessoal é lido nem gravado. |
+| `registrarAtendimento.ts` | Registra um atendimento do chat (agente, modo e fontes) em nome da pessoa da sessão, sem a pergunta nem a resposta. |
 | `registrarConhecimento.ts` | Registra um conhecimento: da pessoa já aprovado; da IA ou da conversa em rascunho (com limite por hora). |
 | `registrarConversa.ts` | Grava uma conversa com segredos mascarados e limite de tamanho. |
 | `registrarOrquestracao.ts` | Guarda o registro de uma orquestração (só metadados) em orquestracoes.jsonl na pasta de dados, mantendo os 500 mais recentes. |
 | `registrarTrechosDeSkill.ts` | Acrescenta trechos a uma Skill: da equipe já aprovados; importados ou de IA em rascunho. Iguais não duplicam; vários numa única transação (se um falhar, nenhum é gravado). |
-| `salvarPerfil.ts` | Salva o perfil da pessoa: como chamar, papel, experiência, foco e a autorização de compartilhar com a IA externa. |
+| `salvarPerfil.ts` | Salva o perfil da pessoa da sessão: como chamar, papel, experiência, foco e a autorização de compartilhar com a IA externa. |
 | `sementeDasSkills.ts` | Trechos das Skills que acompanham o aplicativo (pasta backend/agentes/skills/), já divididos e com identificador estável pelo conteúdo. |
 | `validarAgenteDoConhecimento.ts` | Confere se o agente existe. |
 | `validarProjetoDoConhecimento.ts` | Confere o id do projeto de um conhecimento. |
@@ -126,6 +131,7 @@ O chat: escolhe o agente, responde com dados locais e, se autorizado, consulta C
 | `juntarConhecimentos.ts` | Junta conhecimentos aprovados à resposta local e registra suas fontes sem duplicar fatos. |
 | `montarPrompt.ts` | Monta o texto enviado ao Claude/Codex: persona, agente, pergunta, fatos locais e regras de segurança. |
 | `montarResposta.ts` | Monta a resposta de um agente com fontes, ações e segredos mascarados. |
+| `nomeParaChamar.ts` | Como os agentes chamam a pessoa: o nome escolhido no Meu perfil ou, sem ele, o primeiro nome da conta que entrou. Sem sessão, ninguém. |
 | `numeroDoFato.ts` | Lê um número dos fatos coletados (ex.: falhas=3). |
 | `numeroDoTexto.ts` | Gera um número fixo a partir de um texto, para variar a saudação sem sorteio. |
 | `orquestrar.ts` | Orquestra uma pergunta entre especialistas: delega uma etapa a cada agente, registra tempo, fontes e falhas e junta as respostas. |
@@ -186,6 +192,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 
 | Arquivo | O que faz |
 | --- | --- |
+| `agentesPessoais.ts` | Agentes criados pela própria pessoa: só o dono vê, edita e exclui; marcado como público, as outras contas veem, só para leitura. |
 | `aprovarContexto.ts` | Aprova um contexto: exige origem informada e grava quem aprovou. |
 | `aprovarContextoDaPasta.ts` | Aprova um contexto em nome da pessoa (depois da confirmação nativa). |
 | `autorizarDelegacaoDeIa.ts` | Autoriza ou revoga o chat de enviar perguntas ao Claude Code ou ao Codex. |

@@ -2,7 +2,7 @@
 
 Prumo QA, versão {{VERSAO}}, criado por Ana P. Lysyk (AnaPLysyk).
 
-O código-fonte e o suporte estão no repositório [AnaPLysyk/Prumo-Qa](https://github.com/AnaPLysyk/Prumo-Qa) no GitHub. Para pedir ajuda, abra uma issue. A documentação completa está no README e na pasta `docs`.
+O código-fonte está no repositório [AnaPLysyk/Prumo-Qa](https://github.com/AnaPLysyk/Prumo-Qa) no GitHub. Para pedir ajuda, use a tela **Suporte** (não precisa de conta no GitHub) ou, se preferir, abra uma issue pública. A documentação completa está no README e na pasta `docs`.
 
 ## Administração › Documentação viva
 

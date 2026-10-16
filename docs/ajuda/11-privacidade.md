@@ -30,7 +30,8 @@ O Prumo não apaga esses dados automaticamente. Para removê-los, use **Ajuda �
 - **IA externa no chat** (opcional): se você autorizar, a pergunta e os fatos locais usados na resposta vão ao Claude ou Codex instalado, com a sua conta.
 - **k6**: tráfego de teste só para o destino que você declarou.
 - **Atualizações**: consulta HTTPS à release mais recente no GitHub (ao abrir, a cada 6 horas e quando você clica), sem enviar dados seus. O servidor vê o seu IP, como em qualquer conexão.
-- **Suporte**: consultar um chamado faz GET público ao GitHub pelo número. Abrir formulário ou chamado usa o navegador, depois da sua confirmação; quem publica é você.
+- **Conta por e-mail**: quando você clica em **Enviar código**, o e-mail, o código, a finalidade e o idioma vão ao serviço do Prumo, que manda a mensagem.
+- **Suporte**: **Enviar chamado** manda o relato revisado, o seu nome e o e-mail da conta, o que você marcou (versão, sistema, diagnóstico) e os anexos escolhidos ao serviço do Prumo, que os guarda no repositório privado da equipe. **Meus chamados** consulta o estado e as respostas desses chamados. A issue pública no GitHub continua opcional: abrir o formulário usa o navegador, depois da sua confirmação, e consultar uma issue faz GET público pelo número.
 
 ## O que não é coletado
 

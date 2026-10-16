@@ -109,7 +109,7 @@ test('preferências: padrão seguro, alteração pela interface, persistência e
 test('Suporte: revisão, bloqueio de segredo, confirmação nativa antes de abrir o GitHub, exportação local e nada anexado sem marcação', async (t) => {
   const dados = novoDados(t); const { app, page, erros } = await abrir(t, dados);
   await app.evaluate(({ shell }) => { globalThis.__abertas = []; shell.openExternal = async (u) => { globalThis.__abertas.push(u); }; });
-  await ir(page, 'suporte'); assert.match(await page.textContent('#aviso-publico'), /issues do repositório oficial são públicas/);
+  await ir(page, 'suporte'); assert.match(await page.textContent('#aviso-publico'), /vai só para a equipe do Prumo QA/);
   assert.doesNotMatch(await page.textContent('#conteudo'), /@gmail|mailto:/);
   const preencher = async (desc) => { await page.selectOption('#sup-categoria', 'bug'); await page.fill('#sup-titulo', 'Botão não responde'); await page.fill('#sup-descricao', desc); await page.fill('#sup-passos', '1. Abrir\n2. Clicar'); };
   await preencher('Ao clicar em Verificar nada acontece.');

@@ -11,9 +11,9 @@ import type { IdModulo } from './contas.js';
 export type AcessoDoCanal = 'publico' | 'conta' | 'base' | readonly [IdModulo, 'VER' | 'USAR'];
 
 export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
-  'conta:sessao': 'publico', 'conta:entrar': 'publico', 'conta:cadastrar': 'publico', 'conta:recuperar': 'publico', 'conta:codigo': 'publico', 'conta:githubiniciar': 'publico', 'conta:githubestado': 'publico', 'conta:googleiniciar': 'publico', 'conta:googleestado': 'publico',
+  'conta:sessao': 'publico', 'conta:entrar': 'publico', 'conta:cadastrar': 'publico', 'conta:recuperar': 'publico', 'conta:codigo': 'publico', 'conta:confirmarentrada': 'publico', 'conta:reenviarentrada': 'publico', 'conta:githubiniciar': 'publico', 'conta:githubestado': 'publico', 'conta:googleiniciar': 'publico', 'conta:googleestado': 'publico',
   'app:info': 'publico', 'preferencias:obter': 'publico', 'site:abrir': 'publico',
-  'conta:sair': 'conta', 'conta:senha': 'conta', 'conta:perfil': 'base',
+  'conta:sair': 'conta', 'conta:senha': 'conta', 'conta:perfil': 'base', 'conta:duasetapas': 'base',
   'usuarios:ativar': ['administracao', 'USAR'], 'usuarios:listar': ['administracao', 'VER'], 'usuarios:criar': ['administracao', 'USAR'], 'usuarios:alterar': ['administracao', 'USAR'],
   'usuarios:senha': ['administracao', 'USAR'], 'usuarios:desbloquear': ['administracao', 'USAR'], 'usuarios:excluir': ['administracao', 'USAR'],
   'papeis:listar': ['administracao', 'VER'], 'papeis:salvar': ['administracao', 'USAR'], 'papeis:excluir': ['administracao', 'USAR'],
@@ -29,7 +29,7 @@ export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
   'ajuda:integracoes': 'base', 'dados:resumo': 'base', 'atualizacao:verificar': 'base', 'atualizacao:abrir': 'base',
   'projetos:escolher': ['projetos', 'USAR'], 'projetos:demo': ['projetos', 'USAR'], 'projetos:desvincular': ['projetos', 'USAR'], 'espacos:criar': ['projetos', 'USAR'], 'espacos:editar': ['projetos', 'USAR'],
   'espacos:pasta': ['projetos', 'USAR'], 'espacos:trazer': ['projetos', 'USAR'], 'servicos:desvincular': ['projetos', 'USAR'], 'servicos:conferir': ['projetos', 'VER'],
-  'contextos:listar': ['agentes', 'VER'], 'contextos:obter': ['agentes', 'VER'], 'contextos:salvar': ['agentes', 'USAR'], 'contextos:aprovar': ['agentes', 'USAR'], 'contextos:desatualizar': ['agentes', 'USAR'],
+  'contextos:listar': ['agentes', 'VER'], 'agentes:pessoais': ['agentes', 'VER'], 'agentes:pessoalsalvar': ['agentes', 'USAR'], 'agentes:pessoalexcluir': ['agentes', 'USAR'], 'agentes:pessoaisimportar': ['agentes', 'USAR'], 'contextos:obter': ['agentes', 'VER'], 'contextos:salvar': ['agentes', 'USAR'], 'contextos:aprovar': ['agentes', 'USAR'], 'contextos:desatualizar': ['agentes', 'USAR'],
   'contextos:conflito': ['agentes', 'USAR'], 'contextos:excluir': ['agentes', 'USAR'], 'contextos:mcp': ['agentes', 'USAR'], 'servicos:importar': ['agentes', 'USAR'],
   'repositorio:listar': ['testes', 'VER'], 'repositorio:caso': ['testes', 'USAR'], 'repositorio:suite': ['testes', 'USAR'],
   'espacos:automacoes': ['testes', 'VER'], 'testes:catalogo': ['testes', 'VER'], 'testes:arquivo': ['testes', 'VER'], 'testes:gravar': ['testes', 'USAR'], 'testes:pipelines': ['testes', 'VER'], 'propostas:listar': ['testes', 'VER'], 'runs:listar': ['testes', 'VER'],
@@ -47,5 +47,6 @@ export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
   'agentes:orquestracoes': ['agentes', 'VER'], 'agentes:rastrear': ['agentes', 'VER'], 'skills:listar': ['agentes', 'VER'],
   'conversas:apagar': ['agentes', 'USAR'], 'conhecimento:criar': ['agentes', 'USAR'], 'conhecimento:decidir': ['agentes', 'USAR'], 'conhecimento:apagar': ['agentes', 'USAR'], 'conhecimento:esquecer': ['agentes', 'USAR'],
   'skills:criar': ['agentes', 'USAR'], 'ia:delegacao': ['agentes', 'USAR'],
-  'suporte:consultar': ['suporte', 'VER'], 'suporte:chamado': ['suporte', 'VER'], 'suporte:preparar': ['suporte', 'USAR'], 'suporte:abrir': ['suporte', 'USAR'], 'suporte:exportar': ['suporte', 'USAR']
+  'suporte:consultar': ['suporte', 'VER'], 'suporte:anexar': ['suporte', 'USAR'], 'suporte:enviar': ['suporte', 'USAR'], 'suporte:meus': ['suporte', 'VER'], 'suporte:meu': ['suporte', 'VER'],
+  'chamados:configuracao': ['administracao', 'VER'], 'chamados:chave': ['administracao', 'USAR'], 'chamados:listar': ['administracao', 'VER'], 'chamados:detalhe': ['administracao', 'VER'], 'chamados:anexo': ['administracao', 'VER'], 'chamados:responder': ['administracao', 'USAR'], 'chamados:estado': ['administracao', 'USAR'], 'suporte:chamado': ['suporte', 'VER'], 'suporte:preparar': ['suporte', 'USAR'], 'suporte:abrir': ['suporte', 'USAR'], 'suporte:exportar': ['suporte', 'USAR']
 };

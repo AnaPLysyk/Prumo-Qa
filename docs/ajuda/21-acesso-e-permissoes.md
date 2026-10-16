@@ -39,7 +39,9 @@ Só contas com a marca admin podem abrir **Administração**, que reúne usuári
 - Quem tem a marca admin pode criar contas, aprovar cadastros, trocar papéis, desativar, desbloquear ou excluir contas. Ao criar uma conta ou redefinir uma senha, o Prumo mostra uma **senha temporária** uma vez. A pessoa cria a própria senha ao entrar pela primeira vez.
 - Em **Configurações gerais**: cadastro aberto ou não, aprovação, papel dos novos cadastros, tempo de inatividade e quantas tentativas erradas bloqueiam a conta.
 - Para trocar uma senha esquecida, escolha **Esqueci a senha**, informe o e-mail da conta, digite o código recebido e crie uma senha nova. Se a conta não tiver e-mail (por exemplo, se foi criada por um admin ou pelo GitHub/Google), um admin precisa redefinir a senha.
-- Cada pessoa troca o próprio nome e a senha em **Minha conta**, no canto da janela.
+- Cada pessoa troca o próprio nome e a senha em **Minha conta**, no canto da janela. Em **Configurações › Meu perfil** também ficam **Redefinir senha** (pelo e-mail) e **Sair**.
+- **Verificação em duas etapas:** em **Minha conta**, ligue para que, depois da senha, um código vá ao seu e-mail a cada entrada. Em **Configurações gerais**, um admin pode exigir isso de todas as contas com e-mail. Contas sem e-mail entram só com a senha. Sem o serviço do Prumo no ar, quem precisa do código não consegue entrar.
+- **Esqueci a senha** fica sempre na tela de entrada.
 
 ## Entrar com o GitHub ou o Google
 
@@ -62,4 +64,4 @@ Em **Administração › Agentes**, quem tem a marca admin pode ligar ou desliga
 
 ## Meu perfil
 
-No menu da engrenagem, **Meu perfil** guarda como chamar você, seu papel no time, sua experiência e seu foco (até 160 caracteres). Os agentes usam essas informações neste computador para adaptar as respostas. Claude Code e Codex só recebem esses dados se você marcar **Compartilhar experiência, foco e conta com a IA externa**. Essa opção vem desmarcada; quando compartilhadas, as informações são tratadas como dados, não como instruções.
+No menu da engrenagem, **Meu perfil** guarda como chamar você, seu papel no time, sua experiência e seu foco (até 160 caracteres). O perfil é da sua conta: outra pessoa que entra neste computador não vê nem usa o seu. Os agentes usam essas informações para adaptar as respostas, e o histórico de atendimentos também é só seu. Claude Code e Codex só recebem esses dados se você marcar **Compartilhar experiência, foco e conta com a IA externa**. Essa opção vem desmarcada; quando compartilhadas, as informações são tratadas como dados, não como instruções.

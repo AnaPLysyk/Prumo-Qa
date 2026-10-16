@@ -1,16 +1,20 @@
 import http from 'node:http';
-import { criarServico } from '../../servico-de-email/servidor.mjs';
+import { criarServico } from '../../servico-do-prumo/servidor.mjs';
+import { repositorioDeSuporteFalso } from './repositorio-de-suporte-falso.mjs';
 
 /**
- * Caixa de e-mail dos testes: o serviço de envio real (servico-de-email/servidor.mjs) em 127.0.0.1, com o Resend trocado por uma
- * lista em memória. O aplicativo aponta para ela com PRUMO_SERVICO_DE_EMAIL. Não é um teste e nunca fala com a internet.
+ * Serviço do Prumo dos testes: o serviço real (servico-do-prumo/servidor.mjs) em 127.0.0.1, com o Resend trocado por uma caixa
+ * em memória e o GitHub por um repositório de chamados em memória. O aplicativo aponta para ele com PRUMO_SERVICO.
+ * Não é um teste e nunca fala com a internet.
  */
-let caixa = null;
+export const CHAVE_DE_ADMIN_DOS_TESTES = 'chave-de-administracao-dos-testes-0123456789';
+let servico = null;
 export async function caixaDeEmail() {
-  if (caixa) return caixa;
-  const mensagens = [];
+  if (servico) return servico;
+  const mensagens = []; const repositorio = repositorioDeSuporteFalso();
   const limites = { porEmail10min: 1e6, porEmailDia: 1e6, porIpHora: 1e6, totalHora: 1e6 };
-  const servidor = http.createServer(criarServico({ enviar: async (m) => { mensagens.push(m); }, limites, registrar: () => {} }));
+  const suporte = { github: repositorio, chaveAdmin: CHAVE_DE_ADMIN_DOS_TESTES, limites: { porIpHora: 1e6, totalHora: 1e6, anexosPorIpHora: 1e6, leiturasPorIpHora: 1e6, errosDeAdminPorIpHora: 1e6 } };
+  const servidor = http.createServer(criarServico({ enviar: async (m) => { mensagens.push(m); }, limites, suporte, registrar: () => {} }));
   await new Promise((ok) => servidor.listen(0, '127.0.0.1', ok)); servidor.unref();
   const url = 'http://127.0.0.1:' + servidor.address().port;
   /** Último código mandado a este e-mail, lido do texto da mensagem como a pessoa leria. */
@@ -19,6 +23,7 @@ export async function caixaDeEmail() {
     if (!m) throw new Error('Nenhum e-mail para ' + email);
     return /\b(\d{6})\b/.exec(m.texto)[1];
   };
-  caixa = { url, mensagens, ultimoCodigo };
-  return caixa;
+  servico = { url, mensagens, ultimoCodigo, repositorio };
+  return servico;
 }
+export const servicoLocal = caixaDeEmail;

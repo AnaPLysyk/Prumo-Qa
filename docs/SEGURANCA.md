@@ -22,11 +22,35 @@ Credenciais usam o cofre do Electron (DPAPI, Keychain ou Secret Service/KWallet)
 ## Cadastro e senha nova por e-mail
 
 - **Três caminhos para a conta:** e-mail confirmado por código, GitHub ou Google. O cadastro por e-mail pede nome, e-mail e senha; a conta só nasce com o código de 6 dígitos que chegou nesse e-mail. **Esqueci a senha** manda outro código ao e-mail da conta.
-- **O que sai do computador:** só quando a pessoa clica em **Enviar código**, o e-mail, o código, a finalidade (`CADASTRO` ou `SENHA`) e o idioma vão por HTTPS ao serviço de envio do Prumo (`servico-de-email/`, no Render), que manda a mensagem pelo Resend. Senha, nome e dados de projeto nunca saem. O endereço do serviço é fixo no código; `PRUMO_SERVICO_DE_EMAIL` só o troca por outro HTTPS ou por `http://127.0.0.1` (testes).
+- **O que sai do computador:** só quando a pessoa clica em **Enviar código**, o e-mail, o código, a finalidade (`CADASTRO` ou `SENHA`) e o idioma vão por HTTPS ao serviço do Prumo (`servico-do-prumo/`, no Render), que manda a mensagem pelo Resend. Senha, nome e dados de projeto nunca saem. O endereço do serviço é fixo no código; `PRUMO_SERVICO` só o troca por outro HTTPS ou por `http://127.0.0.1` (testes).
 - **No aplicativo:** o código é sorteado com `crypto.randomInt`, guardado só como resumo SHA-256 com sal aleatório, na memória do processo principal, por 10 minutos e uma única vez. Cinco erros invalidam o código; outro envio para o mesmo e-mail só depois de 60 segundos. Fechar o Prumo descarta tudo. Código errado em **Esqueci a senha** conta para o bloqueio da conta, como senha errada.
 - **Sem revelar quem tem conta:** em **Esqueci a senha**, e-mail sem conta (ou de conta desativada) recebe a mesma resposta e nada é enviado. No cadastro, e-mail já usado é recusado (`EMAIL_TAKEN`), como o login repetido era.
 - **No serviço:** não há banco; nada fica guardado. Pedido fora do formato é recusado (só e-mail, código de 6 dígitos, finalidade e idioma; texto do e-mail fixo). Limites: 3 códigos por e-mail a cada 10 minutos, 10 por dia, 30 por IP por hora e 300 no total por hora. O registro mascara o e-mail e nunca mostra o código. A chave do Resend fica só nas variáveis do serviço, nunca no aplicativo distribuído.
 - **Limites conhecidos:** o serviço é público (qualquer um pode pedir que ele mande um código a um e-mail; os limites seguram o abuso). Os contadores ficam na memória e zeram quando o serviço reinicia. Sem internet ou com o serviço fora do ar, não dá para criar conta por e-mail nem pedir senha nova; GitHub, Google e a senha temporária da Administração continuam funcionando. Contas antigas guardam o resumo do código de recuperação, que não é mais aceito.
+
+## Chamados de suporte (2.17)
+
+- **Sem GitHub para quem abre:** o chamado sai pelo serviço do Prumo (`servico-do-prumo/`), que o grava como issue num repositório **privado** da equipe com um token fine-grained restrito a esse repositório (Issues e Contents). O token fica só nas variáveis do serviço.
+- **O que sai do computador:** só quando a pessoa clica em **Enviar chamado**, depois da revisão: o texto revisado (segredo bloqueia o envio), o nome e o e-mail da conta e só o que ela marcou (versão, sistema, diagnóstico), mais os anexos escolhidos. Logs, evidências e código do projeto nunca vão sozinhos.
+- **Anexos:** escolhidos no diálogo do sistema; o caminho fica no processo principal e a janela recebe só um id. Tipo pela assinatura do arquivo (PNG, JPEG, WebP, MP4, WebM), extensão coerente, tamanho e quantidade limitados, conferidos de novo no envio e de novo no serviço. Arquivo que não é comum (atalho, pasta) é recusado.
+- **Chave do chamado:** 256 bits aleatórios, mostrados uma vez ao aplicativo e guardados no cofre do sistema (`chamados-de-suporte.json` só tem a versão protegida). O serviço guarda só o resumo SHA-256. Chave errada e chamado inexistente respondem igual. Cada conta só lista e abre os próprios chamados.
+- **Administração › Chamados:** só contas com a marca admin. A chave de administração do serviço (32+ caracteres) fica no cofre do sistema e nunca volta para a janela; o serviço a compara em tempo constante e bloqueia por uma hora o IP com 10 erros. Anexos chegam à janela só se o tipo for imagem ou vídeo permitido e são mostrados por `blob:` (a CSP da janela passou a aceitar `blob:` em `img-src` e `media-src`, nada de origem externa).
+- **No repositório:** o texto da pessoa vai dentro de blocos de código com cerca maior que qualquer sequência do texto (menção, link e HTML sem efeito) e caracteres de controle e de direção de texto são removidos. Os anexos só são gravados em `chamados/<número>/` com nome limpo.
+- **Limites:** 10 chamados por IP por hora e 200 no total; anexos e leituras com limite por IP; corpo de até 32 KB para o texto. Os registros do serviço não mostram texto, nome, e-mail nem chaves.
+
+## Verificação em duas etapas (2.17)
+
+- Ligada na conta (**Minha conta**, pede a senha atual) ou exigida pela Administração para todas as contas com e-mail. Depois da senha certa, a sessão **não** abre: o núcleo manda um código de 6 dígitos ao e-mail da conta (finalidade `ENTRADA`, que a janela não consegue pedir para um e-mail qualquer) e devolve só um desafio aleatório e o e-mail mascarado.
+- O código vale 10 minutos, uma vez, com 5 tentativas; o desafio vale 10 minutos e fica só na memória. Código errado conta para o bloqueio da conta, como senha errada. A mensagem avisa para trocar a senha se a pessoa não tentou entrar.
+- Contas sem e-mail e entradas pelo GitHub ou Google não passam pela segunda etapa (o provedor já autentica).
+
+## Isolamento entre contas (2.17)
+
+- **Perfil e histórico com os agentes são de cada conta:** **Meu perfil** (como chamar, papel, experiência, foco e a autorização de compartilhar com a IA) e os atendimentos dos agentes ficam ligados à conta da sessão. Outra conta no mesmo computador não vê, não usa e não avalia nada disso.
+- **Sem sessão, nada pessoal:** worker, bandeja, servidor MCP e linha de comando rodam sem conta do Prumo; nesses caminhos o perfil é vazio e nada pessoal é gravado. A IA externa conectada por MCP não recebe nome nem papel de ninguém.
+- **Dados antigos:** o perfil gravado antes da 2.17 (um por computador), os atendimentos sem dono e as conversas com texto de até a 2.9 continuam no disco, mas não aparecem para nenhuma conta.
+- **Agentes criados pela pessoa:** ficam no núcleo (`plataforma/agentes-pessoais.json`) com dono e projeto. Só o dono vê, edita e exclui; público, as outras contas veem só para leitura (sem o id do dono); a Administração não vê os privados. A janela não escolhe o dono. As prévias que ficavam no armazenamento da janela (até a 2.16, visíveis a todas as contas do computador) passam a ser privadas de quem abrir a tela Agentes primeiro e saem desse armazenamento.
+- **O que continua compartilhado, de propósito:** projetos, conhecimento aprovado dos agentes, testes, runs e evidências são da equipe, conforme o papel de cada um. O login não isola pessoas que usam o mesmo usuário do sistema operacional: quem tem acesso aos arquivos dessa pasta tem acesso aos dados.
 
 ## Entrar com GitHub ou Google
 

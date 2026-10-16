@@ -40,7 +40,9 @@
       const u = window.PrumoConta?.sessao?.()?.usuario;
       contaResumo.replaceChildren(u
         ? h('div', { class: 'ajuste-conta-linha' }, h('span', { class: 'conta-iniciais', 'aria-hidden': 'true', 'data-i18n-ignore': '' }, DS.iniciais(u.nome)), h('div', { class: 'ajuste-conta-nome' }, h('strong', { 'data-i18n-ignore': '' }, u.nome), h('span', { class: 'suave', 'data-i18n-ignore': '' }, u.login + ' · ' + u.papelNome)),
-          DS.acao('Minha conta', () => window.PrumoConta.abrirMinhaConta(), { id: 'ia-abrir-conta', compacto: true }))
+          h('div', { class: 'ajuste-conta-acoes' }, DS.acao('Minha conta', () => window.PrumoConta.abrirMinhaConta(), { id: 'ia-abrir-conta', compacto: true }),
+            u.email ? DS.acao('Redefinir senha', () => window.PrumoConta.redefinirSenha(), { id: 'ia-redefinir-senha', compacto: true }) : null,
+            DS.acao('Sair', () => window.PrumoConta.sair(), { id: 'ia-sair', compacto: true })))
         : h('span'));
     }
     const painelPerfil = h('div', { class: 'ajuste-painel', 'data-painel': 'perfil' },

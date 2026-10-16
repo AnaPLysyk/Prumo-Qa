@@ -142,7 +142,7 @@ window.PrumoAdministracaoAcessos = (() => {
     const alterar = podeAlterar();
     const caixa = (id, v) => h('input', { type: 'checkbox', id, checked: v, disabled: !alterar });
     const numero = (id, v, min, max) => h('input', { type: 'number', id, value: v, min, max, step: 1, disabled: !alterar });
-    const aberto = caixa('geral-cadastro', c.cadastroAberto); const aprovar = caixa('geral-aprovar', c.aprovarCadastros);
+    const aberto = caixa('geral-cadastro', c.cadastroAberto); const aprovar = caixa('geral-aprovar', c.aprovarCadastros); const duasEtapas = caixa('geral-duas-etapas', !!c.exigirDuasEtapas);
     const papel = DS.selecao({ id: 'geral-papel', rotulo: 'Papel de novos cadastros', opcoes: d.papeis.filter((p) => p.id !== 'administrador').map((p) => [p.id, p.nome]), valor: c.papelDoCadastro }); papel.disabled = !alterar;
     const inatividade = numero('geral-inatividade', c.minutosDeInatividade, 5, 720); const tentativas = numero('geral-tentativas', c.tentativasAntesDoBloqueio, 3, 20); const bloqueio = numero('geral-bloqueio', c.minutosDeBloqueio, 1, 240);
     const ghId = h('input', { id: 'geral-github-id', type: 'text', value: c.githubClientId || '', maxlength: 60, autocomplete: 'off', spellcheck: 'false', disabled: !alterar });
@@ -153,11 +153,12 @@ window.PrumoAdministracaoAcessos = (() => {
     const goSalvar = DS.acao('Salvar', async () => { const r = await chamar(() => api.acessoGoogle(goId.value, goSegredo.value)); goSegredo.value = ''; if (r) { avisar(r.configurado ? tr('Google configurado.') : tr('Google desligado.')); void geral(area); } }, { id: 'geral-google-salvar', compacto: true });
     area.replaceChildren(
       DS.secao('Cadastro pela tela de entrada', [h('label', { class: 'opcao', for: 'geral-cadastro' }, aberto, tr('Permitir que a pessoa crie a própria conta')), h('label', { class: 'opcao', for: 'geral-aprovar' }, aprovar, tr('Novos cadastros precisam de aprovação da Administração')), DS.campo('Papel de novos cadastros', papel, { ajuda: 'Nunca administrador: esse papel só a Administração dá.' })]),
-      DS.secao('Sessão e bloqueio', [h('div', { class: 'adm-form' }, DS.campo('Minutos sem uso até pedir login de novo', inatividade), DS.campo('Tentativas erradas antes de bloquear a conta', tentativas), DS.campo('Minutos de bloqueio', bloqueio))]),
+      DS.secao('Sessão e bloqueio', [h('div', { class: 'adm-form' }, DS.campo('Minutos sem uso até pedir login de novo', inatividade), DS.campo('Tentativas erradas antes de bloquear a conta', tentativas), DS.campo('Minutos de bloqueio', bloqueio)),
+        h('label', { class: 'opcao', for: 'geral-duas-etapas' }, duasEtapas, tr('Exigir verificação em duas etapas (código por e-mail ao entrar) de todas as contas com e-mail')), DS.info('Contas sem e-mail (criadas aqui ou pelo GitHub/Google) entram só com a senha. Sem o serviço do Prumo no ar, quem precisa do código não consegue entrar.', { rotulo: 'Sobre as duas etapas' })]),
       DS.secao('Entrar com o GitHub', [DS.info('OAuth App em github.com/settings/developers, com a callback http://127.0.0.1/callback. O segredo fica no cofre do sistema.', { rotulo: 'Como configurar' }), h('div', { class: 'adm-form' }, DS.campo('Client ID', ghId), DS.campo('Client Secret', ghSegredo)), alterar ? ghSalvar : null]),
       DS.secao('Entrar com o Google', [DS.info('Credencial OAuth do tipo "Aplicativo para computador", no Google Cloud Console. O segredo fica no cofre do sistema.', { rotulo: 'Como configurar' }), h('div', { class: 'adm-form' }, DS.campo('Client ID', goId), DS.campo('Client Secret', goSegredo)), alterar ? goSalvar : null]),
       alterar ? DS.rodape(DS.acao('Salvar configurações', async () => {
-        const r = await chamar(() => api.acessoSalvar({ cadastroAberto: aberto.checked, aprovarCadastros: aprovar.checked, papelDoCadastro: papel.value, minutosDeInatividade: Number(inatividade.value), tentativasAntesDoBloqueio: Number(tentativas.value), minutosDeBloqueio: Number(bloqueio.value) }));
+        const r = await chamar(() => api.acessoSalvar({ cadastroAberto: aberto.checked, aprovarCadastros: aprovar.checked, papelDoCadastro: papel.value, minutosDeInatividade: Number(inatividade.value), tentativasAntesDoBloqueio: Number(tentativas.value), minutosDeBloqueio: Number(bloqueio.value), exigirDuasEtapas: duasEtapas.checked }));
         if (r) avisar(tr('Configurações salvas.'));
       }, { primaria: true, id: 'geral-salvar' })) : DS.notaPermissao('Seu papel só permite consultar estas configurações.'));
   }

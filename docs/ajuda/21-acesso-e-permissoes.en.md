@@ -39,7 +39,9 @@ Only accounts with the admin mark can open **Administration**, which includes us
 - Admins can create accounts, approve sign-ups, change roles, disable, unlock or delete accounts. When an admin creates an account or resets its password, Prumo shows a **temporary password** once. The person sets a new password at first sign-in.
 - In **General settings**: open sign-up or not, approval, role for new sign-ups, inactivity time and how many wrong attempts lock the account.
 - To reset a password, choose **Forgot password**, enter the account e-mail, type the code that arrives and set a new password. If the account has no e-mail (for example, an account created by an admin or through GitHub/Google), an admin must reset it.
-- Each person changes their own name and password in **My account**, in the corner of the window.
+- Each person changes their own name and password in **My account**, in the corner of the window. **Settings › My profile** also has **Reset password** (by e-mail) and **Sign out**.
+- **Two-step verification:** in **My account**, turn it on so that, after the password, a code is sent to your e-mail at every sign-in. In **General settings**, an admin can require it for all accounts with e-mail. Accounts without e-mail sign in with the password only. Without the Prumo service up, whoever needs the code cannot sign in.
+- **Forgot password** is always on the sign-in screen.
 
 ## Sign in with GitHub or Google
 
@@ -62,4 +64,4 @@ In **Administration › Agents**, admins can enable or disable each agent, Claud
 
 ## My profile
 
-In the gear menu, **My profile** stores how to address you, your team role, experience and focus (up to 160 characters). Agents use this information on this computer to tailor their answers. Claude Code and Codex receive it only if you select **Share experience, focus and account with the external AI**. This option is off by default, and the information is sent as data, not as instructions.
+In the gear menu, **My profile** stores how to address you, your team role, experience and focus (up to 160 characters). The profile belongs to your account: someone else signing in on this computer neither sees nor uses yours. Agents use this information to tailor their answers, and the attendance history is also yours only. Claude Code and Codex receive it only if you select **Share experience, focus and account with the external AI**. This option is off by default, and the information is sent as data, not as instructions.

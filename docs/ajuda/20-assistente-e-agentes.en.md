@@ -28,7 +28,7 @@ The screen shows the **Prumo Orchestrator**, the Codex and Claude Code clients c
 - **Skills**: short instructions for agents. Only approved Skills are sent to Claude Code or Codex, selected based on the question (up to 8 KB). When importing a Skill folder, Prumo accepts only open licenses. Each snippet starts as a draft and no script is run.
 - **Brain**: everything the agent consults, grouped by color. **Test a question** shows which agent would answer and why, without calling an AI and without saving anything.
 
-**New preview** creates a simulation of a custom agent on this computer (up to 50 per project). It does not create a real agent or start a process.
+**New preview** creates an agent of yours, with name, goal and instructions (up to 50 per project). Only you see, edit and delete it. If you check **Public to the other accounts**, the other people on this computer also see it, read only; Administration does not see your private agents. It is a preview: it does not start a process or change the core policies. Prumo's fixed agents are still managed by Administration.
 
 ## Activity panel
 

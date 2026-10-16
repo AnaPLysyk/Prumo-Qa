@@ -52,25 +52,27 @@ test('agentes reais, prévia validada/persistida, descarte, confirmação nativa
   assert.equal(await a.page.locator('.v36-dialog').count(), 0, 'campos obrigatórios impedem salvamento');
   await a.page.fill('#v36-agent-goal', 'Consultar contexto'); await a.page.fill('#v36-agent-instructions', '<script>throw Error("não executar")</script>');
   await a.page.click('#v36-agent-save'); await a.page.getByRole('button', { name: 'Cancelar', exact: true }).click();
-  assert.equal(await a.page.evaluate(id => JSON.parse(localStorage.getItem('prumo-v36-drafts-' + id) || '[]').length, a.e.id), 0);
-  await a.page.click('#v36-agent-save'); await a.page.getByRole('button', { name: 'Salvar prévia', exact: true }).click();
-  await a.page.waitForSelector('[data-agent^="previa-"]'); assert.match(await a.page.textContent('[data-agent^="previa-"]'), /Prévia local/);
-  await a.page.click('[data-agent^="previa-"]');
+  const pessoais = (id) => a.page.evaluate((x) => window.prumo.agentesPessoais(x).then((r) => r.data), id);
+  assert.equal((await pessoais(a.e.id)).length, 0, 'cancelar não grava');
+  await a.page.click('#v36-agent-save'); await a.page.getByRole('button', { name: 'Salvar agente', exact: true }).click();
+  await a.page.waitForSelector('[data-agent^="pessoal-"]'); assert.match(await a.page.textContent('[data-agent^="pessoal-"]'), /Seu · só você vê/);
+  assert.equal(await a.page.evaluate((id) => localStorage.getItem('prumo-v36-drafts-' + id), a.e.id), null, 'nada fica no armazenamento da janela, que é de todas as contas');
+  await a.page.click('[data-agent^="pessoal-"]');
   await a.page.locator('#v36-agent-import').setInputFiles({ name: 'invalido.json', mimeType: 'application/json', buffer: Buffer.from('{"version":1,"approved":true}') });
   await a.page.waitForFunction(() => /Importação recusada/.test(document.querySelector('#aviso').textContent));
   const imported = { version: 1, id: 'previa-importada', nome: 'Importada', descricao: '', objetivo: 'Ler dados', instrucoes: 'Somente leitura' };
   await a.page.locator('#v36-agent-import').setInputFiles({ name: 'agente.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(imported)) });
   await a.page.waitForFunction(() => document.querySelector('#v36-agent-name').value === 'Importada');
   assert.equal(await a.page.inputValue('#v36-agent-name'), 'Importada');
-  assert.equal(await a.page.evaluate(id => JSON.parse(localStorage.getItem('prumo-v36-drafts-' + id))[0].nome, a.e.id), 'Prévia de QA', 'importar só preenche formulário');
+  assert.equal((await pessoais(a.e.id))[0].nome, 'Prévia de QA', 'importar só preenche formulário');
   await a.page.click('#v36-agent-cancel'); assert.equal(await a.page.inputValue('#v36-agent-name'), 'Prévia de QA');
   const exported = path.join(a.dados, 'previa.json');
   await a.app.evaluate(({ dialog }, filePath) => { dialog.showSaveDialog = async () => ({ canceled: false, filePath }); }, exported);
   await a.page.getByRole('button', { name: 'Exportar JSON', exact: true }).click(); await a.page.waitForFunction(() => /Arquivo exportado/.test(document.querySelector('#aviso').textContent));
   assert.match(fs.readFileSync(exported, 'utf8'), /não executar/);
   const policies = (await a.page.evaluate(id => window.prumo.agentesEstado(id), a.e.id)).data; assert.equal(policies.especializacoes.length, 8, 'prévia não cria especialização no backend');
-  await a.fechar(); const b = await abrir(t, a.dados); await ir(b.page, 'agentes'); await b.page.waitForSelector('[data-agent^="previa-"]');
-  assert.match(await b.page.textContent('[data-agent^="previa-"]'), /Prévia de QA/); assert.deepEqual([...a.erros, ...b.erros], []);
+  await a.fechar(); const b = await abrir(t, a.dados); await ir(b.page, 'agentes'); await b.page.waitForSelector('[data-agent^="pessoal-"]');
+  assert.match(await b.page.textContent('[data-agent^="pessoal-"]'), /Prévia de QA/); assert.deepEqual([...a.erros, ...b.erros], []);
 });
 
 test('MCP/IPC reais alimentam terminal, filtros, gráficos, exportação e painel', async t => {

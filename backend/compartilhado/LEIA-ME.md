@@ -41,6 +41,14 @@ Erros com código fixo e jeitos seguros de tratar falhas.
 | `falharCom.ts` | Interrompe com um código de erro. |
 | `tentarOuPadrao.ts` | Executa uma consulta e, se der erro, usa o valor padrão (a conversa não quebra por uma consulta). |
 
+## integracoes/
+
+Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereços oficiais.
+
+| Arquivo | O que faz |
+| --- | --- |
+| `servicoDoPrumo.ts` | Endereço do serviço do Prumo (servico-do-prumo/ no Render), que manda os códigos por e-mail e recebe os chamados de suporte, e a chamada HTTP até ele. |
+
 ## projeto/
 
 Leitura e validação do contrato qa.project.json de uma pasta.

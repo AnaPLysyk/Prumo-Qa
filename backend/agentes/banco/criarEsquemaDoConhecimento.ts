@@ -18,8 +18,14 @@ export function criarEsquemaDoConhecimento(db: DatabaseSync) {
     CREATE INDEX IF NOT EXISTS conhecimentos_escopo ON conhecimentos (espaco_id, agente_id, estado);
     CREATE TABLE IF NOT EXISTS vocabulario (termo TEXT NOT NULL, agente_id TEXT NOT NULL REFERENCES agentes(id), peso INTEGER NOT NULL, ultima_em TEXT NOT NULL, PRIMARY KEY (termo, agente_id));
     CREATE TABLE IF NOT EXISTS atendimentos (id INTEGER PRIMARY KEY AUTOINCREMENT, em TEXT NOT NULL, espaco_id TEXT, agente_id TEXT NOT NULL REFERENCES agentes(id),
-      modo TEXT NOT NULL CHECK (modo IN ('LOCAL','CLAUDE','CODEX')), fontes TEXT NOT NULL, avaliacao TEXT CHECK (avaliacao IN ('UTIL','NAO_UTIL')));
-    CREATE INDEX IF NOT EXISTS atendimentos_escopo ON atendimentos (espaco_id, agente_id, em);`);
+      modo TEXT NOT NULL CHECK (modo IN ('LOCAL','CLAUDE','CODEX')), fontes TEXT NOT NULL, avaliacao TEXT CHECK (avaliacao IN ('UTIL','NAO_UTIL')), usuario_id TEXT);
+    CREATE INDEX IF NOT EXISTS atendimentos_escopo ON atendimentos (espaco_id, agente_id, em);
+    CREATE TABLE IF NOT EXISTS perfis (usuario_id TEXT PRIMARY KEY, como_chamar TEXT, papel TEXT CHECK (papel IN ('qa','dev','po','analista','outro')),
+      experiencia TEXT CHECK (experiencia IN ('iniciante','intermediario','avancado')), foco TEXT, compartilhar_ia INTEGER NOT NULL DEFAULT 0, atualizado_em TEXT NOT NULL);`);
+  // 2.17: perfil e atendimentos passam a ser de cada conta. A linha antiga de perfil (id = 1) e os atendimentos sem dono ficam guardados, mas ninguém os vê.
+  const doAtendimento = (db.prepare('PRAGMA table_info(atendimentos)').all() as { name: string }[]).map((c) => c.name);
+  if (!doAtendimento.includes('usuario_id')) db.exec('ALTER TABLE atendimentos ADD COLUMN usuario_id TEXT');
+  db.exec('CREATE INDEX IF NOT EXISTS atendimentos_pessoa ON atendimentos (usuario_id, espaco_id, agente_id, em)');
   // 2.13: o perfil ganhou experiência, foco e a autorização de compartilhar com a IA externa (bancos antigos recebem as colunas).
   const colunas = (db.prepare('PRAGMA table_info(perfil)').all() as { name: string }[]).map((c) => c.name);
   if (!colunas.includes('experiencia')) db.exec(`ALTER TABLE perfil ADD COLUMN experiencia TEXT CHECK (experiencia IN ('iniciante','intermediario','avancado'))`);

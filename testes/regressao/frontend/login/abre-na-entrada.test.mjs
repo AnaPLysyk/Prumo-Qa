@@ -8,7 +8,7 @@ const recusado = (r, codigo) => { assert.equal(r.ok, false); assert.match(String
 test('instalação nova: abre no primeiro acesso, nada responde e nenhuma tela aparece até criar a conta de Administrador', { timeout: 120000 }, async (t) => {
   const a = await abrir(t, novoDados(t), [], {}, { semLogin: true }); const p = a.page;
   assert.equal(await p.locator('dialog#entrada[open]').count(), 1); await p.waitForSelector('#entrada-login');
-  assert.equal(await p.locator('#primeiro-nome').count(), 0, 'abre em Entrar, não direto no cadastro'); assert.equal(await p.locator('#entrada-ir-recuperar').count(), 0, 'sem contas não há senha para recuperar');
+  assert.equal(await p.locator('#primeiro-nome').count(), 0, 'abre em Entrar, não direto no cadastro'); assert.equal(await p.locator('#entrada-ir-recuperar').count(), 1, 'Esqueci a senha sempre aparece na entrada (2.17)');
   await p.fill('#entrada-login', 'alguem'); await p.fill('#entrada-senha', 'qualquer-senha-123'); await p.click('#entrada-enviar'); await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /não existe conta/i);
   // Mais de um caminho para a primeira conta: login e senha, GitHub ou Google (sem OAuth configurado, a própria entrada pede o Client ID), além de idioma e site.
   assert.equal(await p.textContent('#entrada-github'), 'Criar conta com o GitHub'); assert.equal(await p.textContent('#entrada-google'), 'Criar conta com o Google');

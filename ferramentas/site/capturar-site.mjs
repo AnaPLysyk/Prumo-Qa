@@ -20,7 +20,7 @@ let s, app;
 const limpezas = [];
 // O código de confirmação do e-mail vai para a caixa local (serviço de envio em 127.0.0.1), nunca para o Resend.
 const caixa = await caixaDeEmail();
-const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO_DE_EMAIL: caixa.url }; delete env.ELECTRON_RUN_AS_NODE;
+const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO: caixa.url }; delete env.ELECTRON_RUN_AS_NODE;
 try {
   s = await servidorFixture();
   app = await electron.launch({ executablePath: electronPath, args: [path.join(repo, 'testes/apoio/desktop-entry.cjs')], env, timeout: 30000 });

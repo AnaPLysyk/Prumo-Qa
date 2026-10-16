@@ -25,14 +25,14 @@ services:
       - path: /*
         name: Content-Security-Policy
         value: "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action https://github.com"
-  # Envia os códigos de confirmação de e-mail do aplicativo (cadastro e Esqueci a senha). Ver servico-de-email/LEIA-ME.md.
+  # Serviço do Prumo: códigos de confirmação por e-mail e chamados de suporte (sem GitHub para quem abre). Ver servico-do-prumo/LEIA-ME.md.
   - type: web
     runtime: node
-    name: prumo-qa-email
+    name: prumo-qa-servico
     plan: free
     repo: https://github.com/AnaPLysyk/Prumo-Qa
     branch: main
-    rootDir: servico-de-email
+    rootDir: servico-do-prumo
     buildCommand: node --version
     startCommand: node servidor.mjs
     healthCheckPath: /saude
@@ -42,3 +42,9 @@ services:
         sync: false
       - key: PRUMO_EMAIL_REMETENTE
         sync: false
+      - key: PRUMO_SUPORTE_REPOSITORIO
+        sync: false
+      - key: PRUMO_SUPORTE_TOKEN
+        sync: false
+      - key: PRUMO_SUPORTE_CHAVE_ADMIN
+        generateValue: true

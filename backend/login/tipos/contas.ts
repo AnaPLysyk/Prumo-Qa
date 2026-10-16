@@ -57,7 +57,9 @@ export const usuarioSchema = z.object({
   falhas: z.number().int().min(0).max(1000), bloqueadoAte: quando.nullable(),
   criadoEm: quando, atualizadoEm: quando, ultimoAcesso: quando.nullable(), origem: z.enum(['ATIVACAO', 'ADMINISTRACAO', 'CADASTRO', 'GITHUB', 'GOOGLE']),
   // Marca admin: só ela libera a tela Administração. Conta antiga sem a marca gravada herda do papel Administrador (ver ehAdmin).
-  admin: z.boolean().optional()
+  admin: z.boolean().optional(),
+  // Verificação em duas etapas (2.17): depois da senha certa, um código vai ao e-mail da conta. Só vale para conta com e-mail.
+  duasEtapas: z.boolean().optional()
 }).strict();
 
 export type Usuario = z.infer<typeof usuarioSchema>;
@@ -74,7 +76,9 @@ export const configuracaoDeAcessoSchema = z.object({
   // Client ID do OAuth App do GitHub que a Administração registrou; o segredo fica no cofre do sistema, nunca neste arquivo.
   githubClientId: z.string().regex(/^[A-Za-z0-9._-]{10,60}$/).nullable().default(null),
   // Idem para o Google (Client ID de aplicativo para computador); o segredo também só no cofre.
-  googleClientId: z.string().regex(/^[A-Za-z0-9._-]{10,120}$/).nullable().default(null)
+  googleClientId: z.string().regex(/^[A-Za-z0-9._-]{10,120}$/).nullable().default(null),
+  // 2.17: a Administração pode exigir a verificação em duas etapas de todas as contas com e-mail.
+  exigirDuasEtapas: z.boolean().default(false)
 }).strict();
 
 export type ConfiguracaoDeAcesso = z.infer<typeof configuracaoDeAcessoSchema>;
@@ -94,9 +98,9 @@ export const papeisPadrao: Papel[] = [
   { id: 'leitor', nome: 'Leitor', descricao: 'Consulta as telas de trabalho sem alterar nada.', fixo: false, telas: { ...tudoVer, administracao: 'NENHUM' } }
 ];
 
-export const acessoPadrao: ConfiguracaoDeAcesso = { cadastroAberto: true, aprovarCadastros: true, papelDoCadastro: 'leitor', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15, githubClientId: null, googleClientId: null };
+export const acessoPadrao: ConfiguracaoDeAcesso = { cadastroAberto: true, aprovarCadastros: true, papelDoCadastro: 'leitor', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15, githubClientId: null, googleClientId: null, exigirDuasEtapas: false };
 
 export const registroDeContasVazio: RegistroDeContas = { version: 1, usuarios: [], papeis: papeisPadrao, acesso: acessoPadrao };
 
 /** Campos que a janela pode ver de uma conta: nunca resumo de senha. */
-export type ContaVisivel = Pick<Usuario, 'id' | 'login' | 'nome' | 'papel' | 'estado' | 'trocarSenha' | 'criadoEm' | 'ultimoAcesso' | 'origem'> & { email: string | null; bloqueada: boolean; papelNome: string; admin: boolean };
+export type ContaVisivel = Pick<Usuario, 'id' | 'login' | 'nome' | 'papel' | 'estado' | 'trocarSenha' | 'criadoEm' | 'ultimoAcesso' | 'origem'> & { email: string | null; bloqueada: boolean; papelNome: string; admin: boolean; duasEtapas: boolean };

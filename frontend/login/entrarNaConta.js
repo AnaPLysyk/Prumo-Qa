@@ -41,6 +41,7 @@ window.PrumoConta = (() => {
       CODE_INVALID: 'Código incorreto. Confira o e-mail e tente de novo.',
       CODE_EXPIRED: 'O código venceu ou foi digitado errado vezes demais. Peça um novo.',
       PASSWORD_INVALID: 'A senha atual não confere.',
+      TWO_STEP_EMAIL_REQUIRED: 'A verificação em duas etapas precisa de um e-mail na conta.',
       PASSWORD_WEAK: 'A senha nova não atende às regras de segurança. Use pelo menos 10 caracteres, com letras e números.',
       PASSWORD_CHANGE_REQUIRED: 'Troque a senha temporária para continuar.',
       SESSION_EXPIRED: 'Sua sessão terminou por inatividade. Entre novamente.',
@@ -115,12 +116,13 @@ window.PrumoConta = (() => {
   function vistaEntrar(aviso) {
     const login = campo('entrada-login', 'E-mail ou login', 'text', { autocomplete: 'username', maxlength: 254, autocapitalize: 'off' });
     const senha = campo('entrada-senha', 'Senha', 'password', { autocomplete: 'current-password', maxlength: 200 });
-    const rodape = [semContas() || sessao?.cadastroAberto ? link('Criar conta', () => vistaCriarConta(semContas()), 'entrada-ir-cadastro') : null, semContas() ? null : link('Esqueci a senha', () => vistaRecuperar(), 'entrada-ir-recuperar')].filter(Boolean);
+    const rodape = [semContas() || sessao?.cadastroAberto ? link('Criar conta', () => vistaCriarConta(semContas()), 'entrada-ir-cadastro') : null, link('Esqueci a senha', () => vistaRecuperar(), 'entrada-ir-recuperar')].filter(Boolean);
     // Três caminhos: e-mail (confirmado por código), GitHub ou Google.
     trocarVista(...cartao('Entrar', semContas() ? 'Este computador ainda não tem contas. Crie a primeira com o seu e-mail, com o GitHub ou com o Google.' : 'Entre com o e-mail e a senha da sua conta, com o GitHub ou com o Google.'), aviso ? DS.alerta(aviso, 'aviso') : null,
       formulario([login, senha], 'Entrar', async (form) => {
-        const r = await api.contaEntrar(login.input.value, senha.input.value);
+        const r = await api.contaEntrar(login.input.value, senha.input.value, idiomaDoEmail());
         if (!r.ok) { senha.input.value = ''; mostrarErro(form, r.error); return; }
+        if (r.data.duasEtapas) { vistaConfirmarEntrada(r.data); return; }
         sessao = r.data; if (sessao.usuario?.trocarSenha) vistaTrocar(); else location.reload();
       }, rodape), botoesExternos(semContas() ? 'ativar' : 'entrar'));
   }
@@ -177,6 +179,16 @@ window.PrumoConta = (() => {
         const e = await api.contaEntrar(d.email, d.senha); if (e.ok) { location.reload(); return; }
         vistaEntrar(mensagemDaEntrada(e.error));
       }, [reenviar(async () => { const r = await api.contaCodigo(d.email, 'CADASTRO', idiomaDoEmail()); if (r.ok) d.enviadoEm = Date.now(); return r; }, 'confirmar-reenviar', d.enviadoEm), link('Corrigir dados', () => vistaCriarConta(d.primeira, null, d), 'entrada-voltar')]));
+  }
+  /** Verificação em duas etapas: a senha conferiu; o código que chegou no e-mail termina a entrada. */
+  function vistaConfirmarEntrada(d) {
+    const codigo = campoDoCodigo('entrada-codigo-email');
+    trocarVista(...cartao('Confirme que é você', null), h('p', { class: 'entrada-desc' }, tr('Mandamos um código de 6 dígitos para'), ' ', h('strong', { 'data-i18n-ignore': '' }, d.email), tr('. Digite o código para entrar.')),
+      formulario([codigo], 'Entrar', async (form) => {
+        const r = await api.contaConfirmarEntrada(d.desafio, codigo.input.value);
+        if (!r.ok) { codigo.input.value = ''; mostrarErro(form, r.error); if (/^(CODE_EXPIRED|ACCOUNT_LOCKED)/.test(String(r.error))) setTimeout(() => vistaEntrar(mensagemDaEntrada(r.error)), 1500); return; }
+        sessao = r.data; if (sessao.usuario?.trocarSenha) vistaTrocar(); else location.reload();
+      }, [reenviar(() => api.contaReenviarEntrada(d.desafio, idiomaDoEmail()), 'entrada-reenviar-codigo'), link('Voltar para entrar', () => vistaEntrar(), 'entrada-voltar')]));
   }
   function vistaAviso(titulo, texto) {
     trocarVista(...cartao(titulo, texto), h('div', { class: 'entrada-links' }, DS.acao('Voltar para entrar', () => vistaEntrar(), { id: 'entrada-continuar', primaria: true })));
@@ -310,6 +322,16 @@ window.PrumoConta = (() => {
           const r = await chamar(() => api.contaSenha(atual.value, nova.value)); atual.value = nova.value = confirma.value = ''; if (!r) return;
           avisar(tr('Senha trocada.'));
         }, { id: 'minha-trocar-senha', primaria: true }))]),
+      DS.secao('Verificação em duas etapas', (() => {
+        const obrigatoria = !!sessao.exigirDuasEtapas && !!u.email; const senhaDuas = h('input', { id: 'minha-duas-senha', type: 'password', autocomplete: 'current-password', maxlength: 200 });
+        if (!u.email) return [h('p', { class: 'suave' }, tr('Precisa de um e-mail na conta. Contas criadas por e-mail já têm.'))];
+        if (obrigatoria) return [h('p', { class: 'suave', id: 'minha-duas-obrigatoria' }, tr('Ligada pela Administração para todas as contas com e-mail: ao entrar, um código vai para o seu e-mail.'))];
+        return [h('p', { class: 'suave' }, tr(u.duasEtapas ? 'Ligada: ao entrar, depois da senha, um código vai para o seu e-mail.' : 'Desligada. Ligue para pedir também um código mandado ao seu e-mail sempre que entrar.')), DS.campo('Senha atual', senhaDuas),
+          h('div', { class: 'ds-cab-acoes ds-mt' }, DS.acao(u.duasEtapas ? 'Desligar' : 'Ligar', async () => {
+            const r = await chamar(() => api.contaDuasEtapas(!u.duasEtapas, senhaDuas.value)); senhaDuas.value = ''; if (!r) return;
+            sessao = r; avisar(tr(sessao.usuario.duasEtapas ? 'Verificação em duas etapas ligada.' : 'Verificação em duas etapas desligada.')); DS.fecharModal(); minhaConta();
+          }, { id: 'minha-duas-etapas', primaria: !u.duasEtapas }))];
+      })()),
       DS.secao('Recuperação de acesso', [
         h('p', { class: 'suave' }, tr(u.email ? 'Esqueceu a senha atual? Receba um código no seu e-mail e defina uma nova.' : 'Esta conta não tem e-mail. Esqueceu a senha atual? Solicite uma senha temporária à Administração.')),
         u.email ? DS.acao('Redefinir senha pelo e-mail', () => { DS.fecharModal(); vistaRecuperar(); }, { id: 'minha-recuperar-senha' }) : null
@@ -366,5 +388,8 @@ window.PrumoConta = (() => {
     return false;
   }
 
-  return { iniciar, tratarErro, pode, soVer, sessao: () => sessao, abrirMinhaConta: () => { if (sessao?.usuario) minhaConta(); }, recarregarSessao: async () => { const r = await api.contaSessao(); if (r.ok) { sessao = r.data; aplicarMenu(); } return sessao; } };
+  const sair = async () => { await api.contaSair(); location.reload(); };
+  /** Redefinir a senha pelo e-mail, a partir do Meu perfil: a mesma tela do Esqueci a senha, com o e-mail da conta. */
+  const redefinirSenha = () => { if (!sessao?.usuario) return; DS.fecharModal?.(); vistaRecuperar(); };
+  return { iniciar, tratarErro, pode, soVer, sessao: () => sessao, sair, redefinirSenha, abrirMinhaConta: () => { if (sessao?.usuario) minhaConta(); }, recarregarSessao: async () => { const r = await api.contaSessao(); if (r.ok) { sessao = r.data; aplicarMenu(); } return sessao; } };
 })();

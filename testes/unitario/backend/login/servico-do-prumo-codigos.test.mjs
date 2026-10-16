@@ -1,8 +1,8 @@
-// Serviço de envio (servico-de-email/servidor.mjs) em 127.0.0.1 com uma caixa em memória no lugar do Resend: nada sai do computador.
+// Serviço do Prumo, rota dos códigos (servico-do-prumo/servidor.mjs) em 127.0.0.1 com uma caixa em memória no lugar do Resend: nada sai do computador.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { criarServico, enviarPeloResend, mensagem } from '../../../../servico-de-email/servidor.mjs';
+import { criarServico, enviarPeloResend, mensagem } from '../../../../servico-do-prumo/servidor.mjs';
 
 async function subir(t, opcoes = {}) {
   const caixa = []; const registros = []; let agora = Date.parse('2026-10-16T12:00:00Z');
@@ -25,6 +25,11 @@ test('pedido válido: manda o código ao e-mail (em minúsculas), responde 202 e
   assert.ok(s.registros.some((l) => l.includes('p***@exemplo.com')));
 });
 
+test('entrada em duas etapas avisa para trocar a senha se não foi a pessoa', () => {
+  const m = mensagem({ codigo: '333444', finalidade: 'ENTRADA', idioma: 'pt-BR' }); assert.match(m.texto, /concluir a entrada no Prumo QA/); assert.match(m.texto, /troque sua senha/);
+  assert.match(mensagem({ codigo: '333444', finalidade: 'ENTRADA', idioma: 'en' }).texto, /change your password/);
+});
+
 test('senha nova e inglês mudam só o texto fixo', () => {
   assert.match(mensagem({ codigo: '111222', finalidade: 'SENHA', idioma: 'pt-BR' }).texto, /definir uma senha nova/);
   const en = mensagem({ codigo: '111222', finalidade: 'SENHA', idioma: 'en' }); assert.equal(en.assunto, 'Your Prumo QA code: 111222'); assert.match(en.texto, /set a new password/);
@@ -39,7 +44,7 @@ test('pedido fora do formato é recusado sem enviar nada', async (t) => {
   assert.equal((await s.pedir({ ...PEDIDO, email: 'a'.repeat(3000) + '@x.com' })).status, 413);
   assert.equal((await s.pedir(null, {}, '/v1/codigos', 'GET')).status, 405);
   assert.equal((await s.pedir(null, {}, '/outra', 'GET')).status, 404);
-  const saude = await s.pedir(null, {}, '/saude', 'GET'); assert.equal(saude.status, 200); assert.deepEqual(await saude.json(), { ok: true, configurado: true });
+  const saude = await s.pedir(null, {}, '/saude', 'GET'); assert.equal(saude.status, 200); assert.deepEqual(await saude.json(), { ok: true, email: true, suporte: false, administracao: false });
   assert.equal(s.caixa.length, 0);
 });
 

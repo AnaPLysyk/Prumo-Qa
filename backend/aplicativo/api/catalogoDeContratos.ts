@@ -19,6 +19,8 @@ import { filtroExecucoes } from '../../testes/tipos/historicoDeExecucoes.js';
 import { associacaoSchema, dadosEspaco, identidadeRecurso, servicoSchema } from '../../projetos/tipos/espacos.js';
 import { filtroSchema } from '../../projetos/tipos/painel.js';
 import { numeroChamado, solicitacaoSchema } from '../../suporte/tipos/suporte.js';
+import { estadosDoChamado } from '../../suporte/tipos/chamados.js';
+import { dadosDoAgentePessoal } from '../../agentes/regras/agentesPessoais.js';
 import { esquemaCaso } from '../../testes/tipos/escritaQase.js';
 import { entradaCasoLocal, entradaSuiteLocal } from '../../testes/tipos/repositorioLocal.js';
 
@@ -119,6 +121,10 @@ export const esquemasIpc = {
   'perfil:salvar': z.object({comoChamar:z.string().max(30).nullable().optional(),papel:z.enum(papeis as unknown as ['qa','dev','po','analista','outro']).nullable().optional(),experiencia:z.enum(['iniciante','intermediario','avancado']).nullable().optional(),foco:z.string().max(160).nullable().optional(),compartilharComIa:z.boolean().optional()}).strict(),
   'ia:delegacao': z.object({provedor:z.enum(['claude','codex']),valor:z.boolean()}).strict(),
   'agentes:estado': z.object({espacoId:z.string().uuid()}).strict(),
+  'agentes:pessoais': z.object({ espacoId: z.string().uuid() }).strict(),
+  'agentes:pessoalsalvar': z.object({ espacoId: z.string().uuid(), agente: dadosDoAgentePessoal }).strict(),
+  'agentes:pessoalexcluir': z.object({ id: z.string().regex(/^[a-z0-9-]{1,80}$/) }).strict(),
+  'agentes:pessoaisimportar': z.object({ espacoId: z.string().uuid(), previas: z.array(dadosDoAgentePessoal.omit({ publico: true })).max(50) }).strict(),
   'agentes:salvar': z.object({espacoId:z.string().uuid(),especializacoes:z.array(z.string().max(40)).max(16),politicas:z.record(z.string().max(30))}).strict(),
   'agenda:listar': z.object({espacoId:z.string().uuid().optional()}).strict(),
   'agenda:salvar': z.object({id:z.string().uuid().optional(),dados:dadosRotinaSchema}).strict(),
@@ -180,9 +186,23 @@ export const esquemasIpc = {
   'suporte:exportar': solicitacaoSchema,
   'suporte:consultar': z.object({numero:numeroChamado}).strict(),
   'suporte:chamado': z.object({numero:numeroChamado}).strict(),
+  'suporte:anexar': vazio,
+  'suporte:enviar': z.object({ relato: solicitacaoSchema, anexos: z.array(z.string().uuid()).max(4) }).strict(),
+  'suporte:meus': vazio,
+  'suporte:meu': z.object({ numero: numeroChamado }).strict(),
+  'chamados:configuracao': vazio,
+  'chamados:chave': z.object({ chave: z.string().max(200) }).strict(),
+  'chamados:listar': z.object({ estado: z.enum(estadosDoChamado).optional() }).strict(),
+  'chamados:detalhe': z.object({ numero: numeroChamado }).strict(),
+  'chamados:anexo': z.object({ numero: numeroChamado, indice: z.number().int().min(0).max(3) }).strict(),
+  'chamados:responder': z.object({ numero: numeroChamado, texto: z.string().trim().min(1).max(4000) }).strict(),
+  'chamados:estado': z.object({ numero: numeroChamado, estado: z.enum(estadosDoChamado) }).strict(),
   // 2.11: login, contas, papéis com permissão por tela e agentes da plataforma (Administração).
   'conta:sessao': vazio,
-  'conta:entrar': z.object({ login: textoEmail, senha: textoSenha }).strict(),
+  'conta:entrar': z.object({ login: textoEmail, senha: textoSenha, idioma: z.enum(['pt-BR', 'en']).optional() }).strict(),
+  'conta:confirmarentrada': z.object({ desafio: z.string().uuid(), codigo: codigoDoEmail }).strict(),
+  'conta:reenviarentrada': z.object({ desafio: z.string().uuid(), idioma: z.enum(['pt-BR', 'en']).optional() }).strict(),
+  'conta:duasetapas': z.object({ ligar: z.boolean(), senha: textoSenha }).strict(),
   'conta:sair': vazio,
   'conta:cadastrar': z.object({ email: textoEmail, nome: textoNome, senha: textoSenha, codigo: codigoDoEmail }).strict(),
   'conta:codigo': z.object({ email: textoEmail, finalidade: z.enum(['CADASTRO', 'SENHA']), idioma: z.enum(['pt-BR', 'en']).optional() }).strict(),
@@ -409,12 +429,40 @@ Object.assign(ipc, {
   'worker:eventos': agendaDesc('Receber avisos do worker e pedidos de navegação da bandeja desde o último número visto.', 'Último número de evento recebido', 'Eventos (iniciado, concluído, falhou, bloqueado, publicação falhou, worker interrompido, navegar) e último número', 'Consulta a memória do processo principal; a janela consulta periodicamente (não há canal de eventos livre na ponte).', 'Nenhuma', { origem: 'Interface > avisos e navegação pela bandeja', destino: 'main.ts > worker.ts' }),
   'worker:pausa': agendaDesc('Pausar ou retomar todos os agendamentos.', 'pausado (true/false)', 'Estado do worker', 'Grava a pausa global; trabalho em andamento termina sem ser corrompido.', 'Ação explícita da pessoa', { origem: 'Interface > Agendamentos ou menu da bandeja' })
 });
+const supErros = [...ipcErros, 'SESSION_REQUIRED', 'PERMISSION_DENIED', 'SUPPORT_SERVICE_UNAVAILABLE', 'SUPPORT_NOT_CONFIGURED', 'SUPPORT_RATE_LIMIT', 'SUPPORT_SEND_FAILED', 'TICKET_NOT_FOUND'];
+const supProt = [...ipcProtecoes, 'Serviço do Prumo só por HTTPS (endereço fixo no código)', 'Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela', 'Cada pessoa vê só os próprios chamados'];
+const supDesc = (finalidade: string, origem: string, entrada: string, saida: string, efeito: string, permissoes: string, extra: Partial<Descricao> = {}): Descricao => ({ finalidade, origem, destino: 'backend/suporte/regras > serviço do Prumo (HTTPS)', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\chamados-de-suporte.json e o cofre do sistema', erros: supErros, protecoes: supProt, registro: 'Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)', ...extra });
+Object.assign(ipc, {
+  'suporte:anexar': supDesc('Escolher imagens (até 3, 5 MB cada) ou um vídeo (até 25 MB) para o chamado.', 'Interface > Suporte > Anexar imagem ou vídeo', 'Nenhuma (diálogo nativo de arquivos)', 'aceitos (id, nome, tipo, tamanho) e recusados (nome, motivo)', 'Lê os arquivos escolhidos e confere a assinatura; o caminho fica só no processo principal.', 'Suporte: USAR', { arquivos: 'Só os arquivos escolhidos (leitura)', erros: [...supErros, 'ATTACHMENT_INVALID', 'ATTACHMENT_TOO_LARGE'] }),
+  'suporte:enviar': supDesc('Enviar o chamado revisado (e os anexos) pelo serviço do Prumo, sem conta no GitHub.', 'Interface > Suporte > Enviar chamado', 'O relato revisado e os ids dos anexos', 'número do chamado, anexos enviados e com falha, e se o acompanhamento ficou guardado', 'Envia o texto, o nome e o e-mail da conta e só o que a pessoa marcou (versão, sistema, diagnóstico); guarda o número e a chave do chamado protegida pelo cofre.', 'Suporte: USAR; ação explícita da pessoa', { erros: [...supErros, 'SUPPORT_BLOCKED_SECRET', 'SUPPORT_TICKET_INVALID', 'ATTACHMENT_INVALID', 'ATTACHMENT_LIMIT', 'ATTACHMENT_TOO_LARGE'] }),
+  'suporte:meus': supDesc('Listar os chamados abertos pela pessoa da sessão, com o estado atual.', 'Interface > Suporte > Meus chamados', 'Nenhuma', 'número, título, categoria, estado, última atualização e quantas respostas', 'Consulta o serviço com a chave de cada chamado; só os chamados desta conta.', 'Suporte: VER'),
+  'suporte:meu': supDesc('Ver um chamado da pessoa da sessão com as respostas da equipe.', 'Interface > Suporte > Meus chamados', 'Número do chamado', 'estado e respostas', 'Consulta o serviço com a chave do chamado; número de outra pessoa responde como inexistente.', 'Suporte: VER', { erros: [...supErros, 'SUPPORT_TRACKING_UNAVAILABLE'] }),
+  'chamados:configuracao': supDesc('Saber se a chave de administração do suporte está guardada neste computador.', 'Interface > Administração > Chamados', 'Nenhuma', 'configurada e o endereço do serviço', 'Consulta local; a chave nunca volta para a janela.', 'Administração: VER'),
+  'chamados:chave': supDesc('Guardar (ou, vazia, apagar) a chave de administração do suporte.', 'Interface > Administração > Chamados', 'Chave (32 a 200 caracteres)', 'configurada', 'Grava a chave só no cofre do sistema.', 'Administração: USAR', { erros: [...supErros, 'SUPPORT_ADMIN_KEY_INVALID', 'CREDENTIAL_PROTECTION_UNAVAILABLE'] }),
+  'chamados:listar': supDesc('Listar todos os chamados de suporte recebidos.', 'Interface > Administração > Chamados', 'Estado (opcional)', 'chamados (número, título, categoria, estado, quem abriu, datas, anexos)', 'Consulta o serviço com a chave de administração.', 'Administração: VER', { erros: [...supErros, 'SUPPORT_ADMIN_KEY_MISSING', 'SUPPORT_ADMIN_DENIED', 'SUPPORT_ADMIN_NOT_CONFIGURED'] }),
+  'chamados:detalhe': supDesc('Ver um chamado por inteiro: texto, quem abriu, anexos recebidos e respostas.', 'Interface > Administração > Chamados', 'Número do chamado', 'dados do chamado, anexos e respostas', 'Consulta o serviço com a chave de administração.', 'Administração: VER', { erros: [...supErros, 'SUPPORT_ADMIN_KEY_MISSING', 'SUPPORT_ADMIN_DENIED'] }),
+  'chamados:anexo': supDesc('Ler uma imagem ou um vídeo anexado a um chamado.', 'Interface > Administração > Chamados > Anexos', 'Número do chamado e índice do anexo', 'tipo e conteúdo (base64)', 'Consulta o serviço; só tipos de imagem e vídeo permitidos chegam à janela.', 'Administração: VER', { erros: [...supErros, 'SUPPORT_ADMIN_KEY_MISSING', 'SUPPORT_ADMIN_DENIED', 'ATTACHMENT_INVALID'] }),
+  'chamados:responder': supDesc('Responder a um chamado.', 'Interface > Administração > Chamados', 'Número do chamado e texto (até 4.000 caracteres)', 'respondido', 'Grava a resposta no chamado; a pessoa vê em Suporte > Meus chamados.', 'Administração: USAR', { erros: [...supErros, 'SUPPORT_ADMIN_KEY_MISSING', 'SUPPORT_ADMIN_DENIED'] }),
+  'chamados:estado': supDesc('Mudar o estado de um chamado.', 'Interface > Administração > Chamados', 'Número do chamado e estado (NOVO, EM_ANALISE, RESOLVIDO, FECHADO)', 'estado', 'Atualiza o estado no chamado.', 'Administração: USAR', { erros: [...supErros, 'SUPPORT_ADMIN_KEY_MISSING', 'SUPPORT_ADMIN_DENIED'] })
+});
+
+const pessoalDesc = (finalidade: string, entrada: string, saida: string, efeito: string, permissoes: string): Descricao => ({ finalidade, origem: 'Interface > Agentes', destino: 'backend/agentes/regras/agentesPessoais.ts', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agentes-pessoais.json', erros: [...ipcErros, 'SESSION_REQUIRED', 'PERMISSION_DENIED', 'AGENT_NOT_FOUND', 'AGENT_LIMIT', 'LOCAL_DATA_INVALID'], protecoes: [...ipcProtecoes, 'Só o dono vê, edita e exclui; público é só leitura para as outras contas; a Administração não vê os privados'], registro: 'Diagnóstico da interface (só canal, estado e duração)' });
+Object.assign(ipc, {
+  'agentes:pessoais': pessoalDesc('Listar os agentes do projeto que a pessoa pode ver: os dela e os públicos das outras contas.', 'Projeto', 'agentes (nome, descrição, objetivo, instruções, público, se é seu e o nome do dono)', 'Consulta local.', 'Agentes: VER'),
+  'agentes:pessoalsalvar': pessoalDesc('Criar ou atualizar um agente da pessoa.', 'Projeto e agente (nome, descrição, objetivo, instruções, público)', 'id do agente salvo', 'Grava o agente com a pessoa da sessão como dona; agente de outra pessoa responde como inexistente.', 'Agentes: USAR'),
+  'agentes:pessoalexcluir': pessoalDesc('Excluir um agente da pessoa.', 'Id do agente', 'excluido', 'Apaga o agente; só o dono consegue.', 'Agentes: USAR'),
+  'agentes:pessoaisimportar': pessoalDesc('Trazer as prévias antigas guardadas na janela como agentes privados da pessoa.', 'Projeto e prévias (até 50)', 'importados', 'Grava as prévias válidas como agentes privados da pessoa da sessão.', 'Agentes: USAR')
+});
+
 const contaErros = [...ipcErros, 'SESSION_REQUIRED', 'SESSION_EXPIRED', 'PERMISSION_DENIED', 'LOGIN_NOT_ACTIVE', 'LOGIN_SETUP_REQUIRED', 'LOCAL_DATA_INVALID'];
 const contaProt = [...ipcProtecoes, 'Senha só como resumo scrypt com sal próprio; código por e-mail só como resumo na memória, por 10 minutos', 'Sessão só na memória do processo principal, com expiração por inatividade', 'Permissão por tela conferida no backend a cada canal (login/tipos/acessoDosCanais.ts)'];
 const contaDesc = (finalidade: string, entrada: string, saida: string, efeito: string, permissoes: string, extra: Partial<Descricao> = {}): Descricao => ({ finalidade, origem: 'Interface > Entrada do Prumo, Minha conta ou Administração', destino: 'backend/administracao/regras', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\acessos.json', erros: contaErros, protecoes: contaProt, registro: 'Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)', ...extra });
 Object.assign(ipc, {
   'conta:sessao': contaDesc('Saber se o login está ligado, quem está na sessão e o nível de cada tela para o papel dessa pessoa.', 'Nenhuma', 'loginAtivo, conta visível (sem resumos), telas e regras de cadastro', 'Consulta local; não renova a sessão.', 'Nenhuma (atende antes do login)'),
-  'conta:entrar': contaDesc('Entrar com o e-mail (ou o login) e a senha.', 'E-mail ou login, e senha', 'Sessão (conta e telas)', 'Abre a sessão na memória; conta tentativas erradas e bloqueia a conta no limite configurado.', 'Nenhuma (atende antes do login)', { erros: [...contaErros, 'LOGIN_INVALID', 'ACCOUNT_LOCKED', 'ACCOUNT_PENDING', 'ACCOUNT_DISABLED', 'LOGIN_RATE_LIMIT'] }),
+  'conta:entrar': contaDesc('Entrar com o e-mail (ou o login) e a senha. Com a verificação em duas etapas, a senha certa manda um código ao e-mail em vez de abrir a sessão.', 'E-mail ou login, senha e idioma (opcional)', 'Sessão (conta e telas) ou { duasEtapas, desafio, e-mail mascarado }', 'Abre a sessão na memória ou manda o código ao serviço do Prumo; conta tentativas erradas e bloqueia a conta no limite configurado.', 'Nenhuma (atende antes do login)', { erros: [...contaErros, 'LOGIN_INVALID', 'ACCOUNT_LOCKED', 'ACCOUNT_PENDING', 'ACCOUNT_DISABLED', 'LOGIN_RATE_LIMIT', 'EMAIL_WAIT', 'EMAIL_SEND_FAILED', 'EMAIL_SERVICE_UNAVAILABLE'] }),
+  'conta:confirmarentrada': contaDesc('Terminar a entrada em duas etapas com o código mandado ao e-mail.', 'Desafio da entrada e código de 6 dígitos', 'Sessão (conta e telas)', 'Abre a sessão; código errado conta para o bloqueio da conta.', 'Nenhuma (atende antes do login); só com um desafio aberto pela senha certa', { erros: [...contaErros, 'CODE_INVALID', 'CODE_EXPIRED', 'ACCOUNT_LOCKED', 'ACCOUNT_DISABLED', 'LOGIN_RATE_LIMIT'] }),
+  'conta:reenviarentrada': contaDesc('Mandar outro código da entrada em duas etapas em andamento.', 'Desafio da entrada e idioma (opcional)', 'E-mail mascarado', 'Manda outro código ao serviço do Prumo (espera de 60 segundos).', 'Nenhuma (atende antes do login); só com um desafio aberto pela senha certa', { erros: [...contaErros, 'CODE_EXPIRED', 'EMAIL_WAIT', 'EMAIL_SEND_FAILED', 'EMAIL_SERVICE_UNAVAILABLE'] }),
+  'conta:duasetapas': contaDesc('Ligar ou desligar a própria verificação em duas etapas.', 'Ligar (sim ou não) e a senha atual', 'Sessão atualizada', 'Grava a escolha na conta.', 'Sessão aberta', { erros: [...contaErros, 'PASSWORD_INVALID', 'TWO_STEP_EMAIL_REQUIRED'] }),
   'conta:sair': contaDesc('Encerrar a sessão.', 'Nenhuma', 'Sessão vazia', 'Esquece a sessão da memória.', 'Sessão aberta'),
   'conta:cadastrar': contaDesc('Criar a própria conta por e-mail pela tela de entrada, com o código de confirmação mandado ao e-mail.', 'E-mail, nome, senha e código de 6 dígitos', 'Estado (PENDENTE ou ATIVO)', 'Grava a conta com o papel de cadastro; com aprovação ligada, ela só entra depois que a Administração aprovar. O código vale uma vez.', 'Nenhuma (atende antes do login); cadastro aberto', { erros: [...contaErros, 'SIGNUP_CLOSED', 'EMAIL_INVALID', 'EMAIL_TAKEN', 'NAME_INVALID', 'PASSWORD_WEAK', 'CODE_INVALID', 'CODE_EXPIRED'] }),
   'conta:codigo': contaDesc('Mandar um código de 6 dígitos ao e-mail, para confirmar o cadastro ou definir senha nova.', 'E-mail, finalidade (CADASTRO ou SENHA) e idioma', 'E-mail, minutos de validade e segundos para pedir outro', 'Envia e-mail, código, finalidade e idioma ao serviço de envio do Prumo (HTTPS), que manda a mensagem pelo Resend. O código fica só como resumo na memória, por 10 minutos. Em SENHA, sem conta com esse e-mail nada é enviado e a resposta é a mesma.', 'Nenhuma (atende antes do login); ação explícita da pessoa', { arquivos: 'Nenhum (código só na memória)', erros: [...contaErros, 'EMAIL_INVALID', 'EMAIL_TAKEN', 'EMAIL_WAIT', 'SIGNUP_CLOSED', 'EMAIL_RATE_LIMIT', 'EMAIL_SEND_FAILED', 'EMAIL_SERVICE_UNAVAILABLE'] }),

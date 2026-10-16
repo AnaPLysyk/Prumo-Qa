@@ -28,7 +28,7 @@ A tela mostra o **Prumo Orchestrator**, os clientes Codex e Claude Code conectad
 - **Skills**: instruções curtas para os agentes. Só as aprovadas são enviadas ao Claude Code ou ao Codex, conforme a pergunta (até 8 KB). Ao importar uma pasta de Skill, o Prumo aceita apenas licenças abertas; cada trecho começa como rascunho e nenhum script é executado.
 - **Cérebro**: tudo o que o agente consulta, agrupado por cor. **Testar uma pergunta** mostra que agente responderia e por quê, sem chamar IA e sem gravar nada.
 
-**Nova prévia** cria uma simulação de agente personalizada neste computador (até 50 por projeto). Não cria um agente real nem inicia um processo.
+**Nova prévia** cria um agente seu, com nome, objetivo e instruções (até 50 por projeto). Só você vê, edita e exclui. Se marcar **Público para as outras contas**, as outras pessoas deste computador também veem, só para leitura; a Administração não vê os seus agentes privados. É uma prévia: não cria um processo nem muda as políticas do núcleo. Os agentes fixos do Prumo continuam sendo geridos pela Administração.
 
 ## Painel de atividades
 

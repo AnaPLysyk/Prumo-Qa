@@ -14,3 +14,14 @@
 
 /* Marca admin (só ela libera a tela Administração). */
 .adm-admin { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; cursor: pointer; }
+
+/* Administração › Chamados e anexos do Suporte (2.17). Só tokens do Design System. */
+.chamado-titulo { margin: 0 0 8px; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.chamado-texto { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; }
+.chamado-anexo { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; border-bottom: 1px solid var(--linha); }
+.chamado-anexo:last-child { border-bottom: 0; }
+.chamado-midia { display: block; max-width: 100%; max-height: 420px; border-radius: 8px; border: 1px solid var(--linha); background: var(--painel); }
+.sup-anexos { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.sup-anexos li { display: flex; align-items: center; gap: 6px; overflow-wrap: anywhere; }
+.sup-anexos li .ds-link { margin-left: auto; }
+.sup-texto { white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -35,7 +35,7 @@ export const telasDaConta = (u: Pick<Usuario, 'admin' | 'papel'>, papel: Papel |
 
 export function contaParaJanela(r: RegistroDeContas, u: Usuario, agora = Date.now()): ContaVisivel {
   return { id: u.id, login: u.login, nome: u.nome, papel: u.papel, papelNome: papelDaConta(r, u)?.nome ?? u.papel, estado: u.estado, trocarSenha: u.trocarSenha, criadoEm: u.criadoEm, ultimoAcesso: u.ultimoAcesso, origem: u.origem,
-    bloqueada: !!u.bloqueadoAte && Date.parse(u.bloqueadoAte) > agora, email: u.email ?? null, admin: ehAdmin(u) };
+    bloqueada: !!u.bloqueadoAte && Date.parse(u.bloqueadoAte) > agora, email: u.email ?? null, admin: ehAdmin(u), duasEtapas: !!u.email && (!!u.duasEtapas || r.acesso.exigirDuasEtapas) };
 }
 
 export type SituacaoDaSessao =
@@ -61,7 +61,7 @@ export function situacaoDaSessao(b?: string, agora = Date.now(), tocar = true): 
 /** O que a janela precisa saber para desenhar o login ou o menu: nunca resumo de senha. */
 export function sessaoParaJanela(b?: string, agora = Date.now()) {
   const s = situacaoDaSessao(b, agora, false);
-  const geral = { cadastroAberto: s.registro.acesso.cadastroAberto, aprovarCadastros: s.registro.acesso.aprovarCadastros, minutosDeInatividade: s.registro.acesso.minutosDeInatividade, entradaGithub: !!(s.registro.acesso.githubClientId || process.env.PRUMO_GITHUB_CLIENT_ID), entradaGoogle: !!(s.registro.acesso.googleClientId || process.env.PRUMO_GOOGLE_CLIENT_ID) };
+  const geral = { cadastroAberto: s.registro.acesso.cadastroAberto, aprovarCadastros: s.registro.acesso.aprovarCadastros, minutosDeInatividade: s.registro.acesso.minutosDeInatividade, entradaGithub: !!(s.registro.acesso.githubClientId || process.env.PRUMO_GITHUB_CLIENT_ID), entradaGoogle: !!(s.registro.acesso.googleClientId || process.env.PRUMO_GOOGLE_CLIENT_ID), exigirDuasEtapas: s.registro.acesso.exigirDuasEtapas };
   // Sem nenhuma conta o Prumo não libera tela alguma: a janela mostra só a criação da conta de Administrador.
   if (s.tipo === 'SEM_LOGIN') return { loginAtivo: false, usuario: null, expirou: false, telas: telasDoPapel(null), ...geral };
   if (s.tipo !== 'ATIVA') return { loginAtivo: true, usuario: null, expirou: s.tipo === 'EXPIRADA', telas: telasDoPapel(null), ...geral };

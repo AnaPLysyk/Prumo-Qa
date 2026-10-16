@@ -1,4 +1,4 @@
-/** Códigos de 6 dígitos mandados por e-mail para confirmar o cadastro ou definir senha nova: só na memória, valem 10 minutos, uma vez, com até 5 tentativas. */
+/** Códigos de 6 dígitos mandados por e-mail para confirmar o cadastro, definir senha nova ou entrar (duas etapas): só na memória, valem 10 minutos, uma vez, com até 5 tentativas. */
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { loginLigado } from './sessao.js';
 import { lerContas } from '../banco/lerContas.js';
@@ -26,21 +26,29 @@ export function emailValido(email: string): string {
  * Manda um código ao e-mail. Cadastro: recusa e-mail que já tem conta e cadastro fechado. Senha: sem conta ativa com esse
  * e-mail não manda nada, mas responde igual, para a tela não revelar quem tem conta.
  */
-export async function pedirCodigo(d: { email: string; finalidade: FinalidadeDoCodigo; idioma?: 'pt-BR' | 'en' }, b?: string, enviar = enviarCodigoPorEmail, agora = Date.now()) {
+export async function pedirCodigo(d: { email: string; finalidade: 'CADASTRO' | 'SENHA'; idioma?: 'pt-BR' | 'en' }, b?: string, enviar = enviarCodigoPorEmail, agora = Date.now()) {
   const email = emailValido(d.email); const r = lerContas(b); const dono = r.usuarios.find((u) => u.email === email);
   if (d.finalidade === 'CADASTRO') {
     if (loginLigado(r) && !r.acesso.cadastroAberto) throw new Error('SIGNUP_CLOSED: o cadastro está fechado; peça uma conta à Administração.');
     if (dono) throw new Error('EMAIL_TAKEN: esse e-mail já tem conta neste computador; entre com ele ou use Esqueci a senha.');
   } else if (!loginLigado(r)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
-  const k = chave(d.finalidade, email); const antes = pendentes.get(k);
+  if (d.finalidade === 'SENHA' && (!dono || dono.estado === 'DESATIVADO')) { esperarParaReenviar(d.finalidade, email, agora); pendentes.set(chave(d.finalidade, email), { resumo: randomBytes(32), expira: agora + MINUTOS_DE_VALIDADE * 60_000, tentativas: 0, enviadoEm: agora }); return respostaDe(email); }
+  return emitirCodigo(d.finalidade, email, d.idioma ?? 'pt-BR', enviar, agora);
+}
+
+const respostaDe = (email: string) => ({ email, minutosDeValidade: MINUTOS_DE_VALIDADE, segundosParaReenviar: SEGUNDOS_PARA_REENVIAR });
+function esperarParaReenviar(f: FinalidadeDoCodigo, email: string, agora: number) {
+  const antes = pendentes.get(chave(f, email));
   if (antes && agora - antes.enviadoEm < SEGUNDOS_PARA_REENVIAR * 1000) throw new Error('EMAIL_WAIT: espere ' + Math.ceil((SEGUNDOS_PARA_REENVIAR * 1000 - (agora - antes.enviadoEm)) / 1000) + ' segundos para pedir outro código.');
-  const resposta = { email, minutosDeValidade: MINUTOS_DE_VALIDADE, segundosParaReenviar: SEGUNDOS_PARA_REENVIAR };
-  const expira = agora + MINUTOS_DE_VALIDADE * 60_000;
-  if (d.finalidade === 'SENHA' && (!dono || dono.estado === 'DESATIVADO')) { pendentes.set(k, { resumo: randomBytes(32), expira, tentativas: 0, enviadoEm: agora }); return resposta; }
+}
+
+/** Sorteia, manda e guarda o resumo. Usado pelo pedido da tela (cadastro e senha) e pela entrada em duas etapas, que o núcleo emite depois da senha certa. */
+export async function emitirCodigo(f: FinalidadeDoCodigo, email: string, idioma: 'pt-BR' | 'en', enviar = enviarCodigoPorEmail, agora = Date.now()) {
+  esperarParaReenviar(f, email, agora);
   const codigo = String(randomInt(0, 1_000_000)).padStart(6, '0');
-  await enviar({ email, codigo, finalidade: d.finalidade, idioma: d.idioma ?? 'pt-BR' });
-  pendentes.set(k, { resumo: resumir(codigo), expira, tentativas: 0, enviadoEm: agora });
-  return resposta;
+  await enviar({ email, codigo, finalidade: f, idioma });
+  pendentes.set(chave(f, email), { resumo: resumir(codigo), expira: agora + MINUTOS_DE_VALIDADE * 60_000, tentativas: 0, enviadoEm: agora });
+  return respostaDe(email);
 }
 
 /** Confere e gasta o código. Errar 5 vezes ou passar dos 10 minutos obriga a pedir outro. */

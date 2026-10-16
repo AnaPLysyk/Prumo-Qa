@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (166 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (184 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -92,6 +92,10 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:perfil:salvar` | `comoChamar`, `compartilharComIa`, `experiencia`, `foco`, `papel` | Grava a única linha da tabela perfil. |
 | `prumo:ia:delegacao` | `provedor`, `valor` | Grava preferencias.json. Autorizar exige confirmação nativa; revogar não. |
 | `prumo:agentes:estado` | `espacoId` | Consulta local. |
+| `prumo:agentes:pessoais` | `espacoId` | Consulta local. |
+| `prumo:agentes:pessoalsalvar` | `agente`, `espacoId` | Grava o agente com a pessoa da sessão como dona; agente de outra pessoa responde como inexistente. |
+| `prumo:agentes:pessoalexcluir` | `id` | Apaga o agente; só o dono consegue. |
+| `prumo:agentes:pessoaisimportar` | `espacoId`, `previas` | Grava as prévias válidas como agentes privados da pessoa da sessão. |
 | `prumo:agentes:salvar` | `espacoId`, `especializacoes`, `politicas` | Grava agentes.json. O bloqueio vale no servidor MCP a cada chamada. |
 | `prumo:agenda:listar` | `espacoId` | Consulta local. |
 | `prumo:agenda:salvar` | `dados`, `id` | Grava agenda.json. Editar reinicia a âncora; não autoriza nada. |
@@ -149,8 +153,22 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:suporte:exportar` | `categoria`, `consentimento`, `descricao`, `esperado`, `incluirDiagnostico`, `incluirSistema`, `incluirVersao`, `passos`, `titulo` | Grava um .md onde a pessoa escolher. Nenhum upload. |
 | `prumo:suporte:consultar` | `numero` | GET público ao GitHub oficial; sem credenciais, upload ou sincronização. |
 | `prumo:suporte:chamado` | `numero` | Abre somente o chamado no navegador; não publica comentário. |
+| `prumo:suporte:anexar` | — | Lê os arquivos escolhidos e confere a assinatura; o caminho fica só no processo principal. |
+| `prumo:suporte:enviar` | `anexos`, `relato` | Envia o texto, o nome e o e-mail da conta e só o que a pessoa marcou (versão, sistema, diagnóstico); guarda o número e a chave do chamado protegida pelo cofre. |
+| `prumo:suporte:meus` | — | Consulta o serviço com a chave de cada chamado; só os chamados desta conta. |
+| `prumo:suporte:meu` | `numero` | Consulta o serviço com a chave do chamado; número de outra pessoa responde como inexistente. |
+| `prumo:chamados:configuracao` | — | Consulta local; a chave nunca volta para a janela. |
+| `prumo:chamados:chave` | `chave` | Grava a chave só no cofre do sistema. |
+| `prumo:chamados:listar` | `estado` | Consulta o serviço com a chave de administração. |
+| `prumo:chamados:detalhe` | `numero` | Consulta o serviço com a chave de administração. |
+| `prumo:chamados:anexo` | `indice`, `numero` | Consulta o serviço; só tipos de imagem e vídeo permitidos chegam à janela. |
+| `prumo:chamados:responder` | `numero`, `texto` | Grava a resposta no chamado; a pessoa vê em Suporte > Meus chamados. |
+| `prumo:chamados:estado` | `estado`, `numero` | Atualiza o estado no chamado. |
 | `prumo:conta:sessao` | — | Consulta local; não renova a sessão. |
-| `prumo:conta:entrar` | `login`, `senha` | Abre a sessão na memória; conta tentativas erradas e bloqueia a conta no limite configurado. |
+| `prumo:conta:entrar` | `idioma`, `login`, `senha` | Abre a sessão na memória ou manda o código ao serviço do Prumo; conta tentativas erradas e bloqueia a conta no limite configurado. |
+| `prumo:conta:confirmarentrada` | `codigo`, `desafio` | Abre a sessão; código errado conta para o bloqueio da conta. |
+| `prumo:conta:reenviarentrada` | `desafio`, `idioma` | Manda outro código ao serviço do Prumo (espera de 60 segundos). |
+| `prumo:conta:duasetapas` | `ligar`, `senha` | Grava a escolha na conta. |
 | `prumo:conta:sair` | — | Esquece a sessão da memória. |
 | `prumo:conta:cadastrar` | `codigo`, `email`, `nome`, `senha` | Grava a conta com o papel de cadastro; com aprovação ligada, ela só entra depois que a Administração aprovar. O código vale uma vez. |
 | `prumo:conta:codigo` | `email`, `finalidade`, `idioma` | Envia e-mail, código, finalidade e idioma ao serviço de envio do Prumo (HTTPS), que manda a mensagem pelo Resend. O código fica só como resumo na memória, por 10 minutos. Em SENHA, sem conta com esse e-mail nada é enviado e a resposta é a mesma. |
@@ -172,7 +190,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:papeis:salvar` | `descricao`, `id`, `nome`, `telas` | Grava o papel; o Administrador é fixo. |
 | `prumo:papeis:excluir` | `id` | Remove o papel. |
 | `prumo:acesso:configuracao` | — | Consulta local. |
-| `prumo:acesso:salvar` | `aprovarCadastros`, `cadastroAberto`, `minutosDeBloqueio`, `minutosDeInatividade`, `papelDoCadastro`, `tentativasAntesDoBloqueio` | Grava em acessos.json; novos cadastros nunca entram como administrador. |
+| `prumo:acesso:salvar` | `aprovarCadastros`, `cadastroAberto`, `exigirDuasEtapas`, `minutosDeBloqueio`, `minutosDeInatividade`, `papelDoCadastro`, `tentativasAntesDoBloqueio` | Grava em acessos.json; novos cadastros nunca entram como administrador. |
 | `prumo:acesso:google` | `clientId`, `clientSecret` | O Client ID vai para acessos.json; o segredo só para o cofre do sistema e nunca volta para a janela. |
 | `prumo:acesso:github` | `clientId`, `clientSecret` | O Client ID vai para acessos.json; o segredo só para o cofre do sistema e nunca volta para a janela. |
 | `prumo:plataforma:agentes` | — | Consulta local. |
@@ -1053,7 +1071,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Listar os atendimentos de um agente (sem texto, desde a 2.10) e as conversas gravadas até a 2.9, para o Cérebro e o Painel de atividades.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/agentes/api/conversasListar.ts > conversasDoAgente, listarAtendimentos
+- **Destino:** backend/agentes/api/conversasListar.ts > listarAtendimentos
 - **Entrada:** Projeto e agente
 - **Saída:** Até 40 itens (data, modo, fontes; pergunta e resposta só nos registros antigos)
 - **Permissões:** Nenhuma
@@ -1407,6 +1425,66 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:agentes:pessoais`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar os agentes do projeto que a pessoa pode ver: os dela e os públicos das outras contas.
+- **Origem:** Interface > Agentes
+- **Destino:** backend/agentes/api/agentesPessoais.ts > listarAgentesPessoais, contaDaSessao
+- **Entrada:** Projeto
+- **Saída:** agentes (nome, descrição, objetivo, instruções, público, se é seu e o nome do dono)
+- **Permissões:** Agentes: VER
+- **Efeito:** Consulta local.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agentes-pessoais.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, AGENT_NOT_FOUND, AGENT_LIMIT, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Só o dono vê, edita e exclui; público é só leitura para as outras contas; a Administração não vê os privados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração)
+
+### `prumo:agentes:pessoalsalvar`
+
+- **Tipo:** IPC
+- **Finalidade:** Criar ou atualizar um agente da pessoa.
+- **Origem:** Interface > Agentes
+- **Destino:** backend/agentes/api/agentesPessoalsalvar.ts > salvarAgentePessoal, contaDaSessao
+- **Entrada:** Projeto e agente (nome, descrição, objetivo, instruções, público)
+- **Saída:** id do agente salvo
+- **Permissões:** Agentes: USAR
+- **Efeito:** Grava o agente com a pessoa da sessão como dona; agente de outra pessoa responde como inexistente.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agentes-pessoais.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, AGENT_NOT_FOUND, AGENT_LIMIT, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Só o dono vê, edita e exclui; público é só leitura para as outras contas; a Administração não vê os privados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração)
+
+### `prumo:agentes:pessoalexcluir`
+
+- **Tipo:** IPC
+- **Finalidade:** Excluir um agente da pessoa.
+- **Origem:** Interface > Agentes
+- **Destino:** backend/agentes/api/agentesPessoalexcluir.ts > excluirAgentePessoal, contaDaSessao
+- **Entrada:** Id do agente
+- **Saída:** excluido
+- **Permissões:** Agentes: USAR
+- **Efeito:** Apaga o agente; só o dono consegue.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agentes-pessoais.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, AGENT_NOT_FOUND, AGENT_LIMIT, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Só o dono vê, edita e exclui; público é só leitura para as outras contas; a Administração não vê os privados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração)
+
+### `prumo:agentes:pessoaisimportar`
+
+- **Tipo:** IPC
+- **Finalidade:** Trazer as prévias antigas guardadas na janela como agentes privados da pessoa.
+- **Origem:** Interface > Agentes
+- **Destino:** backend/agentes/api/agentesPessoaisimportar.ts > importarPreviasAntigas, contaDaSessao
+- **Entrada:** Projeto e prévias (até 50)
+- **Saída:** importados
+- **Permissões:** Agentes: USAR
+- **Efeito:** Grava as prévias válidas como agentes privados da pessoa da sessão.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\agentes-pessoais.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, AGENT_NOT_FOUND, AGENT_LIMIT, LOCAL_DATA_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Só o dono vê, edita e exclui; público é só leitura para as outras contas; a Administração não vê os privados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração)
 
 ### `prumo:agentes:salvar`
 
@@ -2263,6 +2341,171 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; URL reconstruída de número validado; Confirmação nativa
 - **Registro:** Diagnóstico IPC
 
+### `prumo:suporte:anexar`
+
+- **Tipo:** IPC
+- **Finalidade:** Escolher imagens (até 3, 5 MB cada) ou um vídeo (até 25 MB) para o chamado.
+- **Origem:** Interface > Suporte > Anexar imagem ou vídeo
+- **Destino:** backend/suporte/api/suporteAnexar.ts > contaDaSessao, guardarAnexos
+- **Entrada:** Nenhuma (diálogo nativo de arquivos)
+- **Saída:** aceitos (id, nome, tipo, tamanho) e recusados (nome, motivo)
+- **Permissões:** Suporte: USAR
+- **Efeito:** Lê os arquivos escolhidos e confere a assinatura; o caminho fica só no processo principal.
+- **Arquivos consultados:** Só os arquivos escolhidos (leitura)
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, ATTACHMENT_INVALID, ATTACHMENT_TOO_LARGE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:suporte:enviar`
+
+- **Tipo:** IPC
+- **Finalidade:** Enviar o chamado revisado (e os anexos) pelo serviço do Prumo, sem conta no GitHub.
+- **Origem:** Interface > Suporte > Enviar chamado
+- **Destino:** backend/suporte/api/suporteEnviar.ts > versao, protetorDoSistema, contaDaSessao, enviarChamado
+- **Entrada:** O relato revisado e os ids dos anexos
+- **Saída:** número do chamado, anexos enviados e com falha, e se o acompanhamento ficou guardado
+- **Permissões:** Suporte: USAR; ação explícita da pessoa
+- **Efeito:** Envia o texto, o nome e o e-mail da conta e só o que a pessoa marcou (versão, sistema, diagnóstico); guarda o número e a chave do chamado protegida pelo cofre.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, SUPPORT_BLOCKED_SECRET, SUPPORT_TICKET_INVALID, ATTACHMENT_INVALID, ATTACHMENT_LIMIT, ATTACHMENT_TOO_LARGE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:suporte:meus`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar os chamados abertos pela pessoa da sessão, com o estado atual.
+- **Origem:** Interface > Suporte > Meus chamados
+- **Destino:** backend/suporte/api/suporteMeus.ts > protetorDoSistema, contaDaSessao, meusChamados
+- **Entrada:** Nenhuma
+- **Saída:** número, título, categoria, estado, última atualização e quantas respostas
+- **Permissões:** Suporte: VER
+- **Efeito:** Consulta o serviço com a chave de cada chamado; só os chamados desta conta.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:suporte:meu`
+
+- **Tipo:** IPC
+- **Finalidade:** Ver um chamado da pessoa da sessão com as respostas da equipe.
+- **Origem:** Interface > Suporte > Meus chamados
+- **Destino:** backend/suporte/api/suporteMeu.ts > protetorDoSistema, contaDaSessao, meuChamado
+- **Entrada:** Número do chamado
+- **Saída:** estado e respostas
+- **Permissões:** Suporte: VER
+- **Efeito:** Consulta o serviço com a chave do chamado; número de outra pessoa responde como inexistente.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, SUPPORT_TRACKING_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:chamados:configuracao`
+
+- **Tipo:** IPC
+- **Finalidade:** Saber se a chave de administração do suporte está guardada neste computador.
+- **Origem:** Interface > Administração > Chamados
+- **Destino:** backend/administracao/api/chamadosConfiguracao.ts > protetorDoSistema, lerChaveDeAdministracao
+- **Entrada:** Nenhuma
+- **Saída:** configurada e o endereço do serviço
+- **Permissões:** Administração: VER
+- **Efeito:** Consulta local; a chave nunca volta para a janela.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:chamados:chave`
+
+- **Tipo:** IPC
+- **Finalidade:** Guardar (ou, vazia, apagar) a chave de administração do suporte.
+- **Origem:** Interface > Administração > Chamados
+- **Destino:** backend/administracao/api/chamadosChave.ts > protetorDoSistema, salvarChaveDeAdministracao
+- **Entrada:** Chave (32 a 200 caracteres)
+- **Saída:** configurada
+- **Permissões:** Administração: USAR
+- **Efeito:** Grava a chave só no cofre do sistema.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, SUPPORT_ADMIN_KEY_INVALID, CREDENTIAL_PROTECTION_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:chamados:listar`
+
+- **Tipo:** IPC
+- **Finalidade:** Listar todos os chamados de suporte recebidos.
+- **Origem:** Interface > Administração > Chamados
+- **Destino:** backend/administracao/api/chamadosListar.ts > protetorDoSistema, chamadosDaAdministracao
+- **Entrada:** Estado (opcional)
+- **Saída:** chamados (número, título, categoria, estado, quem abriu, datas, anexos)
+- **Permissões:** Administração: VER
+- **Efeito:** Consulta o serviço com a chave de administração.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, SUPPORT_ADMIN_KEY_MISSING, SUPPORT_ADMIN_DENIED, SUPPORT_ADMIN_NOT_CONFIGURED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:chamados:detalhe`
+
+- **Tipo:** IPC
+- **Finalidade:** Ver um chamado por inteiro: texto, quem abriu, anexos recebidos e respostas.
+- **Origem:** Interface > Administração > Chamados
+- **Destino:** backend/administracao/api/chamadosDetalhe.ts > protetorDoSistema, chamadosDaAdministracao
+- **Entrada:** Número do chamado
+- **Saída:** dados do chamado, anexos e respostas
+- **Permissões:** Administração: VER
+- **Efeito:** Consulta o serviço com a chave de administração.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, SUPPORT_ADMIN_KEY_MISSING, SUPPORT_ADMIN_DENIED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:chamados:anexo`
+
+- **Tipo:** IPC
+- **Finalidade:** Ler uma imagem ou um vídeo anexado a um chamado.
+- **Origem:** Interface > Administração > Chamados > Anexos
+- **Destino:** backend/administracao/api/chamadosAnexo.ts > protetorDoSistema, chamadosDaAdministracao
+- **Entrada:** Número do chamado e índice do anexo
+- **Saída:** tipo e conteúdo (base64)
+- **Permissões:** Administração: VER
+- **Efeito:** Consulta o serviço; só tipos de imagem e vídeo permitidos chegam à janela.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, SUPPORT_ADMIN_KEY_MISSING, SUPPORT_ADMIN_DENIED, ATTACHMENT_INVALID
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:chamados:responder`
+
+- **Tipo:** IPC
+- **Finalidade:** Responder a um chamado.
+- **Origem:** Interface > Administração > Chamados
+- **Destino:** backend/administracao/api/chamadosResponder.ts > protetorDoSistema, chamadosDaAdministracao
+- **Entrada:** Número do chamado e texto (até 4.000 caracteres)
+- **Saída:** respondido
+- **Permissões:** Administração: USAR
+- **Efeito:** Grava a resposta no chamado; a pessoa vê em Suporte > Meus chamados.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, SUPPORT_ADMIN_KEY_MISSING, SUPPORT_ADMIN_DENIED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
+### `prumo:chamados:estado`
+
+- **Tipo:** IPC
+- **Finalidade:** Mudar o estado de um chamado.
+- **Origem:** Interface > Administração > Chamados
+- **Destino:** backend/administracao/api/chamadosEstado.ts > protetorDoSistema, chamadosDaAdministracao
+- **Entrada:** Número do chamado e estado (NOVO, EM_ANALISE, RESOLVIDO, FECHADO)
+- **Saída:** estado
+- **Permissões:** Administração: USAR
+- **Efeito:** Atualiza o estado no chamado.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\chamados-de-suporte.json e o cofre do sistema
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, PERMISSION_DENIED, SUPPORT_SERVICE_UNAVAILABLE, SUPPORT_NOT_CONFIGURED, SUPPORT_RATE_LIMIT, SUPPORT_SEND_FAILED, TICKET_NOT_FOUND, SUPPORT_ADMIN_KEY_MISSING, SUPPORT_ADMIN_DENIED
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Serviço do Prumo só por HTTPS (endereço fixo no código); Chaves (do chamado e de administração) só no cofre do sistema; nunca voltam para a janela; Cada pessoa vê só os próprios chamados
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca o texto do chamado)
+
 ### `prumo:conta:sessao`
 
 - **Tipo:** IPC
@@ -2281,15 +2524,60 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 ### `prumo:conta:entrar`
 
 - **Tipo:** IPC
-- **Finalidade:** Entrar com o e-mail (ou o login) e a senha.
+- **Finalidade:** Entrar com o e-mail (ou o login) e a senha. Com a verificação em duas etapas, a senha certa manda um código ao e-mail em vez de abrir a sessão.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
 - **Destino:** backend/login/api/contaEntrar.ts > entrarNaConta
-- **Entrada:** E-mail ou login, e senha
-- **Saída:** Sessão (conta e telas)
+- **Entrada:** E-mail ou login, senha e idioma (opcional)
+- **Saída:** Sessão (conta e telas) ou { duasEtapas, desafio, e-mail mascarado }
 - **Permissões:** Nenhuma (atende antes do login)
-- **Efeito:** Abre a sessão na memória; conta tentativas erradas e bloqueia a conta no limite configurado.
+- **Efeito:** Abre a sessão na memória ou manda o código ao serviço do Prumo; conta tentativas erradas e bloqueia a conta no limite configurado.
 - **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
-- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOGIN_SETUP_REQUIRED, LOCAL_DATA_INVALID, LOGIN_INVALID, ACCOUNT_LOCKED, ACCOUNT_PENDING, ACCOUNT_DISABLED, LOGIN_RATE_LIMIT
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOGIN_SETUP_REQUIRED, LOCAL_DATA_INVALID, LOGIN_INVALID, ACCOUNT_LOCKED, ACCOUNT_PENDING, ACCOUNT_DISABLED, LOGIN_RATE_LIMIT, EMAIL_WAIT, EMAIL_SEND_FAILED, EMAIL_SERVICE_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha só como resumo scrypt com sal próprio; código por e-mail só como resumo na memória, por 10 minutos; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (login/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:confirmarentrada`
+
+- **Tipo:** IPC
+- **Finalidade:** Terminar a entrada em duas etapas com o código mandado ao e-mail.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/login/api/contaConfirmarentrada.ts > confirmarEntrada
+- **Entrada:** Desafio da entrada e código de 6 dígitos
+- **Saída:** Sessão (conta e telas)
+- **Permissões:** Nenhuma (atende antes do login); só com um desafio aberto pela senha certa
+- **Efeito:** Abre a sessão; código errado conta para o bloqueio da conta.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOGIN_SETUP_REQUIRED, LOCAL_DATA_INVALID, CODE_INVALID, CODE_EXPIRED, ACCOUNT_LOCKED, ACCOUNT_DISABLED, LOGIN_RATE_LIMIT
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha só como resumo scrypt com sal próprio; código por e-mail só como resumo na memória, por 10 minutos; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (login/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:reenviarentrada`
+
+- **Tipo:** IPC
+- **Finalidade:** Mandar outro código da entrada em duas etapas em andamento.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/login/api/contaReenviarentrada.ts > reenviarCodigoDeEntrada
+- **Entrada:** Desafio da entrada e idioma (opcional)
+- **Saída:** E-mail mascarado
+- **Permissões:** Nenhuma (atende antes do login); só com um desafio aberto pela senha certa
+- **Efeito:** Manda outro código ao serviço do Prumo (espera de 60 segundos).
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOGIN_SETUP_REQUIRED, LOCAL_DATA_INVALID, CODE_EXPIRED, EMAIL_WAIT, EMAIL_SEND_FAILED, EMAIL_SERVICE_UNAVAILABLE
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha só como resumo scrypt com sal próprio; código por e-mail só como resumo na memória, por 10 minutos; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (login/tipos/acessoDosCanais.ts)
+- **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
+
+### `prumo:conta:duasetapas`
+
+- **Tipo:** IPC
+- **Finalidade:** Ligar ou desligar a própria verificação em duas etapas.
+- **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
+- **Destino:** backend/login/api/contaDuasetapas.ts > alterarMinhasDuasEtapas
+- **Entrada:** Ligar (sim ou não) e a senha atual
+- **Saída:** Sessão atualizada
+- **Permissões:** Sessão aberta
+- **Efeito:** Grava a escolha na conta.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\acessos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, SESSION_REQUIRED, SESSION_EXPIRED, PERMISSION_DENIED, LOGIN_NOT_ACTIVE, LOGIN_SETUP_REQUIRED, LOCAL_DATA_INVALID, PASSWORD_INVALID, TWO_STEP_EMAIL_REQUIRED
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Senha só como resumo scrypt com sal próprio; código por e-mail só como resumo na memória, por 10 minutos; Sessão só na memória do processo principal, com expiração por inatividade; Permissão por tela conferida no backend a cada canal (login/tipos/acessoDosCanais.ts)
 - **Registro:** Diagnóstico da interface (só canal, estado e duração; nunca login nem senha)
 

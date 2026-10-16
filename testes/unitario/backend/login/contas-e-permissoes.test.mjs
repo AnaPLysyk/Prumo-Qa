@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ativarLogin, cadastrarConta, entrarNaConta, recuperarConta, sairDaConta, trocarMinhaSenha } from '../../../../dist/login/regras/contas.js';
+import { alterarMinhasDuasEtapas, ativarLogin, cadastrarConta, confirmarEntrada, entrarNaConta, reenviarCodigoDeEntrada, recuperarConta, sairDaConta, trocarMinhaSenha } from '../../../../dist/login/regras/contas.js';
 import { pedirCodigo } from '../../../../dist/login/regras/codigosPorEmail.js';
 import { cadastrarComEmail, codigoPara, criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
 import { alterarContaPelaAdministracao, criarContaPelaAdministracao, desbloquearConta, excluirConta, listarContasDeAcesso, redefinirSenhaPelaAdministracao } from '../../../../dist/administracao/regras/gestaoDeContas.js';
@@ -164,7 +164,7 @@ test('Administração: sempre sobra um administrador ativo e ninguém se desativ
 
 test('todo canal da janela tem tela e nível definidos; os públicos são só os da entrada (inclusive o site oficial)', () => {
   assert.deepEqual(Object.keys(acessoDosCanais).sort(), Object.keys(esquemasIpc).sort());
-  assert.deepEqual(Object.entries(acessoDosCanais).filter(([, v]) => v === 'publico').map(([k]) => k).sort(), ['app:info', 'conta:cadastrar', 'conta:codigo', 'conta:entrar', 'conta:githubestado', 'conta:githubiniciar', 'conta:googleestado', 'conta:googleiniciar', 'conta:recuperar', 'conta:sessao', 'preferencias:obter', 'site:abrir']);
+  assert.deepEqual(Object.entries(acessoDosCanais).filter(([, v]) => v === 'publico').map(([k]) => k).sort(), ['app:info', 'conta:cadastrar', 'conta:codigo', 'conta:confirmarentrada', 'conta:entrar', 'conta:githubestado', 'conta:githubiniciar', 'conta:googleestado', 'conta:googleiniciar', 'conta:recuperar', 'conta:reenviarentrada', 'conta:sessao', 'preferencias:obter', 'site:abrir']);
   for (const canal of ['usuarios:criar', 'usuarios:alterar', 'usuarios:senha', 'papeis:salvar', 'acesso:salvar', 'plataforma:salvar', 'agentes:salvar', 'skills:importar', 'dados:excluir', 'atualizacao:instalar']) assert.deepEqual(acessoDosCanais[canal], ['administracao', 'USAR'], canal);
 });
 
@@ -178,4 +178,33 @@ test('consultas automáticas do painel não prolongam a sessão, mas interação
   await entrarNaConta({ login: ADMIN.login, senha: ADMIN.senha }, b, new Date(agora));
   assert.doesNotThrow(() => conferirAcessoAoCanal('espacos:criar', b, agora + 25 * 60_000, true));
   assert.doesNotThrow(() => conferirAcessoAoCanal('assistente:agentes', b, agora + 40 * 60_000, false));
+});
+
+test('duas etapas: com a opção ligada, a senha certa não abre a sessão; só o código do e-mail abre, uma vez, e erros contam para o bloqueio', async (t) => {
+  const b = pasta(t); await criarPrimeiraConta(ADMIN, b); const caixa = []; const enviar = async (p) => { caixa.push(p); };
+  await codigo(() => alterarMinhasDuasEtapas({ ligar: true, senha: 'errada-123456' }, b), /^PASSWORD_INVALID/);
+  assert.equal((await alterarMinhasDuasEtapas({ ligar: true, senha: ADMIN.senha }, b)).usuario.duasEtapas, true);
+  sairDaConta(b);
+  const e = await entrarNaConta({ login: 'ana.admin', senha: ADMIN.senha }, b, new Date(), enviar);
+  assert.equal(e.duasEtapas, true); assert.equal(e.email, 'a***@prumo.test'); assert.equal(sessaoParaJanela(b).usuario, null, 'a senha sozinha não abre a sessão');
+  assert.deepEqual(caixa.map((x) => [x.finalidade, x.email]), [['ENTRADA', 'ana.admin@prumo.test']]);
+  assert.throws(() => conferirAcessoAoCanal('espacos:listar', b), /SESSION_REQUIRED/);
+  const certo = caixa[0].codigo; const errado = certo === '000000' ? '111111' : '000000';
+  await codigo(() => confirmarEntrada({ desafio: e.desafio, codigo: errado }, b), /^CODE_INVALID/);
+  await codigo(() => confirmarEntrada({ desafio: '00000000-0000-4000-8000-000000000000', codigo: certo }, b), /^CODE_EXPIRED/, 'desafio inventado não serve');
+  await codigo(() => reenviarCodigoDeEntrada({ desafio: e.desafio }, new Date(), enviar), /^EMAIL_WAIT/);
+  assert.equal((await confirmarEntrada({ desafio: e.desafio, codigo: certo }, b)).usuario.login, 'ana.admin');
+  await codigo(() => confirmarEntrada({ desafio: e.desafio, codigo: certo }, b), /^CODE_EXPIRED/, 'uso único');
+  // A Administração exige para todas as contas com e-mail; conta sem e-mail (criada pela Administração) entra só com a senha.
+  const bia = await criarContaPelaAdministracao({ login: 'bia', nome: 'Bia', papel: 'qa' }, b);
+  salvarConfiguracaoDeAcesso({ cadastroAberto: true, aprovarCadastros: false, papelDoCadastro: 'leitor', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15, exigirDuasEtapas: true }, b);
+  await alterarMinhasDuasEtapas({ ligar: false, senha: ADMIN.senha }, b); sairDaConta(b);
+  assert.equal((await entrarNaConta({ login: 'ana.admin', senha: ADMIN.senha }, b, new Date(Date.now() + 61_000), enviar)).duasEtapas, true, 'exigida pela Administração, mesmo desligada na conta');
+  const sb = await entrarNaConta({ login: 'bia', senha: bia.senhaTemporaria }, b, new Date(), enviar); assert.equal(sb.usuario.login, 'bia', 'sem e-mail entra só com a senha');
+  await codigo(() => alterarMinhasDuasEtapas({ ligar: true, senha: bia.senhaTemporaria }, b), /^TWO_STEP_EMAIL_REQUIRED/);
+  // Cinco códigos errados bloqueiam a conta, como senha errada.
+  sairDaConta(b); const outra = await entrarNaConta({ login: 'ana.admin', senha: ADMIN.senha }, b, new Date(Date.now() + 130_000), enviar); const bom = caixa.at(-1).codigo; const ruim = bom === '000000' ? '111111' : '000000';
+  let ultimo; for (let i = 0; i < 5; i++) { try { await confirmarEntrada({ desafio: outra.desafio, codigo: ruim }, b); } catch (x) { ultimo = x.message; } }
+  assert.match(ultimo, /^(ACCOUNT_LOCKED|CODE_EXPIRED)/);
+  await codigo(() => entrarNaConta({ login: 'ana.admin', senha: ADMIN.senha }, b, new Date(Date.now() + 200_000), enviar), /^ACCOUNT_LOCKED/);
 });

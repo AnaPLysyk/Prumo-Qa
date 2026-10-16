@@ -16,6 +16,13 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `acessoSalvar.ts` | Canal acesso:salvar: Salvar as configurações gerais de acesso. |
 | `administracaoCodigo.ts` | Canal administracao:codigo: Mostrar o código de um arquivo do aplicativo na Documentação viva (somente leitura, só arquivos do mapa). |
 | `administracaoMapa.ts` | Canal administracao:mapa: Mostrar a documentação viva desta versão: tela, interface, canais, backend e testes. |
+| `chamadosAnexo.ts` | Canal chamados:anexo: Ler uma imagem ou um vídeo anexado a um chamado, para mostrar na tela. |
+| `chamadosChave.ts` | Canal chamados:chave: Guardar (ou, vazia, apagar) a chave de administração do suporte no cofre do sistema. |
+| `chamadosConfiguracao.ts` | Canal chamados:configuracao: Saber se a chave de administração do suporte está guardada neste computador (a chave nunca volta para a janela). |
+| `chamadosDetalhe.ts` | Canal chamados:detalhe: Ver um chamado de suporte por inteiro: texto, quem abriu, anexos recebidos e respostas. |
+| `chamadosEstado.ts` | Canal chamados:estado: Mudar o estado de um chamado (Novo, Em análise, Resolvido, Fechado). |
+| `chamadosListar.ts` | Canal chamados:listar: Listar todos os chamados de suporte recebidos, com filtro opcional por estado. |
+| `chamadosResponder.ts` | Canal chamados:responder: Responder a um chamado; a pessoa vê a resposta em Suporte › Meus chamados. |
 | `papeisExcluir.ts` | Canal papeis:excluir: Excluir um papel que ninguém usa. |
 | `papeisListar.ts` | Canal papeis:listar: Listar os papéis e a matriz de permissões por tela. |
 | `papeisSalvar.ts` | Canal papeis:salvar: Criar ou alterar um papel e o nível de cada tela. |

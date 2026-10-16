@@ -1,5 +1,6 @@
 /** Atende uma pergunta do chat: entende intenções, escolhe o agente, responde localmente e, se autorizado, consulta Claude ou Codex. */
 import { lerPerfil } from '../banco/lerPerfil.js';
+import { nomeParaChamar } from './nomeParaChamar.js';
 import { pesosAprendidos } from '../banco/pesosAprendidos.js';
 import { aplicarEstilo } from './aplicarEstilo.js';
 import { escolherAgente } from './escolherAgente.js';
@@ -23,7 +24,7 @@ import { regrasDosAgentes } from '../../administracao/regras/agentesDaPlataforma
 
 export async function conversar(o: Opcoes): Promise<Resposta> {
   const pergunta = o.pergunta.trim(); const estilo = o.estilo ?? 'amigavel'; const nome = (o.nome || 'Prumo').slice(0, 40); const historico = (o.historico ?? []).slice(-6);
-  const perfil = tentarOuPadrao(() => lerPerfil(o.base), null); const pessoa = perfil?.comoChamar ?? null;
+  const perfil = tentarOuPadrao(() => lerPerfil(o.base), null); const pessoa = nomeParaChamar(perfil, o.base);
   const montar = (agente: AgenteChat, c: Coleta, modo: Resposta['modo'], extra: Partial<Resposta> & { rota?: Resposta['rota'] } = {}): Resposta => montarResposta(agente, c, modo, estilo, pessoa, extra);
 
   // 1) Conversas sobre a própria relação (como chamar, papel, ensinar, o que sabe): respondidas localmente, sempre.

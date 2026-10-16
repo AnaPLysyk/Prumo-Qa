@@ -1,6 +1,7 @@
 /** O que a própria pessoa faz com a conta: criar a primeira conta, entrar, sair, se cadastrar por e-mail, definir senha nova pelo e-mail, trocar a senha e o nome. */
 import { randomUUID } from 'node:crypto';
-import { conferirCodigo, emailValido } from './codigosPorEmail.js';
+import { conferirCodigo, emailValido, emitirCodigo } from './codigosPorEmail.js';
+import { enviarCodigoPorEmail } from '../integracoes/enviarCodigoPorEmail.js';
 import { conferirForcaDaSenha, conferirSegredo, resumirSegredo } from './senhas.js';
 import { contaParaJanela, encerrarSessao, iniciarSessao, loginLigado, sessaoParaJanela, situacaoDaSessao } from './sessao.js';
 import { gravarContas } from '../banco/gravarContas.js';
@@ -63,8 +64,16 @@ export async function ativarLogin(d: { email: string; nome: string; senha: strin
   return { conta: contaParaJanela(r, u, agora.getTime()) };
 }
 
-/** Entrar com o e-mail ou o login: mensagem igual para conta inexistente e senha errada; bloqueio por conta depois de várias tentativas erradas. */
-export async function entrarNaConta(d: { login: string; senha: string }, b?: string, agora = new Date()) {
+/** Entrada em duas etapas pendente: a senha já conferiu e falta o código do e-mail. Só na memória, por 10 minutos. */
+const desafios = new Map<string, { usuarioId: string; email: string; expira: number }>();
+const precisaDeDuasEtapas = (r: RegistroDeContas, u: Usuario) => !!u.email && (!!u.duasEtapas || r.acesso.exigirDuasEtapas);
+const mascararEmail = (e: string) => { const [n, dominio] = e.split('@'); return n!.slice(0, 1) + '***@' + dominio; };
+
+/**
+ * Entrar com o e-mail ou o login: mensagem igual para conta inexistente e senha errada; bloqueio por conta depois de várias tentativas erradas.
+ * Com a verificação em duas etapas, a senha certa não abre a sessão: um código vai ao e-mail da conta e a entrada termina em confirmarEntrada.
+ */
+export async function entrarNaConta(d: { login: string; senha: string; idioma?: 'pt-BR' | 'en' }, b?: string, agora = new Date(), enviar = enviarCodigoPorEmail) {
   frearTentativas(agora.getTime());
   const antes = lerContas(b); if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
   const quem = String(d.login ?? '').trim().toLowerCase(); const u = antes.usuarios.find((x) => x.login === quem || (!!x.email && x.email === quem)) ?? null;
@@ -76,7 +85,51 @@ export async function entrarNaConta(d: { login: string; senha: string }, b?: str
   if (u!.estado === 'PENDENTE') throw new Error('ACCOUNT_PENDING: o cadastro aguarda aprovação da Administração.');
   if (u!.estado === 'DESATIVADO') throw new Error('ACCOUNT_DISABLED: esta conta foi desativada pela Administração.');
   const r = lerContas(b); const atual = r.usuarios.find((x) => x.id === u!.id); if (!atual) throw new Error('LOGIN_INVALID: login ou senha incorretos.');
+  if (precisaDeDuasEtapas(r, atual)) {
+    for (const [id, x] of desafios) if (x.expira <= agora.getTime() || x.usuarioId === atual.id) desafios.delete(id);
+    await emitirCodigo('ENTRADA', atual.email!, d.idioma ?? 'pt-BR', enviar, agora.getTime());
+    const desafio = randomUUID(); desafios.set(desafio, { usuarioId: atual.id, email: atual.email!, expira: agora.getTime() + 10 * 60_000 });
+    return { duasEtapas: true as const, desafio, email: mascararEmail(atual.email!) };
+  }
   atual.falhas = 0; atual.bloqueadoAte = null; atual.ultimoAcesso = agora.toISOString(); gravarContas(r, b); iniciarSessao(atual.id, agora.getTime());
+  return sessaoParaJanela(b, agora.getTime());
+}
+
+/** Segunda etapa: o código que chegou no e-mail abre a sessão. Código errado conta para o bloqueio da conta, como senha errada. */
+export async function confirmarEntrada(d: { desafio: string; codigo: string }, b?: string, agora = new Date()) {
+  frearTentativas(agora.getTime());
+  const x = desafios.get(d.desafio);
+  if (!x || x.expira <= agora.getTime()) { desafios.delete(d.desafio); throw new Error('CODE_EXPIRED: a entrada venceu; digite a senha de novo.'); }
+  const antes = lerContas(b); const u = antes.usuarios.find((y) => y.id === x.usuarioId);
+  if (!u) { desafios.delete(d.desafio); throw new Error('LOGIN_INVALID: login ou senha incorretos.'); }
+  conferirBloqueio(u, agora);
+  try { conferirCodigo('ENTRADA', x.email, d.codigo, agora.getTime()); }
+  catch (e) {
+    if (/^CODE_EXPIRED/.test((e as Error).message)) desafios.delete(d.desafio);
+    if (registrarErro(u.id, agora, b)) { desafios.delete(d.desafio); throw new Error('ACCOUNT_LOCKED: conta bloqueada por tentativas erradas; espere ou peça o desbloqueio à Administração.'); }
+    throw e;
+  }
+  desafios.delete(d.desafio);
+  const r = lerContas(b); const atual = r.usuarios.find((y) => y.id === x.usuarioId);
+  if (!atual || atual.estado !== 'ATIVO') throw new Error('ACCOUNT_DISABLED: esta conta foi desativada pela Administração.');
+  atual.falhas = 0; atual.bloqueadoAte = null; atual.ultimoAcesso = agora.toISOString(); gravarContas(r, b); iniciarSessao(atual.id, agora.getTime());
+  return sessaoParaJanela(b, agora.getTime());
+}
+
+/** Manda outro código da entrada em andamento (respeita a espera de 60 segundos). */
+export async function reenviarCodigoDeEntrada(d: { desafio: string; idioma?: 'pt-BR' | 'en' }, agora = new Date(), enviar = enviarCodigoPorEmail) {
+  const x = desafios.get(d.desafio); if (!x || x.expira <= agora.getTime()) throw new Error('CODE_EXPIRED: a entrada venceu; digite a senha de novo.');
+  await emitirCodigo('ENTRADA', x.email, d.idioma ?? 'pt-BR', enviar, agora.getTime());
+  return { email: mascararEmail(x.email) };
+}
+
+/** Liga ou desliga a própria verificação em duas etapas. Pede a senha atual; ligar exige e-mail na conta. */
+export async function alterarMinhasDuasEtapas(d: { ligar: boolean; senha: string }, b?: string, agora = new Date()) {
+  const s = situacaoDaSessao(b, agora.getTime()); if (s.tipo !== 'ATIVA') throw new Error('SESSION_REQUIRED: entre com sua conta do Prumo para continuar.');
+  if (!(await conferirSegredo(d.senha, s.usuario.senha))) { registrarErro(s.usuario.id, agora, b); throw new Error('PASSWORD_INVALID: a senha atual não confere.'); }
+  if (d.ligar && !s.usuario.email) throw new Error('TWO_STEP_EMAIL_REQUIRED: a verificação em duas etapas precisa de um e-mail na conta.');
+  const r = lerContas(b); const u = r.usuarios.find((x) => x.id === s.usuario.id)!;
+  u.duasEtapas = d.ligar; u.atualizadoEm = agora.toISOString(); gravarContas(r, b);
   return sessaoParaJanela(b, agora.getTime());
 }
 
