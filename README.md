@@ -1,10 +1,10 @@
-# Prumo QA 2.15 — Plataforma desktop de engenharia de qualidade
+# Prumo QA 2.16 — Plataforma desktop de engenharia de qualidade
 
-Eu sou a Ana Paula Lysyk, trabalho com QA e criei o Prumo para juntar num lugar só o que faço todo dia: projeto, requisitos, casos, runs, evidências e tickets, com ou sem IA. Ele roda no seu computador (Windows, macOS e Linux) e abre na tela de login. No primeiro acesso você cria a conta de Administrador.
+Eu sou a Ana Paula Lysyk, trabalho com QA e criei o Prumo para juntar num lugar só o que faço todo dia: projeto, requisitos, casos, runs, evidências e tickets, com ou sem IA. Ele roda no seu computador (Windows, macOS e Linux) e abre na tela de login. No primeiro acesso você cria a conta de Administrador com o seu e-mail (confirmado por um código), com o GitHub ou com o Google.
 
 Eu preferi que nada saísse do seu computador sem você ver. Qase, Jira e GitHub conectam só para leitura. A escrita é ligada por projeto e por serviço, e cada envio mostra uma prévia e pede a confirmação nativa do sistema. A IA (Claude Code ou Codex, por MCP) lê o contexto e propõe casos, bugs e aprendizados como rascunho. Executar um teste sempre passa pela sua aprovação.
 
-Versão atual 2.15.1; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases). O instalador não é assinado: confira o SHA-256 publicado junto. [Site e documentação pública](https://prumo-qa-docs.onrender.com) · [catálogo de versões](docs/catalogo/versoes.json) · [registros antigos](docs/historico/).
+Versão atual 2.16.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases). O instalador não é assinado: confira o SHA-256 publicado junto. [Site e documentação pública](https://prumo-qa-docs.onrender.com) · [catálogo de versões](docs/catalogo/versoes.json) · [registros antigos](docs/historico/).
 
 ## Estado atual
 

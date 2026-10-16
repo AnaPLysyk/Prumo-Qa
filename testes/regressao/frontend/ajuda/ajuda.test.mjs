@@ -30,10 +30,10 @@ test('central de ajuda: guia completo, perguntas frequentes expansíveis e tudo 
   const primeira = page.locator('details.faq').first();
   assert.equal(await primeira.getAttribute('open'), null, 'perguntas começam recolhidas');
   await primeira.locator('summary').click();
-  assert.notEqual(await primeira.getAttribute('open'), null); assert.match(await primeira.textContent(), /Não\. Eu fiz o Prumo como um conjunto de verificações/);
+  assert.notEqual(await primeira.getAttribute('open'), null); assert.match(await primeira.textContent(), /Não\. O Prumo confere as regras do projeto/);
   await page.click('.indice button:has-text("Problemas comuns")');
   const problemas = await page.textContent('article');
-  for (const termo of ['Conexão MCP não detectada', 'Projeto sem contrato', 'Não aparecem logs', 'BLOCKED', 'Windows bloqueou']) assert.match(problemas, new RegExp(termo));
+  for (const termo of ['A conexão MCP não aparece', 'O projeto não tem contrato', 'Não aparecem logs', 'BLOCKED', 'Windows bloqueou']) assert.match(problemas, new RegExp(termo));
   assert.deepEqual(erros, []);
 });
 

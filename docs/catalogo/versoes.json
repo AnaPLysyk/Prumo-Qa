@@ -2,6 +2,56 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.16.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "Conta por e-mail com código",
+      "objective": "Deixar a entrada com três caminhos claros (e-mail confirmado por código, GitHub ou Google) e trocar o código de recuperação por um código mandado ao e-mail.",
+      "features": [
+        "Criar conta por e-mail: nome, e-mail e senha; o Prumo manda um código de 6 dígitos ao e-mail e a conta nasce quando a pessoa digita o código. Sem nenhuma conta no computador, é a conta de Administrador.",
+        "Esqueci a senha pelo e-mail: um código chega no e-mail da conta e define a senha nova.",
+        "Serviço de envio do Prumo (servico-de-email/, no Render, enviando pelo Resend), que manda os códigos.",
+        "Na entrada: idioma (português ou inglês) e Site e documentação, disponíveis antes de qualquer conta.",
+        "No primeiro acesso, Criar conta com o GitHub ou com o Google aparecem sempre; sem configuração, a própria entrada pede o Client ID e o segredo."
+      ],
+      "improvements": [
+        "Entrar aceita o e-mail ou o login.",
+        "Reenviar código libera depois de 1 minuto; Corrigir dados volta com nome e e-mail preenchidos e reaproveita o código já mandado.",
+        "Minha conta mostra o e-mail e oferece Redefinir senha pelo e-mail.",
+        "Ajuda e documentação reescritas em linguagem mais direta; a página de versões do site mostra um cartão por instalador."
+      ],
+      "fixes": [
+        "A tela de entrada de uma instalação nova só oferecia Criar conta."
+      ],
+      "differential": "A pessoa não precisa guardar nenhum código: quem confirma a conta e a senha nova é o próprio e-mail.",
+      "howItWorks": [
+        "O código é sorteado no aplicativo, guardado só como resumo na memória por 10 minutos, vale uma vez e cai depois de 5 erros. Outro envio para o mesmo e-mail só depois de 60 segundos.",
+        "Só quando a pessoa clica em Enviar código, o e-mail, o código, a finalidade e o idioma vão por HTTPS ao serviço de envio, que manda a mensagem. Senha, nome e dados de projeto não saem do computador.",
+        "O login curto da conta nasce da parte do e-mail antes do @."
+      ],
+      "security": [
+        "Esqueci a senha responde igual para e-mail com e sem conta e não envia nada quando não há conta.",
+        "Código errado em Esqueci a senha conta para o bloqueio da conta, como senha errada.",
+        "O serviço de envio não guarda e-mails nem códigos, limita 3 códigos por e-mail a cada 10 minutos, 10 por dia, 30 por IP por hora e 300 por hora no total, e o registro mascara o e-mail.",
+        "A chave do Resend fica só no servidor, nunca no instalador.",
+        "Configurar GitHub ou Google pela entrada só é aceito enquanto não existe nenhuma conta."
+      ],
+      "compatibility": [
+        "Contas existentes continuam entrando com login e senha. Contas sem e-mail (criadas pela Administração ou pelo GitHub/Google) recuperam a senha com a Administração."
+      ],
+      "limitations": [
+        "Criar conta por e-mail e Esqueci a senha precisam de internet e do serviço de envio no ar. Na publicação desta versão o serviço ainda não estava no ar: até ele subir, uma instalação nova só cria conta pelo GitHub ou pelo Google (com OAuth App configurado).",
+        "No plano gratuito do Render o serviço adormece; o primeiro código depois de um tempo parado pode levar até um minuto.",
+        "O código de recuperação das versões anteriores deixa de valer.",
+        "O login não isola pessoas que usam o mesmo usuário do sistema operacional."
+      ],
+      "releaseUrl": null,
+      "migration": "Nada a migrar: contas antigas continuam valendo; o e-mail entra nas contas criadas por e-mail a partir desta versão.",
+      "afterUpdate": [
+        "Quem não tem e-mail na conta e esquecer a senha precisa da Administração para redefinir."
+      ]
+    },
+    {
       "version": "2.15.1",
       "status": "publicada",
       "date": "2026-10-16",

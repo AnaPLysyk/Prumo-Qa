@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { _electron as electron } from 'playwright-core';
 import electronPath from 'electron';
 import { servidorFixture } from '../../testes/apoio/servicos-fixtures.mjs';
+import { caixaDeEmail } from '../../testes/apoio/caixa-de-email.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const saida = path.join(repo, 'site', 'imagens');
@@ -17,7 +18,9 @@ fs.mkdirSync(saida, { recursive: true });
 const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-site-captura-'));
 let s, app;
 const limpezas = [];
-const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1' }; delete env.ELECTRON_RUN_AS_NODE;
+// O código de confirmação do e-mail vai para a caixa local (serviço de envio em 127.0.0.1), nunca para o Resend.
+const caixa = await caixaDeEmail();
+const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO_DE_EMAIL: caixa.url }; delete env.ELECTRON_RUN_AS_NODE;
 try {
   s = await servidorFixture();
   app = await electron.launch({ executablePath: electronPath, args: [path.join(repo, 'testes/apoio/desktop-entry.cjs')], env, timeout: 30000 });
@@ -35,7 +38,9 @@ try {
   await page.waitForSelector('#nav button', { state: 'attached' });
   // O Prumo abre na entrada: cria a conta de Administrador sintética (primeiro acesso) e recarrega já dentro.
   await page.waitForSelector('dialog#entrada[open]');
-  const primeiro = await page.evaluate(() => window.prumo.usuariosAtivar('conta-demo', 'Conta Demo', 'Prumo-captura-2026'));
+  const pedido = await page.evaluate(() => window.prumo.contaCodigo('conta-demo@prumo.test', 'CADASTRO'));
+  if (!pedido.ok) throw new Error('Não foi possível pedir o código da conta de demonstração: ' + JSON.stringify(pedido.error));
+  const primeiro = await page.evaluate((c) => window.prumo.usuariosAtivar('conta-demo@prumo.test', 'Conta Demo', 'Prumo-captura-2026', c), caixa.ultimoCodigo('conta-demo@prumo.test'));
   if (!primeiro.ok) throw new Error('Não foi possível criar a conta de demonstração: ' + JSON.stringify(primeiro.error));
   await page.reload();
   await page.waitForSelector('[data-aba=inicio][aria-current=page]');
