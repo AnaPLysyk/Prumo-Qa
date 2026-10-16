@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.17.1",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-16",
       "title": "Publicação do site sem falhas nem cancelamentos",
       "objective": "Fazer cada versão nova chegar ao site sozinha, com todos os passos do CI verdes, sem depender de deploy manual no Render.",
       "features": [
@@ -35,11 +35,15 @@
         "Entrar ou criar conta com GitHub e Google ainda exige configurar o OAuth App em cada computador.",
         "O login não isola pessoas que usam o mesmo usuário do sistema operacional."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.17.1",
       "migration": "Nada a migrar.",
       "afterUpdate": [
         "Nada a fazer: o aplicativo continua como na 2.17.0."
-      ]
+      ],
+      "installer": {
+        "file": "Prumo-QA-Setup-2.17.1.exe",
+        "sha256": "04a9e2cb094b7462933b7f7a48a276f71fc171ebf2a1b8cc622765b3423a89f6"
+      }
     },
     {
       "version": "2.17.0",
