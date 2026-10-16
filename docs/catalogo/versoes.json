@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.15.1",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-16",
       "title": "Marca admin e documentação revisada",
       "objective": "Separar quem cuida do sistema de quem usa o Prumo no dia a dia e deixar site, Ajuda e README coerentes com o que o aplicativo faz.",
       "features": [
@@ -34,11 +34,15 @@
       "limitations": [
         "O login não isola pessoas que usam o mesmo usuário do sistema operacional."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.15.1",
       "migration": "Nada a migrar: a marca é gravada na primeira alteração de cada conta.",
       "afterUpdate": [
         "Confira em Administração › Usuários quem deve ter a marca Admin."
-      ]
+      ],
+      "installer": {
+        "file": "Prumo-QA-Setup-2.15.1.exe",
+        "sha256": "aeb806a3766d8f89165512e7eb1ee34e6aa93dd2718c62a443d4cfeee7733796"
+      }
     },
     {
       "version": "2.15.0",
