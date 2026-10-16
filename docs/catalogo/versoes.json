@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.17.0",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-16",
       "title": "Suporte sem GitHub, duas etapas e dados de cada conta",
       "objective": "Deixar pedir suporte tão simples quanto mandar uma mensagem, com imagem e vídeo e sem conta no GitHub; proteger a entrada com um código por e-mail; e garantir que perfil, histórico e agentes criados por alguém sejam só dessa pessoa.",
       "features": [
@@ -53,13 +53,17 @@
         "Entrar ou criar conta com GitHub e Google ainda exige configurar o OAuth App em cada computador.",
         "O login não isola pessoas que usam o mesmo usuário do sistema operacional."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.17.0",
       "migration": "Nada a migrar. O banco de conhecimento ganha a tabela de perfis por conta e a coluna de dono nos atendimentos na primeira abertura.",
       "afterUpdate": [
         "Preencha de novo o Meu perfil (como chamar, papel, experiência e foco).",
         "Quem administra: informe a chave de administração do suporte em Administração › Chamados.",
         "Se quiser, ligue a verificação em duas etapas em Minha conta."
-      ]
+      ],
+      "installer": {
+        "file": "Prumo-QA-Setup-2.17.0.exe",
+        "sha256": "b63431927d8e93dc03c7e433f99a06581d9851e48bd48c03c865e4b9fc8e8b98"
+      }
     },
     {
       "version": "2.16.0",
