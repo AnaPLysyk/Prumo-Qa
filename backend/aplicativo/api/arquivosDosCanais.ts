@@ -44,6 +44,7 @@ export const arquivosDosCanais: Record<string, string> = {
   'conhecimento:mostrar': 'backend/agentes/api/conhecimentoMostrar.ts > caminhoConhecimento, lerPerfil',
   'conhecimento:vocabulario': 'backend/agentes/api/conhecimentoVocabulario.ts > vocabularioDoAgente',
   'conta:cadastrar': 'backend/login/api/contaCadastrar.ts > cadastrarConta',
+  'conta:codigo': 'backend/login/api/contaCodigo.ts > pedirCodigo',
   'conta:entrar': 'backend/login/api/contaEntrar.ts > entrarNaConta',
   'conta:githubestado': 'backend/login/api/contaGithubestado.ts > estadoDaEntradaGithub',
   'conta:githubiniciar': 'backend/login/api/contaGithubiniciar.ts > dependenciasDoGithub, iniciarEntradaGithub',

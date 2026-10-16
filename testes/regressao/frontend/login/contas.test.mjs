@@ -1,10 +1,12 @@
 // Login e permissões na janela real: ativar o login, criar conta, matriz de permissões, sair, entrar, senha temporária,
-// menu filtrado, recusa no backend, cadastro pendente, esqueci a senha e o aviso embaixo sem cobrir nada.
+// menu filtrado, recusa no backend, cadastro por e-mail pendente, esqueci a senha pelo e-mail e o aviso embaixo sem cobrir nada.
+// Os códigos chegam na caixa de e-mail dos testes (serviço de envio real em 127.0.0.1, sem Resend).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { abrir, novoDados, ir, primeiroAcesso } from '../../../apoio/janela.mjs';
+import { caixaDeEmail } from '../../../apoio/caixa-de-email.mjs';
 
 const capturas = path.join('tmp', 'evidencias', 'telas');
 const capturar = (page, nome) => { fs.mkdirSync(capturas, { recursive: true }); return page.screenshot({ path: path.join(capturas, nome + '.png') }); };
@@ -16,8 +18,7 @@ test('login: primeiro acesso, criar conta com senha temporária, permissão por 
   await p.emulateMedia({ reducedMotion: 'reduce' });
 
   // 1. Primeiro acesso: sem nenhuma conta o Prumo só mostra a criação do Administrador; criada, a pessoa já está dentro.
-  const codigoDoAdmin = await primeiroAcesso(p, { nome: 'Ana Admin', login: 'ana.admin', senha: 'Prumo-admin-2026' });
-  assert.match(codigoDoAdmin, /^[A-Z2-7]{5}(-[A-Z2-7]{5}){3}$/);
+  await primeiroAcesso(p, { nome: 'Ana Admin', login: 'ana.admin', senha: 'Prumo-admin-2026' });
   await capturar(p, 'administracao-login-ativado');
   assert.match(await p.textContent('#conta-botao'), /Ana Admin/);
 
@@ -46,13 +47,12 @@ test('login: primeiro acesso, criar conta com senha temporária, permissão por 
   assert.match(String((await p.evaluate(() => window.prumo.espacos())).error), /^SESSION_REQUIRED/);
   await capturar(p, 'entrada-login');
   await p.fill('#entrada-login', 'bruno'); await p.fill('#entrada-senha', 'senha-errada-1'); await p.click('#entrada-enviar');
-  await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /login ou senha incorretos/i);
+  await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /ou senha incorretos/i);
 
-  // 5. Senha temporária: troca obrigatória antes de qualquer tela; depois o código de recuperação aparece uma vez.
+  // 5. Senha temporária: troca obrigatória antes de qualquer tela; trocada, entra direto (não existe mais código de recuperação).
   await p.fill('#entrada-senha', temporaria); await p.click('#entrada-enviar'); await p.waitForSelector('#trocar-atual');
   await p.fill('#trocar-atual', temporaria); await p.fill('#trocar-nova', 'Leitura-firme-26'); await p.fill('#trocar-confirma', 'Leitura-firme-26');
-  await p.click('#entrada-enviar'); await p.waitForSelector('#entrada-codigo');
-  await Promise.all([p.waitForEvent('load'), p.click('#entrada-continuar')]); await recarregou(p);
+  await Promise.all([p.waitForEvent('load'), p.click('#entrada-enviar')]); await recarregou(p);
   await p.waitForSelector('#conta-botao');
 
   // 6. Menu e backend respeitam o papel: Leitor não vê Administração nem Testes e não altera nada.
@@ -67,17 +67,20 @@ test('login: primeiro acesso, criar conta com senha temporária, permissão por 
   await ir(p, 'projetos'); await p.waitForSelector('#nota-so-ver');
   await capturar(p, 'leitor-somente-consulta');
 
-  // 7. Cadastro pela entrada nasce pendente; "Esqueci a senha" usa o código e troca por outro.
+  // 7. Cadastro por e-mail nasce pendente; "Esqueci a senha" manda outro código ao e-mail e define a senha nova.
+  const caixa = await caixaDeEmail();
   await p.click('#conta-botao'); await Promise.all([p.waitForEvent('load'), p.click('#conta-sair')]); await recarregou(p);
-  await p.click('#entrada-ir-cadastro'); await p.fill('#cadastro-nome', 'Dani Dev'); await p.fill('#cadastro-login', 'dani');
+  await p.click('#entrada-ir-cadastro'); await p.fill('#cadastro-nome', 'Dani Dev'); await p.fill('#cadastro-email', 'dani@prumo.test');
   await p.fill('#cadastro-senha', 'Cadastro-firme-26'); await p.fill('#cadastro-confirma', 'Cadastro-firme-26'); await p.click('#entrada-enviar');
-  await p.waitForSelector('#entrada-codigo'); const codigo = (await p.textContent('#entrada-codigo')).trim();
-  assert.match(await p.textContent('#entrada'), /A Administração precisa aprovar/);
-  await p.click('#entrada-continuar'); await p.fill('#entrada-login', 'dani'); await p.fill('#entrada-senha', 'Cadastro-firme-26'); await p.click('#entrada-enviar');
+  await p.waitForSelector('#confirmar-codigo'); await p.fill('#confirmar-codigo', caixa.ultimoCodigo('dani@prumo.test')); await p.click('#entrada-enviar');
+  await p.waitForFunction(() => /A Administração precisa aprovar/.test(document.querySelector('#entrada')?.textContent || ''));
+  await p.click('#entrada-continuar'); await p.fill('#entrada-login', 'dani@prumo.test'); await p.fill('#entrada-senha', 'Cadastro-firme-26'); await p.click('#entrada-enviar');
   await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /aguarda aprovação/i);
-  await p.click('#entrada-ir-recuperar'); await p.fill('#recuperar-login', 'dani'); await p.fill('#recuperar-codigo', codigo.toLowerCase());
+  await p.click('#entrada-ir-recuperar'); await p.fill('#recuperar-email', 'dani@prumo.test'); await p.click('#entrada-enviar');
+  await p.waitForSelector('#recuperar-codigo'); await p.fill('#recuperar-codigo', caixa.ultimoCodigo('dani@prumo.test'));
   await p.fill('#recuperar-senha', 'Recupera-firme-26'); await p.fill('#recuperar-confirma', 'Recupera-firme-26'); await p.click('#entrada-enviar');
-  await p.waitForSelector('#entrada-codigo'); assert.notEqual((await p.textContent('#entrada-codigo')).trim(), codigo);
+  await p.waitForFunction(() => document.querySelector('#entrada-titulo')?.textContent === 'Senha nova definida');
+  assert.equal(await p.locator('#entrada-codigo').count(), 0, 'nenhuma tela de código de recuperação');
   await capturar(p, 'entrada-recuperacao');
   assert.deepEqual(a.erros, []);
 });

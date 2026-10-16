@@ -52,3 +52,11 @@ dialog.entrada > #aviso { margin: 0 28px 20px; }
 .entrada-outros { display: flex; flex-direction: column; align-items: stretch; gap: 10px; margin-top: 14px; }
 .entrada-ou { display: flex; align-items: center; gap: 10px; color: var(--suave); font-size: 12px; }
 .entrada-ou::before, .entrada-ou::after { content: ''; flex: 1; height: 1px; background: var(--linha); }
+
+/* Rodapé da entrada (fora do cartão, sobre o fundo noturno): idioma e site oficial, disponíveis antes de qualquer conta. */
+.entrada-lugar { display: flex; flex-direction: column; gap: 14px; }
+.entrada-rodape { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 0 4px; color: var(--login-suave); font-size: 13px; }
+.entrada-idioma { display: inline-flex; align-items: center; gap: 6px; }
+.entrada-idioma select { padding: 4px 8px; border: 1px solid rgba(154, 168, 194, .35); border-radius: 8px; background: rgba(6, 11, 24, .6); color: var(--login-texto); font: inherit; }
+.entrada-rodape .ds-link { display: inline-flex; align-items: center; gap: 6px; color: var(--login-suave); }
+.entrada-rodape .ds-link:hover, .entrada-rodape .ds-link:focus-visible { color: var(--login-texto); }

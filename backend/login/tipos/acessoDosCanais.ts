@@ -3,7 +3,7 @@ import type { CanalIpc } from '../../aplicativo/api/catalogoDeContratos.js';
 import type { IdModulo } from './contas.js';
 
 /**
- * - publico: atende sem sessão (tela de entrada, cadastro, recuperação, versão e tema).
+ * - publico: atende sem sessão (tela de entrada, cadastro, recuperação, versão, tema e o site oficial).
  * - conta: exige sessão, mesmo com troca de senha pendente (sair e trocar a senha).
  * - base: exige sessão; dado transversal que várias telas consultam (lista de projetos, worker, assistente, ajuda).
  * - [tela, nível]: exige o nível na tela do papel da pessoa (VER para consultar, USAR para alterar).
@@ -11,8 +11,8 @@ import type { IdModulo } from './contas.js';
 export type AcessoDoCanal = 'publico' | 'conta' | 'base' | readonly [IdModulo, 'VER' | 'USAR'];
 
 export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
-  'conta:sessao': 'publico', 'conta:entrar': 'publico', 'conta:cadastrar': 'publico', 'conta:recuperar': 'publico', 'conta:githubiniciar': 'publico', 'conta:githubestado': 'publico', 'conta:googleiniciar': 'publico', 'conta:googleestado': 'publico',
-  'app:info': 'publico', 'preferencias:obter': 'publico',
+  'conta:sessao': 'publico', 'conta:entrar': 'publico', 'conta:cadastrar': 'publico', 'conta:recuperar': 'publico', 'conta:codigo': 'publico', 'conta:githubiniciar': 'publico', 'conta:githubestado': 'publico', 'conta:googleiniciar': 'publico', 'conta:googleestado': 'publico',
+  'app:info': 'publico', 'preferencias:obter': 'publico', 'site:abrir': 'publico',
   'conta:sair': 'conta', 'conta:senha': 'conta', 'conta:perfil': 'base',
   'usuarios:ativar': ['administracao', 'USAR'], 'usuarios:listar': ['administracao', 'VER'], 'usuarios:criar': ['administracao', 'USAR'], 'usuarios:alterar': ['administracao', 'USAR'],
   'usuarios:senha': ['administracao', 'USAR'], 'usuarios:desbloquear': ['administracao', 'USAR'], 'usuarios:excluir': ['administracao', 'USAR'],
@@ -26,7 +26,7 @@ export const acessoDosCanais: Record<CanalIpc, AcessoDoCanal> = {
   'escrita:estado': 'base', 'agentes:estado': 'base', 'execucoes:listar': 'base', 'execucoes:metricas': 'base', 'worker:estado': 'base', 'worker:eventos': 'base',
   'assistente:perguntar': 'base', 'assistente:situacao': 'base', 'assistente:conversar': 'base', 'assistente:agentes': 'base', 'assistente:abertura': 'base', 'assistente:avaliar': 'base',
   'perfil:obter': 'base', 'perfil:salvar': 'base', 'preferencias:salvar': 'base', 'preferencias:visualizada': 'base', 'ajuda:documentos': 'base', 'ajuda:versoes': 'base',
-  'ajuda:integracoes': 'base', 'dados:resumo': 'base', 'atualizacao:verificar': 'base', 'atualizacao:abrir': 'base', 'site:abrir': 'base',
+  'ajuda:integracoes': 'base', 'dados:resumo': 'base', 'atualizacao:verificar': 'base', 'atualizacao:abrir': 'base',
   'projetos:escolher': ['projetos', 'USAR'], 'projetos:demo': ['projetos', 'USAR'], 'projetos:desvincular': ['projetos', 'USAR'], 'espacos:criar': ['projetos', 'USAR'], 'espacos:editar': ['projetos', 'USAR'],
   'espacos:pasta': ['projetos', 'USAR'], 'espacos:trazer': ['projetos', 'USAR'], 'servicos:desvincular': ['projetos', 'USAR'], 'servicos:conferir': ['projetos', 'VER'],
   'contextos:listar': ['agentes', 'VER'], 'contextos:obter': ['agentes', 'VER'], 'contextos:salvar': ['agentes', 'USAR'], 'contextos:aprovar': ['agentes', 'USAR'], 'contextos:desatualizar': ['agentes', 'USAR'],

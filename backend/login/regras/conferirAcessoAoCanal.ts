@@ -5,7 +5,13 @@ import { modulosDoMenu } from '../tipos/contas.js';
 import type { CanalIpc } from '../../aplicativo/api/catalogoDeContratos.js';
 
 /**
- * O Prumo não abre sem entrar: enquanto não existe nenhuma conta, o único canal além dos públicos é criar a primeira conta (Administrador).
+ * Enquanto não existe nenhuma conta, além dos públicos só atendem os canais do primeiro acesso: criar a conta de Administrador ou
+ * configurar o GitHub/Google para criá-la pelo provedor. Quem está no computador sem contas vira Administrador de qualquer jeito.
+ */
+const CANAIS_DO_PRIMEIRO_ACESSO: readonly CanalIpc[] = ['usuarios:ativar', 'acesso:github', 'acesso:google'];
+
+/**
+ * O Prumo não abre sem entrar: sem nenhuma conta, só o primeiro acesso é atendido.
  * A recusa vem com código próprio e uma frase que a pessoa entende.
  */
 export function conferirAcessoAoCanal(canal: CanalIpc, b?: string, agora = Date.now(), renovarAtividade = true): void {
@@ -13,7 +19,7 @@ export function conferirAcessoAoCanal(canal: CanalIpc, b?: string, agora = Date.
   if (regra === 'publico') return;
   // Consultas automáticas validam o acesso, mas não são interação humana.
   const s = situacaoDaSessao(b, agora, renovarAtividade);
-  if (s.tipo === 'SEM_LOGIN') { if (canal === 'usuarios:ativar') return; throw new Error('LOGIN_SETUP_REQUIRED: crie a conta de Administrador para começar a usar o Prumo.'); }
+  if (s.tipo === 'SEM_LOGIN') { if (CANAIS_DO_PRIMEIRO_ACESSO.includes(canal)) return; throw new Error('LOGIN_SETUP_REQUIRED: crie a conta de Administrador para começar a usar o Prumo.'); }
   if (s.tipo === 'EXPIRADA') throw new Error('SESSION_EXPIRED: a sessão terminou por inatividade; entre de novo.');
   if (s.tipo !== 'ATIVA') throw new Error('SESSION_REQUIRED: entre com sua conta do Prumo para continuar.');
   if (regra === 'conta') return;

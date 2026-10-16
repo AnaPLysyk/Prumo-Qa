@@ -8,7 +8,7 @@ window.PrumoAdministracaoAcessos = (() => {
   const quando = (iso) => (iso ? new Date(iso).toLocaleString() : tr('nunca'));
   const podeAlterar = () => !window.PrumoConta || window.PrumoConta.pode('administracao') && !window.PrumoConta.soVer('administracao');
 
-  /** Segredo mostrado uma única vez (senha temporária ou código de recuperação), com botão de copiar. */
+  /** Senha temporária mostrada uma única vez, com botão de copiar. */
   function segredoUmaVez(titulo, explicacao, valor, depois) {
     DS.modal(titulo, [DS.alerta(explicacao, 'aviso'), h('code', { id: 'adm-segredo', class: 'entrada-codigo', 'data-i18n-ignore': '' }, valor),
       DS.rodape(DS.acao('Copiar', async () => { try { await navigator.clipboard.writeText(valor); avisar(tr('Copiado.')); } catch { avisar(tr('Não foi possível copiar; anote o valor.'), true); } }, { id: 'adm-segredo-copiar' }),

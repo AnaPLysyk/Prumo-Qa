@@ -35,7 +35,7 @@ export const telasDaConta = (u: Pick<Usuario, 'admin' | 'papel'>, papel: Papel |
 
 export function contaParaJanela(r: RegistroDeContas, u: Usuario, agora = Date.now()): ContaVisivel {
   return { id: u.id, login: u.login, nome: u.nome, papel: u.papel, papelNome: papelDaConta(r, u)?.nome ?? u.papel, estado: u.estado, trocarSenha: u.trocarSenha, criadoEm: u.criadoEm, ultimoAcesso: u.ultimoAcesso, origem: u.origem,
-    bloqueada: !!u.bloqueadoAte && Date.parse(u.bloqueadoAte) > agora, temRecuperacao: !!u.recuperacao, admin: ehAdmin(u) };
+    bloqueada: !!u.bloqueadoAte && Date.parse(u.bloqueadoAte) > agora, email: u.email ?? null, admin: ehAdmin(u) };
 }
 
 export type SituacaoDaSessao =

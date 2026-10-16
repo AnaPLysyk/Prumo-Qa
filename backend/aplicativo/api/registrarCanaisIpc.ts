@@ -32,6 +32,7 @@ import { contaEntrar } from '../../login/api/contaEntrar.js';
 import { contaSair } from '../../login/api/contaSair.js';
 import { contaCadastrar } from '../../login/api/contaCadastrar.js';
 import { contaRecuperar } from '../../login/api/contaRecuperar.js';
+import { contaCodigo } from '../../login/api/contaCodigo.js';
 import { contaSenha } from '../../login/api/contaSenha.js';
 import { contaPerfil } from '../../login/api/contaPerfil.js';
 import { usuariosAtivar } from '../../administracao/api/usuariosAtivar.js';
@@ -280,6 +281,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('conta:sair', contaSair);
   registrarCanal('conta:cadastrar', contaCadastrar);
   registrarCanal('conta:recuperar', contaRecuperar);
+  registrarCanal('conta:codigo', contaCodigo);
   registrarCanal('conta:senha', contaSenha);
   registrarCanal('conta:perfil', contaPerfil);
   registrarCanal('usuarios:ativar', usuariosAtivar);

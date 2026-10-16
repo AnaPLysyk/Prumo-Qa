@@ -48,8 +48,8 @@ test('Minha conta: primeiro acesso sem nada liberado, como Administrador e como 
 
   // 4. Usuário comum: primeiro acesso troca a senha; não vê Administração; Minha conta funciona; o backend recusa o que não é dela.
   await p.fill('#entrada-login', 'carla'); await p.fill('#entrada-senha', temporaria); await p.click('#entrada-enviar'); await p.waitForSelector('#trocar-atual');
-  await p.fill('#trocar-atual', temporaria); await p.fill('#trocar-nova', SENHA_QA); await p.fill('#trocar-confirma', SENHA_QA); await p.click('#entrada-enviar'); await p.waitForSelector('#entrada-codigo');
-  await Promise.all([p.waitForEvent('load'), p.click('#entrada-continuar')]); await recarregou(p); await p.waitForSelector('#conta-botao');
+  await p.fill('#trocar-atual', temporaria); await p.fill('#trocar-nova', SENHA_QA); await p.fill('#trocar-confirma', SENHA_QA);
+  await Promise.all([p.waitForEvent('load'), p.click('#entrada-enviar')]); await recarregou(p); await p.waitForSelector('#conta-botao');
   assert.match(await p.textContent('#conta-botao'), /Carla QA/);
   assert.equal(await p.isHidden('[data-aba=administracao]'), true, 'usuário comum não vê Administração');
   for (const aba of ['testes', 'tickets', 'projetos', 'agentes']) assert.equal(await p.isVisible(`[data-aba=${aba}]`), true, 'usuário comum vê ' + aba);

@@ -2,9 +2,9 @@
 import { z } from 'zod';
 
 /**
- * Login do Prumo (2.11): contas locais deste computador, guardadas em plataforma/acessos.json. Senhas e códigos de
- * recuperação só existem como resumo scrypt com sal próprio; nada é enviado pela rede. Enquanto não existe conta,
- * o Prumo funciona como antes (a conta do Windows é a dona de tudo); criar o primeiro administrador liga o login.
+ * Login do Prumo (2.11): contas locais deste computador, guardadas em plataforma/acessos.json. Senhas só existem como
+ * resumo scrypt com sal próprio. Só o e-mail sai do computador, e só quando a pessoa pede o código de confirmação
+ * (cadastro ou Esqueci a senha). Sem nenhuma conta o Prumo não abre: a primeira conta é a de Administrador.
  */
 export const modulosDoMenu = [
   { id: 'inicio', rotulo: 'Início' }, { id: 'projetos', rotulo: 'Projetos' },
@@ -32,7 +32,11 @@ export const nomeDaPessoaSchema = z.string().trim().min(2).max(80);
 /** O tamanho é conferido aqui; letras, números e semelhança com o login são conferidos pela regra de senhas. */
 export const senhaSchema = z.string().min(10).max(200);
 
-export const codigoDeRecuperacaoSchema = z.string().trim().toUpperCase().regex(/^[A-Z2-7]{5}(-?[A-Z2-7]{5}){3}$/);
+/** E-mail da conta (cadastro por e-mail): guardado em minúsculas; é ele que recebe o código de confirmação e o de senha nova. */
+export const emailSchema = z.string().trim().toLowerCase().max(254).regex(/^[^\s@<>()",;:\[\]]{1,64}@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/, 'E-mail inválido.');
+
+/** Código de 6 dígitos mandado por e-mail (cadastro e senha nova). */
+export const codigoPorEmailSchema = z.string().trim().regex(/^\d{6}$/);
 
 export const idPapelSchema = z.string().regex(/^[a-z0-9][a-z0-9-]{1,29}$/);
 
@@ -44,7 +48,10 @@ const quando = z.string().datetime();
 
 export const usuarioSchema = z.object({
   id: z.string().uuid(), login: loginSchema, nome: nomeDaPessoaSchema, papel: idPapelSchema, estado: z.enum(estadosDaConta),
+  // Conferido por código no cadastro; contas da Administração, do GitHub e do Google podem não ter.
+  email: emailSchema.optional(),
   // Conta criada pelo GitHub não tem senha do Prumo (null): só entra autorizando de novo no GitHub.
+  // recuperacao: código de recuperação das versões até a 2.15 (substituído pelo código por e-mail); mantido só para ler arquivos antigos.
   senha: resumoDeSegredoSchema.nullable(), recuperacao: resumoDeSegredoSchema.nullable(), trocarSenha: z.boolean(),
   identidades: z.array(z.object({ provedor: z.enum(['github', 'google']), id: z.string().regex(/^[0-9]{1,30}$/), login: z.string().min(1).max(60) }).strict()).max(5).default([]),
   falhas: z.number().int().min(0).max(1000), bloqueadoAte: quando.nullable(),
@@ -91,5 +98,5 @@ export const acessoPadrao: ConfiguracaoDeAcesso = { cadastroAberto: true, aprova
 
 export const registroDeContasVazio: RegistroDeContas = { version: 1, usuarios: [], papeis: papeisPadrao, acesso: acessoPadrao };
 
-/** Campos que a janela pode ver de uma conta: nunca resumo de senha nem de código de recuperação. */
-export type ContaVisivel = Pick<Usuario, 'id' | 'login' | 'nome' | 'papel' | 'estado' | 'trocarSenha' | 'criadoEm' | 'ultimoAcesso' | 'origem'> & { bloqueada: boolean; temRecuperacao: boolean; papelNome: string; admin: boolean };
+/** Campos que a janela pode ver de uma conta: nunca resumo de senha. */
+export type ContaVisivel = Pick<Usuario, 'id' | 'login' | 'nome' | 'papel' | 'estado' | 'trocarSenha' | 'criadoEm' | 'ultimoAcesso' | 'origem'> & { email: string | null; bloqueada: boolean; papelNome: string; admin: boolean };

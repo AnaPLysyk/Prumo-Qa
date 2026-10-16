@@ -1,5 +1,9 @@
 # Segurança e limites de confiança
 
+## Em poucas palavras
+
+O Prumo limita o que pode ler e executar, pede confirmação do sistema para ações protegidas e guarda tokens no cofre do sistema quando há suporte. O login do aplicativo não separa pessoas que usam a mesma conta do computador. Os testes automatizados não comprovam uma autenticação humana real, e o Prumo não é uma sandbox: comandos e dependências do próprio projeto ainda precisam ser confiáveis. O instalador não tem assinatura digital; confira o SHA-256, sabendo que ele não confirma quem criou o arquivo.
+
 ## Sistemas e consolidação 2.13
 
 O Windows mantém o broker CredUI/LogonUser. No macOS, o pedido usa autenticação administrativa do sistema via AppleScript, com o escopo passado como dado. No Linux, uma janela zenity/kdialog apresenta o escopo e pkexec/polkit autoriza a chamada; sem esses componentes o pedido é bloqueado. Esses mecanismos podem usar autorização administrativa em cache do sistema e não têm a garantia do broker Windows de exigir a senha da mesma conta em cada pedido. O nome registrado em macOS/Linux é o usuário do processo, não uma identidade autenticada retornada pelo sistema. Escopo inválido ou expirado é recusado antes e depois do diálogo. Testes usam executores sintéticos; não comprovam autenticação humana nesses sistemas.
@@ -8,16 +12,25 @@ Credenciais usam o cofre do Electron (DPAPI, Keychain ou Secret Service/KWallet)
 
 ## Login local e permissões (2.12)
 
-- **O Prumo não abre sem entrar (2.14).** Sem nenhuma conta, o único pedido atendido é criar a primeira conta, de Administrador; todos os outros canais recusam com `LOGIN_SETUP_REQUIRED` e a janela mostra só o primeiro acesso. Criar a conta cria `acessos.json` na pasta `plataforma` dos dados, separado de `contas.json` (contas de serviço Jira/Qase/GitHub).
-- **Senhas e códigos** nunca ficam em texto: só resumo scrypt com sal próprio. A senha temporária e o código de recuperação aparecem uma única vez. Respostas, logs e diagnóstico nunca os contêm; erro de login não diz se o usuário existe.
+- **O Prumo não abre sem entrar (2.14).** Sem nenhuma conta, só o primeiro acesso é atendido: criar a primeira conta, de Administrador, ou guardar o Client ID e o segredo do GitHub/Google para criá-la pelo provedor (`acesso:github`, `acesso:google`). Quem está num computador sem contas vira Administrador de qualquer jeito, então isso não amplia o acesso; assim que existe uma conta, configurar o provedor volta a exigir a Administração. Todos os outros canais recusam com `LOGIN_SETUP_REQUIRED` e a janela mostra só a entrada. Antes de entrar também atendem o idioma da janela (só na janela, salvo nas preferências depois do login) e `site:abrir` (endereço fixo do site oficial, com confirmação nativa). Criar a conta cria `acessos.json` na pasta `plataforma` dos dados, separado de `contas.json` (contas de serviço Jira/Qase/GitHub).
+- **Senhas** nunca ficam em texto: só resumo scrypt com sal próprio. A senha temporária aparece uma única vez. Não existe mais código de recuperação: a senha nova sai de um código mandado ao e-mail (veja abaixo). Respostas, logs e diagnóstico nunca os contêm; erro de login não diz se o usuário existe.
 - **Sessão** só na memória do processo principal, com expiração por inatividade e bloqueio da conta após tentativas erradas (ambos configuráveis). Nada de token no renderer.
 - **Autorização no backend:** `registrarCanal` confere, a cada pedido, a sessão e o nível (Sem acesso, Ver, Usar) do papel na tela do canal (`backend/login/tipos/acessoDosCanais.ts`). Esconder item de menu não é a autorização. Todo canal novo precisa de uma regra ali (o compilador recusa o contrário).
 - **Papéis:** o Administrador é fixo; o cadastro público nunca cria administrador; o último administrador não pode ser excluído nem rebaixado; alterar o papel ou desativar uma conta vale no próximo pedido da pessoa.
 - **Limites:** o worker, a bandeja e o servidor MCP seguem com a conta do Windows e as políticas de cada projeto; a confirmação nativa para executar e publicar continua obrigatória. O login não isola dados de quem compartilha a mesma conta do Windows.
 
+## Cadastro e senha nova por e-mail
+
+- **Três caminhos para a conta:** e-mail confirmado por código, GitHub ou Google. O cadastro por e-mail pede nome, e-mail e senha; a conta só nasce com o código de 6 dígitos que chegou nesse e-mail. **Esqueci a senha** manda outro código ao e-mail da conta.
+- **O que sai do computador:** só quando a pessoa clica em **Enviar código**, o e-mail, o código, a finalidade (`CADASTRO` ou `SENHA`) e o idioma vão por HTTPS ao serviço de envio do Prumo (`servico-de-email/`, no Render), que manda a mensagem pelo Resend. Senha, nome e dados de projeto nunca saem. O endereço do serviço é fixo no código; `PRUMO_SERVICO_DE_EMAIL` só o troca por outro HTTPS ou por `http://127.0.0.1` (testes).
+- **No aplicativo:** o código é sorteado com `crypto.randomInt`, guardado só como resumo SHA-256 com sal aleatório, na memória do processo principal, por 10 minutos e uma única vez. Cinco erros invalidam o código; outro envio para o mesmo e-mail só depois de 60 segundos. Fechar o Prumo descarta tudo. Código errado em **Esqueci a senha** conta para o bloqueio da conta, como senha errada.
+- **Sem revelar quem tem conta:** em **Esqueci a senha**, e-mail sem conta (ou de conta desativada) recebe a mesma resposta e nada é enviado. No cadastro, e-mail já usado é recusado (`EMAIL_TAKEN`), como o login repetido era.
+- **No serviço:** não há banco; nada fica guardado. Pedido fora do formato é recusado (só e-mail, código de 6 dígitos, finalidade e idioma; texto do e-mail fixo). Limites: 3 códigos por e-mail a cada 10 minutos, 10 por dia, 30 por IP por hora e 300 no total por hora. O registro mascara o e-mail e nunca mostra o código. A chave do Resend fica só nas variáveis do serviço, nunca no aplicativo distribuído.
+- **Limites conhecidos:** o serviço é público (qualquer um pode pedir que ele mande um código a um e-mail; os limites seguram o abuso). Os contadores ficam na memória e zeram quando o serviço reinicia. Sem internet ou com o serviço fora do ar, não dá para criar conta por e-mail nem pedir senha nova; GitHub, Google e a senha temporária da Administração continuam funcionando. Contas antigas guardam o resumo do código de recuperação, que não é mais aceito.
+
 ## Entrar com GitHub ou Google
 
-- O Client ID fica em `acessos.json`; o Client Secret só no cofre do sistema, nunca na janela, em log ou no arquivo. Sem configuração o botão não aparece e o canal recusa (`GITHUB_LOGIN_NOT_CONFIGURED`, `GOOGLE_LOGIN_NOT_CONFIGURED`).
+- O Client ID fica em `acessos.json`; o Client Secret só no cofre do sistema, nunca na janela, em log ou no arquivo. Sem configuração o botão de entrar não aparece e o canal recusa (`GITHUB_LOGIN_NOT_CONFIGURED`, `GOOGLE_LOGIN_NOT_CONFIGURED`). No primeiro acesso os botões **Criar conta com o GitHub/Google** aparecem sempre e, sem configuração, pedem o Client ID e o segredo antes da autorização.
 - O Prumo abre o navegador (PKCE S256 e `state` aleatório) e escuta um endereço local temporário em 127.0.0.1, porta aleatória, por 5 minutos. Só atende `GET /callback` com o Host exato e o `state` certo; o resto é recusado sem derrubar a tentativa. Cancelar, negar ou esgotar o tempo fecha o endereço.
 - Pessoa nova nasce PENDENTE, sem senha, com o papel de novos cadastros. Conta pendente, desativada ou bloqueada não ganha sessão nem conexão, e o token é descartado. Só a primeira conta de uma instalação sem contas nasce Administrador.
 - A identidade é o provedor mais o id numérico, nunca o login nem o e-mail.
@@ -36,7 +49,8 @@ Credenciais usam o cofre do Electron (DPAPI, Keychain ou Secret Service/KWallet)
 - **Canal `espacos:trazer`**, com confirmação nativa do Windows (repositório, destino e efeito). Só `https://github.com/<dono>/<repositório>.git`, montado a partir do repositório vinculado e validado (sem `..`, barras extras ou caracteres que mudem o endereço).
 - **Git do computador, credenciais do próprio git.** O Prumo não entrega a credencial dele ao git: o ambiente do processo filho não herda variáveis com `token`, `secret`, `password`, `api_key` ou `credential` nem `GIT_*`; repositório privado depende do Git Credential Manager da própria pessoa.
 - **Opções fixas:** hooks desligados, `protocol.allow=never` (só https), `core.symlinks=false`, `core.autocrlf=false`, `transfer.fsckObjects=true`, sem submódulos, 50 commits e sem tags; tempo limite de 10 minutos.
-- **Destino fixo** em `%LOCALAPPDATA%\PrumoQAepositorios\<projeto>\<repositório>`. Atualizar só avança (fast-forward) e só numa pasta que o Prumo trouxe e cujo remoto confere; divergência é recusada sem tocar no trabalho local. Clone que falha apaga a pasta pela metade.
+- **Destino fixo** em `%LOCALAPPDATA%\PrumoQA
+epositorios\<projeto>\<repositório>`. Atualizar só avança (fast-forward) e só numa pasta que o Prumo trouxe e cujo remoto confere; divergência é recusada sem tocar no trabalho local. Clone que falha apaga a pasta pela metade.
 - Depois do clone a pasta é vinculada pelo mesmo caminho de sempre (contrato proposto e confirmado). Nada do repositório é executado.
 
 ## Refatoração da branch em desenvolvimento

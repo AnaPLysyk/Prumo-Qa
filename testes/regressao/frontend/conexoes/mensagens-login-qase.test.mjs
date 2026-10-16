@@ -41,9 +41,13 @@ test('Qase desconhecido não revela dados ou exceções do backend', () => {
   assert.doesNotMatch(resposta, /segredo-123|C:\\perfis|INTERNAL_BROKEN/);
   assert.match(resposta, /Nenhum token foi salvo/);
 });
-test('Login diferencia credenciais, recuperação, bloqueio e senha fraca com orientação', () => {
-  assert.match(mensagemLogin('LOGIN_INVALID: detalhe técnico'), /Login ou senha incorretos/);
-  assert.match(mensagemLogin('RECOVERY_INVALID: código antigo'), /código de recuperação incorretos/);
+test('Login diferencia credenciais, código do e-mail, envio, bloqueio e senha fraca com orientação', () => {
+  assert.match(mensagemLogin('LOGIN_INVALID: detalhe técnico'), /E-mail ou senha incorretos/);
+  assert.match(mensagemLogin('CODE_INVALID: x'), /Código incorreto/);
+  assert.match(mensagemLogin('CODE_EXPIRED: x'), /Peça um novo/);
+  assert.match(mensagemLogin('EMAIL_TAKEN: x'), /já tem conta/);
+  assert.match(mensagemLogin('EMAIL_WAIT: x'), /Espere um minuto/);
+  assert.match(mensagemLogin('EMAIL_SERVICE_UNAVAILABLE: x'), /serviço de envio/);
   assert.match(mensagemLogin('ACCOUNT_PENDING: aguardando'), /aguarda aprovação/);
   assert.match(mensagemLogin('ACCOUNT_LOCKED: x'), /temporariamente bloqueada/);
   assert.match(mensagemLogin('PASSWORD_WEAK: x'), /pelo menos 10 caracteres/);

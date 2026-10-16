@@ -5,7 +5,8 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { ativarLogin, entrarNaConta } from '../../../../dist/login/regras/contas.js';
+import { entrarNaConta } from '../../../../dist/login/regras/contas.js';
+import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
 import { estadoDaEntradaGithub, iniciarEntradaGithub } from '../../../../dist/login/regras/entradaPeloGithub.js';
 import { encerrarSessao, situacaoDaSessao } from '../../../../dist/login/regras/sessao.js';
 import { gravarContas } from '../../../../dist/login/banco/gravarContas.js';
@@ -15,7 +16,7 @@ import { lerContas } from '../../../../dist/login/banco/lerContas.js';
 // Nenhuma rede externa, nenhum cofre, nenhuma conta real.
 const base = async (t) => {
   const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo gh ')); t.after(() => { encerrarSessao(); estadoDaEntradaGithub(true); fs.rmSync(b, { recursive: true, force: true }); });
-  await ativarLogin({ login: 'admin', nome: 'Admin Teste', senha: 'senha-forte-123' }, b); encerrarSessao(); return b;
+  await criarPrimeiraConta({ login: 'admin', nome: 'Admin Teste', senha: 'senha-forte-123' }, b); encerrarSessao(); return b;
 };
 function montar(b, { perfil = { id: '4242', login: 'Ana-Dev', nome: 'Ana Dev' }, tempoMs, configurado = true } = {}) {
   const chamadas = { trocas: [], conexoes: [], urls: [] };

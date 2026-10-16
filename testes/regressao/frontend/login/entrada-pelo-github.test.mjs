@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { abrir, novoDados } from '../../../apoio/janela.mjs';
+import { abrir, ativarPelaApi, novoDados } from '../../../apoio/janela.mjs';
 
 // Tela de entrada com o login ligado: o botão do GitHub só existe quando o OAuth App está configurado; ao clicar o Prumo abre a página de
 // autorização do GitHub (o navegador é um double do runner: nada é aberto nem enviado) e Cancelar volta à entrada sem sessão nem conexão.
 const ENV = { PRUMO_GITHUB_CLIENT_ID: 'Iv1.cliente-de-teste', PRUMO_GITHUB_CLIENT_SECRET: 'segredo-de-teste-xyz' };
 async function comLoginLigado(t, env) {
   const a = await abrir(t, novoDados(t), [], env, { semLogin: true });
-  assert.equal((await a.page.evaluate(() => window.prumo.usuariosAtivar('admin', 'Admin Teste', 'senha-forte-123'))).ok, true);
+  assert.equal((await ativarPelaApi(a.page, { login: 'admin', nome: 'Admin Teste', senha: 'senha-forte-123' })).ok, true);
   await a.page.evaluate(() => window.prumo.contaSair()); await a.page.reload(); await a.page.waitForSelector('#entrada-login');
   return a;
 }
@@ -32,13 +32,15 @@ test('com o OAuth App configurado: botão em Entrar e em Criar conta, abre a aut
   assert.deepEqual(a.erros, []);
 });
 
-test('primeiro acesso: sem nenhuma conta o Prumo não abre; Criar conta com o GitHub abre a autorização e Cancelar volta ao primeiro acesso', { timeout: 120000 }, async (t) => {
+test('primeiro acesso: sem nenhuma conta o Prumo não abre; Criar conta com o GitHub (na entrada e no primeiro acesso) abre a autorização e Cancelar volta ao primeiro acesso', { timeout: 120000 }, async (t) => {
   const a = await abrir(t, novoDados(t), [], ENV, { semLogin: true });
   await a.app.evaluate(({ shell }) => { globalThis.__abertas = []; shell.openExternal = async (u) => { globalThis.__abertas.push(u); }; });
-  await a.page.waitForSelector('#entrada-login'); assert.equal(await a.page.locator('#entrada-github').count(), 0, 'sem contas, entrar por provedor não faz sentido');
+  await a.page.waitForSelector('#entrada-login'); assert.equal(await a.page.textContent('#entrada-github'), 'Criar conta com o GitHub', 'sem contas o botão cria a primeira conta, não entra');
+  await a.page.click('#entrada-github'); await a.page.locator('#entrada-github-espera').waitFor(); await a.page.click('#entrada-github-cancelar'); await a.page.waitForSelector('#primeiro-nome');
+  await a.page.click('#entrada-voltar'); await a.page.waitForSelector('#entrada-login');
   await a.page.click('#entrada-ir-cadastro'); await a.page.waitForSelector('#primeiro-nome');
   await a.page.click('#entrada-github'); await a.page.locator('#entrada-github-espera').waitFor();
-  const abertas = await a.app.evaluate(() => globalThis.__abertas); assert.equal(abertas.length, 1); assert.match(abertas[0], /^https:\/\/github\.com\/login\/oauth\/authorize\?/);
+  const abertas = await a.app.evaluate(() => globalThis.__abertas); assert.equal(abertas.length, 2); for (const u of abertas) assert.match(u, /^https:\/\/github\.com\/login\/oauth\/authorize\?/);
   await a.page.click('#entrada-github-cancelar'); await a.page.waitForSelector('#primeiro-nome');
   const s = (await a.page.evaluate(() => window.prumo.contaSessao())).data; assert.equal(s.loginAtivo, false, 'nenhuma conta foi criada'); assert.equal(await a.page.locator('dialog#entrada[open]').count(), 1, 'a janela continua na entrada');
   assert.deepEqual(a.erros, []);

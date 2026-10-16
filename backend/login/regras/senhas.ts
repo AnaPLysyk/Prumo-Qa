@@ -1,10 +1,9 @@
-/** Resume senhas e códigos de recuperação com scrypt e sal próprio, confere em tempo constante e exige senha mínima. */
+/** Resume senhas com scrypt e sal próprio, confere em tempo constante e exige senha mínima. */
 import { randomBytes, randomInt, scrypt, timingSafeEqual } from 'node:crypto';
 import { ResumoDeSegredo } from '../tipos/contas.js';
 
 // N=2^15, r=8: cerca de 32 MiB e algumas dezenas de milissegundos por conferência; o limite de memória vai acima disso.
 const N = 32768; const R = 8; const P = 1; const TAMANHO = 32;
-const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 const SEM_AMBIGUIDADE = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
 function derivar(segredo: string, sal: Buffer, n: number, r: number, p: number): Promise<Buffer> {
@@ -34,16 +33,6 @@ export function conferirForcaDaSenha(senha: string, login: string): void {
           : null;
   if (problema) throw new Error('PASSWORD_WEAK: senha fraca: ' + problema + '.');
 }
-
-/** Código de recuperação mostrado uma única vez: 20 caracteres base32 (100 bits) em 4 grupos. */
-export function gerarCodigoDeRecuperacao(): string {
-  const bytes = randomBytes(20); let texto = '';
-  for (const b of bytes) texto += BASE32[b & 31];
-  return texto.match(/.{5}/g)!.join('-');
-}
-
-/** O código é conferido sem hífens e em maiúsculas, do jeito que a pessoa digitar. */
-export const normalizarCodigoDeRecuperacao = (codigo: string) => codigo.toUpperCase().replace(/[^A-Z2-7]/g, '');
 
 /** Senha temporária que a Administração entrega à pessoa: 16 caracteres sem letras parecidas, com letra e número garantidos. */
 export function gerarSenhaTemporaria(): string {

@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ativarLogin, cadastrarConta, entrarNaConta, sairDaConta, trocarMinhaSenha } from '../../../../dist/login/regras/contas.js';
+import { entrarNaConta, sairDaConta, trocarMinhaSenha } from '../../../../dist/login/regras/contas.js';
+import { cadastrarComEmail, criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
 import { alterarContaPelaAdministracao, criarContaPelaAdministracao, listarContasDeAcesso } from '../../../../dist/administracao/regras/gestaoDeContas.js';
 import { salvarConfiguracaoDeAcesso } from '../../../../dist/administracao/regras/papeis.js';
 import { conferirAcessoAoCanal } from '../../../../dist/login/regras/conferirAcessoAoCanal.js';
@@ -17,13 +18,13 @@ const codigo = async (fn, padrao) => { await assert.rejects(async () => fn(), (e
 async function entrarComo(b, criada, login) { sairDaConta(b); await entrarNaConta({ login, senha: criada.senhaTemporaria }, b); await trocarMinhaSenha({ atual: criada.senhaTemporaria, nova: 'Nova-senha-forte-2026' }, b); }
 
 test('a primeira conta nasce admin e vê a Administração', async (t) => {
-  const b = pasta(t); const r = await ativarLogin(ADMIN, b);
+  const b = pasta(t); const r = await criarPrimeiraConta(ADMIN, b);
   assert.equal(r.conta.admin, true); assert.equal(sessaoParaJanela(b).telas.administracao, 'USAR');
   assert.doesNotThrow(() => conferirAcessoAoCanal('usuarios:listar', b));
 });
 
 test('papel Administrador sem a marca não vê a Administração; papel comum com a marca vê', async (t) => {
-  const b = pasta(t); await ativarLogin(ADMIN, b);
+  const b = pasta(t); await criarPrimeiraConta(ADMIN, b);
   const semMarca = await criarContaPelaAdministracao({ login: 'papel.admin', nome: 'Papel Admin', papel: 'administrador' }, b);
   const comMarca = await criarContaPelaAdministracao({ login: 'qa.dev', nome: 'QA Dev', papel: 'qa', admin: true }, b);
   assert.equal(semMarca.conta.admin, false); assert.equal(comMarca.conta.admin, true);
@@ -35,7 +36,7 @@ test('papel Administrador sem a marca não vê a Administração; papel comum co
 });
 
 test('marcar e desmarcar pela Administração; ninguém tira a própria marca nem a do último admin', async (t) => {
-  const b = pasta(t); const eu = (await ativarLogin(ADMIN, b)).conta;
+  const b = pasta(t); const eu = (await criarPrimeiraConta(ADMIN, b)).conta;
   const outra = await criarContaPelaAdministracao({ login: 'leitora', nome: 'Leitora', papel: 'leitor' }, b);
   assert.equal(alterarContaPelaAdministracao({ id: outra.conta.id, admin: true }, b).admin, true);
   assert.equal(alterarContaPelaAdministracao({ id: outra.conta.id, admin: false }, b).admin, false);
@@ -51,8 +52,8 @@ test('conta antiga sem a marca gravada segue o papel Administrador e não perde 
 });
 
 test('cadastro pela tela de entrada nasce sem a marca e não vê a Administração', async (t) => {
-  const b = pasta(t); await ativarLogin(ADMIN, b);
+  const b = pasta(t); await criarPrimeiraConta(ADMIN, b);
   salvarConfiguracaoDeAcesso({ cadastroAberto: true, aprovarCadastros: false, papelDoCadastro: 'qa', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15 }, b);
-  sairDaConta(b); await cadastrarConta({ login: 'nova', nome: 'Nova', senha: 'Senha-forte-2026' }, b); await entrarNaConta({ login: 'nova', senha: 'Senha-forte-2026' }, b);
+  sairDaConta(b); await cadastrarComEmail({ login: 'nova', nome: 'Nova', senha: 'Senha-forte-2026' }, b); await entrarNaConta({ login: 'nova', senha: 'Senha-forte-2026' }, b);
   assert.equal(sessaoParaJanela(b).usuario.admin, false); assert.equal(sessaoParaJanela(b).telas.administracao, 'NENHUM');
 });

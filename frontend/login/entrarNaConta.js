@@ -1,5 +1,5 @@
 'use strict';
-/** Entrada do Prumo com o login ligado: entrar, criar conta, esqueci a senha, troca de senha temporária, menu da conta e telas por permissão. */
+/** Entrada do Prumo: entrar, criar conta (e-mail confirmado por código, GitHub ou Google), esqueci a senha pelo e-mail, troca de senha temporária, idioma, site, menu da conta e telas por permissão. */
 window.PrumoConta = (() => {
   let sessao = null; let dialogo = null; let lugar = null; let vigia = null;
   const codigoDo = (erro) => /^([A-Z][A-Z0-9_]{2,63}):/.exec(String(erro || ''))?.[1] || null;
@@ -22,7 +22,7 @@ window.PrumoConta = (() => {
   function mensagemDaEntrada(erro) {
     const codigo = codigoDo(erro);
     const mensagens = {
-      LOGIN_INVALID: 'Login ou senha incorretos. Confira os dados ou use Esqueci a senha.',
+      LOGIN_INVALID: 'E-mail ou senha incorretos. Confira os dados ou use Esqueci a senha.',
       LOGIN_NOT_ACTIVE: 'Ainda não existe conta neste computador. Selecione Criar conta para começar.',
       LOGIN_SETUP_REQUIRED: 'Crie a primeira conta de Administrador para começar.',
       LOGIN_RATE_LIMIT: 'Muitas tentativas de acesso. Aguarde um minuto e tente novamente.',
@@ -32,7 +32,14 @@ window.PrumoConta = (() => {
       ACCOUNT_PENDING: 'Este cadastro aguarda aprovação da Administração.',
       ACCOUNT_DISABLED: 'Esta conta está desativada. Procure a Administração.',
       ACCOUNT_LOCKED: 'Conta temporariamente bloqueada por tentativas incorretas. Aguarde ou solicite desbloqueio à Administração.',
-      RECOVERY_INVALID: 'Login ou código de recuperação incorretos. Confira o código ou peça ajuda à Administração.',
+      EMAIL_INVALID: 'Confira o e-mail informado.',
+      EMAIL_TAKEN: 'Esse e-mail já tem conta neste computador. Entre com ele ou use Esqueci a senha.',
+      EMAIL_WAIT: 'Espere um minuto para pedir outro código.',
+      EMAIL_RATE_LIMIT: 'Muitos códigos pedidos para este e-mail. Espere alguns minutos e tente de novo.',
+      EMAIL_SEND_FAILED: 'O e-mail não pôde ser enviado agora. Tente de novo em instantes.',
+      EMAIL_SERVICE_UNAVAILABLE: 'Não foi possível falar com o serviço de envio. Confira a internet e tente de novo.',
+      CODE_INVALID: 'Código incorreto. Confira o e-mail e tente de novo.',
+      CODE_EXPIRED: 'O código venceu ou foi digitado errado vezes demais. Peça um novo.',
       PASSWORD_INVALID: 'A senha atual não confere.',
       PASSWORD_WEAK: 'A senha nova não atende às regras de segurança. Use pelo menos 10 caracteres, com letras e números.',
       PASSWORD_CHANGE_REQUIRED: 'Troque a senha temporária para continuar.',
@@ -41,7 +48,12 @@ window.PrumoConta = (() => {
       SIGNUP_CLOSED: 'O cadastro de novas contas está fechado. Solicite acesso à Administração.',
       NAME_INVALID: 'Confira o nome informado.',
       GITHUB_LOGIN_NOT_CONFIGURED: 'O acesso com GitHub ainda não foi configurado pela Administração.',
-      GOOGLE_LOGIN_NOT_CONFIGURED: 'O acesso com Google ainda não foi configurado pela Administração.'
+      GOOGLE_LOGIN_NOT_CONFIGURED: 'O acesso com Google ainda não foi configurado pela Administração.',
+      GITHUB_CLIENT_INVALID: 'O Client ID do GitHub não tem o formato esperado. Copie de novo da página do OAuth App.',
+      GITHUB_SECRET_REQUIRED: 'Informe o Client Secret do GitHub.',
+      GOOGLE_CLIENT_INVALID: 'O Client ID do Google não tem o formato esperado. Copie de novo do Google Cloud Console.',
+      GOOGLE_SECRET_REQUIRED: 'Informe o Client Secret do Google.',
+      CREDENTIAL_PROTECTION_UNAVAILABLE: 'O cofre de senhas do sistema não está disponível; o segredo não foi guardado. Crie a conta com login e senha.'
     };
     const validacaoLocal = ['Preencha todos os campos.', 'A confirmação não é igual à senha.'];
     if (validacaoLocal.includes(erro)) return erro;
@@ -64,7 +76,7 @@ window.PrumoConta = (() => {
     return form;
   }
   const iguais = (form, a, b) => { if (a.input.value === b.input.value) return true; mostrarErro(form, tr('A confirmação não é igual à senha.')); b.input.focus(); return false; };
-  const link = (texto, fn, id) => h('button', { type: 'button', class: 'ds-link', id, onclick: fn }, tr(texto));
+  const link = (texto, fn, id) => h('button', { type: 'button', class: 'ds-link', id, ...(fn ? { onclick: fn } : {}) }, tr(texto));
 
   function abrirDialogo() {
     if (!dialogo) {
@@ -78,53 +90,127 @@ window.PrumoConta = (() => {
     if (!dialogo.open) dialogo.showModal();
     return dialogo;
   }
-  function trocarVista(...nos) { const d = abrirDialogo(); lugar.replaceChildren(h('div', { class: 'entrada-cartao' }, ...nos)); d.querySelector('input')?.focus(); }
+  function trocarVista(...nos) { const d = abrirDialogo(); lugar.replaceChildren(h('div', { class: 'entrada-cartao' }, ...nos), rodapeDaEntrada()); d.querySelector('.entrada-cartao input')?.focus(); }
+
+  /** Idioma escolhido antes de entrar: vale na hora para a janela e é salvo nas preferências assim que houver sessão. */
+  const IDIOMA_PENDENTE = 'idioma-da-entrada';
+  function aplicarIdioma(i) { PrumoI18n.definir(i); document.documentElement.lang = PrumoI18n.idioma; if (PrumoI18n.idioma === 'en') PrumoI18n.traduzirDocumento(); }
+  async function salvarIdiomaPendente() {
+    let pendente = null; try { pendente = localStorage.getItem(IDIOMA_PENDENTE); } catch { /* sem armazenamento */ }
+    if (!pendente) return;
+    const r = await api.salvarPreferencias({ idioma: pendente }); if (r.ok) try { localStorage.removeItem(IDIOMA_PENDENTE); } catch { /* sem armazenamento */ }
+  }
+  /** Abaixo do cartão, em todas as vistas da entrada: idioma e o site oficial (documentação), que não dependem de conta. */
+  function rodapeDaEntrada() {
+    const idioma = h('select', { id: 'entrada-idioma', 'aria-label': tr('Idioma') }, [['pt-BR', 'Português (Brasil)'], ['en', 'English']].map(([v, t]) => h('option', { value: v, selected: v === PrumoI18n.idioma, 'data-i18n-ignore': '' }, t)));
+    idioma.addEventListener('change', () => { aplicarIdioma(idioma.value); try { localStorage.setItem(IDIOMA_PENDENTE, idioma.value); } catch { /* vale só nesta janela */ } });
+    const site = h('button', { type: 'button', class: 'ds-link', id: 'entrada-site' }, DS.icone('livro'), h('span', {}, tr('Site e documentação')));
+    site.addEventListener('click', () => { void api.abrirSite(); });
+    return h('div', { class: 'entrada-rodape' }, h('label', { class: 'entrada-idioma' }, DS.icone('globo'), idioma), site);
+  }
 
   /** Sem nenhuma conta neste computador: a entrada continua sendo a primeira tela, e Criar conta leva à conta de Administrador. */
   const semContas = () => !!sessao && !sessao.loginAtivo;
+  const idiomaDoEmail = () => (PrumoI18n.idioma === 'en' ? 'en' : 'pt-BR');
   function vistaEntrar(aviso) {
-    const login = campo('entrada-login', 'Login', 'text', { autocomplete: 'username', maxlength: 60, autocapitalize: 'off' });
+    const login = campo('entrada-login', 'E-mail ou login', 'text', { autocomplete: 'username', maxlength: 254, autocapitalize: 'off' });
     const senha = campo('entrada-senha', 'Senha', 'password', { autocomplete: 'current-password', maxlength: 200 });
-    const rodape = [semContas() || sessao?.cadastroAberto ? link('Criar conta', () => (semContas() ? vistaPrimeiroAcesso() : vistaCadastrar()), 'entrada-ir-cadastro') : null, semContas() ? null : link('Esqueci a senha', () => vistaRecuperar(), 'entrada-ir-recuperar')].filter(Boolean);
-    trocarVista(...cartao('Entrar', semContas() ? 'Este computador ainda não tem contas.' : 'Use a conta que a Administração criou para você.'), aviso ? DS.alerta(aviso, 'aviso') : null,
+    const rodape = [semContas() || sessao?.cadastroAberto ? link('Criar conta', () => vistaCriarConta(semContas()), 'entrada-ir-cadastro') : null, semContas() ? null : link('Esqueci a senha', () => vistaRecuperar(), 'entrada-ir-recuperar')].filter(Boolean);
+    // Três caminhos: e-mail (confirmado por código), GitHub ou Google.
+    trocarVista(...cartao('Entrar', semContas() ? 'Este computador ainda não tem contas. Crie a primeira com o seu e-mail, com o GitHub ou com o Google.' : 'Entre com o e-mail e a senha da sua conta, com o GitHub ou com o Google.'), aviso ? DS.alerta(aviso, 'aviso') : null,
       formulario([login, senha], 'Entrar', async (form) => {
         const r = await api.contaEntrar(login.input.value, senha.input.value);
         if (!r.ok) { senha.input.value = ''; mostrarErro(form, r.error); return; }
         sessao = r.data; if (sessao.usuario?.trocarSenha) vistaTrocar(); else location.reload();
-      }, rodape), semContas() ? null : botoesExternos('entrar'));
+      }, rodape), botoesExternos(semContas() ? 'ativar' : 'entrar'));
   }
-  function vistaCadastrar() {
-    const nome = campo('cadastro-nome', 'Nome', 'text', { autocomplete: 'name', maxlength: 80 });
-    const login = campo('cadastro-login', 'Login', 'text', { autocomplete: 'username', maxlength: 40, autocapitalize: 'off' });
-    const senha = campo('cadastro-senha', 'Senha', 'password', { autocomplete: 'new-password', maxlength: 200 }, 'Mínimo de 10 caracteres, com letras e números.');
-    const confirma = campo('cadastro-confirma', 'Confirmar senha', 'password', { autocomplete: 'new-password', maxlength: 200 });
-    trocarVista(...cartao('Criar conta', sessao?.aprovarCadastros ? 'A conta só funciona depois que a Administração aprovar.' : 'A conta entra com o papel definido pela Administração.'),
-      formulario([nome, login, senha, confirma], 'Criar conta', async (form) => {
+
+  /** Criar conta por e-mail: nome, e-mail e senha; o Prumo manda um código ao e-mail e a conta só nasce com ele. Sem contas, é a de Administrador. */
+  function vistaCriarConta(primeira, aviso, antes = {}) {
+    const px = primeira ? 'primeiro' : 'cadastro';
+    const nome = campo(px + '-nome', 'Nome', 'text', { autocomplete: 'name', maxlength: 80, value: antes.nome || '' });
+    const email = campo(px + '-email', 'E-mail', 'email', { autocomplete: 'email', maxlength: 254, autocapitalize: 'off', value: antes.email || '' });
+    const senha = campo(px + '-senha', 'Senha', 'password', { autocomplete: 'new-password', maxlength: 200 }, 'Mínimo de 10 caracteres, com letras e números.');
+    const confirma = campo(px + '-confirma', 'Confirmar senha', 'password', { autocomplete: 'new-password', maxlength: 200 });
+    const descricao = primeira ? 'Primeiro acesso neste computador. Vamos mandar um código para confirmar o seu e-mail.'
+      : sessao?.aprovarCadastros ? 'Vamos mandar um código para confirmar o seu e-mail. A conta só funciona depois que a Administração aprovar.' : 'Vamos mandar um código para confirmar o seu e-mail.';
+    trocarVista(...cartao(primeira ? 'Criar conta de Administrador' : 'Criar conta', descricao), aviso ? DS.alerta(aviso, 'aviso') : null,
+      formulario([nome, email, senha, confirma], 'Enviar código', async (form) => {
         if (!iguais(form, senha, confirma)) return;
-        const r = await api.contaCadastrar(login.input.value, nome.input.value, senha.input.value);
+        const dados = { primeira, nome: nome.input.value, email: email.input.value, senha: senha.input.value };
+        // Voltou de Corrigir dados com o mesmo e-mail: o código já mandado ainda vale (10 minutos), então não pede outro.
+        if (antes.enviadoEm && dados.email.trim().toLowerCase() === antes.email && Date.now() - antes.enviadoEm < 9 * 60_000) { vistaConfirmarEmail({ ...dados, email: antes.email, enviadoEm: antes.enviadoEm }); return; }
+        const r = await api.contaCodigo(dados.email, 'CADASTRO', idiomaDoEmail());
         if (!r.ok) { mostrarErro(form, r.error); return; }
-        vistaCodigo(r.data.codigoRecuperacao, r.data.estado === 'PENDENTE' ? 'Cadastro enviado. A Administração precisa aprovar antes do primeiro acesso.' : 'Conta criada. Já pode entrar.', () => vistaEntrar());
-      }, [link('Já tenho conta', () => vistaEntrar(), 'entrada-voltar')]), botoesExternos('cadastrar'));
+        vistaConfirmarEmail({ ...dados, email: r.data.email, enviadoEm: Date.now() });
+      }, [link(primeira ? 'Voltar para entrar' : 'Já tenho conta', () => vistaEntrar(), 'entrada-voltar')]), botoesExternos(primeira ? 'ativar' : 'cadastrar'));
   }
+
+  /** Botão de pedir outro código: fica desligado durante a espera que o Prumo exige entre um envio e outro. */
+  function reenviar(enviar, id, enviadoEm = Date.now()) {
+    const botao = link('Reenviar código', null, id); let fim = enviadoEm + 60_000;
+    const rotulo = () => { const s = Math.ceil((fim - Date.now()) / 1000); botao.disabled = s > 0; botao.textContent = s > 0 ? tr('Reenviar código ({s} s)', { s }) : tr('Reenviar código'); return s > 0; };
+    const relogio = setInterval(() => { if (!botao.isConnected || !rotulo()) clearInterval(relogio); }, 1000); rotulo();
+    botao.addEventListener('click', async () => {
+      botao.disabled = true; const r = await enviar();
+      if (!r.ok) { avisar(mensagemDaEntrada(r.error), true); botao.disabled = false; return; }
+      avisar(tr('Código reenviado.')); fim = Date.now() + 60_000; rotulo();
+      const relogio2 = setInterval(() => { if (!botao.isConnected || !rotulo()) clearInterval(relogio2); }, 1000);
+    });
+    return botao;
+  }
+  const campoDoCodigo = (id) => campo(id, 'Código de 6 dígitos', 'text', { autocomplete: 'one-time-code', inputmode: 'numeric', maxlength: 6, pattern: '[0-9]{6}', placeholder: '000000' });
+
+  /** Segunda etapa do cadastro: a pessoa digita o código que chegou no e-mail e a conta está criada. */
+  function vistaConfirmarEmail(d) {
+    const codigo = campoDoCodigo('confirmar-codigo');
+    trocarVista(...cartao('Confirme seu e-mail', null), h('p', { class: 'entrada-desc' }, tr('Mandamos um código de 6 dígitos para'), ' ', h('strong', { 'data-i18n-ignore': '' }, d.email), tr('. Ele vale por 10 minutos. Confira também a caixa de spam.')),
+      formulario([codigo], 'Concluir cadastro', async (form) => {
+        if (d.primeira) {
+          const r = await api.usuariosAtivar(d.email, d.nome, d.senha, codigo.input.value);
+          if (!r.ok) { mostrarErro(form, r.error); return; }
+          location.reload(); return;
+        }
+        const r = await api.contaCadastrar(d.email, d.nome, d.senha, codigo.input.value);
+        if (!r.ok) { mostrarErro(form, r.error); return; }
+        if (r.data.estado === 'PENDENTE') { vistaAviso('Cadastro enviado', 'E-mail confirmado. A Administração precisa aprovar a conta antes do primeiro acesso.'); return; }
+        const e = await api.contaEntrar(d.email, d.senha); if (e.ok) { location.reload(); return; }
+        vistaEntrar(mensagemDaEntrada(e.error));
+      }, [reenviar(async () => { const r = await api.contaCodigo(d.email, 'CADASTRO', idiomaDoEmail()); if (r.ok) d.enviadoEm = Date.now(); return r; }, 'confirmar-reenviar', d.enviadoEm), link('Corrigir dados', () => vistaCriarConta(d.primeira, null, d), 'entrada-voltar')]));
+  }
+  function vistaAviso(titulo, texto) {
+    trocarVista(...cartao(titulo, texto), h('div', { class: 'entrada-links' }, DS.acao('Voltar para entrar', () => vistaEntrar(), { id: 'entrada-continuar', primaria: true })));
+  }
+
+  /** Esqueci a senha: um código vai para o e-mail da conta; com ele a pessoa define a senha nova. Começando em Minha conta, o e-mail já vem preenchido. */
   function vistaRecuperar() {
-    const login = campo('recuperar-login', 'Login', 'text', { autocomplete: 'username', maxlength: 60, autocapitalize: 'off' });
-    if (sessao?.usuario?.login) login.input.value = sessao.usuario.login;
-    const codigo = campo('recuperar-codigo', 'Código de recuperação', 'text', { autocomplete: 'off', maxlength: 40, placeholder: 'XXXXX-XXXXX-XXXXX-XXXXX' });
-    const senha = campo('recuperar-senha', 'Senha nova', 'password', { autocomplete: 'new-password', maxlength: 200 });
+    const email = campo('recuperar-email', 'E-mail', 'email', { autocomplete: 'email', maxlength: 254, autocapitalize: 'off', value: sessao?.usuario?.email || '' });
+    trocarVista(...cartao('Esqueci a senha', 'Vamos mandar um código ao e-mail da sua conta.'),
+      DS.alerta('Conta sem e-mail (criada pela Administração ou pelo GitHub/Google): peça à Administração para redefinir sua senha.', 'info'),
+      formulario([email], 'Enviar código', async (form) => {
+        const r = await api.contaCodigo(email.input.value, 'SENHA', idiomaDoEmail());
+        if (!r.ok) { mostrarErro(form, r.error); return; }
+        vistaSenhaNova(r.data.email);
+      }, [voltarDaRecuperacao()]));
+  }
+  const voltarDaRecuperacao = () => link(sessao?.usuario ? 'Voltar para Minha conta' : 'Voltar para entrar', () => {
+    if (sessao?.usuario) { dialogo.close(); document.body.classList.remove('com-entrada'); minhaConta(); }
+    else vistaEntrar();
+  }, 'entrada-voltar');
+  function vistaSenhaNova(email) {
+    const codigo = campoDoCodigo('recuperar-codigo');
+    const senha = campo('recuperar-senha', 'Senha nova', 'password', { autocomplete: 'new-password', maxlength: 200 }, 'Mínimo de 10 caracteres, com letras e números.');
     const confirma = campo('recuperar-confirma', 'Confirmar senha nova', 'password', { autocomplete: 'new-password', maxlength: 200 });
-    trocarVista(...cartao('Esqueci a senha', 'Use o código de recuperação que apareceu quando a conta foi criada.'),
-      DS.alerta('Sem o código, peça à Administração para redefinir sua senha: você recebe uma senha temporária e troca no primeiro acesso.', 'info'),
-      formulario([login, codigo, senha, confirma], 'Definir senha nova', async (form) => {
+    // A tela não diz se o e-mail tem conta: a resposta é a mesma nos dois casos.
+    trocarVista(...cartao('Defina a senha nova', null), h('p', { class: 'entrada-desc' }, tr('Se houver conta com'), ' ', h('strong', { 'data-i18n-ignore': '' }, email), tr(', mandamos um código de 6 dígitos. Ele vale por 10 minutos.')),
+      formulario([codigo, senha, confirma], 'Definir senha nova', async (form) => {
         if (!iguais(form, senha, confirma)) return;
-        const r = await api.contaRecuperar(login.input.value, codigo.input.value, senha.input.value);
+        const r = await api.contaRecuperar(email, codigo.input.value, senha.input.value);
         if (!r.ok) { mostrarErro(form, r.error); return; }
         // Se a recuperação começou em Minha conta, encerra a sessão antes do próximo login.
         if (sessao?.usuario) { await api.contaSair(); sessao = null; }
-        vistaCodigo(r.data.codigoRecuperacao, 'Senha nova definida. O código antigo deixou de valer; guarde este.', () => location.reload());
-      }, [link(sessao?.usuario ? 'Voltar para Minha conta' : 'Voltar para entrar', () => {
-        if (sessao?.usuario) { dialogo.close(); document.body.classList.remove('com-entrada'); minhaConta(); }
-        else vistaEntrar();
-      }, 'entrada-voltar')]));
+        trocarVista(...cartao('Senha nova definida', 'Entre com o seu e-mail e a senha nova.'), h('div', { class: 'entrada-links' }, DS.acao('Entrar', () => location.reload(), { primaria: true, id: 'entrada-continuar' })));
+      }, [reenviar(() => api.contaCodigo(email, 'SENHA', idiomaDoEmail()), 'recuperar-reenviar'), voltarDaRecuperacao()]));
   }
   /** Senha temporária (dada pela Administração) precisa ser trocada antes de usar qualquer tela. */
   function vistaTrocar() {
@@ -136,32 +222,42 @@ window.PrumoConta = (() => {
         if (!iguais(form, nova, confirma)) return;
         const r = await api.contaSenha(atual.input.value, nova.input.value);
         if (!r.ok) { mostrarErro(form, r.error); return; }
-        if (r.data.codigoRecuperacao) vistaCodigo(r.data.codigoRecuperacao, 'Senha trocada.', () => location.reload()); else location.reload();
+        location.reload();
       }, [link('Sair', async () => { await api.contaSair(); location.reload(); }, 'entrada-sair')]));
   }
-  /** O código de recuperação aparece uma única vez: o Prumo guarda só o resumo dele. */
-  function vistaCodigo(codigo, mensagem, continuar) {
-    const caixa = h('code', { id: 'entrada-codigo', class: 'entrada-codigo', 'data-i18n-ignore': '' }, codigo);
-    trocarVista(...cartao('Guarde o código de recuperação', mensagem),
-      caixa, h('p', { class: 'entrada-regra' }, tr('Ele aparece só agora. Com ele você define uma senha nova se esquecer a atual. Guarde fora deste computador.')),
-      h('div', { class: 'entrada-links' }, DS.acao('Copiar código', async () => { try { await navigator.clipboard.writeText(codigo); avisar(tr('Código copiado.')); } catch { avisar(tr('Não foi possível copiar; anote o código.'), true); } }, { id: 'entrada-copiar' }),
-        DS.acao('Guardei o código', () => continuar(), { primaria: true, id: 'entrada-continuar' })));
-  }
 
-  /** Provedores externos: o botão só aparece quando a Administração configurou o aplicativo do provedor. Serve para entrar e para se cadastrar. */
+  /**
+   * Provedores externos. Para entrar e se cadastrar, o botão só aparece quando a Administração configurou o aplicativo do provedor.
+   * No primeiro acesso (sem nenhuma conta) os dois aparecem sempre: sem configuração, a própria entrada pede o Client ID e o segredo.
+   */
   const PROVEDORES = {
-    github: { nome: 'GitHub', ativo: () => sessao?.entradaGithub, iniciar: (a) => api.contaGithubIniciar(a), estado: (c) => api.contaGithubEstado(c), titulo: 'Autorize no GitHub', texto: 'Autorize no navegador; você volta já autenticado.', entrar: 'Entrar com o GitHub', cadastrar: 'Cadastrar com o GitHub', ativar: 'Criar conta com o GitHub' },
-    google: { nome: 'Google', ativo: () => sessao?.entradaGoogle, iniciar: (a) => api.contaGoogleIniciar(a), estado: (c) => api.contaGoogleEstado(c), titulo: 'Autorize no Google', texto: 'Autorize no navegador; você volta já autenticado.', entrar: 'Entrar com o Google', cadastrar: 'Cadastrar com o Google', ativar: 'Criar conta com o Google' }
+    github: { nome: 'GitHub', ativo: () => sessao?.entradaGithub, iniciar: (a) => api.contaGithubIniciar(a), estado: (c) => api.contaGithubEstado(c), salvar: (id, segredo) => api.acessoGithub(id, segredo), maxId: 60, titulo: 'Autorize no GitHub', texto: 'Autorize no navegador; você volta já autenticado.', entrar: 'Entrar com o GitHub', cadastrar: 'Cadastrar com o GitHub', ativar: 'Criar conta com o GitHub', configurar: 'Configurar o acesso com o GitHub', comoConfigurar: 'OAuth App em github.com/settings/developers, com a callback http://127.0.0.1/callback. O segredo fica no cofre do sistema.' },
+    google: { nome: 'Google', ativo: () => sessao?.entradaGoogle, iniciar: (a) => api.contaGoogleIniciar(a), estado: (c) => api.contaGoogleEstado(c), salvar: (id, segredo) => api.acessoGoogle(id, segredo), maxId: 120, titulo: 'Autorize no Google', texto: 'Autorize no navegador; você volta já autenticado.', entrar: 'Entrar com o Google', cadastrar: 'Cadastrar com o Google', ativar: 'Criar conta com o Google', configurar: 'Configurar o acesso com o Google', comoConfigurar: 'Credencial OAuth do tipo "Aplicativo para computador", no Google Cloud Console. O segredo fica no cofre do sistema.' }
   };
   const botoesExternos = (verbo) => {
-    const ativos = Object.entries(PROVEDORES).filter(([, p]) => p.ativo());
-    return ativos.length ? h('div', { class: 'entrada-outros' }, h('span', { class: 'entrada-ou' }, tr('ou')), ...ativos.map(([id, p]) => DS.acao(p[verbo], () => vistaExterna(id, verbo === 'ativar'), { id: 'entrada-' + id, icone: 'externo' }))) : null;
+    const todos = verbo === 'ativar' && semContas();
+    const ativos = Object.entries(PROVEDORES).filter(([, p]) => todos || p.ativo());
+    return ativos.length ? h('div', { class: 'entrada-outros' }, h('span', { class: 'entrada-ou' }, tr('ou')), ...ativos.map(([id, p]) => DS.acao(p[verbo], () => (p.ativo() ? vistaExterna(id, verbo === 'ativar') : vistaConfigurarProvedor(id)), { id: 'entrada-' + id, icone: 'externo' }))) : null;
   };
+  /** Primeiro acesso pelo GitHub ou Google ainda sem configuração: guarda o Client ID e o segredo (só enquanto não há contas) e segue para a autorização. */
+  function vistaConfigurarProvedor(provedor) {
+    const p = PROVEDORES[provedor];
+    const id = campo('provedor-id', 'Client ID', 'text', { autocomplete: 'off', maxlength: p.maxId, autocapitalize: 'off' });
+    const segredo = campo('provedor-segredo', 'Client Secret', 'password', { autocomplete: 'off', maxlength: 200 });
+    trocarVista(...cartao(p.configurar, 'Feito uma vez neste computador; depois é só autorizar no navegador. Quem administra pode trocar isso em Administração › Configurações gerais.'),
+      DS.alerta(p.comoConfigurar, 'info'),
+      formulario([id, segredo], 'Salvar e continuar', async (form) => {
+        const r = await p.salvar(id.input.value, segredo.input.value); segredo.input.value = '';
+        if (!r.ok) { mostrarErro(form, r.error); return; }
+        const s = await api.contaSessao(); if (s.ok) sessao = s.data;
+        void vistaExterna(provedor, true);
+      }, [link('Voltar para entrar', () => vistaEntrar(), 'entrada-voltar')]));
+  }
   /** Espera a autorização no navegador: o Prumo abre a página do provedor e, quando a pessoa autoriza, ela volta já dentro. */
   async function vistaExterna(provedor, ativar = false) {
     const p = PROVEDORES[provedor]; let parar = false;
     // Criando a primeira conta ainda não existe tela de entrada: desistir ou falhar volta ao primeiro acesso, nunca ao aplicativo.
-    const voltar = (aviso) => { if (ativar) vistaPrimeiroAcesso(aviso); else vistaEntrar(aviso); };
+    const voltar = (aviso) => { if (ativar) vistaCriarConta(true, aviso); else vistaEntrar(aviso); };
     const desistir = async () => { parar = true; await p.estado(true); voltar(); };
     trocarVista(...cartao(p.titulo, p.texto),
       h('p', { class: 'entrada-regra', id: 'entrada-' + provedor + '-espera', role: 'status' }, tr('Aguardando a autorização…')), h('div', { class: 'entrada-links' }, DS.acao('Cancelar', desistir, { id: 'entrada-' + provedor + '-cancelar' })));
@@ -174,21 +270,6 @@ window.PrumoConta = (() => {
       else if (e.estado === 'PENDENTE') trocarVista(...cartao('Cadastro recebido', e.mensagem), h('div', { class: 'entrada-links' }, DS.acao('Voltar para entrar', () => vistaEntrar(), { id: 'entrada-voltar', primaria: true })));
       else voltar(mensagemDaEntrada(e.mensagem || ''));
     }
-  }
-
-  /** Primeiro acesso: sem nenhuma conta o Prumo não abre. A pessoa cria a conta de Administrador (senha ou GitHub/Google) e só então entra. */
-  function vistaPrimeiroAcesso(aviso) {
-    const nome = campo('primeiro-nome', 'Nome', 'text', { autocomplete: 'name', maxlength: 80 });
-    const login = campo('primeiro-login', 'Login', 'text', { autocomplete: 'username', maxlength: 40, autocapitalize: 'off' });
-    const senha = campo('primeiro-senha', 'Senha', 'password', { autocomplete: 'new-password', maxlength: 200 }, 'Mínimo de 10 caracteres, com letras e números.');
-    const confirma = campo('primeiro-confirma', 'Confirmar senha', 'password', { autocomplete: 'new-password', maxlength: 200 });
-    trocarVista(...cartao('Criar conta de Administrador', 'Primeiro acesso neste computador.'), aviso ? DS.alerta(aviso, 'aviso') : null,
-      formulario([nome, login, senha, confirma], 'Criar conta', async (form) => {
-        if (!iguais(form, senha, confirma)) return;
-        const r = await api.usuariosAtivar(login.input.value, nome.input.value, senha.input.value);
-        if (!r.ok) { mostrarErro(form, r.error); return; }
-        vistaCodigo(r.data.codigoRecuperacao, 'Conta criada. Você já está dentro.', () => location.reload());
-      }, [link('Voltar para entrar', () => vistaEntrar(), 'entrada-voltar')]), botoesExternos('ativar'));
   }
 
   /** Esconde do menu o que o papel não permite (e o grupo que ficar vazio) e mostra quem está na sessão. */
@@ -219,7 +300,7 @@ window.PrumoConta = (() => {
     const nova = h('input', { id: 'minha-nova', type: 'password', autocomplete: 'new-password', maxlength: 200 });
     const confirma = h('input', { id: 'minha-confirma', type: 'password', autocomplete: 'new-password', maxlength: 200 });
     DS.modal('Minha conta', [
-      DS.meta([['Login', h('span', { 'data-i18n-ignore': '' }, u.login)], ['Papel', h('span', { 'data-i18n-ignore': '' }, u.papelNome)], ['Último acesso', u.ultimoAcesso ? new Date(u.ultimoAcesso).toLocaleString() : '—']]),
+      DS.meta([['E-mail', h('span', { 'data-i18n-ignore': '' }, u.email || '—')], ['Login', h('span', { 'data-i18n-ignore': '' }, u.login)], ['Papel', h('span', { 'data-i18n-ignore': '' }, u.papelNome)], ['Último acesso', u.ultimoAcesso ? new Date(u.ultimoAcesso).toLocaleString() : '—']]),
       DS.secao('Nome de exibição', [DS.campo('Nome', nome), h('div', { class: 'ds-cab-acoes ds-mt' }, DS.acao('Salvar nome', async () => {
         const r = await chamar(() => api.contaPerfil(nome.value)); if (!r) return; sessao = r; aplicarMenu(); avisar(tr('Nome atualizado.'));
       }, { id: 'minha-salvar-nome' }))]),
@@ -228,11 +309,10 @@ window.PrumoConta = (() => {
           if (nova.value !== confirma.value) { avisar(tr('A confirmação não é igual à senha.'), true); return; }
           const r = await chamar(() => api.contaSenha(atual.value, nova.value)); atual.value = nova.value = confirma.value = ''; if (!r) return;
           avisar(tr('Senha trocada.'));
-          if (r.codigoRecuperacao) { DS.fecharModal(); vistaCodigo(r.codigoRecuperacao, 'Senha trocada.', () => { dialogo.close(); document.body.classList.remove('com-entrada'); }); }
         }, { id: 'minha-trocar-senha', primaria: true }))]),
       DS.secao('Recuperação de acesso', [
-        h('p', { class: 'suave' }, tr('Esqueceu a senha atual? Você pode redefini-la com o código de recuperação guardado no cadastro. Sem o código, solicite uma senha temporária à Administração.')),
-        DS.acao('Redefinir senha com código', () => { DS.fecharModal(); vistaRecuperar(); }, { id: 'minha-recuperar-senha' })
+        h('p', { class: 'suave' }, tr(u.email ? 'Esqueceu a senha atual? Receba um código no seu e-mail e defina uma nova.' : 'Esta conta não tem e-mail. Esqueceu a senha atual? Solicite uma senha temporária à Administração.')),
+        u.email ? DS.acao('Redefinir senha pelo e-mail', () => { DS.fecharModal(); vistaRecuperar(); }, { id: 'minha-recuperar-senha' }) : null
       ])
     ], { tamanho: 'md', subtitulo: u.nome });
   }
@@ -259,12 +339,16 @@ window.PrumoConta = (() => {
 
   /** Chamado pela inicialização da janela: true quando pode seguir (sem login ou com sessão válida). */
   async function iniciar() {
+    // A entrada já fala o idioma salvo (ou o escolhido nela antes de entrar); as preferências são públicas.
+    const pref = await api.preferencias(); let escolhido = null; try { escolhido = localStorage.getItem(IDIOMA_PENDENTE); } catch { /* sem armazenamento */ }
+    const idioma = escolhido || (pref.ok ? pref.data.preferencias?.idioma : null); if (idioma) aplicarIdioma(idioma);
     const r = await api.contaSessao();
     if (!r.ok) { trocarVista(...cartao('Não foi possível ler as contas', null), DS.alerta('As informações das contas não puderam ser carregadas. Nenhum acesso foi liberado.', 'falha'), h('p', { class: 'entrada-regra' }, tr('O arquivo de contas deste computador está ilegível. Quem administra este computador pode restaurá-lo de um backup.'))); return false; }
     sessao = r.data;
     if (!sessao.loginAtivo) { vistaEntrar(); return false; }
     if (sessao.loginAtivo && !sessao.usuario) { vistaEntrar(sessao.expirou ? 'A sessão terminou por inatividade; entre de novo.' : null); return false; }
     if (sessao.usuario?.trocarSenha) { vistaTrocar(); return false; }
+    await salvarIdiomaPendente();
     aplicarMenu(); protegerTelas();
     if (sessao.loginAtivo && !pode('inicio')) { const p = primeiraTela(); setTimeout(() => mostrar(p), 0); }
     // A sessão vence por inatividade no processo principal; a janela confere a cada minuto (sem renovar) e volta para a entrada.

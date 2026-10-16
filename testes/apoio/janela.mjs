@@ -5,6 +5,7 @@ import { _electron as electron } from 'playwright-core';
 import electronPath from 'electron';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { caixaDeEmail } from './caixa-de-email.mjs';
 
 /**
  * Apoio comum aos testes da janela (Playwright sobre o Electron real). Não é um teste.
@@ -23,21 +24,34 @@ export const novoDados = (t) => {
   t.after(async () => { for (const fechar of abertos.get(d)) await fechar().catch(() => {}); abertos.delete(d); fs.rmSync(d, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
   return d;
 };
-/** Conta de teste: o Prumo não abre sem entrar, então abrir() cria (ou usa) esta conta de Administrador. Use { semLogin: true } para testar a própria entrada. */
-export const CONTA_DE_TESTE = { login: 'admin-teste', nome: 'Admin Teste', senha: 'Senha-de-teste-2026' };
-/** Primeiro acesso pela tela, como a pessoa faria: cria a conta de Administrador e entra. Devolve o código de recuperação. */
+/**
+ * Conta de teste: o Prumo não abre sem entrar, então abrir() cria (ou usa) esta conta de Administrador. Use { semLogin: true } para testar a própria entrada.
+ * O login nasce da parte do e-mail antes do @ (admin-teste); a pessoa entra com o e-mail ou com o login.
+ */
+export const CONTA_DE_TESTE = { email: 'admin-teste@prumo.test', login: 'admin-teste', nome: 'Admin Teste', senha: 'Senha-de-teste-2026' };
+/** E-mail de uma conta de teste: quem não informou usa <login>@prumo.test, e o login nasce igual. */
+export const emailDa = (conta) => conta.email || conta.login + '@prumo.test';
+/** Primeiro acesso pela tela, como a pessoa faria: nome, e-mail e senha, o código que chega na caixa de e-mail e pronto, já dentro. */
 export async function primeiroAcesso(page, conta = CONTA_DE_TESTE) {
+  const caixa = await caixaDeEmail(); const email = emailDa(conta);
   await page.waitForSelector('#entrada[open]');
   if (!(await page.locator('#primeiro-nome').count())) await page.click('#entrada-ir-cadastro');
   await page.waitForSelector('#primeiro-nome');
-  await page.fill('#primeiro-nome', conta.nome); await page.fill('#primeiro-login', conta.login); await page.fill('#primeiro-senha', conta.senha); await page.fill('#primeiro-confirma', conta.senha);
-  await page.click('#entrada-enviar'); await page.waitForSelector('#entrada-codigo'); const codigo = (await page.textContent('#entrada-codigo')).trim();
-  await Promise.all([page.waitForEvent('load'), page.click('#entrada-continuar')]); await page.waitForSelector('#conta-botao');
-  return codigo;
+  await page.fill('#primeiro-nome', conta.nome); await page.fill('#primeiro-email', email); await page.fill('#primeiro-senha', conta.senha); await page.fill('#primeiro-confirma', conta.senha);
+  await page.click('#entrada-enviar'); await page.waitForSelector('#confirmar-codigo');
+  await page.fill('#confirmar-codigo', caixa.ultimoCodigo(email));
+  await Promise.all([page.waitForEvent('load'), page.click('#entrada-enviar')]); await page.waitForSelector('#conta-botao');
+}
+/** Cria a primeira conta pelos canais, sem a tela (o código vem da caixa de e-mail dos testes). */
+export async function ativarPelaApi(page, conta = CONTA_DE_TESTE) {
+  const caixa = await caixaDeEmail(); const email = emailDa(conta);
+  const pedido = await page.evaluate((e) => window.prumo.contaCodigo(e, 'CADASTRO'), email); if (!pedido.ok) return pedido;
+  return page.evaluate(([e, n, s, c]) => window.prumo.usuariosAtivar(e, n, s, c), [email, conta.nome, conta.senha, caixa.ultimoCodigo(email)]);
 }
 export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   // VS Code/Claude definem ELECTRON_RUN_AS_NODE; com ele o Electron viraria Node puro e não abriria janela.
-  const env = { ...process.env, PRUMO_SEM_AVISO_AUTOMATICO: '1', ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ...envExtra }; delete env.ELECTRON_RUN_AS_NODE; if (!dados) delete env.PRUMO_DATA_DIR; // sem dados: diretório padrão do usuário
+  // O envio de e-mail vai sempre para a caixa local dos testes, nunca para o serviço real.
+  const env = { ...process.env, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO_DE_EMAIL: (await caixaDeEmail()).url, ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ...envExtra }; delete env.ELECTRON_RUN_AS_NODE; if (!dados) delete env.PRUMO_DATA_DIR; // sem dados: diretório padrão do usuário
   const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [path.join(repo, 'testes/apoio/desktop-entry.cjs'), ...extra], env });
   let fechado = false;
   const fechar = async () => { if (!fechado) { fechado = true; await app.close(); } };
@@ -50,7 +64,7 @@ export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   await page.waitForFunction(() => document.querySelector('dialog#entrada[open]') || document.querySelector('[data-aba=inicio][aria-current=page]'));
   if (await page.locator('dialog#entrada[open]').count()) {
     const ativo = (await page.evaluate(() => window.prumo.contaSessao())).data.loginAtivo; const c = CONTA_DE_TESTE;
-    const r = await page.evaluate(([l, n, s, jaTem]) => (jaTem ? window.prumo.contaEntrar(l, s) : window.prumo.usuariosAtivar(l, n, s)), [c.login, c.nome, c.senha, ativo]);
+    const r = ativo ? await page.evaluate(([l, s]) => window.prumo.contaEntrar(l, s), [c.login, c.senha]) : await ativarPelaApi(page, c);
     if (!r.ok) throw new Error('A conta de teste não entrou: ' + JSON.stringify(r.error));
     await page.reload();
   }

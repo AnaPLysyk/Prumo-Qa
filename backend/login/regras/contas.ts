@@ -1,10 +1,11 @@
-/** O que a própria pessoa faz com a conta: ativar o login, entrar, sair, se cadastrar, recuperar o acesso, trocar a senha e o nome. */
+/** O que a própria pessoa faz com a conta: criar a primeira conta, entrar, sair, se cadastrar por e-mail, definir senha nova pelo e-mail, trocar a senha e o nome. */
 import { randomUUID } from 'node:crypto';
-import { conferirForcaDaSenha, conferirSegredo, gerarCodigoDeRecuperacao, normalizarCodigoDeRecuperacao, resumirSegredo } from './senhas.js';
+import { conferirCodigo, emailValido } from './codigosPorEmail.js';
+import { conferirForcaDaSenha, conferirSegredo, resumirSegredo } from './senhas.js';
 import { contaParaJanela, encerrarSessao, iniciarSessao, loginLigado, sessaoParaJanela, situacaoDaSessao } from './sessao.js';
 import { gravarContas } from '../banco/gravarContas.js';
 import { lerContas } from '../banco/lerContas.js';
-import { RegistroDeContas, Usuario, codigoDeRecuperacaoSchema, loginSchema, nomeDaPessoaSchema } from '../tipos/contas.js';
+import { RegistroDeContas, Usuario, nomeDaPessoaSchema } from '../tipos/contas.js';
 
 // Freio geral contra adivinhação: além do bloqueio por conta, no máximo 20 tentativas erradas por minuto no aplicativo inteiro.
 const errosRecentes: number[] = [];
@@ -14,17 +15,28 @@ function frearTentativas(agora: number): void {
   if (errosRecentes.length >= 20) throw new Error('LOGIN_RATE_LIMIT: muitas tentativas erradas seguidas; espere um minuto.');
 }
 
-function dadosDaConta(d: { login: string; nome: string; senha: string }) {
-  const login = loginSchema.safeParse(d.login); if (!login.success) throw new Error('LOGIN_INVALID_FORMAT: ' + login.error.issues[0]!.message);
-  const nome = nomeDaPessoaSchema.safeParse(d.nome); if (!nome.success) throw new Error('NAME_INVALID: o nome precisa ter de 2 a 80 caracteres.');
-  conferirForcaDaSenha(d.senha, login.data); return { login: login.data, nome: nome.data };
+/** Login interno de quem se cadastra por e-mail: a parte antes do @, no formato de login, com número no fim se já existir. A pessoa entra com o e-mail. */
+function loginDoEmail(r: RegistroDeContas, email: string): string {
+  let base = email.split('@')[0]!.toLowerCase().replace(/[^a-z0-9._-]/g, '-').replace(/^[^a-z0-9]+/, '').slice(0, 36);
+  if (base.length < 3) base = (base ? base + '-' : '') + 'conta';
+  let login = base; for (let i = 2; r.usuarios.some((u) => u.login === login); i++) login = base + '-' + i;
+  return login;
 }
 
-export function contaNova(r: RegistroDeContas, d: { login: string; nome: string }, extra: Pick<Usuario, 'papel' | 'estado' | 'senha' | 'recuperacao' | 'trocarSenha' | 'origem'> & { identidades?: Usuario['identidades']; admin?: boolean }, agora: Date): Usuario {
+/** Confere nome, e-mail e senha antes de gastar o código: um campo errado não obriga a pedir outro código. */
+function dadosDoCadastro(r: RegistroDeContas, d: { email: string; nome: string; senha: string }) {
+  const email = emailValido(d.email);
+  const nome = nomeDaPessoaSchema.safeParse(d.nome); if (!nome.success) throw new Error('NAME_INVALID: o nome precisa ter de 2 a 80 caracteres.');
+  if (r.usuarios.some((u) => u.email === email)) throw new Error('EMAIL_TAKEN: esse e-mail já tem conta neste computador; entre com ele ou use Esqueci a senha.');
+  const login = loginDoEmail(r, email); conferirForcaDaSenha(d.senha, login);
+  return { email, login, nome: nome.data };
+}
+
+export function contaNova(r: RegistroDeContas, d: { login: string; nome: string; email?: string }, extra: Pick<Usuario, 'papel' | 'estado' | 'senha' | 'recuperacao' | 'trocarSenha' | 'origem'> & { identidades?: Usuario['identidades']; admin?: boolean }, agora: Date): Usuario {
   if (r.usuarios.some((u) => u.login === d.login)) throw new Error('LOGIN_TAKEN: esse login já está em uso; escolha outro.');
   const quando = agora.toISOString();
   // Conta nova nasce sem a marca admin (cadastro e provedor); só a primeira conta e a Administração a dão.
-  return { id: randomUUID(), login: d.login, nome: d.nome, identidades: [], falhas: 0, bloqueadoAte: null, criadoEm: quando, atualizadoEm: quando, ultimoAcesso: null, admin: false, ...extra };
+  return { id: randomUUID(), login: d.login, nome: d.nome, ...(d.email ? { email: d.email } : {}), identidades: [], falhas: 0, bloqueadoAte: null, criadoEm: quando, atualizadoEm: quando, ultimoAcesso: null, admin: false, ...extra };
 }
 
 /** Registra uma tentativa errada: conta o erro e, ao chegar no limite, bloqueia a conta pelo tempo configurado. */
@@ -40,21 +52,22 @@ function conferirBloqueio(u: Usuario, agora: Date): void {
   if (u.bloqueadoAte && Date.parse(u.bloqueadoAte) > agora.getTime()) throw new Error('ACCOUNT_LOCKED: conta bloqueada por tentativas erradas até ' + new Date(u.bloqueadoAte).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '; espere ou peça o desbloqueio à Administração.');
 }
 
-/** Liga o login: cria a primeira conta, de administrador, e já entra com ela. Só funciona enquanto não existe nenhuma conta. */
-export async function ativarLogin(d: { login: string; nome: string; senha: string }, b?: string, agora = new Date()) {
-  const dados = dadosDaConta(d); const codigo = gerarCodigoDeRecuperacao();
-  const senha = await resumirSegredo(d.senha); const recuperacao = await resumirSegredo(normalizarCodigoDeRecuperacao(codigo));
+/** Primeira conta, de administrador, com o e-mail confirmado pelo código; já entra com ela. Só funciona enquanto não existe nenhuma conta. */
+export async function ativarLogin(d: { email: string; nome: string; senha: string; codigo: string }, b?: string, agora = new Date()) {
+  const antes = lerContas(b); if (loginLigado(antes)) throw new Error('LOGIN_ALREADY_ACTIVE: o login já está ligado; use Usuários para criar outras contas.');
+  const dados = dadosDoCadastro(antes, d); conferirCodigo('CADASTRO', dados.email, d.codigo, agora.getTime());
+  const senha = await resumirSegredo(d.senha);
   const r = lerContas(b); if (loginLigado(r)) throw new Error('LOGIN_ALREADY_ACTIVE: o login já está ligado; use Usuários para criar outras contas.');
-  const u = contaNova(r, dados, { papel: 'administrador', estado: 'ATIVO', senha, recuperacao, trocarSenha: false, origem: 'ATIVACAO', admin: true }, agora);
+  const u = contaNova(r, dados, { papel: 'administrador', estado: 'ATIVO', senha, recuperacao: null, trocarSenha: false, origem: 'ATIVACAO', admin: true }, agora);
   u.ultimoAcesso = agora.toISOString(); r.usuarios.push(u); gravarContas(r, b); iniciarSessao(u.id, agora.getTime());
-  return { conta: contaParaJanela(r, u, agora.getTime()), codigoRecuperacao: codigo };
+  return { conta: contaParaJanela(r, u, agora.getTime()) };
 }
 
-/** Entrar: mensagem igual para login inexistente e senha errada; bloqueio por conta depois de várias tentativas erradas. */
+/** Entrar com o e-mail ou o login: mensagem igual para conta inexistente e senha errada; bloqueio por conta depois de várias tentativas erradas. */
 export async function entrarNaConta(d: { login: string; senha: string }, b?: string, agora = new Date()) {
   frearTentativas(agora.getTime());
   const antes = lerContas(b); if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
-  const login = String(d.login ?? '').trim().toLowerCase(); const u = antes.usuarios.find((x) => x.login === login) ?? null;
+  const quem = String(d.login ?? '').trim().toLowerCase(); const u = antes.usuarios.find((x) => x.login === quem || (!!x.email && x.email === quem)) ?? null;
   if (u) conferirBloqueio(u, agora);
   if (!(await conferirSegredo(d.senha, u?.senha ?? null))) {
     if (registrarErro(u?.id ?? null, agora, b)) throw new Error('ACCOUNT_LOCKED: conta bloqueada por tentativas erradas; espere ou peça o desbloqueio à Administração.');
@@ -69,50 +82,46 @@ export async function entrarNaConta(d: { login: string; senha: string }, b?: str
 
 export function sairDaConta(b?: string) { encerrarSessao(); return sessaoParaJanela(b); }
 
-/** Cadastro pela tela de entrada: só com o login ligado e o cadastro aberto; nasce PENDENTE quando a Administração aprova cadastros. */
-export async function cadastrarConta(d: { login: string; nome: string; senha: string }, b?: string, agora = new Date()) {
+/** Cadastro por e-mail pela tela de entrada: só com o login ligado e o cadastro aberto; o código confirma o e-mail. Nasce PENDENTE quando a Administração aprova cadastros. */
+export async function cadastrarConta(d: { email: string; nome: string; senha: string; codigo: string }, b?: string, agora = new Date()) {
   const antes = lerContas(b);
   if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
   if (!antes.acesso.cadastroAberto) throw new Error('SIGNUP_CLOSED: o cadastro está fechado; peça uma conta à Administração.');
-  const dados = dadosDaConta(d); const codigo = gerarCodigoDeRecuperacao();
-  const senha = await resumirSegredo(d.senha); const recuperacao = await resumirSegredo(normalizarCodigoDeRecuperacao(codigo));
+  const dados = dadosDoCadastro(antes, d); conferirCodigo('CADASTRO', dados.email, d.codigo, agora.getTime());
+  const senha = await resumirSegredo(d.senha);
   const r = lerContas(b); const papel = r.papeis.some((p) => p.id === r.acesso.papelDoCadastro) ? r.acesso.papelDoCadastro : 'leitor';
-  const u = contaNova(r, dados, { papel, estado: r.acesso.aprovarCadastros ? 'PENDENTE' : 'ATIVO', senha, recuperacao, trocarSenha: false, origem: 'CADASTRO' }, agora);
+  const u = contaNova(r, { ...dados, login: loginDoEmail(r, dados.email) }, { papel, estado: r.acesso.aprovarCadastros ? 'PENDENTE' : 'ATIVO', senha, recuperacao: null, trocarSenha: false, origem: 'CADASTRO' }, agora);
   r.usuarios.push(u); gravarContas(r, b);
-  return { estado: u.estado, codigoRecuperacao: codigo };
+  return { estado: u.estado };
 }
 
-/** Esqueci a senha: o código de recuperação (mostrado uma vez no cadastro) define uma senha nova e é trocado por outro. */
-export async function recuperarConta(d: { login: string; codigo: string; novaSenha: string }, b?: string, agora = new Date()) {
+/** Esqueci a senha: o código mandado ao e-mail da conta define a senha nova. Código errado conta para o bloqueio, como senha errada. */
+export async function recuperarConta(d: { email: string; codigo: string; novaSenha: string }, b?: string, agora = new Date()) {
   frearTentativas(agora.getTime());
   const antes = lerContas(b); if (!loginLigado(antes)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
-  const login = String(d.login ?? '').trim().toLowerCase(); const u = antes.usuarios.find((x) => x.login === login) ?? null;
+  const email = emailValido(d.email); const u = antes.usuarios.find((x) => x.email === email) ?? null;
   if (u) conferirBloqueio(u, agora);
-  const formato = codigoDeRecuperacaoSchema.safeParse(d.codigo);
-  const confere = await conferirSegredo(formato.success ? normalizarCodigoDeRecuperacao(formato.data) : '-', u?.recuperacao ?? null);
-  if (!formato.success || !confere) {
-    if (registrarErro(u?.id ?? null, agora, b)) throw new Error('ACCOUNT_LOCKED: conta bloqueada por tentativas erradas; espere ou peça o desbloqueio à Administração.');
-    throw new Error('RECOVERY_INVALID: login ou código de recuperação incorretos. Sem o código, peça à Administração para redefinir a senha.');
-  }
-  if (u!.estado === 'DESATIVADO') throw new Error('ACCOUNT_DISABLED: esta conta foi desativada pela Administração.');
-  conferirForcaDaSenha(d.novaSenha, u!.login);
-  const codigo = gerarCodigoDeRecuperacao(); const senha = await resumirSegredo(d.novaSenha); const recuperacao = await resumirSegredo(normalizarCodigoDeRecuperacao(codigo));
-  const r = lerContas(b); const atual = r.usuarios.find((x) => x.id === u!.id); if (!atual) throw new Error('RECOVERY_INVALID: login ou código de recuperação incorretos.');
-  Object.assign(atual, { senha, recuperacao, trocarSenha: false, falhas: 0, bloqueadoAte: null, atualizadoEm: agora.toISOString() }); gravarContas(r, b);
-  return { codigoRecuperacao: codigo };
+  conferirForcaDaSenha(d.novaSenha, u?.login ?? email);
+  try { conferirCodigo('SENHA', email, d.codigo, agora.getTime()); }
+  catch (e) { registrarErro(u?.id ?? null, agora, b); throw e; }
+  if (!u) throw new Error('CODE_INVALID: código incorreto; confira o e-mail e tente de novo.');
+  if (u.estado === 'DESATIVADO') throw new Error('ACCOUNT_DISABLED: esta conta foi desativada pela Administração.');
+  const senha = await resumirSegredo(d.novaSenha);
+  const r = lerContas(b); const atual = r.usuarios.find((x) => x.id === u.id); if (!atual) throw new Error('CODE_INVALID: código incorreto; confira o e-mail e tente de novo.');
+  Object.assign(atual, { senha, recuperacao: null, trocarSenha: false, falhas: 0, bloqueadoAte: null, atualizadoEm: agora.toISOString() }); gravarContas(r, b);
+  return { redefinida: true };
 }
 
-/** Troca da própria senha (também a temporária). Quem estava com senha temporária ou sem código ganha um código de recuperação novo. */
+/** Troca da própria senha (também a temporária dada pela Administração). */
 export async function trocarMinhaSenha(d: { atual: string; nova: string }, b?: string, agora = new Date()) {
   const s = situacaoDaSessao(b, agora.getTime()); if (s.tipo !== 'ATIVA') throw new Error('SESSION_REQUIRED: entre com sua conta do Prumo para continuar.');
   if (!(await conferirSegredo(d.atual, s.usuario.senha))) { registrarErro(s.usuario.id, agora, b); throw new Error('PASSWORD_INVALID: a senha atual não confere.'); }
   if (d.atual === d.nova) throw new Error('PASSWORD_WEAK: senha fraca: a nova senha precisa ser diferente da atual.');
   conferirForcaDaSenha(d.nova, s.usuario.login);
-  const precisaCodigo = s.usuario.trocarSenha || !s.usuario.recuperacao; const codigo = precisaCodigo ? gerarCodigoDeRecuperacao() : null;
-  const senha = await resumirSegredo(d.nova); const recuperacao = codigo ? await resumirSegredo(normalizarCodigoDeRecuperacao(codigo)) : null;
+  const senha = await resumirSegredo(d.nova);
   const r = lerContas(b); const u = r.usuarios.find((x) => x.id === s.usuario.id)!;
-  Object.assign(u, { senha, trocarSenha: false, falhas: 0, atualizadoEm: agora.toISOString() }); if (recuperacao) u.recuperacao = recuperacao; gravarContas(r, b);
-  return { codigoRecuperacao: codigo, sessao: sessaoParaJanela(b, agora.getTime()) };
+  Object.assign(u, { senha, trocarSenha: false, falhas: 0, atualizadoEm: agora.toISOString() }); gravarContas(r, b);
+  return { sessao: sessaoParaJanela(b, agora.getTime()) };
 }
 
 export function alterarMeuNome(nome: string, b?: string, agora = new Date()) {
