@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.16.0",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-16",
       "title": "Conta por e-mail com código",
       "objective": "Deixar a entrada com três caminhos claros (e-mail confirmado por código, GitHub ou Google) e trocar o código de recuperação por um código mandado ao e-mail.",
       "features": [
@@ -45,11 +45,15 @@
         "O código de recuperação das versões anteriores deixa de valer.",
         "O login não isola pessoas que usam o mesmo usuário do sistema operacional."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.16.0",
       "migration": "Nada a migrar: contas antigas continuam valendo; o e-mail entra nas contas criadas por e-mail a partir desta versão.",
       "afterUpdate": [
         "Quem não tem e-mail na conta e esquecer a senha precisa da Administração para redefinir."
-      ]
+      ],
+      "installer": {
+        "file": "Prumo-QA-Setup-2.16.0.exe",
+        "sha256": "7e561f893a99c3ee6997140ea39025ad59f9238a2256d8482516963b893135d9"
+      }
     },
     {
       "version": "2.15.1",
