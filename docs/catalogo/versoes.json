@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.15.0",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-16",
       "title": "Integrações reais: Qase pelo token, destino de publicação e GitHub Issues",
       "objective": "Deixar Qase, Jira e GitHub funcionando com contas reais: projetos do Qase importados pelo token, rascunhos de bug ou melhoria publicados no destino escolhido e a tela Conexões reorganizada por serviço.",
       "features": [
@@ -49,11 +49,15 @@
         "Editar ou fechar issue, editar título ou resultado de defeito e excluir qualquer item não têm contrato.",
         "O plano gratuito do Qase não libera os vínculos caso-ticket do Jira."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.15.0",
       "migration": "Nada a migrar.",
       "afterUpdate": [
         "Gere tokens novos com as permissões listadas em Conexões."
-      ]
+      ],
+      "installer": {
+        "file": "Prumo-QA-Setup-2.15.0.exe",
+        "sha256": "9392f135c33dc288ae18848c9f77dca11ad66beec96fd633d886f526ab8cd42e"
+      }
     },
     {
       "version": "2.14.1",
