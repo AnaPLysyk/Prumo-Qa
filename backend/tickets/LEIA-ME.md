@@ -14,7 +14,7 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `propostasDescartar.ts` | Canal propostas:descartar: Descartar uma proposta. |
 | `propostasEditar.ts` | Canal propostas:editar: Editar uma proposta; invalida a revisão anterior. |
 | `propostasListar.ts` | Canal propostas:listar: Listar propostas de casos e bugs (da pessoa, do Prumo ou de uma IA). |
-| `propostasPublicar.ts` | Canal propostas:publicar: Publicar uma proposta (caso no Qase ou bug no Jira). |
+| `propostasPublicar.ts` | Canal propostas:publicar: Publicar uma proposta (caso no Qase; bug ou melhoria no Jira, em Defeitos Qase ou em GitHub Issues). |
 | `propostasRevisar.ts` | Canal propostas:revisar: Registrar a revisão (duplicidade, requisito, risco e cobertura) de uma proposta. |
 | `propostasVincular.ts` | Canal propostas:vincular: Vincular uma proposta de bug a um ticket que já existe no Jira. |
 
@@ -68,7 +68,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `marcarPublicada.ts` | Marca a proposta como publicada e guarda o endereço do item criado no Jira ou Qase. |
 | `palavrasDoTexto.ts` | Separa as palavras importantes (mais de 2 letras) de um texto. |
 | `podePublicar.ts` | Confere se a proposta pode ser publicada: não pode estar fechada e, se veio da IA, precisa ter sido revisada. |
-| `publicarProposta.ts` | Publica uma proposta: cria o caso no Qase ou o bug no Jira (com vínculo ao ticket de origem) e marca como publicada. |
+| `publicarProposta.ts` | Publica uma proposta: cria o caso no Qase, o bug no Jira, o defeito no Qase ou a issue no GitHub, e marca como publicada. |
 | `resolverAnexo.ts` | Decide qual arquivo pode ser anexado: uma evidência do projeto ou o arquivo escolhido pela pessoa na janela do Windows. |
 | `revisarProposta.ts` | Registra a revisão da pessoa (duplicidade, requisito, risco e cobertura) e quem revisou. |
 | `semelhancaEntrePalavras.ts` | Mede de 0 a 1 o quanto dois conjuntos de palavras se parecem, para achar propostas repetidas. |

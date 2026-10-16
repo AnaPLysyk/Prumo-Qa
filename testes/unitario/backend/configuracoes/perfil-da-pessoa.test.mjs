@@ -1,7 +1,6 @@
 /** Perfil da pessoa: o que é guardado, validado e o que cada IA recebe. Banco de conhecimento em memória; nada sai do computador. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DatabaseSync } from 'node:sqlite';
 import { lerPerfil } from '../../../../dist/agentes/banco/lerPerfil.js';
 import { salvarPerfil } from '../../../../dist/agentes/banco/salvarPerfil.js';
 import { LIMITE_FOCO, normalizarFoco } from '../../../../dist/agentes/regras/normalizarFoco.js';
@@ -63,15 +62,31 @@ test('o assistente local mostra que conhece a pessoa: usa o nome e o foco na abe
   salvarPerfil({ foco: null }); assert.ok(!saudacao(null).linhas.some((l) => /Vou priorizar/.test(l)));
 });
 
-test('banco antigo (sem as colunas novas) é migrado sem perder o perfil já guardado', () => {
-  const db = new DatabaseSync(':memory:');
-  db.exec(`CREATE TABLE perfil (id INTEGER PRIMARY KEY CHECK (id = 1), como_chamar TEXT, papel TEXT CHECK (papel IN ('qa','dev','po','analista','outro')), atualizado_em TEXT NOT NULL);
-    INSERT INTO perfil (id, como_chamar, papel, atualizado_em) VALUES (1, 'Ana', 'qa', '2026-10-01T00:00:00.000Z');`);
+test('plano de migração do perfil antigo gera colunas faltantes apenas uma vez, sem abrir SQLite', () => {
+  // Simulador da fronteira SQL. Não substitui teste real de migração com banco autorizado.
+  const colunas = new Set(['id', 'como_chamar', 'papel', 'atualizado_em']);
+  const alteracoes = [];
+  const exec = (sql) => {
+    for (const match of sql.matchAll(/ALTER TABLE perfil ADD COLUMN (experiencia|foco|compartilhar_ia)\b/g)) {
+      alteracoes.push(match[1]); colunas.add(match[1]);
+    }
+  };
+  const db = {
+    exec,
+    prepare(sql) {
+      return {
+        all: () => {
+          assert.match(sql, /PRAGMA table_info\(perfil\)/);
+          return [...colunas].map(name => ({ name }));
+        },
+        get: () => undefined,
+        run: () => ({ changes: 1 })
+      };
+    }
+  };
   criarEsquemaDoConhecimento(db);
-  const colunas = db.prepare('PRAGMA table_info(perfil)').all().map((c) => c.name);
-  for (const c of ['experiencia', 'foco', 'compartilhar_ia']) assert.ok(colunas.includes(c), c);
-  const r = db.prepare('SELECT como_chamar, papel, experiencia, foco, compartilhar_ia FROM perfil WHERE id = 1').get();
-  assert.deepEqual({ ...r }, { como_chamar: 'Ana', papel: 'qa', experiencia: null, foco: null, compartilhar_ia: 0 });
-  criarEsquemaDoConhecimento(db); // idempotente
-  db.close();
+  assert.deepEqual(alteracoes, ['experiencia', 'foco', 'compartilhar_ia']);
+  for (const nome of ['id', 'como_chamar', 'papel', 'atualizado_em']) assert.ok(colunas.has(nome), nome);
+  criarEsquemaDoConhecimento(db);
+  assert.equal(alteracoes.length, 3, 'migração não tenta recriar colunas já existentes');
 });

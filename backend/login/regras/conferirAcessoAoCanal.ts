@@ -8,10 +8,11 @@ import type { CanalIpc } from '../../aplicativo/api/catalogoDeContratos.js';
  * O Prumo não abre sem entrar: enquanto não existe nenhuma conta, o único canal além dos públicos é criar a primeira conta (Administrador).
  * A recusa vem com código próprio e uma frase que a pessoa entende.
  */
-export function conferirAcessoAoCanal(canal: CanalIpc, b?: string, agora = Date.now()): void {
+export function conferirAcessoAoCanal(canal: CanalIpc, b?: string, agora = Date.now(), renovarAtividade = true): void {
   const regra = acessoDosCanais[canal];
   if (regra === 'publico') return;
-  const s = situacaoDaSessao(b, agora);
+  // Consultas automáticas validam o acesso, mas não são interação humana.
+  const s = situacaoDaSessao(b, agora, renovarAtividade);
   if (s.tipo === 'SEM_LOGIN') { if (canal === 'usuarios:ativar') return; throw new Error('LOGIN_SETUP_REQUIRED: crie a conta de Administrador para começar a usar o Prumo.'); }
   if (s.tipo === 'EXPIRADA') throw new Error('SESSION_EXPIRED: a sessão terminou por inatividade; entre de novo.');
   if (s.tipo !== 'ATIVA') throw new Error('SESSION_REQUIRED: entre com sua conta do Prumo para continuar.');

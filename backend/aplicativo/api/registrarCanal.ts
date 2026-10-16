@@ -31,7 +31,7 @@ export function registrarCanal<C extends CanalIpc>(nome: C, fn: (a: z.output<(ty
       if (!entrada.success) throw new Error('INVALID_ARGUMENTS: argumentos recusados.');
       const args = entrada.data as z.output<(typeof esquemasIpc)[C]>;
       // 2.11: com o login ligado, cada canal exige sessão e o nível da tela no papel da pessoa (login/tipos/acessoDosCanais.ts).
-      conferirAcessoAoCanal(nome);
+      conferirAcessoAoCanal(nome, undefined, Date.now(), !canaisFrequentes.has(nome));
       apagaDiagnostico = nome === 'dados:excluir' && (args as { escopo?: string }).escopo === 'diagnostico';
       const data = await fn(args, janela);
       diag('OK'); return { ok: true, data };

@@ -22,34 +22,56 @@ export function descrever(arquivo) {
 }
 export function catalogar(existentes) { return existentes.map(descrever); }
 export function argumentos(args) {
-  const filtros = {}; let listar = false;
+  const filtros = {}; let listar = false; let isolado = false;
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === '--listar') { listar = true; continue; }
+    if (arg === '--listar') { if (listar) throw new Error('TEST_ARGUMENT_INVALID: --listar'); listar = true; continue; }
+    if (arg === '--isolado') { if (isolado) throw new Error('TEST_ARGUMENT_INVALID: --isolado'); isolado = true; continue; }
     if (!['--natureza', '--camada', '--modulo'].includes(arg) || !args[i + 1] || args[i + 1].startsWith('--') || filtros[arg.slice(2)]) throw new Error('TEST_ARGUMENT_INVALID: ' + arg);
     filtros[arg.slice(2)] = args[++i];
   }
-  return { filtros, listar };
+  return { filtros, listar, isolado };
 }
 export function selecionar(catalogo, filtros) {
   for (const [chave, valor] of Object.entries(filtros)) if (!catalogo.some(t => t[chave] === valor)) throw new Error('TEST_FILTER_UNKNOWN: ' + chave + '=' + valor);
   return catalogo.filter(t => Object.entries(filtros).every(([k, v]) => t[k] === v));
 }
-export function planoDeExecucao(selecao, env = process.env) {
+/** Modo isolado: arquivo que importa o helper Electron não entra; os demais continuam sujeitos ao bloqueador de efeitos em runtime. */
+export function dividirPorIsolamento(catalogo, base = raiz) {
+  const elegiveis = [], pendentes = [];
+  for (const t of catalogo) {
+    if (t.perfilReal) { pendentes.push({ arquivo: t.arquivo, motivo: 'MIGRACAO_PERFIL_REAL' }); continue; }
+    const fonte = fs.readFileSync(path.join(base, t.arquivo), 'utf8');
+    if (/janela\.mjs|playwright-core|electron\.launch|desktop-entry\.cjs/.test(fonte)) {
+      pendentes.push({ arquivo: t.arquivo, motivo: 'ELECTRON_NAO_AUTORIZADO' }); continue;
+    }
+    elegiveis.push(t);
+  }
+  return { elegiveis, pendentes };
+}
+export function planoDeExecucao(selecao, env = process.env, isolado = false) {
   if (Object.entries(env).some(([k, v]) => (k === 'PRUMO_APP_EXE' || k.startsWith('PRUMO_MIGRACAO')) && v)) throw new Error('TEST_REAL_PROFILE_BLOCKED: remova PRUMO_APP_EXE e flags PRUMO_MIGRACAO');
+  if (isolado && env.PRUMO_DATA_DIR) throw new Error('TEST_DATA_PROFILE_BLOCKED: remova PRUMO_DATA_DIR externo');
   if (!selecao.length) throw new Error('TEST_SELECTION_EMPTY');
   if (selecao.some(t => t.perfilReal)) throw new Error('TEST_REAL_PROFILE_BLOCKED: migração pertence ao workflow isolado de instalação');
-  return ['--require', './testes/apoio/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
+  return [...(isolado ? ['--require', './ferramentas/testes/bloquear-efeitos.cjs'] : []),
+    '--require', './testes/apoio/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
 }
 export function executar(args = process.argv.slice(2)) {
-  const { filtros, listar } = argumentos(args);
+  const { filtros, listar, isolado } = argumentos(args);
   const catalogo = catalogar(arquivosDeTeste());
   const encontrados = selecionar(catalogo, filtros);
-  const selecao = !listar && !Object.keys(filtros).length ? encontrados.filter(t => !t.perfilReal) : encontrados;
-  if (listar) { console.log(JSON.stringify(selecao, null, 2)); return 0; }
-  const argv = planoDeExecucao(selecao);
+  const { elegiveis, pendentes } = isolado ? dividirPorIsolamento(encontrados) : { elegiveis: encontrados, pendentes: [] };
+  const selecao = isolado ? elegiveis : !listar && !Object.keys(filtros).length ? encontrados.filter(t => !t.perfilReal) : encontrados;
+  if (listar) { console.log(JSON.stringify(isolado ? { elegiveis, pendentes } : selecao, null, 2)); return 0; }
+  if (isolado) {
+    console.log('CHECK_ISOLADO: ' + elegiveis.length + ' arquivos elegíveis; ' + pendentes.length + ' arquivos NOT_RUN (requerem Electron ou migração).');
+    for (const p of pendentes) console.log('NOT_RUN|' + p.motivo + '|' + p.arquivo);
+  }
+  const argv = planoDeExecucao(selecao, process.env, isolado);
   const resultado = spawnSync(process.execPath, argv, { cwd: raiz, env: process.env, stdio: 'inherit', windowsHide: true });
   if (resultado.error) throw resultado.error;
+  if (isolado) console.log('CHECK_ISOLADO_RESULTADO=' + (resultado.status === 0 ? 'PASS' : 'FAIL') + '; E2E_ELECTRON=NOT_RUN; ARQUIVOS_PENDENTES=' + pendentes.length);
   return resultado.status ?? 1;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

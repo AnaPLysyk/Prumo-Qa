@@ -6,16 +6,57 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { Readable, Transform } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { instaladoresDaVersao } from './instaladores.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repoUrl = 'https://github.com/AnaPLysyk/Prumo-Qa';
 const limite = 600 * 1024 * 1024;
+const limiteChecksum = 4096;
 
+// O prazo cobre também a leitura do corpo; não apenas os cabeçalhos HTTP.
 async function baixar(url) {
-  const r = await fetch(url, { redirect: 'follow' });
-  return r;
+  return fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(10 * 60 * 1000) });
+}
+
+/** O arquivo .sha256 é texto curto: recusar conteúdo excessivo antes de armazená-lo. */
+export async function lerChecksumSeguro(resposta, maximo = limiteChecksum) {
+  if (!resposta.body) throw new Error('Resposta SHA-256 sem conteúdo.');
+  const partes = []; let bytes = 0;
+  for await (const parte of resposta.body) {
+    bytes += parte.byteLength;
+    if (bytes > maximo) throw new Error('Resposta SHA-256 maior que o limite aceito.');
+    partes.push(Buffer.from(parte));
+  }
+  return Buffer.concat(partes).toString('utf8');
+}
+
+/** Stream direto a um arquivo temporário. Hash, teto e publicação são verificados sem carregar o instalador na RAM. */
+export async function gravarInstaladorConferido(resposta, destino, esperado, maximo = limite) {
+  if (!resposta.body) throw new Error('Instalador sem conteúdo.');
+  const declarado = resposta.headers.get('content-length');
+  if (declarado !== null && Number(declarado) > maximo) throw new Error('Instalador maior que o limite aceito.');
+  const temporario = destino + '.parcial-' + crypto.randomUUID();
+  const hash = crypto.createHash('sha256'); let bytes = 0;
+  const conferir = new Transform({
+    transform(parte, _encoding, proximo) {
+      bytes += parte.length;
+      if (bytes > maximo) return proximo(new Error('Instalador maior que o limite aceito.'));
+      hash.update(parte);
+      proximo(null, parte);
+    }
+  });
+  try {
+    await pipeline(Readable.fromWeb(resposta.body), conferir, fs.createWriteStream(temporario, { flags: 'wx' }));
+    const calculado = hash.digest('hex');
+    if (calculado !== esperado) throw new Error(`SHA-256 de ${path.basename(destino)} difere do publicado (${calculado}).`);
+    fs.renameSync(temporario, destino);
+    return bytes;
+  } finally {
+    fs.rmSync(temporario, { force: true });
+  }
 }
 
 export async function baixarInstaladores(out = path.join(repo, 'site/public')) {
@@ -33,19 +74,15 @@ export async function baixarInstaladores(out = path.join(repo, 'site/public')) {
       console.log(`Sem ${item.arquivo} na release ainda; omitido do site.`);
       continue;
     }
-    const checksum = /^([0-9a-f]{64})\s+\*?(.+)$/i.exec((await hashResp.text()).trim());
+    const checksum = /^([0-9a-f]{64})\s+\*?(.+)$/i.exec((await lerChecksumSeguro(hashResp)).trim());
     const esperado = checksum?.[2] === item.arquivo ? checksum[1].toLowerCase() : undefined;
     if (!esperado) throw new Error(`${item.arquivo}.sha256 da release não tem um SHA-256 válido.`);
     if (item.id === 'win' && esperado !== publicada.installer.sha256) throw new Error(`SHA-256 de ${item.arquivo} na release difere do catálogo.`);
     const resposta = await baixar(url);
     if (!resposta.ok) throw new Error(`GitHub respondeu HTTP ${resposta.status} para ${item.arquivo}.`);
-    const corpo = Buffer.from(await resposta.arrayBuffer());
-    if (corpo.length > limite) throw new Error(`${item.arquivo} maior que o limite aceito.`);
-    const calculado = crypto.createHash('sha256').update(corpo).digest('hex');
-    if (calculado !== esperado) throw new Error(`SHA-256 de ${item.arquivo} difere do publicado (${calculado}).`);
-    fs.writeFileSync(path.join(destino, item.arquivo), corpo);
+    const bytes = await gravarInstaladorConferido(resposta, path.join(destino, item.arquivo), esperado);
     fs.writeFileSync(path.join(destino, `${item.arquivo}.sha256`), `${esperado}  ${item.arquivo}\n`);
-    entregues.push({ id: item.id, sistema: item.sistema, detalhe: item.detalhe, arquivo: item.arquivo, sha256: esperado, bytes: corpo.length });
+    entregues.push({ id: item.id, sistema: item.sistema, detalhe: item.detalhe, arquivo: item.arquivo, sha256: esperado, bytes });
   }
   fs.writeFileSync(path.join(destino, 'instaladores.json'), JSON.stringify({ version: publicada.version, instaladores: entregues }, null, 2) + '\n');
   return { version: publicada.version, instaladores: entregues };

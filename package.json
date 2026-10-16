@@ -1,6 +1,6 @@
 {
   "name": "prumo-qa",
-  "version": "2.14.1",
+  "version": "2.15.0",
   "description": "Engenharia de qualidade local: contexto, contratos, MCP, evidências e aplicativo desktop Windows",
   "private": true,
   "license": "UNLICENSED",
@@ -28,6 +28,7 @@
     "mcp": "node dist/mcp.js",
     "demo": "node ferramentas/demonstracao/demonstrar.mjs",
     "check": "npm run dependencias && npm run typecheck && npm test",
+    "check:isolado": "npm run dependencias && npm run typecheck && npm run build && node ferramentas/testes/executar.mjs --isolado",
     "dependencias": "node ferramentas/arquitetura/dependencias.mjs",
     "test:selecionar": "node ferramentas/testes/executar.mjs",
     "test:unitarios": "node ferramentas/testes/executar.mjs --natureza unitario",

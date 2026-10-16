@@ -14,7 +14,7 @@
   const refDoNo = (n) => { const [tipo, ...resto] = n.id.split(':'); const id = resto[0] ?? n.id; return { tipo: n.tipo === 'run' ? 'run' : tipo, id }; };
   function botaoNo(e, n, origem) {
     const ref = refDoNo(n); const servico = servicoDoTipo[n.tipo] || 'prumo'; const desat = n.estado === 'DESATUALIZADO';
-    const abrir = { jira: () => abrirTicket(e, ref.id), 'jira-bug': () => abrirTicket(e, ref.id), qase: () => abrirCaso(e, ref.id), 'qase-defeito': () => abrirDefeito(e, ref.id), evidencia: () => window.PrumoOperacao?.abrirEvidencia(e, ref.id), run: () => abrirRunLocal(e, ref.id, false) }[n.tipo];
+    const abrir = { 'caso-local': async () => { const r = await api.repositorioLocal(e.id); const c = r.ok && r.data.casos.find(p => p.id === ref.id); if (c) await abrirCasoLocal(e, c); }, 'ticket-local': () => abrirTicketLocalPorId(e, ref.id), jira: () => abrirTicket(e, ref.id), 'jira-bug': () => abrirTicket(e, ref.id), qase: () => abrirCaso(e, ref.id), 'qase-defeito': () => abrirDefeito(e, ref.id), evidencia: () => window.PrumoOperacao?.abrirEvidencia(e, ref.id), run: () => abrirRunLocal(e, ref.id, false) }[n.tipo];
     const texto = n.tipo === 'jira' ? ref.id : n.rotulo;
     if (!abrir) return h('span', { class: 'ds-no', 'data-servico': servico, 'data-origem': origem || null, title: n.detalhe || null }, h('i'), texto);
     const b = h('button', { type: 'button', class: 'ds-no', 'data-servico': servico, 'data-origem': origem || null, 'aria-label': tr('Abrir {t} {id}', { t: n.tipo, id: ref.id }), title: desat ? tr('Vínculo original removido; consulta não autorizada ao vínculo atual.') : (n.detalhe || null), disabled: desat }, h('i'), texto);
@@ -26,7 +26,11 @@
     const { nos } = grafo(m); const nome = (id) => nos.get(id);
     corpo.append(projSel ? DS.barra(projSel) : null, h('p', { class: 'adm-origem' }, DS.info(m.aviso, { id: 'vinc-aviso', rotulo: 'O que estas relações provam' })));
     corpo.append(DS.secao(tr('Relações ({n})', { n: m.arestas.length }), m.arestas.length ? DS.tabela({ id: 'vinc-tabela', colunas: ['De', 'Relação', 'Para', 'Origem'], linhas: m.arestas.map((a) => ({ celulas: [botaoNo(e, nome(a.de) || { id: a.de, tipo: 'prumo', rotulo: a.de }), a.tipo + (a.nota ? ' · ' + a.nota : ''), botaoNo(e, nome(a.para) || { id: a.para, tipo: 'prumo', rotulo: a.para }), DS.chip(origemTxt[a.origem], a.origem === 'OBSERVADO' ? 'ok' : null)] })) }) : DS.estadoTela('vazio', 'Nenhuma relação ainda.', null, [], { compacto: true })));
-    corpo.append(DS.secao('Lacunas de cadastro', m.lacunas.length ? h('ul', { id: 'vinc-lacunas', class: 'ds-lista' }, m.lacunas.map((l) => h('li', {}, l.mensagem))) : h('p', { class: 'suave' }, tr('Nenhuma lacuna de cadastro encontrada.'))));
+    const haRecursosAvaliaveis = m.nos.some(n => ['qase', 'caso-local', 'jira', 'ticket-local'].includes(n.tipo));
+    const textoSemLacunas = haRecursosAvaliaveis
+      ? 'Nenhuma lacuna identificada nos casos e tickets conhecidos pelo Prumo. Isso não comprova cobertura ou execução.'
+      : 'Sem casos ou tickets para avaliar lacunas. Cadastre casos locais ou conecte suas fontes para iniciar a análise.';
+    corpo.append(DS.secao('Lacunas de cadastro', m.lacunas.length ? h('ul', { id: 'vinc-lacunas', class: 'ds-lista' }, m.lacunas.map((l) => h('li', {}, l.mensagem))) : h('p', { class: 'suave' }, tr(textoSemLacunas))));
     corpo.append(DS.secao('Operações externas recentes', m.operacoesRecentes.length ? h('ul', { id: 'vinc-operacoes', class: 'ds-lista' }, m.operacoesRecentes.map((o) => h('li', {}, seloOp(o.estado), ' ', o.resumo, h('span', { class: 'ds-sub' }, hora(o.em) + (o.remoto?.chave ? ' · ' + o.remoto.chave : ''))))) : h('p', { class: 'suave' }, tr('Nenhuma operação externa registrada.'))));
   }
   function declarar(e) {

@@ -3,6 +3,8 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { analisarVersao } from '../../ajuda/versoes/analisarVersao.js';
 import { baixarComRedirecionamentoSeguro } from './baixarComRedirecionamentoSeguro.js';
 import { enderecoDoInstalador } from './enderecoDoInstalador.js';
@@ -21,13 +23,17 @@ export async function baixarAtualizacao(versao: string, o: Opcoes = {}): Promise
   const arquivo = path.join(pasta, nomeDoInstalador(versao));
   try {
     const r = await baixarComRedirecionamentoSeguro(url, o); if (!r.body) throw new Error('UPDATE_DOWNLOAD_FAILED: resposta sem conteúdo. Nada foi instalado.');
-    const resumo = createHash('sha256'); let bytes = 0; const saida = fs.createWriteStream(arquivo, { flags: 'wx', mode: 0o700 });
-    try {
-      for await (const parte of r.body as unknown as AsyncIterable<Uint8Array>) {
-        bytes += parte.byteLength; if (bytes > LIMITE_INSTALADOR) throw new Error('UPDATE_DOWNLOAD_FAILED: instalador maior que o limite. Nada foi instalado.');
-        resumo.update(parte); if (!saida.write(parte)) await new Promise<void>((ok) => saida.once('drain', () => ok()));
+    const resumo = createHash('sha256'); let bytes = 0;
+    const origem = Readable.from(r.body as unknown as AsyncIterable<Uint8Array>);
+    async function* conferirPartes() {
+      for await (const parte of origem) {
+        bytes += parte.byteLength;
+        if (bytes > LIMITE_INSTALADOR) throw new Error('UPDATE_DOWNLOAD_FAILED: instalador maior que o limite. Nada foi instalado.');
+        resumo.update(parte);
+        yield parte;
       }
-    } finally { await new Promise<void>((ok) => saida.end(() => ok())); }
+    }
+    await pipeline(Readable.from(conferirPartes()), fs.createWriteStream(arquivo, { flags: 'wx', mode: 0o700 }));
     const obtido = resumo.digest('hex');
     if (obtido !== esperado) throw new Error(`UPDATE_HASH_MISMATCH: o SHA-256 do instalador baixado (${obtido.slice(0, 12)}…) não confere com o publicado (${esperado.slice(0, 12)}…). O arquivo foi apagado e nada foi instalado.`);
     return { arquivo, sha256: obtido, bytes };

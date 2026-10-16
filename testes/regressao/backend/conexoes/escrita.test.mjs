@@ -103,7 +103,7 @@ test('Qase: criar caso sem duplicar, associar ao ticket, editar, resposta perdid
   const { mundo, rodar } = await montar(t);
   const caso = { titulo: 'Editor grava e persiste após recarregar', descricao: 'Regra RQ-01', preCondicoes: 'Usuário Editor', passos: [{ acao: 'Entrar como Editor', esperado: 'Painel visível' }, { acao: 'Gravar', esperado: 'Valor persistido' }], automacao: 'a-automatizar', ticket: 'SMART-100', prioridade: 1 };
   const c1 = await rodar('qase.criar_caso', caso); assert.equal(c1.estado, 'CONFIRMADA'); assert.match(c1.remoto.chave, /^SFQ-\d+$/); const salvo = mundo.qase.casos[0];
-  assert.equal(salvo.steps.length, 2); assert.equal(salvo.isManual, true); assert.equal(salvo.isToBeAutomated, true); assert.equal(salvo.steps_type, 'classic'); assert.deepEqual(salvo.external_issues[0].issues, [{ id: 'SMART-100' }]); assert.equal(c1.remoto.detalhes.ticket, 'SMART-100');
+  assert.equal(salvo.steps.length, 2); assert.equal(salvo.isManual, 1); assert.equal(salvo.isToBeAutomated, 1); /* API real do Qase só aceita 0/1 */ assert.equal(salvo.steps_type, 'classic'); assert.deepEqual(salvo.external_issues[0].issues, [{ id: 'SMART-100' }]); assert.equal(c1.remoto.detalhes.ticket, 'SMART-100');
   assert.equal((await rodar('qase.criar_caso', caso)).reutilizada, true); assert.equal(mundo.qase.casos.length, 1);
   const dup = await rodar('qase.criar_caso', { ...caso, descricao: 'Outra descrição, mesmo título' }); assert.equal(dup.estado, 'FALHA'); assert.equal(dup.erro, 'SERVICE_DUPLICATE'); assert.equal(mundo.qase.casos.length, 1, 'título repetido na mesma suite não duplica');
   mundo.perderProximaResposta = true; const c2 = { titulo: 'Leitor é recusado ao gravar', passos: [{ acao: 'Entrar como Leitor' }] };

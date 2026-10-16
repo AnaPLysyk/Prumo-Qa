@@ -1,0 +1,86 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../');
+const read = p => fs.readFileSync(path.join(root, p), 'utf8');
+
+test('repositório independente é usado na interface somente sem Qase', () => {
+  const t = read('frontend/testes/fluxos-casos-qase.parte.js');
+  const v = read('frontend/testes/visao-geral-dos-testes.parte.js');
+  assert.match(v, /if \(!vq\) await F\.telaCasosLocais\(e, mem, corpo\)/);
+  assert.match(t, /async function telaCasosLocais\(e, _mem, corpo\)/);
+  assert.match(t, /if \(vinc\(e, 'qase'\)\) return/);
+  assert.match(t, /api\.repositorioLocal\(e\.id\)/);
+  assert.match(t, /r\.data\.casos/);
+  assert.match(t, /r\.data\.suites/);
+  assert.match(t, /data-caso-local/);
+  assert.match(t, /abrirCasoLocal\(e, c\)/);
+  assert.match(t, /const vivas = \(ps \|\| \[\]\)\.filter\(p => p\.estado !== 'DESCARTADA' && \(vinc\(e, 'qase'\) \|\| p\.tipo === 'bug' \|\| p\.origem !== 'PESSOA'\)\)/);
+});
+
+test('o catálogo não apaga as seções locais de casos e suítes', () => {
+  const v = read('frontend/testes/visao-geral-dos-testes.parte.js');
+  assert.match(v, /const area = h\('div', \{ id: 'cat-carregando' \}/);
+  assert.match(v, /area\.replaceChildren\(\.\.\.\[/);
+  assert.doesNotMatch(v, /corpo\.replaceChildren\(\.\.\.\[/);
+});
+
+test('casos locais persistem no novo núcleo, não em propostas nem Qase', () => {
+  const c = read('frontend/testes/formularios/montarFormularioProposta.js');
+  assert.match(c, /const local = !e\.vinculos\.some\(v => v\.servico === 'qase'\)/);
+  assert.match(c, /local \? api\.casoLocalSalvar\(/);
+  assert.match(c, /suiteLocalId: suiteLocal\.value \|\| null/);
+  assert.match(c, /Caso salvo somente neste computador/);
+  assert.match(c, /Salvar caso local/);
+  assert.match(c, /local \? dadosLocal : d/);
+});
+
+test('suítes locais têm formulário próprio, edição e escopo do projeto', () => {
+  const t = read('frontend/testes/fluxos-casos-qase.parte.js');
+  assert.match(t, /function formularioSuiteLocal\(e, suites, atual = null\)/);
+  assert.match(t, /api\.suiteLocalSalvar\(\{ espacoId: e\.id/);
+  assert.match(t, /'Nova suíte local'/);
+  assert.match(t, /data-suite-local/);
+  assert.match(t, /formularioSuiteLocal\(e, suites, s\)/);
+});
+
+test('associação de casos locais valida IDs e o escopo no back-end', () => {
+  const ui = read('frontend/testes/fluxos-casos-qase.parte.js');
+  const regra = read('backend/projetos/regras/associarEspaco.ts');
+  assert.match(ui, /api\.espacoAssociar\(e\.id, d\)/);
+  assert.match(ui, /tipo: 'caso-local', id: caso\.id, origem: 'prumo'/);
+  assert.match(ui, /tipo: 'ticket-local', id: seletor\.value, origem: 'prumo'/);
+  assert.match(ui, /tipo: 'jira', id: chave, vinculoId: vj\.id/);
+  assert.match(regra, /listarPropostas\(id,base\)\.some\(p=>p\.id===ref\.id/);
+  assert.match(regra, /TRACE_LOCAL_REFERENCE_INVALID/);
+  const mapa = read('backend/testes/regras/mapaDeVinculos.ts');
+  assert.match(mapa, /ligarCasosLocais\(g, espacoId, prumo, b\)/);
+  assert.match(mapa, /n\.tipo === 'caso-local'/);
+});
+
+test('canais locais são estritos, autorizados e expostos apenas pela ponte', () => {
+  const contract = read('backend/aplicativo/api/catalogoDeContratos.ts');
+  const acesso = read('backend/login/tipos/acessoDosCanais.ts');
+  const reg = read('backend/aplicativo/api/registrarCanaisIpc.ts');
+  const preload = read('backend/aplicativo/preload.cjs');
+  for (const [canal, nivel, func] of [
+    ['repositorio:listar', 'VER', 'repositorioLocal'],
+    ['repositorio:caso', 'USAR', 'casoLocalSalvar'],
+    ['repositorio:suite', 'USAR', 'suiteLocalSalvar']
+  ]) {
+    assert.ok(contract.includes("'" + canal + "':"), canal);
+    assert.ok(acesso.includes("'" + canal + "': ['testes', '" + nivel + "']"), canal);
+    assert.ok(reg.includes("registrarCanal('" + canal + "',"), canal);
+    assert.ok(preload.includes("'" + canal + "'"), canal);
+    assert.ok(preload.includes(func + ':'), func);
+  }
+});
+
+test('detalhe do caso local exibe os dados de teste dos passos, não apenas ação e resultado', () => {
+  const t = read('frontend/testes/fluxos-casos-qase.parte.js');
+  assert.match(t, /DS\.bloco\('Passos', passos\.length \? DS\.tabela\(\{ colunas: \['Ação', 'Dados de teste', 'Resultado esperado'\]/);
+  assert.match(t, /celulas: \[s\.acao, s\.dados \|\| '—', s\.esperado \|\| '—'\]/);
+});

@@ -21,12 +21,22 @@ test('demonstração: vinte verificações na janela real, dois projetos e APIs 
   const selecionar=async e=>{await ir(a.page,'projetos');await a.page.locator(`[data-espaco="${e.id}"]`).getByRole('button',{name:'Selecionar projeto',exact:true}).click();await a.page.waitForFunction(n=>document.querySelector('#projeto-atual').textContent===n,e.nome);};
   await selecionar(smart);
   for(const servico of ['jira','qase','github']){
-    await ir(a.page,'conexoes');await a.page.click('#conexao-nova');await a.page.selectOption('#conexao-servico',servico);await a.page.fill('#conexao-nome','Simulação '+servico);await a.page.fill('#conexao-token','fixture-secret-27-'+servico);
-    if(servico==='jira'){await a.page.fill('#conexao-instancia','https://lab.atlassian.net');await a.page.fill('#conexao-usuario','fixture@example.test');}
-    await a.page.click('#conexao-salvar');await a.page.waitForFunction(s=>[...document.querySelectorAll('#conteudo h2')].some(x=>x.textContent==='Simulação '+s),servico);
+    await ir(a.page,'conexoes');
+    if(servico==='qase'){
+      // A nova UX do Qase oferece importação de projetos, não o formulário genérico. Este cenário testa
+      // a vinculação dos dois projetos manuais existentes, sem importar/criar um terceiro projeto.
+      const criado=await a.page.evaluate(token=>window.prumo.servicoAdicionar({servico:'qase',nome:'Simulação qase',token}),'fixture-secret-27-qase');
+      assert.ok(criado.ok,criado.error);await ir(a.page,'projetos');await ir(a.page,'conexoes');
+    }else{
+      await a.page.click('#conexao-nova');await a.page.selectOption('#conexao-servico',servico);
+      await a.page.fill('#conexao-nome','Simulação '+servico);await a.page.fill('#conexao-token','fixture-secret-27-'+servico);
+      if(servico==='jira'){await a.page.fill('#conexao-instancia','https://lab.atlassian.net');await a.page.fill('#conexao-usuario','fixture@example.test');}
+      await a.page.click('#conexao-salvar');
+    }
+    await a.page.waitForFunction(s=>[...document.querySelectorAll('#conteudo [data-conta] .cx-conta-nome')].some(x=>x.textContent==='Simulação '+s),servico);
     const conta=(await a.page.evaluate(()=>window.prumo.servicos())).data.find(c=>c.servico===servico);assert.ok(conta);assert.doesNotMatch(await a.page.textContent('body'),/fixture-secret-27/);
-    await a.page.getByRole('button',{name:'Listar recursos disponíveis',exact:true}).filter({visible:true}).all().then(async botoes=>{await botoes[botoes.length-1].click();});
-    await a.page.waitForSelector('#recursos-remotos .nota');assert.doesNotMatch(await a.page.textContent('#recursos-remotos'),/Selecione primeiro/,JSON.stringify(await a.page.evaluate(()=>({root:estado.root,espaco:estado.espaco}))));
+    await a.page.locator('[data-integracao="'+servico+'"] [data-conta]').last().getByRole('button',{name:'Listar recursos disponíveis',exact:true}).click();
+    await a.page.waitForSelector('#recursos-remotos .cx-recurso');assert.doesNotMatch(await a.page.textContent('#recursos-remotos'),/Selecione primeiro/,JSON.stringify(await a.page.evaluate(()=>({root:estado.root,espaco:estado.espaco}))));
     const recursos=(await a.page.evaluate(id=>window.prumo.servicoRecursos(id),conta.id)).data.recursos;assert.equal(recursos.length,2);
     await a.page.getByRole('button',{name:'Vincular '+recursos[0].chave,exact:true}).click();await a.page.waitForFunction(()=>document.querySelector('#aviso')?.textContent.includes('Vínculo confirmado'));
     const rb=await a.page.evaluate(async([e,c,r])=>window.prumo.servicoVincular(e,c,r),[cid.id,conta.id,recursos[1]]);assert.ok(rb.ok);

@@ -18,6 +18,8 @@ import { consultarJobsGithub } from './consultarJobsGithub.js';
 import { consultarArtefatosGithub } from './consultarArtefatosGithub.js';
 import { consultarRevisoesGithub } from './consultarRevisoesGithub.js';
 import { consultarCommitGithub } from './consultarCommitGithub.js';
+import { consultarIssuesGithub } from './consultarIssuesGithub.js';
+import { consultarAmbientesQase, consultarCamposPersonalizadosQase, consultarMarcosQase } from './consultarCadastrosQase.js';
 import { Recurso } from '../../projetos/tipos/espacos.js';
 
 export async function lerDetalheDoServico(ctx: ContextoServico, rec: Recurso, op: OperacaoExtra, p: Pg, id?: string, f: Filtros = {}): Promise<ResultadoConsulta> {
@@ -89,6 +91,26 @@ export async function lerDetalheDoServico(ctx: ContextoServico, rec: Recurso, op
     }
     case 'commit': {
       const resposta = await consultarCommitGithub(parametros);
+      if (resposta !== null) return resposta;
+      break;
+    }
+    case 'issues': {
+      const resposta = await consultarIssuesGithub(parametros);
+      if (resposta !== null) return resposta;
+      break;
+    }
+    case 'marcos': {
+      const resposta = await consultarMarcosQase(parametros);
+      if (resposta !== null) return resposta;
+      break;
+    }
+    case 'ambientes': {
+      const resposta = await consultarAmbientesQase(parametros);
+      if (resposta !== null) return resposta;
+      break;
+    }
+    case 'campos-personalizados': {
+      const resposta = await consultarCamposPersonalizadosQase(parametros);
       if (resposta !== null) return resposta;
       break;
     }

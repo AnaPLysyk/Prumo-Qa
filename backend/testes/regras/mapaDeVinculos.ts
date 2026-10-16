@@ -7,11 +7,13 @@ import { catalogoDeTestes } from './catalogoDeTestes.js';
 import { listarRunsLocais } from '../banco/listarRunsLocais.js';
 import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
 import { listarPropostas } from '../../tickets/banco/listarPropostas.js';
+import { listarRepositorioLocal } from './listarRepositorioLocal.js';
 
 export function mapaDeVinculos(espacoId: string, b?: string) {
   const e = obterEspaco(espacoId, b); const g = novoGrafoDeVinculos(); const avisos: string[] = [];
   // Cada etapa acrescenta ligações de uma fonte: cadastro, código, runs, execuções e propostas publicadas.
   const prumo = ligarCadastroDoProjeto(g, e);
+  ligarCasosLocais(g, espacoId, prumo, b);
   ligarTestesDoCodigo(g, e, avisos);
   ligarRunsDoProjeto(g, espacoId, prumo, b);
   ligarExecucoesDeTickets(g, espacoId, b);
@@ -46,6 +48,8 @@ function ligarCadastroDoProjeto(g: GrafoDeVinculos, e: Espaco) {
 
 /** Nome legível de uma referência do mapa (ex.: "Caso Qase 12", "Ticket ABC-3", "Commit 1a2b3c4"). */
 function rotuloDaReferencia(r: { tipo: string; id: string }) {
+  if (r.tipo === 'caso-local') return `Caso local ${r.id.slice(0, 8)}`;
+  if (r.tipo === 'ticket-local') return `Ticket local ${r.id.slice(0, 8)}`;
   if (r.tipo === 'qase') return `Caso Qase ${r.id}`;
   if (r.tipo === 'jira') return `Ticket ${r.id}`;
   if (r.tipo === 'jira-bug') return `Bug ${r.id}`;
@@ -104,6 +108,25 @@ function ligarExecucoesDeTickets(g: GrafoDeVinculos, espacoId: string, b?: strin
   }
 }
 
+/** O cadastro offline é parte do repositório local: mostrar casos e tickets mesmo quando ainda não há vínculo. */
+function ligarCasosLocais(g: GrafoDeVinculos, espacoId: string, prumo: string, b?: string) {
+  for (const caso of listarRepositorioLocal(espacoId, b).casos) {
+    const id = 'caso-local:' + caso.id;
+    g.no({ id, tipo: 'caso-local', rotulo: caso.titulo, detalhe: 'Caso local · Prumo' });
+    const no = g.nos.get(id);
+    if (no) { no.rotulo = caso.titulo; no.detalhe = 'Caso local · Prumo'; }
+    g.ar({ de: prumo, para: id, tipo: 'possui registro local', origem: 'REGISTRADO_PELO_PRUMO' });
+  }
+  // Tickets locais ainda têm cadastro próprio no fluxo de propostas, sem Qase ou Jira remoto.
+  for (const p of listarPropostas(espacoId, b).filter(x => x.tipo === 'bug' && x.origem === 'PESSOA' && x.estado !== 'DESCARTADA' && !x.remoto)) {
+    const id = 'ticket-local:' + p.id;
+    g.no({ id, tipo: 'ticket-local', rotulo: p.titulo, detalhe: 'Ticket local · Prumo' });
+    const no = g.nos.get(id);
+    if (no) { no.rotulo = p.titulo; no.detalhe = 'Ticket local · Prumo'; }
+    g.ar({ de: prumo, para: id, tipo: 'possui registro local', origem: 'REGISTRADO_PELO_PRUMO' });
+  }
+}
+
 /** Põe no mapa os casos e bugs que o Prumo publicou a partir de propostas, e a falha de caso que originou cada bug. */
 function ligarPropostasPublicadas(g: GrafoDeVinculos, espacoId: string, prumo: string, b?: string) {
   for (const p of listarPropostas(espacoId, b).filter(x => (x.estado === 'PUBLICADA' || x.estado === 'VINCULADA') && x.remoto?.chave)) {
@@ -118,10 +141,10 @@ function ligarPropostasPublicadas(g: GrafoDeVinculos, espacoId: string, prumo: s
 function lacunasDoMapa(g: GrafoDeVinculos): LacunaDoMapa[] {
   const lacunas: LacunaDoMapa[] = [];
   const liga = (id: string, tipo: string, sentido: 'de' | 'para') => g.arestas.some(a => a[sentido] === id && g.nos.get(sentido === 'de' ? a.para : a.de)?.tipo === tipo);
-  for (const c of [...g.nos.values()].filter(n => n.tipo === 'qase')) {
-    if (!liga(c.id, 'automacao', 'de')) lacunas.push({ tipo: 'CASO_SEM_AUTOMACAO', id: c.id, mensagem: `${c.rotulo} não tem automação associada no Prumo (pode ser um caso manual).` });
-    if (!liga(c.id, 'jira', 'para') && !liga(c.id, 'jira', 'de')) lacunas.push({ tipo: 'CASO_SEM_TICKET', id: c.id, mensagem: `${c.rotulo} não tem ticket Jira associado no Prumo.` });
+  for (const c of [...g.nos.values()].filter(n => n.tipo === 'qase' || n.tipo === 'caso-local')) {
+    if (c.tipo === 'qase' && !liga(c.id, 'automacao', 'de')) lacunas.push({ tipo: 'CASO_SEM_AUTOMACAO', id: c.id, mensagem: `${c.rotulo} não tem automação associada no Prumo (pode ser um caso manual).` });
+    if (!['jira','ticket-local'].some(t => liga(c.id, t, 'para') || liga(c.id, t, 'de'))) lacunas.push({ tipo: 'CASO_SEM_TICKET', id: c.id, mensagem: `${c.rotulo} não tem ticket vinculado no Prumo.` });
   }
-  for (const t of [...g.nos.values()].filter(n => n.tipo === 'jira')) if (!liga(t.id, 'qase', 'de') && !liga(t.id, 'qase', 'para')) lacunas.push({ tipo: 'TICKET_SEM_CASO', id: t.id, mensagem: `${t.rotulo} não tem caso do Qase associado no Prumo.` });
+  for (const t of [...g.nos.values()].filter(n => n.tipo === 'jira' || n.tipo === 'ticket-local')) if (!['qase', 'caso-local'].some(tipo => liga(t.id, tipo, 'de') || liga(t.id, tipo, 'para'))) lacunas.push({ tipo: 'TICKET_SEM_CASO', id: t.id, mensagem: `${t.rotulo} não tem caso Qase ou local associado no Prumo.` });
   return lacunas;
 }

@@ -20,6 +20,7 @@ import { associacaoSchema, dadosEspaco, identidadeRecurso, servicoSchema } from 
 import { filtroSchema } from '../../projetos/tipos/painel.js';
 import { numeroChamado, solicitacaoSchema } from '../../suporte/tipos/suporte.js';
 import { esquemaCaso } from '../../testes/tipos/escritaQase.js';
+import { entradaCasoLocal, entradaSuiteLocal } from '../../testes/tipos/repositorioLocal.js';
 
 /**
  * Fonte única dos contratos técnicos: o que a janela (IPC) e os agentes de IA (MCP) podem pedir ao Prumo.
@@ -46,6 +47,10 @@ export const esquemasIpc = {
   'espacos:associar': z.object({id:z.string().uuid(),dados:associacaoSchema}).strict(),
   'servicos:listar': vazio,
   'servicos:adicionar': conexaoEntrada,
+  'servicos:qaseprevia': z.object({token: conexaoEntrada.shape.token}).strict(),
+  'servicos:qasepreviaconta': z.object({conexaoId:z.string().uuid()}).strict(),
+  'servicos:qaseimportar': z.object({previaId:z.string().uuid(),codigos:z.array(z.string().regex(/^[A-Z][A-Z0-9]{1,9}$/)).min(1).max(1000)}).strict(),
+  'servicos:qasecancelar': z.object({previaId:z.string().uuid()}).strict(),
   'servicos:validar': z.object({id:z.string().uuid()}).strict(),
   'servicos:remover': z.object({id:z.string().uuid()}).strict(),
   'servicos:recursos': z.object({id:z.string().uuid(),pagina:paginaSchema.optional()}).strict(),
@@ -60,15 +65,18 @@ export const esquemasIpc = {
   'operacoes:listar': z.object({espacoId:z.string().uuid().optional(),limite:z.number().int().min(1).max(500).optional()}).strict(),
   'escrita:estado': z.object({espacoId:z.string().uuid()}).strict(),
   'escrita:habilitar': z.object({espacoId:z.string().uuid(),servico:servicoSchema,habilitada:z.boolean()}).strict(),
+  'repositorio:listar': z.object({espacoId:z.string().uuid()}).strict(),
+  'repositorio:caso': entradaCasoLocal,
+  'repositorio:suite': entradaSuiteLocal,
   'propostas:listar': z.object({espacoId:z.string().uuid()}).strict(),
   'propostas:criar': z.object({espacoId:z.string().uuid(),tipo:z.enum(['caso','bug']),dados:z.record(z.unknown()),requisito:z.string().max(500).optional(),risco:z.string().max(300).optional(),falhaDeOrigem:z.object({runLocalId:z.string().uuid(),casoId:z.number().int().positive()}).strict().optional()}).strict(),
   'propostas:editar': z.object({id:z.string().uuid(),dados:z.record(z.unknown()),requisito:z.string().max(500).optional(),risco:z.string().max(300).optional()}).strict(),
   'propostas:revisar': z.object({id:z.string().uuid(),duplicidade:z.boolean(),requisito:z.boolean(),risco:z.boolean(),cobertura:z.boolean()}).strict(),
   'propostas:descartar': z.object({id:z.string().uuid()}).strict(),
   'propostas:vincular': z.object({id:z.string().uuid(),chave:z.string().trim().min(3).max(40)}).strict(),
-  'propostas:publicar': z.object({id:z.string().uuid(),tipoId:z.string().regex(/^\d{1,12}$/).optional()}).strict(),
+  'propostas:publicar': z.object({id:z.string().uuid(),tipoId:z.string().regex(/^\d{1,12}$/).optional(),destino:z.enum(['jira','qase','github']).optional(),severidadeQase:z.number().int().min(1).max(20).optional(),marcoQase:z.number().int().positive().optional(),camposQase:z.record(z.string().regex(/^\d{1,12}$/),z.string().trim().min(1).max(2000)).optional()}).strict(),
   'runs:listar': z.object({espacoId:z.string().uuid()}).strict(),
-  'runs:preparar': z.object({espacoId:z.string().uuid(),titulo:z.string().trim().min(3).max(255),ambiente:z.enum(ambientes),casos:z.array(z.object({casoId:z.number().int().positive(),titulo:z.string().max(255)}).strict()).min(1).max(500),planoId:z.number().int().positive().optional()}).strict(),
+  'runs:preparar': z.object({espacoId:z.string().uuid(),titulo:z.string().trim().min(3).max(255),ambiente:z.enum(ambientes),casos:z.array(z.object({casoId:z.number().int().positive(),titulo:z.string().max(255)}).strict()).min(1).max(500),planoId:z.number().int().positive().optional(),marcoId:z.number().int().positive().optional(),ambienteQaseId:z.number().int().positive().optional()}).strict(),
   'runs:criar': z.object({id:z.string().uuid()}).strict(),
   'runs:executar': z.object({id:z.string().uuid()}).strict(),
   'runs:resultado': z.object({id:z.string().uuid(),casoId:z.number().int().positive(),status:z.enum(['PASS','FAIL','BLOCKED']),comentario:z.string().trim().min(3).max(2000)}).strict(),
@@ -238,6 +246,48 @@ const ipc: Partial<Record<CanalIpc, Descricao>> = {
   'dados:excluir': { finalidade: 'Excluir histórico operacional, evidências de um projeto ou diagnósticos do aplicativo.', origem: 'Interface > Ajuda > Privacidade e dados', destino: 'main.ts (confirmação nativa) > atividades/evidencias/diagnostico', entrada: 'escopo (historico, evidencias, contextos ou diagnostico) + projeto quando aplicável', saida: 'deleted, failed', permissoes: vinculado + ' Confirmação nativa destrutiva.', efeito: 'Apaga somente arquivos do escopo, validados por nome, tipo e caminho canônico. Nunca apaga código-fonte; não é exposto ao MCP.', arquivos: 'Histórico do projeto; <projeto>/.prumo/evidencias; diagnóstico do app', erros: [...ipcErros, 'PROJECT_NOT_LINKED', 'HISTORY_SYMLINK'], protecoes: [...ipcProtecoes, 'Confirmação nativa', 'Recusa links e arquivos fora do padrão', 'Falhas parciais informadas, nunca ocultadas'], registro: 'Diagnóstico IPC' },
   'diagnostico:listar': { finalidade: 'Listar o diagnóstico técnico das chamadas da interface.', origem: 'Interface > Logs > Diagnóstico da interface', destino: 'main.ts > diagnostico.lerDiagnostico', entrada: 'Nenhuma', saida: 'Eventos (canal, estado, duração, código)', permissoes: 'Nenhuma', efeito: consulta, arquivos: '%LOCALAPPDATA%\\PrumoQA\\diagnostico', erros: ipcErros, protecoes: [...ipcProtecoes, 'Somente metadados, sem argumentos'], registro: 'Não se registra (evita recursão)' }
 };
+Object.assign(ipc, {
+  'servicos:qaseprevia': {
+    finalidade: 'Validar token do Qase e descobrir todos os projetos disponíveis antes de cadastrar a conta.',
+    origem: 'Interface > Conexões > Qase > Conectar ao Qase',
+    destino: 'backend/conexoes/api/servicosQaseprevia.ts > servicosQasePrevia > backend/conexoes/regras/importarProjetosQase.ts',
+    entrada: 'Token Qase (somente em memória, nunca documentado em texto)', saida: 'ID temporário da prévia, nomes e códigos dos projetos, estado de importação',
+    permissoes: 'Conexões: USAR e acesso de leitura Qase',
+    efeito: 'GET Qase paginado; prévia válida por 5 minutos somente na memória do processo principal. Não persiste credencial nem importa projetos.',
+    arquivos: 'Nenhum arquivo alterado',
+    erros: [...ipcErros, 'CREDENTIAL_INVALID_OR_EXPIRED', 'SERVICE_UNAVAILABLE', 'SERVICE_PERMISSION', 'QASE_PROJECT_LIMIT'],
+    protecoes: [...ipcProtecoes, 'Token não retorna ao renderer', 'Host Qase fixo', 'Prévia expira automaticamente'], registro: 'Somente metadados sem credenciais'
+  },
+  'servicos:qasepreviaconta': {
+    finalidade: 'Consultar projetos da conta Qase já armazenada no cofre, sem mostrar seu token.',
+    origem: 'Interface > Conexões > Importar projetos Qase', destino: 'backend/conexoes/api/servicosQasepreviaconta.ts > servicosQasePreviaConta',
+    entrada: 'ID da conexão protegida', saida: 'ID temporário da prévia e projetos paginados',
+    permissoes: 'Conexões: USAR', efeito: 'GET Qase usando token no cofre; não persiste projetos até a confirmação.',
+    arquivos: 'Somente leitura do cofre e das contas de serviço',
+    erros: [...ipcErros, 'SERVICE_NOT_FOUND', 'SERVICE_UNAVAILABLE'],
+    protecoes: [...ipcProtecoes, 'Token nunca sai do backend'], registro: 'Somente metadados'
+  },
+  'servicos:qaseimportar': {
+    finalidade: 'Importar para o Prumo apenas os projetos Qase explicitamente selecionados.',
+    origem: 'Interface > Conexões > Adicionar projetos ao Prumo',
+    destino: 'backend/conexoes/api/servicosQaseimportar.ts > servicosQaseImportar > backend/conexoes/regras/importarProjetosQase.ts',
+    entrada: 'ID temporário da prévia e códigos selecionados', saida: 'Códigos adicionados, existentes e falhas individualizadas',
+    permissoes: 'Conexões: USAR mais confirmação nativa de cada lote',
+    efeito: 'Confere o escopo remoto; salva token protegido e cria projetos locais com vínculo Qase. Não publica dados no Qase.',
+    arquivos: 'contas.json, cofre criptografado, espacos.json e contrato local de cada espaço',
+    erros: [...ipcErros, 'QASE_PREVIEW_EXPIRED', 'SERVICE_SCOPE_CHANGED', 'WORKSPACE_LIMIT'],
+    protecoes: [...ipcProtecoes, 'Confirmação nativa', 'Releitura do Qase antes de gravar', 'Idempotência por conta e código'], registro: 'Contagens e códigos sem token'
+  },
+  'servicos:qasecancelar': {
+    finalidade: 'Cancelar uma prévia e descartar o token temporário antes da importação.',
+    origem: 'Interface > Conexões > Cancelar importação',
+    destino: 'backend/conexoes/api/servicosQasecancelar.ts > servicosQaseCancelar',
+    entrada: 'ID temporário da prévia', saida: 'Confirmação de descarte',
+    permissoes: 'Conexões: USAR', efeito: 'Remove a prévia da memória; sem rede e sem gravação.',
+    arquivos: 'Nenhum', erros: ipcErros,
+    protecoes: [...ipcProtecoes, 'Nenhuma credencial persistida'], registro: 'Sem tokens'
+  }
+});
 const ctxArquivos = '%LOCALAPPDATA%\\PrumoQA\\contextos\\<projeto> (somente este projeto)';
 const ctxProt = [...ipcProtecoes, 'Isolado por projeto', 'Texto limitado e tratado como dado, nunca como instrução', 'Histórico encadeado por hash'];
 Object.assign(ipc, {
@@ -278,13 +328,16 @@ Object.assign(ipc, {
   'operacoes:listar': extDesc('Livro-razão das operações externas por projeto.', 'Projeto opcional e limite', 'Operações com estado, resumo, identificador remoto e tentativas', 'Consulta local.', 'Nenhuma'),
   'escrita:estado': extDesc('Ver em quais serviços a escrita está habilitada no projeto.', 'Projeto', 'Habilitação por serviço', 'Consulta local.', 'Nenhuma'),
   'escrita:habilitar': extDesc('Habilitar ou desabilitar a escrita externa de um serviço no projeto.', 'Projeto, serviço e habilitada', 'Estado da habilitação', 'Grava permissoes-servicos.json. Habilitar não executa nada; cada operação ainda pede confirmação.', 'Confirmação nativa ao habilitar'),
+  'repositorio:listar': extDesc('Consultar casos e suítes locais, incluindo casos antigos sem criar duplicatas.', 'Projeto selecionado', 'Casos e suítes locais', 'Leitura local, sem Qase.', 'Testes: VER', { destino: 'backend/testes/api/repositorioListar.ts > listarRepositorioLocal', arquivos: 'repositorio-testes-local.json e propostas.json' }),
+  'repositorio:caso': extDesc('Criar ou editar caso local independente, com migração segura do legado.', 'Projeto, dados de caso e suite opcional', 'Caso local com ID estável', 'Grava repositorio-testes-local.json. Não envia ao Qase.', 'Testes: USAR', { destino: 'backend/testes/api/repositorioCaso.ts > salvarCasoLocal', arquivos: 'repositorio-testes-local.json' }),
+  'repositorio:suite': extDesc('Criar ou editar suíte local do projeto.', 'Projeto, título, descrição e pai opcional', 'Suíte local persistida', 'Grava repositorio-testes-local.json. Não envia ao Qase.', 'Testes: USAR', { destino: 'backend/testes/api/repositorioSuite.ts > salvarSuiteLocal', arquivos: 'repositorio-testes-local.json' }),
   'propostas:listar': extDesc('Listar propostas de casos e bugs (da pessoa, do Prumo ou de uma IA).', 'Projeto', 'Propostas com estado, origem, revisão e semelhantes', 'Consulta local.', 'Nenhuma'),
   'propostas:criar': extDesc('Criar uma proposta de caso de teste ou de bug em rascunho.', 'Projeto, tipo e dados (esquema estrito)', 'Proposta', 'Grava propostas.json. Não envia nada ao Qase ou Jira.', 'Ação explícita da pessoa'),
   'propostas:editar': extDesc('Editar uma proposta; invalida a revisão anterior.', 'Id e dados', 'Proposta', 'Grava propostas.json.', 'Ação explícita da pessoa'),
   'propostas:revisar': extDesc('Registrar a revisão (duplicidade, requisito, risco e cobertura) de uma proposta.', 'Id e as quatro confirmações', 'Proposta REVISADA', 'Grava propostas.json com quem revisou e quando. Proposta de IA exige revisão completa e requisito informado.', 'Confirmação da pessoa'),
   'propostas:descartar': extDesc('Descartar uma proposta.', 'Id da proposta', 'Proposta DESCARTADA', 'Grava propostas.json.', 'Ação explícita da pessoa'),
   'propostas:vincular': extDesc('Vincular uma proposta de bug a um ticket que já existe no Jira.', 'Id da proposta e chave do ticket', 'Proposta VINCULADA', 'Grava propostas.json e, se a proposta veio de uma falha, registra a relação ticket ↔ caso. Não consulta nem escreve no Jira.', 'Ação explícita da pessoa'),
-  'propostas:publicar': extDesc('Publicar uma proposta (caso no Qase ou bug no Jira).', 'Id e, para bug, o tipo de ticket', 'Registro da operação externa e proposta PUBLICADA', 'Cria o caso ou o ticket depois da confirmação nativa e registra o vínculo como REGISTRADO_PELO_PRUMO.', 'Escrita habilitada + revisão (IA) + confirmação nativa'),
+  'propostas:publicar': extDesc('Publicar uma proposta (caso no Qase; bug ou melhoria no Jira, em Defeitos Qase ou em GitHub Issues).', 'Id, destino (jira, qase ou github), tipo do ticket Jira e severidade Qase quando aplicáveis', 'Registro da operação externa e proposta PUBLICADA', 'Cria o caso, o ticket, o defeito ou a issue somente no destino escolhido, depois da confirmação nativa, e registra o vínculo como REGISTRADO_PELO_PRUMO quando há relação conhecida.', 'Escrita habilitada + revisão (IA) + confirmação nativa'),
   'site:abrir': extDesc('Abrir o site institucional oficial no navegador, depois de confirmar.', 'Nenhuma: a URL é fixa', 'Se abriu ou não', 'Abre o navegador padrão; nada é enviado pelo aplicativo.', 'Confirmação nativa'),
   'testes:arquivo': extDesc('Ler o conteúdo de um arquivo de teste listado pelo catálogo, para a visão de código.', 'Projeto e caminho relativo do arquivo de teste', 'Caminho, número de linhas e conteúdo com segredos mascarados', 'Somente leitura dentro da pasta vinculada; recusa caminho fora dela, link simbólico, arquivo que não é de teste ou maior que 300 KB.', 'Nenhuma'),
   'testes:pipelines': extDesc('Listar os pipelines do GitHub Actions (.github/workflows) da pasta vinculada ao projeto, para a IDE de Testes.', 'Projeto', 'Se há pasta vinculada e, para cada pipeline, caminho, nome, eventos, jobs e número de linhas', 'Somente leitura dentro da pasta vinculada; ignora link simbólico, arquivo maior que 300 KB e mais de 50 pipelines. Nada é executado.', 'Testes: VER'),
@@ -385,7 +438,7 @@ Object.assign(ipc, {
   'plataforma:agentes': contaDesc('Ler a configuração geral dos agentes da plataforma.', 'Nenhuma', 'Agentes com estado ligado, IA externa e orquestração', 'Consulta local.', 'Administração: VER', { arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agentes-plataforma.json' }),
   'plataforma:salvar': contaDesc('Ligar ou desligar agentes, o uso de Claude Code/Codex e a orquestração em todos os projetos.', 'Agentes desligados, iaExterna e orquestracao', 'Configuração salva', 'Grava agentes-plataforma.json; vale para o chat e para o servidor MCP.', 'Administração: USAR', { arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agentes-plataforma.json', erros: [...contaErros, 'AGENT_UNKNOWN'] })
 });
-export const canaisFrequentes: ReadonlySet<string> = new Set(['testes:catalogo','testes:arquivo','assistente:situacao','operacoes:previa','operacoes:listar','escrita:estado','propostas:listar','runs:listar','vinculos:mapa','agentes:estado','worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter', 'conhecimento:estado', 'conhecimento:listar', 'perfil:obter', 'assistente:abertura', 'conhecimento:vocabulario']);
+export const canaisFrequentes: ReadonlySet<string> = new Set(['repositorio:listar','testes:catalogo','testes:arquivo','assistente:situacao','assistente:agentes','conversas:listar','operacoes:previa','operacoes:listar','escrita:estado','propostas:listar','runs:listar','vinculos:mapa','agentes:estado','worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter', 'conhecimento:estado', 'conhecimento:listar', 'perfil:obter', 'assistente:abertura', 'conhecimento:vocabulario']);
 const mcpProtecoes = ['Projeto fixado na configuração do servidor, nunca pela ferramenta', 'Leitura limitada à raiz autorizada', 'Registro de início e término'];
 const mcp: { nome: string; campos: string[]; d: Descricao }[] = [
   { nome: 'contexto_projeto', campos: [], d: { finalidade: 'Identificar tipo, tecnologias, testes, comandos e o que falta no contexto autorizado.', origem: 'Agente de IA por MCP (stdio)', destino: 'backend/agentes/mcp/criarServidor.ts > contextoCompleto', entrada: 'Nenhuma', saida: 'Contexto NOT_VERIFIED com fontes, hashes e informações ausentes', permissoes: 'Servidor iniciado pelo cliente para um projeto', efeito: 'Somente leitura.', arquivos: 'Arquivos listados no contexto do qa.project.json', erros: ['ROOT_REQUIRED', 'INVALID_MANIFEST', 'PATH_FORBIDDEN', 'SECRET_FORBIDDEN', 'CONTEXT_LIMIT'], protecoes: [...mcpProtecoes, 'Arquivos tratados como dados, não instruções', 'Segredos mascarados'], registro: 'Histórico de atividades (origem MCP)' } },

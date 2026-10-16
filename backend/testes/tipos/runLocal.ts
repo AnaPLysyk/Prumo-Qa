@@ -20,7 +20,7 @@ export const resultadoSchema = z.object({ status: statusLocal, origem: z.enum(['
 export const casoSchema = z.object({ casoId: z.number().int().positive(), titulo: z.string().max(255), capability: z.string().max(80).nullable(), casoRunner: z.string().max(100).nullable(), resultado: resultadoSchema.nullable(), publicado: z.boolean() }).strict();
 
 export const runSchema = z.object({
-  id: z.string().uuid(), espacoId: z.string().uuid(), titulo: z.string().max(255), ambiente: z.string().max(40), runIdRemoto: z.number().int().positive().nullable(), planoId: z.number().int().positive().nullable(),
+  id: z.string().uuid(), espacoId: z.string().uuid(), titulo: z.string().max(255), ambiente: z.string().max(40), runIdRemoto: z.number().int().positive().nullable(), planoId: z.number().int().positive().nullable(), marcoId: z.number().int().positive().nullable().optional(), ambienteQaseId: z.number().int().positive().nullable().optional(),
   estado: z.enum(['PREPARADA', 'CRIADA', 'EXECUTADA', 'PARCIAL', 'PUBLICADA']), confirmadaNoQase: z.boolean(), criadaEm: z.string().datetime(), atualizadaEm: z.string().datetime(), casos: z.array(casoSchema).min(1).max(500),
   execucoes: z.array(z.object({ capability: z.string().max(80), evidenciaId: z.string().uuid(), status: statusLocal, em: z.string().datetime() }).strict()).max(200),
   publicacoes: z.array(z.object({ em: z.string().datetime(), estado: z.string().max(20), enviados: z.number().int(), operacaoId: z.string().uuid() }).strict()).max(200)

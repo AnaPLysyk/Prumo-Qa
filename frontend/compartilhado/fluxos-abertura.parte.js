@@ -12,7 +12,7 @@
   const relacoesDe = (e, tipos, id) => (e?.relacoes || []).filter((r) => [r.de, r.para].some((x) => tipos.includes(x.tipo) && String(x.id) === String(id)));
   const outroLado = (r, tipos, id) => ([r.de, r.para].find((x) => !(tipos.includes(x.tipo) && String(x.id) === String(id))) || r.para);
   const vigente = (e, ref) => !ref.vinculoId || e.vinculos.some((v) => v.id === ref.vinculoId);
-  const servicoDoTipo = { jira: 'jira', 'jira-bug': 'jira', qase: 'qase', 'qase-run': 'qase', 'qase-defeito': 'qase', github: 'github', 'github-pr': 'github', 'github-commit': 'github', automacao: 'local', evidencia: 'local', execucao: 'local', run: 'prumo', contexto: 'prumo', pasta: 'local', projeto: 'prumo', servico: 'prumo' };
+  const servicoDoTipo = { 'caso-local': 'prumo', 'ticket-local': 'prumo', jira: 'jira', 'jira-bug': 'jira', qase: 'qase', 'qase-run': 'qase', 'qase-defeito': 'qase', github: 'github', 'github-pr': 'github', 'github-commit': 'github', automacao: 'local', evidencia: 'local', execucao: 'local', run: 'prumo', contexto: 'prumo', pasta: 'local', projeto: 'prumo', servico: 'prumo' };
   const escritaDesligada = (servico) => DS.notaPermissao(tr('Escrita no {s} desligada. Habilite em Conexões.', { s: DS.nomesServico[servico] }));
   const atualizarEspaco = async (e) => { const r = await api.espacoObter(e.id); if (r.ok) { estado.espaco = r.data; return r.data; } return e; };
   const resultadoOp = (destino, r) => { if (r && destino?.isConnected) destino.append(painelResultado(r)); return r; };
@@ -21,7 +21,7 @@
   /** Nós clicáveis da rastreabilidade e das relações dentro dos modais. */
   function noRef(e, ref, rotulo) {
     const servico = servicoDoTipo[ref.tipo] || 'prumo'; const ok = vigente(e, ref);
-    const abrir = { jira: () => abrirTicket(e, ref.id), 'jira-bug': () => abrirTicket(e, ref.id), qase: () => abrirCaso(e, ref.id), 'qase-defeito': () => abrirDefeito(e, ref.id) }[ref.tipo];
+    const abrir = { 'caso-local': async () => { const r = await api.repositorioLocal(e.id); const c = r.ok && r.data.casos.find(p => p.id === ref.id); if (c) await abrirCasoLocal(e, c); }, 'ticket-local': () => abrirTicketLocalPorId(e, ref.id), jira: () => abrirTicket(e, ref.id), 'jira-bug': () => abrirTicket(e, ref.id), qase: () => abrirCaso(e, ref.id), 'qase-defeito': () => abrirDefeito(e, ref.id) }[ref.tipo];
     if (!abrir) return h('span', { class: 'ds-no', 'data-servico': servico }, h('i'), rotulo || ref.id);
     const b = h('button', { type: 'button', class: 'ds-no', 'data-servico': servico, 'aria-label': tr('Abrir {t} {id}', { t: ref.tipo, id: ref.id }), disabled: !ok, title: ok ? null : tr('Vínculo original removido; consulta não autorizada ao vínculo atual.') }, h('i'), rotulo || ref.id);
     if (ok) b.addEventListener('click', abrir);

@@ -2,4 +2,4 @@
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { prepararRunLocal } from '../regras/prepararRunLocal.js';
 
-export const runsPreparar: TratadorDoCanal<'runs:preparar'> = a => prepararRunLocal(a.espacoId, { titulo: a.titulo, ambiente: a.ambiente, casos: a.casos, planoId: a.planoId });
+export const runsPreparar: TratadorDoCanal<'runs:preparar'> = a => prepararRunLocal(a.espacoId, { titulo: a.titulo, ambiente: a.ambiente, casos: a.casos, planoId: a.planoId, marcoId: a.marcoId, ambienteQaseId: a.ambienteQaseId });

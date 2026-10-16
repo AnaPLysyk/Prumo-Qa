@@ -16,7 +16,7 @@ export type DefOperacao<P = unknown> = {
   resumo: (p: P) => string;
   executar: (ctx: ContextoServico, rec: Recurso, p: P, chave: string, aux: Auxiliar) => Promise<Remoto>;
   /** Depois de resposta perdida: procura no serviço o que esta mesma chave já criou. Evita duplicar. */
-  reconciliar?: (ctx: ContextoServico, rec: Recurso, p: P, chave: string) => Promise<Remoto | null>;
+  reconciliar?: (ctx: ContextoServico, rec: Recurso, p: P, chave: string, anterior?: Remoto) => Promise<Remoto | null>;
   /** Releitura no serviço para confirmar que o efeito existe. */
   confirmar?: (ctx: ContextoServico, rec: Recurso, p: P, r: Remoto, chave: string) => Promise<boolean>;
 };

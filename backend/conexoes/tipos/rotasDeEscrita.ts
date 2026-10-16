@@ -25,8 +25,9 @@ export const rotas: Record<Servico, { metodo: MetodoEscrita; caminho: RegExp }[]
     { metodo: 'POST', caminho: /^\/rest\/api\/3\/issueLink$/ }
   ],
   qase: [
-    { metodo: 'POST', caminho: new RegExp(`^/v1/(case|suite|plan|run)/${codigoQase}$`) },
+    { metodo: 'POST', caminho: new RegExp(`^/v1/(case|suite|plan|run|defect)/${codigoQase}$`) },
     { metodo: 'PATCH', caminho: new RegExp(`^/v1/case/${codigoQase}/\\d{1,15}$`) },
+    { metodo: 'PATCH', caminho: new RegExp(`^/v1/defect/${codigoQase}/status/\\d{1,15}$`) },
     { metodo: 'POST', caminho: new RegExp(`^/v1/run/${codigoQase}/\\d{1,15}/complete$`) },
     { metodo: 'POST', caminho: new RegExp(`^/v1/result/${codigoQase}/\\d{1,15}$`) },
     { metodo: 'POST', caminho: new RegExp(`^/v1/result/${codigoQase}/\\d{1,15}/bulk$`) },
@@ -36,6 +37,7 @@ export const rotas: Record<Servico, { metodo: MetodoEscrita; caminho: RegExp }[]
   github: [
     { metodo: 'POST', caminho: new RegExp(`^/repos/${dono}/${dono}/git/refs$`) },
     { metodo: 'PUT', caminho: new RegExp(`^/repos/${dono}/${dono}/contents/[^?#]{1,500}$`) },
-    { metodo: 'POST', caminho: new RegExp(`^/repos/${dono}/${dono}/pulls$`) }
+    { metodo: 'POST', caminho: new RegExp(`^/repos/${dono}/${dono}/pulls$`) },
+    { metodo: 'POST', caminho: new RegExp(`^/repos/${dono}/${dono}/issues$`) }
   ]
 };

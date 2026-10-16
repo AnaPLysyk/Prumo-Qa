@@ -2,6 +2,60 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.15.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "Integrações reais: Qase pelo token, destino de publicação e GitHub Issues",
+      "objective": "Deixar Qase, Jira e GitHub funcionando com contas reais: projetos do Qase importados pelo token, rascunhos de bug ou melhoria publicados no destino escolhido e a tela Conexões reorganizada por serviço.",
+      "features": [
+        "Conexões › Conectar Qase: o token lista os projetos da conta, com busca e \"Selecionar todos\"; os escolhidos viram projetos Prumo já vinculados, com casos em Testes e defeitos em Tickets. O token só é guardado depois da confirmação.",
+        "Projeto criado à mão continua sem integração e pode ser vinculado depois a um projeto Qase, Jira ou GitHub existente (Listar recursos disponíveis, na linha da conta).",
+        "Rascunho local de bug ou melhoria com destino escolhido: manter local, Jira, Defeitos Qase ou GitHub Issues. Só aparecem os destinos vinculados ao projeto; cada envio pede confirmação nativa e é conferido no serviço.",
+        "GitHub Issues: publicar bug (rótulo bug) ou melhoria (enhancement) no repositório vinculado e ver as issues abertas em Tickets, ao lado de Jira, Defeitos Qase e rascunhos locais.",
+        "Defeitos Qase: severidade com os nomes do próprio Qase, milestone opcional, campos personalizados obrigatórios e mudança de status (em andamento, resolvido ou inválido) no detalhe do defeito.",
+        "Runs do Qase podem levar milestone e ambiente do próprio Qase.",
+        "Casos e suítes locais para projetos sem Qase, com passos e dados de teste, e vínculo declarado com tickets do Jira.",
+        "Conexões: uma linha por serviço com contas, escrita no projeto e ações; o formulário abre sob a linha e lista as permissões que o token precisa ter."
+      ],
+      "improvements": [
+        "Quando o serviço recusa um envio (400, 402, 403 ou 422), o Prumo mostra o motivo dado pelo serviço; no GitHub, a permissão que faltou no token.",
+        "Rascunho já publicado aparece uma vez só em Tickets, na linha do serviço, marcado \"publicado pelo Prumo\".",
+        "Filtro de status oficial do Qase (open, in_progress, resolved, invalid) consulta todas as páginas de defeitos.",
+        "A Ajuda e o mapa das APIs (docs/INTEGRACOES-ORIGEM-DESTINO.md) descrevem o que cada serviço lê e recebe."
+      ],
+      "fixes": [
+        "Conexões reais com Qase, Jira e GitHub falhavam com \"não foi possível comunicar\": o endereço fixado por segurança era entregue num formato que o Node atual não aceitava.",
+        "Criar caso no Qase era recusado: a API real exige 0 ou 1 nos campos de automação, não verdadeiro ou falso.",
+        "Testes falhava ao listar casos em planos do Qase sem vínculos com o Jira (HTTP 402); agora a lista vem sem esses vínculos e um ⓘ explica.",
+        "Run criada e resultados publicados no Qase ficavam como \"não confirmados\": a conferência exigia campos que o Qase não devolve e não esperava o processamento do envio em lote."
+      ],
+      "differential": "Cada integração foi homologada com conta real: caso, defeito, run e resultado no Qase, bug e comentário no Jira e issue no GitHub, todos conferidos direto no serviço.",
+      "howItWorks": [
+        "Conectar dá acesso de leitura. A escrita é habilitada por projeto e serviço, e cada envio mostra prévia e pede confirmação nativa.",
+        "Todo item criado leva um marcador; se a resposta se perder, o Prumo procura pelo marcador antes de reenviar e não duplica.",
+        "GitHub Actions não é destino de defeito: criar uma issue não dispara pipeline."
+      ],
+      "security": [
+        "Tokens ficam no cofre do Windows e nunca chegam à janela; recusas mostradas ao usuário passam pelo mascaramento de segredos.",
+        "Novas rotas de escrita na lista fechada: issue no GitHub e status de defeito no Qase. Nenhuma rota apaga dados."
+      ],
+      "compatibility": [
+        "Runs locais ganham milestone e ambiente do Qase opcionais; dados existentes continuam válidos.",
+        "Casos e suítes locais ficam em repositorio-testes-local.json; casos antigos de propostas são lidos sem alteração."
+      ],
+      "limitations": [
+        "Sem a permissão Issues: Read and write, o GitHub cria a issue em repositório público mas descarta os rótulos; o Prumo avisa.",
+        "Campos personalizados obrigatórios do Qase são enviados pelo ID do campo; com conta real só foram homologados projetos sem campos obrigatórios.",
+        "Editar ou fechar issue, editar título ou resultado de defeito e excluir qualquer item não têm contrato.",
+        "O plano gratuito do Qase não libera os vínculos caso-ticket do Jira."
+      ],
+      "releaseUrl": null,
+      "migration": "Nada a migrar.",
+      "afterUpdate": [
+        "Gere tokens novos com as permissões listadas em Conexões."
+      ]
+    },
+    {
       "version": "2.14.1",
       "status": "publicada",
       "date": "2026-10-15",

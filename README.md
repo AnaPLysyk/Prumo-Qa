@@ -1,4 +1,4 @@
-# Prumo QA 2.14 — Plataforma desktop de engenharia de qualidade
+# Prumo QA 2.15 — Plataforma desktop de engenharia de qualidade
 
 ## Onde fica cada coisa
 
@@ -18,7 +18,7 @@ Procure pelo nome da tela que aparece no menu: a mesma pasta existe no frontend 
 
 Mapa completo: [Arquitetura modular por tela](docs/ARQUITETURA-MODULAR-ATUAL.md) · [índice do backend](backend/LEIA-ME.md) · [seleção de testes](docs/TESTES.md). `npm.cmd run check` confere dependências, tipos e a suíte inteira.
 
-Versão atual 2.14.1; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/historico/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/historico/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/historico/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
+Versão atual 2.15.0; releases publicadas em [github.com/AnaPLysyk/Prumo-Qa/releases](https://github.com/AnaPLysyk/Prumo-Qa/releases) (a 2.8.0 e a 2.7.0 não foram alteradas). [Agendamentos e worker](docs/AGENDAMENTOS.md) · [reaproveitamento](docs/historico/REAPROVEITAMENTO-2.8.md) · [baseline 2.8](docs/historico/BASELINE-2.8.md). [Documentação pública](https://prumo-qa-docs.onrender.com) · [baseline 2.7](docs/historico/BASELINE-2.7.md) · [contratos dos serviços](docs/SERVICOS.md). Instalador sem assinatura; publicação depende das verificações obrigatórias.
 
 ## Ciclo de qualidade e IA
 
@@ -153,6 +153,12 @@ O backend é organizado **por tela**: `backend/<tela>/` tem a mesma pasta que a 
 | `backend/projetos/exemplos/g3-somente-leitura.json` | Contrato externo restrito, sem comandos, para G3 |
 | `ferramentas/demonstracao/demonstrar.mjs` | Demonstração CLI/MCP com logs reais; sem simular aprovação humana |
 | `docs/` | Segurança, proveniência, validação, diagnóstico e entrega |
+
+## Validar sem abrir o Electron
+
+Em uma máquina sem homologação de navegador/banco autorizada, use `npm run check:isolado`. Ele confere dependências, TypeScript, build e executa os testes elegíveis com proteção adicional contra inicialização de Electron/Chromium, SQLite por `require` e TCP fora de localhost. Registra os arquivos que dependem da janela ou de migração como `NOT_RUN`, sem tratá-los como PASS. Para inspecionar a seleção sem rodar testes: `npm run test:selecionar -- --isolado --listar`.
+
+**Este modo não substitui `npm run check` nem é uma sandbox de segurança**: a seleção é conservadora por dependências conhecidas e a proteção em runtime não prova ausência de todos os efeitos de outros processos. E2E visual, login real, permissões nativas e integrações externas continuam pendentes até homologação específica e autorizada. Falha em qualquer teste selecionado faz o comando falhar.
 
 ## Vincular um projeto
 

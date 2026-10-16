@@ -6,11 +6,13 @@ Prumo reads your repository's tests, shows them next to the Qase cases and, with
 
 Tests and Tickets work with no connection at all: tests come from the repository folder, and proposals, runs and tickets stay local on this computer. Each connection adds data:
 
-- **Qase**: cases and suites in Repository, runs in Runs and plans in Plans.
+- **Qase**: cases and suites in Repository, runs in Runs, plans in Plans and defects in Tickets. In Connections, **Connect Qase** asks only for the token, lists the account's projects and each one you pick becomes a Prumo project already linked.
 - **Jira**: tickets in Tickets.
-- **GitHub**: repository and pipelines in Tests. In Projects, **Choose a GitHub repository…** lists the account's repositories; **Link** associates one with the project and **Link and bring to this computer** also downloads a copy, after confirmation.
+- **GitHub**: repository and pipelines in Tests and open issues in Tickets. In Projects, **Choose a GitHub repository…** lists the account's repositories; **Link** associates one with the project and **Link and bring to this computer** also downloads a copy, after confirmation.
 
-What you did locally can be published after you connect.
+What you did locally can be published after you connect. A project created by hand can be linked later to an existing project: in Connections, **List available resources** on the account row.
+
+When creating the token, grant the permissions listed in each service's form. On GitHub (fine-grained token): **Issues** read and write; **Contents**, **Pull requests** and **Actions** read-only. Without write on Issues, GitHub creates the issue but drops the labels.
 
 ## Tests
 
@@ -47,11 +49,18 @@ Lists and creates the Qase test plans.
 
 ## Tickets
 
-Jira tickets, Qase defects and local tickets share one table, with the origin on each row and filters by text, origin, type, status and period. The detail shows description, criteria, relations, comments, history, attachments and transitions. Commenting, attaching, changing status, editing and creating ask for confirmation with a preview.
+Jira tickets, Qase defects, GitHub issues and local drafts share one table, with the origin on each row and filters by text, origin, type, status and period. The detail shows description, criteria, relations, comments, history, attachments and transitions. Commenting, attaching, changing status, editing and creating ask for confirmation with a preview.
 
-In **Local (Prumo)** you create and review bugs and improvements without sending anything to a service, classify the failure, link it to an existing ticket or publish to Jira after review.
+**New local draft** creates a bug or improvement without sending anything. In the draft, **Publishing destination** offers only what is linked to the project:
 
-Qase defects are read-only. **Open Jira ticket…** fills in a new ticket and records the defect → ticket link; when a link exists, the button does not appear.
+- **Keep local draft**: nothing leaves the computer.
+- **Jira**: ticket with the project's bug or improvement type.
+- **Qase Defects** (bugs only): severity with Qase's own names, milestone and the project's required fields.
+- **GitHub Issues**: issue labelled `bug` or `enhancement`. It does not trigger GitHub Actions.
+
+Once published, the item appears only once, on the service row, marked "published by Prumo".
+
+In a Qase defect's detail you can change the status (in progress, resolved or invalid); the rest of the defect is read-only. **Open Jira ticket…** fills in a new ticket and records the defect → ticket link; when a link exists, the button does not appear.
 
 ## External writes
 
@@ -63,6 +72,6 @@ F5 or Ctrl+R refreshes the screen. The gear opens My profile, Appearance (theme,
 
 ## Limits
 
-Writes were validated against simulated services; real Jira, Qase and GitHub accounts have not been exercised yet. Test classification is an inference. The installer is not signed: check the SHA-256 before running it.
+Writes were verified with real Qase, Jira and GitHub accounts (case, defect, run and result; bug and comment; issue), but each account has its own plan and permissions: Qase's free plan does not include case-to-Jira links. Editing or closing issues, editing a defect's title or result and deleting items have no contract. Test classification is an inference. The installer is not signed: check the SHA-256 before running it.
 
 For agents and the chat, see [Assistant, agents and knowledge](20-assistente-e-agentes.md).

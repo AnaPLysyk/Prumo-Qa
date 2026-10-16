@@ -7,6 +7,10 @@ import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { resultadosDaRun } from './resultadosDaRun.js';
 import { publicar } from '../tipos/escritaQase.js';
 
+/** Espera base entre releituras (ms); exportada para os testes simularem o atraso sem esperar de verdade. */
+export let esperaDaConfirmacao = 1200;
+export const definirEsperaDaConfirmacao = (ms: number) => { esperaDaConfirmacao = ms; };
+
 export const publicarResultadosNoQase: DefOperacao<z.infer<typeof publicar>> = {
   id: 'qase.publicar_resultados', servico: 'qase', rotulo: 'Publicar resultados na run do Qase', efeito: 'Envia o resultado de cada caso (passed, failed, blocked ou skipped) à run. Casos que esta mesma publicação já registrou não são reenviados; depois do envio a run é relida para confirmar.', exigeConfirmacao: true, schema: publicar,
   resumo: p => `Publicar ${p.resultados.length} resultado(s) na run ${p.runId}: ${(['passed', 'failed', 'blocked', 'skipped'] as const).map(s => `${p.resultados.filter(r => r.status === s).length} ${s}`).filter(t => !t.startsWith('0')).join(', ')}`,
@@ -24,8 +28,14 @@ export const publicarResultadosNoQase: DefOperacao<z.infer<typeof publicar>> = {
     const m = `[${marcadorDaOperacao(k)}]`; const feitos = new Set((await resultadosDaRun(ctx, rec, p.runId)).filter(e => String(e.comment ?? '').includes(m)).map(e => Number(e.case_id)));
     return p.resultados.every(r => feitos.has(r.casoId)) ? { id: String(p.runId), detalhes: { enviados: 0, jaRegistrados: p.resultados.length } } : null;
   },
+  // O envio em lote é processado de forma assíncrona pelo Qase (homologação 15/10/2026): relê até 3 vezes antes de dizer "não confirmado".
   async confirmar(ctx, rec, p, _r, k) {
-    const m = `[${marcadorDaOperacao(k)}]`; const feitos = new Set((await resultadosDaRun(ctx, rec, p.runId)).filter(e => String(e.comment ?? '').includes(m)).map(e => Number(e.case_id)));
-    return p.resultados.every(r => feitos.has(r.casoId));
+    const m = `[${marcadorDaOperacao(k)}]`;
+    for (let tentativa = 0; tentativa < 3; tentativa++) {
+      if (tentativa) await new Promise(ok => setTimeout(ok, esperaDaConfirmacao * tentativa));
+      const feitos = new Set((await resultadosDaRun(ctx, rec, p.runId)).filter(e => String(e.comment ?? '').includes(m)).map(e => Number(e.case_id)));
+      if (p.resultados.every(r => feitos.has(r.casoId))) return true;
+    }
+    return false;
   }
 };

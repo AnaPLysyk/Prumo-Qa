@@ -34,7 +34,15 @@ export const atualizacaoInstalar: TratadorDoCanal<'atualizacao:instalar'> = asyn
     shell.showItemInFolder(entregue);
     return { canceled: false, verificado: true, instalando: false, versao: v, sha256: baixado.sha256, baixadoEm: entregue, proximoPasso: instrucaoDeInstalacao(plataforma) };
   }
-  spawn(baixado.arquivo, [...argumentosInstalador], { detached: true, stdio: 'ignore', windowsHide: false }).unref();
+  // Outra rotina pode começar durante o download. Não fechar o aplicativo com trabalho ativo.
+  if (workerDoAplicativo.estado().emExecucao) throw new Error('UPDATE_BUSY: uma execução começou durante o download; tente instalar depois que terminar.');
+  const filho = spawn(baixado.arquivo, [...argumentosInstalador], { detached: true, stdio: 'ignore', windowsHide: false });
+  await new Promise<void>((resolve, reject) => {
+    filho.once('error', reject);
+    filho.once('spawn', resolve);
+  });
+  filho.on('error', () => { /* erro posterior não deve derrubar o processo principal */ });
+  filho.unref();
   setTimeout(() => app.quit(), 600).unref();
   return { canceled: false, verificado: true, instalando: true, versao: v, sha256: baixado.sha256 };
 };

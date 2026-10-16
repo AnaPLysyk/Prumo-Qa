@@ -17,5 +17,13 @@ export const editarTicket: DefOperacao<z.infer<typeof editar>> = {
     if (p.adicionarRotulos?.length) corpo.update = { labels: p.adicionarRotulos.map(add => ({ add })) };
     await ctx.enviar('PUT', `/rest/api/3/issue/${codificarParaUrl(p.ticket)}`, JSON.stringify(corpo)); return { chave: p.ticket, url: enderecoDoTicket(ctx, p.ticket) };
   },
-  async confirmar(ctx, rec, p) { const r = z.object({ fields: z.object({ summary: z.string().optional() }).passthrough() }).passthrough().parse(await ctx.ler(`/rest/api/3/issue/${codificarParaUrl(p.ticket)}?fields=summary`)); return p.resumo === undefined || r.fields.summary === mascarar(p.resumo); }
+  async confirmar(ctx, rec, p) {
+    const r = z.object({ fields: z.object({
+      summary: z.string().optional(), description: z.unknown().optional(), labels: z.array(z.string()).optional()
+    }).passthrough() }).passthrough().parse(await ctx.ler(`/rest/api/3/issue/${codificarParaUrl(p.ticket)}?fields=summary,description,labels`));
+    if (p.resumo !== undefined && r.fields.summary !== mascarar(p.resumo)) return false;
+    if (p.descricao !== undefined && JSON.stringify(r.fields.description) !== JSON.stringify(textoParaAdf(mascarar(p.descricao)))) return false;
+    if (p.adicionarRotulos?.some(rotulo => !r.fields.labels?.includes(rotulo))) return false;
+    return true;
+  }
 };

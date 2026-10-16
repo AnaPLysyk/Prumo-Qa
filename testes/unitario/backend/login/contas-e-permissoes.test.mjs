@@ -152,3 +152,15 @@ test('todo canal da janela tem tela e nível definidos; os de conta pública sã
   assert.deepEqual(Object.entries(acessoDosCanais).filter(([, v]) => v === 'publico').map(([k]) => k).sort(), ['app:info', 'conta:cadastrar', 'conta:entrar', 'conta:githubestado', 'conta:githubiniciar', 'conta:googleestado', 'conta:googleiniciar', 'conta:recuperar', 'conta:sessao', 'preferencias:obter']);
   for (const canal of ['usuarios:criar', 'usuarios:alterar', 'usuarios:senha', 'papeis:salvar', 'acesso:salvar', 'plataforma:salvar', 'agentes:salvar', 'skills:importar', 'dados:excluir', 'atualizacao:instalar']) assert.deepEqual(acessoDosCanais[canal], ['administracao', 'USAR'], canal);
 });
+
+
+test('consultas automáticas do painel não prolongam a sessão, mas interação humana prolonga', async (t) => {
+  const b = pasta(t); const agora = Date.now(); await ativarLogin(ADMIN, b, new Date(agora));
+  for (const canal of ['assistente:agentes', 'conversas:listar', 'worker:estado']) {
+    assert.doesNotThrow(() => conferirAcessoAoCanal(canal, b, agora + 10 * 60_000, false), canal);
+  }
+  assert.throws(() => conferirAcessoAoCanal('assistente:agentes', b, agora + 31 * 60_000, false), /SESSION_EXPIRED/);
+  await entrarNaConta({ login: ADMIN.login, senha: ADMIN.senha }, b, new Date(agora));
+  assert.doesNotThrow(() => conferirAcessoAoCanal('espacos:criar', b, agora + 25 * 60_000, true));
+  assert.doesNotThrow(() => conferirAcessoAoCanal('assistente:agentes', b, agora + 40 * 60_000, false));
+});

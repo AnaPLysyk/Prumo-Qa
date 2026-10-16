@@ -24,6 +24,10 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `servicosConsultar.ts` | Canal servicos:consultar: Faz uma consulta de leitura no serviço vinculado (tickets, casos, runs, commits...) para as telas. |
 | `servicosDesvincular.ts` | Canal servicos:desvincular: Remove o vínculo do projeto com um serviço depois da confirmação; nada é apagado no serviço. |
 | `servicosListar.ts` | Canal servicos:listar: Lista as contas de Jira, Qase e GitHub configuradas (sem credenciais). |
+| `servicosQasecancelar.ts` | Descarta imediatamente uma prévia temporária da importação Qase. |
+| `servicosQaseimportar.ts` | Importa projetos Qase selecionados depois da confirmação nativa da pessoa. |
+| `servicosQaseprevia.ts` | Valida o token Qase e devolve a prévia paginada sem persistir a credencial. |
+| `servicosQasepreviaconta.ts` | Consulta projetos Qase usando credencial já guardada no cofre, sem revelá-la à janela. |
 | `servicosRecursos.ts` | Canal servicos:recursos: Lista os projetos/repositórios que a conta enxerga, para escolher qual vincular. |
 | `servicosRemover.ts` | Canal servicos:remover: Remove uma conta e sua credencial depois da confirmação nativa. |
 | `servicosValidar.ts` | Canal servicos:validar: Confere se a credencial de uma conta ainda funciona. |
@@ -85,6 +89,7 @@ Operações no GitHub: branch prumo/..., commit de teste e Pull Request rascunho
 | `caminhoDoRepositorio.ts` | Monta o caminho da API do repositório GitHub vinculado. |
 | `commitAtualDoBranch.ts` | Lê o commit atual de um branch (ou nada se não existe). |
 | `criarBranchNoGithub.ts` | Operação "Criar branch de trabalho no GitHub" (prumo/...), nunca o branch padrão. |
+| `criarIssueNoGithub.ts` | Operação "Publicar issue no GitHub" (bug ou melhoria), com marcador de idempotência e confirmação por GET. |
 | `dadosDoRepositorio.ts` | Lê os dados do repositório (branch padrão, nome). |
 | `gravarTesteNoGithub.ts` | Operação "Gravar arquivo de teste em branch de trabalho" (commit só em prumo/...). |
 | `operacoesGithub.ts` | Lista das operações de escrita no GitHub que o Prumo conhece. |
@@ -125,10 +130,12 @@ Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereç
 | `consultarAnexosJira.ts` | Consulta anexos no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `consultarArquivosGithub.ts` | Consulta arquivos no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `consultarArtefatosGithub.ts` | Consulta artefatos no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarCadastrosQase.ts` | Consulta milestones, ambientes e campos personalizados do projeto Qase vinculado, para preencher run e defeito. |
 | `consultarCamposSistemaQase.ts` | Consulta campos-sistema no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `consultarCamposTipoJira.ts` | Consulta campos-tipo no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `consultarCommitGithub.ts` | Consulta commit no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `consultarHistoricoJira.ts` | Consulta historico no serviço correspondente, mantendo as validações de resposta e autorização. |
+| `consultarIssuesGithub.ts` | Consulta as issues do repositório GitHub vinculado (abertas por padrão), sem os Pull Requests que a mesma rota devolve. |
 | `consultarJobsGithub.ts` | Consulta jobs no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `consultarMetadadosJira.ts` | Consulta metadados no serviço correspondente, mantendo as validações de resposta e autorização. |
 | `consultarNoServico.ts` | Faz uma consulta de leitura da tela no recurso vinculado: monta o endereço do serviço, lê a resposta, confere o escopo e devolve só o seguro. |
@@ -176,6 +183,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `escolherCampoAceite.ts` | Confere que o campo do Jira existe e é personalizado, e o grava como o campo de critérios de aceite do projeto. |
 | `estadoDoVinculoPeloErro.ts` | Traduz um erro do serviço no estado do vínculo: sem permissão, sem credencial, desatualizado ou indisponível. |
 | `executarComServico.ts` | Executa uma operação com o serviço já revalidado (conta, vínculo e projeto); a credencial não sai do adaptador. |
+| `importarProjetosQase.ts` | Prévia em memória e importação confirmada de projetos Qase; nunca entrega credenciais ao renderer. |
 | `listarRecursosDaConta.ts` | Lista os projetos ou repositórios que uma conta enxerga no serviço, para escolher qual vincular. |
 | `nucleoServicos.ts` | Reúne tudo o que a tela Conexões faz com Jira, Qase e GitHub: adicionar e validar conta, listar recursos, vincular, consultar e escrever com a credencial protegida. |
 | `procurarComentarioNoJira.ts` | Procura no ticket do Jira um comentário que o Prumo já publicou (pelo marcador), para não publicar duas vezes. |

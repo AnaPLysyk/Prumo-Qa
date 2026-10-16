@@ -16,7 +16,7 @@
 #conteudo[data-qualidade-tela="tickets"] table, #conteudo[data-qualidade-tela="execucoes"] table { border-spacing: 0; width: 100%; }
 #conteudo[data-qualidade-tela="tickets"] tbody tr:hover, #conteudo[data-qualidade-tela="execucoes"] tbody tr:hover { background: var(--fundo2); }
 #conteudo[data-qualidade-tela="projetos"] .nota, #conteudo[data-qualidade-tela="conexoes"] .nota, #conteudo[data-qualidade-tela="agenda"] .agenda-rotina { border-radius: 12px; padding: 20px; }
-#espaco-form:not(:empty), #conexao-form { padding: 20px; border: 1px solid var(--linha); border-radius: 12px; background: var(--painel); }
+#espaco-form:not(:empty) { padding: 20px; border: 1px solid var(--linha); border-radius: 12px; background: var(--painel); }
 #conteudo[data-qualidade-tela="rastreabilidade"] .nota { border-left: 3px solid var(--acento); border-radius: 10px; }
 @media (max-width: 600px) { .qualidade-dialog-corpo { padding: 16px; } .qualidade-dialog-cabecalho { padding: 14px 16px; } }
 @media (prefers-reduced-motion: reduce) { .qualidade-dialog::backdrop { backdrop-filter: none; } }

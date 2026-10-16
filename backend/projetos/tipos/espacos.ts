@@ -18,7 +18,7 @@ export const vinculoSchema=z.object({id:z.string().uuid(),servico:servicoSchema,
 
 export const dadosEspaco=z.object({nome:z.string().trim().min(1).max(200),descricao:z.string().max(1000).default('')}).strict();
 
-export const referencia=z.object({tipo:z.enum(['jira','qase','contexto','automacao','execucao','evidencia','jira-bug','qase-run','qase-defeito','github','github-pr','github-commit']),id:z.string().min(1).max(200),vinculoId:z.string().uuid().optional(),origem:z.string().min(1).max(500)}).strict();
+export const referencia=z.object({tipo:z.enum(['jira','qase','caso-local','ticket-local','contexto','automacao','execucao','evidencia','jira-bug','qase-run','qase-defeito','github','github-pr','github-commit']),id:z.string().min(1).max(200),vinculoId:z.string().uuid().optional(),origem:z.string().min(1).max(500)}).strict();
 
 export const associacaoSchema=z.object({de:referencia,para:referencia,justificativa:z.string().trim().min(1).max(1000)}).strict();
 

@@ -1,12 +1,31 @@
 /** Faz a chamada HTTPS ao serviço: IP público fixado, sem redirecionamento, com tempo e tamanho limitados. */
 import { lookup } from 'node:dns/promises';
 import https from 'node:https';
+import type { LookupFunction } from 'node:net';
 import { rotaEscritaPermitida } from '../escrita/rotaEscritaPermitida.js';
 import { enderecoPublico } from './enderecoPublico.js';
 import { ErroServico } from './ErroServico.js';
+import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { instanciaServico } from './instanciaServico.js';
 import { MetodoEscrita } from '../tipos/rotasDeEscrita.js';
 import { PedidoServico } from '../tipos/transporte.js';
+
+/**
+ * lookup que devolve sempre o IP já conferido. O Node atual (autoSelectFamily) chama com {all:true} e espera uma LISTA;
+ * devolver um endereço só nesse caso dava "Invalid IP address: undefined" e derrubava toda conexão real com Qase, Jira e GitHub.
+ */
+export const fixarIp=(ip:string):LookupFunction=>(_h,o,cb)=>(o as {all?:boolean})?.all?(cb as unknown as (e:null,l:{address:string;family:number}[])=>void)(null,[{address:ip,family:4}]):cb(null,ip,4);
+
+/** Motivo da recusa em JSON do Qase (errorMessage, errorFields), do Jira (errorMessages, errors) ou do GitHub (message, errors). */
+export function motivoDaRecusa(texto:string,segredos:string[]=[]):string|undefined{
+  let j:unknown;try{j=JSON.parse(texto);}catch{return undefined;}if(!j||typeof j!=='object')return undefined;const o=j as Record<string,unknown>;
+  const partes:string[]=[];const add=(v:unknown)=>{if(typeof v==='string'&&v.trim())partes.push(v.trim());};
+  add(o.errorMessage);add(o.message);if(Array.isArray(o.errorMessages))o.errorMessages.forEach(add);
+  if(Array.isArray(o.errorFields))for(const f of o.errorFields as Record<string,unknown>[])add([f?.field,f?.error].filter(x=>typeof x==='string').join(': '));
+  if(o.errors&&typeof o.errors==='object'&&!Array.isArray(o.errors))for(const [k,v] of Object.entries(o.errors))add(k+': '+String(v));
+  if(Array.isArray(o.errors))for(const e of o.errors as Record<string,unknown>[])add([e?.field,e?.code,e?.message].filter(x=>typeof x==='string').join(' '));
+  const m=mascarar(partes.join(' · '),segredos).replace(/\s+/g,' ').trim();return m?m.slice(0,200):undefined;
+}
 
 export async function requisitarServico(p:PedidoServico,metodo:'GET'|MetodoEscrita,corpo?:string|Buffer,tipoConteudo='application/json'):Promise<unknown>{
   const origem=instanciaServico(p.servico,p.instancia);if(origem!==p.instancia||!p.caminho.startsWith('/')||p.caminho.startsWith('//'))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
@@ -18,9 +37,15 @@ export async function requisitarServico(p:PedidoServico,metodo:'GET'|MetodoEscri
   if(!enderecoPublico(ip))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   return new Promise((resolve,reject)=>{
     let encerrado=false;const fim=(e?:Error,v?:unknown)=>{if(encerrado)return;encerrado=true;clearTimeout(timer);e?reject(e):resolve(v);};
-    const req=https.request(u,{method:metodo,agent:false,headers:{Accept:'application/json','User-Agent':'Prumo-QA-desktop',...(corpo!==undefined?{'Content-Type':tipoConteudo,'Content-Length':String(Buffer.byteLength(corpo))}:{}),...p.headers},lookup:(_h,_o,cb)=>cb(null,ip,4)},res=>{
+    const req=https.request(u,{method:metodo,agent:false,headers:{Accept:'application/json','User-Agent':'Prumo-QA-desktop',...(corpo!==undefined?{'Content-Type':tipoConteudo,'Content-Length':String(Buffer.byteLength(corpo))}:{}),...p.headers},lookup:fixarIp(ip)},res=>{
       const status=res.statusCode??0;
-      if(!(metodo==='GET'?status===200:status===200||status===201||status===204)){res.resume();const code=status===401?'CREDENTIAL_INVALID_OR_EXPIRED':status===403?(res.headers['x-ratelimit-remaining']==='0'?'SERVICE_RATE_LIMIT':'SERVICE_PERMISSION'):status===404?'SERVICE_NOT_FOUND':status===429?'SERVICE_RATE_LIMIT':status>=300&&status<400?'SERVICE_REDIRECT_BLOCKED':status>=500?'SERVICE_UNAVAILABLE':'SERVICE_RESPONSE_INVALID';fim(new ErroServico(code));return;}
+      if(!(metodo==='GET'?status===200:status===200||status===201||status===204)){
+        // 400/422: o serviço explica o que recusou; o Prumo guarda o motivo (curto e mascarado) em vez de só "resposta inválida".
+        // 402: recurso fora do plano contratado (ex.: Qase sem external_issues no plano gratuito); o motivo também é guardado.
+        if((status===400||status===402||status===422)&&/json/i.test(String(res.headers['content-type']??''))){let t='';res.setEncoding('utf8');res.on('data',b=>{if(t.length<8192)t+=b;});res.on('end',()=>fim(new ErroServico(status===402?'SERVICE_PLAN_LIMIT':'SERVICE_RESPONSE_INVALID',undefined,motivoDaRecusa(t,Object.values(p.headers??{}).map(String)))));res.on('error',()=>fim(new ErroServico('SERVICE_RESPONSE_INVALID')));return;}
+        // 403 sem limite esgotado: o GitHub diz no cabeçalho qual permissão do token faltou (ex.: issues=write); o Prumo repassa isso.
+        if(status===403&&res.headers['x-ratelimit-remaining']!=='0'){const aceitas=String(res.headers['x-accepted-github-permissions']??'').trim();let t='';res.setEncoding('utf8');res.on('data',b=>{if(t.length<8192)t+=b;});res.on('end',()=>fim(new ErroServico('SERVICE_PERMISSION',undefined,[aceitas?'permissão necessária: '+aceitas:'',motivoDaRecusa(t,Object.values(p.headers??{}).map(String))??''].filter(Boolean).join(' · ').slice(0,200)||undefined)));res.on('error',()=>fim(new ErroServico('SERVICE_PERMISSION')));return;}
+        res.resume();const code=status===401?'CREDENTIAL_INVALID_OR_EXPIRED':status===403?(res.headers['x-ratelimit-remaining']==='0'?'SERVICE_RATE_LIMIT':'SERVICE_PERMISSION'):status===402?'SERVICE_PLAN_LIMIT':status===404?'SERVICE_NOT_FOUND':status===429?'SERVICE_RATE_LIMIT':status>=300&&status<400?'SERVICE_REDIRECT_BLOCKED':status>=500?'SERVICE_UNAVAILABLE':'SERVICE_RESPONSE_INVALID';fim(new ErroServico(code));return;}
       if(status===204){res.resume();fim(undefined,{});return;}
       if(!/\bapplication\/(?:[a-z.+-]*\+)?json\b/i.test(String(res.headers['content-type']??''))){res.destroy();fim(new ErroServico('SERVICE_RESPONSE_INVALID'));return;}
       let size=0;const chunks:Buffer[]=[];res.on('data',b=>{size+=b.length;if(size>2*1024*1024){res.destroy();fim(new ErroServico('SERVICE_RESPONSE_LIMIT'));}else chunks.push(b);});

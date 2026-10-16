@@ -11,6 +11,7 @@ import { Filtros } from '../tipos/leituras.js';
 import { TransporteEscrita, TransporteServico, paginaSchema } from '../tipos/transporte.js';
 import { Recurso, Servico } from '../../projetos/tipos/espacos.js';
 import { adicionarConta } from './adicionarConta.js';
+import { importarProjetosQase } from './importarProjetosQase.js';
 import { comentarNoJira } from './comentarNoJira.js';
 import { consultarServico } from './consultarServico.js';
 import { escolherCampoAceite } from './escolherCampoAceite.js';
@@ -25,8 +26,13 @@ import { vincularRecursoAoEspaco } from './vincularRecursoAoEspaco.js';
 /** Dependências só do processo principal. Testes fornecem doubles; nenhum toggle em produção. Cada ação fica no seu arquivo. */
 export function nucleoServicos(protetor: Protetor, transporte: TransporteServico = lerDoServico, base?: string, escrita: TransporteEscrita = enviarAoServico) {
   const c: ContextoDosServicos = { protetor, transporte, escrita, base, cofre: cofreCredenciais(protetor, base) };
+  const importacaoQase = importarProjetosQase(c);
   return {
     contas: () => listarContas(base),
+    qasePrever: (token: string) => importacaoQase.prever(token),
+    qasePreverConta: (conexaoId: string) => importacaoQase.preverConta(conexaoId),
+    qaseImportar: (previaId: string, codigos: string[]) => importacaoQase.importar(previaId, codigos),
+    qaseCancelar: (previaId: string) => importacaoQase.cancelar(previaId),
     adicionar: (entrada: z.input<typeof conexaoEntrada>) => adicionarConta(c, entrada),
     validarConta: (id: string) => validarConta(c, id),
     removerConta: (id: string) => removerConta(c, id),

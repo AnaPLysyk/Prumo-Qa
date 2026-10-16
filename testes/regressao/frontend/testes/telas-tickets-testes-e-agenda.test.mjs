@@ -203,7 +203,7 @@ test('Testes representa Qase e código: ligação só por anotação, tags, vis�
   await escolherPasta(a.app, f.root); assert.equal((await a.page.evaluate((id) => window.prumo.espacoPasta(id), e.id)).ok, true);
   await selecionar(a.page, e); await ir(a.page, 'testes'); await a.page.waitForSelector('#cat-resumo');
   const resumo = await a.page.textContent('#cat-resumo');
-  assert.match(resumo, /1\s*casos no Qase/); assert.match(resumo, /3\s*testes no código/); assert.match(resumo, /1\s*casos com código/); assert.match(resumo, /2\s*testes sem caso/);
+  assert.match(resumo, /1\s*casos carregados do Qase/); assert.match(resumo, /3\s*testes no código/); assert.match(resumo, /1\s*casos com código/); assert.match(resumo, /2\s*testes sem caso/);
   const caso = a.page.locator('#cat-lista tr[data-caso="31"]').first(); assert.match(await caso.textContent(), /login\.spec\.ts:3[\s\S]*Caso com código/);
   assert.match(await a.page.textContent('#cat-lista'), /Anota Qase SFQ-32, caso não encontrado/);
   const homonimo = a.page.locator('#cat-lista tr', { hasText: 'Caso fictício SFQ sem anotação' }).first(); assert.match(await homonimo.textContent(), /Código sem caso no Qase/, 'nome parecido com o caso não cria ligação');

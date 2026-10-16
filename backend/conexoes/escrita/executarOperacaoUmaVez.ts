@@ -41,7 +41,7 @@ export async function executarOperacaoUmaVez(ex: Executor, espacoId: string, ope
       if (info.vinculoId !== escopo.vinculoId || info.conexaoId !== escopo.conexaoId) throw new Error('OPERATION_SCOPE_CHANGED: vínculo alterado durante a operação.');
       let r: Remoto | null = null; let reconciliado = false;
       // Houve tentativa anterior sem confirmação: o serviço pode já ter criado o recurso (resposta perdida). Procura antes de enviar.
-      if (anterior && op.reconciliar) { r = await op.reconciliar(ctx, rec, p, chave); reconciliado = r !== null; }
+      if (anterior && op.reconciliar) { r = await op.reconciliar(ctx, rec, p, chave, anterior.remoto ?? undefined); reconciliado = r !== null; }
       r ??= await op.executar(ctx, rec, p, chave, o.aux ?? semAux);
       let confirmada = true; if (op.confirmar) { try { confirmada = await op.confirmar(ctx, rec, p, r, chave); } catch { confirmada = false; } }
       return { remoto: { ...r, detalhes: { ...(r.detalhes ?? {}), ...(reconciliado ? { reconciliado: true } : {}) } }, info: { ...info, confirmada } };

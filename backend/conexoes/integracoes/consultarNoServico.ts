@@ -27,8 +27,15 @@ export async function consultarNoServico(a: PartesDoAdaptador, r: Recurso, opera
   const plano = a.c.servico === 'jira' ? await planoDaConsultaJira(a, r, operacao, p, id, campoAceite, filtros) : a.c.servico === 'qase' ? planoDaConsultaQase(r, operacao, p, id, filtros) : planoDaConsultaGithub(r, operacao, p, id);
   if ('pronto' in plano) return plano.pronto;
   try {
-    const bruto = await lerComCredencial(a, plano.endpoint);
+    let endpoint = plano.endpoint; let limitacao: string | undefined; let bruto: unknown;
+    try { bruto = await lerComCredencial(a, endpoint); }
+    catch (e) {
+      if (!(e instanceof ErroServico && e.codigo === 'SERVICE_PLAN_LIMIT' && /[?&]include=external_issues\b/.test(endpoint))) throw e;
+      endpoint = endpoint.replace(/([?&])include=external_issues(&|$)/, (_m, a1, a2) => (a2 ? a1 : '')).replace(/[?&]$/, '');
+      limitacao = 'O plano do Qase não libera os vínculos com o Jira (external_issues): os casos aparecem sem eles.';
+      bruto = await lerComCredencial(a, endpoint);
+    }
     const { dados, proxima } = lerEnvelopeDaConsulta(a.c, bruto, plano, operacao, p);
-    return saidaDaConsulta(a.c, conferirEscopoDaConsulta(r, operacao, dados, id), proxima, r, plano.endpoint);
+    return { ...saidaDaConsulta(a.c, conferirEscopoDaConsulta(r, operacao, dados, id), proxima, r, endpoint), ...(limitacao ? { limitacao } : {}) };
   } catch (e) { if (e instanceof ErroServico) throw e; throw new ErroServico('SERVICE_RESPONSE_INVALID'); }
 }

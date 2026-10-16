@@ -449,6 +449,50 @@ main#conteudo:has(.ds-ide-cheio) { max-width: none; padding: 14px 18px 12px; }
 .ds-integra-acoes { display: inline-flex; gap: 8px; justify-content: flex-end; }
 @media (max-width: 760px) { .ds-integra { grid-template-columns: 1fr; } .ds-integra-acoes { justify-content: flex-start; } }
 .ds-integracoes { margin-bottom: 20px; }
+/* Conexões: conteúdo direto sobre o fundo, uma linha por serviço; o painel de conexão abre sob a linha com um traço lateral, sem cartão. */
+.cx-servicos { margin: 8px 0 28px; }
+.cx-secao-cab { display: flex; align-items: center; gap: 8px; margin: 18px 0 6px; }
+.cx-secao-cab h2 { margin: 0; font-size: var(--ds-fs-lg); }
+.cx-secao-cab > .acao { margin-left: auto; }
+.cx-servico { border-bottom: 1px solid var(--ds-linha-suave); }
+.cx-linha { display: grid; grid-template-columns: 110px minmax(0, 1fr) minmax(110px, auto) minmax(0, auto) auto; align-items: center; gap: 8px 16px; padding: 14px 0; }
+.cx-nome { display: inline-flex; align-items: center; gap: 9px; font-weight: 650; color: var(--texto); }
+.cx-nome i { width: 9px; height: 9px; border-radius: 50%; background: var(--c, var(--suave)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c, var(--suave)) 18%, transparent); }
+.cx-nome[data-servico="qase"] { --c: var(--ds-qase); } .cx-nome[data-servico="jira"] { --c: var(--ds-jira); } .cx-nome[data-servico="github"] { --c: var(--ds-github); }
+.cx-serve { font-size: var(--ds-fs-sm); min-width: 0; }
+.cx-estado, .cx-escrita, .cx-acoes { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cx-acoes { justify-content: flex-end; }
+.cx-conta { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; align-items: center; gap: 6px 16px; padding: 0 0 12px; font-size: var(--ds-fs-sm); }
+.cx-conta-nome { grid-column: 1; color: var(--texto); overflow-wrap: anywhere; }
+.cx-conta-detalhe { overflow-wrap: anywhere; }
+.cx-painel { margin: 4px 0 16px; padding: 4px 0 4px 18px; border-left: 2px solid color-mix(in srgb, var(--acento) 55%, transparent); }
+.cx-painel-cab { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.cx-painel-titulo { font-size: var(--ds-fs-lg); color: var(--texto); }
+.cx-servico-sel { margin-left: auto; display: inline-flex; flex-direction: row; align-items: center; gap: 8px; font-size: var(--ds-fs-sm); color: var(--suave); }
+.cx-form { display: grid; grid-template-columns: minmax(0, 520px); gap: 10px; }
+.cx-campos { display: grid; gap: 10px; }
+.cx-form .cx-acoes { justify-content: flex-start; }
+.cx-permissoes { padding: 10px 0 4px; border-top: 1px solid var(--ds-linha-suave); }
+.cx-permissoes p { margin: 4px 0 8px; font-size: var(--ds-fs-sm); }
+.cx-permissoes ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cx-permissoes li { display: grid; grid-template-columns: 130px 120px minmax(0, 1fr); align-items: center; gap: 10px; font-size: var(--ds-fs-sm); }
+.cx-perm-nome { color: var(--texto); font-weight: 600; }
+.cx-erro { color: var(--falha); font-size: var(--ds-fs-sm); margin: 8px 0 0; }
+.cx-lista-cab { display: flex; align-items: center; gap: 8px; margin: 18px 0 8px; }
+.cx-barra { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
+.cx-barra input[type="search"] { flex: 1 1 260px; max-width: 420px; }
+.cx-todos { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; font-size: var(--ds-fs-sm); color: var(--suave); cursor: pointer; }
+.cx-lista { display: grid; max-height: 360px; overflow: auto; border-top: 1px solid var(--ds-linha-suave); }
+.cx-item { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 9px 4px; border-bottom: 1px solid var(--ds-linha-suave); font-size: var(--ds-fs-md); cursor: pointer; }
+.cx-item:hover { background: var(--ds-hover); }
+.cx-item input[type="checkbox"] { flex: 0 0 auto; margin: 0; }
+.cx-item-nome { flex: 1 1 auto; min-width: 0; color: var(--texto); overflow-wrap: anywhere; }
+.cx-recurso { cursor: default; }
+.cx-vazio { padding: 10px 4px; }
+.cx-rodape { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 12px; }
+.cx-ops { list-style: none; margin: 0; padding: 0; }
+.cx-ops li { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--ds-linha-suave); font-size: var(--ds-fs-sm); }
+@media (max-width: 900px) { .cx-linha { grid-template-columns: 1fr auto; } .cx-serve, .cx-escrita { grid-column: 1 / -1; } .cx-conta { grid-template-columns: 1fr; } }
 
 .ds-mcp-chave { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ds-2) var(--ds-3); padding: var(--ds-3) 0; border-bottom: 1px solid var(--ds-linha-suave); }
 /* Controles de barra: sem a margem herdada de input e select, todos com a mesma altura; datas no mesmo formato. */

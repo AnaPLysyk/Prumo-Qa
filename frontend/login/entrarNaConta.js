@@ -15,8 +15,43 @@ window.PrumoConta = (() => {
     return [h('div', { class: 'entrada-marca' }, h('img', { src: '../../assets/prumo-icon.png', alt: '', width: 40, height: 40 }), h('strong', { 'data-i18n-ignore': '' }, 'Prumo QA')),
       h('h1', { id: 'entrada-titulo' }, tr(titulo)), descricao ? h('p', { class: 'entrada-desc' }, tr(descricao)) : null, ...conteudo];
   }
-  const erroNo = () => h('p', { id: 'entrada-erro', class: 'entrada-erro', role: 'alert', hidden: true });
-  function mostrarErro(form, erro) { const p = form.querySelector('#entrada-erro'); p.textContent = textoErro(erro); p.hidden = false; }
+  const erroNo = () => h('div', { id: 'entrada-erro', class: 'ds-alerta entrada-erro', 'data-tom': 'falha', role: 'alert', hidden: true },
+    DS.icone('alerta'), h('span', { class: 'entrada-erro-mensagem' }));
+  // Na tela de entrada, nunca exibir stack, exceção, texto livre nem código bruto do backend.
+  // Os códigos conhecidos viram mensagens objetivas; os desconhecidos mantêm orientação segura.
+  function mensagemDaEntrada(erro) {
+    const codigo = codigoDo(erro);
+    const mensagens = {
+      LOGIN_INVALID: 'Login ou senha incorretos. Confira os dados ou use Esqueci a senha.',
+      LOGIN_NOT_ACTIVE: 'Ainda não existe conta neste computador. Selecione Criar conta para começar.',
+      LOGIN_SETUP_REQUIRED: 'Crie a primeira conta de Administrador para começar.',
+      LOGIN_RATE_LIMIT: 'Muitas tentativas de acesso. Aguarde um minuto e tente novamente.',
+      LOGIN_INVALID_FORMAT: 'Confira o formato do login informado.',
+      LOGIN_TAKEN: 'Esse login já está em uso. Escolha outro.',
+      LOGIN_ALREADY_ACTIVE: 'Já existe uma conta neste computador. Entre com ela.',
+      ACCOUNT_PENDING: 'Este cadastro aguarda aprovação da Administração.',
+      ACCOUNT_DISABLED: 'Esta conta está desativada. Procure a Administração.',
+      ACCOUNT_LOCKED: 'Conta temporariamente bloqueada por tentativas incorretas. Aguarde ou solicite desbloqueio à Administração.',
+      RECOVERY_INVALID: 'Login ou código de recuperação incorretos. Confira o código ou peça ajuda à Administração.',
+      PASSWORD_INVALID: 'A senha atual não confere.',
+      PASSWORD_WEAK: 'A senha nova não atende às regras de segurança. Use pelo menos 10 caracteres, com letras e números.',
+      PASSWORD_CHANGE_REQUIRED: 'Troque a senha temporária para continuar.',
+      SESSION_EXPIRED: 'Sua sessão terminou por inatividade. Entre novamente.',
+      SESSION_REQUIRED: 'Entre com sua conta do Prumo para continuar.',
+      SIGNUP_CLOSED: 'O cadastro de novas contas está fechado. Solicite acesso à Administração.',
+      NAME_INVALID: 'Confira o nome informado.',
+      GITHUB_LOGIN_NOT_CONFIGURED: 'O acesso com GitHub ainda não foi configurado pela Administração.',
+      GOOGLE_LOGIN_NOT_CONFIGURED: 'O acesso com Google ainda não foi configurado pela Administração.'
+    };
+    const validacaoLocal = ['Preencha todos os campos.', 'A confirmação não é igual à senha.'];
+    if (validacaoLocal.includes(erro)) return erro;
+    return mensagens[codigo] || 'Não foi possível concluir esta ação. Confira os campos e tente novamente. Se persistir, procure a Administração.';
+  }
+  function mostrarErro(form, erro) {
+    const p = form.querySelector('#entrada-erro');
+    p.querySelector('.entrada-erro-mensagem').textContent = mensagemDaEntrada(erro);
+    p.hidden = false;
+  }
   /** Envia o formulário uma vez (botão desligado enquanto o núcleo responde) e mostra o erro dentro do cartão, não num aviso solto. */
   function formulario(campos, rotuloBotao, enviar, rodape = []) {
     const botao = h('button', { type: 'submit', class: 'acao primaria entrada-enviar', id: 'entrada-enviar' }, tr(rotuloBotao));
@@ -73,6 +108,7 @@ window.PrumoConta = (() => {
   }
   function vistaRecuperar() {
     const login = campo('recuperar-login', 'Login', 'text', { autocomplete: 'username', maxlength: 60, autocapitalize: 'off' });
+    if (sessao?.usuario?.login) login.input.value = sessao.usuario.login;
     const codigo = campo('recuperar-codigo', 'Código de recuperação', 'text', { autocomplete: 'off', maxlength: 40, placeholder: 'XXXXX-XXXXX-XXXXX-XXXXX' });
     const senha = campo('recuperar-senha', 'Senha nova', 'password', { autocomplete: 'new-password', maxlength: 200 });
     const confirma = campo('recuperar-confirma', 'Confirmar senha nova', 'password', { autocomplete: 'new-password', maxlength: 200 });
@@ -82,8 +118,13 @@ window.PrumoConta = (() => {
         if (!iguais(form, senha, confirma)) return;
         const r = await api.contaRecuperar(login.input.value, codigo.input.value, senha.input.value);
         if (!r.ok) { mostrarErro(form, r.error); return; }
-        vistaCodigo(r.data.codigoRecuperacao, 'Senha nova definida. O código antigo deixou de valer; guarde este.', () => vistaEntrar());
-      }, [link('Voltar para entrar', () => vistaEntrar(), 'entrada-voltar')]));
+        // Se a recuperação começou em Minha conta, encerra a sessão antes do próximo login.
+        if (sessao?.usuario) { await api.contaSair(); sessao = null; }
+        vistaCodigo(r.data.codigoRecuperacao, 'Senha nova definida. O código antigo deixou de valer; guarde este.', () => location.reload());
+      }, [link(sessao?.usuario ? 'Voltar para Minha conta' : 'Voltar para entrar', () => {
+        if (sessao?.usuario) { dialogo.close(); document.body.classList.remove('com-entrada'); minhaConta(); }
+        else vistaEntrar();
+      }, 'entrada-voltar')]));
   }
   /** Senha temporária (dada pela Administração) precisa ser trocada antes de usar qualquer tela. */
   function vistaTrocar() {
@@ -124,14 +165,14 @@ window.PrumoConta = (() => {
     const desistir = async () => { parar = true; await p.estado(true); voltar(); };
     trocarVista(...cartao(p.titulo, p.texto),
       h('p', { class: 'entrada-regra', id: 'entrada-' + provedor + '-espera', role: 'status' }, tr('Aguardando a autorização…')), h('div', { class: 'entrada-links' }, DS.acao('Cancelar', desistir, { id: 'entrada-' + provedor + '-cancelar' })));
-    const ini = await p.iniciar(ativar); if (!ini.ok) { voltar(textoErro(ini.error)); return; }
+    const ini = await p.iniciar(ativar); if (!ini.ok) { voltar(mensagemDaEntrada(ini.error)); return; }
     while (!parar) {
       await new Promise((ok) => setTimeout(ok, 1200)); if (parar) return;
-      const r = await p.estado(); if (!r.ok) { voltar(textoErro(r.error)); return; }
+      const r = await p.estado(); if (!r.ok) { voltar(mensagemDaEntrada(r.error)); return; }
       const e = r.data; if (e.estado === 'AGUARDANDO') continue; parar = true;
       if (e.estado === 'CONCLUIDO') { sessao = e.sessao; if (e.mensagem) { trocarVista(...cartao('Você entrou', e.mensagem), h('div', { class: 'entrada-links' }, DS.acao('Continuar', () => location.reload(), { primaria: true, id: 'entrada-continuar' }))); } else location.reload(); }
       else if (e.estado === 'PENDENTE') trocarVista(...cartao('Cadastro recebido', e.mensagem), h('div', { class: 'entrada-links' }, DS.acao('Voltar para entrar', () => vistaEntrar(), { id: 'entrada-voltar', primaria: true })));
-      else voltar(textoErro(e.mensagem || ''));
+      else voltar(mensagemDaEntrada(e.mensagem || ''));
     }
   }
 
@@ -188,7 +229,11 @@ window.PrumoConta = (() => {
           const r = await chamar(() => api.contaSenha(atual.value, nova.value)); atual.value = nova.value = confirma.value = ''; if (!r) return;
           avisar(tr('Senha trocada.'));
           if (r.codigoRecuperacao) { DS.fecharModal(); vistaCodigo(r.codigoRecuperacao, 'Senha trocada.', () => { dialogo.close(); document.body.classList.remove('com-entrada'); }); }
-        }, { id: 'minha-trocar-senha', primaria: true }))])
+        }, { id: 'minha-trocar-senha', primaria: true }))]),
+      DS.secao('Recuperação de acesso', [
+        h('p', { class: 'suave' }, tr('Esqueceu a senha atual? Você pode redefini-la com o código de recuperação guardado no cadastro. Sem o código, solicite uma senha temporária à Administração.')),
+        DS.acao('Redefinir senha com código', () => { DS.fecharModal(); vistaRecuperar(); }, { id: 'minha-recuperar-senha' })
+      ])
     ], { tamanho: 'md', subtitulo: u.nome });
   }
 
@@ -215,7 +260,7 @@ window.PrumoConta = (() => {
   /** Chamado pela inicialização da janela: true quando pode seguir (sem login ou com sessão válida). */
   async function iniciar() {
     const r = await api.contaSessao();
-    if (!r.ok) { trocarVista(...cartao('Não foi possível ler as contas', null), DS.alerta(textoErro(r.error), 'falha'), h('p', { class: 'entrada-regra' }, tr('O arquivo de contas deste computador está ilegível. Quem administra este computador pode restaurá-lo de um backup.'))); return false; }
+    if (!r.ok) { trocarVista(...cartao('Não foi possível ler as contas', null), DS.alerta('As informações das contas não puderam ser carregadas. Nenhum acesso foi liberado.', 'falha'), h('p', { class: 'entrada-regra' }, tr('O arquivo de contas deste computador está ilegível. Quem administra este computador pode restaurá-lo de um backup.'))); return false; }
     sessao = r.data;
     if (!sessao.loginAtivo) { vistaEntrar(); return false; }
     if (sessao.loginAtivo && !sessao.usuario) { vistaEntrar(sessao.expirou ? 'A sessão terminou por inatividade; entre de novo.' : null); return false; }

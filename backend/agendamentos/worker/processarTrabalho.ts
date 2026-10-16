@@ -14,11 +14,16 @@ import { executarTrabalhoDaRotina } from './executarTrabalhoDaRotina.js';
 import { publicarComentarioSeAutorizado } from './publicarComentarioSeAutorizado.js';
 
 export async function processarTrabalho(e: EstadoDoWorker, t: Trabalho) {
-  const rotina = (() => { try { return obterRotina(t.rotinaId, e.base); } catch { return null; } })();
+  let erroLeitura: unknown = null;
+  const rotina = (() => { try { return obterRotina(t.rotinaId, e.base); } catch (erro) {
+    if ((erro as Error).message === 'SCHEDULE_NOT_FOUND') return null;
+    erroLeitura = erro; return null;
+  } })();
   const bat = setInterval(() => { try { registrarBatimento(t.id, e.base, e.agora()); } catch { /* trabalho removido */ } }, e.d.heartbeatMs ?? 30000); bat.unref?.();
-  const nome = rotina?.nome ?? 'Rotina removida'; e.processando = true;
+  const nome = rotina?.nome ?? (erroLeitura ? 'Rotina indisponível' : 'Rotina removida'); e.processando = true;
   emitirEventoDoWorker(e, 'AGENDAMENTO_INICIADO', t.rotinaId, t.id, nome, `Execução ${t.tipo} iniciada${t.origem === 'MANUAL' ? ' (manual)' : ''}.`);
   try {
+    if (erroLeitura) throw erroLeitura;
     if (!rotina) { concluirTrabalho(t.id, { status: 'NOT_RUN', motivo: 'A rotina foi excluída antes da execução.' }, e.base, e.agora()); return; }
     const resultado = await executarTrabalhoDaRotina(e, t, rotina);
     if (e.abort.signal.aborted && (resultado.status === 'BLOCKED' && /CANCELLED/.test(resultado.motivo))) {
@@ -36,7 +41,7 @@ export async function processarTrabalho(e: EstadoDoWorker, t: Trabalho) {
       emitirEventoDoWorker(e, 'PUBLICACAO_JIRA_FALHOU', rotina.id, t.id, nome, `Resultado preservado; comentário no Jira não publicado (${cod}).`);
     }
   } catch (erro) {
-    const cod = erro instanceof ErroServico ? erro.codigo : erro instanceof ErroQa ? erro.codigo : 'WORKER_ERROR';
+    const cod = erro instanceof ErroServico ? erro.codigo : erro instanceof ErroQa ? erro.codigo : /^([A-Z][A-Z0-9_]{2,63})\b/.exec((erro as Error).message ?? '')?.[1] ?? 'WORKER_ERROR';
     const infra = ['SERVICE_TIMEOUT', 'SERVICE_UNAVAILABLE', 'SERVICE_RATE_LIMIT'].includes(cod);
     if (infra) { falharPorInfraestrutura(t.id, cod, `Falha de infraestrutura: ${cod}`, true, e.base, e.agora()); emitirEventoDoWorker(e, 'EXECUCAO_FALHOU', t.rotinaId, t.id, nome, `Falha de infraestrutura (${cod}); nova tentativa automática se restar alguma.`); }
     else { concluirTrabalho(t.id, { status: 'BLOCKED', motivo: `${cod}: ${(erro as Error).message}`.slice(0, 600) }, e.base, e.agora()); emitirEventoDoWorker(e, 'EXECUCAO_BLOQUEADA', t.rotinaId, t.id, nome, `${cod}`); }

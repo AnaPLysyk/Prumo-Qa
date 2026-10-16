@@ -14,6 +14,9 @@ Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mes
 | `jiraPrevia.ts` | Canal jira:previa: Mostrar o comentário de resultado que seria publicado no Jira. |
 | `jiraPublicar.ts` | Canal jira:publicar: Publicar o comentário de resultado em um ticket do projeto vinculado (escrita remota, sempre com prévia e confirmação ou política). |
 | `projetoEvidencias.ts` | Canal projeto:evidencias: Resultados e logs de execuções reais, preservando PASS, FAIL, BLOCKED e NOT_RUN. |
+| `repositorioCaso.ts` | Canal repositorio:caso: Criar ou editar um caso offline sem publicar no Qase. |
+| `repositorioListar.ts` | Canal repositorio:listar: Consultar casos e suítes do projeto no repositório offline. |
+| `repositorioSuite.ts` | Canal repositorio:suite: Criar ou editar uma suíte de testes offline do projeto. |
 | `runsBugs.ts` | Canal runs:bugs: Preparar rascunhos de bug para as falhas da run. |
 | `runsCriar.ts` | Canal runs:criar: Criar a run no Qase com os casos escolhidos. |
 | `runsExecutar.ts` | Canal runs:executar: Executar as automações associadas aos casos da run (somente capabilities declaradas). |
@@ -51,8 +54,10 @@ Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na 
 | `consultarEvidencias.ts` | Lê as evidências do projeto conferindo integridade e se pertencem a este projeto; sem evidência, responde NOT_RUN. |
 | `excluirEvidencias.ts` | Apaga as evidências do projeto (Ajuda › Privacidade e dados), informando falhas. |
 | `gravarPublicacoesJira.ts` | Grava o registro das publicações de comentário no Jira, guardando as 1.000 últimas. |
+| `gravarRepositorioLocal.ts` | Grava dados locais de forma atômica e validada, sem tocar o cadastro de propostas. |
 | `gravarRunsLocais.ts` | Grava as runs locais em runs-qase.json. |
 | `lerPublicacoesJira.ts` | Lê o registro das publicações de comentário no Jira (publicacoes-jira.json). |
+| `lerRepositorioLocal.ts` | Lê o repositório offline; ausência de arquivo não cria dados nem modifica propostas antigas. |
 | `lerRunsLocais.ts` | Lê as runs locais gravadas em runs-qase.json. |
 | `listarRunsLocais.ts` | Lista as runs locais de um projeto, da mais nova para a mais antiga. |
 | `obterRunLocal.ts` | Busca uma run local pelo id. |
@@ -68,10 +73,13 @@ Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereç
 | `acharCasoNoQase.ts` | Procura um caso com o mesmo título (e suite) no Qase. |
 | `associarCasoAoTicket.ts` | Liga um caso do Qase ao ticket do Jira de origem. |
 | `associarTicketAoCasoNoQase.ts` | Operação "Associar caso do Qase a ticket do Jira". |
+| `automacaoNoQase.ts` | Converte o tipo de automação do caso para o formato do Qase (0/1 no envio) e lê qualquer formato que o Qase devolva. |
 | `camposDeSistema.ts` | Lê os campos de sistema do Qase (prioridade, severidade...). |
 | `conferirCasosNoQase.ts` | Confere no Qase que todos os casos escolhidos existem no projeto vinculado. |
+| `conferirIdsDoObjetoQase.ts` | Confere casos do plano/run releitos do Qase: IDs, não apenas quantidade. |
 | `corpoDoCasoQase.ts` | Monta o corpo do caso de teste enviado ao Qase, com segredos mascarados. |
 | `criarCasoNoQase.ts` | Operação "Criar caso de teste no Qase", ligando ao ticket de origem quando informado. |
+| `criarDefeitoNoQase.ts` | Publica defeito Qase autorizado, com marcador de idempotência e confirmação por GET. |
 | `criarPlanoNoQase.ts` | Operação "Criar plano de teste no Qase". |
 | `criarRunNoQase.ts` | Cria no Qase a run correspondente à run local, depois da confirmação. |
 | `criarRunNoQaseOperacao.ts` | Operação "Criar test run no Qase" (não executa nada). |
@@ -81,8 +89,9 @@ Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereç
 | `enviarAnexoAoQase.ts` | Operação "Enviar anexo ao Qase". |
 | `idCriadoNoQase.ts` | Lê o id do item criado numa resposta do Qase. |
 | `itensDaPaginaQase.ts` | Lê a lista de itens de uma resposta paginada do Qase. |
-| `listarNoQase.ts` | Lista casos, runs, planos ou suites do projeto Qase com filtros. |
+| `listarNoQase.ts` | Percorre as paginas da consulta Qase sem concluir falsamente que um caso/run/suite não existe. |
 | `marcadorDaExecucao.ts` | Texto que identifica no Jira o comentário de uma execução ("Prumo-Execução: <id>"). |
+| `mudarStatusDefeitoNoQase.ts` | Operação "Mudar status de defeito no Qase" (em andamento, resolvido ou inválido), com conferência por GET. |
 | `operacoesQase.ts` | Lista das operações de escrita no Qase que o Prumo conhece. |
 | `paragrafoDoComentario.ts` | Monta um parágrafo do comentário no formato do Jira. |
 | `publicarComentarioDeResultado.ts` | Publica o comentário de resultado no Jira uma única vez (confere se já existe pelo marcador) e registra o resultado. |
@@ -135,6 +144,7 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `listarEvidenciasDoProjeto.ts` | Lista as evidências de execução do projeto, com segredos mascarados, para a tela Evidências. |
 | `listarExecucoes.ts` | Lista o histórico de execuções por projeto, repositório, ticket, rotina, estado e período. |
 | `listarPipelines.ts` | Lista os pipelines (.github/workflows) da pasta do projeto, com nome, eventos e jobs lidos do próprio arquivo, sem executar nada. |
+| `listarRepositorioLocal.ts` | Combina casos locais próprios e casos pessoais antigos, sem duplicar IDs nem modificar propostas.json. |
 | `mapaDeVinculos.ts` | Desenha o mapa de ligações do projeto (Jira, Qase, repositório, tickets, casos, runs, execuções e evidências) e mostra o que falta ligar. |
 | `mascararLogsDaExecucao.ts` | Mascara segredos declarados e do ambiente antes de mostrar ou gravar a saída de uma execução. |
 | `montarComentario.ts` | Escreve o comentário de resultado (PASS/FAIL, contagens, duração, evidência) a partir de uma execução concluída. |
@@ -148,6 +158,8 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `repositorioDoEspaco.ts` | Devolve o repositório GitHub vinculado ao projeto, se houver. |
 | `resolverExecutavel.ts` | Descobre como chamar o node ou o npm instalado junto do Node, sem passar pelo shell. |
 | `revisarCobertura.ts` | Revisa um plano de testes contra o requisito: rastreabilidade, riscos, oráculos, lacunas e cenários repetidos. Nunca diz que está aprovado. |
+| `salvarCasoLocal.ts` | Cria/edita caso offline. Ao editar um legado, copia o mesmo ID para o arquivo novo sem apagar o original. |
+| `salvarSuiteLocal.ts` | Cria/edita suítes locais com escopo por projeto e recusa árvore cíclica. |
 | `seletorFragil.ts` | Diz se um seletor de tela é frágil (XPath, nth-child, classes geradas, cadeias de div). |
 
 ## reporters/
@@ -173,5 +185,6 @@ Formato dos dados, listas fixas e limites. Não tem funções.
 | `historicoDeExecucoes.ts` | Filtros aceitos pelo histórico de execuções. |
 | `mapaDeVinculos.ts` | Formato dos nós e ligações do mapa de rastreabilidade. |
 | `relatorioPlaywright.ts` | Formato do relatório JSON do Playwright e do caso convertido para o Prumo. |
+| `repositorioLocal.ts` | Cadastro de casos e suítes do modo offline. Independente de propostas e do Qase. |
 | `revisaoDeCobertura.ts` | Formato do plano enviado para revisão de cobertura (requisito, cenários, testes existentes, contradições). |
 | `runLocal.ts` | Formato de uma run local (casos, resultados, publicações) e a tradução de estados para o Qase. |

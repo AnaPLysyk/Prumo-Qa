@@ -7,7 +7,10 @@ export const ticket = z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/);
 
 export const campoInt = z.number().int().min(0).max(100);
 
-export type Pagina = { entities: Record<string, unknown>[] };
+/** Valores de campos personalizados do Qase: chave = ID do campo, valor sempre texto escalar (exigência da API). */
+export const camposPersonalizados = z.record(z.string().regex(/^\d{1,12}$/), z.string().trim().min(1).max(2000)).refine(c => Object.keys(c).length <= 30, 'campos demais');
+
+export type Pagina ={ entities: Record<string, unknown>[]; total?: number; filtered?: number };
 
 export const passo = z.object({ acao: z.string().trim().min(1).max(2000), esperado: z.string().max(2000).default(''), dados: z.string().max(2000).default('') }).strict();
 
@@ -23,9 +26,14 @@ export const editarCaso = z.object({ casoId: id, titulo: z.string().trim().min(3
 
 export const associarTicket = z.object({ casoId: id, ticket }).strict();
 
+export const criarDefeito = z.object({ titulo: z.string().trim().min(3).max(255), resultadoAtual: z.string().trim().min(3).max(8000), severidade: z.number().int().min(1).max(20), marcoId: id.optional(), campos: camposPersonalizados.default({}) }).strict(); // severidade: IDs das opções do campo de sistema "severity" do Qase
+
+/** Mudança de status de defeito: `versao` é o updated_at lido, para não sobrescrever uma alteração feita no Qase depois da leitura. */
+export const statusDefeito = z.object({ defeitoId: id, status: z.enum(['in_progress', 'resolved', 'invalid']), versao: z.string().min(10).max(40) }).strict();
+
 export const criarPlano = z.object({ titulo: z.string().trim().min(3).max(255), descricao: z.string().max(4000).default(''), casos: z.array(id).min(1).max(500) }).strict();
 
-export const criarRun = z.object({ titulo: z.string().trim().min(3).max(255), descricao: z.string().max(4000).default(''), casos: z.array(id).min(1).max(500), planoId: id.optional(), autoteste: z.boolean().default(false) }).strict();
+export const criarRun = z.object({ titulo: z.string().trim().min(3).max(255), descricao: z.string().max(4000).default(''), casos: z.array(id).min(1).max(500), planoId: id.optional(), marcoId: id.optional(), ambienteId: id.optional(), autoteste: z.boolean().default(false) }).strict();
 
 export const completarRun = z.object({ runId: id }).strict();
 

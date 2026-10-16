@@ -19,7 +19,7 @@ const pastaTemp = (t, arquivos) => {
 // Diálogo nativo simulado: guarda o que foi mostrado e responde como a pessoa (1 = confirmar, 0 = cancelar).
 const responder = (app, resposta) => app.evaluate(({ dialog }, r) => { globalThis.__dialogos = []; dialog.showMessageBox = async (_j, o) => { globalThis.__dialogos.push({ message: o.message, detail: o.detail, buttons: o.buttons }); return { response: r, checkboxChecked: false }; }; }, resposta);
 const mostrados = (app) => app.evaluate(() => globalThis.__dialogos);
-const vincularPelaTela = async (page, nome) => { await ir(page, 'projetos'); await page.locator('[data-espaco]', { hasText: nome }).getByRole('button', { name: /Vincular pasta/ }).click(); };
+const vincularPelaTela = async (page, nome) => { await ir(page, 'projetos'); await page.locator('[data-espaco]', { hasText: nome }).getByRole('button', { name: /Vincular repositório local/ }).click(); };
 
 test('vincular pasta npm sem qa.project.json: mostra a proposta, cancelar não grava, aprovar cria o contrato e vincula', { timeout: 120000 }, async (t) => {
   const a = await abrir(t, novoDados(t));

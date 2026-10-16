@@ -6,7 +6,7 @@ import { z } from 'zod';
  * que o recurso pertence ao projeto/repositório vinculado. Limites: logs de workflow e download de artefatos exigem redirecionamento,
  * que o Prumo bloqueia por segurança; por isso só metadados e links oficiais são apresentados.
  */
-export const operacoesExtras = ['metadados', 'campos-tipo', 'transicoes', 'historico', 'anexos', 'plano', 'campos-sistema', 'arquivos', 'workflows', 'jobs', 'artefatos', 'revisoes', 'commit'] as const;
+export const operacoesExtras = ['metadados', 'campos-tipo', 'transicoes', 'historico', 'anexos', 'plano', 'campos-sistema', 'arquivos', 'workflows', 'jobs', 'artefatos', 'revisoes', 'commit', 'issues', 'marcos', 'ambientes', 'campos-personalizados'] as const;
 
 export type OperacaoExtra = typeof operacoesExtras[number];
 

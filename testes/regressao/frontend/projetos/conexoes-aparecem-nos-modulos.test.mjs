@@ -21,7 +21,7 @@ const conectar = async (page, servico, nome, extras = {}) => {
   await page.selectOption('#conexao-servico', servico); await page.fill('#conexao-nome', nome);
   if (extras.instancia) { await page.fill('#conexao-instancia', extras.instancia); await page.fill('#conexao-usuario', extras.usuario); }
   await page.fill('#conexao-token', 'fixture-secret-conexoes'); await page.click('#conexao-salvar');
-  await page.locator('section.nota', { hasText: nome }).waitFor();
+  await page.locator('[data-conta]', { hasText: nome }).waitFor(); // 2.15: a conta é uma linha sob o serviço, não um cartão
 };
 
 test('GitHub conectado em Conexões lista os repositórios em Projetos, vincula e aparece em Testes', { timeout: 120000 }, async (t) => {

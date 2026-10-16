@@ -6,11 +6,13 @@ O Prumo lê os testes do repositório, mostra-os ao lado dos casos do Qase e, co
 
 Testes e Tickets funcionam sem nenhuma conexão: os testes vêm da pasta do repositório, e propostas, runs e tickets locais ficam neste computador. Cada conexão acrescenta dados:
 
-- **Qase**: casos e suites em Repositório, runs em Runs e planos em Planos.
+- **Qase**: casos e suites em Repositório, runs em Runs, planos em Planos e defeitos em Tickets. Em Conexões, **Conectar Qase** pede só o token, lista os projetos da conta e cada um escolhido vira um projeto Prumo já vinculado.
 - **Jira**: tickets em Tickets.
-- **GitHub**: repositório e pipelines em Testes. Em Projetos, **Escolher repositório do GitHub…** lista os repositórios da conta; **Vincular** associa ao projeto e **Vincular e trazer para este computador** também baixa uma cópia, com confirmação.
+- **GitHub**: repositório e pipelines em Testes e issues abertas em Tickets. Em Projetos, **Escolher repositório do GitHub…** lista os repositórios da conta; **Vincular** associa ao projeto e **Vincular e trazer para este computador** também baixa uma cópia, com confirmação.
 
-O que foi feito localmente pode ser publicado depois de conectar.
+O que foi feito localmente pode ser publicado depois de conectar. Um projeto criado à mão pode ser vinculado depois a um projeto existente: em Conexões, **Listar recursos disponíveis** na linha da conta.
+
+Ao criar o token, libere as permissões listadas no formulário de cada serviço. No GitHub (token *fine-grained*): **Issues** com leitura e escrita; **Contents**, **Pull requests** e **Actions** só leitura. Sem escrita em Issues, o GitHub cria a issue mas descarta os rótulos.
 
 ## Testes
 
@@ -47,11 +49,18 @@ Lista e cria os planos de teste do Qase.
 
 ## Tickets
 
-Tickets do Jira, defeitos do Qase e tickets locais ficam numa tabela única, com a origem em cada linha e filtros por texto, origem, tipo, status e período. O detalhe mostra descrição, critérios, relações, comentários, histórico, anexos e transições. Comentar, anexar, mudar status, editar e criar pedem confirmação com prévia.
+Tickets do Jira, defeitos do Qase, issues do GitHub e rascunhos locais ficam numa tabela única, com a origem em cada linha e filtros por texto, origem, tipo, status e período. O detalhe mostra descrição, critérios, relações, comentários, histórico, anexos e transições. Comentar, anexar, mudar status, editar e criar pedem confirmação com prévia.
 
-Em **Locais (Prumo)** você cria e revisa bugs e melhorias sem enviar nada a um serviço, classifica a falha, vincula a um ticket existente ou publica no Jira depois da revisão.
+**Novo rascunho local** cria um bug ou uma melhoria sem enviar nada. No rascunho, **Destino da publicação** oferece só o que está vinculado ao projeto:
 
-Defeitos do Qase são somente leitura. **Abrir ticket no Jira…** preenche um ticket novo e registra o vínculo defeito → ticket; com vínculo existente, o botão não aparece.
+- **Manter rascunho local**: nada sai do computador.
+- **Jira**: ticket com o tipo de bug ou melhoria do projeto.
+- **Defeitos Qase** (só bugs): severidade com os nomes do Qase, milestone e campos obrigatórios do projeto.
+- **GitHub Issues**: issue com o rótulo `bug` ou `enhancement`. Não dispara GitHub Actions.
+
+Depois de publicado, o item aparece uma vez só, na linha do serviço, marcado "publicado pelo Prumo".
+
+No detalhe de um defeito do Qase dá para mudar o status (em andamento, resolvido ou inválido); o resto do defeito é somente leitura. **Abrir ticket no Jira…** preenche um ticket novo e registra o vínculo defeito → ticket.
 
 ## Escrita externa
 
@@ -63,6 +72,6 @@ F5 ou Ctrl+R atualiza a tela. A engrenagem abre Meu perfil, Aparência (tema, id
 
 ## Limites
 
-As escritas foram validadas contra serviços simulados; contas reais do Jira, Qase e GitHub ainda não foram exercitadas. A classificação dos testes é uma inferência. O instalador não é assinado: confira o SHA-256 antes de executar.
+As escritas foram homologadas com contas reais do Qase, do Jira e do GitHub (caso, defeito, run e resultado; bug e comentário; issue), mas cada conta tem plano e permissões próprios: o plano gratuito do Qase não libera os vínculos caso-ticket do Jira. Editar ou fechar issue, editar título ou resultado de defeito e excluir itens não têm contrato. A classificação dos testes é uma inferência. O instalador não é assinado: confira o SHA-256 antes de executar.
 
 Sobre agentes e o chat, veja [Assistente, agentes e conhecimento](20-assistente-e-agentes.md).
