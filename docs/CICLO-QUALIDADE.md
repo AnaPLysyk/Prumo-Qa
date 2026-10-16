@@ -1,5 +1,9 @@
 # Ciclo de qualidade e agentes
 
+## Em poucas palavras
+
+Vincule um projeto, confira de onde vêm os testes e associe casos a testes usando uma referência explícita. Registre evidências e só execute ou publique depois da autorização necessária. O assistente local consulta informações; uma resposta dele não significa que um teste foi executado.
+
 O projeto Prumo tem identidade própria e pode vincular uma pasta local, um repositório GitHub e uma conexão Qase. Nomes parecidos não fazem associações: cada vínculo pertence ao projeto selecionado. O perfil local permite informar nome e papel (QA, desenvolvimento, produto ou análise); não é uma autenticação de conta remota. Os dados ficam no perfil do Windows desta instalação.
 
 ## Fluxo de trabalho

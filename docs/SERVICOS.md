@@ -2,6 +2,8 @@
 
 O desktop consulta APIs oficiais pelo processo principal. Não abre servidor HTTP local. A ponte IPC estrita está no [catálogo gerado](CONTRATOS.md); as sete ferramentas MCP não expõem tokens nem consultas diretas aos serviços. IA é opcional. Credenciais de conectores do ChatGPT não são herdadas.
 
+Em termos simples: Jira, Qase e GitHub só são consultados quando você conecta uma conta. As leituras não alteram esses serviços. Para enviar alterações, é preciso habilitar a escrita para o projeto e confirmar a operação. No Windows, tokens ficam protegidos no cofre do sistema e não são exibidos novamente; outros sistemas recusam a configuração nesta versão.
+
 ## Identidade e armazenamento
 
 Um projeto Prumo tem UUID, nome, descrição, contextos próprios, histórico de metadados e pasta de automação opcional. O manifesto técnico interno v2, em dados próprios do aplicativo, permite reutilizar o núcleo de contextos/MCP. Não é uma pasta de automação criada no projeto da pessoa. Pastas existentes e seus contratos continuam separados e não são sobrescritos. Nome apresentado pelo desktop pode ser editado; o nome técnico inicial do manifesto interno permanece estável.

@@ -1,39 +1,39 @@
 # Agendamentos, bandeja e execuções
 
-Eu queria que a rotina de QA rodasse sozinha, sem depender de IA. Tudo nesta página funciona com Claude e Codex desligados: eles podem ajudar a ler um resultado, mas não executam, não agendam e não publicam nada.
+As rotinas de QA funcionam sem IA. Claude e Codex podem ajudar a interpretar um resultado, mas não criam rotinas, não executam testes nem publicam resultados.
 
 ## Criar uma rotina
 
-Em Agendamentos, clique em **Nova rotina** e escolha projeto, tipo, ambiente, frequência e fuso horário.
+Em **Agendamentos**, clique em **Nova rotina**. Escolha o projeto, o tipo de rotina, o ambiente, a frequência e o fuso horário.
 
 - **Consulta Jira**: lê até 50 tickets e mostra o que é novo ou mudou. Não executa nada.
 - **Smoke** e **Regressão**: rodam uma automação já declarada no `qa.project.json` do projeto.
-- **Validação por ticket**: roda só as automações associadas ao ticket nos vínculos declarados (Testes › Repositório). Sem vínculo, fica BLOCKED.
+- **Validação por ticket**: executa apenas os testes ligados ao ticket em **Testes › Repositório**. Se não houver vínculo, fica `BLOCKED`.
 - **Análise de mudanças**: lê os commits do GitHub vinculado e diz quantos são novos. Nunca dispara testes.
-- **Desempenho (k6)**: usa o k6 oficial instalado, até 50 usuários virtuais e 600 s, nunca em produção. Sem k6, fica NOT_RUN.
+- **Desempenho (k6)**: usa o k6 oficial instalado no computador, com até 50 usuários virtuais por até 600 segundos. Não pode ser executado em produção. Sem k6, fica `NOT_RUN`.
 - **Run do Qase**: roda as automações dos casos de uma run já criada no Qase.
 
-Frequência: uma vez, a cada N minutos, todos os dias ou semanal, sempre no fuso escolhido. Horário de verão é tratado: um horário que não existe vai para logo depois do salto; um horário repetido vale uma vez.
+Você pode executar a rotina uma vez, a cada certo número de minutos, diariamente ou semanalmente. Ela usa o fuso horário escolhido. Na mudança para o horário de verão, um horário que não existe passa para o primeiro horário disponível; se um horário acontecer duas vezes, a rotina roda apenas uma.
 
-A rotina nunca recebe comando livre, só uma capability que o projeto declarou. Texto de ticket é dado, nunca ordem.
+A rotina só pode executar um comando permitido no projeto; ela não aceita comandos escritos livremente. O texto de um ticket é tratado como informação, nunca como uma instrução para o Prumo.
 
 ## Autorizar testes
 
-Rodar testes é ação protegida. Abra a rotina, aba **Autorização**, escolha a validade (1 a 30 dias) e o máximo de execuções e clique em **Autorizar execuções agendadas…**. O Prumo mostra o que a rotina pode fazer, pede a sua confirmação e depois a autenticação do sistema.
+Executar testes exige autorização. Abra a rotina, escolha a aba **Autorização**, defina por quantos dias (de 1 a 30) e quantas vezes a autorização vale e clique em **Autorizar execuções agendadas…**. O Prumo mostra o que a rotina poderá fazer e pede sua confirmação e a autenticação do sistema.
 
-- Vale só para aquele projeto, ambiente e comando exatos.
-- Se o comando, o contrato ou os arquivos de teste mudarem, deixa de valer e a execução fica BLOCKED até você autorizar de novo.
+- Vale apenas para aquele projeto, ambiente e comando.
+- Se o comando, o contrato ou os arquivos de teste mudarem, a autorização deixa de valer. A rotina fica `BLOCKED` até você autorizá-la novamente.
 - Você pode revogar quando quiser.
 
 **Executar agora** é feito por você e pede a autenticação a cada vez.
 
 ## Bandeja e horário perdido
 
-Ao fechar a janela, o Prumo fica na bandeja para as rotinas seguirem. O menu do ícone abre o Prumo, mostra agendamentos e execuções, pausa ou retoma, mostra o estado do worker e tem **Sair do Prumo**, que encerra o worker e os processos que ele iniciou.
+Ao fechar a janela, o Prumo continua na área de notificação do sistema (bandeja), para que as rotinas possam rodar. No menu do ícone, você pode abrir o Prumo, ver ou pausar as rotinas e consultar o estado do worker (processo que executa as rotinas). **Sair do Prumo** encerra o worker e os processos que ele iniciou.
 
 Em **Políticas e preferências › Prumo residente** você liga **Iniciar o Prumo com o sistema**. Vem desligado.
 
-Pausar impede novas execuções; o que já está rodando termina sem ser corrompido. Com o computador desligado, suspenso ou o Prumo fechado, nada roda: o horário aparece como PERDIDO, nunca como executado. Na rotina, **Se o Prumo estiver fechado no horário** permite trocar para **Executar uma vez ao voltar**.
+Pausar impede o início de novas execuções, mas não interrompe uma que já começou. Se o computador estiver desligado ou suspenso, ou se você sair do Prumo, a rotina não roda; o horário aparece como **PERDIDO**. Em **Se o Prumo estiver fechado no horário**, você pode escolher **Executar uma vez ao voltar**.
 
 ## PASS, FAIL, BLOCKED e NOT_RUN
 

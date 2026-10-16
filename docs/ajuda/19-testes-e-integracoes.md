@@ -1,45 +1,45 @@
 # Testes, tickets e integrações
 
-O Prumo lê os testes do repositório, mostra-os ao lado dos casos do Qase e, com a sua autorização, cria e atualiza itens no Jira, no Qase e no GitHub.
+O Prumo mostra os testes do repositório junto com os casos do Qase. Se você autorizar, também pode criar ou atualizar itens no Jira, Qase e GitHub.
 
 ## Com e sem conexões
 
-Testes e Tickets funcionam sem nenhuma conexão: os testes vêm da pasta do repositório, e propostas, runs e tickets locais ficam neste computador. Cada conexão acrescenta dados:
+**Testes** e **Tickets** funcionam mesmo sem conectar serviços. Os testes vêm da pasta do projeto. Propostas, execuções e tickets locais ficam neste computador. Ao conectar um serviço, seus dados aparecem no Prumo:
 
 - **Qase**: casos e suites em Repositório, runs em Runs, planos em Planos e defeitos em Tickets. Em Conexões, **Conectar Qase** pede só o token, lista os projetos da conta e cada um escolhido vira um projeto Prumo já vinculado.
 - **Jira**: tickets em Tickets.
 - **GitHub**: repositório e pipelines em Testes e issues abertas em Tickets. Em Projetos, **Escolher repositório do GitHub…** lista os repositórios da conta; **Vincular** associa ao projeto e **Vincular e trazer para este computador** também baixa uma cópia, com confirmação.
 
-O que foi feito localmente pode ser publicado depois de conectar. Um projeto criado à mão pode ser vinculado depois a um projeto existente: em Conexões, **Listar recursos disponíveis** na linha da conta.
+Você pode conectar um serviço depois e publicar o que preparou localmente. Para ligar um projeto criado à mão a um projeto que já existe, use **Listar recursos disponíveis** na linha da conta em **Conexões**.
 
 Ao criar o token, libere as permissões listadas no formulário de cada serviço. No GitHub (token *fine-grained*): **Issues** com leitura e escrita; **Contents**, **Pull requests** e **Actions** só leitura. Sem escrita em Issues, o GitHub cria a issue mas descarta os rótulos.
 
 ## Testes
 
-Quatro seções, na ordem do fluxo: caso de teste → automação → execução com evidências.
+As seções acompanham o fluxo de trabalho: caso de teste, automação e execução com evidências.
 
 ### IDE
 
-Tela inteira, sem títulos. À esquerda a árvore dos arquivos de teste; no meio o código, com marcadores de nível, tags e caso do Qase; à direita o caso, os tickets, os resultados e as permissões dos agentes.
+Na tela **IDE**, à esquerda ficam os arquivos de teste. No centro, você vê e edita o código. À direita, aparecem o caso, os tickets, os resultados e as permissões dos agentes.
 
 - **Editar** abre um editor com realce de sintaxe (TypeScript, JavaScript, Python, Gherkin). **Salvar** (Ctrl+S) pede a confirmação do sistema e só grava se o arquivo não mudou fora do Prumo.
 - **Novo arquivo** cria uma automação. Com o caso do Qase informado, grava a anotação `Qase: CHAVE-ID` que liga os dois.
-- Só grava arquivos de teste (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`) dentro da pasta vinculada, sem link simbólico e até 300 KB. Arquivo com aparência de segredo não abre para edição. Nada é executado.
+- O Prumo só grava arquivos de teste (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`) dentro da pasta vinculada, sem atalhos para outras pastas e com até 300 KB. Arquivos que parecem conter segredos não podem ser editados. Salvar não executa o teste.
 - **Pipelines CI/CD** lista, edita e cria (**Novo pipeline**) os workflows do GitHub Actions (`.github/workflows`) do repositório vinculado. Salvar altera só o arquivo local; o pipeline vale no GitHub quando você enviar o repositório. **Execuções no GitHub** mostra as execuções do Actions. O Prumo só escreve em branches `prumo/...`, nunca na principal, e abre o Pull Request como rascunho.
 
-Com só o GitHub vinculado, sem pasta local, a IDE é somente leitura e oferece **Trazer o repositório do GitHub**. O Prumo baixa uma cópia para a pasta repositorios dos dados do Prumo, com o git instalado e as credenciais dele, e a vincula ao projeto. **Atualizar do GitHub** só avança a cópia, sem sobrescrever o seu trabalho. Hooks e links simbólicos ficam desligados.
+Se você vinculou apenas o GitHub e ainda não tem uma cópia local, a IDE permite ler os arquivos e oferece **Trazer o repositório do GitHub**. O Prumo usa o Git e as credenciais já configuradas no computador para baixar uma cópia para a pasta de dados dele. **Atualizar do GitHub** só incorpora mudanças que não apagam seu trabalho. Scripts de Git e links simbólicos ficam desativados.
 
 ### Repositório
 
-Lista única com os casos do Qase e os testes do código, manuais e automatizados. Um caso e um teste só se juntam por anotação explícita no teste: `qase(31, …)`, `qase.id(31)`, `@qase(31)`, `@qase-31` ou `Qase: SFQ-31`. Nome parecido não liga nada.
+Esta lista reúne os casos do Qase e os testes manuais e automatizados do código. Um caso só é ligado a um teste quando o próprio teste contém uma anotação, como `qase(31, …)`, `@qase-31` ou `Qase: SFQ-31`. Nomes parecidos não criam vínculos.
 
-Cada linha mostra a situação (caso com código, manual, automação planejada, automatizado no Qase sem código, código que anota um caso inexistente ou código sem caso), o nível, as tags e o último resultado. Abaixo da lista ficam as propostas em revisão, as suites do Qase e os vínculos declarados (ticket ↔ caso ↔ automação). Uma proposta é um rascunho de caso, seu, do Prumo ou de uma IA, que espera revisão antes de ir ao Qase. O detalhe do caso mostra passos, resultados locais e o código, e tem **Criar automação na IDE**.
+Cada linha mostra o tipo de teste, o nível, as tags e o último resultado. Abaixo aparecem as propostas que aguardam revisão, as suítes do Qase e os vínculos registrados entre tickets, casos e automações. Uma proposta é um rascunho criado por você, pelo Prumo ou por uma IA; revise-a antes de enviá-la ao Qase. No detalhe de um caso, você pode ver os passos, os resultados locais e o código, ou escolher **Criar automação na IDE**.
 
 ### Runs
 
-Lista única com as execuções locais (manuais e agendadas, com evidências e comentário no Jira), as runs preparadas no Prumo e as runs do Qase, com filtro por origem e situação.
+Esta lista reúne as execuções locais (manuais ou agendadas), as execuções preparadas no Prumo e as execuções do Qase. Use os filtros para escolher a origem ou o estado.
 
-Uma run local registra resultados manuais, roda as automações associadas (cada uma pede a autenticação do sistema) e publica no Qase conferindo a run. Sem o Qase, **Preparar run** usa os testes do código: a run fica só neste computador e não pode ser criada no Qase, porque esses casos não existem lá. Para publicar, crie os casos no Qase e prepare outra run.
+Uma execução local pode guardar resultados manuais, executar automações associadas (com autenticação do sistema) e publicar resultados no Qase após conferir a execução. Sem conexão ao Qase, **Preparar run** usa os testes do código e guarda a execução apenas neste computador. Para publicar no Qase, crie os casos nesse serviço e prepare uma nova execução.
 
 **Evidências CLI/MCP** abre as evidências gravadas na pasta do projeto.
 
@@ -49,7 +49,7 @@ Lista e cria os planos de teste do Qase.
 
 ## Tickets
 
-Tickets do Jira, defeitos do Qase, issues do GitHub e rascunhos locais ficam numa tabela única, com a origem em cada linha e filtros por texto, origem, tipo, status e período. O detalhe mostra descrição, critérios, relações, comentários, histórico, anexos e transições. Comentar, anexar, mudar status, editar e criar pedem confirmação com prévia.
+Tickets do Jira, defeitos do Qase, chamados do GitHub e rascunhos locais aparecem na mesma tabela. Cada linha mostra a origem. Você pode filtrar por texto, origem, tipo, estado ou período. O detalhe mostra descrição, critérios, relações, comentários, histórico, anexos e mudanças de estado. Para comentar, anexar, mudar o estado, editar ou criar um item, o Prumo pede confirmação e mostra uma prévia.
 
 **Novo rascunho local** cria um bug ou uma melhoria sem enviar nada. No rascunho, **Destino da publicação** oferece só o que está vinculado ao projeto:
 
@@ -58,13 +58,13 @@ Tickets do Jira, defeitos do Qase, issues do GitHub e rascunhos locais ficam num
 - **Defeitos Qase** (só bugs): severidade com os nomes do Qase, milestone e campos obrigatórios do projeto.
 - **GitHub Issues**: issue com o rótulo `bug` ou `enhancement`. Não dispara GitHub Actions.
 
-Depois de publicado, o item aparece uma vez só, na linha do serviço, marcado "publicado pelo Prumo".
+Depois do envio, o item aparece na lista do serviço correspondente, marcado como **publicado pelo Prumo**.
 
 No detalhe de um defeito do Qase dá para mudar o status (em andamento, resolvido ou inválido); o resto do defeito é somente leitura. **Abrir ticket no Jira…** preenche um ticket novo e registra o vínculo defeito → ticket.
 
 ## Escrita externa
 
-Desligada por padrão; habilite por projeto e serviço em Conexões. Cada operação mostra a prévia, pede a confirmação do sistema, usa uma chave que impede duplicar e confere o resultado relendo o serviço. Se a resposta se perder, repetir não cria outro item. O Prumo não apaga nada.
+Por padrão, o Prumo não altera dados nos serviços. Para permitir isso, habilite a escrita para cada projeto e serviço em **Conexões**. Antes de enviar, ele mostra uma prévia e pede sua confirmação. Depois, confere o resultado no serviço. Se você repetir uma operação cuja resposta se perdeu, o Prumo evita criar o mesmo item outra vez. Ele não apaga dados.
 
 ## Atalhos
 
@@ -72,6 +72,6 @@ F5 ou Ctrl+R atualiza a tela. A engrenagem abre Meu perfil, Aparência (tema, id
 
 ## Limites
 
-As escritas foram homologadas com contas reais do Qase, do Jira e do GitHub (caso, defeito, run e resultado; bug e comentário; issue), mas cada conta tem plano e permissões próprios: o plano gratuito do Qase não libera os vínculos caso-ticket do Jira. Editar ou fechar issue, editar título ou resultado de defeito e excluir itens não têm contrato. A classificação dos testes é uma inferência. O instalador não é assinado: confira o SHA-256 antes de executar.
+As operações de escrita foram testadas com contas reais do Qase, Jira e GitHub, mas os recursos disponíveis dependem do plano e das permissões de cada conta. Por exemplo, o plano gratuito do Qase não permite vincular casos a tickets do Jira. O Prumo ainda não permite editar ou fechar chamados, editar o título ou o resultado de defeitos nem excluir itens. A classificação dos testes é uma estimativa baseada nos arquivos. O instalador não tem assinatura digital: confira o SHA-256 antes de abri-lo.
 
 Sobre agentes e o chat, veja **Ajuda › Assistente, agentes e conhecimento**.

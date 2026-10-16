@@ -1,10 +1,10 @@
 # Termos de uso (rascunho)
 
-Rascunho meu, para revisão jurídica. Não é contrato nem aconselhamento jurídico.
+Este texto é um rascunho para revisão jurídica. Não é um contrato nem aconselhamento jurídico.
 
-- O Prumo QA é fornecido como está, sem garantia de que encontre todos os defeitos.
-- Os resultados apoiam decisões de qualidade; a decisão é da equipe.
-- Vincule só projetos que você tem direito de analisar e revise os comandos do qa.project.json.
-- Execuções e publicações pedem a sua autenticação no sistema; não compartilhe credenciais com terceiros ou agentes.
-- A licença é proprietária (UNLICENSED) até eu definir outra. Uso por terceiros depende de autorização.
+- O Prumo QA é fornecido como está. Não há garantia de que encontre todos os defeitos.
+- Os resultados ajudam a equipe a decidir sobre qualidade; não substituem essa decisão.
+- Vincule apenas projetos que você tem autorização para analisar. Revise os comandos do arquivo `qa.project.json`.
+- Para executar ou publicar, o Prumo pede sua autenticação no sistema. Não compartilhe suas credenciais com outras pessoas ou agentes.
+- A licença atual é proprietária (`UNLICENSED`). Outras pessoas só podem usar o Prumo com autorização.
 - Ainda a definir: licença definitiva, limitação de responsabilidade, lei aplicável e canal de suporte.

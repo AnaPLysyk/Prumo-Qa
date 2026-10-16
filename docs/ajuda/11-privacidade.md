@@ -1,6 +1,6 @@
 # Política de privacidade (rascunho)
 
-Eu escrevi este rascunho a partir do que o Prumo faz hoje. Ele ainda precisa de revisão jurídica antes de distribuição ampla e não afirma conformidade com leis ou certificações.
+Este rascunho descreve como o Prumo funciona hoje. Ele ainda precisa de revisão jurídica antes de uma distribuição ampla e não declara conformidade com leis ou certificações.
 
 ## Onde ficam os dados
 
@@ -10,18 +10,18 @@ Tudo fica na pasta de dados do Prumo neste computador:
 - macOS: ~/Library/Application Support/PrumoQA
 - Linux: ~/.local/share/prumo-qa
 
-Dentro dela:
+Os principais dados guardados nessa pasta são:
 
-- **projects**: histórico de operações (identificadores com hash, ferramenta, cliente declarado, estado, duração, contagens). Não guarda o texto de requisitos nem respostas completas.
-- **diagnostico**: canal, estado, duração e código das chamadas da janela; nunca argumentos, caminhos ou conteúdo.
-- **integracoes**: testes de protocolo MCP (cliente, hashes, horários, resultado). Até 1000 registros por projeto; não guarda credenciais.
+- **projects**: histórico de operações (identificadores com hash, ferramenta, cliente informado, estado, duração e contagens). Não guarda o texto dos requisitos nem as respostas completas.
+- **diagnostico**: canal, estado, duração e código das chamadas da janela. Não guarda argumentos, caminhos ou conteúdo.
+- **integracoes**: testes de conexão MCP (cliente, hashes, horários e resultado). Guarda até 1.000 registros por projeto, sem credenciais.
 - **contextos**: requisitos e regras que você cadastra, com histórico.
-- **plataforma**: contas de login (só resumos de senha, nunca a senha), projetos, conexões e vínculos, tokens protegidos pelo cofre do sistema (DPAPI no Windows, Keychain no macOS, gnome-keyring ou KWallet no Linux), agenda, fila, autorizações (validade e hash do escopo, nunca senha), rascunhos locais e registro das operações externas.
+- **plataforma**: contas, projetos, conexões, agendamentos, autorizações, rascunhos e registros de operações externas. Senhas não são guardadas em texto. Tokens ficam protegidos pelo cofre do sistema (DPAPI no Windows, Keychain no macOS, gnome-keyring ou KWallet no Linux).
 - **preferencias.json**: tema, idioma, avisos e se o Prumo inicia com o sistema (desligado por padrão).
 
-Na pasta de cada projeto, **.prumo** guarda evidências e relatórios das execuções, com logs mascarados.
+Na pasta de cada projeto, `.prumo` guarda as evidências e os relatórios das execuções. Os logs têm segredos ocultados.
 
-Nada é apagado sozinho. Você exclui quando quiser, em **Ajuda › Privacidade e dados**. Desinstalar mantém os dados.
+O Prumo não apaga esses dados automaticamente. Para removê-los, use **Ajuda › Privacidade e dados**. Desinstalar o aplicativo não apaga os dados.
 
 ## O que sai deste computador
 

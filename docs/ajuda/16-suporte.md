@@ -2,18 +2,18 @@
 
 ## Pedir ajuda ou reportar um problema
 
-O canal oficial é o GitHub Issues do repositório do Prumo; eu não tenho e-mail de suporte. Na tela **Suporte** você relata um bug, pede uma melhoria ou manda uma sugestão:
+O suporte oficial é feito pelo GitHub Issues do Prumo. Não há atendimento por e-mail. Na tela **Suporte**, você pode relatar um bug, pedir uma melhoria ou enviar uma sugestão:
 
-1. Preencha tipo, título, descrição e, em bugs, os passos para reproduzir.
-2. Marque o que incluir: versão, sistema operacional e os últimos eventos do diagnóstico da interface. Nada vai sem a sua marcação; logs, evidências, caminhos, contextos e código nunca vão.
-3. Confirme que a issue é pública e clique **Revisar**. O Prumo mostra o texto final, bloqueia o que parece segredo (token, senha, chave) e avisa sobre e-mail, telefone, CPF e caminhos.
-4. **Abrir formulário no GitHub** pede confirmação e abre o navegador com o formulário preenchido; nada é publicado até você enviar lá. Ou **Exportar para arquivo** para guardar só aqui.
+1. Preencha o tipo, o título e a descrição. Para um bug, inclua os passos para reproduzi-lo.
+2. Escolha se quer incluir a versão, o sistema operacional ou os eventos recentes de diagnóstico. Só serão incluídos os itens que você marcar. Logs, evidências, caminhos, contextos e código não são anexados.
+3. Lembre-se de que o chamado (issue) será público e clique em **Revisar**. O Prumo mostra o texto final, bloqueia o que parece ser um segredo (token, senha ou chave) e avisa se encontrar e-mail, telefone, CPF ou caminhos locais.
+4. Escolha **Abrir formulário no GitHub** para revisar o formulário no navegador. O chamado só será publicado quando você o enviar pelo GitHub. Ou escolha **Exportar para arquivo** para guardar o relato no computador.
 
 Issues são públicas: não inclua senhas, tokens, código confidencial ou dados pessoais. Falha de segurança vai pelo canal privado de vulnerabilidades do GitHub.
 
 ## Aviso de versão nova
 
-O sino no cabeçalho mostra um ponto quando há versão que você ainda não viu. Passe o mouse ou clique: aparece o resumo, e o clique abre **Ajuda › Atualizações** com as notas completas.
+Quando há uma versão nova, aparece um ponto no sino do cabeçalho. Passe o mouse para ver um resumo ou clique para abrir **Ajuda › Atualizações** e ler as notas completas.
 
 Em **Ajuda › Atualizações › Preferências de aviso**:
 
@@ -21,8 +21,8 @@ Em **Ajuda › Atualizações › Preferências de aviso**:
 - **Tocar um som curto quando houver uma versão nova**: uma vez por versão.
 - **Silenciar**: nunca toca som, mesmo com o som ligado.
 
-A consulta só acontece com o Prumo aberto e vai só ao GitHub oficial, sem dados seus.
+A consulta acontece apenas enquanto o Prumo está aberto. Ela acessa o GitHub oficial e não envia seus dados.
 
 ## Atualizar com um clique
 
-Em **Ajuda › Atualizações**, clique **Atualizar agora** e confirme. O Prumo baixa o instalador oficial do seu sistema, confere o SHA-256, fecha, instala e reabre. Projetos, histórico e evidências ficam. Se houver execução em andamento, ele pede para esperar. Onde não há instalador oficial (Linux em ARM, por exemplo), atualize pela página de download.
+Em **Ajuda › Atualizações**, clique em **Atualizar agora** e confirme. O Prumo baixa o instalador oficial do seu sistema, confere o SHA-256, fecha, instala a atualização e abre novamente. Seus projetos, histórico e evidências são mantidos. Se houver uma execução em andamento, espere que ela termine. Se não houver instalador para o seu sistema (por exemplo, Linux em ARM), use a página **Download**.

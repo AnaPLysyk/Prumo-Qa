@@ -1,31 +1,31 @@
 # Perguntas frequentes
 
 ## O Prumo é uma IA?
-Não. Eu fiz o Prumo como um conjunto de verificações determinísticas: ele valida contratos, aplica permissões, executa o que você autorizou e guarda evidências. O raciocínio fica com você ou com a IA que você conectar (Claude Code ou Codex), se quiser.
+Não. O Prumo confere as regras do projeto, aplica permissões, executa o que você autorizou e guarda evidências. Você pode conectá-lo ao Claude Code ou ao Codex para pedir ajuda, mas isso é opcional.
 
 ## O Prumo precisa de internet?
-Não para o uso local. Projetos, métricas, logs e ajuda funcionam offline. A internet entra quando você consulta ou publica no Jira, Qase ou GitHub, e na verificação de versão nova (ao abrir, a cada 6 horas e quando você clica).
+Não para trabalhar com dados locais: projetos, métricas, logs e ajuda funcionam sem internet. É necessária conexão para consultar ou publicar no Jira, Qase ou GitHub e para verificar atualizações (ao abrir, a cada 6 horas e quando você pede a verificação).
 
 ## O Prumo altera o meu projeto?
-Só com a sua confirmação. Ele lê o que o contrato autoriza e grava na pasta apenas o contrato que você aprovou, os arquivos salvos na IDE e as evidências em .prumo. Veja **Ajuda › Como vincular um projeto**.
+Só depois da sua confirmação. Ele lê os arquivos permitidos pelo contrato. Na pasta do projeto, grava apenas o contrato aprovado, os arquivos salvos na IDE e as evidências em `.prumo`. Veja **Ajuda › Como vincular um projeto**.
 
 ## Por que a execução pede a minha senha?
-Executar um teste pode ter efeitos reais. A autenticação do sistema (Windows, senha ou Touch ID no macOS, polkit no Linux) garante que a decisão é sua, não da IA.
+Um teste pode alterar dados ou usar recursos do computador. Por isso, o sistema pede sua autenticação: no Windows, macOS ou Linux (polkit). Assim, a IA não pode aprovar por você.
 
-## O que significa NOT_VERIFIED?
-A análise foi estrutural; nada foi comprovado por execução. PASS exige execução real.
+## O que significa `NOT_VERIFIED`?
+O Prumo analisou os arquivos, mas não executou nada para confirmar o resultado. Para obter `PASS`, é preciso executar os testes.
 
 ## As métricas mostram tokens ou custos?
-Não. Eu só mostro o que o Prumo mede de verdade: operações, achados, lacunas, estados e durações.
+Não. O Prumo mostra apenas dados que consegue medir, como operações, achados, lacunas, resultados e duração.
 
 ## O Prumo vê as minhas conversas com a IA?
 Não. Ele só vê as chamadas que chegam às ferramentas MCP dele.
 
 ## Como sei se há uma versão nova?
-O sino acende uma vez por versão. Em **Ajuda › Atualizações**, **Atualizar agora** baixa, confere o SHA-256, instala e reabre. Nada é instalado sem você pedir, e seus dados ficam.
+O sino avisa quando há uma versão nova. Em **Ajuda › Atualizações**, clique em **Atualizar agora** para baixar e instalar. O Prumo confere o SHA-256 e reabre ao terminar. A atualização só começa quando você pedir; seus dados ficam no computador.
 
 ## Como apago meus dados?
 Em **Ajuda › Privacidade e dados**. Cada exclusão é separada, pede confirmação e nunca toca no código do projeto.
 
-## O instalador é seguro?
-Ele não tem assinatura digital. O Prumo confere o SHA-256 antes de atualizar; se baixar à mão, confira você e baixe só do repositório oficial. O SHA-256 prova que o arquivo é o publicado, não quem publicou.
+## Como confiro o instalador?
+O instalador ainda não tem assinatura digital. Compare o SHA-256 do arquivo com o valor na release oficial. Se forem iguais, o arquivo corresponde ao publicado; isso não confirma quem o criou. Baixe-o apenas do site ou repositório oficial.

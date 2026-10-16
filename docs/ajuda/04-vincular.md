@@ -1,19 +1,19 @@
 # Como vincular um projeto
 
-O vínculo funciona com qualquer pasta de código, mas eu fiz questão de que nada seja gravado nela sem você aprovar o contrato.
+Você pode vincular qualquer pasta de código. O Prumo só grava nela o contrato depois que você aprová-lo.
 
 O contrato é o arquivo **qa.project.json** (schemaVersion 2) na raiz da pasta:
 
-- **context**: documentação, testes e código que o Prumo pode ler;
-- **commands**: capacidades permitidas, sempre node ou npm run, sem shell;
-- **execution**: aprovação humana obrigatória, variáveis permitidas, limites de tempo e de saída.
+- **context**: arquivos e pastas que o Prumo pode ler;
+- **commands**: comandos permitidos. São comandos `node` ou `npm run`; não é permitido executar comandos livres do sistema;
+- **execution**: regras de execução, incluindo aprovação, variáveis permitidas e limites de tempo e de saída.
 
 ## Vincular uma pasta
 
 Em **Projetos**, no projeto, use **Vincular repositório local…** (ou, no fim da página, em Pastas com contrato local, **Vincular pasta…**) e escolha a pasta:
 
 - **Já tem qa.project.json válido:** vincula na hora.
-- **Não tem qa.project.json:** o Prumo detecta a stack pelos arquivos da raiz (package.json, pyproject.toml, go.mod, pom.xml, build.gradle, .csproj, Cargo.toml, composer.json, Gemfile) e mostra o contrato proposto. O arquivo só é criado se você clicar em **Criar contrato e vincular**.
+- **Não tem `qa.project.json`:** o Prumo identifica a tecnologia pelos arquivos da pasta (como `package.json`, `pyproject.toml` ou `go.mod`) e mostra uma proposta. O arquivo só é criado quando você escolhe **Criar contrato e vincular**.
 - **qa.project.json inválido:** nada é vinculado. A mensagem explica o motivo; corrija o arquivo ou apague-o para receber uma proposta nova.
 
 ## Vincular um repositório do GitHub
@@ -26,10 +26,10 @@ Com uma conta do GitHub conectada, use **Escolher repositório do GitHub…** no
 ## O que entra no contrato proposto
 
 - **Node.js (npm):** npm run para os scripts de teste, build, lint, typecheck ou check que existem no package.json. Scripts de e2e, integração, deploy, publicação, migração ou banco ficam bloqueados até você revisar.
-- **Python, Go, Java, .NET, Rust, PHP e Ruby:** contrato **somente leitura**. O Prumo, os agentes e o MCP leem código e testes; rodar pytest, go test, mvn, dotnet test ou cargo pelo Prumo ainda não é possível.
+- **Python, Go, Java, .NET, Rust, PHP e Ruby:** o contrato permite **somente leitura**. O Prumo, os agentes e o MCP podem ler o código e os testes, mas ainda não podem executá-los.
 - Nada roda ao vincular. Cada execução pede a sua aprovação.
 
-Depois você pode editar o qa.project.json como qualquer arquivo do repositório.
+Depois, você pode editar o `qa.project.json` como qualquer outro arquivo do projeto.
 
 ## O que o Prumo grava na pasta
 

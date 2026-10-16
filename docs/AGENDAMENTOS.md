@@ -2,6 +2,8 @@
 
 O Prumo organiza e executa uma rotina de QA **sem IA**. Este documento descreve o funcionamento técnico. O guia em linguagem simples está na Ajuda do aplicativo (Agendamentos, bandeja e execuções).
 
+Em termos simples: você escolhe o que será executado e quando. O Prumo só roda uma ação já declarada no projeto, e testes agendados precisam de uma autorização com prazo e limite de uso. Se o computador estiver desligado ou suspenso, a rotina não roda naquele horário; ao voltar, o resultado depende da política escolhida para horários perdidos.
+
 ## Visão geral
 
 ```

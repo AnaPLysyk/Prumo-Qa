@@ -1,15 +1,15 @@
 # Sobre
 
-Prumo QA, versão {{VERSAO}}. Feito por mim, Ana P. Lysyk (AnaPLysyk).
+Prumo QA, versão {{VERSAO}}, criado por Ana P. Lysyk (AnaPLysyk).
 
-O código-fonte e o suporte ficam no repositório AnaPLysyk/Prumo-Qa no GitHub: para pedir ajuda, abra uma issue. A documentação completa está no README e na pasta docs.
+O código-fonte e o suporte estão no repositório [AnaPLysyk/Prumo-Qa](https://github.com/AnaPLysyk/Prumo-Qa) no GitHub. Para pedir ajuda, abra uma issue. A documentação completa está no README e na pasta `docs`.
 
 ## Administração › Documentação viva
 
-Para quem tem a marca admin, **Administração › Documentação viva** mostra o código desta versão, gerado no build:
+Para contas com a marca admin, **Administração › Documentação viva** mostra informações sobre o código desta versão, geradas durante a compilação:
 
-- à esquerda, a árvore de arquivos;
-- no meio, o fluxo da tela (tela → canal → API → regras → dados);
-- à direita, o código do arquivo com a explicação, as funções, os canais e quem o usa.
+- à esquerda, a lista de arquivos;
+- no meio, o caminho que o aplicativo percorre para atender à tela;
+- à direita, o código, as funções e os canais usados por cada arquivo.
 
-Procure por tela, arquivo, função ou canal. Nada é executado e nada sai deste computador.
+Você pode procurar por tela, arquivo, função ou canal. Essa tela não executa o código nem envia dados para fora do computador.

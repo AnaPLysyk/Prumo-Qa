@@ -13,7 +13,7 @@ test('site no Chromium real: navegação, teclado e resoluções 1280/640/320 se
   const indexUrl=page.url();
   await page.getByRole('link',{name:'Download',exact:true}).focus();await page.keyboard.press('Enter');
   await page.getByRole('heading',{name:'Versões e download',exact:true}).waitFor();
-  assert.ok((await page.getByRole('link',{name:/Abrir release oficial/}).getAttribute('href')).startsWith('https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/'));
+  assert.ok((await page.getByRole('link',{name:/Ver release oficial/}).getAttribute('href')).startsWith('https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/'));
   await page.getByRole('link',{name:'Prumo QA',exact:true}).click();await page.getByRole('heading',{name:/Do ticket à evidência/}).waitFor();
   for(const largura of [1280,640,320]){
     await a.app.evaluate(({BrowserWindow},[l,u])=>{BrowserWindow.getAllWindows().find(w=>w.webContents.getURL()===u).setSize(l,900);},[largura,indexUrl]);

@@ -4,6 +4,10 @@
 
 A implementação fica em `site/gerar.mjs`, com a estrutura HTML comum em `site/componentes/pagina.mjs` e o CSS estático em `site/estilos/base.css`. As regras de animação das órbitas continuam geradas junto ao SVG e são acrescentadas ao CSS publicado. `site/gerar.mjs` mantém a entrada compatível e reexporta `gerarSite` e `markdown`; npm, Render e consumidores existentes continuam usando o mesmo comando. Os caminhos das fontes são resolvidos a partir do módulo, sem depender da pasta atual do terminal.
 
+As páginas técnicas mantêm o conteúdo completo das fontes. A página de contratos, gerada pelo catálogo do backend, recebe uma introdução simples e deixa os detalhes em uma seção expansível; o arquivo `docs/CONTRATOS.md` continua sem edição manual.
+
+A página de versões agrupa os instaladores disponíveis por plataforma em cartões com o símbolo de cada marca; formatos e arquiteturas aparecem como opções compactas, sem repetir o nome do sistema.
+
 Render Static Site gratuito: repositório oficial, branch main, build `node site/gerar.mjs`, publish `site/public`, `SKIP_INSTALL_DEPS=true`. Configuração reproduzível em `render.yaml`. Auto deploy desligado para publicação deliberada. Somente esse novo serviço pertence à tarefa.
 
 O build não compila o broker Windows. A mesma fonte de versões alimenta o desktop, o site e as release notes. Apenas versões marcadas como publicadas têm download oficial; código da 2.6 não deve ser anunciado como release até o CI de distribuição passar.

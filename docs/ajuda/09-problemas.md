@@ -1,13 +1,13 @@
 # Problemas comuns
 
-Juntei aqui o que mais aparece. Se não resolver, veja **Ajuda › Suporte e avisos de atualização**.
+Encontre aqui soluções para problemas comuns. Se precisar de mais ajuda, consulte **Ajuda › Suporte e avisos de atualização**.
 
-- **Conexão MCP não detectada.** Configuração não prova sessão. Reabra o cliente de IA e use **Testar integração** em Conexões; se houver chamadas em Logs, a conexão funciona. Se instalou o Prumo em outra pasta, configure de novo.
-- **Projeto sem contrato ou inválido.** A mensagem diz o motivo. Corrija o qa.project.json, ou apague-o para o Prumo propor um novo; nada é vinculado enquanto ele for inválido.
-- **Não aparecem logs.** Ainda não houve chamadas nesse projeto, ou outro projeto está selecionado. Confira o seletor **Projeto** no topo do menu lateral.
-- **Métricas parciais.** Há registro inválido ou truncado; ele fica fora do cálculo e é sinalizado, nunca corrigido.
-- **Execução retorna BLOCKED.** Falta a sua aprovação (esperado), uma pré-condição, ou o contrato bloqueia a capacidade. No Windows, o aprovar.exe pode ter sido bloqueado; no Linux, podem faltar polkit e zenity ou kdialog.
-- **O Windows bloqueou o instalador ou o aprovar.exe.** Smart App Control e Controle de Aplicativo bloqueiam arquivos novos sem assinatura digital. O Prumo não desliga nem contorna essas proteções; a solução definitiva é a assinatura de código, que ainda não existe.
-- **npm run falha com RUNTIME_MISSING.** O Prumo não traz npm: instale Node.js com npm ou use uma capacidade node.
-- **O serviço recusou um envio.** O Prumo mostra o motivo dado pelo Jira, Qase ou GitHub (no GitHub, a permissão que faltou no token). Gere um token com as permissões listadas em Conexões.
-- **Não foi possível verificar atualizações.** Sem internet ou GitHub indisponível; o Prumo continua funcionando.
+- **A conexão MCP não aparece.** Feche e reabra o cliente de IA. Em **Conexões**, clique em **Testar integração**. Se as chamadas aparecerem em **Logs**, a conexão está funcionando. Se você reinstalou o Prumo em outra pasta, configure a conexão novamente.
+- **O projeto não tem contrato ou o contrato é inválido.** Leia a mensagem para saber o motivo. Corrija o arquivo `qa.project.json` ou remova-o para que o Prumo possa sugerir outro. O projeto não será vinculado enquanto o contrato estiver inválido.
+- **Não aparecem logs.** Talvez ainda não tenha havido chamadas neste projeto ou outro projeto esteja selecionado. Confira **Projeto**, no topo do menu lateral.
+- **As métricas estão parciais.** Há um registro inválido ou incompleto. O Prumo avisa e não inclui esse registro nos cálculos nem o altera.
+- **A execução ficou `BLOCKED`.** Pode estar faltando sua aprovação, um pré-requisito ou uma permissão no contrato. No Windows, o `aprovar.exe` pode ter sido bloqueado. No Linux, podem faltar polkit, zenity ou kdialog.
+- **O Windows bloqueou o instalador ou o `aprovar.exe`.** O Smart App Control pode bloquear arquivos novos sem assinatura digital. O Prumo não desativa nem contorna essa proteção. O instalador ainda não tem assinatura digital.
+- **`npm run` falhou com `RUNTIME_MISSING`.** O Prumo não inclui o npm. Instale o Node.js com npm ou use uma capacidade `node`.
+- **Jira, Qase ou GitHub recusou o envio.** O Prumo mostra o motivo informado pelo serviço. No GitHub, confira as permissões do token. Em **Conexões**, veja quais permissões são necessárias.
+- **Não foi possível verificar atualizações.** Talvez não haja internet ou o GitHub esteja indisponível. O Prumo continua funcionando.

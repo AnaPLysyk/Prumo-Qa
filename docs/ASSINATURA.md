@@ -2,6 +2,10 @@
 
 **Estado atual: o instalador e os executáveis (`Prumo QA.exe`, `aprovar.exe`, desinstalador) NÃO são assinados.** Nada neste repositório compra, cria ou finge um certificado. Este documento registra a investigação (consultada em 2026-10-10) e o que já está preparado para assinar com uma credencial legítima.
 
+## Em poucas palavras
+
+O Prumo não tem assinatura digital hoje. O SHA-256 ajuda a identificar se um arquivo mudou, mas não confirma quem o criou. Não desative as proteções do Windows para instalar o aplicativo. A escolha de comprar um certificado ou publicar pela Microsoft Store depende da titular do projeto.
+
 ## Por que isso importa
 
 Com **Smart App Control** (ou Controle de Aplicativo) ativo, o Windows bloqueia executáveis novos sem assinatura confiável. Nesta máquina isso já bloqueou o `aprovar.exe` recém-compilado e o instalador provisório do electron-builder. O Prumo **não** desativa essas proteções. Um arquivo assinado por uma AC confiável deixa de ser "sem assinatura", mas o SmartScreen ainda pode alertar até a reputação do editor se formar.

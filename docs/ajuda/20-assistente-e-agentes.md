@@ -1,49 +1,49 @@
 # Assistente, agentes e conhecimento
 
-Eu quis um assistente que responda com os dados deste computador, aprenda só o que você aprova e não ganhe permissão nova por conversar.
+O assistente usa os dados deste computador. Ele só guarda aprendizados que você aprovar e não ganha permissões novas durante uma conversa.
 
 ## Início e chat
 
-O Início e o chat (flutuante ou lateral) usam o mesmo orquestrador e as oito especializações da tela Agentes. A conversa guarda até seis turnos por projeto e some quando a janela fecha. Em **Agente automático** você escolhe outro agente se a rota não for a certa.
+O Início e o chat (flutuante ou lateral) usam os mesmos agentes. A conversa guarda até seis trocas de mensagens por projeto e é apagada quando a janela fecha. Em **Agente automático**, você pode escolher outro agente se o selecionado não for o mais adequado.
 
-Sem IA externa, o assistente consulta os dados, mostra as fontes e sugere próximos passos, sem rede. Uma resposta do chat nunca vira teste executado.
+Sem conectar uma IA externa, o assistente consulta os dados locais, mostra as fontes e sugere próximos passos. Ele não acessa a internet. Uma resposta do chat nunca significa que um teste foi executado.
 
 ## Claude Code e Codex no chat
 
-São opcionais e só respondem se você autorizar em **Configurações**. O chat chama o programa instalado aqui, só para pedir uma resposta: sem ferramentas, sem MCP e sem hooks. A resposta diz de onde veio. Sem autorização ou sem o programa, o chat responde com os dados locais e avisa.
+Claude Code e Codex são opcionais. O chat só os usa se você autorizar em **Configurações** e se o programa estiver instalado. Ele pede uma resposta, sem ferramentas, MCP ou hooks. A resposta informa sua origem. Sem autorização ou sem o programa, o chat usa os dados locais e avisa.
 
 O MCP é o caminho inverso: Claude e Codex chamando o Prumo.
 
 ## Perfil e conhecimento
 
-Na primeira conversa o Prumo pergunta como chamar você e qual o seu papel. Perfil e conhecimentos ficam em conhecimento.db, na pasta de dados do Prumo. Do chat fica só o atendimento (agente, modo e fontes), nunca perguntas nem respostas.
+Na primeira conversa, o Prumo pergunta como chamar você e qual é o seu papel. O perfil e os aprendizados ficam em `conhecimento.db`, na pasta de dados do Prumo. O histórico do chat guarda apenas qual agente foi usado, o modo e as fontes — não guarda as perguntas nem as respostas.
 
-Todo aprendizado vindo de conversa ou de IA nasce rascunho. Você aprova ou descarta no chat ou no **Cérebro** do agente. **Útil** e **Não ajudou** registram a sua avaliação.
+Todo aprendizado sugerido por uma conversa ou por uma IA começa como rascunho. Você pode aprová-lo ou descartá-lo no chat ou no **Cérebro** do agente. **Útil** e **Não ajudou** registram sua avaliação.
 
 ## Agentes
 
 A tela mostra o **Prumo Orchestrator**, os clientes Codex e Claude Code conectados por MCP e as oito especializações. Cada agente tem:
 
 - **Configuração**: liga ou desliga a especialização e define o que a IA pode pedir. O bloqueio vale no servidor MCP a cada chamada.
-- **Skills**: trechos de instrução. Só os aprovados vão para o Claude Code ou o Codex, escolhidos pela pergunta (até 8 KB). Importar uma pasta de Skill aceita só licença aberta; cada trecho entra como rascunho e nenhum script da pasta roda.
+- **Skills**: instruções curtas para os agentes. Só as aprovadas são enviadas ao Claude Code ou ao Codex, conforme a pergunta (até 8 KB). Ao importar uma pasta de Skill, o Prumo aceita apenas licenças abertas; cada trecho começa como rascunho e nenhum script é executado.
 - **Cérebro**: tudo o que o agente consulta, agrupado por cor. **Testar uma pergunta** mostra que agente responderia e por quê, sem chamar IA e sem gravar nada.
 
-**Nova prévia** cria um agente personalizado só como prévia local (até 50 por projeto); não cria especialização nem processo.
+**Nova prévia** cria uma simulação de agente personalizada neste computador (até 50 por projeto). Não cria um agente real nem inicia um processo.
 
 ## Painel de atividades
 
-Em **Agentes › Painel de atividades**, um canvas mostra clientes MCP, Orchestrator, worker, ferramentas e operações. Cada linha vem de um registro gravado; nada é inferido. Um início sem término não prova que o processo está ativo.
+Em **Agentes › Painel de atividades**, um diagrama mostra os clientes MCP, o Orchestrator, o worker, as ferramentas e as operações. Cada linha vem de um registro; o Prumo não supõe o que aconteceu. Um registro de início sem registro de término não prova que o processo ainda está rodando.
 
-Arraste para mover; Ctrl + roda ou pinça para aproximar; no teclado, setas, `+`, `-` e `0`. **Ao vivo** atualiza a cada 3 segundos com a aba visível.
+Arraste o diagrama para movê-lo. Use Ctrl + roda do mouse ou pinça para aproximar; no teclado, use as setas, `+`, `-` e `0`. **Ao vivo** atualiza a cada 3 segundos enquanto a aba estiver visível.
 
 ## Orquestração
 
-Quando a pergunta toca duas ou mais especialidades e você não escolheu agente, o orquestrador consulta cada uma e junta as respostas. Em **Orquestrações**, no painel, aparecem quem participou, a ordem, o tempo e o que falhou. Pergunta e respostas não são gravadas.
+Se uma pergunta envolver duas ou mais especialidades e você não escolher um agente, o Orchestrator consulta cada uma e reúne as respostas. Em **Orquestrações**, você vê quais agentes participaram, a ordem, a duração e eventuais falhas. As perguntas e respostas não são gravadas.
 
 ## Pelo MCP
 
-O servidor MCP oferece prompts das especializações e a ferramenta propor_aprendizado, que só cria rascunho, com limite por hora. O conhecimento aprovado só vai à IA externa com a permissão de compartilhamento do projeto. Documentos e conhecimentos são dados, nunca ordens.
+O servidor MCP oferece instruções para cada especialidade e a ferramenta `propor_aprendizado`, que só cria rascunhos e tem um limite de uso por hora. Um aprendizado aprovado só é enviado a uma IA externa se o compartilhamento estiver autorizado no projeto. Documentos e aprendizados são conteúdo, não comandos.
 
 ## Limites
 
-Claude e Codex dependem da sua conta, do programa instalado e da sua autorização. O assistente local não interpreta requisitos como uma IA: ele busca e mostra o que está registrado.
+Claude e Codex dependem da sua conta, de o programa estar instalado e da sua autorização. O assistente local não interpreta requisitos como uma IA; ele procura e mostra as informações registradas.

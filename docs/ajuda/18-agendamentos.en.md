@@ -1,39 +1,39 @@
 # Schedules, tray and runs
 
-I wanted the QA routine to run by itself, without depending on AI. Everything on this page works with Claude and Codex turned off: they can help you read a result, but they do not run, schedule or publish anything.
+QA routines work without AI. Claude and Codex can help interpret a result, but they do not create routines, run tests or publish results.
 
 ## Create a routine
 
-In Schedules, click **New routine** and choose the project, type, environment, frequency and time zone.
+In **Schedules**, click **New routine**. Choose the project, routine type, environment, frequency and time zone.
 
 - **Jira query**: reads up to 50 tickets and shows what is new or changed. It runs nothing.
 - **Smoke** and **Regression**: run an automation already declared in the project's `qa.project.json`.
-- **Validation by ticket**: runs only the automations associated with the ticket in the declared links (Tests › Repository). With no link, it is BLOCKED.
+- **Validation by ticket**: runs only the tests linked to the ticket in **Tests › Repository**. Without a link, it is `BLOCKED`.
 - **Change analysis**: reads the linked GitHub commits and says how many are new. It never triggers tests.
-- **Performance (k6)**: uses the official k6 installed, up to 50 virtual users and 600 s, never in production. Without k6, it is NOT_RUN.
+- **Performance (k6)**: uses the official k6 installed on your computer, with up to 50 virtual users for up to 600 seconds. It cannot run in production. Without k6, it is `NOT_RUN`.
 - **Qase run**: runs the automations of the cases in a run already created in Qase.
 
-Frequency: once, every N minutes, every day or weekly, always in the chosen time zone. Daylight saving is handled: a time that does not exist moves to just after the jump; a repeated time counts once.
+You can run a routine once, every few minutes, daily or weekly. It uses the chosen time zone. When daylight saving starts, a time that does not exist moves to the first available time. If a time occurs twice, the routine runs only once.
 
-A routine never receives a free-form command, only a capability the project declared. Ticket text is data, never an order.
+A routine can run only a capability declared by the project; it cannot accept a free-form command. Ticket text is treated as information, never as an instruction to Prumo.
 
 ## Authorize tests
 
-Running tests is a protected action. Open the routine, **Authorization** tab, choose the validity (1 to 30 days) and the maximum number of runs and click **Authorize scheduled runs…**. Prumo shows what the routine can do, asks for your confirmation and then for your system authentication.
+Running tests requires authorization. Open the routine and its **Authorization** tab. Choose how long the authorization lasts (1 to 30 days), set the maximum number of runs and click **Authorize scheduled runs…**. Prumo shows what the routine can do, then asks you to confirm and authenticate with your system.
 
-- It is valid only for that exact project, environment and command.
-- If the command, the contract or the test files change, it stops being valid and the run is BLOCKED until you authorize again.
+- It applies only to that project, environment and command.
+- If the command, project contract or test files change, the authorization expires. The run is `BLOCKED` until you authorize it again.
 - You can revoke it at any time.
 
 **Run now** is done by you and asks for authentication every time.
 
 ## Tray and missed times
 
-When you close the window, Prumo stays in the tray so routines keep going. The icon menu opens Prumo, shows schedules and runs, pauses or resumes, shows the worker state and has **Quit Prumo**, which stops the worker and the processes it started.
+When you close the window, Prumo stays in the system tray so routines can continue. Its menu lets you open Prumo, view or pause routines and check the worker (the process that runs them). **Quit Prumo** stops the worker and the processes it started.
 
 In **Policies and preferences › Resident Prumo** you turn on **Start Prumo with the system**. It is off by default.
 
-Pausing prevents new runs; what is already running finishes without being corrupted. If the computer is off or suspended, or Prumo is closed, nothing runs: the time shows as MISSED, never as run. In the routine, **If Prumo is closed at that time** lets you switch to **Run once when back**.
+Pausing prevents new runs but does not stop one already in progress. If the computer is off or suspended, or you quit Prumo, the routine does not run; its time is marked **MISSED**. Under **If Prumo is closed at that time**, you can choose **Run once when back**.
 
 ## PASS, FAIL, BLOCKED and NOT_RUN
 

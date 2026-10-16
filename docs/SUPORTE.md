@@ -1,5 +1,9 @@
 # Suporte e triagem (2.5)
 
+## Em poucas palavras
+
+O aplicativo prepara o relato no seu computador. Você revisa o texto e escolhe se quer exportá-lo ou abrir o formulário oficial do GitHub. O aplicativo não envia o chamado. Issues no GitHub são públicas; não inclua senhas, tokens, código privado ou dados pessoais.
+
 ## Evolução 2.6: relato local e acompanhamento
 
 O Markdown exportado traz frontmatter com `id: LOCAL-<hash>`, categoria, `status: rascunho_local` e origem aplicativo. A versão só entra se marcada. O hash identifica o conteúdo local; não é um número global nem uma issue recebida. GitHub emite o número real depois do envio humano.

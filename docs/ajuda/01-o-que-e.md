@@ -1,15 +1,16 @@
 # O que é o Prumo QA
 
-Eu criei o Prumo para quem faz QA ter projeto, testes, tickets e evidências num lugar só, no próprio computador.
+O Prumo QA reúne projetos, testes, tickets e evidências no seu computador.
 
-Com ele você:
+Com o Prumo, você pode:
 
-- cria projetos à mão ou importa do Qase, e conecta Jira, Qase e GitHub;
-- entende o requisito antes de propor testes e separa fato comprovado de hipótese;
-- enxerga lacunas de cobertura, testes redundantes e testes sem oráculo;
-- executa só as verificações declaradas no contrato do projeto, depois da sua aprovação;
-- guarda resultados e evidências reais.
+- criar projetos ou importar projetos do Qase;
+- conectar Jira, Qase e GitHub, se precisar;
+- registrar requisitos e ver o que são fatos ou hipóteses;
+- encontrar o que falta testar, possíveis testes repetidos e resultados esperados ausentes;
+- executar apenas verificações permitidas pelo projeto, depois de aprovar;
+- consultar os resultados e as evidências guardados no computador.
 
-Claude Code e Codex são opcionais e entram pelo MCP.
+Claude Code e Codex são opcionais. Eles se conectam ao Prumo pelo MCP (protocolo de comunicação entre aplicativos).
 
-Os registros ficam neste computador. Não há servidor do Prumo, IA própria nem telemetria. Contextos e arquivos locais não vão sozinhos para os serviços nem para os agentes, e nada é publicado fora daqui sem a sua confirmação.
+Os dados ficam neste computador. O Prumo não tem servidor próprio, inteligência artificial própria nem telemetria. Arquivos e contextos locais não são enviados automaticamente. Para publicar algo em outro serviço, você precisa confirmar.
