@@ -6,17 +6,15 @@ import { contaNova } from './contas.js';
 import { iniciarSessao, loginLigado, sessaoParaJanela } from './sessao.js';
 import { gravarContas } from '../banco/gravarContas.js';
 import { lerContas } from '../banco/lerContas.js';
-import { RegistroDeContas, Usuario } from '../tipos/contas.js';
+import { RegistroDeContas, Usuario, emailSchema } from '../tipos/contas.js';
 
 export type Provedor = 'github' | 'google';
 export type DependenciasDeEntrada = {
   /** Client ID e segredo do OAuth App; null enquanto a Administração não configurou. */
   configuracao: () => { clientId: string; clientSecret: string } | null;
   trocarCodigo: (p: { clientId: string; clientSecret: string; code: string; redirectUri: string; codeVerifier: string }) => Promise<string>;
-  lerPerfil: (token: string) => Promise<{ id: string; login: string; nome: string | null }>;
+  lerPerfil: (token: string) => Promise<{ id: string; login: string; nome: string | null; email?: string }>;
   abrirNavegador: (url: string) => Promise<void>;
-  /** Cria a conexão do serviço com o token da autorização (só o GitHub tem); só é chamada para conta ativa. */
-  guardarConexao?: (token: string, nome: string) => Promise<void>;
   /** Chamado quando a tentativa termina (qualquer desfecho): o aplicativo traz a janela do Prumo para a frente. */
   aoTerminar?: () => void;
   base?: string; tempoMs?: number; agora?: () => Date;
@@ -27,7 +25,7 @@ export type EstadoDaEntrada = { estado: 'NENHUMA' | 'AGUARDANDO' | 'CONCLUIDO' |
 
 /** Endereços e escopos fixos de cada provedor: nada disso vem da janela. */
 const PROVEDORES = {
-  github: { nome: 'GitHub', prefixo: 'gh', origem: 'GITHUB', autorizar: 'https://github.com/login/oauth/authorize', escopo: 'read:user repo', extras: { allow_signup: 'true' } },
+  github: { nome: 'GitHub', prefixo: 'gh', origem: 'GITHUB', autorizar: 'https://github.com/login/oauth/authorize', escopo: 'read:user', extras: { allow_signup: 'true' } },
   google: { nome: 'Google', prefixo: 'g', origem: 'GOOGLE', autorizar: 'https://accounts.google.com/o/oauth2/v2/auth', escopo: 'openid email profile', extras: { response_type: 'code', prompt: 'select_account' } }
 } as const;
 
@@ -51,45 +49,41 @@ function loginLivre(r: RegistroDeContas, prefixo: string, nomeNoProvedor: string
   return login;
 }
 
-type Perfil = { id: string; login: string; nome: string | null };
+type Perfil = { id: string; login: string; nome: string | null; email?: string };
 const nomeDaPessoa = (p: Perfil) => (p.nome && p.nome.length >= 2 ? p.nome : p.login.padEnd(2, '_'));
 
-/** Guarda a conexão do serviço quando o provedor tem uma (o GitHub); a falta dela não impede a entrada. */
-async function conectarServico(d: DependenciasDeEntrada, provedor: Provedor, token: string, perfil: Perfil): Promise<string | undefined> {
-  if (!d.guardarConexao) return undefined;
-  try { await d.guardarConexao(token, PROVEDORES[provedor].nome + ' de ' + perfil.login); return undefined; }
-  catch (e) { return /CONNECTION_DUPLICATE/.test((e as Error).message) ? undefined : 'Você entrou, mas a conexão do ' + PROVEDORES[provedor].nome + ' não foi criada: ' + (e as Error).message.slice(0, 120); }
-}
-
 /** Liga o login com a primeira conta, de administrador: só enquanto não existe nenhuma conta (a mesma regra de ativar o login com senha). */
-async function ativarPeloProvedor(d: DependenciasDeEntrada, provedor: Provedor, r: RegistroDeContas, token: string, perfil: Perfil, agora: Date): Promise<EstadoDaEntrada> {
+async function ativarPeloProvedor(d: DependenciasDeEntrada, provedor: Provedor, r: RegistroDeContas, perfil: Perfil, agora: Date): Promise<EstadoDaEntrada> {
   if (loginLigado(r)) throw new Error('LOGIN_ALREADY_ACTIVE: o login já está ligado; entre pela tela de entrada.');
   const p = PROVEDORES[provedor];
-  const u = contaNova(r, { login: loginLivre(r, p.prefixo, perfil.login), nome: nomeDaPessoa(perfil) }, { papel: 'administrador', estado: 'ATIVO', senha: null, recuperacao: null, trocarSenha: false, origem: p.origem, admin: true, identidades: [{ provedor, id: perfil.id, login: perfil.login }] }, agora);
+  const email = perfil.email && emailSchema.safeParse(perfil.email).success ? perfil.email.toLowerCase() : undefined;
+  const u = contaNova(r, { login: loginLivre(r, p.prefixo, perfil.login), nome: nomeDaPessoa(perfil), ...(email ? { email } : {}) }, { papel: 'administrador', estado: 'ATIVO', senha: null, recuperacao: null, trocarSenha: false, origem: p.origem, admin: true, identidades: [{ provedor, id: perfil.id, login: perfil.login }] }, agora);
   u.ultimoAcesso = agora.toISOString(); r.usuarios.push(u); gravarContas(r, d.base); iniciarSessao(u.id, agora.getTime());
-  const aviso = await conectarServico(d, provedor, token, perfil);
-  return { estado: 'CONCLUIDO', ...(aviso ? { mensagem: aviso } : {}), sessao: sessaoParaJanela(d.base, agora.getTime()) };
+  return { estado: 'CONCLUIDO', sessao: sessaoParaJanela(d.base, agora.getTime()) };
 }
 
-/** Decide o que a autorização vira: conta existente entra; pessoa nova fica PENDENTE (nunca entra sem aprovação da Administração). */
+/** Decide o que a autorização vira: conta existente entra; pessoa nova segue a política de aprovação da Administração. */
 async function resolverConta(d: DependenciasDeEntrada, provedor: Provedor, token: string, modo: ModoDaEntrada): Promise<EstadoDaEntrada> {
   const perfil = await d.lerPerfil(token); const agora = (d.agora ?? (() => new Date()))(); const r = lerContas(d.base); const p = PROVEDORES[provedor];
-  if (modo === 'ativar') return ativarPeloProvedor(d, provedor, r, token, perfil, agora);
+  if (modo === 'ativar') return ativarPeloProvedor(d, provedor, r, perfil, agora);
   if (!loginLigado(r)) throw new Error('LOGIN_NOT_ACTIVE: ainda não existe conta neste computador. Use Criar conta.');
   let u: Usuario | undefined = r.usuarios.find((x) => x.identidades.some((i) => i.provedor === provedor && i.id === perfil.id));
   if (!u) {
+    // Não associar uma identidade externa a uma conta local apenas pelo e-mail.
+    const email = perfil.email && emailSchema.safeParse(perfil.email).success ? perfil.email.toLowerCase() : undefined;
+    if (email && r.usuarios.some(x => x.email === email)) throw new Error('EMAIL_TAKEN: e-mail já registrado; entre pela conta existente.');
     if (!r.acesso.cadastroAberto) throw new Error('SIGNUP_CLOSED: o cadastro está fechado; peça uma conta à Administração.');
     const papel = r.papeis.some((x) => x.id === r.acesso.papelDoCadastro) ? r.acesso.papelDoCadastro : 'leitor';
-    u = contaNova(r, { login: loginLivre(r, p.prefixo, perfil.login), nome: nomeDaPessoa(perfil) }, { papel, estado: 'PENDENTE', senha: null, recuperacao: null, trocarSenha: false, origem: p.origem, identidades: [{ provedor, id: perfil.id, login: perfil.login }] }, agora);
+    u = contaNova(r, { login: loginLivre(r, p.prefixo, perfil.login), nome: nomeDaPessoa(perfil), ...(email ? { email } : {}) }, { papel, estado: r.acesso.aprovarCadastros ? 'PENDENTE' : 'ATIVO', senha: null, recuperacao: null, trocarSenha: false, origem: p.origem, identidades: [{ provedor, id: perfil.id, login: perfil.login }] }, agora);
     r.usuarios.push(u); gravarContas(r, d.base);
-    return { estado: 'PENDENTE', mensagem: 'Cadastro criado com o ' + p.nome + '. Ele aguarda aprovação da Administração; depois de aprovado, é só entrar de novo pelo ' + p.nome + '.' };
+    if (u.estado === 'PENDENTE') return { estado: 'PENDENTE', mensagem: 'Cadastro criado com o ' + p.nome + '. Ele aguarda aprovação da Administração; depois de aprovado, é só entrar de novo pelo ' + p.nome + '.' };
+    iniciarSessao(u.id, agora.getTime()); return { estado: 'CONCLUIDO', sessao: sessaoParaJanela(d.base, agora.getTime()) };
   }
   if (u.estado === 'PENDENTE') return { estado: 'PENDENTE', mensagem: 'O cadastro aguarda aprovação da Administração.' };
   if (u.estado === 'DESATIVADO') throw new Error('ACCOUNT_DISABLED: esta conta foi desativada pela Administração.');
   if (u.bloqueadoAte && Date.parse(u.bloqueadoAte) > agora.getTime()) throw new Error('ACCOUNT_LOCKED: conta bloqueada; peça o desbloqueio à Administração.');
   const atual = r.usuarios.find((x) => x.id === u!.id)!; atual.ultimoAcesso = agora.toISOString(); atual.falhas = 0; gravarContas(r, d.base); iniciarSessao(atual.id, agora.getTime());
-  const aviso = await conectarServico(d, provedor, token, perfil);
-  return { estado: 'CONCLUIDO', ...(aviso ? { mensagem: aviso } : {}), sessao: sessaoParaJanela(d.base, agora.getTime()) };
+  return { estado: 'CONCLUIDO', sessao: sessaoParaJanela(d.base, agora.getTime()) };
 }
 
 const pagina = (titulo: string, texto: string) => `<!doctype html><meta charset="utf-8"><title>Prumo QA</title><body style="font-family:system-ui;margin:12vh auto;max-width:30rem;text-align:center"><h1>${titulo}</h1><p>${texto}</p></body>`;

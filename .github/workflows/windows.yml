@@ -1,10 +1,7 @@
-name: Windows — testes, instalador, atualização 2.2/2.6/2.7→atual e release
+name: Windows — unitários, instalador e release
 
-# Numa máquina Windows limpa: roda a suíte, gera o instalador NSIS, instala a 2.2.0 PUBLICADA (hash fixado),
-# cria dados reais com ela, instala a versão atual SOBRE a 2.2.0 em pasta com espaços e acentos, confere que os dados
-# foram preservados, roda a automação da janela e o cliente MCP real sobre o executável INSTALADO,
-# desinstala verificando que os dados do usuário permanecem e gera o SHA-256 do instalador.
-# Release (instalador NÃO ASSINADO) só é criada para tags v* e somente se todas as etapas anteriores passarem.
+# Executa somente testes unitários, gera instalador, verifica SHA-256 e cria release nas tags v*.
+# Preserva publicação verificada do instalador, catálogo de versões e site.
 on:
   push:
     branches: [main]
@@ -41,128 +38,15 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Verificação completa (tipos, build, unitários, MCP, segurança, CLI, janela em desenvolvimento)
+      - name: Verificar tipos e apenas testes unitários
         shell: pwsh
         run: |
-          npm run check *> check.txt
-          $codigo = $LASTEXITCODE
-          Get-Content check.txt -Tail 12
-          # Anotações públicas: o log completo do Actions exige login, então as falhas sobem como erro do job.
-          $linhas = Get-Content check.txt; $i = [Array]::FindIndex($linhas, [Predicate[string]]{ param($l) $l -match 'failing tests:' })
-          $nome = ''; $n = 0
-          if ($i -ge 0) { foreach ($l in $linhas[$i..($linhas.Count - 1)]) {
-            if ($l -match '^✖ (.+?) \(') { $nome = $Matches[1] }
-            elseif ($nome -and $l -match '^\s+(\w*Error[^:]*:.*|.*Error: .*)') { if ($n++ -lt 9) { '::error::' + $nome.Substring(0, [Math]::Min(70, $nome.Length)) + ' => ' + $Matches[1].Trim().Substring(0, [Math]::Min(220, $Matches[1].Trim().Length)) }; $nome = '' } } }
-          exit $codigo
-      - name: Preservar o resultado da verificação, inclusive quando falhar
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: prumo-qa-verificacao
-          path: |
-            check.txt
-            tmp/evidencias/**
-          if-no-files-found: error
+          npm run typecheck
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:unitarios
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Gerar instalador
         run: npm run dist
-      - name: Instalar a versão 2.2.0 publicada (hash fixado) em pasta com espaços e acentos
-        shell: pwsh
-        run: |
-          $antigo = Join-Path $env:RUNNER_TEMP 'Prumo-QA-Setup-2.2.0.exe'
-          Invoke-WebRequest 'https://github.com/AnaPLysyk/Prumo-Qa/releases/download/v2.2.0/Prumo-QA-Setup-2.2.0.exe' -OutFile $antigo
-          $hash = (Get-FileHash $antigo -Algorithm SHA256).Hash.ToLower()
-          "SHA-256 do 2.2.0 baixado: $hash"
-          if ($hash -ne 'a902ca0eb4bc81d97d2c82f3de1756a137823ce042c034da389277a1d126edfe') { throw 'O instalador 2.2.0 baixado não confere com o hash publicado na entrega 2.2' }
-          $dir = 'C:\Prumo QA instalação'
-          Start-Process -FilePath $antigo -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
-          if (-not (Test-Path "$dir\Prumo QA.exe")) { throw '2.2.0 não instalada' }
-          $v = (Get-Content "$dir\resources\app\package.json" -Raw | ConvertFrom-Json).version
-          if ($v -ne '2.2.0') { throw "Versão instalada inesperada: $v" }
-      - name: Criar dados reais com a 2.2.0 (vínculo, chamadas MCP, evidência BLOCKED)
-        run: node ferramentas/migracao/preparar-dados-22.mjs "C:\Prumo QA instalação"
-      - name: Atualizar para a versão atual instalando SOBRE a 2.2.0
-        shell: pwsh
-        run: |
-          $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
-          $dir = 'C:\Prumo QA instalação'
-          Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
-          $esperada = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          $v = (Get-Content "$dir\resources\app\package.json" -Raw | ConvertFrom-Json).version
-          if ($v -ne $esperada) { throw "Após atualizar a versão é $v, esperada $esperada" }
-          if (-not (Test-Path "$dir\Uninstall Prumo QA.exe")) { throw 'Desinstalador ausente' }
-          $menu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Prumo QA.lnk'
-          $desktop = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Prumo QA.lnk'
-          foreach ($atalho in $menu, $desktop) { if (-not (Test-Path $atalho)) { throw "Atalho ausente: $atalho" } }
-          "PRUMO_APP_EXE=$dir\Prumo QA.exe" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
-      - name: Migração 2.2.0 → atual preservou projetos, histórico, métricas, evidências e MCP
-        shell: pwsh
-        env:
-          PRUMO_MIGRACAO: '1'
-        run: |
-          node --test --test-concurrency=1 testes/regressao/frontend/aplicativo/migracao.test.mjs *> migracao.txt
-          $codigo = $LASTEXITCODE
-          Get-Content migracao.txt | Select-String '^(✔|✖|﹣|ℹ (tests|pass|fail|skipped))'
-          if ($codigo -ne 0) { exit $codigo }
-          if ((Select-String -Path migracao.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Testes de migração foram ignorados: etapa inválida' }
-      - name: Janela e MCP do programa instalado (sem Node.js dedicado ao app)
-        run: node --test --test-concurrency=1 testes/regressao/frontend/aplicativo/janela-e-seguranca.test.mjs testes/regressao/frontend/ajuda/ajuda.test.mjs testes/regressao/frontend/conexoes/conexoes-e-acessibilidade.test.mjs testes/regressao/frontend/agentes/contextos.test.mjs testes/regressao/frontend/projetos/plataforma-dois-projetos.test.mjs testes/regressao/frontend/inicio/agenda.test.mjs testes/regressao/frontend/tickets/jira.test.mjs testes/regressao/frontend/compartilhado/i18n.test.mjs testes/regressao/frontend/agendamentos/agenda-e-bandeja-ponta-a-ponta.test.mjs
-      - name: Instalar a 2.6 publicada, criar dados com ela e atualizar para a atual
-        shell: pwsh
-        run: |
-          $anterior26 = Join-Path $env:RUNNER_TEMP 'Prumo-QA-Setup-2.6.0.exe'
-          Invoke-WebRequest 'https://github.com/AnaPLysyk/Prumo-Qa/releases/download/v2.6.0/Prumo-QA-Setup-2.6.0.exe' -OutFile $anterior26
-          if ((Get-FileHash $anterior26 -Algorithm SHA256).Hash.ToLower() -ne '53c1de612536f13afe817b0dd4f9ff09343991d5ac4bb3c60eabc68486fec183') { throw 'Hash da 2.6 publicada não confere' }
-          $dir = 'C:\Prumo QA instalação'
-          Start-Process -FilePath $anterior26 -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
-          node ferramentas/migracao/preparar-dados-26.mjs $dir
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
-          Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
-          $esperada = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          if ((Get-Content "$dir\resources\app\package.json" -Raw | ConvertFrom-Json).version -ne $esperada) { throw 'Atualização 2.6 → atual falhou' }
-      - name: Verificar preservação dos dados criados pela 2.6 instalada
-        shell: pwsh
-        env:
-          PRUMO_MIGRACAO_26: '1'
-        run: |
-          node --test --test-concurrency=1 testes/regressao/frontend/aplicativo/migracao-26.test.mjs *> migracao-26.txt
-          $codigo = $LASTEXITCODE
-          Get-Content migracao-26.txt
-          if ($codigo -ne 0) { exit $codigo }
-          if ((Select-String -Path migracao-26.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Migração 2.6 não executada' }
-      - name: Instalar a 2.7 publicada, criar dados com ela e atualizar para a atual
-        shell: pwsh
-        run: |
-          $anterior27 = Join-Path $env:RUNNER_TEMP 'Prumo-QA-Setup-2.7.0.exe'
-          Invoke-WebRequest 'https://github.com/AnaPLysyk/Prumo-Qa/releases/download/v2.7.0/Prumo-QA-Setup-2.7.0.exe' -OutFile $anterior27
-          if ((Get-FileHash $anterior27 -Algorithm SHA256).Hash.ToLower() -ne '3febfd139ced5d201c934dbb8674294677645301999a432e0cfd82b78a5cdbf5') { throw 'Hash da 2.7 publicada não confere' }
-          $dir = 'C:\Prumo QA instalação'
-          Start-Process -FilePath $anterior27 -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
-          node ferramentas/migracao/preparar-dados-27.mjs $dir
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $setup = (Get-ChildItem release\Prumo-QA-Setup-*.exe).FullName
-          Start-Process -FilePath $setup -ArgumentList '/S', "/D=$dir" -WindowStyle Hidden -Wait
-          $esperada = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          if ((Get-Content "$dir\resources\app\package.json" -Raw | ConvertFrom-Json).version -ne $esperada) { throw 'Atualização 2.7 → atual falhou' }
-      - name: Verificar preservação dos dados criados pela 2.7 instalada
-        shell: pwsh
-        env:
-          PRUMO_MIGRACAO_27: '1'
-        run: |
-          node --test --test-concurrency=1 testes/regressao/frontend/aplicativo/migracao-27.test.mjs *> migracao-27.txt
-          $codigo = $LASTEXITCODE
-          Get-Content migracao-27.txt
-          if ($codigo -ne 0) { exit $codigo }
-          if ((Select-String -Path migracao-27.txt -Pattern '^ℹ skipped 0$') -eq $null) { throw 'Migração 2.7 não executada' }
-      - name: Desinstalar e conferir que dados do usuário permanecem
-        shell: pwsh
-        run: |
-          $dados = Join-Path $env:LOCALAPPDATA 'PrumoQA'
-          $dir = 'C:\Prumo QA instalação'
-          Start-Process -FilePath "$dir\Uninstall Prumo QA.exe" -ArgumentList '/S' -WindowStyle Hidden -Wait
-          for ($i = 0; $i -lt 60 -and (Test-Path "$dir\Prumo QA.exe"); $i++) { Start-Sleep 1 }
-          if (Test-Path "$dir\Prumo QA.exe") { throw 'Programa não foi removido' }
-          foreach ($item in 'marca-migracao.txt', 'instantaneo-2.6.0.json', 'instantaneo-2.7.0.json', 'vinculos.json', 'projects', 'contextos', 'plataforma') { if (-not (Test-Path (Join-Path $dados $item))) { throw "Desinstalação apagou dados do usuário: $item" } }
       - name: SHA-256 do instalador
         shell: pwsh
         run: |

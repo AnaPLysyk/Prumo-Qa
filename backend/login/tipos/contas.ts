@@ -98,7 +98,7 @@ export const papeisPadrao: Papel[] = [
   { id: 'leitor', nome: 'Leitor', descricao: 'Consulta as telas de trabalho sem alterar nada.', fixo: false, telas: { ...tudoVer, administracao: 'NENHUM' } }
 ];
 
-export const acessoPadrao: ConfiguracaoDeAcesso = { cadastroAberto: true, aprovarCadastros: true, papelDoCadastro: 'leitor', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15, githubClientId: null, googleClientId: null, exigirDuasEtapas: false };
+export const acessoPadrao: ConfiguracaoDeAcesso = { cadastroAberto: true, aprovarCadastros: false, papelDoCadastro: 'leitor', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15, githubClientId: null, googleClientId: null, exigirDuasEtapas: false };
 
 export const registroDeContasVazio: RegistroDeContas = { version: 1, usuarios: [], papeis: papeisPadrao, acesso: acessoPadrao };
 

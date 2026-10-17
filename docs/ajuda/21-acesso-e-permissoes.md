@@ -7,11 +7,11 @@ O Prumo sempre abre na tela de entrada. O **papel** define quais telas de trabal
 Num computador sem contas, a tela de entrada oferece três caminhos para criar a primeira conta:
 
 - **Criar conta**: informe seu nome, e-mail e senha (pelo menos 10 caracteres, incluindo letras e números). O Prumo envia um código de 6 dígitos para seu e-mail. Digite o código para criar a conta e entrar. Ele vale por 10 minutos. Se não chegar, confira o spam e use **Reenviar código** depois de um minuto.
-- **Criar conta com o GitHub** ou **Criar conta com o Google**: o Prumo abre o navegador, você autoriza e volta já dentro. Se o provedor ainda não estiver configurado neste computador, a entrada pede o **Client ID** e o **Client Secret** uma vez (como criar: seção **Entrar com o GitHub ou o Google**, abaixo).
+- **Continuar com GitHub / Google**: autorize sua identidade no navegador. O provedor deve ter sido configurado uma vez pela Administração; o login nunca pede Client ID, segredo nem token ao usuário. Repositórios são independentes.
 
 Abaixo do cartão ficam o **idioma** (português ou inglês, já vale na entrada) e **Site e documentação**, que abre o site oficial no navegador.
 
-A primeira conta recebe a marca admin. Depois, entre com seu e-mail e senha. Você também pode usar o login curto: a parte do e-mail antes de `@`.
+A primeira conta recebe a marca admin. Se foi criada por e-mail, você entra com e-mail e senha (ou login curto). Se foi criada pelo GitHub ou Google, entre novamente pelo mesmo provedor.
 
 O envio do código precisa de internet: o e-mail, o código e o idioma vão para o serviço de envio do Prumo, que manda a mensagem. Nada mais sai do computador.
 
@@ -45,14 +45,13 @@ Só contas com a marca admin podem abrir **Administração**, que reúne usuári
 
 ## Entrar com o GitHub ou o Google
 
-Depois de configurar um provedor, aparecem **Entrar com o GitHub** e **Entrar com o Google**. O Prumo abre o navegador para você autorizar e depois volta ao aplicativo.
+O card mostra a versão realmente instalada, mantendo e-mail e senha e as opções Continuar com GitHub e Continuar com Google. O fundo estrelado e as demais telas não mudam.
 
-- Conta ativa: entra direto. O GitHub também cria uma conexão somente para leitura. O token inclui o escopo `repo`, mas o Prumo só escreve depois que você habilita a escrita e confirma. O Google serve apenas para identificar você.
-- Pessoa nova: a conta fica **pendente** e usa o papel definido para novos cadastros até um admin aprová-la.
-- A conta é reconhecida pelo número do provedor, não pelo nome nem pelo e-mail.
-- Cancelar, negar ou esperar 5 minutos não cria nada.
+O login pelo GitHub pede apenas read:user, nunca repo. Não cria conexões com repositórios. Para usá-los, vá a Conexões depois de entrar. O Google pode fornecer e-mail verificado, mas e-mails iguais não vinculam contas automaticamente.
 
-Para configurar um provedor, abra **Administração › Configurações gerais**. No GitHub, crie um OAuth App com o endereço de retorno `http://127.0.0.1/callback`. No Google Cloud Console, crie uma credencial OAuth do tipo **Aplicativo para computador**. Informe o Client ID e o Client Secret; o segredo fica protegido no cofre do sistema e não é mostrado novamente.
+A primeira conta do computador torna-se administradora. Depois, novos cadastros seguem a política existente: com aprovação obrigatória, aguardam; sem ela, entram automaticamente. Em novas instalações, a aprovação padrão vem desligada.
+
+A Administração deve configurar credenciais OAuth válidas em Administração > Configurações gerais uma única vez. Sem essas credenciais, o botão informa que o provedor não está disponível e o login por e-mail continua. Login social não equivale por si só a uma segunda etapa de MFA.
 
 ## O que o login não faz
 

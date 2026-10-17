@@ -15,8 +15,8 @@ export async function trocarCodigoNoGoogle(p: { clientId: string; clientSecret: 
 /** Quem autorizou: `sub` (a identidade que vale, nunca o e-mail), parte local do e-mail como login e o nome. */
 export async function lerPerfilDoGoogle(token: string): Promise<{ id: string; login: string; nome: string | null }> {
   const r = await chamarHttps(ERRO, 'openidconnect.googleapis.com', '/v1/userinfo', 'GET', { Authorization: 'Bearer ' + token });
-  const j = (r.json ?? {}) as { sub?: unknown; email?: unknown; name?: unknown };
+  const j = (r.json ?? {}) as { sub?: unknown; email?: unknown; email_verified?: unknown; name?: unknown };
   if (r.status !== 200 || typeof j.sub !== 'string' || !/^[0-9]{1,30}$/.test(j.sub)) throw new Error(ERRO + ': não foi possível ler o perfil do Google.');
   const email = typeof j.email === 'string' ? j.email : ''; const login = (email.split('@')[0] || 'usuario').slice(0, 60);
-  return { id: j.sub, login, nome: typeof j.name === 'string' && j.name.trim() ? j.name.trim().slice(0, 80) : null };
+  return { id: j.sub, login, nome: typeof j.name === 'string' && j.name.trim() ? j.name.trim().slice(0, 80) : null, ...(j.email_verified === true && email ? { email } : {}) };
 }

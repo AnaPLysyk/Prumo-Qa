@@ -120,6 +120,7 @@ test('papel alterado, conta desativada e sessão vencida valem no próximo pedid
 
 test('cadastro por e-mail: fechado, pendente até aprovar, nunca como administrador; senha nova pelo código do e-mail', async (t) => {
   const b = pasta(t); await criarPrimeiraConta(ADMIN, b);
+  salvarConfiguracaoDeAcesso({ cadastroAberto: true, aprovarCadastros: true, papelDoCadastro: 'leitor', minutosDeInatividade: 30, tentativasAntesDoBloqueio: 5, minutosDeBloqueio: 15 }, b);
   const DANI = { email: 'dani@prumo.test', nome: 'Dani Dev', senha: 'Cadastro-firme-26' };
   const novo = await cadastrarComEmail(DANI, b);
   assert.deepEqual(novo, { estado: 'PENDENTE' }, 'sem código de recuperação');

@@ -7,11 +7,11 @@ Prumo always opens on the sign-in screen. A person's **role** controls which wor
 On a computer with no accounts, the sign-in screen offers three ways to create the first account:
 
 - **Create account**: enter a name, e-mail and password (at least 10 characters, including letters and numbers). Prumo sends a 6-digit code to your e-mail. Enter the code to create the account and sign in. It is valid for 10 minutes. If it does not arrive, check your spam folder and try **Resend code** after a minute.
-- **Create account with GitHub** or **Create account with Google**: Prumo opens the browser, you authorize and come back already signed in. If the provider is not configured on this computer yet, the sign-in screen asks once for the **Client ID** and **Client Secret** (how to create them: section **Sign in with GitHub or Google**, below).
+- **Continue with GitHub / Google**: authorize your identity in your browser. The provider must have been configured by the administrator once; the sign-in form never asks for a client ID, secret or token. Repositories are separate.
 
 Below the card are the **language** (Portuguese or English, applied right on the sign-in screen) and **Website and docs**, which opens the official website in the browser.
 
-The first account gets the admin mark. Later, sign in with your e-mail and password. You can also use the short login: the part of your e-mail before `@`.
+The first account gets the admin mark. E-mail accounts use e-mail and password (or the short login). Accounts created using GitHub or Google must sign in through that same provider.
 
 Sending the code needs internet: the e-mail, the code and the language go to the Prumo sending service, which sends the message. Nothing else leaves the computer.
 
@@ -45,14 +45,13 @@ Only accounts with the admin mark can open **Administration**, which includes us
 
 ## Sign in with GitHub or Google
 
-Once a provider is configured, **Sign in with GitHub** and **Sign in with Google** appear. Prumo opens the browser for you to authorize, then returns you to the app.
+The login card now shows the actual installed app version. Email sign-in remains and two identity choices are available. The starry background and the rest of the product are unchanged.
 
-- Active account: signs in directly. GitHub also creates a read-only connection. Its token includes the `repo` scope, but Prumo only writes after you enable writing and confirm. Google is used only to identify you.
-- New person: the account stays **pending** and uses the role for new sign-ups until an admin approves it.
-- The account is recognized by the provider's number, not by name or email.
-- Cancelling, denying or waiting 5 minutes creates nothing.
+GitHub login asks only for profile read:user, never repo permission. It does not create repository connections; use Connections after signing in. Google can supply a verified email, never used to silently join an existing identity.
 
-To configure a provider, open **Administration › General settings**. For GitHub, create an OAuth App with the callback `http://127.0.0.1/callback`. In Google Cloud Console, create an OAuth credential of type **Desktop app**. Enter the Client ID and Client Secret; the secret is stored in the system vault and is not shown again.
+First authorization creates the administrator on an empty computer. Later registrations use the existing administrator policy: approve first when approval is required, otherwise automatically sign in. New installations default to no approval.
+
+The application administrator must configure valid OAuth credentials once in Administration > General settings. If not configured, the provider button explains the limitation; email sign-in remains available. Social sign-in is not itself a second MFA factor.
 
 ## What sign-in does not do
 

@@ -2,6 +2,7 @@
 /** Entrada do Prumo: entrar, criar conta (e-mail confirmado por código, GitHub ou Google), esqueci a senha pelo e-mail, troca de senha temporária, idioma, site, menu da conta e telas por permissão. */
 window.PrumoConta = (() => {
   let sessao = null; let dialogo = null; let lugar = null; let vigia = null;
+  let versaoAplicativo = null;
   const codigoDo = (erro) => /^([A-Z][A-Z0-9_]{2,63}):/.exec(String(erro || ''))?.[1] || null;
   const pode = (aba) => !sessao || (sessao.telas?.[aba] ?? 'NENHUM') !== 'NENHUM';
   const soVer = (aba) => !!sessao?.loginAtivo && sessao.telas?.[aba] === 'VER';
@@ -12,7 +13,7 @@ window.PrumoConta = (() => {
     return { input, no: DS.campo(rotulo, input, { id, ...(ajuda ? { ajuda } : {}) }) };
   }
   function cartao(titulo, descricao, ...conteudo) {
-    return [h('div', { class: 'entrada-marca' }, h('img', { src: '../../assets/prumo-icon.png', alt: '', width: 40, height: 40 }), h('strong', { 'data-i18n-ignore': '' }, 'Prumo QA')),
+    return [h('div', { class: 'entrada-marca' }, h('img', { src: '../../assets/prumo-icon.png', alt: '', width: 40, height: 40 }), h('strong', { 'data-i18n-ignore': '' }, 'Prumo QA'), h('span', { class: 'entrada-versao', 'data-i18n-ignore': '', 'aria-label': 'Versão instalada do Prumo QA' }, versaoAplicativo ? 'v' + versaoAplicativo : 'Versão…')),
       h('h1', { id: 'entrada-titulo' }, tr(titulo)), descricao ? h('p', { class: 'entrada-desc' }, tr(descricao)) : null, ...conteudo];
   }
   const erroNo = () => h('div', { id: 'entrada-erro', class: 'ds-alerta entrada-erro', 'data-tom': 'falha', role: 'alert', hidden: true },
@@ -48,8 +49,8 @@ window.PrumoConta = (() => {
       SESSION_REQUIRED: 'Entre com sua conta do Prumo para continuar.',
       SIGNUP_CLOSED: 'O cadastro de novas contas está fechado. Solicite acesso à Administração.',
       NAME_INVALID: 'Confira o nome informado.',
-      GITHUB_LOGIN_NOT_CONFIGURED: 'O acesso com GitHub ainda não foi configurado pela Administração.',
-      GOOGLE_LOGIN_NOT_CONFIGURED: 'O acesso com Google ainda não foi configurado pela Administração.',
+      GITHUB_LOGIN_NOT_CONFIGURED: 'Entrar com GitHub ainda não está disponível. Use seu e-mail ou procure a Administração.',
+      GOOGLE_LOGIN_NOT_CONFIGURED: 'Entrar com Google ainda não está disponível. Use seu e-mail ou procure a Administração.',
       GITHUB_CLIENT_INVALID: 'O Client ID do GitHub não tem o formato esperado. Copie de novo da página do OAuth App.',
       GITHUB_SECRET_REQUIRED: 'Informe o Client Secret do GitHub.',
       GOOGLE_CLIENT_INVALID: 'O Client ID do Google não tem o formato esperado. Copie de novo do Google Cloud Console.',
@@ -86,6 +87,11 @@ window.PrumoConta = (() => {
       lugar = h('div', { class: 'entrada-lugar' });
       dialogo.append(PrumoVitrine.ceu(), h('div', { class: 'entrada-palco' }, PrumoVitrine.lema(), lugar));
       document.body.append(dialogo);
+      // Versão real do aplicativo instalado, obtida do processo principal.
+      void api.info().then((r) => {
+        if (r.ok && /^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/.test(String(r.data?.version || ''))) versaoAplicativo = r.data.version;
+        for (const no of document.querySelectorAll('.entrada-versao')) no.textContent = versaoAplicativo ? 'v' + versaoAplicativo : 'Versão indisponível';
+      }).catch(() => { for (const no of document.querySelectorAll('.entrada-versao')) no.textContent = 'Versão indisponível'; });
     }
     document.body.classList.add('com-entrada');
     if (!dialogo.open) dialogo.showModal();
@@ -238,38 +244,18 @@ window.PrumoConta = (() => {
       }, [link('Sair', async () => { await api.contaSair(); location.reload(); }, 'entrada-sair')]));
   }
 
-  /**
-   * Provedores externos. Para entrar e se cadastrar, o botão só aparece quando a Administração configurou o aplicativo do provedor.
-   * No primeiro acesso (sem nenhuma conta) os dois aparecem sempre: sem configuração, a própria entrada pede o Client ID e o segredo.
-   */
+  /** A entrada identifica a pessoa. Permissões de repositório pertencem somente à tela Conexões. */
   const PROVEDORES = {
-    github: { nome: 'GitHub', ativo: () => sessao?.entradaGithub, iniciar: (a) => api.contaGithubIniciar(a), estado: (c) => api.contaGithubEstado(c), salvar: (id, segredo) => api.acessoGithub(id, segredo), maxId: 60, titulo: 'Autorize no GitHub', texto: 'Autorize no navegador; você volta já autenticado.', entrar: 'Entrar com o GitHub', cadastrar: 'Cadastrar com o GitHub', ativar: 'Criar conta com o GitHub', configurar: 'Configurar o acesso com o GitHub', comoConfigurar: 'OAuth App em github.com/settings/developers, com a callback http://127.0.0.1/callback. O segredo fica no cofre do sistema.' },
-    google: { nome: 'Google', ativo: () => sessao?.entradaGoogle, iniciar: (a) => api.contaGoogleIniciar(a), estado: (c) => api.contaGoogleEstado(c), salvar: (id, segredo) => api.acessoGoogle(id, segredo), maxId: 120, titulo: 'Autorize no Google', texto: 'Autorize no navegador; você volta já autenticado.', entrar: 'Entrar com o Google', cadastrar: 'Cadastrar com o Google', ativar: 'Criar conta com o Google', configurar: 'Configurar o acesso com o Google', comoConfigurar: 'Credencial OAuth do tipo "Aplicativo para computador", no Google Cloud Console. O segredo fica no cofre do sistema.' }
+    github: { nome: 'GitHub', iniciar: (a) => api.contaGithubIniciar(a), estado: (c) => api.contaGithubEstado(c), titulo: 'Autorize no GitHub', texto: 'Confirme sua identidade no navegador. Seus repositórios não serão conectados agora.', entrar: 'Continuar com GitHub', cadastrar: 'Continuar com GitHub', ativar: 'Continuar com GitHub' },
+    google: { nome: 'Google', iniciar: (a) => api.contaGoogleIniciar(a), estado: (c) => api.contaGoogleEstado(c), titulo: 'Autorize no Google', texto: 'Escolha sua conta no navegador. Nenhuma conexão de serviço será criada.', entrar: 'Continuar com Google', cadastrar: 'Continuar com Google', ativar: 'Continuar com Google' }
   };
-  const botoesExternos = (verbo) => {
-    const todos = verbo === 'ativar' && semContas();
-    const ativos = Object.entries(PROVEDORES).filter(([, p]) => todos || p.ativo());
-    return ativos.length ? h('div', { class: 'entrada-outros' }, h('span', { class: 'entrada-ou' }, tr('ou')), ...ativos.map(([id, p]) => DS.acao(p[verbo], () => (p.ativo() ? vistaExterna(id, verbo === 'ativar') : vistaConfigurarProvedor(id)), { id: 'entrada-' + id, icone: 'externo' }))) : null;
-  };
-  /** Primeiro acesso pelo GitHub ou Google ainda sem configuração: guarda o Client ID e o segredo (só enquanto não há contas) e segue para a autorização. */
-  function vistaConfigurarProvedor(provedor) {
-    const p = PROVEDORES[provedor];
-    const id = campo('provedor-id', 'Client ID', 'text', { autocomplete: 'off', maxlength: p.maxId, autocapitalize: 'off' });
-    const segredo = campo('provedor-segredo', 'Client Secret', 'password', { autocomplete: 'off', maxlength: 200 });
-    trocarVista(...cartao(p.configurar, 'Feito uma vez neste computador; depois é só autorizar no navegador. Quem administra pode trocar isso em Administração › Configurações gerais.'),
-      DS.alerta(p.comoConfigurar, 'info'),
-      formulario([id, segredo], 'Salvar e continuar', async (form) => {
-        const r = await p.salvar(id.input.value, segredo.input.value); segredo.input.value = '';
-        if (!r.ok) { mostrarErro(form, r.error); return; }
-        const s = await api.contaSessao(); if (s.ok) sessao = s.data;
-        void vistaExterna(provedor, true);
-      }, [link('Voltar para entrar', () => vistaEntrar(), 'entrada-voltar')]));
-  }
+  const botoesExternos = (verbo) => h('div', { class: 'entrada-outros' }, h('span', { class: 'entrada-ou' }, tr('ou continue com')),
+    ...Object.entries(PROVEDORES).map(([id, p]) => DS.acao(p[verbo], () => vistaExterna(id, verbo === 'ativar', verbo === 'cadastrar'), { id: 'entrada-' + id, icone: 'externo' })));
   /** Espera a autorização no navegador: o Prumo abre a página do provedor e, quando a pessoa autoriza, ela volta já dentro. */
-  async function vistaExterna(provedor, ativar = false) {
+  async function vistaExterna(provedor, ativar = false, cadastro = false) {
     const p = PROVEDORES[provedor]; let parar = false;
     // Criando a primeira conta ainda não existe tela de entrada: desistir ou falhar volta ao primeiro acesso, nunca ao aplicativo.
-    const voltar = (aviso) => { if (ativar) vistaCriarConta(true, aviso); else vistaEntrar(aviso); };
+    const voltar = (aviso) => { if (cadastro) vistaCriarConta(semContas(), aviso); else vistaEntrar(aviso); };
     const desistir = async () => { parar = true; await p.estado(true); voltar(); };
     trocarVista(...cartao(p.titulo, p.texto),
       h('p', { class: 'entrada-regra', id: 'entrada-' + provedor + '-espera', role: 'status' }, tr('Aguardando a autorização…')), h('div', { class: 'entrada-links' }, DS.acao('Cancelar', desistir, { id: 'entrada-' + provedor + '-cancelar' })));

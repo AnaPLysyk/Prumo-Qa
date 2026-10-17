@@ -16,7 +16,7 @@ import { lerContas } from '../../../../dist/login/banco/lerContas.js';
 // Nenhuma rede externa, nenhum cofre, nenhuma conta real.
 const base = async (t) => {
   const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo gh ')); t.after(() => { encerrarSessao(); estadoDaEntradaGithub(true); fs.rmSync(b, { recursive: true, force: true }); });
-  await criarPrimeiraConta({ login: 'admin', nome: 'Admin Teste', senha: 'senha-forte-123' }, b); encerrarSessao(); return b;
+  await criarPrimeiraConta({ login: 'admin', nome: 'Admin Teste', senha: 'senha-forte-123' }, b); const cfg=lerContas(b);cfg.acesso.aprovarCadastros=true;gravarContas(cfg,b); encerrarSessao(); return b;
 };
 function montar(b, { perfil = { id: '4242', login: 'Ana-Dev', nome: 'Ana Dev' }, tempoMs, configurado = true } = {}) {
   const chamadas = { trocas: [], conexoes: [], urls: [] };
@@ -40,11 +40,11 @@ test('a página de autorização leva PKCE S256, state, escopo e retorno em 127.
   const b = await base(t), { d, chamadas } = montar(b); await iniciarEntradaGithub(d);
   const u = new URL(chamadas.urls[0]); assert.equal(u.origin + u.pathname, 'https://github.com/login/oauth/authorize');
   assert.equal(u.searchParams.get('code_challenge_method'), 'S256'); assert.match(u.searchParams.get('redirect_uri'), /^http:\/\/127\.0\.0\.1:\d+\/callback$/);
-  assert.equal(u.searchParams.get('scope'), 'read:user repo'); assert.ok(u.searchParams.get('state').length >= 30); assert.doesNotMatch(chamadas.urls[0], /segredo-de-teste|client_secret/);
+  assert.equal(u.searchParams.get('scope'), 'read:user'); assert.ok(u.searchParams.get('state').length >= 30); assert.doesNotMatch(chamadas.urls[0], /segredo-de-teste|client_secret/);
   assert.equal(estadoDaEntradaGithub().estado, 'AGUARDANDO');
 });
 
-test('pessoa nova: o cadastro pelo GitHub nasce PENDENTE, sem senha e sem sessão, e o token não é guardado; depois de aprovada, entra já com a conexão', async (t) => {
+test('pessoa nova: com aprovacao exigida fica PENDENTE; depois de aprovada entra sem vincular repositorios', async (t) => {
   const b = await base(t), { d, chamadas } = montar(b); await iniciarEntradaGithub(d);
   const u = new URL(chamadas.urls[0]); const r = await volta(chamadas.urls[0], { code: 'codigo-1', state: u.searchParams.get('state') }); assert.equal(r.status, 200);
   const e = await esperar((x) => x.estado !== 'AGUARDANDO'); assert.equal(e.estado, 'PENDENTE');
@@ -58,7 +58,7 @@ test('pessoa nova: o cadastro pelo GitHub nasce PENDENTE, sem senha e sem sessã
   const reg = lerContas(b); reg.usuarios.find((x) => x.id === conta.id).estado = 'ATIVO'; gravarContas(reg, b);
   await iniciarEntradaGithub(d); const u2 = new URL(chamadas.urls[1]); await volta(chamadas.urls[1], { code: 'codigo-2', state: u2.searchParams.get('state') });
   const f = await esperar((x) => x.estado !== 'AGUARDANDO'); assert.equal(f.estado, 'CONCLUIDO'); assert.equal(f.sessao.usuario.login, conta.login); assert.equal(situacaoDaSessao(b).tipo, 'ATIVA');
-  assert.deepEqual(chamadas.conexoes, [{ token: 'token-de-teste', nome: 'GitHub de Ana-Dev' }]);
+  assert.deepEqual(chamadas.conexoes, [], 'login nao cria conexoes de repositorio');
 });
 
 test('retorno suspeito é recusado e não derruba a tentativa: state errado, host errado, caminho errado', async (t) => {
@@ -112,14 +112,14 @@ test('sem concluir o login ou o cadastro nada fica habilitado: sem sessão, sem 
   assert.ok(!fs.readFileSync(path.join(b, 'plataforma', 'acessos.json'), 'utf8').includes('token-de-teste'), 'o token não é gravado nas contas');
 });
 
-test('ativar o login pelo GitHub: sem nenhuma conta, a primeira (administradora) nasce da autorização, entra já e ganha a conexão; com contas, recusa', async (t) => {
+test('primeiro login pelo GitHub cria administradora, entra sem conexao de repositorio e recusa segunda ativacao', async (t) => {
   const vazio = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo gh ativar ')); t.after(() => { encerrarSessao(); estadoDaEntradaGithub(true); fs.rmSync(vazio, { recursive: true, force: true }); });
   const { d, chamadas } = montar(vazio); let terminou = 0; d.aoTerminar = () => { terminou++; };
   await assert.rejects(iniciarEntradaGithub(d), /LOGIN_NOT_ACTIVE/, 'o modo entrar não vale sem conta');
   await iniciarEntradaGithub(d, 'ativar'); await volta(chamadas.urls[0], { code: 'c', state: new URL(chamadas.urls[0]).searchParams.get('state') });
   const e = await esperar((x) => x.estado !== 'AGUARDANDO'); assert.equal(e.estado, 'CONCLUIDO'); assert.equal(e.sessao.usuario.papel, 'administrador'); assert.equal(e.sessao.loginAtivo, true);
   const conta = lerContas(vazio).usuarios[0]; assert.equal(conta.estado, 'ATIVO'); assert.equal(conta.senha, null); assert.equal(conta.origem, 'GITHUB');
-  assert.deepEqual(chamadas.conexoes, [{ token: 'token-de-teste', nome: 'GitHub de Ana-Dev' }]); assert.ok(terminou >= 1, 'a janela do Prumo é trazida para a frente');
+  assert.deepEqual(chamadas.conexoes, [], 'primeiro login nao cria conexoes de repositorio'); assert.ok(terminou >= 1, 'a janela do Prumo é trazida para a frente');
   encerrarSessao(); await assert.rejects(iniciarEntradaGithub(montar(vazio).d, 'ativar'), /LOGIN_ALREADY_ACTIVE/, 'com contas, ativar não vale mais');
 });
 
@@ -154,4 +154,15 @@ test('Google: ativar o login sem nenhuma conta cria a administradora; a falta de
   const { d, chamadas } = montar(vazio, { perfil: { id: '777', login: 'admin.g', nome: 'Admin G' } }); delete d.guardarConexao; await iniciarEntrada('google', d, 'ativar');
   await volta(chamadas.urls[0], { code: 'c', state: new URL(chamadas.urls[0]).searchParams.get('state') }); const e = await esperar((x) => x.estado !== 'AGUARDANDO');
   assert.equal(e.estado, 'CONCLUIDO'); assert.equal(e.sessao.usuario.papel, 'administrador'); assert.equal(lerContas(vazio).usuarios[0].origem, 'GOOGLE');
+});
+
+test('cadastro social sem aprovacao cria conta ativa, login imediato e nao conecta repositorios', async (t) => {
+  const b = await base(t); const reg = lerContas(b); reg.acesso.aprovarCadastros = false; gravarContas(reg, b);
+  const { d, chamadas } = montar(b, { perfil: { id: '10101', login: 'conta-google', nome: 'Pessoa Nova', email: 'nova@example.com' } });
+  delete d.guardarConexao; await iniciarEntrada('google', d); const url = chamadas.urls[0];
+  await volta(url, { code: 'codigo', state: new URL(url).searchParams.get('state') });
+  const resultado = await esperar(x => x.estado !== 'AGUARDANDO');
+  assert.equal(resultado.estado, 'CONCLUIDO'); assert.equal(resultado.sessao.usuario.email, 'nova@example.com');
+  assert.equal(lerContas(b).usuarios.find(x=>x.origem==='GOOGLE').estado,'ATIVO');
+  assert.equal(situacaoDaSessao(b).tipo,'ATIVA'); assert.deepEqual(chamadas.conexoes, []);
 });

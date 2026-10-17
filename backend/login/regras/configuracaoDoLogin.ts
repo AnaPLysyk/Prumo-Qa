@@ -2,7 +2,6 @@
 import { BrowserWindow, safeStorage, shell } from 'electron';
 import { cofreCredenciais } from '../../conexoes/banco/cofreCredenciais.js';
 import { protetorDoSistema } from '../../conexoes/regras/protetorDoSistema.js';
-import { servicosDoAplicativo } from '../../conexoes/regras/servicosDoAplicativo.js';
 import { lerPerfilDoGithub, trocarCodigoNoGithub } from '../integracoes/githubOauth.js';
 import { lerPerfilDoGoogle, trocarCodigoNoGoogle } from '../integracoes/googleOauth.js';
 import { gravarContas } from '../banco/gravarContas.js';
@@ -42,8 +41,7 @@ const abrirSoNoProvedor = (provedor: Provedor) => async (url: string) => { if (!
 /** Ligações reais com o GitHub: perfil, conexão do GitHub na tela Conexões e o navegador padrão. */
 export const dependenciasDoGithub = (): DependenciasDeEntrada => ({
   configuracao: () => configuracaoDoProvedor('github'), trocarCodigo: trocarCodigoNoGithub, lerPerfil: lerPerfilDoGithub,
-  abrirNavegador: abrirSoNoProvedor('github'), aoTerminar: trazerJanelaParaFrente,
-  guardarConexao: async (token, nome) => { await servicosDoAplicativo.adicionar({ servico: 'github', nome, token }); }
+  abrirNavegador: abrirSoNoProvedor('github'), aoTerminar: trazerJanelaParaFrente
 });
 
 /** Ligações reais com o Google: só login (o Google não é um serviço do Prumo, então não há conexão para criar). */

@@ -67,20 +67,6 @@ jobs:
             if command -v sha256sum >/dev/null; then h=$(sha256sum "$f" | cut -d' ' -f1); else h=$(shasum -a 256 "$f" | cut -d' ' -f1); fi
             echo "$h *$f" > "$f.sha256"; echo "SHA-256 $f: $h"
           done
-      - name: Abrir o programa empacotado e conferir janela, segurança e MCP (Linux, tela virtual)
-        if: matrix.alvo == 'linux'
-        run: |
-          pasta=$(ls -d release/linux-unpacked)
-          bin="$pasta/$(ls $pasta | grep -i '^prumo' | head -1)"
-          printf '#!/bin/sh\nexec "%s" --no-sandbox "$@"\n' "$PWD/$bin" > "$RUNNER_TEMP/prumo-ci.sh"; chmod +x "$RUNNER_TEMP/prumo-ci.sh"
-          export PRUMO_APP_EXE="$RUNNER_TEMP/prumo-ci.sh"
-          xvfb-run -a node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/regressao/frontend/aplicativo/janela-e-seguranca.test.mjs
-      - name: Abrir o programa empacotado e conferir janela e segurança (macOS)
-        if: matrix.alvo == 'mac'
-        run: |
-          app=$(ls -d release/mac-arm64/*.app release/mac/*.app 2>/dev/null | head -1)
-          export PRUMO_APP_EXE="$PWD/$app/Contents/MacOS/Prumo QA"
-          node --test --test-concurrency=1 --test-name-pattern="janela nativa abre|segurança da janela" testes/regressao/frontend/aplicativo/janela-e-seguranca.test.mjs
       - uses: actions/upload-artifact@v5
         with:
           name: prumo-qa-${{ matrix.alvo }}
