@@ -38,10 +38,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - name: Verificar tipos e apenas testes unitários
+      - name: Compilar e executar apenas testes unitários
         shell: pwsh
         run: |
-          npm run typecheck
+          # Os testes de unidade importam dist/: primeiro compilar, depois testar.
+          npm run build
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:unitarios
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
