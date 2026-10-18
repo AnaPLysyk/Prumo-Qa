@@ -5,11 +5,14 @@ O Prumo roda no computador de cada pessoa. Duas coisas precisam de um lugar cent
 - **Códigos por e-mail:** manda o código de 6 dígitos do cadastro e do **Esqueci a senha**, pelo [Resend](https://resend.com).
 - **Chamados de suporte:** recebe os chamados da tela de Suporte (com imagens e vídeo) e grava cada um como issue num **repositório privado** da equipe no GitHub. Quem abre o chamado não precisa de conta no GitHub. A equipe lê e responde em **Administração › Chamados**.
 
-Sem dependências e sem banco. Chaves e tokens ficam só nas variáveis do serviço, nunca no aplicativo distribuído.
+O módulo de **autenticação central** agora usa Better Auth e PostgreSQL. O envio de códigos e o suporte continuam disponíveis. Chaves e tokens ficam nas variáveis do serviço, nunca no aplicativo distribuído.
 
 | Arquivo | O que faz |
 | --- | --- |
 | `servidor.mjs` | Junta as rotas, lê as variáveis de ambiente e responde `GET /saude`. |
+| `autenticacao.mjs` | Better Auth + PostgreSQL, e-mail confirmado, sessões e recuperação com Resend. Inclui `GET /saude/autenticacao` para validar conexão ao banco sem revelar dados. |
+| `auth.config.mjs` | Configuração do CLI Better Auth para gerar/migrar tabelas (somente com banco autorizado). |
+| `recuperar-senha.html` e `recuperar-senha.js` | Página mínima para redefinição de senha por link de e-mail. |
 | `codigos.mjs` | `POST /v1/codigos`: confere o pedido, limita e manda o e-mail. |
 | `chamados.mjs` | Chamados: abrir, anexar, acompanhar e as rotas da administração. |
 | `github.mjs` | Cliente do GitHub, preso ao repositório dos chamados. |

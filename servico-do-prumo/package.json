@@ -2,7 +2,15 @@
   "name": "prumo-qa-servico-de-email",
   "private": true,
   "type": "module",
-  "description": "Envia os códigos de confirmação de e-mail do Prumo QA. Sem dependências.",
-  "engines": { "node": ">=20" },
-  "scripts": { "start": "node servidor.mjs" }
+  "description": "Serviço Node.js do Prumo QA: Better Auth/PostgreSQL, códigos de e-mail e suporte.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node servidor.mjs"
+  },
+  "dependencies": {
+    "better-auth": "1.7.10",
+    "pg": "8.23.1"
+  }
 }
