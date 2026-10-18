@@ -47,7 +47,7 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
           'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
           'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
         });
-        return res.end(fs.readFileSync(new URL('../../login/servidor/'+nome,import.meta.url)));
+        return res.end(fs.readFileSync(new URL('../../../frontend/login/web/'+nome,import.meta.url)));
       }
       if (caminho === '/v1/codigos') return await codigos(req, res);
       if (caminho.startsWith('/v1/chamados') || caminho.startsWith('/v1/admin/')) return await chamados(req, res, caminho, url.searchParams);

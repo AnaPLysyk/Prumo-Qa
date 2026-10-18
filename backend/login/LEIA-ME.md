@@ -71,8 +71,6 @@ Rotas HTTP desta área que rodam no Render; login e suporte continuam nas suas p
 | `auth.config.mjs` | Configuração para o CLI do Better Auth gerar/migrar tabelas. Só use com DATABASE_URL de desenvolvimento. |
 | `codigos.mjs` | Rota dos códigos por e-mail: recebe do aplicativo um código de 6 dígitos e o manda ao e-mail informado, pelo Resend. |
 | `migrar-autenticacao.mjs` | Migração controlada do esquema do Better Auth. Execute SOMENTE no serviço DEV, |
-| `recuperar-senha.html` | Página de recuperação de acesso mostrada no navegador. |
-| `recuperar-senha.js` | (sem descrição) |
 
 ## tipos/
 

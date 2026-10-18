@@ -9,8 +9,8 @@ Este arquivo `servidor.mjs` apenas **inicializa a API Node.js** que roda no Rend
 | `backend/aplicativo/servidor/servidor.mjs` | Ponto de entrada HTTP, roteamento e `/saude` |
 | `backend/login/servidor/autenticacao.mjs` | Better Auth, sessões, senha, PostgreSQL e mensagens de verificação |
 | `backend/login/servidor/codigos.mjs` | Envio legado de códigos por e-mail, com limites |
-| `backend/login/servidor/recuperar-senha.html` | Página de recuperação de acesso |
-| `backend/login/servidor/recuperar-senha.js` | Confirmação da nova senha |
+| `frontend/login/web/recuperar-senha.html` | Página de recuperação de acesso |
+| `frontend/login/web/recuperar-senha.js` | Confirmação da nova senha |
 | `backend/login/servidor/auth.config.mjs` | Contrato de migração Better Auth |
 | `backend/login/servidor/migrar-autenticacao.mjs` | Migração DEV explícita, nunca automática |
 | `backend/suporte/servidor/chamados.mjs` | Validação, abertura, anexos e consultas de chamados |
@@ -45,9 +45,9 @@ Sem esses valores, o servidor pode expor `GET /saude`, mas não permite login re
 
 Para serviços que usam `render.yaml` como Blueprint:
 
-- `rootDir: backend/login/servidor`
-- `buildCommand: npm ci --omit=dev`
-- `startCommand: node ../../aplicativo/servidor/servidor.mjs`
+- Diretório raiz: raiz do repositório (sem `rootDir` específico)
+- `buildCommand: cd backend/login/servidor && npm ci --omit=dev`
+- `startCommand: node backend/aplicativo/servidor/servidor.mjs`
 
 **O serviço de desenvolvimento já criado no painel Render usa rootDir vazio**. Seus comandos equivalentes são:
 

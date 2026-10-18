@@ -32,9 +32,8 @@ services:
     plan: free
     repo: https://github.com/AnaPLysyk/Prumo-Qa
     branch: main
-    rootDir: backend/login/servidor
-    buildCommand: npm ci --omit=dev
-    startCommand: node ../../aplicativo/servidor/servidor.mjs
+    buildCommand: cd backend/login/servidor && npm ci --omit=dev
+    startCommand: node backend/aplicativo/servidor/servidor.mjs
     healthCheckPath: /saude
     autoDeployTrigger: "off"
     envVars:

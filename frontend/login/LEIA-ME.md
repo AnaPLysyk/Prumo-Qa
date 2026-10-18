@@ -9,3 +9,7 @@
 | `entrada.css` | Estilos da entrada e do menu da conta. |
 
 **De onde vêm os dados:** `window.prumo.conta*` (`backend/aplicativo/preload.cjs`) → canais `conta:*` em `backend/login/api/`. São canais IPC da janela, não endpoints HTTP.
+
+
+## RecuperaÃ§Ã£o de senha no navegador
+A pÃ¡gina de redefiniÃ§Ã£o estÃ¡ em `frontend/login/web/recuperar-senha.html` e a lÃ³gica visual em `frontend/login/web/recuperar-senha.js`. O backend `backend/aplicativo/servidor/servidor.mjs` apenas entrega esses arquivos por HTTPS. A sincronizaÃ§Ã£o do Electron **nÃ£o copia** o diretÃ³rio `web/` para o instalador: Ã© interface exclusiva do navegador, mantendo a tela desktop e o backend separados.

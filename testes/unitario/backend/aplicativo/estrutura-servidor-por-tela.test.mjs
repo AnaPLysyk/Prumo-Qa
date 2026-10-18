@@ -11,7 +11,7 @@ test('API HTTP obedece a arquitetura de backend por tela e nao mantém pasta de 
   for(const arquivo of [
     'backend/aplicativo/servidor/servidor.mjs',
     'backend/login/servidor/autenticacao.mjs',
-    'backend/login/servidor/recuperar-senha.html',
+    'frontend/login/web/recuperar-senha.html',
     'backend/login/servidor/migrar-autenticacao.mjs',
     'backend/suporte/servidor/chamados.mjs',
     'backend/suporte/servidor/github.mjs',
@@ -24,6 +24,7 @@ test('API HTTP obedece a arquitetura de backend por tela e nao mantém pasta de 
   assert.match(principal,/\.\.\/\.\.\/login\/servidor\/codigos\.mjs/);
   assert.match(principal,/\.\.\/\.\.\/suporte\/servidor\/chamados\.mjs/);
   const blueprint=fs.readFileSync(path.join(raiz,'render.yaml'),'utf8');
-  assert.ok(blueprint.includes('rootDir: backend/login/servidor'));
-  assert.ok(blueprint.includes('startCommand: node ../../aplicativo/servidor/servidor.mjs'));
+  assert.ok(!blueprint.includes('rootDir: servico-do-prumo'));
+  assert.ok(blueprint.includes('buildCommand: cd backend/login/servidor && npm ci --omit=dev'));
+  assert.ok(blueprint.includes('startCommand: node backend/aplicativo/servidor/servidor.mjs'));
 });

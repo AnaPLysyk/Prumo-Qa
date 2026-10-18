@@ -15,7 +15,7 @@ const lista = (base) => {
   return visitar(base).sort();
 };
 test('frontend: os mesmos arquivos e conteúdos do Electron, sem duplicatas editáveis', () => {
-  const arquivos = lista(origem).filter(arq => /\.(js|css|html)$/.test(arq) && !mapeadas.has(arq));
+  const arquivos = lista(origem).filter(arq => /\.(js|css|html)$/.test(arq) && !/(^|\/)web\//.test(arq) && !mapeadas.has(arq));
   assert.deepEqual(lista(copia).filter(arq => /\.(js|css|html)$/.test(arq)), arquivos, 'Cópia de execução deve ter os mesmos arquivos distribuíveis da fonte oficial');
   assert.ok(lista(copia).every(arq => !arq.endsWith('.md')), 'Documentação de desenvolvimento não deve ser distribuída como tela');
   for (const arq of arquivos) assert.deepEqual(
