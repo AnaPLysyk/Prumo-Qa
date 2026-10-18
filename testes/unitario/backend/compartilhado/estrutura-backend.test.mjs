@@ -106,12 +106,19 @@ test('backend: cada canal da janela (IPC) é atendido por um arquivo api/ com o 
   assert.deepEqual(problemas, []);
 });
 
-test('backend: o LEIA-ME de cada tela está igual ao código (rode npm run leia-me)', async () => {
-  const { gerarLeiaMe } = await import('../../../../ferramentas/documentacao/gerar-leia-me-backend.mjs');
+test('backend: Documentação Viva corresponde ao catálogo de telas e canais IPC', async () => {
+  const { telas, papeis, gerarArquivosDosCanais } = await import('../../../../ferramentas/documentacao/catalogo-documentacao-viva.mjs');
   const problemas = [];
-  for (const [arq, texto] of gerarLeiaMe()) {
-    if (texto.includes('(sem explicação)')) problemas.push(`${arq}: pasta sem explicação em ferramentas/documentacao/gerar-leia-me-backend.mjs`);
-    if (!fs.existsSync(arq) || fs.readFileSync(arq, 'utf8').split('\r').join('') !== texto) problemas.push(`${arq}: desatualizado`);
+  for (const nome of fs.readdirSync('backend', { withFileTypes: true }).filter(f=>f.isDirectory()).map(f=>f.name)) {
+    if (!telas[nome]) problemas.push('sem descrição na Documentação Viva: backend/'+nome);
   }
+  for (const [papel, descricao] of Object.entries(papeis)) {
+    if (!descricao || descricao.includes('(sem explicação)')) problemas.push('papel sem explicação: '+papel);
+  }
+  const arquivo='backend/aplicativo/api/arquivosDosCanais.ts';
+  if(fs.readFileSync(arquivo,'utf8').replaceAll('\r','')!==gerarArquivosDosCanais().replaceAll('\r',''))
+    problemas.push('catálogo de canais IPC desatualizado');
+  const fonte=fs.readdirSync('backend', {recursive:true}).map(String).filter(n=>/(^|[\/])(LEIA-ME|README)[^\/]*\.md$/i.test(n)&&!n.split(/[\/]/).includes('node_modules'));
+  problemas.push(...fonte.map(n=>'documentação duplicada em backend: '+n));
   assert.deepEqual(problemas, []);
 });

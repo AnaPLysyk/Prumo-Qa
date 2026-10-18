@@ -25,7 +25,7 @@ services:
       - path: /*
         name: Content-Security-Policy
         value: "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action https://github.com"
-  # Serviço do Prumo: códigos de confirmação por e-mail e chamados de suporte (sem GitHub para quem abre). Ver backend/aplicativo/servidor/LEIA-ME.md.
+  # Serviço do Prumo: códigos de confirmação por e-mail e chamados de suporte (sem GitHub para quem abre). Ver Documentação Viva e docs/ajuda/21-acesso-e-permissoes.md.
   - type: web
     runtime: node
     name: prumo-qa-servico

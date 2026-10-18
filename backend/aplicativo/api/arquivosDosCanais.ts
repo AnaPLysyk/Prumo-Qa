@@ -1,4 +1,4 @@
-/** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado por npm run leia-me; não edite à mão. */
+/** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado pelo catálogo da Documentação Viva; não edite à mão. */
 export const arquivosDosCanais: Record<string, string> = {
   'acesso:configuracao': 'backend/administracao/api/acessoConfiguracao.ts > configuracaoDeAcesso',
   'acesso:github': 'backend/administracao/api/acessoGithub.ts > salvarEntradaDoProvedor',

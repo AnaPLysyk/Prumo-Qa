@@ -1,9 +1,7 @@
-// Gera backend/LEIA-ME.md e backend/<tela>/LEIA-ME.md a partir da primeira linha de cada arquivo.
-// Rode com: npm run leia-me. Um teste compara o resultado com os arquivos gravados, então o LEIA-ME nunca fica velho.
+/** Catálogo da Documentação Viva: telas, responsabilidades e canais IPC, sem duplicar arquivos de leitura. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-
+import {pathToFileURL} from 'node:url';
 const raiz = 'backend';
 export const telas = {
   contas: 'Contas: cadastro e autenticação online, recuperação por e-mail e administração de acessos; profissão não concede privilégio.',
@@ -60,45 +58,9 @@ export const papeis = {
   conversas: 'Conversas antigas do chat (até a 2.9).',
   servidor: 'Rotas HTTP desta área que rodam no Render; login e suporte continuam nas suas próprias pastas. Diferente dos canais IPC do Electron.',
 };
-const primeiraLinha = (arq) => {
-  const linhas = fs.readFileSync(arq, 'utf8').split(/\r?\n/);
-  const p = linhas[0].startsWith('#!') ? linhas[1] : linhas[0];
-  const inline = /^\/\*\* (.*) \*\/$/.exec(p ?? '');
-  if (inline) return inline[1];
-  if (p?.startsWith('/**')) return (p.slice(3).trim() || linhas[1]?.replace(/^\s*\*\s*/, '').trim() || '(sem descrição)').replace(/\*\/$/, '').trim();
-  if (p?.startsWith('//')) return p.replace(/^\/\/\s*/, '').trim();
-  if (arq.endsWith('.html')) return 'Página de recuperação de acesso mostrada no navegador.';
-  return '(sem descrição)';
-};
-const tabela = (pasta, incluirServidor = false) => {
-  const arqs = fs.readdirSync(pasta).filter((n) => n.endsWith('.ts') || (incluirServidor && /\.(mjs|js|html)$/.test(n))).sort((a, b) => a.localeCompare(b));
-  return ['| Arquivo | O que faz |', '| --- | --- |', ...arqs.map((n) => `| \`${n}\` | ${primeiraLinha(path.join(pasta, n)).replaceAll('|', '\\|')} |`)].join('\n');
-};
-
-export function gerarLeiaMe() {
-  const saida = new Map();
-  const pastasTela = fs.readdirSync(raiz, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
-  const indice = ['# Backend do Prumo QA', '', 'Arquivo gerado por `npm run leia-me` a partir da primeira linha de cada arquivo. Não edite à mão.', '',
-    'As pastas correspondentes a telas visíveis também existem em `frontend/`; módulos internos, como aplicativo e terminal, não precisam ter uma tela própria. Dentro das pastas: `api/` recebe os pedidos da janela (IPC), `regras/` decide, `banco/` lê e grava os dados, `integracoes/` conversa com sistemas externos, `tipos/` descreve formatos e `servidor/` contém rotas HTTP do Render associadas àquela tela.', '',
-    '## Portas de entrada', '', '| Arquivo | O que faz |', '| --- | --- |',
-    ...['aplicativo.ts', 'cli.ts', 'mcp.ts'].map((n) => `| \`${n}\` | ${primeiraLinha(path.join(raiz, n))} |`), '',
-    '## Telas', '', '| Pasta | Para que serve |', '| --- | --- |', ...pastasTela.map((t) => `| [\`${t}/\`](${t}/LEIA-ME.md) | ${telas[t] ?? '(sem explicação)'} |`), ''];
-  saida.set(path.join(raiz, 'LEIA-ME.md'), indice.join('\n'));
-  for (const t of pastasTela) {
-    const dir = path.join(raiz, t); const linhas = [`# ${t} — backend`, '', telas[t] ?? '(sem explicação)', '', 'Arquivo gerado por `npm run leia-me`. Não edite à mão.', ''];
-    const soltos = fs.readdirSync(dir).filter((n) => n.endsWith('.ts'));
-    if (soltos.length) linhas.push('## Nesta pasta', '', tabela(dir), '');
-    for (const sub of fs.readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort()) {
-      linhas.push(`## ${sub}/`, '', papeis[sub] ?? '(sem explicação)', '', tabela(path.join(dir, sub), sub === 'servidor'), '');
-    }
-    saida.set(path.join(dir, 'LEIA-ME.md'), linhas.join('\n'));
-  }
-  saida.set(path.join(raiz, 'aplicativo', 'api', 'arquivosDosCanais.ts'), arquivosDosCanais());
-  return saida;
-}
 
 /** Para cada canal da janela: o arquivo api/ que o atende e as funções do backend que ele chama (lidas dos imports). */
-function arquivosDosCanais() {
+export function gerarArquivosDosCanais() {
   const linhas = [];
   for (const rel of fs.readdirSync(raiz, { recursive: true }).map(String).filter((n) => /[\\/]api[\\/][^\\/]+\.ts$/.test(n) && !n.split(/[\\/]/).includes('node_modules'))) {
     const arq = path.join(raiz, rel).split(path.sep).join('/'); const texto = fs.readFileSync(arq, 'utf8');
@@ -107,10 +69,12 @@ function arquivosDosCanais() {
     linhas.push([canal, `  '${canal}': '${arq}${chamadas.length ? ' > ' + chamadas.join(', ') : ''}',`]);
   }
   linhas.sort((a, b) => a[0].localeCompare(b[0]));
-  return '/** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado por npm run leia-me; não edite à mão. */\nexport const arquivosDosCanais: Record<string, string> = {\n' + linhas.map((l) => l[1]).join('\n') + '\n};\n';
+  return '/** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado pelo catálogo da Documentação Viva; não edite à mão. */\nexport const arquivosDosCanais: Record<string, string> = {\n' + linhas.map((l) => l[1]).join('\n') + '\n};\n';
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  for (const [arq, texto] of gerarLeiaMe()) fs.writeFileSync(arq, texto);
-  console.log("LEIA-ME do backend e arquivosDosCanais.ts atualizados.");
+
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
+  const destino=path.join(raiz,'aplicativo','api','arquivosDosCanais.ts');
+  fs.writeFileSync(destino,gerarArquivosDosCanais());
+  console.log('Catálogo de canais da Documentação Viva atualizado.');
 }

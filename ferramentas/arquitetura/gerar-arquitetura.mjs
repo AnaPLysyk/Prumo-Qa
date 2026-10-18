@@ -8,7 +8,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import { telas, papeis } from '../documentacao/gerar-leia-me-backend.mjs';
+import { telas, papeis } from '../documentacao/catalogo-documentacao-viva.mjs';
 
 const raizRepo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const pastasLidas = /^(frontend|backend|src|app|scripts|ferramentas|site|skills|testes)\//;
