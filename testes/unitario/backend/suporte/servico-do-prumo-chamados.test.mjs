@@ -1,13 +1,13 @@
-// Segurança dos chamados no serviço do Prumo (servico-do-prumo/chamados.mjs), em 127.0.0.1 com um repositório em memória no lugar do GitHub.
+// Segurança dos chamados no serviço do Prumo (backend/suporte/servidor/chamados.mjs), em 127.0.0.1 com um repositório em memória no lugar do GitHub.
 // Nada sai do computador. Cobre: formato do pedido, injeção no texto, chave do chamado, anexo disfarçado, tamanho, prazo, chave de administração,
 // força bruta, limites, isolamento entre chamados e o que vai para os registros.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import { createHash } from 'node:crypto';
-import { criarServico } from '../../../../servico-do-prumo/servidor.mjs';
-import { lerChamado, assinaturaConfere } from '../../../../servico-do-prumo/chamados.mjs';
-import { clienteDoGitHub } from '../../../../servico-do-prumo/github.mjs';
+import { criarServico } from '../../../../backend/aplicativo/servidor/servidor.mjs';
+import { lerChamado, assinaturaConfere } from '../../../../backend/suporte/servidor/chamados.mjs';
+import { clienteDoGitHub } from '../../../../backend/suporte/servidor/github.mjs';
 import { repositorioDeSuporteFalso } from '../../../apoio/repositorio-de-suporte-falso.mjs';
 
 const ADMIN = 'chave-de-administracao-com-mais-de-32-caracteres-xyz';
@@ -166,7 +166,7 @@ test('cliente do GitHub: só o repositório configurado, cabeçalhos certos, tok
 });
 
 test('IP do pedido: vale o que o proxy acrescentou (último do X-Forwarded-For), não o que o cliente inventou no começo', async () => {
-  const { ipDe } = await import('../../../../servico-do-prumo/comum.mjs');
+  const { ipDe } = await import('../../../../backend/compartilhado/servidor/comum.mjs');
   const req = (h, remoto = '10.0.0.1') => ({ headers: h, socket: { remoteAddress: remoto } });
   assert.equal(ipDe(req({ 'x-forwarded-for': '1.2.3.4, 203.0.113.9' })), '203.0.113.9', 'o primeiro item é do cliente');
   assert.equal(ipDe(req({ 'x-forwarded-for': '1.2.3.4, 5.6.7.8, 203.0.113.9' })), '203.0.113.9');

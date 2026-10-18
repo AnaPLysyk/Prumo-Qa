@@ -1,16 +1,16 @@
 /**
  * Serviço do Prumo QA (Render): manda os códigos de confirmação por e-mail (Resend) e recebe os chamados de suporte (repositório
- * privado no GitHub). Sem dependências e sem banco. Chaves e tokens ficam só nas variáveis do serviço, nunca no aplicativo distribuído.
+ * privado no GitHub). O módulo remoto de login usa Better Auth e PostgreSQL. Chaves e tokens ficam apenas no Render, nunca no instalador.
  */
 import http from 'node:http';
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { criarLimitador, responder } from './comum.mjs';
-import { LIMITES, enviarPeloResend, rotaDeCodigos } from './codigos.mjs';
-import { LIMITES_DE_CHAMADOS, rotaDeChamados } from './chamados.mjs';
-import { clienteDoGitHub } from './github.mjs';
+import { criarLimitador, responder } from '../../compartilhado/servidor/comum.mjs';
+import { LIMITES, enviarPeloResend, rotaDeCodigos } from '../../login/servidor/codigos.mjs';
+import { LIMITES_DE_CHAMADOS, rotaDeChamados } from '../../suporte/servidor/chamados.mjs';
+import { clienteDoGitHub } from '../../suporte/servidor/github.mjs';
 
-export { mensagem, enviarPeloResend } from './codigos.mjs';
+export { mensagem, enviarPeloResend } from '../../login/servidor/codigos.mjs';
 
 /**
  * Cria o atendimento HTTP. `enviar` (Resend) e `suporte.github` são injetados: os testes usam uma caixa e um repositório em memória.
@@ -47,7 +47,7 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
           'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
           'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
         });
-        return res.end(fs.readFileSync(new URL('./'+nome,import.meta.url)));
+        return res.end(fs.readFileSync(new URL('../../login/servidor/'+nome,import.meta.url)));
       }
       if (caminho === '/v1/codigos') return await codigos(req, res);
       if (caminho.startsWith('/v1/chamados') || caminho.startsWith('/v1/admin/')) return await chamados(req, res, caminho, url.searchParams);
@@ -68,7 +68,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   // Não inicia login parcial: se alguma variável de autenticação existir, exige todas.
   let autenticacao=null;
   if(env.DATABASE_URL || env.BETTER_AUTH_SECRET || env.BETTER_AUTH_URL){
-    const {criarAutenticacao}=await import('./autenticacao.mjs');
+    const {criarAutenticacao}=await import('../../login/servidor/autenticacao.mjs');
     autenticacao=criarAutenticacao({env});
   }
   const porta = Number(env.PORT) || 10000;

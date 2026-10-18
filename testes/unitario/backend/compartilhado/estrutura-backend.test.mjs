@@ -12,7 +12,9 @@ const apoio = ['aplicativo', 'terminal', 'compartilhado'];
 const entradas = ['aplicativo.ts', 'cli.ts', 'mcp.ts'];
 // Tabela única de dados de propósito: o catálogo reúne todos os canais e ferramentas num só lugar.
 const tabelas = ['backend/aplicativo/api/catalogoDeContratos.ts'];
-const arquivos = fs.readdirSync(raiz, { recursive: true }).map(String).filter((n) => n.endsWith('.ts')).map((n) => path.join(raiz, n).split(path.sep).join('/')).sort();
+const arquivos = fs.readdirSync(raiz, { recursive: true }).map(String)
+  .filter((n) => n.endsWith('.ts') && !n.split(/[\\/]/).includes('node_modules'))
+  .map((n) => path.join(raiz, n).split(path.sep).join('/')).sort();
 const ehEntrada = (a) => entradas.includes(path.relative(raiz, a));
 
 function declaracoes(arquivo) {

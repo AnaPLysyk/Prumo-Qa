@@ -1,8 +1,8 @@
-// Serviço do Prumo, rota dos códigos (servico-do-prumo/servidor.mjs) em 127.0.0.1 com uma caixa em memória no lugar do Resend: nada sai do computador.
+// Serviço do Prumo, rota dos códigos (backend/aplicativo/servidor/servidor.mjs) em 127.0.0.1 com uma caixa em memória no lugar do Resend: nada sai do computador.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { criarServico, enviarPeloResend, mensagem } from '../../../../servico-do-prumo/servidor.mjs';
+import { criarServico, enviarPeloResend, mensagem } from '../../../../backend/aplicativo/servidor/servidor.mjs';
 
 async function subir(t, opcoes = {}) {
   const caixa = []; const registros = []; let agora = Date.parse('2026-10-16T12:00:00Z');

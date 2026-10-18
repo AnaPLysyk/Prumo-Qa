@@ -2,7 +2,7 @@
 
 Arquivo gerado por `npm run leia-me` a partir da primeira linha de cada arquivo. Não edite à mão.
 
-As pastas correspondentes a telas visíveis também existem em `frontend/`; módulos internos, como aplicativo e terminal, não precisam ter uma tela própria. Dentro das pastas: `api/` recebe os pedidos da janela, `regras/` decide, `banco/` lê e grava os dados deste computador, `integracoes/` fala com serviços de fora e `tipos/` descreve o formato dos dados.
+As pastas correspondentes a telas visíveis também existem em `frontend/`; módulos internos, como aplicativo e terminal, não precisam ter uma tela própria. Dentro das pastas: `api/` recebe os pedidos da janela (IPC), `regras/` decide, `banco/` lê e grava os dados, `integracoes/` conversa com sistemas externos, `tipos/` descreve formatos e `servidor/` contém rotas HTTP do Render associadas àquela tela.
 
 ## Portas de entrada
 

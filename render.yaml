@@ -25,16 +25,16 @@ services:
       - path: /*
         name: Content-Security-Policy
         value: "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action https://github.com"
-  # Serviço do Prumo: códigos de confirmação por e-mail e chamados de suporte (sem GitHub para quem abre). Ver servico-do-prumo/LEIA-ME.md.
+  # Serviço do Prumo: códigos de confirmação por e-mail e chamados de suporte (sem GitHub para quem abre). Ver backend/aplicativo/servidor/LEIA-ME.md.
   - type: web
     runtime: node
     name: prumo-qa-servico
     plan: free
     repo: https://github.com/AnaPLysyk/Prumo-Qa
     branch: main
-    rootDir: servico-do-prumo
+    rootDir: backend/login/servidor
     buildCommand: npm ci --omit=dev
-    startCommand: node servidor.mjs
+    startCommand: node ../../aplicativo/servidor/servidor.mjs
     healthCheckPath: /saude
     autoDeployTrigger: "off"
     envVars:

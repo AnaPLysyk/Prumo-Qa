@@ -9,7 +9,7 @@
  * - Anexo só com tipo permitido, tamanho declarado e assinatura do arquivo conferida (extensão trocada não passa).
  */
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
-import { EMAIL, ipDe, lerCorpo, lerObjeto, responder, textoLimpo } from './comum.mjs';
+import { EMAIL, ipDe, lerCorpo, lerObjeto, responder, textoLimpo } from '../../compartilhado/servidor/comum.mjs';
 
 export const CATEGORIAS = { bug: 'Bug', melhoria: 'Melhoria', sugestao: 'Sugestão' };
 export const ESTADOS = ['NOVO', 'EM_ANALISE', 'RESOLVIDO', 'FECHADO'];

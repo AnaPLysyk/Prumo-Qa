@@ -47,7 +47,7 @@ Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereç
 
 | Arquivo | O que faz |
 | --- | --- |
-| `servicoDoPrumo.ts` | Endereço do serviço do Prumo (servico-do-prumo/ no Render), que manda os códigos por e-mail e recebe os chamados de suporte, e a chamada HTTP até ele. |
+| `servicoDoPrumo.ts` | Endereço do serviço do Prumo (backend/aplicativo/servidor/ no Render), que manda os códigos por e-mail e recebe os chamados de suporte, e a chamada HTTP até ele. |
 
 ## projeto/
 
@@ -76,6 +76,14 @@ Proteções usadas por todas as telas: caminhos seguros, sem atalhos, segredos m
 | `semLinks.ts` | Recusa caminhos que passam por atalhos (links simbólicos ou junctions) em qualquer pasta do caminho. |
 | `sensivel.ts` | Diz se um caminho aponta para algo que nunca deve ser lido: senhas, chaves, .env, .git, node_modules, builds. |
 | `validarRelativo.ts` | Recusa caminhos absolutos, com "..", unidades de disco ou caracteres de controle: o caminho tem de ficar dentro da pasta do projeto. |
+
+## servidor/
+
+Rotas HTTP desta área que rodam no Render; login e suporte continuam nas suas próprias pastas. Diferente dos canais IPC do Electron.
+
+| Arquivo | O que faz |
+| --- | --- |
+| `comum.mjs` | Peças comuns do serviço do Prumo: resposta JSON, leitura do corpo com limite, IP de quem pediu, máscara de e-mail e limites por janela de tempo. |
 
 ## texto/
 

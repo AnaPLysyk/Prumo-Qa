@@ -56,6 +56,15 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `resumoDoDiagnosticoParaRelato.ts` | Resume os 20 últimos registros do diagnóstico da janela para anexar ao relato, se a pessoa marcar. |
 | `revisarPrivacidadeDoRelato.ts` | Procura no relato segredos (bloqueiam) e dados pessoais ou caminhos locais (avisam), sem repetir o segredo. |
 
+## servidor/
+
+Rotas HTTP desta área que rodam no Render; login e suporte continuam nas suas próprias pastas. Diferente dos canais IPC do Electron.
+
+| Arquivo | O que faz |
+| --- | --- |
+| `chamados.mjs` | Rotas dos chamados de suporte. Quem abre não precisa de conta no GitHub: o serviço grava cada chamado como issue no |
+| `github.mjs` | Cliente do GitHub usado só pelo serviço, só no repositório PRIVADO dos chamados (PRUMO_SUPORTE_REPOSITORIO), com um token |
+
 ## tipos/
 
 Formato dos dados, listas fixas e limites. Não tem funções.

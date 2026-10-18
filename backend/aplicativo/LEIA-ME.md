@@ -61,6 +61,14 @@ A janela do aplicativo e a confirmação nativa do Windows.
 | `navegarPara.ts` | Pede à janela que abra uma tela (ex.: Execuções) e mostra a janela. |
 | `usuarioDoWindows.ts` | Nome do usuário do Windows, lido aqui (nunca informado pela página), usado como aprovador. |
 
+## servidor/
+
+Rotas HTTP desta área que rodam no Render; login e suporte continuam nas suas próprias pastas. Diferente dos canais IPC do Electron.
+
+| Arquivo | O que faz |
+| --- | --- |
+| `servidor.mjs` | Serviço do Prumo QA (Render): manda os códigos de confirmação por e-mail (Resend) e recebe os chamados de suporte (repositório |
+
 ## tipos/
 
 Formato dos dados, listas fixas e limites. Não tem funções.

@@ -61,6 +61,19 @@ O que a tela decide: validações, cálculos e os passos de cada ação.
 | `senhas.ts` | Resume senhas com scrypt e sal próprio, confere em tempo constante e exige senha mínima. |
 | `sessao.ts` | Sessão de quem entrou no Prumo: fica só na memória do processo principal e termina ao sair, ao fechar o Prumo ou por inatividade. |
 
+## servidor/
+
+Rotas HTTP desta área que rodam no Render; login e suporte continuam nas suas próprias pastas. Diferente dos canais IPC do Electron.
+
+| Arquivo | O que faz |
+| --- | --- |
+| `autenticacao.mjs` | Identidade global do Prumo: Better Auth e PostgreSQL, somente no processo Node do Render. |
+| `auth.config.mjs` | Configuração para o CLI do Better Auth gerar/migrar tabelas. Só use com DATABASE_URL de desenvolvimento. |
+| `codigos.mjs` | Rota dos códigos por e-mail: recebe do aplicativo um código de 6 dígitos e o manda ao e-mail informado, pelo Resend. |
+| `migrar-autenticacao.mjs` | Migração controlada do esquema do Better Auth. Execute SOMENTE no serviço DEV, |
+| `recuperar-senha.html` | Página de recuperação de acesso mostrada no navegador. |
+| `recuperar-senha.js` | (sem descrição) |
+
 ## tipos/
 
 Formato dos dados, listas fixas e limites. Não tem funções.
