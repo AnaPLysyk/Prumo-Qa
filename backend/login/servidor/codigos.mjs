@@ -56,7 +56,7 @@ export function rotaDeCodigos({ enviar, configurado, limites = LIMITES, limitado
     // Conta antes de enviar: falha do provedor também consome a cota, para ninguém martelar o serviço.
     limitador.marcar(janelas);
     try { await enviar({ para: pedido.email, ...mensagem(pedido) }); }
-    catch (e) { registrar('falha ao enviar para ' + mascarar(pedido.email) + ': ' + String(e?.message || e).slice(0, 200)); return responder(res, 502, { erro: 'EMAIL_SEND_FAILED' }); }
+    catch { registrar('EMAIL_SEND_FAILED: ' + mascarar(pedido.email)); return responder(res, 502, { erro: 'EMAIL_SEND_FAILED' }); }
     registrar('código de ' + pedido.finalidade + ' enviado para ' + mascarar(pedido.email));
     responder(res, 202, { enviado: true });
   };

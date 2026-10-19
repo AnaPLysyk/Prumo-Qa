@@ -98,7 +98,7 @@ const resumoDoChamado = (issue, b) => ({ numero: issue.number, titulo: b.dados.t
 /** Todas as rotas de chamados. `github` é injetado: os testes usam um repositório em memória e nunca falam com o GitHub. */
 export function rotaDeChamados({ github, configurado, chaveAdmin, limites = LIMITES_DE_CHAMADOS, limitador, registrar, agora = () => Date.now() }) {
   const adminPronto = typeof chaveAdmin === 'string' && chaveAdmin.length >= 32;
-  const falhaDoGitHub = (res, e) => { registrar('falha ao falar com o GitHub: ' + String(e?.message || e).slice(0, 120)); responder(res, 502, { erro: 'SUPPORT_UPSTREAM_FAILED' }); };
+  const falhaDoGitHub = (res) => { registrar('SUPPORT_UPSTREAM_FAILED'); responder(res, 502, { erro: 'SUPPORT_UPSTREAM_FAILED' }); };
   const naoExiste = (res) => responder(res, 404, { erro: 'TICKET_NOT_FOUND' });
   /** Chamado com a chave da pessoa; chave errada e chamado inexistente respondem igual. */
   const comChave = async (req, n) => { const chave = String(req.headers['x-prumo-chamado'] || ''); if (chave.length < 20 || chave.length > 100) return null; const issue = await github.lerIssue(n); const b = lerDoIssue(issue); return b && iguais(b.chave, resumo(chave)) ? { issue, b } : null; };
