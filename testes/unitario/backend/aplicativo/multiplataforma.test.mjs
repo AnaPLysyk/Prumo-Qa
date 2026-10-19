@@ -40,9 +40,9 @@ test('cofre: Linux sem cofre real (basic_text) é recusado; Windows e macOS depe
 test('pasta de dados: Windows em LOCALAPPDATA, macOS em Application Support, Linux em XDG; PRUMO_DATA_DIR sempre vence', () => {
   assert.equal(diretorioDados(process.platform === 'win32' ? 'C:\\dados-prumo' : '/tmp/dados-prumo'), process.platform === 'win32' ? 'C:\\dados-prumo' : '/tmp/dados-prumo');
   const padrao = diretorioDados(undefined);
-  if (process.platform === 'darwin') assert.match(padrao, /Library[\\/]Application Support[\\/]PrumoQA$/);
-  else if (process.platform === 'linux') assert.match(padrao, /prumo-qa$/);
-  else assert.match(padrao, /PrumoQA$/);
+  if (process.platform === 'darwin') assert.match(padrao, /Library[\\/]Application Support[\\/]PrumoQA[\\/]usuarios[\\/]sem-sessao$/);
+  else if (process.platform === 'linux') assert.match(padrao, /prumo-qa[\\/]usuarios[\\/]sem-sessao$/);
+  else assert.match(padrao, /PrumoQA[\\/]usuarios[\\/]sem-sessao$/);
 });
 
 test('iniciar com o sistema: Windows e macOS usam o item de login; Linux grava e remove o atalho de autostart', async () => {

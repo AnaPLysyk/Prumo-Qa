@@ -131,5 +131,6 @@ export function importarProjetosQase(c: ContextoDosServicos) {
     if (!conta) throw new Error('SERVICE_NOT_FOUND');
     return prever(c.cofre.ler(conta.id));
   }
-  return { prever, preverConta, importar, cancelar: (previaId: string) => { limpar(previaId); return { cancelada: true }; } };
+  return { prever, preverConta, importar, cancelar: (previaId: string) => { limpar(previaId); return { cancelada: true }; },
+    limparTodas: () => { for (const id of previas.keys()) limpar(id); } };
 }
