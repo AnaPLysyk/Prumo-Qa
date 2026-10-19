@@ -7,7 +7,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node ../../aplicativo/servidor/servidor.mjs", "auth:migrar": "node migrar-autenticacao.mjs"
+    "start": "node ../../aplicativo/servidor/servidor.mjs",
+    "auth:migrar": "node migrar-autenticacao.mjs",
+    "auth:migrar:prod": "node migrar-autenticacao-producao.mjs"
   },
   "dependencies": {
     "better-auth": "1.7.10",
