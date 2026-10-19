@@ -173,3 +173,14 @@ test('IP do pedido: vale o que o proxy acrescentou (último do X-Forwarded-For),
   assert.equal(ipDe(req({ 'cf-connecting-ip': '198.51.100.7', 'x-forwarded-for': '1.2.3.4' })), '198.51.100.7');
   assert.equal(ipDe(req({})), '10.0.0.1');
 });
+
+test('falha do GitHub jamais registra token de integração', async t => {
+  const s=await subir(t);
+  const segredo='ghp_TOKEN_FICTICIO_123';
+  s.repo.criarIssue=async()=>{throw new Error('Authorization Bearer '+segredo);};
+  const resposta=await s.abrir();
+  assert.equal(resposta.status,502);
+  assert.deepEqual(resposta.corpo,{erro:'SUPPORT_UPSTREAM_FAILED'});
+  assert.deepEqual(s.registros,['SUPPORT_UPSTREAM_FAILED']);
+  assert.doesNotMatch(JSON.stringify({logs:s.registros,body:resposta.corpo}),/ghp_TOKEN_FICTICIO_123/);
+});
