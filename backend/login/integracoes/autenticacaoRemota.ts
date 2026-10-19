@@ -3,6 +3,7 @@ import {encerrarSessao} from '../regras/sessao.js';
 
 let cookieSessao:string|null=null;
 let proximaConferencia=0;
+let loginEmAndamento=false;
 import { enderecoDeAutenticacao, usarAutenticacaoRemota } from './configuracaoDaAutenticacao.js';
 export { enderecoDeAutenticacao, usarAutenticacaoRemota } from './configuracaoDaAutenticacao.js';
 function obrigatorio(){const u=enderecoDeAutenticacao();if(!u)throw new Error('IDENTITY_NOT_CONFIGURED');return u;}
@@ -41,17 +42,24 @@ function confirmarUsuario(valor:any):UsuarioRemoto{
   return {id:u.id,email:u.email.toLowerCase(),name:String(u.name||'Pessoa Prumo'),emailVerified:true};
 }
 export async function entrarRemotamente(email:string,senha:string){
+  if(loginEmAndamento)throw new Error('LOGIN_IN_PROGRESS');
   if(typeof senha!=='string'||senha.length<10)throw new Error('LOGIN_INVALID');
-  cookieSessao=null;proximaConferencia=0;encerrarSessao();
+  // Um único login por processo evita cruzar o cookie de duas identidades
+  // enquanto os pedidos HTTP assíncronos ainda estão em andamento.
+  loginEmAndamento=true;
   try {
-    await chamar('/api/auth/sign-in/email',{email:email.trim().toLowerCase(),password:senha,rememberMe:false});
-    if(!cookieSessao)throw new Error('IDENTITY_INVALID');
-    return confirmarUsuario(await chamar('/api/auth/get-session',undefined,true));
-  } catch(erro) {
-    // O servidor pode emitir cookie antes de confirmar e-mail ou expiração.
-    // Se a segunda verificação falhar, revogar também a sessão remota.
-    await sairRemotamente();
-    throw erro;
+    cookieSessao=null;proximaConferencia=0;encerrarSessao();
+    try {
+      await chamar('/api/auth/sign-in/email',{email:email.trim().toLowerCase(),password:senha,rememberMe:false});
+      if(!cookieSessao)throw new Error('IDENTITY_INVALID');
+      return confirmarUsuario(await chamar('/api/auth/get-session',undefined,true));
+    } catch(erro) {
+      // Uma conta não confirmada ou falha de rede não pode reter sessão.
+      await sairRemotamente();
+      throw erro;
+    }
+  } finally {
+    loginEmAndamento=false;
   }
 }
 export async function cadastrarRemotamente(nome:string,email:string,senha:string){
