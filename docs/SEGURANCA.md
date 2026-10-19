@@ -21,6 +21,15 @@ A migração de produção **não é automática**. A partir do backend remoto, 
 
 O PostgreSQL gratuito do Render informa exclusão em 12/11/2026, salvo atualização do plano. Não usar essa instância como armazenamento definitivo de contas reais sem uma solução de continuidade/backup.
 
+## Preparação do login social central (GitHub e Google)
+
+O servidor Better Auth aceita GitHub e Google como **provedores de identidade**, sem confundir essa autorização com as conexões de repositórios realizadas depois do login. Cada provedor só é habilitado se tiver **Client ID e Client Secret**, configurados exclusivamente no Render:
+
+- GitHub: `GITHUB_CLIENT_ID` e `GITHUB_CLIENT_SECRET`. Callback HTTPS no OAuth App: `https://prumo-qa-servico.onrender.com/api/auth/callback/github`. Escopos de perfil e e-mail, **sem** `repo`.
+- Google: `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`. URI de redirecionamento autorizada: `https://prumo-qa-servico.onrender.com/api/auth/callback/google`.
+
+Um par incompleto não habilita o provedor nem altera o acesso por e-mail. O próprio login social **não está habilitado na interface Electron remota** até existir e ser testado o retorno seguro navegador → aplicativo, com verificação de estado, PKCE, proteção contra sessão trocada e vínculo explícito de contas antigas. A implementação de OAuth local legado é separada e não deve receber credenciais do Better Auth. Não adicionar Client Secrets ao instalador ou ao Git.
+
 ## Em poucas palavras
 
 O Prumo limita o que pode ler e executar, pede confirmação do sistema para ações protegidas e guarda tokens no cofre do sistema quando há suporte. O login central foi projetado para separar contas do Prumo, mas não é uma barreira de segurança entre pessoas que compartilham a mesma conta do sistema operacional. Os testes automatizados não comprovam uma autenticação humana real, e o Prumo não é uma sandbox: comandos e dependências do próprio projeto ainda precisam ser confiáveis. O instalador não tem assinatura digital; confira o SHA-256, sabendo que ele não confirma quem criou o arquivo.
