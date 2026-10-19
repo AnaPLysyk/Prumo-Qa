@@ -16,7 +16,7 @@ A migração de produção **não é automática**. A partir do backend remoto, 
 
 1. Executar `npm run auth:migrar:prod` com as variáveis do ambiente de produção para consultar a quantidade de alterações, sem gravar nada.
 2. Revisar o preview, confirmar backup recuperável e autorizar explicitamente `PRUMO_APROVAR_MIGRACAO_PROD=SIM`, `PRUMO_BACKUP_CONFIRMADO=SIM`, `PRUMO_CREDENCIAL_ROTACIONADA=SIM` **somente no processo manual de migração**, não como variáveis permanentes do servidor.
-3. Executar `npm run auth:migrar:prod` novamente e conferir `/saude/autenticacao` (HTTP 200). O endpoint verifica conexão **e** tabelas `user`, `session`, `account` e `verification`. Antes disso, 503 é o estado seguro.
+3. Executar `npm run auth:migrar:prod` novamente e conferir `/saude/autenticacao` (HTTP 200). O endpoint verifica conexão **e** tabelas `user`, `session`, `account`, `verification` e `rateLimit` (usada para limitar tentativas por banco). Antes disso, 503 é o estado seguro.
 4. Validar cadastro, confirmação de e-mail, login, logout e recuperação de senha em uma conta de teste, sem publicar senhas ou tokens.
 
 O PostgreSQL gratuito do Render informa exclusão em 12/11/2026, salvo atualização do plano. Não usar essa instância como armazenamento definitivo de contas reais sem uma solução de continuidade/backup.
