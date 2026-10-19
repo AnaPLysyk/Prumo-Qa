@@ -52,8 +52,10 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
       if (caminho === '/v1/codigos') return await codigos(req, res);
       if (caminho.startsWith('/v1/chamados') || caminho.startsWith('/v1/admin/')) return await chamados(req, res, caminho, url.searchParams);
       return responder(res, 404, { erro: 'NOT_FOUND' });
-    } catch (e) {
-      registrar('erro inesperado: ' + String(e?.message || e).slice(0, 120));
+    } catch {
+      // Exceções de banco, OAuth ou e-mail podem incluir tokens e URLs privadas.
+      // Registre somente um código fixo; nunca copie mensagens externas para logs.
+      registrar('SERVER_UNEXPECTED_ERROR');
       if (!res.headersSent) responder(res, 500, { erro: 'INTERNAL' });
     }
   };
