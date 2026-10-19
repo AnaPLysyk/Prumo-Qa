@@ -8,7 +8,7 @@ import {entrarRemotamente,sairRemotamente} from '../../../../dist/login/integrac
 import {entrarComIdentidadeRemota} from '../../../../dist/login/regras/entrarComIdentidadeRemota.js';
 import {encerrarSessao} from '../../../../dist/login/regras/sessao.js';
 
-test('polling detecta sessão revogada no servidor e fecha a janela local', async t => {
+test('polling detecta sessão revogada no servidor e invalida sessão local', async t => {
   const authAnterior=process.env.PRUMO_AUTH_API_URL;
   const dadosAnteriores=process.env.PRUMO_DATA_DIR;
   const fetchAnterior=globalThis.fetch;
