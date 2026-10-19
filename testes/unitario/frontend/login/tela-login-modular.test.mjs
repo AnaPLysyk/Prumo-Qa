@@ -28,6 +28,10 @@ test('mensagens de login não expõem erro interno', () => {
   const m = carregar('frontend/login/mensagensDeEntrada.js').PrumoMensagensEntrada;
   assert.equal(m.codigoDo('SESSION_EXPIRED: expired'), 'SESSION_EXPIRED');
   assert.match(m.mensagemDaEntrada('LOGIN_INVALID: segredo'), /senha incorretos/);
+  assert.match(m.mensagemDaEntrada('LOGIN_IN_PROGRESS: pending'), /já está em andamento/);
+  assert.match(m.mensagemDaEntrada('LOGIN_IN_PROGRESS'), /já está em andamento/);
+  assert.match(m.mensagemDaEntrada('LOGIN_INVALID'), /senha incorretos/);
+  assert.equal(m.codigoDo('LOGIN_INVALID dados pessoais'), null, 'não interpretar erro livre como código');
   assert.doesNotMatch(m.mensagemDaEntrada('UNHANDLED: senha=teste e stack'), /stack|senha=teste/);
 });
 test('login remoto autentica, limpa o campo de senha e repassa sessão', async () => {
