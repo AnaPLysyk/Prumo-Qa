@@ -47,9 +47,11 @@ services:
         sync: false
       - key: PRUMO_SUPORTE_CHAVE_ADMIN
         generateValue: true
-      # Login central: banco existente do Render, sem senha no repositório.
+      # Banco existente no mesmo workspace e regiao: URL interna, sem senha no repositorio.
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: prumo-qa-contas-db
+          property: connectionString
       - key: BETTER_AUTH_URL
         value: https://prumo-qa-servico.onrender.com
       - key: BETTER_AUTH_SECRET
