@@ -8,7 +8,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { lerCopiaDeTrabalho, montarInstantaneo } from './gerar-arquitetura.mjs';
-import { telas as frasesDasTelas, papeis } from '../documentacao/gerar-leia-me-backend.mjs';
+import { telas as frasesDasTelas, papeis } from '../documentacao/catalogo-documentacao-viva.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const destino = path.join(raiz, 'dist', 'documentacao', 'mapa.json');

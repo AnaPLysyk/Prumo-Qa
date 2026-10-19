@@ -1,9 +1,9 @@
 import http from 'node:http';
-import { criarServico } from '../../servico-do-prumo/servidor.mjs';
+import { criarServico } from '../../backend/aplicativo/servidor/servidor.mjs';
 import { repositorioDeSuporteFalso } from './repositorio-de-suporte-falso.mjs';
 
 /**
- * Serviço do Prumo dos testes: o serviço real (servico-do-prumo/servidor.mjs) em 127.0.0.1, com o Resend trocado por uma caixa
+ * Serviço do Prumo dos testes: o serviço real (backend/aplicativo/servidor/servidor.mjs) em 127.0.0.1, com o Resend trocado por uma caixa
  * em memória e o GitHub por um repositório de chamados em memória. O aplicativo aponta para ele com PRUMO_SERVICO.
  * Não é um teste e nunca fala com a internet.
  */

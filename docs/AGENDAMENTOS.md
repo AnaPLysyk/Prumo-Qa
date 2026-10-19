@@ -13,7 +13,7 @@ Janela / bandeja  ->  agendamentos/api  ->  agendamentos/regras (quando)  ->  ag
                                                                                                                        ->  execucoes/integracoes (comentário Jira, opcional)
 ```
 
-Tudo é Node puro (sem Electron) e testado fora da janela. Só `backend/aplicativo.ts`, `backend/aplicativo/` e os arquivos `api/` que abrem diálogos conhecem Electron: janela, bandeja, diálogos e ciclo de vida. Todas as pastas abaixo ficam em `backend/` e têm `LEIA-ME.md`.
+Tudo é Node puro (sem Electron) e testado fora da janela. Só `backend/aplicativo.ts`, `backend/aplicativo/` e os arquivos `api/` que abrem diálogos conhecem Electron: janela, bandeja, diálogos e ciclo de vida. Todas as pastas abaixo ficam em `backend/` e podem ser consultadas pela Documentação Viva.
 
 | Módulo | Responsabilidade |
 |---|---|

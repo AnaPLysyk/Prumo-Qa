@@ -1,0 +1,16 @@
+{
+  "name": "prumo-qa-backend-remoto",
+  "private": true,
+  "type": "module",
+  "description": "Backend remoto do Prumo QA por tela: autenticação, suporte e entrada HTTP do aplicativo.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node ../../aplicativo/servidor/servidor.mjs", "auth:migrar": "node migrar-autenticacao.mjs"
+  },
+  "dependencies": {
+    "better-auth": "1.7.10",
+    "pg": "8.23.1"
+  }
+}

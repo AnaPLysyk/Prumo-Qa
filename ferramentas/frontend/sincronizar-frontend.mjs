@@ -33,7 +33,7 @@ for (const recurso of recursos) {
   if (fontesMapeadas.has(recurso.fonte) || destinosMapeados.has(recurso.destino)) throw new Error('Recurso duplicado: ' + recurso.fonte);
   fontesMapeadas.add(recurso.fonte); destinosMapeados.add(recurso.destino);
 }
-const distribuivel = arquivo => /\.(js|css|html)$/.test(arquivo);
+const distribuivel = arquivo => /\.(js|css|html)$/.test(arquivo) && !/(^|[\\/])web[\\/]/.test(arquivo);
 const fontes = arquivosDentro(origem).filter(arquivo => distribuivel(arquivo) && !fontesMapeadas.has('frontend/' + arquivo.split(path.sep).join('/')));
 const copias = arquivosDentro(destino).filter(distribuivel);
 const diferencas = [];

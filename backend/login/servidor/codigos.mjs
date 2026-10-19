@@ -2,7 +2,7 @@
  * Rota dos códigos por e-mail: recebe do aplicativo um código de 6 dígitos e o manda ao e-mail informado, pelo Resend.
  * Não guarda e-mails nem códigos: só contadores em memória para limitar abuso. Nos registros, o e-mail aparece mascarado e o código nunca.
  */
-import { EMAIL, lerCorpo, lerObjeto, ipDe, mascarar, responder } from './comum.mjs';
+import { EMAIL, lerCorpo, lerObjeto, ipDe, mascarar, responder } from '../../compartilhado/servidor/comum.mjs';
 
 export const FINALIDADES = ['CADASTRO', 'SENHA', 'ENTRADA'];
 export const IDIOMAS = ['pt-BR', 'en'];

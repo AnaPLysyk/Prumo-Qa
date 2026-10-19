@@ -1,6 +1,6 @@
 {
   "requirement": "R1: Somente Editor pode salvar uma publicação.",
-  "source": "README.md R1 e R3, exemplo fictício",
+  "source": "requisitos.txt R1 e R3, exemplo fictício",
   "sourcePath": "README.md",
   "existingTests": [{ "id": "editor-existente", "behavior": "Editor salva publicação", "source": "README.md R1/R3", "risk": "Perda de publicação", "expected": "status 200 e título persistido", "oracle": "retorno e nova leitura", "technique": "equivalence", "partition": "Editor", "testPath": "testes/publicacao.test.mjs" }],
   "candidates": [

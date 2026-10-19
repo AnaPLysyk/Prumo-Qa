@@ -1,8 +1,8 @@
-// Serviço do Prumo, rota dos códigos (servico-do-prumo/servidor.mjs) em 127.0.0.1 com uma caixa em memória no lugar do Resend: nada sai do computador.
+// Serviço do Prumo, rota dos códigos (backend/aplicativo/servidor/servidor.mjs) em 127.0.0.1 com uma caixa em memória no lugar do Resend: nada sai do computador.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { criarServico, enviarPeloResend, mensagem } from '../../../../servico-do-prumo/servidor.mjs';
+import { criarServico, enviarPeloResend, mensagem } from '../../../../backend/aplicativo/servidor/servidor.mjs';
 
 async function subir(t, opcoes = {}) {
   const caixa = []; const registros = []; let agora = Date.parse('2026-10-16T12:00:00Z');
@@ -73,4 +73,19 @@ test('envio pelo Resend: endereço oficial, chave só no cabeçalho e resposta d
   assert.equal(chamadas[0].url, 'https://api.resend.com/emails'); assert.equal(chamadas[0].op.headers.Authorization, 'Bearer re_teste');
   assert.deepEqual(JSON.parse(chamadas[0].op.body), { from: 'Prumo QA <nao-responda@exemplo.com>', to: ['pessoa@exemplo.com'], subject: 'A', text: 'B', html: '<p>B</p>' });
   await assert.rejects(enviar({ para: 'pessoa@exemplo.com', assunto: 'A', texto: 'B', html: 'B' }), /403/);
+});
+
+test('recuperaÃ§Ã£o de senha usa a interface oficial de frontend/login/web, com cabeÃ§alhos seguros', async (t) => {
+  const autenticacao = { checar: async () => {}, atender: () => { throw new Error('route inesperada'); } };
+  const servidor = http.createServer(criarServico({ autenticao: null, autenticacao, configurado: false, registrar: () => {} }));
+  await new Promise(resolve => servidor.listen(0, '127.0.0.1', resolve));
+  t.after(() => servidor.close());
+  const base='http://127.0.0.1:'+servidor.address().port;
+  const pagina=await fetch(base+'/recuperar-senha');
+  assert.equal(pagina.status, 200);
+  assert.match(pagina.headers.get('content-security-policy') || '', /default-src 'none'/);
+  assert.match(await pagina.text(), /recuperar-senha\.js/);
+  const codigo=await fetch(base+'/recuperar-senha.js');
+  assert.equal(codigo.status, 200);
+  assert.match(await codigo.text(), /reset-password/);
 });

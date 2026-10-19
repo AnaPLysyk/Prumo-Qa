@@ -42,6 +42,14 @@ Por padrão, o Prumo não altera dados nos serviços. Para permitir alterações
 
 Antes de enviar, o Prumo mostra uma prévia e pede confirmação do sistema. Depois, confere o resultado no serviço e evita criar itens duplicados. O Prumo não apaga dados dos serviços.
 
+## Onde consultar a implementação
+
+A documentação de uso fica em **Ajuda**, dentro do aplicativo, e no **site oficial**. Para quem desenvolve o Prumo, a tela **Administração → Documentação Viva** apresenta a arquitetura atualizada a partir do código: telas, arquivos, funções, dependências e canais IPC.
+
+A organização do código segue o nome da tela: `frontend/login/` contém sua interface e `backend/login/` contém as regras, dados e integrações. O mesmo padrão vale para Projetos, Testes, Tickets e as outras telas. As rotas HTTP remotas ficam em `backend/<tela>/servidor/`; a entrada comum fica em `backend/aplicativo/servidor/`. A página web de recuperação fica em `frontend/login/web/`, separada das telas Electron.
+
+Para atualizar o catálogo de canais usado pela Documentação Viva execute `npm run documentacao:viva`. O build também o atualiza automaticamente. Não são gerados arquivos `LEIA-ME` por pasta.
+
 ## Limites
 
 - Jira com token com escopos ou OAuth não está implementado.

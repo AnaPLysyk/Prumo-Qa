@@ -5,7 +5,7 @@ Toda versão nova segue os mesmos passos. Do passo 1 ao 4 o trabalho é no repos
 ## 1. Número da versão
 
 - `package.json` e `package-lock.json` (dois lugares no lock).
-- `README.md`: título e linha "Versão atual".
+- `package.json` e `docs/catalogo/versoes.json`: versão atual e versões publicadas.
 
 ## 2. Catálogo de versões (`docs/catalogo/versoes.json`)
 
