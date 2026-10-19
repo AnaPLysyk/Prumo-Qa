@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { criarServico } from '../../../../backend/aplicativo/servidor/servidor.mjs';
+import { criarServico, estadoDaAutenticacao } from '../../../../backend/aplicativo/servidor/servidor.mjs';
 
 async function verificar(autenticacao) {
   let status = null;
@@ -34,4 +34,22 @@ test('Render de producao consulta saude da autenticacao, nao apenas HTTP basico'
   assert.ok(inicio !== -1, 'servico de producao presente no manifesto');
   const servico = yaml.slice(inicio);
   assert.match(servico, /^    healthCheckPath: \/saude\/autenticacao$/m);
+});
+
+test('configuracao gradual no Render nao habilita login sem banco, segredo e e-mail', () => {
+  assert.deepEqual(estadoDaAutenticacao({}), { configurada: false, incompleta: false });
+  assert.deepEqual(estadoDaAutenticacao({ DATABASE_URL: 'postgresql://interno' }), {
+    configurada: false, incompleta: true
+  });
+  const completa = {
+    DATABASE_URL: 'postgresql://interno',
+    BETTER_AUTH_SECRET: 's'.repeat(40),
+    BETTER_AUTH_URL: 'https://prumo-qa-servico.onrender.com',
+    RESEND_API_KEY: 'chave-de-teste',
+    PRUMO_EMAIL_REMETENTE: 'teste@example.com'
+  };
+  assert.deepEqual(estadoDaAutenticacao(completa), { configurada: true, incompleta: false });
+  assert.deepEqual(estadoDaAutenticacao({ ...completa, RESEND_API_KEY: '   ' }), {
+    configurada: false, incompleta: true
+  });
 });
