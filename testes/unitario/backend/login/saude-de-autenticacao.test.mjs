@@ -53,3 +53,28 @@ test('configuracao gradual no Render nao habilita login sem banco, segredo e e-m
     configurada: false, incompleta: true
   });
 });
+
+test('exceções externas não expõem credenciais nos logs de produção', async () => {
+  const segredoFicticio = 'postgresql://usuario:segredo-ficticio@localhost:5432/contas';
+  const logs = [];
+  let status = 0;
+  let retorno;
+  const atender = criarServico({
+    configurado: false,
+    enviar: async () => {},
+    registrar: linha => logs.push(linha),
+    autenticacao: {
+      atender: async () => { throw new Error('Falha no banco: ' + segredoFicticio); },
+      checar: async () => {}
+    }
+  });
+  await atender({ method: 'GET', url: '/api/auth/get-session' }, {
+    headersSent: false,
+    writeHead(codigo) { status = codigo; },
+    end(valor) { retorno = JSON.parse(valor); }
+  });
+  assert.equal(status, 500);
+  assert.deepEqual(retorno, { erro: 'INTERNAL' });
+  assert.deepEqual(logs, ['SERVER_UNEXPECTED_ERROR']);
+  assert.doesNotMatch(JSON.stringify({logs,retorno}), /segredo-ficticio|postgresql:\/\//);
+});
