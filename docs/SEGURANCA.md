@@ -6,6 +6,21 @@ A nova arquitetura mantém o login visual em `frontend/login/`, a autorização 
 
 O servidor de autenticação ainda não está pronto para contas reais: sem URL HTTPS, segredo forte, banco persistente, migração e envio de e-mail configurados, o acesso deve recusar. O PostgreSQL gratuito atual expira em 12/11/2026, portanto não deve guardar contas reais sem plano de persistência. Os trechos abaixo documentam o **login legado**, não descrevem o comportamento futuro do Better Auth.
 
+## Preparação do banco de contas central
+
+O serviço de produção é `prumo-qa-servico` e o PostgreSQL interno é `prumo-qa-contas-db`. O Blueprint conecta `DATABASE_URL` pelo nome do banco; a declaração em `render.yaml` **não configura automaticamente** serviços já criados pela API. Conferir a conexão efetiva em **Render › prumo-qa-servico › Environment**; não abrir acesso público ao PostgreSQL. A credencial publicada em uma conversa deve ser rotacionada antes do uso com contas reais.
+
+Na mesma tela, `BETTER_AUTH_URL` deve ser `https://prumo-qa-servico.onrender.com`, `BETTER_AUTH_SECRET` deve ser gerado aleatoriamente (mínimo de 32 caracteres), e `RESEND_API_KEY` e `PRUMO_EMAIL_REMETENTE` devem ser configurados para um domínio remetente verificado. Não inserir essas credenciais em Git, logs, testes ou mensagens. A ausência de qualquer parte deixa `/api/auth/*` e `/saude/autenticacao` indisponíveis (503), mantendo outras rotas operacionais.
+
+A migração de produção **não é automática**. A partir do backend remoto, depois de garantir plano de persistência para o banco, conexão interna, rotação de senha e backup verificado:
+
+1. Executar `npm run auth:migrar:prod` com as variáveis do ambiente de produção para consultar a quantidade de alterações, sem gravar nada.
+2. Revisar o preview, confirmar backup recuperável e autorizar explicitamente `PRUMO_APROVAR_MIGRACAO_PROD=SIM`, `PRUMO_BACKUP_CONFIRMADO=SIM`, `PRUMO_CREDENCIAL_ROTACIONADA=SIM` **somente no processo manual de migração**, não como variáveis permanentes do servidor.
+3. Executar `npm run auth:migrar:prod` novamente e conferir `/saude/autenticacao` (HTTP 200). O endpoint verifica conexão **e** tabelas `user`, `session`, `account` e `verification`. Antes disso, 503 é o estado seguro.
+4. Validar cadastro, confirmação de e-mail, login, logout e recuperação de senha em uma conta de teste, sem publicar senhas ou tokens.
+
+O PostgreSQL gratuito do Render informa exclusão em 12/11/2026, salvo atualização do plano. Não usar essa instância como armazenamento definitivo de contas reais sem uma solução de continuidade/backup.
+
 ## Em poucas palavras
 
 O Prumo limita o que pode ler e executar, pede confirmação do sistema para ações protegidas e guarda tokens no cofre do sistema quando há suporte. O login central foi projetado para separar contas do Prumo, mas não é uma barreira de segurança entre pessoas que compartilham a mesma conta do sistema operacional. Os testes automatizados não comprovam uma autenticação humana real, e o Prumo não é uma sandbox: comandos e dependências do próprio projeto ainda precisam ser confiáveis. O instalador não tem assinatura digital; confira o SHA-256, sabendo que ele não confirma quem criou o arquivo.

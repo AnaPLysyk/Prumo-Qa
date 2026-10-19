@@ -3,6 +3,7 @@ import {betterAuth} from 'better-auth';
 import {toNodeHandler} from 'better-auth/node';
 import pg from 'pg';
 import {enviarPeloResend} from './codigos.mjs';
+import {verificarEsquemaDaAutenticacao} from '../regras/verificarEsquema.mjs';
 
 /** Falha fechada: sem servidor HTTPS, banco, segredo forte ou e-mail, não habilita cadastro. */
 export function conferirAmbienteDeAutenticacao(env=process.env) {
@@ -52,5 +53,5 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
         '/request-password-reset':{window:60,max:3}}},
     advanced:{useSecureCookies:true}
   });
-  return {auth,atender:toNodeHandler(auth),checar:async()=>{await pool.query('SELECT 1');},fechar:()=>pool.end()};
+  return {auth,atender:toNodeHandler(auth),checar:()=>verificarEsquemaDaAutenticacao(pool),fechar:()=>pool.end()};
 }
