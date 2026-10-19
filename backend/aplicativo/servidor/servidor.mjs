@@ -59,17 +59,30 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
   };
 }
 
+/** Inicialização segura durante a configuração gradual de credenciais no Render.
+ * Nunca habilita sessões enquanto banco, segredo e envio de e-mails estiverem incompletos.
+ */
+export function estadoDaAutenticacao(env = process.env) {
+  const chaves = ['BETTER_AUTH_URL', 'DATABASE_URL', 'BETTER_AUTH_SECRET', 'RESEND_API_KEY', 'PRUMO_EMAIL_REMETENTE'];
+  const informadas = chaves.filter(chave => !!String(env[chave] ?? '').trim()).length;
+  return { configurada: informadas === chaves.length, incompleta: informadas > 0 && informadas < chaves.length };
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const env = process.env;
   const comEmail = !!(env.RESEND_API_KEY && env.PRUMO_EMAIL_REMETENTE);
   const enviar = comEmail ? enviarPeloResend({ chave: env.RESEND_API_KEY, remetente: env.PRUMO_EMAIL_REMETENTE }) : async () => { throw new Error('sem configuração'); };
   const comSuporte = !!(env.PRUMO_SUPORTE_TOKEN && env.PRUMO_SUPORTE_REPOSITORIO);
   const suporte = comSuporte ? { github: clienteDoGitHub({ token: env.PRUMO_SUPORTE_TOKEN, repositorio: env.PRUMO_SUPORTE_REPOSITORIO }), chaveAdmin: env.PRUMO_SUPORTE_CHAVE_ADMIN } : null;
-  // Não inicia login parcial: se alguma variável de autenticação existir, exige todas.
+  // Credenciais podem ser provisionadas em etapas no Render. Sem o conjunto completo,
+  // login segue desabilitado (503), mas as rotas existentes continuam disponíveis.
+  const estado = estadoDaAutenticacao(env);
   let autenticacao=null;
-  if(env.DATABASE_URL || env.BETTER_AUTH_SECRET || env.BETTER_AUTH_URL){
+  if(estado.configurada){
     const {criarAutenticacao}=await import('../../login/servidor/autenticacao.mjs');
     autenticacao=criarAutenticacao({env});
+  } else if (estado.incompleta) {
+    console.warn('Autenticação central incompleta: login permanece desabilitado.');
   }
   const porta = Number(env.PORT) || 10000;
   http.createServer(criarServico({ enviar, configurado: comEmail, suporte, autenticacao })).listen(porta, () => console.log(`serviço do Prumo QA na porta ${porta} (e-mail: ${comEmail ? 'sim' : 'NÃO'}; suporte: ${comSuporte ? 'sim' : 'NÃO'}; administração: ${(env.PRUMO_SUPORTE_CHAVE_ADMIN || '').length >= 32 ? 'sim' : 'NÃO'})`));
