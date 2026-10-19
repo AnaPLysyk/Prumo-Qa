@@ -34,7 +34,7 @@ services:
     branch: main
     buildCommand: cd backend/login/servidor && npm ci --omit=dev
     startCommand: node backend/aplicativo/servidor/servidor.mjs
-    healthCheckPath: /saude
+    healthCheckPath: /saude/autenticacao
     autoDeployTrigger: "off"
     envVars:
       - key: RESEND_API_KEY
