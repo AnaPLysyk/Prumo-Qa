@@ -26,7 +26,7 @@ test('Google e GitHub são habilitados por pares independentes e sem variáveis 
   assert.ok(provedoresSociais({...env,GOOGLE_CLIENT_SECRET:'  '}).github);
 });
 
-test('Better Auth registra provedores no servidor sem abrir sessão ou consultar o banco', async () => {
+test('Better Auth registra provedores no servidor sem conexão com o banco de produção', async () => {
   const env = {
     BETTER_AUTH_URL:'https://auth.example.com',
     DATABASE_URL:'postgresql://fake:fake@127.0.0.1:5432/nao_conectar',
