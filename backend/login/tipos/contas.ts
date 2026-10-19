@@ -53,7 +53,7 @@ export const usuarioSchema = z.object({
   // Conta criada pelo GitHub não tem senha do Prumo (null): só entra autorizando de novo no GitHub.
   // recuperacao: código de recuperação das versões até a 2.15 (substituído pelo código por e-mail); mantido só para ler arquivos antigos.
   senha: resumoDeSegredoSchema.nullable(), recuperacao: resumoDeSegredoSchema.nullable(), trocarSenha: z.boolean(),
-  identidades: z.array(z.object({ provedor: z.enum(['github', 'google']), id: z.string().regex(/^[0-9]{1,30}$/), login: z.string().min(1).max(60) }).strict()).max(5).default([]),
+  identidades: z.array(z.object({ provedor: z.enum(['github', 'google', 'supabase', 'better-auth']), id: z.string().regex(/^(?:[0-9]{1,30}|[a-f0-9-]{36}|[A-Za-z0-9_-]{8,128})$/i), login: z.string().min(1).max(60) }).strict()).max(5).default([]),
   falhas: z.number().int().min(0).max(1000), bloqueadoAte: quando.nullable(),
   criadoEm: quando, atualizadoEm: quando, ultimoAcesso: quando.nullable(), origem: z.enum(['ATIVACAO', 'ADMINISTRACAO', 'CADASTRO', 'GITHUB', 'GOOGLE']),
   // Marca admin: só ela libera a tela Administração. Conta antiga sem a marca gravada herda do papel Administrador (ver ehAdmin).

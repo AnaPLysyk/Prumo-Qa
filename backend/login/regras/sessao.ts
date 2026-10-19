@@ -1,12 +1,15 @@
 /** Sessão de quem entrou no Prumo: fica só na memória do processo principal e termina ao sair, ao fechar o Prumo ou por inatividade. */
 import { lerContas } from '../banco/lerContas.js';
+import { definirUsuarioDoEscopo } from '../../compartilhado/banco/escopoDeUsuario.js';
+import { renovarCredencialMcp, revogarCredencialMcp } from '../../aplicativo/ponteDaSessaoMcp.js';
+import { usarAutenticacaoRemota } from '../integracoes/configuracaoDaAutenticacao.js';
 import { ContaVisivel, IdModulo, NivelDeAcesso, Papel, RegistroDeContas, Usuario, modulosDoMenu } from '../tipos/contas.js';
 
 let atual: { usuarioId: string; ultimoUso: number } | null = null;
 
-export function iniciarSessao(usuarioId: string, agora = Date.now()): void { atual = { usuarioId, ultimoUso: agora }; }
+export function iniciarSessao(usuarioId: string, agora = Date.now()): void { definirUsuarioDoEscopo(usuarioId); atual = { usuarioId, ultimoUso: agora }; renovarCredencialMcp(); }
 
-export function encerrarSessao(): void { atual = null; }
+export function encerrarSessao(): void { atual = null; definirUsuarioDoEscopo(null); revogarCredencialMcp(); }
 
 /** O login vale assim que existe a primeira conta (criada ao ativar o login na Administração). */
 export const loginLigado = (r: RegistroDeContas) => r.usuarios.length > 0;
@@ -49,11 +52,11 @@ export type SituacaoDaSessao =
  */
 export function situacaoDaSessao(b?: string, agora = Date.now(), tocar = true): SituacaoDaSessao {
   const registro = lerContas(b);
-  if (!loginLigado(registro)) { atual = null; return { tipo: 'SEM_LOGIN', registro }; }
+  if (!loginLigado(registro)) { encerrarSessao(); return { tipo: 'SEM_LOGIN', registro }; }
   if (!atual) return { tipo: 'SEM_SESSAO', registro };
   const usuario = registro.usuarios.find((u) => u.id === atual!.usuarioId);
-  if (!usuario || usuario.estado !== 'ATIVO') { atual = null; return { tipo: 'SEM_SESSAO', registro }; }
-  if (agora - atual.ultimoUso > registro.acesso.minutosDeInatividade * 60_000) { atual = null; return { tipo: 'EXPIRADA', registro }; }
+  if (!usuario || usuario.estado !== 'ATIVO') { encerrarSessao(); return { tipo: 'SEM_SESSAO', registro }; }
+  if (agora - atual.ultimoUso > registro.acesso.minutosDeInatividade * 60_000) { encerrarSessao(); return { tipo: 'EXPIRADA', registro }; }
   if (tocar) atual.ultimoUso = agora;
   return { tipo: 'ATIVA', registro, usuario, papel: papelDaConta(registro, usuario) };
 }
@@ -61,9 +64,10 @@ export function situacaoDaSessao(b?: string, agora = Date.now(), tocar = true): 
 /** O que a janela precisa saber para desenhar o login ou o menu: nunca resumo de senha. */
 export function sessaoParaJanela(b?: string, agora = Date.now()) {
   const s = situacaoDaSessao(b, agora, false);
-  const geral = { cadastroAberto: s.registro.acesso.cadastroAberto, aprovarCadastros: s.registro.acesso.aprovarCadastros, minutosDeInatividade: s.registro.acesso.minutosDeInatividade, entradaGithub: !!(s.registro.acesso.githubClientId || process.env.PRUMO_GITHUB_CLIENT_ID), entradaGoogle: !!(s.registro.acesso.googleClientId || process.env.PRUMO_GOOGLE_CLIENT_ID), exigirDuasEtapas: s.registro.acesso.exigirDuasEtapas };
+  const modoMvp = process.env.PRUMO_LOGIN_MVP === '1';
+  const geral = { loginMvpSemServico: modoMvp && !usarAutenticacaoRemota(), identidadeRemota: usarAutenticacaoRemota(), cadastroAberto: s.registro.acesso.cadastroAberto, aprovarCadastros: s.registro.acesso.aprovarCadastros, minutosDeInatividade: s.registro.acesso.minutosDeInatividade, entradaGithub: false, entradaGoogle: false, exigirDuasEtapas: s.registro.acesso.exigirDuasEtapas };
   // Sem nenhuma conta o Prumo não libera tela alguma: a janela mostra só a criação da conta de Administrador.
-  if (s.tipo === 'SEM_LOGIN') return { loginAtivo: false, usuario: null, expirou: false, telas: telasDoPapel(null), ...geral };
+  if (s.tipo === 'SEM_LOGIN') return { loginAtivo: modoMvp || usarAutenticacaoRemota(), usuario: null, expirou: false, telas: telasDoPapel(null), ...geral };
   if (s.tipo !== 'ATIVA') return { loginAtivo: true, usuario: null, expirou: s.tipo === 'EXPIRADA', telas: telasDoPapel(null), ...geral };
   return { loginAtivo: true, usuario: contaParaJanela(s.registro, s.usuario, agora), expirou: false, telas: telasDaConta(s.usuario, s.papel), ...geral };
 }
