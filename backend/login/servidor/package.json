@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Backend remoto do Prumo QA por tela: autenticação, suporte e entrada HTTP do aplicativo.",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "start": "node ../../aplicativo/servidor/servidor.mjs",
@@ -12,6 +12,7 @@
     "auth:migrar:prod": "node migrar-autenticacao-producao.mjs"
   },
   "dependencies": {
+    "@better-auth/electron": "1.7.10",
     "better-auth": "1.7.10",
     "pg": "8.23.1"
   }

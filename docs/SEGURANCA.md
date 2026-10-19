@@ -30,6 +30,8 @@ O servidor Better Auth aceita GitHub e Google como **provedores de identidade**,
 
 Um par incompleto não habilita o provedor nem altera o acesso por e-mail. O próprio login social **não está habilitado na interface Electron remota** até existir e ser testado o retorno seguro navegador → aplicativo, com verificação de estado, PKCE, proteção contra sessão trocada e vínculo explícito de contas antigas. A implementação de OAuth local legado é separada e não deve receber credenciais do Better Auth. Não adicionar Client Secrets ao instalador ou ao Git.
 
+O instalador registra o protocolo `com.anaplysyk.prumoqa`, e o servidor carrega o plugin oficial `@better-auth/electron` somente com `PRUMO_OAUTH_DESKTOP_ATIVO=SIM`. **Não configurar essa variável no Render ainda**: o fluxo de tela web, transferência PKCE, verificação do callback e armazenamento seguro da sessão no Electron ainda não estão integrados. O cadastro por e-mail e as conexões de repositórios não dependem do protocolo.
+
 ## Em poucas palavras
 
 O Prumo limita o que pode ler e executar, pede confirmação do sistema para ações protegidas e guarda tokens no cofre do sistema quando há suporte. O login central foi projetado para separar contas do Prumo, mas não é uma barreira de segurança entre pessoas que compartilham a mesma conta do sistema operacional. Os testes automatizados não comprovam uma autenticação humana real, e o Prumo não é uma sandbox: comandos e dependências do próprio projeto ainda precisam ser confiáveis. O instalador não tem assinatura digital; confira o SHA-256, sabendo que ele não confirma quem criou o arquivo.
