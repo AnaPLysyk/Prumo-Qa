@@ -1,7 +1,7 @@
 'use strict';
 /** Mensagens seguras para o formulário de login: converte códigos de falha em texto sem expor erros internos. */
 window.PrumoMensagensEntrada = (() => {
-  const codigoDo = (erro) => /^([A-Z][A-Z0-9_]{2,63}):/.exec(String(erro || ''))?.[1] || null;
+  const codigoDo = (erro) => /^([A-Z][A-Z0-9_]{2,63})(?::|$)/.exec(String(erro || ''))?.[1] || null;
   function mensagemDaEntrada(erro) {
     const codigo = codigoDo(erro);
     const mensagens = {
