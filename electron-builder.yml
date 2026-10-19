@@ -1,5 +1,11 @@
 # Instalador Windows (NSIS). Gerar: npm run dist  ->  release/Prumo-QA-Setup-<versão>.exe
 appId: com.anaplysyk.prumoqa
+# Protocolo exclusivo do aplicativo para o futuro retorno OAuth via navegador.
+# O handler de autenticação ainda depende da integração PKCE no processo principal.
+protocols:
+  - name: Prumo QA Identity
+    schemes:
+      - com.anaplysyk.prumoqa
 productName: Prumo QA
 executableName: Prumo QA
 copyright: Ana P. Lysyk
