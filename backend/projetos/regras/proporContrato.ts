@@ -2,9 +2,21 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Manifesto, manifestoSchema } from '../../compartilhado/tipos/projeto.js';
-import { idDoProjetoPeloNome } from './idDoProjetoPeloNome.js';
 import { listarRaizDoProjeto } from './listarRaizDoProjeto.js';
 import { CODIGO, DOCUMENTACAO, EXIGE_REVISAO, PropostaContrato, SCRIPT, STACKS, Stack, TESTES } from '../tipos/contrato.js';
+
+/** Gera um identificador simples (letras, números e hífen) a partir do nome da pasta. */
+
+const idDoProjetoPeloNome = (nome: string): string => {
+  const identificador = nome
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 76);
+  return /^[a-z]/.test(identificador) ? identificador : 'p-' + (identificador || 'projeto');
+};
 
 export function proporContrato(raizInformada: string): PropostaContrato {
   const raiz = fs.realpathSync(raizInformada);

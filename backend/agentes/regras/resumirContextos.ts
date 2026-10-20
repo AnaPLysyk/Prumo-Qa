@@ -1,7 +1,9 @@
 /** Monta o resumo de cada contexto para a lista, apontando conflitos (mesma chave ou marcados pela pessoa) e alterações suspeitas. */
-import { suspeitaDeInstrucao } from './suspeitaDeInstrucao.js';
+
 import { ultimaVersaoDoContexto } from './ultimaVersaoDoContexto.js';
-import { Arquivo, Estado, Resumo } from '../tipos/contexto.js';
+import { Arquivo, Estado, Resumo , ehInstrucao } from '../tipos/contexto.js';
+
+const suspeitaDeInstrucao = (texto: string) => ehInstrucao.test(texto);
 
 /** Estado efetivo: DESATUALIZADO prevalece; depois conflito (marcado ou derivado da mesma chave); senão o registrado. */
 export function resumirContextos(itens: { arq: Arquivo; integro: boolean }[]): Resumo[] {

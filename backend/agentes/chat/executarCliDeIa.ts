@@ -3,8 +3,11 @@ import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ambienteDaIa } from './ambienteDaIa.js';
 import { Executor } from '../tipos/chat.js';
+
+/** Ambiente mínimo passado ao CLI do Claude/Codex. */
+
+const ambienteDaIa = () => Object.fromEntries(['PATH', 'SystemRoot', 'WINDIR', 'USERPROFILE', 'HOME', 'APPDATA', 'LOCALAPPDATA', 'TEMP', 'TMP', 'CODEX_HOME', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY'].filter(k => process.env[k]).map(k => [k, process.env[k] as string]));
 
 export const executarCliDeIa: Executor = (comando, args, o) => new Promise(ok => {
   // Não carrega configuração, hooks ou MCP do repositório conectado.

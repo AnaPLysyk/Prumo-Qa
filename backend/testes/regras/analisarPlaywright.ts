@@ -1,9 +1,15 @@
 /** Aponta problemas num teste Playwright (esperas fixas, seletores frágeis, falta de verificação...) com a orientação e a fonte oficial. */
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { blocosDeTeste } from './blocosDeTeste.js';
-import { codigoSemComentarios } from './codigoSemComentarios.js';
-import { seletorFragil } from './seletorFragil.js';
 import { AchadoTeste, doc } from '../tipos/frameworks.js';
+
+/** Diz se um seletor de tela é frágil (XPath, nth-child, classes geradas, cadeias de div). */
+
+const seletorFragil = (s: string) => /^\s*(\/\/|xpath=|\.\.\/)/.test(s) || /:nth-(child|of-type)\(/.test(s) || /\.(css|sc|jss|MuiBox)-[A-Za-z0-9]{4,}/.test(s) || /^(body|html)\s*>/.test(s) || /(?:^|\s)(?:div|span|ul|li|tr|td|section)\s*(?:>|\s)\s*(?:div|span|ul|li|tr|td|section)\s*(?:>|\s)\s*(?:div|span|ul|li|tr|td|section)/.test(s);
+
+/** Apaga os comentários de um código mantendo as linhas no lugar, para analisar só o que executa. */
+
+const codigoSemComentarios = (c: string) => c.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' ')).split('\n').map(l => l.replace(/(^|[^:'"`])\/\/.*$/, '$1'));
 
 /** Análise estática de um arquivo de teste Playwright. Cada regra cita a fonte oficial; falsos positivos possíveis estão descritos na orientação. */
 export function analisarPlaywright(arquivo: string, conteudo: string): AchadoTeste[] {

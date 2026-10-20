@@ -4,8 +4,11 @@ import { analisarVersao } from '../../ajuda/versoes/analisarVersao.js';
 import { compararVersoes } from '../../ajuda/versoes/compararVersoes.js';
 import { enderecoDaVersao } from '../../ajuda/versoes/enderecoDaVersao.js';
 import { destinoAutorizado } from './destinoAutorizado.js';
-import { limparTextoDaRelease } from './limparTextoDaRelease.js';
 import { Resultado, limiteResposta, mensagemOffline, releaseSchema, urlConsulta } from '../tipos/consulta.js';
+
+/** Tira caracteres de controle e limita o texto vindo da release. */
+
+const limparTextoDaRelease = (s: string) => s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]/g, ' ').slice(0, 4000);
 
 export async function verificarAtualizacao(instalada: string, opcoes: { buscar?: typeof fetch; url?: string; permitirLocal?: boolean; timeoutMs?: number } = {}): Promise<Resultado> {
   if (!analisarVersao(instalada)) throw new Error('INVALID_VERSION: versão instalada inválida.');

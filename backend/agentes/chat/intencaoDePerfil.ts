@@ -1,13 +1,14 @@
 /** Reconhece quando a pessoa diz como quer ser chamada ou qual é o papel dela, e salva. */
 import { salvarPerfil } from '../banco/salvarPerfil.js';
 import { palavrasDaPergunta } from './palavrasDaPergunta.js';
-import { papelNoTexto } from './papelNoTexto.js';
 import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { normalizarNome } from '../regras/normalizarNome.js';
-import { Meta, Turno } from '../tipos/chat.js';
+import { Meta, Turno , PAPEIS } from '../tipos/chat.js';
 import { Perfil } from '../tipos/conhecimento.js';
-import { rotuloPapel } from '../tipos/persona.js';
+import { rotuloPapel, Papel } from '../tipos/persona.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+
+const papelNoTexto = (t: string): Papel | null => { for (const [re, p] of PAPEIS) if (re.test(t)) return p; return null; };
 
 export function intencaoDePerfil(pergunta: string, historico: Turno[], perfil: Perfil | null, base?: string): Meta | null {
   const t = semAcentos(pergunta); const pend = historico.at(-1)?.pendente ?? null; const palavras = palavrasDaPergunta(pergunta);

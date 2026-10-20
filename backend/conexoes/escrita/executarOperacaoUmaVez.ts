@@ -8,13 +8,16 @@ import { chaveDaOperacao } from './chaveDaOperacao.js';
 import { codigoDaFalhaDeOperacao } from './codigoDaFalhaDeOperacao.js';
 import { escritaHabilitada } from './escritaHabilitada.js';
 import { limparRespostaRemota } from './limparRespostaRemota.js';
-import { operacaoPodeRepetir } from './operacaoPodeRepetir.js';
 import { operacaoPorId } from './operacaoPorId.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { Remoto } from '../tipos/operacao.js';
 import { Executor, OpcoesOperacao, RegistroOperacao, semAux } from '../tipos/operacoesExternas.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { registrarEscritaExterna } from '../../projetos/regras/registrarEscritaExterna.js';
+
+/** Diz se vale tentar a operação de novo (tempo, indisponível, limite, resposta inválida). */
+
+const operacaoPodeRepetir = (c: string) => ['SERVICE_TIMEOUT', 'SERVICE_UNAVAILABLE', 'SERVICE_RATE_LIMIT', 'SERVICE_RESPONSE_INVALID'].includes(c);
 
 export async function executarOperacaoUmaVez(ex: Executor, espacoId: string, operacaoId: string, bruto: unknown, o: OpcoesOperacao): Promise<RegistroOperacao & { reutilizada: boolean }> {
   const b = o.base; const agora = o.agora ?? (() => new Date()); const origem = o.origem ?? 'MANUAL';

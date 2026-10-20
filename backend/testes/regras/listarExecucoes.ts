@@ -1,21 +1,76 @@
-/** Lista o histórico de execuções por projeto, repositório, ticket, rotina, estado e período. */
+/** Lista o histórico real das execuções com os filtros informados pela interface. */
 import { listarRotinas } from '../../agendamentos/banco/listarRotinas.js';
 import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
-import { duracaoDoTrabalho } from './duracaoDoTrabalho.js';
-import { repositorioDoEspaco } from './repositorioDoEspaco.js';
-import { FiltroExecucoes, filtroExecucoes } from '../tipos/historicoDeExecucoes.js';
+import { Trabalho } from '../../agendamentos/tipos/fila.js';
 import { listarEspacos } from '../../projetos/banco/listarEspacos.js';
+import { Espaco } from '../../projetos/tipos/espacos.js';
+import { FiltroExecucoes, filtroExecucoes } from '../tipos/historicoDeExecucoes.js';
 
-export function listarExecucoes(f: FiltroExecucoes = {}, base?: string) {
-  const q = filtroExecucoes.parse(f); const rotinas = new Map(listarRotinas(base).map(r => [r.id, r])); const espacos = new Map(listarEspacos(base).map(e => [e.id, e]));
-  const itens = listarTrabalhos(base).filter(t =>
-    (!q.espacoId || t.espacoId === q.espacoId) && (!q.rotinaId || t.rotinaId === q.rotinaId) && (!q.ticket || t.ticket === q.ticket) && (!q.estado || t.estado === q.estado)
-    && (!q.resultado || t.resultado?.status === q.resultado) && (!q.since || t.criadoEm >= q.since) && (!q.until || t.criadoEm <= q.until) && (!q.repositorio || repositorioDoEspaco(espacos.get(t.espacoId)) === q.repositorio));
-  const ordenados = itens.sort((a, b) => (b.slot ?? b.criadoEm).localeCompare(a.slot ?? a.criadoEm));
-  return { total: ordenados.length, execucoes: ordenados.slice(0, q.limite).map(t => {
-    const r = rotinas.get(t.rotinaId); const e = espacos.get(t.espacoId);
-    return { id: t.id, rotinaId: t.rotinaId, rotina: r?.nome ?? '(rotina excluída)', espacoId: t.espacoId, projeto: e?.nome ?? '(projeto removido)', repositorio: repositorioDoEspaco(e), tipo: t.tipo, capability: t.capability ?? null, ambiente: t.ambiente, ticket: t.ticket ?? null,
-      executor: t.origem === 'AGENDA' ? 'Prumo (agenda)' : 'Prumo (manual)', origem: t.origem, slot: t.slot, criadoEm: t.criadoEm, inicio: t.iniciadoEm, termino: t.terminadoEm, duracaoMs: duracaoDoTrabalho(t), estado: t.estado,
-      resultado: t.resultado, tentativas: t.log.map(x => ({ n: x.n, inicio: x.inicio, fim: x.fim, estado: x.estado, codigo: x.codigo ?? null })), erro: t.erro, jira: t.jira, evidenciaId: t.resultado?.evidenciaId ?? null, pastaLocal: e?.pastaLocal ?? null };
-  }) };
+const repositorioDoEspaco = (espaco: Espaco | undefined): string | null =>
+  espaco?.vinculos.find(vinculo => vinculo.servico === 'github')?.recurso.chave ?? null;
+
+const duracaoDoTrabalho = (trabalho: Trabalho): number | null =>
+  trabalho.iniciadoEm && trabalho.terminadoEm
+    ? Math.max(0, Date.parse(trabalho.terminadoEm) - Date.parse(trabalho.iniciadoEm))
+    : null;
+
+export function listarExecucoes(filtros: FiltroExecucoes = {}, base?: string) {
+  const filtro = filtroExecucoes.parse(filtros);
+  const rotinas = new Map(listarRotinas(base).map(rotina => [rotina.id, rotina]));
+  const espacos = new Map(listarEspacos(base).map(espaco => [espaco.id, espaco]));
+
+  const execucoes = listarTrabalhos(base).filter(trabalho =>
+    (!filtro.espacoId || trabalho.espacoId === filtro.espacoId) &&
+    (!filtro.rotinaId || trabalho.rotinaId === filtro.rotinaId) &&
+    (!filtro.ticket || trabalho.ticket === filtro.ticket) &&
+    (!filtro.estado || trabalho.estado === filtro.estado) &&
+    (!filtro.resultado || trabalho.resultado?.status === filtro.resultado) &&
+    (!filtro.since || trabalho.criadoEm >= filtro.since) &&
+    (!filtro.until || trabalho.criadoEm <= filtro.until) &&
+    (!filtro.repositorio || repositorioDoEspaco(espacos.get(trabalho.espacoId)) === filtro.repositorio)
+  );
+
+  execucoes.sort(
+    (a, b) => (b.slot ?? b.criadoEm).localeCompare(a.slot ?? a.criadoEm)
+  );
+
+  return {
+    total: execucoes.length,
+    execucoes: execucoes.slice(0, filtro.limite).map(trabalho => {
+      const rotina = rotinas.get(trabalho.rotinaId);
+      const espaco = espacos.get(trabalho.espacoId);
+      return {
+        id: trabalho.id,
+        rotinaId: trabalho.rotinaId,
+        rotina: rotina?.nome ?? '(rotina excluída)',
+        espacoId: trabalho.espacoId,
+        projeto: espaco?.nome ?? '(projeto removido)',
+        repositorio: repositorioDoEspaco(espaco),
+        tipo: trabalho.tipo,
+        capability: trabalho.capability ?? null,
+        ambiente: trabalho.ambiente,
+        ticket: trabalho.ticket ?? null,
+        executor: trabalho.origem === 'AGENDA' ? 'Prumo (agenda)' : 'Prumo (manual)',
+        origem: trabalho.origem,
+        slot: trabalho.slot,
+        criadoEm: trabalho.criadoEm,
+        inicio: trabalho.iniciadoEm,
+        termino: trabalho.terminadoEm,
+        duracaoMs: duracaoDoTrabalho(trabalho),
+        estado: trabalho.estado,
+        resultado: trabalho.resultado,
+        tentativas: trabalho.log.map(tentativa => ({
+          n: tentativa.n,
+          inicio: tentativa.inicio,
+          fim: tentativa.fim,
+          estado: tentativa.estado,
+          codigo: tentativa.codigo ?? null
+        })),
+        erro: trabalho.erro,
+        jira: trabalho.jira,
+        evidenciaId: trabalho.resultado?.evidenciaId ?? null,
+        pastaLocal: espaco?.pastaLocal ?? null
+      };
+    })
+  };
 }

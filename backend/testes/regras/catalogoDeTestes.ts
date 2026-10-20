@@ -6,8 +6,11 @@ import { analisarArquivoJs } from './analisarArquivoJs.js';
 import { analisarArquivoPython } from './analisarArquivoPython.js';
 import { anotarQase } from './anotarQase.js';
 import { coletarArquivosDeTeste } from './coletarArquivosDeTeste.js';
-import { funcionalidadeDoArquivo } from './funcionalidadeDoArquivo.js';
 import { Catalogo, FeatureTestes, TipoTeste, limites, tiposDeTeste } from '../tipos/catalogoDeTestes.js';
+
+/** Deduz o nome da funcionalidade a partir do caminho do arquivo de teste. */
+
+const funcionalidadeDoArquivo = (rel: string) => { const p = rel.replaceAll('\\', '/').split('/'); const arq = p.at(-1)!.replace(/\.(spec|test)\.[cm]?[jt]sx?$|\.feature$|\.py$/i, '').replace(/^test_|_test$/g, ''); const pai = p.length > 1 ? p.at(-2)! : ''; return (['tests', 'test', 'e2e', 'spec', 'specs', '__tests__'].includes(pai.toLowerCase()) || !pai ? arq : pai + ' / ' + arq).replace(/[-_.]+/g, ' ').slice(0, 120); };
 
 export function catalogoDeTestes(raiz: string): Catalogo {
   const { arquivos, truncado } = coletarArquivosDeTeste(raiz); const features: FeatureTestes[] = []; const porTipo = Object.fromEntries(tiposDeTeste.map(t => [t, 0])) as Record<TipoTeste, number>;

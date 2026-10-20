@@ -4,10 +4,29 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { gravarPropostas } from '../banco/gravarPropostas.js';
 import { lerPropostas } from '../banco/lerPropostas.js';
-import { semelhancaEntrePalavras } from './semelhancaEntrePalavras.js';
-import { textoComparavel } from './textoComparavel.js';
 import { validarDadosDaProposta } from './validarDadosDaProposta.js';
 import { MAX_IA_POR_HORA, MAX_PROPOSTAS, NovaProposta, Proposta, propostaSchema } from '../tipos/proposta.js';
+
+/** Mede de 0 a 1 o quanto dois conjuntos de palavras se parecem, para achar propostas repetidas. */
+
+const semelhancaEntrePalavras = (primeiro: Set<string>, segundo: Set<string>): number => {
+  if (!primeiro.size || !segundo.size) return 0;
+  let emComum = 0;
+  for (const palavra of primeiro) {
+    if (segundo.has(palavra)) emComum++;
+  }
+  return emComum / (primeiro.size + segundo.size - emComum);
+};
+
+/** Simplifica um texto (minúsculas, sem acentos e sem pontuação) para comparar propostas. */
+
+const textoComparavel = (texto: string): string => texto
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[̀-ͯ]/g, '')
+  .replace(/[^a-z0-9 ]+/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
 
 /** Usada somente na busca de propostas semelhantes. */
 const palavrasDoTexto = (texto: string): Set<string> =>

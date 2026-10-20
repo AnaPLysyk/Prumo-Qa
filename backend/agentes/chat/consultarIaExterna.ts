@@ -5,13 +5,27 @@ import { skillDoAgente } from './skillDoAgente.js';
 import { montarPrompt } from './montarPrompt.js';
 import { contaParaIa } from './contaParaIa.js';
 import { registrarSugestoesDaIa } from './registrarSugestoesDaIa.js';
-import { separarAprendizados } from './separarAprendizados.js';
 import { ContextoDelegacao } from '../tipos/ContextoDelegacao.js';
 import { Resposta } from '../tipos/chat.js';
-import { Conhecimento } from '../tipos/conhecimento.js';
+import { Conhecimento, limitesConhecimento } from '../tipos/conhecimento.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+
+/** Separa as linhas "APRENDIZADO:" do texto da IA externa (no máximo duas). */
+function separarAprendizados(texto: string) {
+  const aprendizados: string[] = [];
+  const linhasDaResposta = texto.split('\n').filter(linha => {
+    const sugestao = linha.match(/^\s*[-*]?\s*APRENDIZADO:\s*(.{4,})$/i);
+    if (!sugestao) return true;
+
+    if (aprendizados.length < 2) {
+      aprendizados.push(sugestao[1]!.trim().slice(0, limitesConhecimento.texto));
+    }
+    return false; // Não mostrar instruções de registro de aprendizado na resposta.
+  });
+  return { texto: linhasDaResposta.join('\n'), aprendizados };
+}
 
 export async function consultarIaExterna({ o, agente, pergunta, local, estilo, nome, perfil, historico, comum, provedor, montar, vestido }: ContextoDelegacao): Promise<Resposta> {
   // 3) IA externa: só com autorização registrada e executável encontrado; qualquer falha volta para a resposta local.

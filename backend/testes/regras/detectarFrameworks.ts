@@ -1,7 +1,9 @@
 /** Descobre, por evidência (dependência, configuração, imports), quais frameworks de teste o projeto usa. */
-import { declaraPlaywright } from './declaraPlaywright.js';
+
 import { ehTestePlaywright } from './ehTestePlaywright.js';
 import { Fonte, Framework, config, conhecimento } from '../tipos/frameworks.js';
+
+const declaraPlaywright = (f: Fonte) => { if (!/(^|[\\/])package\.json$/.test(f.path)) return false; try { const p = JSON.parse(f.content); return !!({ ...p.dependencies, ...p.devDependencies })['@playwright/test']; } catch { return false; } };
 
 /** Estado só é CONFIRMADO com dependência + (configuração ou teste que importa o pacote). Nome de pasta nunca confirma. */
 export function detectarFrameworks(fontes: Fonte[], omitidos: string[] = []): Framework[] {
