@@ -1,7 +1,7 @@
 /** Rotina k6: procura o executável oficial e roda o teste de desempenho com a autorização prévia (ou a aprovação humana, se manual). */
 import { autorizacaoDelegada } from '../autorizacoes/autorizacaoDelegada.js';
-import { executarK6 } from '../k6/executarK6.js';
-import { localizarK6 } from '../k6/localizarK6.js';
+import { executarK6 } from '../servicoK6.js';
+import { localizarK6 } from '../servicoK6.js';
 import { ResultadoTrabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';
 import { EstadoDoWorker } from '../tipos/worker.js';

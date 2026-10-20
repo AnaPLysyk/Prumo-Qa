@@ -1,6 +1,6 @@
 /** Controlador da funcionalidade agendamentos: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { autorizarRotina } from "./autorizacoes/autorizarRotina.js";
-import { obterRotina } from "./banco/agenda.js";
+import { obterRotina } from "./repositorioAgenda.js";
 import { permissoesDaRotina } from "./regras/permissoesDaRotina.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";

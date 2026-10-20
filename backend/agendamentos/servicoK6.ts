@@ -1,25 +1,35 @@
-/** Executa o teste k6 autorizado, sem shell e com teto de tempo, e grava a evidência. Três etapas: preparar (conferir e aprovar), rodar com limites e registrar o resultado por limiar. */
-import { spawn } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { capacidadeDoK6 } from './capacidadeDoK6.js';
-import { escopoDoK6 } from './escopoDoK6.js';
+/** Lógica e contratos de agendamentos: operações relacionadas no mesmo módulo. */
+import { ConfigK6, ExecutavelK6, LIMITE_DURACAO_S, LIMITE_USUARIOS } from "./tipos/k6.js";
+import { promises as fs } from "node:fs";
+import { ErroQa } from "../compartilhado/erros/ErroQa.js";
+import { hash } from "../compartilhado/seguranca/hash.js";
+import { lerSeguro } from "../compartilhado/seguranca/lerSeguro.js";
+import { Projeto } from "../compartilhado/tipos/projeto.js";
+import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import path from "node:path";
+import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
+import { caminhoSeguro } from "../compartilhado/seguranca/caminhoSeguro.js";
+import { mascarar } from "../compartilhado/seguranca/mascarar.js";
+import { salvarEvidencia } from "../testes/banco/salvarEvidencia.js";
+import { classificarResultado } from "../testes/regras/classificarResultado.js";
+import { Evidencia } from "../testes/tipos/evidencia.js";
+import { solicitarAprovacao } from "../testes/aprovacao/solicitarAprovacao.js";
+import { criarEvidenciaInicial } from "../testes/regras/criarEvidenciaInicial.js";
+import { Delegada } from "../testes/tipos/execucao.js";
 
-import { ConfigK6, ExecutavelK6 } from '../tipos/k6.js';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
-import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
-import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';
-import { hash } from '../../compartilhado/seguranca/hash.js';
-import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';
-import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { salvarEvidencia } from '../../testes/banco/salvarEvidencia.js';
-import { classificarResultado } from '../../testes/regras/classificarResultado.js';
-import { Evidencia } from '../../testes/tipos/evidencia.js';
-import { solicitarAprovacao } from '../../testes/aprovacao/solicitarAprovacao.js';
-import { criarEvidenciaInicial } from '../../testes/regras/criarEvidenciaInicial.js';
-import { Delegada } from '../../testes/tipos/execucao.js';
+export const capacidadeDoK6 = (c: ConfigK6) => ('k6:' + c.script.replaceAll('\\', '/')).slice(0, 80);
+
+/** Escopo estável: raiz, manifesto, script (hash), parâmetros, destino, ambiente e executável (caminho+tamanho). */
+export async function escopoDoK6(p: Projeto, c: ConfigK6, ambiente: string, exe: ExecutavelK6) {
+  validarLimitesDoK6(c); const origem = validarAlvoDoK6(c.alvo, ambiente);
+  if (p.manifesto.execution.readOnly) throw new ErroQa('POLICY_BLOCKED', 'Projeto autorizado estritamente para leitura.');
+  if (!/\.m?js$/i.test(c.script)) throw new ErroQa('K6_SCRIPT_INVALID', 'O script do k6 deve ser .js ou .mjs.');
+  const fonte = await lerSeguro(p.raiz, c.script, false, 262144);
+  const st = await fs.stat(exe.executable);
+  const scopeHash = hash(JSON.stringify({ root: p.raiz, manifest: p.manifestoHash, script: c.script, scriptSha: hash(fonte), alvo: origem, usuarios: c.usuarios, duracao: c.duracaoSegundos, ambiente, exe: { p: exe.executable, size: st.size } }));
+  return { scopeHash, command: JSON.stringify({ tool: 'k6', script: c.script, alvo: origem, usuarios: c.usuarios, duracaoSegundos: c.duracaoSegundos, ambiente }) };
+}
 
 /** Extrai do resumo do k6 as métricas principais (requisições, falhas, tempos). */
 
@@ -31,9 +41,9 @@ function metricasDoK6(resumo: unknown) {
   return { http_reqs: pega('http_reqs', ['count', 'rate']), http_req_failed: pega('http_req_failed', ['value', 'passes', 'fails']), http_req_duration: pega('http_req_duration', ['avg', 'med', 'p(90)', 'p(95)', 'max']), iterations: pega('iterations', ['count']), limiares };
 }
 
-
 /** O que fica pronto depois das conferências e da aprovação: os argumentos, o arquivo de resumo e o tempo máximo. */
 type K6Preparado = { args: string[]; resumoRel: string; timeoutMs: number };
+
 /** Como o processo do k6 terminou: código de saída, erro ao iniciar, motivo da interrupção e saídas capturadas. */
 type ProcessoDoK6 = { exitCode: number | null; error?: string; bloqueio?: string; stdout: string; stderr: string };
 
@@ -101,4 +111,30 @@ async function registrarResultadoDoK6(p: Projeto, e: Evidencia, r: ProcessoDoK6,
   e.status = limiarFalhou ? 'FAIL' : classificarResultado(r.exitCode, bloqueio, casos);
   e.reason = bloqueio ?? (limiarFalhou ? 'Limiar de desempenho do k6 ultrapassado (exit 99).' : r.exitCode === 0 ? 'k6 terminou com exit code 0; limiares conforme resumo.' : `k6 terminou com exit code ${r.exitCode}: falha de execução do script ou do ambiente.`);
   e.logSha256 = hash(e.stdout + '\n' + e.stderr); e.endedAt = new Date().toISOString();
+}
+
+export async function localizarK6(path_ = process.env.PATH ?? ''): Promise<string | null> {
+  const nomes = process.platform === 'win32' ? ['k6.exe'] : ['k6'];
+  for (const pasta of path_.split(path.delimiter)) {
+    if (!pasta || !path.isAbsolute(pasta)) continue;
+    for (const n of nomes) { const c = path.join(pasta, n); try { const st = await fs.stat(c); if (st.isFile()) return c; } catch { /* próximo */ } }
+  }
+  return null;
+}
+
+/** Diz se um endereço é deste próprio computador (localhost, 127.x, ::1). */
+
+const enderecoLocal = (h: string) => h === 'localhost' || h === '::1' || h === '[::1]' || /^127\./.test(h);
+
+export function validarAlvoDoK6(alvo: string, ambiente: string) {
+  let u: URL; try { u = new URL(alvo); } catch { throw new ErroQa('K6_TARGET_INVALID', 'Destino inválido.'); }
+  if (!['http:', 'https:'].includes(u.protocol) || u.username || u.password) throw new ErroQa('K6_TARGET_INVALID', 'Destino deve ser http(s) sem credenciais na URL.');
+  if (ambiente === 'producao') throw new ErroQa('POLICY_BLOCKED', 'Teste de carga em produção está bloqueado por padrão nesta versão.');
+  if (ambiente === 'local' && !enderecoLocal(u.hostname)) throw new ErroQa('K6_TARGET_NOT_LOCAL', 'Ambiente "local" só aceita localhost/127.0.0.1.');
+  return u.origin;
+}
+
+export function validarLimitesDoK6(c: ConfigK6) {
+  if (!Number.isInteger(c.usuarios) || c.usuarios < 1 || c.usuarios > LIMITE_USUARIOS) throw new ErroQa('K6_LIMIT', `Usuários virtuais entre 1 e ${LIMITE_USUARIOS}.`);
+  if (!Number.isInteger(c.duracaoSegundos) || c.duracaoSegundos < 1 || c.duracaoSegundos > LIMITE_DURACAO_S) throw new ErroQa('K6_LIMIT', `Duração entre 1 e ${LIMITE_DURACAO_S} segundos.`);
 }

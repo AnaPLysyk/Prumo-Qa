@@ -1,7 +1,7 @@
 /** Cria uma rotina agendada, recusando horário único no passado e mais de 200 rotinas. */
 import { randomUUID } from 'node:crypto';
-import { gravarAgenda } from '../banco/agenda.js';
-import { lerAgenda } from '../banco/agenda.js';
+import { gravarAgenda } from '../repositorioAgenda.js';
+import { lerAgenda } from '../repositorioAgenda.js';
 import { anotarNaRotina } from './anotarNaRotina.js';
 import { DadosRotina, Rotina, dadosRotinaSchema, rotinaSchema } from '../tipos/rotina.js';
 

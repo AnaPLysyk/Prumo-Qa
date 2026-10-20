@@ -1,8 +1,9 @@
-/** Guarda a agenda de rotinas: leitura, gravação, busca, alteração e pausa geral. */
-import { z } from 'zod';
-import { lerLocal } from '../../compartilhado/banco/lerLocal.js';
-import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
-import { Registro, registro, Rotina, rotinaSchema } from '../tipos/rotina.js';
+/** Persistência de agendamentos: operações relacionadas no mesmo módulo. */
+import { z } from "zod";
+import { lerLocal } from "../compartilhado/banco/lerLocal.js";
+import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
+import { Registro, registro, Rotina, rotinaSchema } from "./tipos/rotina.js";
+import { EstadoRot, estadoRot } from "./tipos/worker.js";
 
 export const lerAgenda = (base?: string): Registro =>
   lerLocal<Registro>(
@@ -35,3 +36,14 @@ export function alterarRotina(id: string, alterar: (rotina: Rotina) => void, bas
 }
 
 export const agendaPausada = (base?: string) => lerAgenda(base).pausaGlobal;
+
+export const lerEstadoDasRotinas = (base?: string): EstadoRot =>
+  lerLocal<EstadoRot>(
+    'agenda-estado.json',
+    estadoRot,
+    { version: 1, itens: {} },
+    base
+  );
+
+export const gravarEstadoDasRotinas = (estado: EstadoRot, base?: string) =>
+  gravarLocal('agenda-estado.json', estadoRot.parse(estado), base);

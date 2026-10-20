@@ -3,7 +3,7 @@ import { dialog } from "electron";
 import { autorizarDelegacaoDeIa } from "./regras/autorizarDelegacaoDeIa.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { lerPreferencias } from "../configuracoes/repositorio.js";
-import { regrasDosAgentes } from "../administracao/regras/agentesDaPlataforma.js";
+import { regrasDosAgentes } from "../administracao/servico.js";
 import { lerPerfil } from "./banco/lerPerfil.js";
 import { salvarPerfil } from "./banco/salvarPerfil.js";
 

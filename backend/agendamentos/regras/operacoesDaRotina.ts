@@ -1,5 +1,5 @@
 /** Operações de ciclo de vida das rotinas: pausa, retomada, conclusão e exclusão. */
-import { alterarRotina, gravarAgenda, lerAgenda } from '../banco/agenda.js';
+import { alterarRotina, gravarAgenda, lerAgenda } from '../repositorioAgenda.js';
 import { anotarNaRotina } from './anotarNaRotina.js';
 
 export function definirPausaGlobal(pausado: boolean, base?: string) {

@@ -1,5 +1,5 @@
 /** Controlador da funcionalidade administracao: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
-import { configuracaoDeAcesso, salvarConfiguracaoDeAcesso } from "./regras/papeis.js";
+import { configuracaoDeAcesso, salvarConfiguracaoDeAcesso } from "./servico.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { salvarEntradaDoProvedor } from "../login/regras/configuracaoDoLogin.js";
 

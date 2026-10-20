@@ -5,7 +5,7 @@ import { GrafoDeVinculos, LacunaDoMapa } from '../tipos/mapaDeVinculos.js';
 import { Espaco } from '../../projetos/contratos.js';
 import { catalogoDeTestes } from './catalogoDeTestes.js';
 import { listarRunsLocais } from '../banco/listarRunsLocais.js';
-import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
+import { listarTrabalhos } from '../../agendamentos/repositorioFila.js';
 import { listarPropostas } from '../../tickets/repositorio.js';
 import { listarRepositorioLocal } from './listarRepositorioLocal.js';
 

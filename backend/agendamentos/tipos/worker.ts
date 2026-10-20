@@ -1,6 +1,6 @@
 /** Formato dos eventos do worker, da trava de instância única e do estado de cada rotina. */
 import { z } from 'zod';
-import { executarK6 } from '../k6/executarK6.js';
+import { executarK6 } from '../servicoK6.js';
 import { ExecutavelK6 } from './k6.js';
 import { OperacaoServico } from '../../conexoes/tipos/adaptador.js';
 import { Executor } from '../../conexoes/tipos/operacoesExternas.js';

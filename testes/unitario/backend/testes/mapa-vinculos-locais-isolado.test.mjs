@@ -24,7 +24,7 @@ mock.module('../../../../dist/tickets/repositorio.js', { exports: { listarPropos
 } } });
 mock.module('../../../../dist/conexoes/banco/listarOperacoes.js', { exports: { listarOperacoes: () => [] } });
 mock.module('../../../../dist/testes/banco/listarRunsLocais.js', { exports: { listarRunsLocais: () => [] } });
-mock.module('../../../../dist/agendamentos/banco/listarTrabalhos.js', { exports: { listarTrabalhos: () => [] } });
+mock.module('../../../../dist/agendamentos/repositorioFila.js', { exports: { listarTrabalhos: () => [] } });
 mock.module('../../../../dist/testes/regras/catalogoDeTestes.js', { exports: { catalogoDeTestes: () => { throw new Error('Não pode consultar projeto real'); } } });
 
 const { mapaDeVinculos } = await import('../../../../dist/testes/regras/mapaDeVinculos.js');

@@ -1,8 +1,8 @@
 /** Publica o comentário de resultado no Jira uma única vez (confere se já existe pelo marcador) e registra o resultado. */
 import { createHash } from 'node:crypto';
 import { consumirPublicacao } from '../../agendamentos/autorizacoes/politicasDaAutorizacao.js';
-import { definirEstadoJiraDoTrabalho } from '../../agendamentos/banco/armazenamentoDaFila.js';
-import { obterTrabalho } from '../../agendamentos/banco/armazenamentoDaFila.js';
+import { definirEstadoJiraDoTrabalho } from '../../agendamentos/repositorioFila.js';
+import { obterTrabalho } from '../../agendamentos/repositorioFila.js';
 import { gravarPublicacoesJira } from '../banco/publicacoesJira.js';
 import { lerPublicacoesJira } from '../banco/publicacoesJira.js';
 import { codigoDoErroDePublicacao } from '../regras/codigoDoErroDePublicacao.js';

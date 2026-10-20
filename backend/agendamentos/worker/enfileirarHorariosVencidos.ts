@@ -1,8 +1,8 @@
 /** Para cada rotina ativa, põe na fila os horários vencidos que ainda dá tempo de rodar e registra como perdidos os que passaram. */
-import { enfileirar } from '../banco/enfileirar.js';
-import { listarRotinas } from '../banco/agenda.js';
-import { registrarPerdido } from '../banco/registrarPerdido.js';
-import { horariosVencidos } from '../regras/horariosVencidos.js';
+import { enfileirar } from '../repositorioFila.js';
+import { listarRotinas } from '../repositorioAgenda.js';
+import { registrarPerdido } from '../repositorioFila.js';
+import { horariosVencidos } from '../servicoHorarios.js';
 import { marcarHorarioTratado } from '../regras/operacoesDaRotina.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
 import { capacidadeDaRotinaAgendada } from './apoioDoWorker.js';

@@ -1,7 +1,7 @@
 /** Controlador da funcionalidade projetos: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { associarEspaco } from "./servicoProjetos.js";
-import { localizarK6 } from "../agendamentos/k6/localizarK6.js";
+import { localizarK6 } from "../agendamentos/servicoK6.js";
 import { contextoCompleto } from "../agentes/mcp/contextoCompleto.js";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { obterEspaco } from "./repositorio.js";

@@ -2,7 +2,7 @@
 import { matrizDePoliticas } from '../politicas/avaliarCapacidades.js';
 import { agentesChat } from '../tipos/persona.js';
 import { especializacoes } from '../tipos/politicas.js';
-import { regrasDosAgentes } from '../../administracao/regras/agentesDaPlataforma.js';
+import { regrasDosAgentes } from '../../administracao/servico.js';
 
 /** Retrato do roster para a interface: agentes do chat ligados às especializações e às políticas do projeto. */
 export function agentesDoChat(espacoId: string | null, base?: string) {

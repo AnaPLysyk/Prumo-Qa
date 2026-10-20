@@ -11,7 +11,7 @@ import { listarAtendimentos } from '../../../../dist/agentes/banco/listarAtendim
 import { avaliarAtendimento } from '../../../../dist/agentes/banco/avaliarAtendimento.js';
 import { pessoaDoConhecimento } from '../../../../dist/agentes/banco/pessoaDoConhecimento.js';
 import { entrarNaConta, sairDaConta } from '../../../../dist/login/regras/contas.js';
-import { criarContaPelaAdministracao } from '../../../../dist/administracao/regras/gestaoDeContas.js';
+import { criarContaPelaAdministracao } from '../../../../dist/administracao/servico.js';
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';
 import { criarPrimeiraConta } from '../../infra/contas-por-email.mjs';
 import { LIMITE_FOCO, normalizarFoco } from '../../../../dist/agentes/regras/normalizarFoco.js';

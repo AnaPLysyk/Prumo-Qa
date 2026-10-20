@@ -1,5 +1,5 @@
 /** Reúne apoio do worker da funcionalidade, mantendo cada operação identificável pelo nome. */
-import { capacidadeDoK6 } from "../k6/capacidadeDoK6.js";
+import { capacidadeDoK6 } from "../servicoK6.js";
 import { Rotina } from "../tipos/rotina.js";
 import { EstadoDoWorker, TipoEvento } from "../tipos/worker.js";
 import { ErroQa } from "../../compartilhado/erros/ErroQa.js";

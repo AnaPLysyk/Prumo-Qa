@@ -1,11 +1,11 @@
 /** Lista as rotinas para a tela Agendamentos, com próxima e última execução, permissões e autorizações. */
 import { estadoDaAutorizacao } from '../autorizacoes/estadoDaAutorizacao.js';
 import { lerAutorizacoes } from '../banco/autorizacoes.js';
-import { listarRotinas } from '../banco/agenda.js';
-import { listarTrabalhos } from '../banco/listarTrabalhos.js';
+import { listarRotinas } from '../repositorioAgenda.js';
+import { listarTrabalhos } from '../repositorioFila.js';
 import { capacidadesDaRotina } from './capacidadesDaRotina.js';
 import { permissoesDaRotina } from './permissoesDaRotina.js';
-import { proximoHorario } from './proximoHorario.js';
+import { proximoHorario } from '../servicoHorarios.js';
 
 export function listarAgenda(espacoId?: string, base?: string, agora = new Date()) {
   const trab = listarTrabalhos(base); const aut = lerAutorizacoes(base);

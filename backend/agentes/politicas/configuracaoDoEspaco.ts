@@ -1,7 +1,7 @@
 /** Lê as especializações e políticas da IA neste projeto (ou o padrão). */
 import { lerConfiguracaoDosAgentes } from '../banco/lerConfiguracaoDosAgentes.js';
 import { Configuracao, idsEsp } from '../tipos/politicas.js';
-import { especializacaoLigada } from '../../administracao/regras/agentesDaPlataforma.js';
+import { especializacaoLigada } from '../../administracao/servico.js';
 
 /** Sem configuração salva vale o padrão: todas as especializações habilitadas e as políticas padrão (comportamento anterior à 2.9). */
 export function configuracaoDoEspaco(espacoId: string, b?: string): Configuracao {

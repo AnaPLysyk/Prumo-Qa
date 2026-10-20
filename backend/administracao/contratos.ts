@@ -1,5 +1,19 @@
-/** Formato do mapa da Documentação viva: telas com interface, canais IPC, backend por papel e testes, gerado do código no build. */
-import { z } from 'zod';
+/** Lógica e contratos de administracao: operações relacionadas no mesmo módulo. */
+import { z } from "zod";
+
+/**
+ * Vale para todos os projetos deste computador, inclusive o servidor MCP: agente desligado não responde no chat nem
+ * aparece nas políticas do MCP; IA externa desligada impede delegar ao Claude Code ou ao Codex. O Prumo Orchestrator
+ * nunca é desligado (é quem conversa); a orquestração só decide se ele combina vários agentes numa resposta.
+ */
+export const agentesDaPlataformaSchema = z.object({
+  version: z.literal(1), desligados: z.array(z.string().min(1).max(40)).max(16), iaExterna: z.boolean(), orquestracao: z.boolean(),
+  alteradoEm: z.string().datetime().nullable(), por: z.string().max(200).nullable()
+}).strict();
+
+export type AgentesDaPlataforma = z.infer<typeof agentesDaPlataformaSchema>;
+
+export const agentesDaPlataformaPadrao: AgentesDaPlataforma = { version: 1, desligados: [], iaExterna: true, orquestracao: true, alteradoEm: null, por: null };
 
 const arquivo = z.object({ caminho: z.string().max(300), descricao: z.string().max(2000).nullable(), funcoes: z.array(z.string().max(120)).max(400), usadoPor: z.number().int().min(0) }).strict();
 
@@ -23,6 +37,9 @@ export const LIMITE_MAPA = 4 * 1024 * 1024;
 
 /** Código de cada arquivo do mapa, gerado no build em dist/documentacao/codigo.json (caminho → texto). Lido um arquivo por pedido. */
 export const LIMITE_CODIGO_TOTAL = 12 * 1024 * 1024;
+
 export const LIMITE_CODIGO_ARQUIVO = 200 * 1024;
+
 export const caminhoDeCodigoSchema = z.string().max(300).regex(/^(frontend|backend|testes)\/[A-Za-z0-9_./-]+\.(ts|js|mjs|cjs|css|html)$/).refine((c) => !c.split('/').includes('..'));
+
 export type CodigoDoArquivo = { caminho: string; texto: string; linhas: number; bytes: number; truncado: boolean };

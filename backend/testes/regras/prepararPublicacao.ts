@@ -1,5 +1,5 @@
 /** Mostra a prévia do comentário de resultado que seria publicado no Jira. */
-import { obterTrabalho } from '../../agendamentos/banco/armazenamentoDaFila.js';
+import { obterTrabalho } from '../../agendamentos/repositorioFila.js';
 import { publicacaoDoTrabalho } from '../banco/publicacaoDoTrabalho.js';
 import { montarComentario } from './montarComentario.js';
 import { obterEspaco } from '../../projetos/repositorio.js';

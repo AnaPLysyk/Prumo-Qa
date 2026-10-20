@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { agentesDaPlataformaParaJanela, especializacaoLigada, regrasDosAgentes, salvarAgentesDaPlataforma } from '../../../../dist/administracao/regras/agentesDaPlataforma.js';
+import { agentesDaPlataformaParaJanela, especializacaoLigada, regrasDosAgentes, salvarAgentesDaPlataforma } from '../../../../dist/administracao/servico.js';
 import { escolherAgente } from '../../../../dist/agentes/chat/escolherAgente.js';
 import { agentesDoChat } from '../../../../dist/agentes/chat/agentesDoChat.js';
 import { configuracaoDoEspaco } from '../../../../dist/agentes/politicas/configuracaoDoEspaco.js';

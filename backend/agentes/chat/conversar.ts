@@ -19,7 +19,7 @@ import { consultarIaExterna } from './consultarIaExterna.js';
 
 import { AgenteChat, agentesChat } from '../tipos/persona.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
-import { regrasDosAgentes } from '../../administracao/regras/agentesDaPlataforma.js';
+import { regrasDosAgentes } from '../../administracao/servico.js';
 import { Conhecimento, TipoConhecimento } from '../tipos/conhecimento.js';
 import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';

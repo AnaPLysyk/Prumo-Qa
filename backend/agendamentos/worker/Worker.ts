@@ -1,10 +1,10 @@
 /** Coordena o worker: agenda horários, executa tarefas e apresenta o estado à interface. */
 import { randomUUID } from 'node:crypto';
-import { agendaPausada, listarRotinas, obterRotina } from '../banco/agenda.js';
-import { enfileirar } from '../banco/enfileirar.js';
+import { agendaPausada, listarRotinas, obterRotina } from '../repositorioAgenda.js';
+import { enfileirar } from '../repositorioFila.js';
 import { lerTravaDoWorker } from '../banco/lerTravaDoWorker.js';
-import { listarTrabalhos } from '../banco/listarTrabalhos.js';
-import { proximoHorario } from '../regras/proximoHorario.js';
+import { listarTrabalhos } from '../repositorioFila.js';
+import { proximoHorario } from '../servicoHorarios.js';
 import { DepsWorker, EstadoDoWorker } from '../tipos/worker.js';
 import { capacidadeDaRotinaAgendada } from './apoioDoWorker.js';
 import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';

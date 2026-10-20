@@ -11,8 +11,8 @@ import { executarRunQaseAgendada } from './executarRunQaseAgendada.js';
 import { projetoDaRotina } from './apoioDoWorker.js';
 import { resultadoDaEvidencia } from './resultadosDasEvidencias.js';
 import { validarTicketAgendado } from './validarTicketAgendado.js';
-import { gravarEstadoDasRotinas } from '../banco/estadoDasRotinas.js';
-import { lerEstadoDasRotinas } from '../banco/estadoDasRotinas.js';
+import { gravarEstadoDasRotinas } from '../repositorioAgenda.js';
+import { lerEstadoDasRotinas } from '../repositorioAgenda.js';
 
 async function analisarMudancasAgendada(e: EstadoDoWorker, r: Rotina): Promise<ResultadoTrabalho> {
   if (!e.d.servicos) return { status: 'BLOCKED', motivo: 'SERVICES_UNAVAILABLE: conexões de serviço indisponíveis neste processo.' };

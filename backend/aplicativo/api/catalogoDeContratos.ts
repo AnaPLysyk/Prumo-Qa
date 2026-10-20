@@ -1,6 +1,6 @@
 /** Lista oficial do que a janela (IPC) e os agentes de IA (MCP) podem pedir ao Prumo, com o formato de cada pedido e sua explicação. */
 import { z } from 'zod';
-import { caminhoDeCodigoSchema } from '../../administracao/tipos/mapaDoAplicativo.js';
+import { caminhoDeCodigoSchema } from '../../administracao/contratos.js';
 import { ambientes, dadosRotinaSchema } from '../../agendamentos/tipos/rotina.js';
 import { tiposConhecimento } from '../../agentes/tipos/conhecimento.js';
 import { papeis } from '../../agentes/tipos/persona.js';

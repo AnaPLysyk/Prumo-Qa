@@ -1,5 +1,5 @@
 /** Controlador da funcionalidade administracao: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
-import { alterarContaPelaAdministracao, criarContaPelaAdministracao, desbloquearConta, excluirConta, listarContasDeAcesso, redefinirSenhaPelaAdministracao } from "./regras/gestaoDeContas.js";
+import { alterarContaPelaAdministracao, criarContaPelaAdministracao, desbloquearConta, excluirConta, listarContasDeAcesso, redefinirSenhaPelaAdministracao } from "./servico.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { ativarLogin } from "../login/regras/contas.js";
 

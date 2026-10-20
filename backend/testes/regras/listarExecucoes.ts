@@ -1,6 +1,6 @@
 /** Lista o histórico real das execuções com os filtros informados pela interface. */
-import { listarRotinas } from '../../agendamentos/banco/agenda.js';
-import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
+import { listarRotinas } from '../../agendamentos/repositorioAgenda.js';
+import { listarTrabalhos } from '../../agendamentos/repositorioFila.js';
 import { Trabalho } from '../../agendamentos/tipos/fila.js';
 import { listarEspacos } from '../../projetos/repositorio.js';
 import { Espaco } from '../../projetos/contratos.js';

@@ -1,5 +1,5 @@
 /** Lógica e contratos de inicio: operações relacionadas no mesmo módulo. */
-import { listarTrabalhos } from "../agendamentos/banco/listarTrabalhos.js";
+import { listarTrabalhos } from "../agendamentos/repositorioFila.js";
 import { dataEmPortugues } from "../compartilhado/texto/dataEmPortugues.js";
 import { semAcentos } from "../compartilhado/texto/semAcentos.js";
 import { listarContextosDaPasta } from "../agentes/regras/listarContextosDaPasta.js";
