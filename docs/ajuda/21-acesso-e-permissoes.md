@@ -35,7 +35,7 @@ Num computador sem contas, a tela de entrada oferece três caminhos para criar a
 - **Criar conta**: informe seu nome, e-mail e senha (pelo menos 10 caracteres, incluindo letras e números). O Prumo envia um código de 6 dígitos para seu e-mail. Digite o código para criar a conta e entrar. Ele vale por 10 minutos. Se não chegar, confira o spam e use **Reenviar código** depois de um minuto.
 - **Continuar com GitHub / Google**: autorize sua identidade no navegador. A identidade pública do aplicativo deve ser registrada uma vez pelo mantenedor antes de distribuir; o login nunca pede Client ID, segredo nem token ao usuário. No GitHub, a autorização inclui um código curto digitado no navegador. Repositórios são independentes.
 
-Abaixo do cartão ficam o **idioma** (português ou inglês, já vale na entrada) e **Site e documentação**, que abre o site oficial no navegador.
+Abaixo do cartão ficam o **idioma** (português ou inglês, já vale na entrada) e **Site e documentação**, que abre o site oficial no navegador. Em janelas estreitas e baixas, a vitrine decorativa é compactada para manter os campos e o rodapé visíveis. Formulários maiores, como o cadastro da primeira conta, permitem rolagem na própria entrada.
 
 A primeira conta recebe a marca admin. Se foi criada por e-mail, você entra com e-mail e senha (ou login curto). Se foi criada pelo GitHub ou Google, entre novamente pelo mesmo provedor.
 

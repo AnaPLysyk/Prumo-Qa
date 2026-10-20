@@ -70,3 +70,12 @@ test('módulos do login são carregados na ordem correta', () => {
   assert.match(principal,/PrumoMensagensEntrada/);assert.match(principal,/PrumoLoginRemoto/);
   assert.doesNotMatch(principal,/function vistaCadastrarRemoto/);
 });
+
+test('entrada mantém rolagem e compacta somente o visual em janelas estreitas e baixas', () => {
+  const css = fs.readFileSync('frontend/login/entrada.css', 'utf8');
+  assert.match(css, /\.entrada\s*\{[^{}]*overflow:\s*auto/);
+  assert.match(css, /@media\s*\(max-width:\s*860px\)\s*and\s*\(max-height:\s*700px\)\s*\{/);
+  assert.match(css, /\.entrada-orbita\s*\{\s*display:\s*none/);
+  assert.match(css, /\.entrada-palco\s*\{\s*gap:\s*12px;\s*padding:\s*12px 20px/);
+  assert.match(css, /\.entrada-versao\s*\{[^{}]*white-space:\s*nowrap/);
+});
