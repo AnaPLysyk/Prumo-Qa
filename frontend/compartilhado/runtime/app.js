@@ -98,7 +98,13 @@ async function mostrar(aba) {
   if (estado.root && !nome && consultou) estado.root = null;
   // 2.10.2: um só nome de projeto atual para lateral, Suporte e Projetos (inclusive pasta com contrato local, como a demonstração).
   if (nome || consultou) { estado.projetoNome = nome ? (nome.nome || nome.name || nome.id) : null; estado.projetoLegado = !!nome && !estado.espaco; $('#projeto-atual').textContent = estado.projetoNome || 'nenhum selecionado'; }
-  try { await abas[aba](el); } catch (e) { if (token === estado.render) avisar('Falha ao carregar a seção.', true); }
+  try { await abas[aba](el); } catch {
+    if (token !== estado.render) return;
+    // Uma tela parcialmente montada não deve substituir o conteúdo por uma área incompleta.
+    el.replaceChildren(DS.estadoTela('erro', 'Não foi possível abrir esta tela', 'A seção falhou ao carregar. Tente novamente.',
+      [DS.acao('Tentar novamente', () => mostrar(aba), { icone: 'atualizar' })], { id: 'tela-falha-carregamento' }));
+    avisar('Falha ao carregar a seção.', true);
+  }
   if (token !== estado.render) return;
   $('#conteudo').replaceChildren(...el.childNodes);
   if (typeof montarSeletorProjeto === 'function') montarSeletorProjeto();
@@ -114,6 +120,7 @@ async function mostrar(aba) {
   for (const b of document.querySelectorAll('#nav button')) b.addEventListener('click', () => mostrar(b.dataset.aba));
   iniciarMenu();
   await iniciarAgenda();
-  mostrar('inicio');
+  // Abre diretamente uma tela permitida; não exibe Início bloqueado antes de redirecionar.
+  void mostrar(window.PrumoConta?.telaInicial?.() || 'inicio');
   iniciarNotificacoes();
 })();

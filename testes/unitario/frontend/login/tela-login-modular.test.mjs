@@ -79,3 +79,53 @@ test('entrada mantém rolagem e compacta somente o visual em janelas estreitas e
   assert.match(css, /\.entrada-palco\s*\{\s*gap:\s*12px;\s*padding:\s*12px 20px/);
   assert.match(css, /\.entrada-versao\s*\{[^{}]*white-space:\s*nowrap/);
 });
+
+
+test('início escolhe a primeira tela autorizada sem disparar navegação duplicada', async () => {
+  const fonte = fs.readFileSync('frontend/login/entrarNaConta.js', 'utf8');
+  const bootstrap = fs.readFileSync('frontend/compartilhado/runtime/app.js', 'utf8');
+  assert.match(bootstrap, /mostrar\(window\.PrumoConta\?\.telaInicial\?\.\(\) \|\| 'inicio'\)/);
+  assert.doesNotMatch(fonte, /setTimeout\(\(\) => mostrar\(p\)/);
+
+  async function primeiraAutorizada(permissoes) {
+    const botoes = ['inicio', 'testes', 'ajuda'].map(aba => ({ dataset: { aba }, hidden: false }));
+    const navegações = [];
+    const h = (tag, attrs) => ({
+      tag, attrs, append() {}, addEventListener() {}, setAttribute() {}
+    });
+    const contexto = {
+      window: {
+        PrumoMensagensEntrada: { codigoDo: (x) => x, mensagemDaEntrada: (x) => x },
+        PrumoLoginRemoto: () => ({ vistaServicoIndisponivel() {}, vistaEntrarRemota() {}, vistaCadastrarRemoto() {}, vistaRecuperarRemoto() {} }),
+        PrumoEntradaProvedores: () => ({ botoes: () => [] })
+      },
+      api: {
+        preferencias: async () => ({ ok: true, data: {} }),
+        contaSessao: async () => ({
+          ok: true,
+          data: { loginAtivo: true, usuario: { nome: 'Exemplo', login: 'qa', papelNome: 'QA' }, telas: permissoes }
+        })
+      },
+      DS: { iniciais: () => 'EX' },
+      h,
+      tr: (s) => s,
+      localStorage: { getItem: () => null },
+      clearInterval() {},
+      setInterval: () => 1,
+      document: {
+        addEventListener() {},
+        querySelectorAll: (seletor) => seletor === '#nav button[data-aba]' ? botoes : [],
+        querySelector: (seletor) => seletor === '.topo-direita' ? { prepend() {} } : null
+      },
+      mostrar: async (aba) => { navegações.push(aba); }
+    };
+    vm.runInNewContext(fonte, contexto, { filename: 'entrarNaConta.js' });
+    assert.equal(await contexto.window.PrumoConta.iniciar(), true);
+    assert.deepEqual(navegações, [], 'o login não navega antes da janela iniciar');
+    return contexto.window.PrumoConta.telaInicial();
+  }
+
+  assert.equal(await primeiraAutorizada({ inicio: 'NENHUM', testes: 'VER', ajuda: 'VER' }), 'testes');
+  assert.equal(await primeiraAutorizada({ inicio: 'USAR', testes: 'VER', ajuda: 'VER' }), 'inicio');
+  assert.equal(await primeiraAutorizada({ inicio: 'NENHUM', testes: 'NENHUM', ajuda: 'VER' }), 'ajuda');
+});

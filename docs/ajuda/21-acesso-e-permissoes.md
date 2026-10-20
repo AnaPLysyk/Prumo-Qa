@@ -51,6 +51,8 @@ Cada papel tem um nível por tela de trabalho:
 
 O papel Administrador é fixo e pode usar todas as telas de trabalho. Crie outros papéis em **Administração › Permissões**, começando de um papel existente. O Prumo verifica a permissão a cada pedido; esconder um botão não protege a ação.
 
+Após o login, o Prumo abre **Início** quando a pessoa tem acesso. Caso contrário, abre diretamente a primeira tela autorizada no menu, sem mostrar brevemente uma tela bloqueada.
+
 ## Marca admin
 
 Só contas com a marca admin podem abrir **Administração**, que reúne usuários, permissões, agentes da plataforma, configurações gerais e documentação viva. O papel não muda essa regra: um Administrador sem a marca não entra, mas uma conta com papel comum e a marca pode entrar.

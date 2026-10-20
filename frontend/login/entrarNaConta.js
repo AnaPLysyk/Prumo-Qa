@@ -305,8 +305,8 @@ window.PrumoConta = (() => {
     if (sessao.loginAtivo && !sessao.usuario) { vistaEntrar(sessao.expirou ? 'A sessão terminou por inatividade; entre de novo.' : null); return false; }
     if (sessao.usuario?.trocarSenha) { vistaTrocar(); return false; }
     await salvarIdiomaPendente();
+    // O aplicativo escolhe a primeira tela autorizada após esta inicialização; não dispara duas navegações.
     aplicarMenu(); protegerTelas();
-    if (sessao.loginAtivo && !pode('inicio')) { const p = primeiraTela(); setTimeout(() => mostrar(p), 0); }
     // A sessão vence por inatividade no processo principal; a janela confere a cada minuto (sem renovar) e volta para a entrada.
     clearInterval(vigia);
     if (sessao.loginAtivo) vigia = setInterval(async () => { const s = await api.contaSessao(); if (s.ok && s.data.loginAtivo && !s.data.usuario) { clearInterval(vigia); vistaEntrar(tr('A sessão terminou por inatividade; entre de novo.')); } }, 60_000);
@@ -332,5 +332,5 @@ window.PrumoConta = (() => {
   };
   /** Redefinir a senha pelo e-mail, a partir do Meu perfil: a mesma tela do Esqueci a senha, com o e-mail da conta. */
   const redefinirSenha = () => { if (!sessao?.usuario) return; DS.fecharModal?.(); vistaRecuperar(); };
-  return { iniciar, tratarErro, pode, soVer, sessao: () => sessao, sair, redefinirSenha, abrirMinhaConta: () => { if (sessao?.usuario) minhaConta(); } };
+  return { iniciar, tratarErro, pode, soVer, telaInicial: () => pode('inicio') ? 'inicio' : primeiraTela(), sessao: () => sessao, sair, redefinirSenha, abrirMinhaConta: () => { if (sessao?.usuario) minhaConta(); } };
 })();
