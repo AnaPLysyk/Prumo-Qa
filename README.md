@@ -11,6 +11,8 @@ Prumo QA é um aplicativo desktop para gestão local de projetos, integrações,
 - `docs/`: documentação oficial, origem do projeto e arquitetura.
 - `site/`: geração do site público e documentação estatica.
 - `assets/`: ativos visuais e imagens de apoio.
+- `dist/`: saída gerada pelo build (backend compilado e interface em `dist/renderer/`). Não editar nem versionar; alterações devem ser feitas nas fontes `backend/` e `frontend/`.
+- `release/`: instaladores produzidos a partir do build. Também não é código-fonte.
 
 ## Arquitetura por tela
 
