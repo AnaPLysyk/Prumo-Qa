@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 export const raiz = fileURLToPath(new URL('../../', import.meta.url));
-export const naturezas = ['unitario', 'smoke', 'regressao'];
+export const naturezas = ['unitario'];
 export const camadas = ['backend', 'frontend'];
 export function arquivosDeTeste(base = raiz, pasta = 'testes') {
   return fs.readdirSync(path.join(base, pasta), { withFileTypes: true }).flatMap(e => {

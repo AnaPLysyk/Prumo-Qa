@@ -1,5 +1,5 @@
 // Gera docs/CONTRATOS.md a partir do catálogo real (backend/aplicativo/api/catalogoDeContratos.ts), a mesma fonte da tela Ajuda › Integrações técnicas.
-// Uso: npm run contratos        (o teste testes/regressao/backend/aplicativo/contratos.test.mjs falha se o arquivo estiver desatualizado)
+// Uso: npm run contratos        (o teste Prumo-QA-Lab/automacao/prumo-qa/testes/regressao/backend/aplicativo/contratos.test.mjs falha se o arquivo estiver desatualizado)
 import fs from 'node:fs';
 import { catalogo } from '../../dist/aplicativo/api/catalogoDeContratos.js';
 

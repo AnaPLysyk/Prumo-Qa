@@ -101,7 +101,7 @@ Na tela `frontend/conexoes/`:
 
 No backend, `backend/conexoes/api/` recebe os pedidos IPC; `banco/` protege e recupera credenciais; `integracoes/`, `github/` e `ia/` acessam os sistemas correspondentes; `escrita/` verifica permissões e registra operações; `tipos/` contém os contratos. Nenhuma dessas pastas substitui `backend/login/`.
 
-Para conferir o comportamento do formulário sem enviar credenciais reais, execute `node --test testes/unitario/frontend/conexoes/campos-por-servico.test.mjs testes/regressao/frontend/conexoes/mensagens-login-qase.test.mjs`. O teste visual completo e a homologação real das permissões externas ainda são etapas separadas.
+Para conferir o comportamento do formulário sem enviar credenciais reais, execute `node --test testes/unitario/frontend/conexoes/campos-por-servico.test.mjs no Prumo QA e node automacao/prumo-qa/executar.mjs --tipo regressao --arquivo frontend/conexoes/mensagens-login-qase.test.mjs no Prumo QA Lab`. O teste visual completo e a homologação real das permissões externas ainda são etapas separadas.
 
 ## Manutenção da tela Agentes
 

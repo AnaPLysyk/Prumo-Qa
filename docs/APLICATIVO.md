@@ -108,7 +108,7 @@ Com **Smart App Control** (ou Controle de Aplicativo) em modo ativo, o Windows b
 
 ## Atualizar de uma versão anterior
 
-Instale a nova versão sobre a antiga (mesma pasta). Projetos vinculados, histórico, métricas e evidências ficam em `%LOCALAPPDATA%\PrumoQA` e nos projetos, fora da pasta de instalação, e são preservados. Os testes de atualização sobre dados reais (`testes/regressao/frontend/aplicativo/migracao*.test.mjs`) exigem o executável e o perfil instalados e hoje não rodam no CI. Conexões MCP continuam válidas enquanto o executável permanecer na mesma pasta; se mudar, reconfigure em Conexões. Nada é reconfigurado em silêncio.
+Instale a nova versão sobre a antiga (mesma pasta). Projetos vinculados, histórico, métricas e evidências ficam em `%LOCALAPPDATA%\PrumoQA` e nos projetos, fora da pasta de instalação, e são preservados. Os testes de atualização sobre dados reais (`Prumo-QA-Lab/automacao/prumo-qa/testes/regressao/frontend/aplicativo/migracao*.test.mjs`) exigem o executável e o perfil instalados e hoje não rodam no CI. Conexões MCP continuam válidas enquanto o executável permanecer na mesma pasta; se mudar, reconfigure em Conexões. Nada é reconfigurado em silêncio.
 
 ## Instalar em outra máquina
 

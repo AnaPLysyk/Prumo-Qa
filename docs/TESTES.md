@@ -1,39 +1,38 @@
-# Seleção e organização dos testes
+# Testes e CI/CD
 
-Os arquivos ficam em `testes/<natureza>/<camada>/<módulo>/`: natureza `unitario`, `smoke` ou `regressao`; camada `backend` ou `frontend`; módulo igual à pasta da tela em `backend/` ou `frontend/` (ou `compartilhado`). Auxiliares ficam em `testes/apoio/`. Não há catálogo: o caminho do arquivo é a classificação, e `testes/unitario/backend/compartilhado/seletor-testes.test.mjs` recusa arquivo fora do lugar. Migração (`migracao*.test.mjs`) depende do perfil instalado e só roda no workflow de instalação.
+## Onde ficam os testes
 
-Exemplos:
+No aplicativo Prumo QA, `testes/unitario/<camada>/<tela>/*.test.mjs` guarda apenas testes unitários de frontend e backend. `testes/apoio/` contém as fixtures e os scripts essenciais para unidade, compilação, documentação, segurança do CI e construção do site; esses auxiliares não são uma suíte adicional.
+
+Os testes de fumaça, regressão, interfaces reais, integração, migração simulada e automação de ponta a ponta pertencem ao repositório **Prumo-QA-Lab**: `automacao/prumo-qa/testes/smoke/` e `automacao/prumo-qa/testes/regressao/`. A aplicação fictícia `aplicacao/` e os cenários de avaliação do Lab continuam independentes.
+
+## Comandos do Prumo QA
 
 ```powershell
-node testes/apoio/executar.mjs --listar
-node testes/apoio/executar.mjs --natureza smoke
-node testes/apoio/executar.mjs --natureza unitario --camada backend --listar
-node testes/apoio/executar.mjs --camada frontend --modulo agentes --listar
+npm run build
+npm run test:unitarios
+npm test
+npm run check
+npm run test:selecionar -- --natureza unitario --camada backend --listar
 ```
 
-Os filtros combinam com AND e valores desconhecidos falham. `--listar` apenas lê as pastas; não importa módulos da aplicação e não abre banco, janela ou rede.
+`npm test` faz build seguido de **somente unitários**. O seletor recusa outras naturezas. `npm run check:isolado` também é restrito aos unitários e aplica o bloqueador de efeitos, mas não é um sandbox do sistema operacional.
 
-A execução usa `node:test`, concorrência 1, module mocks e o hook atual `testes/apoio/conhecimento-hook.cjs`, que substitui conhecimento por memória. Não existe build implícito: os testes que importam `dist/` exigem build prévio. Não há interface para comandos arbitrários ou caminhos de teste fornecidos pelo usuário.
+## Automação externa com Prumo QA Lab
 
-O runner exclui testes `migracao*.test.mjs` da execução normal, com ou sem filtros, e registra cada um como `NOT_RUN|MIGRACAO_PERFIL_REAL`. O teste de migração do perfil instalado exige uma execução separada e autorizada; não há autorização para rodá-lo pelo seletor. A presença de qualquer valor em `PRUMO_APP_EXE` ou `PRUMO_MIGRACAO*` bloqueia a execução normal. O plano também rejeita migrações caso sejam passadas diretamente a ele. Nenhuma opção deste seletor remove essas barreiras.
+Nos dois repositórios lado a lado, execute `npm ci` e `npm run build` no Prumo QA; em seguida, no Lab:
 
-Os testes reais de UI continuam dependendo da janela e das fixtures existentes; serviços externos não são autorização para testes contra contas reais. O hook não fornece sandbox de sistema operacional. Estes comandos não devem receber segredos ou acesso a banco real. `npm.cmd run check` continua sendo o gate principal após alterações.
+```powershell
+npm run test:prumo:smoke
+npm run test:prumo:regressao
+```
 
-Verificação do seletor: `node --test testes/unitario/backend/compartilhado/seletor-testes.test.mjs`. Esses testes conferem a organização real, filtros com fixtures em memória, argumentos do runner e recusa de perfil real sem executar a seleção. O seletor não inventa aprovação humana e preserva códigos de saída e falhas do Node.
+O executor `automacao/prumo-qa/executar.mjs` copia temporariamente os arquivos externos para a estrutura esperada pelas fixtures existentes, executa os testes contra o Prumo QA compilado e apaga apenas os arquivos que ele próprio criou. Se encontrar um arquivo no destino, recusa sobrescrevê-lo. Dados, perfis reais e credenciais externas não são necessários.
 
-`npm run check:isolado` (ou `test:selecionar -- --isolado`) roda só o que não precisa de janela: arquivos que usam o Electron ou de migração ficam `NOT_RUN|motivo|arquivo`, e `testes/apoio/bloquear-efeitos.cjs` recusa abrir navegador, carregar driver SQLite e conectar fora de localhost. Não é sandbox do sistema, e a falha de um teste selecionado continua falha; `--isolado --listar` mostra a divisão sem executar.
+## Pipeline de publicação
 
-O `npm test` também usa esse seletor após o build, sem ignorar os bloqueios de migração. Os scripts npm `test:unitarios`, `test:smoke`, `test:regressao`, `test:backend` e `test:frontend` usam esse mesmo seletor; `test:selecionar -- --modulo agentes` permite combinações. Faça o build antes de executar os testes que usam `dist/`.
+Em *pull requests* e pushes, o GitHub Actions valida tipos, build e testes unitários do Prumo QA. A pipeline continua gerando e verificando instaladores conforme suas regras.
 
-No contrato do próprio Prumo, `nucleo` executa arquivos sem janela, incluindo contratos, integração e persistência sintética; não significa apenas testes unitários. `unidade` permanece como alias compatível. `janela-1`…`janela-3` distribuem os arquivos Electron existentes. Todos continuam sujeitos à autenticação humana ao serem executados pelo produto.
+Antes de publicar uma **tag de release Windows**, o workflow baixa o Prumo-QA-Lab em um commit fixado e executa o smoke, a regressão e o smoke do executável empacotado a partir do Lab. Se falhar, a release não é publicada. O Lab dispõe de workflow próprio para testes do laboratório e para disparar homologação externa sob demanda. Isso não substitui homologação manual de OAuth nem de serviços reais.
 
-O adaptador `backend/testes/reporters/prumo-node-reporter.mjs` transforma eventos de cada caso em resultados Prumo.  Skip e TODO viram `NOT_RUN`, suites agregadas não duplicam casos, e o processo com falha permanece `FAIL`. Um teste com subprocesso sintético confere eventos reais de PASS, FAIL, skip e TODO; isso não representa execução autorizada da capability do próprio Prumo.
-
-## Conexões, login e jornada manual
-
-- `conexoes-aparecem-nos-modulos` e `conexoes-alimentam-testes-e-tickets`: GitHub, Qase e Jira alimentam Projetos, Testes e Tickets; sem Qase e sem Jira as abas seguem usáveis, e a run sem Qase usa casos locais.
-- `jornada-manual-e-publicacao`: tudo local sem conexão (run, resultado manual, rascunho de bug); depois de conectar, publicação no Qase, no Jira e no GitHub. Run com caso local nunca vai ao Qase.
-- `entrada-pelo-github` (unitário e de tela) e `abre-na-entrada`: login por GitHub e Google com retorno local real e provedor simulado, primeiro acesso, nada habilitado sem concluir. O navegador é um double.
-- `chat-claude-codex` e `localizar-cliente-de-ia`: chat com executor falso, travas dos argumentos e busca do CLI. Nenhum CLI real roda.
-
-Os arquivos ficam em `testes/<natureza>/<camada>/<módulo>/`. Os testes de janela usam `abrir()`, que faz o primeiro acesso com a conta de teste; `{ semLogin: true }` testa a própria entrada.
+Os nomes `smoke` e `regressao` continuam disponíveis como categorias de testes dos projetos que a plataforma gerencia; isso não significa que suas suítes internas estejam no repositório do aplicativo.

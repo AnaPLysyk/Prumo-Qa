@@ -1,6 +1,6 @@
 name: Windows — unitários, instalador e release
 
-# Push e PR: unitários. Tag v*: unitários, smoke, regressão e smoke do executável empacotado antes de publicar.
+# Push e PR: unitários. Tag v*: unitários no Prumo QA e smoke/regressão do Prumo QA Lab (commit fixado) antes de publicar.
 # Preserva publicação verificada do instalador, catálogo de versões e site.
 on:
   push:
@@ -24,14 +24,15 @@ jobs:
       contents: write
       actions: write   # dispara o fluxo do site depois de marcar a versão como publicada
     env:
-      # Prumo QA Lab público, fixado por commit: a demonstração 2.8 usa uma CÓPIA dele; o laboratório não é alterado nem entra no instalador.
+      # Prumo QA Lab público, fixado por commit: a suite externa de smoke/regressão vem de um commit imutável; o laboratório não entra no instalador.
       PRUMO_LAB_DIR: ${{ github.workspace }}\.lab
     steps:
       - uses: actions/checkout@v5
       - uses: actions/checkout@v5
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           repository: AnaPLysyk/Prumo-QA-Lab
-          ref: 8808e57c5c997975f6588af00d4bb52fe642861a
+          ref: 56af1f0a76fd9767c0d167af1686ded2cbc1abd9
           path: .lab
       - uses: actions/setup-node@v5
         with:
@@ -52,9 +53,9 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         run: |
-          npm run test:smoke
+          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo smoke
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          npm run test:regressao
+          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo regressao
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Gerar instalador
         run: npm run dist
@@ -63,7 +64,7 @@ jobs:
         shell: pwsh
         run: |
           $env:PRUMO_APP_EXE = (Resolve-Path 'release/win-unpacked/Prumo QA.exe').Path
-          node --require ./testes/apoio/conhecimento-hook.cjs --experimental-test-module-mocks --test --test-concurrency=1 testes/smoke/frontend/aplicativo/todas-as-telas.test.mjs
+          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo smoke --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: SHA-256 do instalador
         shell: pwsh

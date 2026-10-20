@@ -20,8 +20,8 @@ test('E2E fica NOT_RUN; entram sÃ³ arquivos sem janela, inclusive migraÃ§Ã�
   t.after(() => fs.rmSync(base, { recursive: true, force: true }));
   const nomes = [
     'testes/unitario/backend/compartilhado/seguro.test.mjs',
-    'testes/regressao/frontend/projetos/visual.test.mjs',
-    'testes/regressao/frontend/aplicativo/migracao-lab.test.mjs'
+    'testes/unitario/frontend/projetos/visual.test.mjs',
+    'testes/unitario/frontend/aplicativo/migracao-lab.test.mjs'
   ];
   const helper = ['janela', '.mjs'].join('');
   for (const n of nomes) fs.mkdirSync(path.join(base, path.dirname(n)), { recursive: true });

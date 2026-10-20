@@ -6,7 +6,7 @@ Prumo QA é um aplicativo desktop para gestão local de projetos, integrações,
 
 - `frontend/`: telas, componentes visuais e interações da interface.
 - `backend/`: regras, APIs IPC, persistência local e lógica de negócio.
-- `testes/`: testes automáticos, fixtures e cenários de regressão.
+- `testes/`: apenas testes unitários e auxiliares necessários ao build e CI/CD. Smoke, regressão e automação ficam no repositório independente `Prumo-QA-Lab/automacao/prumo-qa/`.
 - `frontend/construcao/`: geração e sincronização da interface. Scripts de apoio estão organizados em `testes/apoio/`, `docs/geradores/` e `site/release/`.
 - `docs/`: documentação oficial, origem do projeto e arquitetura.
 - `site/`: geração do site público e documentação estatica.
