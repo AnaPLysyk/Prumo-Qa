@@ -2,9 +2,9 @@
 import { Projeto } from '../compartilhado/tipos/projeto.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
 import { calcularMetricas } from '../metricas/regras/calcularMetricas.js';
-import { avisarHistoricoIncompleto } from './avisarHistoricoIncompleto.js';
-import { imprimirJson } from './imprimirJson.js';
-import { textoSeguroNoTerminal } from './textoSeguroNoTerminal.js';
+import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
+import { imprimirJson } from './saidaDoTerminal.js';
+import { textoSeguroNoTerminal } from './saidaDoTerminal.js';
 
 export function comandoMetricas(p:Projeto,json=false) {
   const m=calcularMetricas(consultarAtividades(p));avisarHistoricoIncompleto(m.problems);

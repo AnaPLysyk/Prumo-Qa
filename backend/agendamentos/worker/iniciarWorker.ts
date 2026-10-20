@@ -3,7 +3,7 @@ import { lerTravaDoWorker } from '../banco/lerTravaDoWorker.js';
 import { recuperarInterrompidos } from '../banco/recuperarInterrompidos.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
 
-import { emitirEventoDoWorker } from './emitirEventoDoWorker.js';
+import { emitirEventoDoWorker } from './apoioDoWorker.js';
 import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';
 import { processoVivo } from './processoVivo.js';
 import { passadaDoWorker } from './passadaDoWorker.js';

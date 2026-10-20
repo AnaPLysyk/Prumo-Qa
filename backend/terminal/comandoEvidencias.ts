@@ -2,8 +2,8 @@
 import { Projeto } from '../compartilhado/tipos/projeto.js';
 import { consultarEvidencias } from '../testes/banco/consultarEvidencias.js';
 import { chamadaRegistrada } from './chamadaRegistrada.js';
-import { imprimirJson } from './imprimirJson.js';
-import { textoSeguroNoTerminal } from './textoSeguroNoTerminal.js';
+import { imprimirJson } from './saidaDoTerminal.js';
+import { textoSeguroNoTerminal } from './saidaDoTerminal.js';
 
 export async function comandoEvidencias(p:Projeto,id?:string,json=false) {
   const r=await chamadaRegistrada(p,'consultar_evidencias',{jobId:id},()=>consultarEvidencias(p,id));

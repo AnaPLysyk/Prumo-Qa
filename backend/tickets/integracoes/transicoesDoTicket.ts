@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
 import { Recurso } from '../../projetos/tipos/espacos.js';
-import { projetoDoTicket } from './projetoDoTicket.js';
+import { projetoDoTicket } from './formatoDoTicket.js';
 
 export async function transicoesDoTicket(ctx: ContextoServico, rec: Recurso, t: string) {
   await projetoDoTicket(ctx, rec, t);

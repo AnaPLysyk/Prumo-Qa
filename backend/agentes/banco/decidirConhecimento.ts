@@ -1,7 +1,7 @@
 /** Aprova ou descarta um conhecimento. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
 import { falharConhecimento } from './validacoesDoConhecimento.js';
-import { linhaParaConhecimento } from './linhaParaConhecimento.js';
+import { linhaParaConhecimento } from './formatosDoConhecimento.js';
 import { Conhecimento, EstadoConhecimento, Linha } from '../tipos/conhecimento.js';
 
 /** Aprovar ou descartar é ato da pessoa (janela ou chip do chat). */

@@ -2,8 +2,8 @@
 import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { enderecoDoTicket } from './enderecoDoTicket.js';
-import { projetoDoTicket } from './projetoDoTicket.js';
+import { enderecoDoTicket } from './formatoDoTicket.js';
+import { projetoDoTicket } from './formatoDoTicket.js';
 import { vincular } from '../tipos/escritaJira.js';
 
 export const vincularTickets: DefOperacao<z.infer<typeof vincular>> = {

@@ -1,7 +1,7 @@
 /** Ferramenta MCP listar_politicas: mostra à IA o que ela pode e não pode pedir neste projeto (especializações e capacidades, com o motivo). */
 import { z } from 'zod';
 import { configuracaoDoEspaco } from '../politicas/configuracaoDoEspaco.js';
-import { matrizDePoliticas } from '../politicas/matrizDePoliticas.js';
+import { matrizDePoliticas } from '../politicas/avaliarCapacidades.js';
 import { MeiosDoServidorMcp, somenteLeitura } from '../tipos/mcp.js';
 import { especializacoes } from '../tipos/politicas.js';
 

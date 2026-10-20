@@ -5,7 +5,7 @@ import { localizarK6 } from '../k6/localizarK6.js';
 import { ResultadoTrabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
-import { projetoDaRotina } from './projetoDaRotina.js';
+import { projetoDaRotina } from './apoioDoWorker.js';
 import { resultadoDaEvidencia } from './resultadosDasEvidencias.js';
 
 export async function executarK6Agendado(e: EstadoDoWorker, r: Rotina, manual: boolean): Promise<ResultadoTrabalho> {

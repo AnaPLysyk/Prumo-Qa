@@ -6,7 +6,7 @@ import { lerTravaDoWorker } from '../banco/lerTravaDoWorker.js';
 import { listarTrabalhos } from '../banco/listarTrabalhos.js';
 import { proximoHorario } from '../regras/proximoHorario.js';
 import { DepsWorker, EstadoDoWorker } from '../tipos/worker.js';
-import { capacidadeDaRotinaAgendada } from './capacidadeDaRotinaAgendada.js';
+import { capacidadeDaRotinaAgendada } from './apoioDoWorker.js';
 import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';
 import { iniciarWorker } from './iniciarWorker.js';
 import { passadaDoWorker } from './passadaDoWorker.js';

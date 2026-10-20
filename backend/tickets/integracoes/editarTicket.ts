@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { enderecoDoTicket } from './enderecoDoTicket.js';
-import { projetoDoTicket } from './projetoDoTicket.js';
-import { textoParaAdf } from './textoParaAdf.js';
+import { enderecoDoTicket } from './formatoDoTicket.js';
+import { projetoDoTicket } from './formatoDoTicket.js';
+import { textoParaAdf } from './formatoDoTicket.js';
 import { editar } from '../tipos/escritaJira.js';
 
 export const editarTicket: DefOperacao<z.infer<typeof editar>> = {

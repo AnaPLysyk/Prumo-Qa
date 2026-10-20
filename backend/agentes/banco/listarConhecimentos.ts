@@ -1,6 +1,6 @@
 /** Lista os conhecimentos por projeto, agente, estado e busca. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { linhaParaConhecimento } from './linhaParaConhecimento.js';
+import { linhaParaConhecimento } from './formatosDoConhecimento.js';
 import { validarAgenteDoConhecimento } from './validacoesDoConhecimento.js';
 import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
 import { Conhecimento, Filtro, Linha, estadosConhecimento, limitesConhecimento } from '../tipos/conhecimento.js';

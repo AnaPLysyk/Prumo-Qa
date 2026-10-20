@@ -4,9 +4,9 @@ import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { montarEnvioDeArquivo } from '../../conexoes/integracoes/montarEnvioDeArquivo.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { enderecoDoTicket } from './enderecoDoTicket.js';
+import { enderecoDoTicket } from './formatoDoTicket.js';
 import { lerAnexo } from './lerAnexo.js';
-import { projetoDoTicket } from './projetoDoTicket.js';
+import { projetoDoTicket } from './formatoDoTicket.js';
 import { anexar } from '../tipos/escritaJira.js';
 
 export const anexarArquivo: DefOperacao<z.infer<typeof anexar>> = {

@@ -2,8 +2,8 @@
 import { randomUUID } from 'node:crypto';
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
 import { falharConhecimento } from './validacoesDoConhecimento.js';
-import { impressaoDoConhecimento } from './impressaoDoConhecimento.js';
-import { linhaParaConhecimento } from './linhaParaConhecimento.js';
+import { impressaoDoConhecimento } from './formatosDoConhecimento.js';
+import { linhaParaConhecimento } from './formatosDoConhecimento.js';
 import { validarAgenteDoConhecimento } from './validacoesDoConhecimento.js';
 import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
 import { Conhecimento, EstadoConhecimento, Linha, NovoConhecimento, limitesConhecimento, tiposConhecimento } from '../tipos/conhecimento.js';

@@ -1,9 +1,9 @@
 /** Operação "Abrir Pull Request no GitHub" (rascunho), sem merge nem aprovação. */
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { caminhoDoRepositorio } from './caminhoDoRepositorio.js';
-import { commitAtualDoBranch } from './commitAtualDoBranch.js';
-import { dadosDoRepositorio } from './dadosDoRepositorio.js';
+import { caminhoDoRepositorio } from './dadosDoGithub.js';
+import { commitAtualDoBranch } from './dadosDoGithub.js';
+import { dadosDoRepositorio } from './dadosDoGithub.js';
 
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { abrirPr } from '../tipos/escritaGithub.js';

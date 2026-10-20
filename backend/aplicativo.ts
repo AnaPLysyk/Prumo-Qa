@@ -3,7 +3,7 @@ import { app, Menu, session } from 'electron';
 import path from 'node:path';
 import { conectarAvisosDoWorker, workerDoAplicativo } from './agendamentos/worker/workerDoAplicativo.js';
 import { registrarCanaisIpc } from './aplicativo/api/registrarCanaisIpc.js';
-import { empilharAviso } from './aplicativo/avisos/empilharAviso.js';
+import { empilharAviso } from './aplicativo/avisos/avisos.js';
 import { publicarEventoDoWorker } from './aplicativo/avisos/publicarEventoDoWorker.js';
 import { atualizarBandeja } from './aplicativo/bandeja/atualizarBandeja.js';
 import { criarBandeja } from './aplicativo/bandeja/criarBandeja.js';

@@ -1,5 +1,5 @@
 /** Sugere próximos passos úteis conforme o agente, os fatos e o papel da pessoa. */
-import { termosDaFrase } from '../regras/termosDaFrase.js';
+import { termosDaFrase } from '../regras/textosDoConhecimento.js';
 import { Proximo } from '../tipos/chat.js';
 import { Papel } from '../tipos/persona.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';

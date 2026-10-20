@@ -2,7 +2,7 @@
 import { salvarPerfil } from '../banco/salvarPerfil.js';
 import { palavrasDaPergunta } from './interpretarPergunta.js';
 import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
-import { normalizarNome } from '../regras/normalizarNome.js';
+import { normalizarNome } from '../regras/textosDoConhecimento.js';
 import { Meta, Turno , PAPEIS } from '../tipos/chat.js';
 import { Perfil } from '../tipos/conhecimento.js';
 import { rotuloPapel, Papel } from '../tipos/persona.js';

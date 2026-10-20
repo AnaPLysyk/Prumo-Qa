@@ -5,7 +5,7 @@ import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
 import { lerPerfil } from './lerPerfil.js';
 import { pessoaDoConhecimento } from './pessoaDoConhecimento.js';
 import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
-import { vistaDoAgente } from './vistaDoAgente.js';
+import { vistaDoAgente } from './formatosDoConhecimento.js';
 import { Linha, VERSAO_ESQUEMA } from '../tipos/conhecimento.js';
 import { agentesChat } from '../tipos/persona.js';
 

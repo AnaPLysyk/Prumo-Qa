@@ -9,7 +9,7 @@ import { obterRotina } from '../banco/agenda.js';
 import { registrarBatimento } from '../banco/armazenamentoDaFila.js';
 import { Trabalho } from '../tipos/fila.js';
 import { EstadoDoWorker, TipoEvento } from '../tipos/worker.js';
-import { emitirEventoDoWorker } from './emitirEventoDoWorker.js';
+import { emitirEventoDoWorker } from './apoioDoWorker.js';
 import { executarTrabalhoDaRotina } from './executarTrabalhoDaRotina.js';
 import { publicarComentarioSeAutorizado } from './publicarComentarioSeAutorizado.js';
 

@@ -1,6 +1,6 @@
 /** Canal agentes:estado: Especializações, políticas e propostas de IA do projeto. */
 import { configuracaoDoEspaco } from '../politicas/configuracaoDoEspaco.js';
-import { matrizDePoliticas } from '../politicas/matrizDePoliticas.js';
+import { matrizDePoliticas } from '../politicas/avaliarCapacidades.js';
 import { especializacoes } from '../tipos/politicas.js';
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { listarPropostas } from '../../tickets/banco/listarPropostas.js';

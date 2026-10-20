@@ -1,6 +1,6 @@
 /** Soma, por agente, o peso dos termos aprendidos que aparecem na frase. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { termosDaFrase } from '../regras/termosDaFrase.js';
+import { termosDaFrase } from '../regras/textosDoConhecimento.js';
 import { Linha } from '../tipos/conhecimento.js';
 
 /** Pontos por agente para os termos da pergunta (peso aprendido, no máximo 5 por termo). */

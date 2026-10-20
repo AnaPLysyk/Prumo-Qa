@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { enderecoDoTicket } from './enderecoDoTicket.js';
-import { projetoDoTicket } from './projetoDoTicket.js';
+import { enderecoDoTicket } from './formatoDoTicket.js';
+import { projetoDoTicket } from './formatoDoTicket.js';
 import { transicoesDoTicket } from './transicoesDoTicket.js';
 import { transicionar } from '../tipos/escritaJira.js';
 

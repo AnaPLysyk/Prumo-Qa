@@ -1,7 +1,7 @@
 /** Busca os conhecimentos aprovados que mais combinam com a pergunta. */
 import { listarConhecimentos } from './listarConhecimentos.js';
-import { raizDaPalavra } from '../regras/raizDaPalavra.js';
-import { termosDaFrase } from '../regras/termosDaFrase.js';
+import { raizDaPalavra } from '../regras/textosDoConhecimento.js';
+import { termosDaFrase } from '../regras/textosDoConhecimento.js';
 import { Conhecimento } from '../tipos/conhecimento.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 

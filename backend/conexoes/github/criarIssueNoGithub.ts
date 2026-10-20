@@ -8,7 +8,7 @@ import { ContextoServico } from '../tipos/adaptador.js';
 import { criarIssue } from '../tipos/escritaGithub.js';
 import { DefOperacao, Remoto } from '../tipos/operacao.js';
 import { Recurso } from '../../projetos/tipos/espacos.js';
-import { caminhoDoRepositorio } from './caminhoDoRepositorio.js';
+import { caminhoDoRepositorio } from './dadosDoGithub.js';
 
 type P = z.infer<typeof criarIssue>;
 

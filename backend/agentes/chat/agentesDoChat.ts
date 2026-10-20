@@ -1,5 +1,5 @@
 /** Lista os agentes do chat com especialização, capacidades e o que estão autorizados a fazer neste projeto. */
-import { matrizDePoliticas } from '../politicas/matrizDePoliticas.js';
+import { matrizDePoliticas } from '../politicas/avaliarCapacidades.js';
 import { agentesChat } from '../tipos/persona.js';
 import { especializacoes } from '../tipos/politicas.js';
 import { regrasDosAgentes } from '../../administracao/regras/agentesDaPlataforma.js';

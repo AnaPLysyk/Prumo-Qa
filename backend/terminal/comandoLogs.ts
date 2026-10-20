@@ -3,8 +3,8 @@ import { Projeto } from '../compartilhado/tipos/projeto.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
 import { acompanharLogs } from '../logs/regras/acompanharLogs.js';
 import { Evento } from '../logs/tipos/atividade.js';
-import { avisarHistoricoIncompleto } from './avisarHistoricoIncompleto.js';
-import { linhaDaOperacao } from './linhaDaOperacao.js';
+import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
+import { linhaDaOperacao } from './saidaDoTerminal.js';
 
 export async function comandoLogs(p:Projeto,json:boolean,follow:boolean) {
   const emitir=(e:Evento)=>console.log(json?JSON.stringify(e):`${e.phase==='start'?'INÍCIO':'TÉRMINO'} · ${linhaDaOperacao(e)}`);

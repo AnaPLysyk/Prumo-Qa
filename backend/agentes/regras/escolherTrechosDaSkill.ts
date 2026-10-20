@@ -1,6 +1,6 @@
 /** Escolhe os trechos aprovados de uma Skill que vão para o prompt: o essencial sempre, depois os que combinam com a pergunta, até o limite de bytes. */
-import { raizDaPalavra } from './raizDaPalavra.js';
-import { termosDaFrase } from './termosDaFrase.js';
+import { raizDaPalavra } from './textosDoConhecimento.js';
+import { termosDaFrase } from './textosDoConhecimento.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 import { TrechoDeSkill, limitesSkills } from '../tipos/skills.js';
 

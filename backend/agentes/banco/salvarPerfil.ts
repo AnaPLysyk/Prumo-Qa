@@ -4,7 +4,7 @@ import { falharConhecimento } from './validacoesDoConhecimento.js';
 import { lerPerfil } from './lerPerfil.js';
 import { pessoaDoConhecimento } from './pessoaDoConhecimento.js';
 import { normalizarFoco } from '../regras/normalizarFoco.js';
-import { normalizarNome } from '../regras/normalizarNome.js';
+import { normalizarNome } from '../regras/textosDoConhecimento.js';
 import { Perfil } from '../tipos/conhecimento.js';
 import { Experiencia, Papel, experiencias, papeis } from '../tipos/persona.js';
 

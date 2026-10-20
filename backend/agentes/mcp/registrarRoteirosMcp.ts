@@ -4,7 +4,7 @@ import { MeiosDoServidorMcp } from '../tipos/mcp.js';
 import { promptsPrumo } from '../tipos/roteiros.js';
 import { textoDoPrompt } from './textoDoPrompt.js';
 import { contaAutorizadaMcp, conferirAcessoMcp } from './contaAutorizadaMcp.js';
-import { exigirCapacidade } from '../politicas/exigirCapacidade.js';
+import { exigirCapacidade } from '../politicas/avaliarCapacidades.js';
 
 export function registrarRoteirosMcp(m: MeiosDoServidorMcp) {
   for (const p of promptsPrumo) {

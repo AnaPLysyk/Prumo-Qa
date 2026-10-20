@@ -5,9 +5,9 @@ import { marcadorDaOperacao } from '../../conexoes/escrita/marcadorDaOperacao.js
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao, Remoto } from '../../conexoes/tipos/operacao.js';
 import { acharTicketCriadoPeloPrumo } from './acharTicketCriadoPeloPrumo.js';
-import { enderecoDoTicket } from './enderecoDoTicket.js';
-import { projetoDoTicket } from './projetoDoTicket.js';
-import { textoParaAdf } from './textoParaAdf.js';
+import { enderecoDoTicket } from './formatoDoTicket.js';
+import { projetoDoTicket } from './formatoDoTicket.js';
+import { textoParaAdf } from './formatoDoTicket.js';
 import { tiposDeCriacao } from './tiposDoTicketJira.js';
 import { criar } from '../tipos/escritaJira.js';
 

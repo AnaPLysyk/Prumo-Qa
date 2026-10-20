@@ -1,7 +1,7 @@
 /** Reúne comentarios jira da funcionalidade, mantendo cada operação identificável pelo nome. */
 import { ContextoServico } from "../../conexoes/tipos/adaptador.js";
 import { Remoto } from "../../conexoes/tipos/operacao.js";
-import { enderecoDoTicket } from "./enderecoDoTicket.js";
+import { enderecoDoTicket } from "./formatoDoTicket.js";
 import { z } from "zod";
 import { codificarParaUrl } from "../../compartilhado/texto/codificarParaUrl.js";
 import { marcadorDaOperacao } from "../../conexoes/escrita/marcadorDaOperacao.js";

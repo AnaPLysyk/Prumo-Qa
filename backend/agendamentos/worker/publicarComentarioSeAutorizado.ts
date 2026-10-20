@@ -5,7 +5,7 @@ import { definirEstadoJiraDoTrabalho } from '../banco/armazenamentoDaFila.js';
 import { Trabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
-import { emitirEventoDoWorker } from './emitirEventoDoWorker.js';
+import { emitirEventoDoWorker } from './apoioDoWorker.js';
 
 export async function publicarComentarioSeAutorizado(e: EstadoDoWorker, t: Trabalho, r: Rotina) {
   if (!e.d.servicos) return; const pol = elegivelParaPublicar(t, e.base, e.agora());

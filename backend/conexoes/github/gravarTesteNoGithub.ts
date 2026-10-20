@@ -2,9 +2,9 @@
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
-import { caminhoDoRepositorio } from './caminhoDoRepositorio.js';
-import { commitAtualDoBranch } from './commitAtualDoBranch.js';
-import { dadosDoRepositorio } from './dadosDoRepositorio.js';
+import { caminhoDoRepositorio } from './dadosDoGithub.js';
+import { commitAtualDoBranch } from './dadosDoGithub.js';
+import { dadosDoRepositorio } from './dadosDoGithub.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { commitar, sha40 } from '../tipos/escritaGithub.js';
 import { DefOperacao } from '../tipos/operacao.js';

@@ -1,6 +1,6 @@
 /** Se o worker parou sem a pessoa pedir, tenta religar e avisa; nunca finge que está ativo. */
 import { workerDoAplicativo } from './workerDoAplicativo.js';
-import { empilharAviso } from '../../aplicativo/avisos/empilharAviso.js';
+import { empilharAviso } from '../../aplicativo/avisos/avisos.js';
 import { estadoDoAplicativo } from '../../aplicativo/estadoDoAplicativo.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
 

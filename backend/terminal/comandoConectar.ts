@@ -2,9 +2,9 @@
 import { Projeto } from '../compartilhado/tipos/projeto.js';
 import { aplicarConexao } from '../conexoes/ia/aplicarConexao.js';
 import { prepararConexao } from '../conexoes/ia/prepararConexao.js';
-import { imprimirJson } from './imprimirJson.js';
+import { imprimirJson } from './saidaDoTerminal.js';
 import { perguntarNoTerminal } from './perguntarNoTerminal.js';
-import { textoSeguroNoTerminal } from './textoSeguroNoTerminal.js';
+import { textoSeguroNoTerminal } from './saidaDoTerminal.js';
 
 export async function comandoConectar(p:Projeto,cliente:string,contrato?:string,json=false,interagir=true) {
   const plano=prepararConexao(p,cliente,contrato);

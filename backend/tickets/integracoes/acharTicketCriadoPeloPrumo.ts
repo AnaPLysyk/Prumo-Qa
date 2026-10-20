@@ -4,7 +4,7 @@ import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js'
 import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
 import { Remoto } from '../../conexoes/tipos/operacao.js';
 import { Recurso } from '../../projetos/tipos/espacos.js';
-import { enderecoDoTicket } from './enderecoDoTicket.js';
+import { enderecoDoTicket } from './formatoDoTicket.js';
 
 export const acharTicketCriadoPeloPrumo = async (ctx: ContextoServico, rec: Recurso, rot: string): Promise<Remoto | null> => {
   const jql = `project = ${rec.id} AND labels = "${rot}"`;

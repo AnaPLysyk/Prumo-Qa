@@ -4,10 +4,10 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { acharComentarioDoPrumo } from './comentariosJira.js';
-import { enderecoDoTicket } from './enderecoDoTicket.js';
+import { enderecoDoTicket } from './formatoDoTicket.js';
 import { marcadorNoComentario } from './comentariosJira.js';
-import { projetoDoTicket } from './projetoDoTicket.js';
-import { textoParaAdf } from './textoParaAdf.js';
+import { projetoDoTicket } from './formatoDoTicket.js';
+import { textoParaAdf } from './formatoDoTicket.js';
 import { comentar } from '../tipos/escritaJira.js';
 
 export const comentarTicket: DefOperacao<z.infer<typeof comentar>> = {

@@ -7,7 +7,7 @@ import { ResultadoTrabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';
 import { EstadoDoWorker, prioridade } from '../tipos/worker.js';
 import { contarCasosDaEvidencia } from './resultadosDasEvidencias.js';
-import { projetoDaRotina } from './projetoDaRotina.js';
+import { projetoDaRotina } from './apoioDoWorker.js';
 import { resumoDasFalhas } from './resultadosDasEvidencias.js';
 
 export async function validarTicketAgendado(e: EstadoDoWorker, r: Rotina, manual: boolean): Promise<ResultadoTrabalho> {

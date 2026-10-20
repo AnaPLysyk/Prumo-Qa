@@ -1,7 +1,7 @@
 /** Transforma um evento do worker em aviso da janela e, se a pessoa quiser, em notificação do Windows. */
 import { Notification } from 'electron';
 import { EventoWorker } from '../../agendamentos/tipos/worker.js';
-import { empilharAviso } from './empilharAviso.js';
+import { empilharAviso } from './avisos.js';
 import { atualizarBandeja } from '../bandeja/atualizarBandeja.js';
 import { navegarPara } from '../janela/navegarPara.js';
 import { lerPreferencias } from '../../configuracoes/banco/lerPreferencias.js';

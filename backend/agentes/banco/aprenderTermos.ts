@@ -1,7 +1,7 @@
 /** Ensina a um agente os termos de uma pergunta que deveria ter ido para ele. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
 import { validarAgenteDoConhecimento } from './validacoesDoConhecimento.js';
-import { termosDaFrase } from '../regras/termosDaFrase.js';
+import { termosDaFrase } from '../regras/textosDoConhecimento.js';
 import { limitesConhecimento } from '../tipos/conhecimento.js';
 
 export function aprenderTermos(agente: string, frase: string, base?: string, agora = new Date()) {

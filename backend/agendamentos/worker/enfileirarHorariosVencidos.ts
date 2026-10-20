@@ -5,7 +5,7 @@ import { registrarPerdido } from '../banco/registrarPerdido.js';
 import { horariosVencidos } from '../regras/horariosVencidos.js';
 import { marcarHorarioTratado } from '../regras/operacoesDaRotina.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
-import { capacidadeDaRotinaAgendada } from './capacidadeDaRotinaAgendada.js';
+import { capacidadeDaRotinaAgendada } from './apoioDoWorker.js';
 
 export function enfileirarHorariosVencidos(e: EstadoDoWorker, agora: Date) {
   for (const r of listarRotinas(e.base)) {

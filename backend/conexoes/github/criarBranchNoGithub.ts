@@ -1,8 +1,8 @@
 /** Operação "Criar branch de trabalho no GitHub" (prumo/...), nunca o branch padrão. */
 import { z } from 'zod';
-import { caminhoDoRepositorio } from './caminhoDoRepositorio.js';
-import { commitAtualDoBranch } from './commitAtualDoBranch.js';
-import { dadosDoRepositorio } from './dadosDoRepositorio.js';
+import { caminhoDoRepositorio } from './dadosDoGithub.js';
+import { commitAtualDoBranch } from './dadosDoGithub.js';
+import { dadosDoRepositorio } from './dadosDoGithub.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { criarBranch, sha40 } from '../tipos/escritaGithub.js';
 import { DefOperacao } from '../tipos/operacao.js';

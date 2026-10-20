@@ -1,6 +1,6 @@
 /** Aviso automático de versão nova (ao abrir e a cada 6 horas): acende o sino e mostra notificação do Windows uma vez por versão. */
 import { app, Notification } from 'electron';
-import { empilharAviso } from '../../aplicativo/avisos/empilharAviso.js';
+import { empilharAviso } from '../../aplicativo/avisos/avisos.js';
 import { navegarPara } from '../../aplicativo/janela/navegarPara.js';
 import { consultarAtualizacao } from './consultarAtualizacao.js';
 import { lerPreferencias } from '../../configuracoes/banco/lerPreferencias.js';

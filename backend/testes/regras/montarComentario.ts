@@ -1,8 +1,8 @@
 /** Escreve o comentário de resultado (PASS/FAIL, contagens, duração, evidência) a partir de uma execução concluída. */
 import { Trabalho } from '../../agendamentos/tipos/fila.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { marcadorDaExecucao } from '../integracoes/marcadorDaExecucao.js';
-import { paragrafoDoComentario } from '../integracoes/paragrafoDoComentario.js';
+import { marcadorDaExecucao } from '../integracoes/helpersDeComentario.js';
+import { paragrafoDoComentario } from '../integracoes/helpersDeComentario.js';
 import { Comentario, rotulo } from '../tipos/comentarioJira.js';
 
 export function montarComentario(t: Trabalho, nomeProjeto: string): Comentario {
