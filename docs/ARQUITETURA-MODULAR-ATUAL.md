@@ -60,6 +60,7 @@ A fronteira local Electron usa **IPC**, não endpoints HTTP. Existem serviços H
 
 - **Fonte:** `frontend/<tela>/` e `frontend/compartilhado/`; não edite os compilados em `dist/renderer/`.
 - **Scripts da janela:** `frontend/compartilhado/runtime/index.html` define os caminhos e a ordem de carregamento. Ao mover um script independente, atualize a referência e os testes que conferem o caminho.
+- **Menu e preferências:** `frontend/compartilhado/navegacaoDaJanela.js` cuida do menu lateral, do seletor de projetos e dos atalhos globais; `frontend/configuracoes/preferenciasDaJanela.js` mantém tema, cor e idioma. O estilo global do menu fica em `frontend/compartilhado/menuLateral.parte.css`, e não na pasta da tela Configurações.
 - **Partes de telas:** `*.parte.js` e `*.parte.css` são concatenados, na ordem de `frontend/construcao/telas-modulares.json`, nos bundles do renderer. Essas partes não devem ser carregadas individualmente pelo HTML.
 - **Recursos comuns:** `frontend/recursos.json` mapeia estilos, login, traduções, identidade visual e recursos de terceiros para os caminhos distribuídos; não crie cópias editáveis adicionais.
 - **Formulários e componentes:** mantenha-os na pasta da tela. Use `componentes/` ou `modais/` somente quando houver mais de uma responsabilidade que justifique a subpasta.

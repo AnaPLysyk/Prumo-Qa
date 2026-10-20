@@ -84,7 +84,7 @@
         "frontend/agentes/tela-agentes.parte.css",
         "frontend/compartilhado/reflow-zoom-e-movimento.parte.css",
         "frontend/agentes/espaco-profundo.parte.css",
-        "frontend/configuracoes/menu-lateral-ceu.parte.css",
+        "frontend/compartilhado/menuLateral.parte.css",
         "frontend/agentes/seletor-de-agente.parte.css",
         "frontend/configuracoes/ajustes-em-secoes.parte.css"
       ]

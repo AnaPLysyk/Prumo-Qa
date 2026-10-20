@@ -22,3 +22,17 @@ test('Configurações mantém perfil, assistente e abas no bundle da interface',
  const expected=b.origens.map(p=>{ const s=fs.readFileSync(p,'utf8'); return s.slice(s.indexOf('\n')+1); }).join('');
  assert.equal(expected,fs.readFileSync(b.destino,'utf8'));
 });
+
+test('navegação compartilhada e preferências continuam carregadas na ordem correta', () => {
+ const html=fs.readFileSync('frontend/compartilhado/runtime/index.html','utf8');
+ const scripts=['telas/compartilhado/mostrarEstadoWorker.js','telas/configuracoes/preferenciasDaJanela.js','telas/compartilhado/navegacaoDaJanela.js','telas/compartilhado/acompanharEventosWorker.js'];
+ let anterior=-1;
+ for(const script of scripts){ const indice=html.indexOf('src="'+script+'"'); assert.ok(indice>anterior,'Carregamento incorreto: '+script); anterior=indice; }
+ const preferencias=fs.readFileSync('frontend/configuracoes/preferenciasDaJanela.js','utf8');
+ const navegacao=fs.readFileSync('frontend/compartilhado/navegacaoDaJanela.js','utf8');
+ assert.match(preferencias,/function montarControles\(/);
+ assert.doesNotMatch(preferencias,/function montarSeletorProjeto\(/);
+ assert.match(navegacao,/function montarSeletorProjeto\(/);
+ assert.match(navegacao,/function iniciarMenu\(/);
+ assert.doesNotMatch(navegacao,/function montarControles\(/);
+});

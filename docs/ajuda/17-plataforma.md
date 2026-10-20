@@ -142,7 +142,7 @@ A Documentação Viva utiliza o bundle `administracao.js`, gerado de cinco fragm
 
 ## Manutenção de Configurações
 
-O painel de Configurações em `frontend/configuracoes/` tem quatro partes no bundle `interfaces-v36.js`: `ajustes-do-assistente.parte.js` prepara o estado e os controles compartilhados, `perfil-e-conta.parte.js` apresenta e salva dados de perfil, `aparencia-e-assistente.parte.js` cuida de aparência, voz e IA externa e `navegacao-dos-ajustes.parte.js` controla as abas e a atualização das informações. `controlesDaJanela.js` permanece com as preferências da janela.
+O painel de Configurações em `frontend/configuracoes/` tem quatro partes no bundle `interfaces-v36.js`: `ajustes-do-assistente.parte.js` prepara o estado e os controles compartilhados, `perfil-e-conta.parte.js` apresenta e salva dados de perfil, `aparencia-e-assistente.parte.js` cuida de aparência, voz e IA externa e `navegacao-dos-ajustes.parte.js` controla as abas e a atualização das informações. `preferenciasDaJanela.js` mantém tema, idioma e cor. A navegação, o menu lateral e o seletor de projeto ficam em `frontend/compartilhado/navegacaoDaJanela.js`.
 
 Os fragmentos preservam o código anterior na mesma ordem; a persistência e a autorização permanecem nas APIs já existentes. A homologação manual do painel e as permissões de usuário ainda precisam ser conferidas na aplicação real.
 
