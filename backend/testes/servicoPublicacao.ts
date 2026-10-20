@@ -3,7 +3,7 @@ import { ErroServico } from "../conexoes/integracoes/ErroServico.js";
 import { politicaCobre } from "../agendamentos/autorizacoes/politicasDaAutorizacao.js";
 import { Trabalho } from "../agendamentos/tipos/fila.js";
 import { obterTrabalho } from "../agendamentos/repositorioFila.js";
-import { publicacaoDoTrabalho } from "./banco/publicacoes.js";
+import { publicacaoDoTrabalho } from "./repositorioPublicacoes.js";
 import { montarComentario } from "./regras/montarComentario.js";
 import { obterEspaco } from "../projetos/repositorio.js";
 

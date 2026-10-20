@@ -13,7 +13,7 @@ import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { consultarAtividades } from "../logs/banco/consultarAtividades.js";
 import { calcularMetricas } from "../metricas/servico.js";
-import { Projeto } from "../compartilhado/tipos/projeto.js";
+import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { gravarContratoProposto, proporContrato, resumirContratoProposto } from "./servicoContrato.js";
 
 export const abrirProjetoVinculado = (raiz: string) => projetoVinculado(raiz, diretorioDados());

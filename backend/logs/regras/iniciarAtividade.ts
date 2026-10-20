@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { arquivosDoDiario } from '../banco/arquivosDoDiario.js';
 import { gravarNoDiario } from '../banco/gravarNoDiario.js';
 import { pastaAtividades } from '../banco/pastaAtividades.js';

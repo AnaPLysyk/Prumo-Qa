@@ -1,5 +1,5 @@
 /** Seleção de agente e Skill adequada à pergunta, respeitando políticas e preferências. */
-import { matrizDePoliticas } from '../politicas/avaliarCapacidades.js';
+import { matrizDePoliticas } from '../servicoCapacidades.js';
 import { agentesChat } from '../tipos/persona.js';
 import { especializacoes } from '../tipos/politicas.js';
 import { regrasDosAgentes } from '../../administracao/servico.js';

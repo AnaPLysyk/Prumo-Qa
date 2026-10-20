@@ -3,10 +3,10 @@ import { randomUUID } from 'node:crypto';
 import { validadeDaAutorizacao } from './politicasDaAutorizacao.js';
 import { abrirEspacoDeAutorizacoes } from './estadoERevogacao.js';
 import { estadoDaAutorizacao } from './estadoERevogacao.js';
-import { gravarAutorizacoes } from '../banco/autorizacoes.js';
-import { lerAutorizacoes } from '../banco/autorizacoes.js';
+import { gravarAutorizacoes } from '../repositorioAutorizacoes.js';
+import { lerAutorizacoes } from '../repositorioAutorizacoes.js';
 import { AutorizacaoExecucao, EscopoAutorizado, MAX_USOS, Solicitador, execSchema } from '../tipos/autorizacoes.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { solicitarAprovacao } from '../../testes/servicoAprovacao.js';
 
 /** Pede o consentimento humano nativo para este escopo exato e só então grava a autorização. */

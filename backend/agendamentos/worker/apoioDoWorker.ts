@@ -4,7 +4,7 @@ import { Rotina } from "../tipos/rotina.js";
 import { EstadoDoWorker, TipoEvento } from "../tipos/worker.js";
 import { ErroQa } from "../../compartilhado/erros.js";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
-import { Projeto } from "../../compartilhado/tipos/projeto.js";
+import { Projeto } from "../../compartilhado/projeto/contratos.js";
 import { obterEspaco } from "../../projetos/repositorio.js";
 
 export function capacidadeDaRotinaAgendada(r: Rotina) {

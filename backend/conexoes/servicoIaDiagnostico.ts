@@ -4,7 +4,7 @@ import { Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema,
 import fs from "node:fs";
 import path from "node:path";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
-import { Projeto } from "../compartilhado/tipos/projeto.js";
+import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { registrosIntegracao, pastaDosTestesDeIntegracao } from "./repositorioIntegracoes.js";
 import { assinaturaDaConfiguracao } from "./ia/validacaoDeConfiguracao.js";
 import { prepararConexao } from "./ia/prepararConexao.js";

@@ -1,5 +1,5 @@
 /** Lógica e contratos de projetos: operações relacionadas no mesmo módulo. */
-import { Manifesto } from "../compartilhado/tipos/projeto.js";
+import { Manifesto } from "../compartilhado/projeto/contratos.js";
 import { z } from "zod";
 import { ferramentas } from "../logs/contratos.js";
 

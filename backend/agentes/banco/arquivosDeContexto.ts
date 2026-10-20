@@ -4,7 +4,7 @@ import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";
 import { ErroQa } from "../../compartilhado/erros.js";
 import { hash } from "../../compartilhado/seguranca/hash.js";
 import { semLinks } from "../../compartilhado/seguranca/semLinks.js";
-import { Projeto } from "../../compartilhado/tipos/projeto.js";
+import { Projeto } from "../../compartilhado/projeto/contratos.js";
 import fs from "node:fs";
 import { hashDoConteudoDoContexto, seloDaVersaoDoContexto } from "../regras/validacoesDeContexto.js";
 import { idDeContextoValido } from "../regras/validacoesDeContexto.js";

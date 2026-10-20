@@ -9,7 +9,7 @@ import { anexosDoEnvio, guardarAnexos, tipoPelaAssinatura } from '../../../../di
 import { enviarChamado, meuChamado, meusChamados } from '../../../../dist/suporte/regras/chamadosDaPessoa.js';
 import { chamadosDaAdministracao, lerChaveDeAdministracao, salvarChaveDeAdministracao } from '../../../../dist/suporte/regras/chamadosDaAdministracao.js';
 import { servicoDeChamados } from '../../../../dist/suporte/integracoes.js';
-import { urlDoServico } from '../../../../dist/compartilhado/integracoes/servicoDoPrumo.js';
+import { urlDoServico } from '../../../../dist/compartilhado/servicoRemoto.js';
 import { acessoDosCanais } from '../../../../dist/login/tipos/acessoDosCanais.js';
 import { caixaDeEmail, CHAVE_DE_ADMIN_DOS_TESTES } from '../../../apoio/caixa-de-email.mjs';
 

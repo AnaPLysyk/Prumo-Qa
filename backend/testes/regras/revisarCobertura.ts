@@ -1,5 +1,5 @@
 /** Revisa um plano de testes contra o requisito: rastreabilidade, riscos, oráculos, lacunas e cenários repetidos. Nunca diz que está aprovado. */
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { revisaoSchema, AnaliseDeCobertura, Revisao } from '../tipos/revisaoDeCobertura.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';

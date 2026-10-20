@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { falharCom } from '../../compartilhado/erros.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { arquivosDoDiario } from './arquivosDoDiario.js';
 import { pastaAtividades } from './pastaAtividades.js';
 

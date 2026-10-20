@@ -6,7 +6,7 @@ import { abrirProjetoVinculado } from '../../projetos/servicoProjetos.js';
 import { obterContexto } from './consultasDeContextos.js';
 import { gravarPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
 import { ErroQa } from '../../compartilhado/erros.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
 import { novaVersaoDoContexto, ultimaVersaoDoContexto, hashDoConteudoDoContexto } from './validacoesDeContexto.js';
 import { Arquivo, conteudoSchema, limites } from '../tipos/contexto.js';

@@ -1,22 +1,84 @@
 /** Comandos de consulta do terminal: atividades, evidências e indicadores. */
-import { Projeto } from "../compartilhado/tipos/projeto.js";
-import { consultarAtividades } from "../logs/banco/consultarAtividades.js";
-import { avisarHistoricoIncompleto, imprimirJson, linhaDaOperacao, textoSeguroNoTerminal } from "./saidaDoTerminal.js";
-import { consultarEvidencias } from "../testes/repositorioEvidencias.js";
-import { chamadaRegistrada } from "./chamadaRegistrada.js";
-import { calcularMetricas } from "../metricas/servico.js";
+import { Projeto } from '../compartilhado/projeto/contratos.js';
+import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
+import {
+  avisarHistoricoIncompleto, imprimirJson, linhaDaOperacao, textoSeguroNoTerminal
+} from './saidaDoTerminal.js';
+import { consultarEvidencias } from '../testes/repositorioEvidencias.js';
+import { chamadaRegistrada } from './chamadaRegistrada.js';
+import { calcularMetricas } from '../metricas/servico.js';
 
-export function comandoAtividade(p:Projeto,json=false) {
-  const h=consultarAtividades(p);avisarHistoricoIncompleto(h.problems);
-  if(json)imprimirJson(h);else {console.log(`ATIVIDADES · ${textoSeguroNoTerminal(p.manifesto.name)}\nHistórico: ${h.directory}`);console.log(h.activities.length?h.activities.slice(-20).reverse().map(linhaDaOperacao).join('\n\n'):'Não existem atividades registradas.');}
+/** Resume as últimas 20 atividades, sem apresentar um histórico parcial como completo. */
+export function comandoAtividade(projeto: Projeto, json = false) {
+  const historico = consultarAtividades(projeto);
+  avisarHistoricoIncompleto(historico.problems);
+  if (json) {
+    imprimirJson(historico);
+    return;
+  }
+
+  console.log(
+    'ATIVIDADES · ' + textoSeguroNoTerminal(projeto.manifesto.name) +
+    '\nHistórico: ' + historico.directory
+  );
+  console.log(
+    historico.activities.length
+      ? historico.activities.slice(-20).reverse().map(linhaDaOperacao).join('\n\n')
+      : 'Não existem atividades registradas.'
+  );
 }
 
-export async function comandoEvidencias(p:Projeto,id?:string,json=false) {
-  const r=await chamadaRegistrada(p,'consultar_evidencias',{jobId:id},()=>consultarEvidencias(p,id));
-  if(json)imprimirJson(r);else {console.log(`EVIDÊNCIAS · ${textoSeguroNoTerminal(p.manifesto.name)}`);console.log(r.results.length?r.results.map(e=>`${e.endedAt} · ${e.status} · ${e.jobId}\n  ${textoSeguroNoTerminal(e.reason)}\n  ${e.evidencePath}`).join('\n'): 'NOT_RUN · Nenhuma evidência para esta consulta.');}
+/** Consulta evidências somente através do canal registrado de leitura. */
+export async function comandoEvidencias(projeto: Projeto, id?: string, json = false) {
+  const resposta = await chamadaRegistrada(
+    projeto,
+    'consultar_evidencias',
+    { jobId: id },
+    () => consultarEvidencias(projeto, id)
+  );
+  if (json) {
+    imprimirJson(resposta);
+    return;
+  }
+
+  console.log('EVIDÊNCIAS · ' + textoSeguroNoTerminal(projeto.manifesto.name));
+  console.log(
+    resposta.results.length
+      ? resposta.results.map(item =>
+          item.endedAt + ' · ' + item.status + ' · ' + item.jobId +
+          '\n  ' + textoSeguroNoTerminal(item.reason) +
+          '\n  ' + item.evidencePath
+        ).join('\n')
+      : 'NOT_RUN · Nenhuma evidência para esta consulta.'
+  );
 }
 
-export function comandoMetricas(p:Projeto,json=false) {
-  const m=calcularMetricas(consultarAtividades(p));avisarHistoricoIncompleto(m.problems);
-  if(json)imprimirJson(m);else console.log(`MÉTRICAS · ${textoSeguroNoTerminal(p.manifesto.name)}\n${m.complete?'Histórico válido':'HISTÓRICO PARCIAL'}\nOperações: ${m.totalOperations} · Chamadas MCP: ${m.mcpCalls}\nContextos: ${m.contextAnalyses} · Revisões: ${m.coverageReviews}\nAchados: ${m.findings} · Recomendações: ${m.recommendations}\nLacunas: ${m.gaps} · Redundâncias candidatas: ${m.candidateRedundancies}\nExecuções solicitadas: ${m.executionsRequested}\nPASS: ${m.executions.PASS} · FAIL: ${m.executions.FAIL} · BLOCKED: ${m.executions.BLOCKED} · NOT_RUN: ${m.executions.NOT_RUN}\nErros: ${m.errors} · Sem término observado: ${m.unfinished}\nDuração média: ${m.averageDurationMs===null?'indisponível':m.averageDurationMs+' ms'}\nÚltima atividade: ${m.lastActivity??'nenhuma'}\nTokens/custos: ${m.providerMetrics}\nAlterações aplicadas pela IA: não observadas pelo Prumo.`);
+/** Mostra métricas observadas pelo Prumo sem inventar dados de custo ou execução de IA. */
+export function comandoMetricas(projeto: Projeto, json = false) {
+  const metricas = calcularMetricas(consultarAtividades(projeto));
+  avisarHistoricoIncompleto(metricas.problems);
+  if (json) {
+    imprimirJson(metricas);
+    return;
+  }
+
+  console.log([
+    'MÉTRICAS · ' + textoSeguroNoTerminal(projeto.manifesto.name),
+    metricas.complete ? 'Histórico válido' : 'HISTÓRICO PARCIAL',
+    'Operações: ' + metricas.totalOperations + ' · Chamadas MCP: ' + metricas.mcpCalls,
+    'Contextos: ' + metricas.contextAnalyses + ' · Revisões: ' + metricas.coverageReviews,
+    'Achados: ' + metricas.findings + ' · Recomendações: ' + metricas.recommendations,
+    'Lacunas: ' + metricas.gaps + ' · Redundâncias candidatas: ' + metricas.candidateRedundancies,
+    'Execuções solicitadas: ' + metricas.executionsRequested,
+    'PASS: ' + metricas.executions.PASS +
+      ' · FAIL: ' + metricas.executions.FAIL +
+      ' · BLOCKED: ' + metricas.executions.BLOCKED +
+      ' · NOT_RUN: ' + metricas.executions.NOT_RUN,
+    'Erros: ' + metricas.errors + ' · Sem término observado: ' + metricas.unfinished,
+    'Duração média: ' + (metricas.averageDurationMs === null
+      ? 'indisponível' : metricas.averageDurationMs + ' ms'),
+    'Última atividade: ' + (metricas.lastActivity ?? 'nenhuma'),
+    'Tokens/custos: ' + metricas.providerMetrics,
+    'Alterações aplicadas pela IA: não observadas pelo Prumo.'
+  ].join('\n'));
 }

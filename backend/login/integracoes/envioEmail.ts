@@ -1,5 +1,5 @@
 /** Configuração do serviço de autenticação e solicitação de códigos por e-mail. */
-import { chamarServico } from '../../compartilhado/integracoes/servicoDoPrumo.js';
+import { chamarServico } from '../../compartilhado/servicoRemoto.js';
 
 /** Valida o endereço HTTPS da autenticação central, sem fazer chamadas de rede. */
 export function enderecoDeAutenticacao() {

@@ -2,7 +2,7 @@
 import { ErroQa } from '../../compartilhado/erros.js';
 import { normalizarComando } from '../../compartilhado/projeto/normalizarComando.js';
 import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { ambienteMinimo } from './ambienteMinimo.js';
 import { escopoDaExecucao } from './escopoDaExecucao.js';
 

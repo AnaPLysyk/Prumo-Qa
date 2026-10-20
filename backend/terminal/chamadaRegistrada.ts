@@ -1,5 +1,5 @@
 /** Executa uma ação do terminal e registra a operação no diário de atividades. */
-import { Projeto } from '../compartilhado/tipos/projeto.js';
+import { Projeto } from '../compartilhado/projeto/contratos.js';
 import { observar } from '../logs/regras/observar.js';
 
 /** Erros ao registrar o diário não descartam a resposta da operação. */

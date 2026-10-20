@@ -1,6 +1,6 @@
 /** Acompanha o diário ao vivo (prumo logs --follow) até a pessoa interromper. */
 import { setTimeout as esperar } from 'node:timers/promises';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { consultarAtividades } from '../banco/consultarAtividades.js';
 import { Evento } from '../contratos.js';
 

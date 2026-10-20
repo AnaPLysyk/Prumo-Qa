@@ -3,7 +3,7 @@ import { safeStorage } from "electron";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { protetorDoSistema } from "../conexoes/regras/protetorDoSistema.js";
 import { chamadosDaAdministracao, salvarChaveDeAdministracao, lerChaveDeAdministracao } from "../suporte/regras/chamadosDaAdministracao.js";
-import { ENDERECO_DO_SERVICO } from "../compartilhado/integracoes/servicoDoPrumo.js";
+import { ENDERECO_DO_SERVICO } from "../compartilhado/servicoRemoto.js";
 
 export const chamadosAnexo: TratadorDoCanal<'chamados:anexo'> = (a) => chamadosDaAdministracao.anexo(a.numero, a.indice, { protetor: protetorDoSistema(safeStorage) });
 

@@ -1,5 +1,5 @@
 /** Executa uma operação registrando início e término no diário, mesmo quando ela falha. */
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { iniciarAtividade } from './iniciarAtividade.js';
 import { Origem } from '../contratos.js';
 

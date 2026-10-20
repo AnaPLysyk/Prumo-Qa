@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { PropostaContrato, CODIGO, DOCUMENTACAO, EXIGE_REVISAO, SCRIPT, STACKS, Stack, TESTES } from "./contratos.js";
-import { Manifesto, manifestoSchema } from "../compartilhado/tipos/projeto.js";
+import { Manifesto, manifestoSchema } from "../compartilhado/projeto/contratos.js";
 import { sensivel } from "../compartilhado/seguranca/sensivel.js";
 
 /** Grava a proposta aprovada sem sobrescrever nada e confere com o mesmo validador do núcleo; se não passar, desfaz. */

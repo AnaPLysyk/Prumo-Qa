@@ -3,7 +3,7 @@ import { repositorio } from "../ajuda/contratos.js";
 import { z } from "zod";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { eventoSchema, issueSchema, numeroChamado, statusChamados } from "./contratos.js";
-import { chamarServico } from "../compartilhado/integracoes/servicoDoPrumo.js";
+import { chamarServico } from "../compartilhado/servicoRemoto.js";
 
 export async function buscarDadosDoChamado(numero:number,sufixo:string,buscar:typeof fetch=fetch){
     const r=await buscar(`https://api.github.com/repos/${repositorio}/issues/${numero}${sufixo}`,{method:'GET',redirect:'error',credentials:'omit',cache:'no-store',headers:{Accept:'application/vnd.github+json','User-Agent':'PrumoQA-suporte'},signal:AbortSignal.timeout(8000)});

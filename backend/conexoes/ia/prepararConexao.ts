@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { hash } from '../../compartilhado/seguranca/hash.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { comandoParaOTerminal } from './comandoParaOTerminal.js';
 import { localizarClienteDeIa } from './localizarClienteDeIa.js';
 import { pastaAtividades } from '../../logs/banco/pastaAtividades.js';

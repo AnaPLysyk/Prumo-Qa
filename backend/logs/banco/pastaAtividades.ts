@@ -4,7 +4,7 @@ import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 
 /** Diz se `alvo` fica dentro de `raiz` (ou é a própria raiz). */
 function caminhoDentroDe(raiz:string,alvo:string) { const r=path.relative(raiz,alvo);return !r || (r!=='..'&&!r.startsWith('..'+path.sep)&&!path.isAbsolute(r)); }

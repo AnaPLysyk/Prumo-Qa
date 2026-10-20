@@ -1,18 +1,66 @@
-/** Cria rascunhos de bug para os casos que falharam na run. */
+/** Elabora rascunhos de bugs para casos que falharam numa run, sem publicá-los. */
 import { obterEspaco } from '../../projetos/repositorio.js';
 import { obterRunLocal } from '../repositorioRuns.js';
 import { criarProposta } from '../../tickets/servicoPropostas.js';
 import { classificacoesDeFalha } from '../../tickets/contratos.js';
 
 type ClassificacaoDeFalha = typeof classificacoesDeFalha[number];
-const prefixo = { PRODUTO: 'Bug de produto', OUTRO_BUG: 'Outro bug', MELHORIA: 'Melhoria' } as const;
+const prefixo = {
+  PRODUTO: 'Bug de produto',
+  OUTRO_BUG: 'Outro bug',
+  MELHORIA: 'Melhoria'
+} as const;
 
-/** Rascunhos de bug para cada falha da run (um por caso), com ticket Jira de origem quando houver relação declarada. Nada é publicado. */
-export function propostasDeBugs(runLocalId: string, b?: string, classificacao?: ClassificacaoDeFalha) {
-  const run = obterRunLocal(runLocalId, b); const e = obterEspaco(run.espacoId, b); const criadas = [];
-  for (const c of run.casos.filter(k => k.resultado?.status === 'FAIL')) {
-    const rel = e.relacoes.find(r => r.de.tipo === 'jira' && r.para.tipo === 'qase' && r.para.id === String(c.casoId)); const origem = rel?.de.id;
-    try { criadas.push(criarProposta({ espacoId: run.espacoId, tipo: 'bug', origem: 'PRUMO', dados: { ...(classificacao ? { classificacao } : {}), resumo: `[Prumo QA] ${classificacao ? prefixo[classificacao] : 'Falha'}: ${c.titulo}`.slice(0, 255), descricao: `Caso do Qase: ${c.casoId}\nRun do Qase: ${run.runIdRemoto ?? '(ainda não criada)'}\nAmbiente: ${run.ambiente}\nResultado: ${c.resultado!.status} (${c.resultado!.granularidade === 'RODADA' ? 'escopo da rodada' : 'cenário'})\nEvidência local: ${c.resultado!.evidenciaId ?? '—'}\n\n${c.resultado!.comentario}`, ...(origem && /^[A-Z][A-Z0-9_]*-\d+$/.test(origem) ? { origem } : {}), rotulos: ['prumo-qa', 'regressao'] }, falhaDeOrigem: { runLocalId, casoId: c.casoId } }, b)); } catch (er) { if (!/DUPLICATE_PROPOSAL/.test((er as Error).message)) throw er; }
+/** Gera um rascunho por falha e inclui a origem Jira somente quando vinculada e válida. */
+export function propostasDeBugs(
+  runLocalId: string,
+  base?: string,
+  classificacao?: ClassificacaoDeFalha
+) {
+  const run = obterRunLocal(runLocalId, base);
+  const espaco = obterEspaco(run.espacoId, base);
+  const propostas = [];
+
+  for (const caso of run.casos.filter(item => item.resultado?.status === 'FAIL')) {
+    const relacao = espaco.relacoes.find(item =>
+      item.de.tipo === 'jira' &&
+      item.para.tipo === 'qase' &&
+      item.para.id === String(caso.casoId)
+    );
+    const origemJira = relacao?.de.id;
+    const titulo = classificacao ? prefixo[classificacao] : 'Falha';
+    const resultado = caso.resultado!;
+    const descricao = [
+      'Caso do Qase: ' + caso.casoId,
+      'Run do Qase: ' + (run.runIdRemoto ?? '(ainda não criada)'),
+      'Ambiente: ' + run.ambiente,
+      'Resultado: ' + resultado.status + ' (' +
+        (resultado.granularidade === 'RODADA' ? 'escopo da rodada' : 'cenário') + ')',
+      'Evidência local: ' + (resultado.evidenciaId ?? '—'),
+      '',
+      resultado.comentario
+    ].join('\n');
+
+    try {
+      propostas.push(criarProposta({
+        espacoId: run.espacoId,
+        tipo: 'bug',
+        origem: 'PRUMO',
+        dados: {
+          ...(classificacao ? { classificacao } : {}),
+          resumo: ('[Prumo QA] ' + titulo + ': ' + caso.titulo).slice(0, 255),
+          descricao,
+          ...(origemJira && /^[A-Z][A-Z0-9_]*-\d+$/.test(origemJira)
+            ? { origem: origemJira }
+            : {}),
+          rotulos: ['prumo-qa', 'regressao']
+        },
+        falhaDeOrigem: { runLocalId, casoId: caso.casoId }
+      }, base));
+    } catch (erro) {
+      // A duplicação esperada não impede rascunhos para os demais casos.
+      if (!/DUPLICATE_PROPOSAL/.test((erro as Error).message)) throw erro;
+    }
   }
-  return criadas;
+  return propostas;
 }

@@ -1,7 +1,7 @@
-/** Persistência das publicações de resultados e do vínculo dos trabalhos com o Jira. */
+/** Consulta e grava registros de publicação de resultados no Jira. */
 import { z } from "zod";
-import { lerLocal, gravarLocal } from "../../compartilhado/banco/persistenciaLocal.js";
-import { Registro, registro } from "../tipos/comentarioJira.js";
+import { lerLocal, gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
+import { Registro, registro } from "./tipos/comentarioJira.js";
 
 export const publicacaoDoTrabalho = (id: string, b?: string) => lerPublicacoesJira(b).itens.find(x => x.trabalhoId === id) ?? null;
 

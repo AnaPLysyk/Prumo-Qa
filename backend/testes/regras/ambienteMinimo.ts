@@ -1,6 +1,6 @@
 /** Monta o ambiente mínimo do processo de teste: só variáveis permitidas, sem PATH herdado nem segredos. */
 import path from 'node:path';
-import { Comando, Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Comando, Projeto } from '../../compartilhado/projeto/contratos.js';
 
 export function ambienteMinimo(p:Projeto,c:Comando,jobId:string) {
   const env:NodeJS.ProcessEnv={};

@@ -1,5 +1,5 @@
 /** Consultas, histórico e resumos de contextos da pasta vinculada de um projeto. */
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { carregarTodosOsContextos } from '../banco/consultarContextos.js';
 import { lerPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
 import { ultimaVersaoDoContexto } from './validacoesDeContexto.js';

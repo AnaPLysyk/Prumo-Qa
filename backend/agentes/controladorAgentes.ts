@@ -1,6 +1,6 @@
 /** Controlador da funcionalidade agentes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { configuracaoDoEspaco } from "./servicoPoliticas.js";
-import { matrizDePoliticas } from "./politicas/avaliarCapacidades.js";
+import { matrizDePoliticas } from "./servicoCapacidades.js";
 import { especializacoes } from "./tipos/politicas.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { listarPropostas } from "../tickets/repositorio.js";

@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { pastaContextos, gravarArquivoDeContexto } from './arquivosDeContexto.js';
 import { configSchema } from '../tipos/contexto.js';
 

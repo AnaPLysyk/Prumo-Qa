@@ -5,7 +5,7 @@ import { contextoCompleto } from '../agentes/mcp/consultasDoProjeto.js';
 import { textoDoPrompt } from '../agentes/mcp/roteirosMcp.js';
 import { promptsPrumo } from '../agentes/tipos/roteiros.js';
 import { carregarProjeto } from '../compartilhado/projeto/carregarProjeto.js';
-import { Projeto } from '../compartilhado/tipos/projeto.js';
+import { Projeto } from '../compartilhado/projeto/contratos.js';
 import { executarValidacao } from '../testes/regras/executarValidacao.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
 import { calcularMetricas } from '../metricas/servico.js';
@@ -20,7 +20,7 @@ import { imprimirJson } from './saidaDoTerminal.js';
 import { menuDoTerminal } from './menuDoTerminal.js';
 import { perguntarNoTerminal } from './perguntarNoTerminal.js';
 import { textoSeguroNoTerminal } from './saidaDoTerminal.js';
-import { ajuda } from './tipos/terminal.js';
+import { ajuda } from './contratos.js';
 import { revisarCobertura } from '../testes/regras/revisarCobertura.js';
 
 export async function executarComandoPrumo() {

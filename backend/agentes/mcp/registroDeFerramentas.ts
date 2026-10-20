@@ -7,7 +7,7 @@ import { executarValidacao } from "../../testes/regras/executarValidacao.js";
 import { revisarCobertura } from "../../testes/regras/revisarCobertura.js";
 import { revisaoSchema } from "../../testes/tipos/revisaoDeCobertura.js";
 import { configuracaoDoEspaco } from "../servicoPoliticas.js";
-import { matrizDePoliticas } from "../politicas/avaliarCapacidades.js";
+import { matrizDePoliticas } from "../servicoCapacidades.js";
 import { especializacoes } from "../tipos/politicas.js";
 
 export function registrarConsultarEvidencias(m: MeiosDoServidorMcp) {

@@ -1,7 +1,7 @@
 /** Gerencia caminhos e registros dos testes de integração com serviços. */
 import path from "node:path";
 import { hash } from "../compartilhado/seguranca/hash.js";
-import { Projeto } from "../compartilhado/tipos/projeto.js";
+import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { pastaAtividades } from "../logs/banco/pastaAtividades.js";
 import fs from "node:fs";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";

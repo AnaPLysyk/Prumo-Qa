@@ -7,7 +7,7 @@ import { lerContas } from "../../login/repositorioContas.js";
 import { loginLigado, nivelDaConta, papelDaConta } from "../../login/regras/sessao.js";
 import { ErroQa } from "../../compartilhado/erros.js";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
-import { Projeto } from "../../compartilhado/tipos/projeto.js";
+import { Projeto } from "../../compartilhado/projeto/contratos.js";
 
 const autorizacao = z.object({
   versao: z.literal(1),

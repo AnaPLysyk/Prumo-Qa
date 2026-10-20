@@ -1,7 +1,7 @@
 /** Exclusão de contextos, com registro mínimo e indicação de falhas parciais. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { carregarContexto } from './consultarContextos.js';
 import { ultimaVersaoDoContexto } from '../regras/validacoesDeContexto.js';
 import { pastaContextos } from './arquivosDeContexto.js';

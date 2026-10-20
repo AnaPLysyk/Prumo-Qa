@@ -3,7 +3,7 @@ import path from 'node:path';
 import { inventariar } from '../../compartilhado/projeto/inventariar.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';
-import { Comando, Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Comando, Projeto } from '../../compartilhado/projeto/contratos.js';
 
 export async function escopoDaExecucao(p:Projeto,c:Comando,env:NodeJS.ProcessEnv) {
   const inv=await inventariar(p); const fontes=inv.fontes.map(({path,sha256})=>({path,sha256}));

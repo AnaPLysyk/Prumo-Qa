@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import { ErroQa } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { lerArquivoDeContexto, pastaContextos } from './arquivosDeContexto.js';
 import { Arquivo, limites } from '../tipos/contexto.js';
 

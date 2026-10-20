@@ -1,5 +1,5 @@
 /** Cria a evidência BLOCKED inicial antes de validar contrato, escopo e autorização humana. */
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { Evidencia } from '../tipos/evidencia.js';
 

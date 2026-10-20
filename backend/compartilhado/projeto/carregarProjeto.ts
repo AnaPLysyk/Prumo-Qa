@@ -8,7 +8,7 @@ import { caminhoSeguro } from '../seguranca/caminhoSeguro.js';
 import { hash } from '../seguranca/hash.js';
 import { lerSeguro } from '../seguranca/lerSeguro.js';
 import { validarRelativo } from '../seguranca/validarRelativo.js';
-import { Manifesto, Projeto, manifestoSchema } from '../tipos/projeto.js';
+import { Manifesto, Projeto, manifestoSchema } from './contratos.js';
 
 export async function carregarProjeto(raizInformada: string, contratoLeitura?: string): Promise<Projeto> {
   if (!path.isAbsolute(raizInformada)) throw new ErroQa('ROOT_REQUIRED', 'Informe uma raiz absoluta autorizada.');

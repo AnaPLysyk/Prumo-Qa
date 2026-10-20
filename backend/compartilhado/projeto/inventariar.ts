@@ -6,7 +6,7 @@ import { caminhoSeguro } from '../seguranca/caminhoSeguro.js';
 import { hash } from '../seguranca/hash.js';
 import { lerSeguro } from '../seguranca/lerSeguro.js';
 import { sensivel } from '../seguranca/sensivel.js';
-import { Projeto } from '../tipos/projeto.js';
+import { Projeto } from './contratos.js';
 
 export async function inventariar(p: Projeto) {
   const arquivos = new Map<string, { path: string; category: string; sha256: string; content: string }>();

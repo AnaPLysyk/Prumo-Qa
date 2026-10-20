@@ -1,6 +1,6 @@
 /** Menu interativo do terminal com o painel do projeto. */
 import { createInterface } from 'node:readline/promises';
-import { Projeto } from '../compartilhado/tipos/projeto.js';
+import { Projeto } from '../compartilhado/projeto/contratos.js';
 import { versaoDoPacote } from '../compartilhado/versaoDoPacote.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
 import { calcularMetricas } from '../metricas/servico.js';

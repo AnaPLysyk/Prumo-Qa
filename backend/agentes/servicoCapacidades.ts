@@ -1,8 +1,6 @@
-/** Política de capacidades: consulta efetiva, exigência de autorização e matriz da interface. */
-import { configuracaoDoEspaco } from '../servicoPoliticas.js';
-import {
-  Configuracao, EstadoCapacidade, capacidades, especializacoes, idsEsp
-} from '../tipos/politicas.js';
+/** Calcula as capacidades de agentes permitidas pelas políticas do projeto. */
+import { configuracaoDoEspaco } from "./servicoPoliticas.js";
+import { Configuracao, EstadoCapacidade, capacidades, especializacoes, idsEsp } from "./tipos/politicas.js";
 
 export function capacidadeEfetiva(
   espacoId: string | null,

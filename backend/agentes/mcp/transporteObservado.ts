@@ -1,6 +1,6 @@
 /** Envolve a conversa MCP para registrar no diário o início e o término de cada chamada de ferramenta. */
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
+import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { iniciarAtividade } from '../../logs/regras/iniciarAtividade.js';
 
 /** Observa tools/call na fronteira do protocolo, inclusive rejeições de schema do SDK. */

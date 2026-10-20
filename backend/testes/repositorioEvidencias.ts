@@ -6,7 +6,7 @@ import { ErroQa } from "../compartilhado/erros.js";
 import { caminhoSeguro } from "../compartilhado/seguranca/caminhoSeguro.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
 import { lerSeguro } from "../compartilhado/seguranca/lerSeguro.js";
-import { Projeto } from "../compartilhado/tipos/projeto.js";
+import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { evidenciaSchema, Evidencia } from "./tipos/evidencia.js";
 
 export async function consultarEvidencias(p:Projeto, jobId?:string, criterio?:string) {

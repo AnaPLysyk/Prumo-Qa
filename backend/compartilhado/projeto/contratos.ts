@@ -1,5 +1,5 @@
-/** Formato do contrato qa.project.json (schema v2), dos comandos permitidos e do projeto carregado. */
-import { z } from 'zod';
+/** Contratos e validações dos comandos de projeto compartilhados pelas funcionalidades. */
+import { z } from "zod";
 
 const nome = z.string().regex(/^[a-zA-Z][a-zA-Z0-9_-]{0,79}$/);
 

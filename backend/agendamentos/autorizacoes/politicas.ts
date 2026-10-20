@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { validadeDaAutorizacao } from "./politicasDaAutorizacao.js";
 import { abrirEspacoDeAutorizacoes } from "./estadoERevogacao.js";
 import { estadoDaAutorizacao } from "./estadoERevogacao.js";
-import { gravarAutorizacoes, lerAutorizacoes } from "../banco/autorizacoes.js";
+import { gravarAutorizacoes, lerAutorizacoes } from "../repositorioAutorizacoes.js";
 import { PoliticaEscrita, escritaSchema, PoliticaPublicacao, pubSchema } from "../tipos/autorizacoes.js";
 
 export function criarPoliticaEscrita(espacoId: string, d: { operacao: PoliticaEscrita['operacao']; runs: number[]; dias: number; maxUsos: number }, aprovadoPor: string, base?: string, agora = new Date()): PoliticaEscrita {
