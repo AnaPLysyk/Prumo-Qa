@@ -51,3 +51,26 @@ test('o painel carrega seu modelo antes da interface e mantém as posições cal
  assert.ok(Number.isFinite(layout.largura) && layout.largura > 0);
  assert.ok(layout.pos.has('op:op-1'));
 });
+
+test('CSS de Agentes mantém o visual definitivo sem animações contraditórias', () => {
+ const arquivo = 'frontend/agentes/espaco-profundo.parte.css';
+ const css = fs.readFileSync(arquivo, 'utf8');
+ const regras = (expressao) => [...css.matchAll(expressao)].map((m) => m[1]);
+ const astro = regras(/\.v36a-astro\{([^{}]*)\}/g);
+ const halo = regras(/\.v36a-astro::after\{([^{}]*)\}/g);
+ const foco = regras(/\.v36a-astro:hover,\.v36a-astro:focus-visible\{([^{}]*)\}/g);
+ assert.equal(astro.length, 1, 'não recriar a animação do cartão antigo');
+ assert.equal(halo.length, 1, 'manter uma definição do halo');
+ assert.equal(foco.length, 1, 'manter uma definição de hover/foco');
+ assert.match(astro[0], /animation:none/);
+ assert.match(halo[0], /inset:0 4% 34%/);
+ assert.match(halo[0], /opacity:\.25/);
+ assert.match(foco[0], /transform:none/);
+ assert.match(css, /@media\(prefers-reduced-motion:reduce\)/);
+ assert.match(css, /@media\(max-width:820px\)/);
+ const manifesto = JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json', 'utf8'));
+ const bundle = manifesto.bundles.find((b) => b.destino === 'dist/renderer/interfaces.css');
+ assert.ok(bundle.origens.includes(arquivo));
+ const gerado = bundle.origens.map((f) => { const s = fs.readFileSync(f, 'utf8'); return s.slice(s.indexOf('\n') + 1); }).join('');
+ assert.equal(gerado, fs.readFileSync(bundle.destino, 'utf8'));
+});

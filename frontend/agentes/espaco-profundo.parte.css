@@ -9,9 +9,9 @@ body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
 .v36a-primario{box-shadow:0 0 24px -6px var(--acento)}
 /* Constelação */
 .v36a-constelacao{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px 22px;padding:10px 0 26px}
-.v36a-astro{--face-color:#7abaff;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:14px 10px 18px;border:0;border-radius:28px;background:none;color:var(--texto);font:inherit;text-align:center;cursor:pointer;animation:v36a-deriva 9s ease-in-out infinite;animation-delay:var(--atraso,0s);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-.v36a-astro::after{content:"";position:absolute;inset:4% 8% 30%;z-index:-1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--face-color) 22%,transparent),transparent 70%);opacity:.55;transition:opacity .35s}
-.v36a-astro:hover,.v36a-astro:focus-visible{transform:translateY(-6px) scale(1.035)}
+.v36a-astro{--face-color:#7abaff;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:14px 10px 18px;border:0;border-radius:28px;background:none;color:var(--texto);font:inherit;text-align:center;cursor:pointer;animation:none;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.v36a-astro::after{content:"";position:absolute;inset:0 4% 34%;z-index:-1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--face-color) 22%,transparent),transparent 70%);opacity:.25;transition:opacity .35s}
+.v36a-astro:hover,.v36a-astro:focus-visible{transform:none}
 .v36a-astro:hover::after,.v36a-astro:focus-visible::after{opacity:1}
 .v36a-astro:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
 .v36a-astro-figura{position:relative;display:grid;place-items:center;width:170px;height:190px;margin-bottom:6px}
@@ -41,14 +41,11 @@ body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
 /* ---------- Robôs 3D, portal e neurônios de conhecimento ---------- */
 .v36-robo{position:relative;display:block}
 .v36-robo-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.v36a-astro{animation:none}
 .v36a-astro-figura{animation:v36a-deriva 9s ease-in-out infinite;animation-delay:var(--atraso,0s)}
 .v36a-astro .v36a-astro-figura.v36-robo{width:210px;height:220px;margin:-6px 0 2px}
-.v36a-astro::after{inset:0 4% 34%;opacity:.25}
-.v36a-astro:hover,.v36a-astro:focus-visible{transform:none}
 .v36a-astro:hover .v36a-astro-figura{filter:brightness(1.15)}
 .v36a-astro-cliente .v36a-astro-figura{display:grid;place-items:center;width:210px;height:220px}
-.v36a-cliente-icone{display:grid;place-items:center;width:104px;height:104px;border-radius:30px;box-shadow:var(--ds-sombra-curta)}
+.v36a-cliente-icone{display:grid;place-items:center;width:104px;height:104px;border-radius:30px;box-shadow:var(--ds-sombra-curta);color:var(--texto)}
 .v36a-cliente-icone.claude{background:radial-gradient(circle at 30% 25%,#f6efe6,#e8dccd 70%);box-shadow:var(--ds-sombra-curta),0 0 60px -18px rgba(217,119,87,.6)}
 .v36a-cliente-icone svg{width:62px;height:62px}
 .v36a-astro-estado i.erro{background:var(--falha);box-shadow:0 0 8px var(--falha)}
@@ -88,5 +85,4 @@ body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
 @media(max-width:670px){.v36f-alvo{width:52px;height:52px;margin:-26px 0 0 -26px}}
 
 /* Ícone do Codex: placa na cor do painel do tema, com o traço na cor do texto. */
-.v36a-cliente-icone{color:var(--texto)}
 .v36a-cliente-icone:not(.claude){background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--texto) 12%,var(--painel)),var(--painel) 70%);box-shadow:0 0 0 1px var(--ds-linha-suave),var(--ds-sombra-curta)}
