@@ -7,7 +7,7 @@ import { testarIntegracao } from "./servicoIaDiagnostico.js";
 import { catalogoOperacoes } from "./escrita/catalogoOperacoes.js";
 import { permissoesDoEspaco, habilitarEscrita } from "./escrita/permissoes.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
-import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
+import { confirmarNoWindows } from "../aplicativo/janela/controleDaJanela.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { nomeServico } from "../aplicativo/tipos/aplicativo.js";
 import { idiomaAtual } from "../configuracoes/servico.js";

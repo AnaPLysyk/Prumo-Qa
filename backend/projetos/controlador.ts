@@ -9,7 +9,7 @@ import { criarEspaco } from "./servicoProjetos.js";
 import { editarEspaco } from "./servicoProjetos.js";
 import { listarEspacos } from "./banco/projetos.js";
 import { dialog, app } from "electron";
-import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
+import { confirmarNoWindows } from "../aplicativo/janela/controleDaJanela.js";
 import { vincularPastaDoDisco } from "./servicoProjetos.js";
 import path from "node:path";
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";

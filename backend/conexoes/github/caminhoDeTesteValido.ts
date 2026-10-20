@@ -1,5 +1,5 @@
 /** Diz se um arquivo pode ser gravado pelo Prumo: só arquivos de teste, fora de .github, sem ".." nem caminho absoluto. */
-import { sensivel } from '../../compartilhado/seguranca/sensivel.js';
+import { sensivel } from '../../compartilhado/seguranca/caminhoSeguro.js';
 
 const padraoTeste = /(^|\/)(tests?|e2e|__tests__|specs?|cypress|playwright|automacao|automation)\//i;
 const arquivoTeste = /\.(spec|test)\.[a-z]+$/i;

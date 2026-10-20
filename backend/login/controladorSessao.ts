@@ -6,7 +6,7 @@ import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 
 import { entrarNaConta } from './regras/contas.js';
 import { entrarRemotamente, sairRemotamente } from './integracoes/autenticacaoRemota.js';
-import { entrarComIdentidadeRemota } from './regras/entrarComIdentidadeRemota.js';
+import { entrarComIdentidadeRemota } from './regras/entradaPorProvedor.js';
 
 export const contaEntrar: TratadorDoCanal<'conta:entrar'> = async a => {
   if(usarAutenticacaoRemota()){

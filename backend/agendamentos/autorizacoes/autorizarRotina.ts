@@ -1,5 +1,5 @@
 /** Autorização de rotinas e acesso delegado — arquivos relacionados agrupados para manutenção. */
-import { estadoDaAutorizacao, abrirEspacoDeAutorizacoes } from "./estadoERevogacao.js";
+import { estadoDaAutorizacao, abrirEspacoDeAutorizacoes } from "../banco/autorizacoes.js";
 import { gravarAutorizacoes, lerAutorizacoes } from "../banco/autorizacoes.js";
 import { MAX_VALIDADE_DIAS, AutorizacaoExecucao, EscopoAutorizado, MAX_USOS, Solicitador, execSchema } from "../tipos/autorizacoes.js";
 import { randomUUID } from "node:crypto";
@@ -8,12 +8,12 @@ import { solicitarAprovacao } from "../../testes/servicoAprovacao.js";
 import { obterRotina } from "../banco/agenda.js";
 import { capacidadeDoK6, escopoDoK6, localizarK6 } from "../servicoK6.js";
 import { capacidadesDaRotina } from "../regras/cicloDaRotina.js";
-import { ExecutavelK6 } from "../tipos/k6.js";
+import { ExecutavelK6 } from "../servicoK6.js";
 import { ErroQa } from "../../compartilhado/erros.js";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
 import { escopoDeCapability } from "../../testes/regras/executarValidacao.js";
 import { obterEspaco } from "../../projetos/banco/projetos.js";
-import { Delegada } from "../../testes/tipos/autorizacoes.js";
+import { Delegada } from "../../testes/tipos/catalogoDeTestes.js";
 
 // ── politicasDaAutorizacao ──
 /** Consome um uso se existir política vigente que cubra a operação e a run. Sem política: null (a operação agendada fica BLOQUEADA). */

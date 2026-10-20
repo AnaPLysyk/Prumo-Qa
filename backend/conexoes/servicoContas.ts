@@ -1,17 +1,18 @@
-/** Adiciona, valida e seleciona contas vinculadas a serviços externos. */
+/** servicoContas: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { AdaptadorServico } from "./integracoes/AdaptadorServico.js";
 import { Conta, ContextoDosServicos, conexaoEntrada, contaSchema } from "./tipos/contaDeServico.js";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { lerContasDeServico, gravarContasDeServico } from "./banco/contasDeServico.js";
 import { instanciaServico } from "./integracoes/configuracaoDosServicos.js";
-import { ErroServico } from "./integracoes/ErroServico.js";
+import { ErroServico } from "./integracoes/configuracaoDosServicos.js";
 import { atualizarEstadoDoVinculo } from "../projetos/servicoProjetos.js";
 import { Servico } from "../projetos/contratos.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";
+import { Protetor } from "./tipos/adaptador.js";
 
+// --- servicoContas ---
 export function adaptadorDaConta(c: ContextoDosServicos, conta: Conta) {
   return new AdaptadorServico({ ...conta, token: c.cofre.ler(conta.id) }, c.transporte, c.escrita);
 }
@@ -63,4 +64,16 @@ export function vinculoDoServico(c: ContextoDosServicos, espacoId: string, servi
   const v = obterEspaco(espacoId, c.base).vinculos.find(x => x.servico === servico);
   if (!v) throw new Error('WORKSPACE_LINK_NOT_FOUND');
   return v;
+}
+
+// --- protetorDoSistema ---
+type CofreDoSistema = { isEncryptionAvailable: () => boolean; encryptString: (s: string) => Buffer; decryptString: (b: Buffer) => string; getSelectedStorageBackend?: () => string };
+
+/**
+ * No Linux, sem Secret Service ou KWallet o Electron cai em "basic_text" (chave fixa, equivale a texto aberto). Isso é
+ * recusado: sem cofre real o Prumo não guarda token, e a pessoa é orientada a instalar o gnome-keyring ou o KWallet.
+ */
+export function protetorDoSistema(cofre: CofreDoSistema, sistema: string = process.platform): Protetor {
+  const cofreReal = () => sistema !== 'linux' || !['basic_text', 'unknown'].includes(cofre.getSelectedStorageBackend?.() ?? 'unknown');
+  return { disponivel: () => cofre.isEncryptionAvailable() && cofreReal(), proteger: s => cofre.encryptString(s), abrir: b => cofre.decryptString(b) };
 }

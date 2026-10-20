@@ -1,7 +1,7 @@
 /** Adaptador das integrações: autenticação, leitura, comentário e publicação. */
 import { z } from "zod";
 import { PartesDoAdaptador, nome, obj, paginaQase, sid, ConfigServico, ContextoServico, OperacaoServico } from "../tipos/adaptador.js";
-import { ErroServico } from "./ErroServico.js";
+import { ErroServico } from "./configuracaoDosServicos.js";
 import { lerComCredencial, enviarAoServico, lerDoServico, obterRecursoDoServico } from "./requisicoes.js";
 import { limparRespostaDoServico, textoRemoto } from "./configuracaoDosServicos.js";
 import { Recurso } from "../../projetos/contratos.js";
@@ -9,7 +9,7 @@ import { consultarNoServico } from "./leiturasDeServicos.js";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { cabecalhosDoServico, instanciaServico } from "./configuracaoDosServicos.js";
 import { Filtros } from "../tipos/adaptador.js";
-import { TransporteEscrita, TransporteServico, paginaSchema } from "../tipos/transporte.js";
+import { TransporteEscrita, TransporteServico, paginaSchema } from "../tipos/adaptador.js";
 import { contextoDoAdaptador, listarRecursosDoServico } from "./leiturasDeServicos.js";
 
 // autenticarNoServico — responsabilidade deste trecho

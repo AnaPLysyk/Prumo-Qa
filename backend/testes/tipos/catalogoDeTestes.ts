@@ -1,6 +1,8 @@
-/** Tipos de automação, cobertura e vínculos — arquivos relacionados agrupados para manutenção. */
+/** catalogoDeTestes: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { z } from "zod";
 
+// --- catalogoDeTestes ---
+// --- catalogoDeTestes ---
 // ── catalogoDeTestes ──
 /** Tipos de teste, formato do catálogo e as pastas e limites usados ao procurar testes. */
 
@@ -107,3 +109,56 @@ export type GrafoDeVinculos = { nos: Map<string, No>; arestas: Aresta[]; no: (n:
 
 /** Uma lacuna de cadastro: caso sem automação, caso sem ticket ou ticket sem caso. */
 export type LacunaDoMapa = { tipo: string; id: string; mensagem: string };
+
+// --- evidencia ---
+// ── evidencia ──
+const statusSchema = z.enum(['PASS','FAIL','BLOCKED','NOT_RUN']);
+
+export type Status = z.infer<typeof statusSchema>;
+
+export const casoResultadoSchema = z.object({ id:z.string().min(1).max(100), status:statusSchema, evidence:z.string().min(1).max(4000) }).strict();
+
+export const resultadoRunnerSchema = z.object({ jobId:z.string().uuid(), cases:z.array(casoResultadoSchema).max(1000) }).strict();
+
+export const evidenciaSchema = z.object({
+  kind:z.literal('execution_evidence'), jobId:z.string().uuid(), projectId:z.string(), rootHash:z.string(),
+  manifestHash:z.string(), scopeHash:z.string().nullable(), capability:z.string(), status:statusSchema,
+  reason:z.string(), startedAt:z.string(), endedAt:z.string(), executed:z.boolean(), exitCode:z.number().int().nullable(),
+  command:z.unknown(), approval:z.unknown(), cases:z.array(casoResultadoSchema),
+  stdout:z.string(), stderr:z.string(), logSha256:z.string(), resultArtifact:z.unknown(),
+  evidenceScope:z.enum(['round','individual']), provenance:z.literal('local-process')
+}).strict();
+
+export type Evidencia = z.infer<typeof evidenciaSchema>;
+
+// ── historicoDeExecucoes ──
+/**
+ * Histórico centralizado: une os trabalhos da fila (execuções, consultas, horários perdidos) com rotina, projeto,
+ * ticket e repositório vinculado. Consulta apenas dados locais já registrados; nada é recalculado nem inventado.
+ * Métricas contam execuções de QA reais (PASS/FAIL/BLOCKED/NOT_RUN). Consultas (INFO) e horários perdidos ficam à parte,
+ * e abrir a interface nunca conta como execução.
+ */
+export const filtroExecucoes = z.object({
+  espacoId: z.string().uuid().optional(), rotinaId: z.string().uuid().optional(), ticket: z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/).optional(),
+  repositorio: z.string().max(200).optional(), estado: z.enum(['PENDENTE', 'EXECUTANDO', 'CONCLUIDO', 'ERRO', 'CANCELADO', 'PERDIDO']).optional(),
+  resultado: z.enum(['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'ERRO_INFRA', 'INFO']).optional(),
+  since: z.string().datetime().optional(), until: z.string().datetime().optional(), limite: z.number().int().min(1).max(500).default(100)
+}).strict();
+
+export type FiltroExecucoes = z.input<typeof filtroExecucoes>;
+
+// --- autorizacoes ---
+/** Contratos de autorização de execuções: escopo, aprovação humana e delegação. */
+
+
+/** Formato da autorização delegada: reconhece um consentimento humano prévio, restrito ao escopo exato. */
+
+/** Devolve quem aprovou, como e quando, ou null se não houver autorização vigente; nunca cria aprovação. */
+export type Delegada=(escopo:{scopeHash:string;capability:string;command:string})=>Promise<{subject:string;method:string;scopeHash:string;at:string}|null>;
+
+/** O que a janela de senha do Windows mostra para a pessoa aprovar: projeto, pasta, capacidade, comando, hash e validade. */
+
+export type EscopoAprovacao = { projectId:string; root:string; capability:string; scopeHash:string; command:string; expiresAt:string };
+
+/** Resultado de uma aprovação humana: quem aprovou, por qual mecanismo do sistema, o escopo aprovado e quando. */
+export type Aprovacao = { subject:string; method:string; scopeHash:string; at:string };

@@ -1,9 +1,8 @@
-/** Lógica e contratos de agendamentos: operações relacionadas no mesmo módulo. */
-import { ConfigK6, ExecutavelK6, LIMITE_DURACAO_S, LIMITE_USUARIOS } from "./tipos/k6.js";
+/** servicoK6: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { promises as fs } from "node:fs";
 import { ErroQa } from "../compartilhado/erros.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
-import { lerSeguro } from "../compartilhado/seguranca/lerSeguro.js";
+import { lerSeguro } from "../compartilhado/seguranca/caminhoSeguro.js";
 import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
@@ -11,13 +10,30 @@ import path from "node:path";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { caminhoSeguro } from "../compartilhado/seguranca/caminhoSeguro.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { salvarEvidencia } from "../testes/banco/evidencias.js";
-import { classificarResultado } from "../testes/regras/executarValidacao.js";
-import { Evidencia } from "../testes/tipos/evidencia.js";
+import { salvarEvidencia } from "../testes/banco/publicacoes.js";
+import { classificarResultado, criarEvidenciaInicial } from "../testes/regras/executarValidacao.js";
+import { Evidencia } from "../testes/tipos/catalogoDeTestes.js";
 import { solicitarAprovacao } from "../testes/servicoAprovacao.js";
-import { criarEvidenciaInicial } from "../testes/regras/executarValidacao.js";
-import { Delegada } from "../testes/tipos/autorizacoes.js";
+import { Delegada } from "../testes/tipos/catalogoDeTestes.js";
 
+// --- k6 ---
+/** Formato da configuração do k6 e seus limites (50 usuários, 600 segundos). */
+
+/**
+ * Adaptador do k6. Usa o executável oficial; não existe motor próprio de carga e nenhum código do k6 é copiado.
+ * Regras: executável procurado só em pastas absolutas do PATH (nunca na pasta atual), sem shell; script dentro da raiz do
+ * projeto; usuários virtuais e duração com teto; destino declarado; produção bloqueada; mesma aprovação humana das demais
+ * execuções (manual pelo broker nativo, agendada por autorização delegada restrita ao hash exato).
+ */
+export type ConfigK6 = { script: string; alvo: string; usuarios: number; duracaoSegundos: number };
+
+export const LIMITE_USUARIOS = 50;
+
+export const LIMITE_DURACAO_S = 600;
+
+export type ExecutavelK6 = { executable: string; argsIniciais?: string[] };
+
+// --- servicoK6 ---
 export const capacidadeDoK6 = (c: ConfigK6) => ('k6:' + c.script.replaceAll('\\', '/')).slice(0, 80);
 
 /** Escopo estável: raiz, manifesto, script (hash), parâmetros, destino, ambiente e executável (caminho+tamanho). */

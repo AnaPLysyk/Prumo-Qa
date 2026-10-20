@@ -2,10 +2,10 @@
 import path from "node:path";
 import { hash } from "../../compartilhado/seguranca/hash.js";
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
-import { pastaAtividades } from "../../logs/banco/atividades.js";
+import { pastaAtividades } from "../../logs/regras/iniciarAtividade.js";
 import fs from "node:fs";
 import { semLinks } from "../../compartilhado/seguranca/semLinks.js";
-import { Registro, registroSchema } from "../tipos/integracaoIa.js";
+import { Registro, registroSchema } from "../ia/conectarIa.js";
 
 export function pastaDosTestesDeIntegracao(p: Projeto) { return path.resolve(pastaAtividades(p), '..', '..', 'integracoes', hash(p.raiz + '\0' + p.manifesto.id)); }
 

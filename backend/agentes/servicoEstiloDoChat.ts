@@ -3,7 +3,7 @@ import { Estilo, PerfilParaIa, Pendente, Proximo } from "./tipos/chat.js";
 import { AgenteChat, personalidades, agentesChat, enfasePorPapel, personaBase, rotuloExperiencia, rotuloPapel } from "./tipos/persona.js";
 import { lerPerfil } from "./banco/perfil.js";
 import { proximosPassosSugeridos } from "./chat/roteamento.js";
-import { tentarOuPadrao } from "./chat/tentarOuPadrao.js";
+import { tentarOuPadrao } from "./chat/responderComDadosLocais.js";
 import { situacaoDoProjeto } from "../inicio/servico.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import type { Perfil } from "./tipos/conhecimento.js";

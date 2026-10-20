@@ -1,10 +1,10 @@
 /** Executar CLI e interpretar resposta das IAs — arquivos relacionados agrupados para manutenção. */
 import { conhecimentosRelevantes, registrarConhecimento } from "../banco/conhecimento.js";
 import { skillDoAgente } from "./roteamento.js";
-import { ContextoDelegacao } from "../tipos/ContextoDelegacao.js";
+import { ContextoDelegacao } from "../tipos/chat.js";
 import { Resposta, Acao, Opcoes, Provedor, Coleta, Estilo, ExtrasPrompt, Executor } from "../tipos/chat.js";
 import { Conhecimento, limitesConhecimento } from "../tipos/conhecimento.js";
-import { tentarOuPadrao } from "./tentarOuPadrao.js";
+import { tentarOuPadrao } from "./responderComDadosLocais.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { obterEspaco } from "../../projetos/banco/projetos.js";
 import { AgenteChat } from "../tipos/persona.js";

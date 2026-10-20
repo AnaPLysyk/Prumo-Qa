@@ -1,6 +1,6 @@
-/** Ferramentas do MCP e consultas ao projeto — arquivos relacionados agrupados para manutenção. */
+/** consultasDoProjeto: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
-import { contextosParaMcp } from "../regras/contextosParaMcp.js";
+import { contextosParaMcp } from "../regras/consultasDeContextos.js";
 import { detectarFrameworks, revisarCobertura } from "../../testes/regras/revisaoDeCobertura.js";
 import { conhecimento, revisaoSchema } from "../../testes/tipos/catalogoDeTestes.js";
 import path from "node:path";
@@ -9,13 +9,14 @@ import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { conhecimentoParaIA } from "../regras/conhecimentoParaIA.js";
 import { espacoDaRaiz } from "../../projetos/servicoProjetos.js";
 import { z } from "zod";
-import { consultarEvidencias } from "../../testes/banco/evidencias.js";
-import { MeiosDoServidorMcp, somenteLeitura } from "../tipos/mcp.js";
+import { consultarEvidencias } from "../../testes/banco/publicacoes.js";
+import { MeiosDoServidorMcp, somenteLeitura, RespostaMcp } from "../tipos/mcp.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";
-import { configuracaoDoEspaco } from "../servicoPoliticas.js";
-import { matrizDePoliticas } from "../servicoPoliticas.js";
+import { configuracaoDoEspaco, matrizDePoliticas } from "../servicoPoliticas.js";
 import { especializacoes } from "../tipos/politicas.js";
+import { mensagemComCodigo } from "../../compartilhado/erros.js";
 
+// --- consultasDoProjeto ---
 // ── consultasDoProjeto ──
 /**
  * Resposta de `contexto_projeto` (MCP) e de `prumo context` (CLI): o contexto autorizado do projeto acrescido de
@@ -96,3 +97,23 @@ export function registrarListarPoliticas(m: MeiosDoServidorMcp) {
         aviso: 'SOMENTE_PESSOA significa que a ação existe, mas só a pessoa a executa na janela do Prumo, com confirmação. Você pode apenas propor.' };
     }));
 }
+
+// --- formatoDasFerramentas ---
+/** Erros são devolvidos como resultado MCP, com código preservado e segredos mascarados. */
+export async function respostaDaFerramentaMcp(
+  executar: () => Promise<unknown>
+): Promise<RespostaMcp> {
+  try {
+    const dados = await executar();
+    return { content: [{ type: 'text' as const, text: JSON.stringify(dados) }] };
+  } catch (erro) {
+    return {
+      isError: true,
+      content: [{ type: 'text' as const, text: mensagemComCodigo(erro) }]
+    };
+  }
+}
+
+/** Texto curto da pessoa ou padrão explícito, com limite de 300 caracteres. */
+export const valorOuPadrao = (valor: string | undefined, padrao: string) =>
+  valor && valor.trim() ? valor.trim().slice(0, 300) : padrao;

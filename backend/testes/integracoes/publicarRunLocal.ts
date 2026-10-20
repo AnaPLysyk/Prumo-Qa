@@ -1,4 +1,4 @@
-/** Publicação e criação de runs Qase — arquivos relacionados agrupados para manutenção. */
+/** publicarRunLocal: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import path from "node:path";
 import { executarOperacao } from "../../conexoes/escrita/executarOperacao.js";
 import { Auxiliar } from "../../conexoes/tipos/operacao.js";
@@ -6,7 +6,15 @@ import { RegistroOperacao } from "../../conexoes/tipos/operacoesExternas.js";
 import { obterEspaco } from "../../projetos/banco/projetos.js";
 import { alterarRunLocal, obterRunLocal } from "../banco/runs.js";
 import { Dep, paraQase, CASO_LOCAL_MIN, RunLocal } from "../tipos/runLocal.js";
+import { createHash } from "node:crypto";
+import { consumirPublicacao } from "../../agendamentos/autorizacoes/autorizarRotina.js";
+import { definirEstadoJiraDoTrabalho, obterTrabalho } from "../../agendamentos/banco/fila.js";
+import { gravarPublicacoesJira, lerPublicacoesJira } from "../banco/publicacoes.js";
+import { codigoDoErroDePublicacao, publicacaoPodeRepetir } from "../servicoExecucoes.js";
+import { montarComentario } from "../regras/propostasDeBugs.js";
+import { Pub, PublicadorJira, registroPub } from "../tipos/escritaQase.js";
 
+// --- publicarRunLocal ---
 // ── publicarRunLocal ──
 /** Publica os resultados ainda não publicados (nunca NOT_RUN) e relê a run no Qase. */
 export async function publicarRunLocal(d: Dep, runLocalId: string, o: { confirmado: boolean; origem?: 'MANUAL' | 'AGENDADO'; anexarEvidencia?: boolean; aux?: Auxiliar }) {
@@ -44,4 +52,37 @@ export async function criarRunNoQase(d: Dep, runLocalId: string, o: { confirmado
   const reg = await executarOperacao(d.executor, run.espacoId, 'qase.criar_run', parametrosDaRunQase(run), { base: d.base, confirmado: o.confirmado, agora: d.agora });
   const id = reg.estado === 'CONFIRMADA' || reg.estado === 'ENVIADA' ? numeroDoId(reg.remoto?.id) : null; if (id) alterarRunLocal(runLocalId, r => { r.runIdRemoto = id; r.estado = 'CRIADA'; r.confirmadaNoQase = reg.estado === 'CONFIRMADA'; }, d.base);
   return reg;
+}
+
+// --- publicarComentarioDeResultado ---
+/**
+ * Publica (ou confirma que já está publicado) o comentário da execução. `modo` MANUAL exige `confirmado` (a confirmação nativa
+ * acontece no processo principal, nunca na página). AGENDADO exige política vigente que cubra ticket e tipo.
+ */
+export async function publicarComentarioDeResultado(trabalhoId: string, modo: 'MANUAL' | 'AGENDADO', pub: PublicadorJira, b?: string, confirmado = false, agora = new Date()): Promise<Pub> {
+  const t = obterTrabalho(trabalhoId, b); const nome = obterEspaco(t.espacoId, b).nome;
+  if (modo === 'MANUAL' && !confirmado) throw new Error('HUMAN_CONFIRMATION_REQUIRED');
+  const c = montarComentario(t, nome); const ticket = t.ticket!; const chave = `${t.id}:${ticket}`;
+  const sha = createHash('sha256').update(c.texto).digest('hex');
+  let r = lerPublicacoesJira(b); let reg = r.itens.find(x => x.chave === chave);
+  if (reg?.estado === 'PUBLICADO') return reg; // idempotência: nunca publica duas vezes a mesma execução no mesmo ticket
+  if (!reg) { reg = { chave, trabalhoId: t.id, espacoId: t.espacoId, ticket, modo, estado: 'PREPARADO', tentativas: 0, textoSha256: sha, texto: c.texto, consumida: false, criadoEm: agora.toISOString() }; r.itens.push(reg); }
+  const salvar = (patch: Partial<Pub>) => { r = lerPublicacoesJira(b); const i = r.itens.findIndex(x => x.chave === chave); const novo = registroPub.parse({ ...(i >= 0 ? r.itens[i] : reg), ...patch }); if (i >= 0) r.itens[i] = novo; else r.itens.push(novo); gravarPublicacoesJira(r, b); reg = novo; return novo; };
+  salvar({});
+  if (modo === 'AGENDADO' && !reg!.consumida) {
+    const p = consumirPublicacao(t.espacoId, ticket, t.tipo, b, agora);
+    if (!p) { salvar({ estado: 'BLOQUEADO', erro: 'PUBLISH_POLICY_MISSING', ultimaTentativa: agora.toISOString() }); definirEstadoJiraDoTrabalho(t.id, { estado: 'BLOQUEADO', codigo: 'PUBLISH_POLICY_MISSING' }, b); return reg!; }
+    salvar({ consumida: true, politicaId: p.id });
+  }
+  salvar({ tentativas: reg!.tentativas + 1, ultimaTentativa: agora.toISOString(), modo });
+  try {
+    // Falha de rede ambígua na tentativa anterior: o comentário pode já existir. Procura o marcador antes de enviar.
+    const existente = reg!.tentativas > 1 || reg!.estado === 'FALHA' ? await pub.procurarComentarioJira(t.espacoId, ticket, c.marcador) : null;
+    if (existente) { salvar({ estado: 'PUBLICADO', comentarioId: existente, publicadoEm: agora.toISOString(), erro: undefined }); definirEstadoJiraDoTrabalho(t.id, { estado: 'PUBLICADO', comentarioId: existente }, b); return reg!; }
+    const enviado = await pub.comentarJira(t.espacoId, ticket, c.adf);
+    salvar({ estado: 'PUBLICADO', comentarioId: enviado.id, vinculoId: enviado.vinculoId, conexaoId: enviado.conexaoId, publicadoEm: new Date().toISOString(), erro: undefined });
+    definirEstadoJiraDoTrabalho(t.id, { estado: 'PUBLICADO', comentarioId: enviado.id }, b); return reg!;
+  } catch (e) {
+    const cod = codigoDoErroDePublicacao(e); salvar({ estado: 'FALHA', erro: cod.slice(0, 80) }); definirEstadoJiraDoTrabalho(t.id, { estado: publicacaoPodeRepetir(cod) ? 'PENDENTE' : 'FALHA', codigo: cod.slice(0, 80) }, b); return reg!;
+  }
 }

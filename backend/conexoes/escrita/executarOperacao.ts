@@ -6,7 +6,7 @@ import { gravarRegistroDaOperacao, lerRegistroDeOperacoes } from "../banco/opera
 import { chaveDaOperacao } from "./chaveDaOperacao.js";
 import { escritaHabilitada } from "./permissoes.js";
 import { operacaoPorId } from "./catalogoOperacoes.js";
-import { ErroServico } from "../integracoes/ErroServico.js";
+import { ErroServico } from "../integracoes/configuracaoDosServicos.js";
 import { Remoto } from "../tipos/operacao.js";
 import { Executor, OpcoesOperacao, RegistroOperacao, semAux, emCurso } from "../tipos/operacoesExternas.js";
 import { obterEspaco } from "../../projetos/banco/projetos.js";

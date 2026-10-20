@@ -1,24 +1,21 @@
-/** Monta a resposta do agente com os dados locais do projeto (sem IA): prepara a pergunta, chama a parte do agente certo e devolve linhas, fontes e fatos usados. */
-import { listarRotinas } from '../../agendamentos/banco/agenda.js';
-import { listarTrabalhos } from '../../agendamentos/banco/fila.js';
-import { Trabalho } from '../../agendamentos/tipos/fila.js';
+/** responderComDadosLocais: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
+import { listarRotinas } from "../../agendamentos/banco/agenda.js";
+import { listarTrabalhos } from "../../agendamentos/banco/fila.js";
+import { Trabalho } from "../../agendamentos/tipos/worker.js";
+import { Coleta, GUIA_MANUAL, guia } from "../tipos/chat.js";
+import { AgenteChat } from "../tipos/persona.js";
+import { dataEmPortugues, semAcentos } from "../../compartilhado/texto.js";
+import { listarContextosDaPasta } from "../regras/consultasDeContextos.js";
+import { listarHistoricoDoProjeto } from "../../logs/regras/consultasDoDiario.js";
+import { perguntarAoAssistenteLocal, situacaoDoProjeto, Fonte } from "../../inicio/servico.js";
+import { metricasDasExecucoes } from "../../metricas/servico.js";
+import { obterEspaco } from "../../projetos/banco/projetos.js";
+import { Espaco } from "../../projetos/contratos.js";
+import { listarRunsLocais } from "../../testes/banco/runs.js";
+import { catalogoDeTestes } from "../../testes/servicoClassificacao.js";
+import { listarPropostas } from "../../tickets/banco/tickets.js";
 
-import { Coleta, GUIA_MANUAL, guia } from '../tipos/chat.js';
-import { AgenteChat } from '../tipos/persona.js';
-import { dataEmPortugues } from '../../compartilhado/texto.js';
-import { semAcentos } from '../../compartilhado/texto.js';
-import { listarContextosDaPasta } from '../regras/consultasDeContextos.js';
-import { listarHistoricoDoProjeto } from '../../logs/regras/consultasDoDiario.js';
-import { perguntarAoAssistenteLocal } from '../../inicio/servico.js';
-import { situacaoDoProjeto } from '../../inicio/servico.js';
-import { Fonte } from '../../inicio/servico.js';
-import { metricasDasExecucoes } from '../../metricas/servico.js';
-import { obterEspaco } from '../../projetos/banco/projetos.js';
-import { Espaco } from '../../projetos/contratos.js';
-import { listarRunsLocais } from '../../testes/banco/runs.js';
-import { catalogoDeTestes } from '../../testes/servicoClassificacao.js';
-import { listarPropostas } from '../../tickets/banco/tickets.js';
-
+// --- responderComDadosLocais ---
 /** Classificação inicial de uma falha pelo texto do resultado. É hipótese: confirmar reproduzindo. */
 function classificarFalha(texto: string): { classe: 'automacao' | 'ambiente' | 'produto' | 'inconclusiva'; rotulo: string; motivo: string } {
   const t = semAcentos(texto);
@@ -28,9 +25,9 @@ function classificarFalha(texto: string): { classe: 'automacao' | 'ambiente' | '
   return { classe: 'inconclusiva', rotulo: 'inconclusiva', motivo: 'o registro não traz detalhe suficiente' };
 }
 
-
 /** A resposta sendo montada: linhas, fontes (sem repetir aba) e fatos; generico = não achou nada específico. */
 type Montagem = { linhas: string[]; fontes: Fonte[]; fatos: string[]; generico: boolean; fonte: (f: Fonte) => void; semProjeto: () => void };
+
 /** O que cada agente recebe: a pergunta (também sem acentos), o projeto e as execuções dele. */
 type Pergunta = { pergunta: string; semAcento: string; espacoId: string | null; espaco: Espaco | null; trabalhos: Trabalho[]; base?: string };
 
@@ -146,3 +143,8 @@ async function comoMonitoramento(c: Montagem, q: Pergunta) {
   const m = metricasDasExecucoes(q.espacoId ?? undefined, q.base); if (m.ultimaExecucao) c.linhas.push(`Última execução registrada: ${m.ultimaExecucao.resultado} em ${dataEmPortugues(m.ultimaExecucao.em)}.`);
   c.fonte({ rotulo: 'Métricas', aba: 'metricas' });
 }
+
+// --- tentarOuPadrao ---
+/** Executa uma consulta e, se der erro, usa o valor padrão (a conversa não quebra por uma consulta). */
+
+export const tentarOuPadrao = <T>(fn: () => T, padrao: T): T => { try { return fn(); } catch { return padrao; } };

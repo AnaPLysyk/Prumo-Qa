@@ -6,8 +6,8 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { caminhoSeguro } from "../seguranca/caminhoSeguro.js";
 import { hash } from "../seguranca/hash.js";
-import { lerSeguro } from "../seguranca/lerSeguro.js";
-import { sensivel } from "../seguranca/sensivel.js";
+import { lerSeguro } from "../seguranca/caminhoSeguro.js";
+import { sensivel } from "../seguranca/caminhoSeguro.js";
 
 // ── carregarProjeto ──
 // ── normalizarComando ──

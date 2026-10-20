@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {z} from 'zod';
-import {entrarComIdentidadeRemota,idLocalDeIdentidadeRemota} from '../../../../dist/login/regras/entrarComIdentidadeRemota.js';
+import {entrarComIdentidadeRemota,idLocalDeIdentidadeRemota} from '../../../../dist/login/regras/entradaPorProvedor.js';
 import {encerrarSessao} from '../../../../dist/login/regras/sessao.js';
 import {diretorioDados} from '../../../../dist/compartilhado/banco/diretorioDados.js';
 import {lerLocal} from '../../../../dist/compartilhado/banco/persistenciaLocal.js';

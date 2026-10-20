@@ -1,13 +1,13 @@
 /** Execução do trabalho e publicação de resultados — arquivos relacionados agrupados para manutenção. */
-import { publicarComentarioDeResultado } from "../../testes/integracoes/publicarComentarioDeResultado.js";
+import { publicarComentarioDeResultado } from "../../testes/integracoes/publicarRunLocal.js";
 import { elegivelParaPublicar, publicacaoPodeRepetir } from "../../testes/servicoExecucoes.js";
 import { definirEstadoJiraDoTrabalho, listarTrabalhos, obterTrabalho, concluirTrabalho, falharPorInfraestrutura, registrarBatimento } from "../banco/fila.js";
-import { Trabalho } from "../tipos/fila.js";
+import { Trabalho } from "../tipos/worker.js";
 import { Rotina } from "../tipos/rotina.js";
 import { EstadoDoWorker, TipoEvento } from "../tipos/worker.js";
 import { emitirEventoDoWorker } from "./apoioDoWorker.js";
 import { ErroQa } from "../../compartilhado/erros.js";
-import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
+import { ErroServico } from "../../conexoes/integracoes/configuracaoDosServicos.js";
 import { obterRotina } from "../banco/agenda.js";
 import { executarTrabalhoDaRotina } from "./executoresDeTrabalhos.js";
 

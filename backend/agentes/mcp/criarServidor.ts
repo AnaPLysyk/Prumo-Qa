@@ -1,26 +1,59 @@
-/** Cria o servidor MCP do Prumo ligado a um projeto: as oito ferramentas, os roteiros e a política conferida a cada chamada. */
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
-import { versaoDoPacote } from '../../compartilhado/versaoDoPacote.js';
-import { espacoDaRaiz } from '../../projetos/servicoProjetos.js';
-import { projetoVinculado } from '../../projetos/servicoProjetos.js';
-import { exigirCapacidade } from '../servicoPoliticas.js';
-import { MeiosDoServidorMcp } from '../tipos/mcp.js';
-import { projetoAindaVinculado } from './segurancaDaSessao.js';
-import { registrarConsultarEvidencias } from './consultasDoProjeto.js';
-import { registrarContextoProjeto } from './consultasDoProjeto.js';
-import { registrarExecutarValidacao } from './consultasDoProjeto.js';
-import { registrarListarPoliticas } from './consultasDoProjeto.js';
-import { registrarProporAprendizado } from '../servicoPropostasMcp.js';
-import { registrarProporBug } from '../servicoPropostasMcp.js';
-import { registrarProporCaso } from '../servicoPropostasMcp.js';
-import { registrarRevisarCobertura } from './consultasDoProjeto.js';
-import { registrarRoteirosMcp } from './roteirosMcp.js';
-import { respostaDaFerramentaMcp } from './formatoDasFerramentas.js';
-import { transporteObservado } from './transporteObservado.js';
-import { contaAutorizadaMcp, conferirAcessoMcp } from './segurancaDaSessao.js';
-import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from '../../compartilhado/banco/diretorioDados.js';
+/** criarServidor: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
+import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import { Projeto } from "../../compartilhado/projeto/contratos.js";
+import { iniciarAtividade } from "../../logs/regras/iniciarAtividade.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
+import { versaoDoPacote } from "../../compartilhado/raizDoAplicativo.js";
+import { espacoDaRaiz, projetoVinculado } from "../../projetos/servicoProjetos.js";
+import { exigirCapacidade } from "../servicoPoliticas.js";
+import { MeiosDoServidorMcp } from "../tipos/mcp.js";
+import { projetoAindaVinculado, contaAutorizadaMcp, conferirAcessoMcp } from "./segurancaDaSessao.js";
+import { registrarConsultarEvidencias, registrarContextoProjeto, registrarExecutarValidacao, registrarListarPoliticas, registrarRevisarCobertura, respostaDaFerramentaMcp } from "./consultasDoProjeto.js";
+import { registrarProporAprendizado, registrarProporBug, registrarProporCaso, registrarRoteirosMcp } from "../servicoPropostasMcp.js";
+import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from "../../compartilhado/banco/diretorioDados.js";
 
+// --- transporteObservado ---
+/** Observa tools/call na fronteira do protocolo, inclusive rejeições de schema do SDK. */
+export function transporteObservado(transporte:Transport,p:Projeto,cliente:()=>string|undefined):Transport {
+  const pendentes=new Map<string|number,ReturnType<typeof iniciarAtividade>>();
+  const observado:Transport={
+    async start() {
+      transporte.onmessage=(mensagem,extra)=>{
+        if('method' in mensagem && mensagem.method==='tools/call' && 'id' in mensagem) {
+          const params=mensagem.params;
+          pendentes.set(mensagem.id,iniciarAtividade(p,typeof params?.name==='string'?params.name:'desconhecida',{origin:'MCP',client:cliente()},params?.arguments));
+        }
+        observado.onmessage?.(mensagem,extra);
+      };
+      transporte.onerror=e=>observado.onerror?.(e);
+      // Inícios sem término ficam observáveis, sem inventar resultado após desconexão.
+      transporte.onclose=()=>{pendentes.clear();observado.onclose?.();};
+      await transporte.start();
+    },
+    async send(mensagem,opcoes) {
+      if('id' in mensagem && mensagem.id!==undefined && !('method' in mensagem)) {
+        const a=pendentes.get(mensagem.id);
+        if(a) {
+          pendentes.delete(mensagem.id);
+          if('error' in mensagem)a.finalizar({codigo:'TOOL_ERROR'},true);
+          else {
+            const r=mensagem.result;let dados:unknown={};
+            const texto=Array.isArray(r.content)?r.content.find(c=>c?.type==='text')?.text:undefined;
+            if(typeof texto==='string') {try{dados=JSON.parse(texto);}catch{ /* Erro textual do SDK: nunca copiar texto livre ao log. */ }}
+            a.finalizar(dados,r.isError===true);
+          }
+        }
+      }
+      await transporte.send(mensagem,opcoes);
+    },
+    close:()=>transporte.close(),
+    setProtocolVersion:v=>transporte.setProtocolVersion?.(v)
+  };
+  return observado;
+}
+
+// --- criarServidor ---
 export async function criarServidor(raiz: string, contratoLeitura?: string) {
   const dono = await contaAutorizadaMcp();
   definirUsuarioDoEscopo(dono);

@@ -1,10 +1,14 @@
-/** Configuração e formato de serviços remotos — arquivos relacionados agrupados para manutenção. */
-import { ErroServico } from "./ErroServico.js";
+/** configuracaoDosServicos: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
+import { codigosServico, ConfigServico, nome, obj, sid } from "../tipos/adaptador.js";
 import { Servico, Recurso, identidadeRecurso } from "../../projetos/contratos.js";
-import { ConfigServico, nome, obj, sid } from "../tipos/adaptador.js";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 
+// --- ErroServico ---
+/** `detalhe`: motivo curto e mascarado que o próprio serviço deu ao recusar (400/422), para a pessoa saber o que corrigir. */
+export class ErroServico extends Error{constructor(public codigo:typeof codigosServico[number],public retryAfter?:string,public detalhe?:string){super(codigo);}}
+
+// --- configuracaoDosServicos ---
 // ── configuracaoDosServicos ──
 /** GitHub e Qase usam destinos fixos; Jira aceita somente HTTPS em *.atlassian.net. */
 export function instanciaServico(servico: Servico, valor?: string) {

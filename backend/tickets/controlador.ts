@@ -4,7 +4,7 @@ import { criarProposta } from "./servicoPropostas.js";
 import { descartarProposta, editarProposta, revisarProposta } from "./servicoPropostas.js";
 import { listarPropostas } from "./banco/tickets.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
-import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
+import { confirmarNoWindows } from "../aplicativo/janela/controleDaJanela.js";
 import { nomeServico } from "../aplicativo/tipos/aplicativo.js";
 import { prepararOperacao } from "../conexoes/escrita/executarOperacao.js";
 import { servicosDoAplicativo } from "../conexoes/regras/nucleoServicos.js";

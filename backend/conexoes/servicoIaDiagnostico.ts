@@ -3,13 +3,13 @@ import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
 import { prepararConexao } from "./ia/conectarIa.js";
 import { projetoVinculado } from "../projetos/servicoProjetos.js";
 
-import { Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools } from "./tipos/integracaoIa.js";
+import { Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools } from "./ia/conectarIa.js";
 import fs from "node:fs";
 import path from "node:path";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { registrosIntegracao, pastaDosTestesDeIntegracao } from "./banco/integracoes.js";
-import { consultarAtividades } from "../logs/banco/atividades.js";
+import { consultarAtividades } from "../logs/regras/iniciarAtividade.js";
 import { spawnSync } from "node:child_process";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";

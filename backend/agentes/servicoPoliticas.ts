@@ -1,9 +1,11 @@
-/** Regras, capacidades e persistência de políticas dos agentes — arquivos relacionados agrupados para manutenção. */
+/** servicoPoliticas: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { Registro, registro, Configuracao, idsEsp, EstadoCapacidade, capacidades, especializacoes } from "./tipos/politicas.js";
 import { lerLocal, gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { especializacaoLigada } from "../administracao/servico.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";
+import { gravarPreferencias, lerPreferencias } from "../configuracoes/servico.js";
 
+// --- servicoPoliticas ---
 // ── configuracaoDosAgentes ──
 export const lerConfiguracaoDosAgentes = (b?: string) => lerLocal<Registro>('agentes.json', registro, { version: 1, itens: [] }, b);
 
@@ -89,3 +91,7 @@ export function matrizDePoliticas(espacoId: string | null, base?: string) {
     };
   });
 }
+
+// --- autorizarDelegacaoDeIa ---
+/** Autoriza ou revoga a delegação do chat ao Claude Code/Codex. Chamado só após confirmação nativa da pessoa. */
+export function autorizarDelegacaoDeIa(provedor: 'claude' | 'codex', valor: boolean, base?: string) { const p = lerPreferencias(base); return gravarPreferencias({ ...p, ia: { ...p.ia, delegacao: { ...p.ia.delegacao, [provedor]: valor } } }, base); }

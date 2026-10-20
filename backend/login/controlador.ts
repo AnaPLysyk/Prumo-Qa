@@ -3,7 +3,7 @@ import { cadastrarConta, confirmarEntrada, alterarMinhasDuasEtapas, entrarNaCont
 import { cadastrarRemotamente, usarAutenticacaoRemota, pedirRecuperacaoRemota, entrarRemotamente, sairRemotamente } from "./integracoes/autenticacaoRemota.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { pedirCodigo } from "./regras/codigosPorEmail.js";
-import { entrarComIdentidadeRemota } from "./regras/entrarComIdentidadeRemota.js";
+import { entrarComIdentidadeRemota } from "./regras/entradaPorProvedor.js";
 import { estadoDaEntrada, iniciarEntrada } from "./regras/entradaPorProvedor.js";
 import { dependenciasDoGithub, dependenciasDoGoogle } from "./regras/configuracaoDoLogin.js";
 import { workerDoAplicativo } from "../agendamentos/worker/workerDoAplicativo.js";

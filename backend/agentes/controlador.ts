@@ -9,7 +9,7 @@ import { listarAgentesPessoais, importarPreviasAntigas, excluirAgentePessoal, sa
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { rastrearPergunta } from "./chat/conversar.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
-import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
+import { confirmarNoWindows } from "../aplicativo/janela/controleDaJanela.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
 import { textoRemoto } from "../conexoes/integracoes/configuracaoDosServicos.js";
@@ -30,7 +30,7 @@ import { estadoConhecimento } from "./banco/estadoConhecimento.js";
 import { caminhoConhecimento } from "./banco/comBancoDeConhecimento.js";
 import { lerPerfil, salvarPerfil } from "./banco/perfil.js";
 import { listarContextosDaPasta } from "./regras/consultasDeContextos.js";
-import { autorizarDelegacaoDeIa } from "./regras/autorizarDelegacaoDeIa.js";
+import { autorizarDelegacaoDeIa } from "./servicoPoliticas.js";
 import { registrarTrechosDeSkill, decidirTrechoDeSkill, listarTrechosDeSkill } from "./banco/skills.js";
 import { importarPastaDeSkill } from "./banco/importarPastaDeSkill.js";
 import { validarEspecializacao } from "./regras/regrasDasSkills.js";

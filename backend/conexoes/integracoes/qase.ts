@@ -8,8 +8,8 @@ import { parametrosDaUrl, idNumericoDaConsulta } from "./configuracaoDosServicos
 import { Recurso } from "../../projetos/contratos.js";
 import { OperacaoServico, PlanoDaConsulta } from "../tipos/adaptador.js";
 import { Filtros } from "../tipos/adaptador.js";
-import { paginaSchema } from "../tipos/transporte.js";
-import { ErroServico } from "./ErroServico.js";
+import { paginaSchema } from "../tipos/adaptador.js";
+import { ErroServico } from "./configuracaoDosServicos.js";
 
 const pagina = <T extends z.ZodTypeAny>(item: T) => z.object({ result: z.object({ entities: z.array(item).default([]), total: z.number().optional(), filtered: z.number().optional() }).passthrough() }).passthrough();
 

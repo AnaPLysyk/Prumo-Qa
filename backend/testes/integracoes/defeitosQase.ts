@@ -3,7 +3,7 @@ import { z } from "zod";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { marcadorDaOperacao } from "../../conexoes/escrita/chaveDaOperacao.js";
-import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
+import { ErroServico } from "../../conexoes/integracoes/configuracaoDosServicos.js";
 import { DefOperacao } from "../../conexoes/tipos/operacao.js";
 import { camposDeSistema, idCriadoNoQase } from "./casosQase.js";
 import { listarNoQase } from "./pesquisasQase.js";

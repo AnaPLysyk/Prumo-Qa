@@ -2,11 +2,11 @@
 import { z } from "zod";
 import { Recurso } from "../../projetos/contratos.js";
 import { OperacaoServico, nome, obj, ContextoServico, PartesDoAdaptador, objetos, paginaQase, ConfigServico, PlanoDaConsulta, itemQase } from "../tipos/adaptador.js";
-import { ErroServico } from "./ErroServico.js";
+import { ErroServico } from "./configuracaoDosServicos.js";
 import { cabecalhosDoServico } from "./configuracaoDosServicos.js";
 import { lerComCredencial } from "./requisicoes.js";
 import { limparRespostaDoServico, parametrosDaUrl, recursoDaResposta, saidaDaConsulta } from "./configuracaoDosServicos.js";
-import { paginaSchema } from "../tipos/transporte.js";
+import { paginaSchema } from "../tipos/adaptador.js";
 import { ParametrosConsulta, ResultadoConsulta } from "../tipos/adaptador.js";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { projetoDoTicket, camposDoTipo, tiposDeCriacao, transicoesDoTicket, jqlDeTickets } from "../../tickets/integracoesJira.js";

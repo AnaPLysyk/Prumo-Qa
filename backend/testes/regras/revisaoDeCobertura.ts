@@ -3,7 +3,7 @@ import { hash } from "../../compartilhado/seguranca/hash.js";
 import { AchadoTeste, doc, Fonte, Framework, config, conhecimento } from "../tipos/catalogoDeTestes.js";
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
 import { revisaoSchema, AnaliseDeCobertura, Revisao } from "../tipos/catalogoDeTestes.js";
-import { lerSeguro } from "../../compartilhado/seguranca/lerSeguro.js";
+import { lerSeguro } from "../../compartilhado/seguranca/caminhoSeguro.js";
 import { contextoParaRevisao } from "../../agentes/regras/consultasDeContextos.js";
 import { caminhoSeguro } from "../../compartilhado/seguranca/caminhoSeguro.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";

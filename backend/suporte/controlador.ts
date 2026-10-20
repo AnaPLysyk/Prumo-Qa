@@ -5,9 +5,9 @@ import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { enderecoOficialDoRelato, prepararRelato, resumoDoDiagnosticoParaRelato } from "./servicoRelato.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { guardarAnexos } from "./regras/chamadosDaPessoa.js";
-import { consultarChamado } from "./integracoes.js";
+import { consultarChamado } from "./servicoRelato.js";
 import { versao } from "../aplicativo/tipos/aplicativo.js";
-import { protetorDoSistema } from "../conexoes/regras/protetorDoSistema.js";
+import { protetorDoSistema } from "../conexoes/servicoContas.js";
 import { enviarChamado, meuChamado, meusChamados } from "./regras/chamadosDaPessoa.js";
 import fs from "node:fs";
 

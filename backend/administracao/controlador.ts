@@ -1,12 +1,12 @@
 /** Controlador da Administração: os canais da tela, agrupados por assunto. */
 import { safeStorage } from "electron";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { lerCodigoDoAplicativo, lerMapaDoAplicativo } from "./banco/administracao.js";
+import { lerCodigoDoAplicativo, lerMapaDoAplicativo } from "./servico.js";
 import { agentesDaPlataformaParaJanela, salvarAgentesDaPlataforma, configuracaoDeAcesso, salvarConfiguracaoDeAcesso, excluirPapel, listarPapeis, salvarPapel, alterarContaPelaAdministracao, criarContaPelaAdministracao, desbloquearConta, excluirConta, listarContasDeAcesso, redefinirSenhaPelaAdministracao } from "./servico.js";
 import { salvarEntradaDoProvedor } from "../login/regras/configuracaoDoLogin.js";
 import { ativarLogin } from "../login/regras/contas.js";
-import { protetorDoSistema } from "../conexoes/regras/protetorDoSistema.js";
-import { chamadosDaAdministracao, salvarChaveDeAdministracao, lerChaveDeAdministracao } from "../suporte/regras/chamadosDaAdministracao.js";
+import { protetorDoSistema } from "../conexoes/servicoContas.js";
+import { chamadosDaAdministracao, salvarChaveDeAdministracao, lerChaveDeAdministracao } from "../suporte/regras/chamadosDaPessoa.js";
 import { ENDERECO_DO_SERVICO } from "../compartilhado/servicoRemoto.js";
 
 // Plataforma

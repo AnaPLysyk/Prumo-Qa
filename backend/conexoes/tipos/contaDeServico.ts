@@ -2,8 +2,8 @@
 import { z } from 'zod';
 import { servicoSchema } from '../../projetos/contratos.js';
 import type { cofreCredenciais } from '../banco/credenciais.js';
-import type { Protetor } from './transporte.js';
-import type { TransporteEscrita, TransporteServico } from './transporte.js';
+import type { Protetor } from './adaptador.js';
+import type { TransporteEscrita, TransporteServico } from './adaptador.js';
 
 export const conexaoEntrada=z.object({servico:servicoSchema,nome:z.string().trim().min(1).max(100),instancia:z.string().max(300).optional(),usuario:z.string().email().max(200).optional(),token:z.string().min(1).max(6000).regex(/^[^\x00-\x1f]+$/)}).strict();
 

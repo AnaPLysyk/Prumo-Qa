@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {conferirAmbienteDeAutenticacao,criarAutenticacao} from '../../../../backend/login/servidor/autenticacao.mjs';
 import {enderecoDeAutenticacao,entrarRemotamente,pedirRecuperacaoRemota,sairRemotamente,validarSessaoRemota} from '../../../../dist/login/integracoes/autenticacaoRemota.js';
-import {entrarComIdentidadeRemota,idLocalDeIdentidadeRemota} from '../../../../dist/login/regras/entrarComIdentidadeRemota.js';
+import {entrarComIdentidadeRemota,idLocalDeIdentidadeRemota} from '../../../../dist/login/regras/entradaPorProvedor.js';
 import {encerrarSessao} from '../../../../dist/login/regras/sessao.js';
 import {conferirAcessoAoCanal} from '../../../../dist/login/regras/conferirAcessoAoCanal.js';
 import fs from 'node:fs';

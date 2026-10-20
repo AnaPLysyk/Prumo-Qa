@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { analisarVersao } from "../ajuda/servicoVersoes.js";
+import { analisarVersao } from "../ajuda/servicoAjuda.js";
 import { LIMITE_INSTALADOR, Opcoes, HOSTS } from "./contratos.js";
 import { repositorio } from "../ajuda/contratos.js";
 

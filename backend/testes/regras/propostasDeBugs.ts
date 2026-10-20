@@ -4,7 +4,7 @@ import { obterRunLocal } from "../banco/runs.js";
 import { criarProposta } from "../../tickets/servicoPropostas.js";
 import { classificacoesDeFalha } from "../../tickets/contratos.js";
 import { CasoTeste, QASE_PADROES } from "../tipos/catalogoDeTestes.js";
-import { Trabalho } from "../../agendamentos/tipos/fila.js";
+import { Trabalho } from "../../agendamentos/tipos/worker.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { Comentario, rotulo } from "../tipos/escritaQase.js";
 

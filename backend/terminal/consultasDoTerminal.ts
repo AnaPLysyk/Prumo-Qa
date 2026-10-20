@@ -1,16 +1,24 @@
-/** CLI: consultas, logs e conexões — arquivos relacionados agrupados para manutenção. */
+/** consultasDoTerminal: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
+import { createInterface } from "node:readline/promises";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { descreverAchados } from "../logs/regras/resumoDoDiario.js";
 import { Evento } from "../logs/contratos.js";
 import { Projeto } from "../compartilhado/projeto/contratos.js";
-import { observar } from "../logs/regras/iniciarAtividade.js";
-import { consultarAtividades } from "../logs/banco/atividades.js";
-import { consultarEvidencias } from "../testes/banco/evidencias.js";
+import { observar, consultarAtividades } from "../logs/regras/iniciarAtividade.js";
+import { consultarEvidencias } from "../testes/banco/publicacoes.js";
 import { calcularMetricas } from "../metricas/servico.js";
 import { aplicarConexao, prepararConexao } from "../conexoes/ia/conectarIa.js";
-import { perguntarNoTerminal } from "./perguntarNoTerminal.js";
 import { setTimeout as esperar } from "node:timers/promises";
+import { versaoDoPacote } from "../compartilhado/raizDoAplicativo.js";
 
+// --- perguntarNoTerminal ---
+export async function perguntarNoTerminal(pergunta:string) {
+  const rl=createInterface({input:process.stdin,output:process.stdout});
+  try{return await rl.question(pergunta);}catch{return '';}finally{rl.close();}
+}
+
+// --- consultasDoTerminal ---
+// --- consultasDoTerminal ---
 // ── saidaDoTerminal ──
 export const avisarHistoricoIncompleto = (registros: unknown[]) => {
   if (registros.length) {
@@ -156,3 +164,34 @@ export async function acompanharLogs(p:Projeto,emitir:(e:Evento)=>void,opcoes:{s
     try{await esperar(opcoes.intervalMs??1000,undefined,{signal:opcoes.signal});}catch(e){if(!opcoes.signal.aborted)throw e;}
   }
 }
+
+// --- menuDoTerminal ---
+export async function menuDoTerminal(p:Projeto,contrato?:string,json=false) {
+  const painel=()=>{
+    const h=consultarAtividades(p);const m=calcularMetricas(h);avisarHistoricoIncompleto(h.problems);
+    const ultima=h.activities.filter(e=>e.origin==='MCP').at(-1);
+    if(json){imprimirJson({project:p.manifesto.name,metrics:m,lastObservedClient:ultima?.client??null,connection:'Sessão ativa não verificada'});return;}
+    console.log(`\nPRUMO QA · v${versaoDoPacote}\nEngenharia de Qualidade\n\nProjeto: ${textoSeguroNoTerminal(p.manifesto.name)}\nConexão: ${ultima?'última chamada observada de '+ultima.client+' (identidade declarada)':'nenhuma chamada MCP observada'}; sessão ativa não verificada\nÚltima atividade: ${m.lastActivity??'nenhuma'}\n\nATIVIDADES\n  ${m.totalOperations} operações registradas · ${m.mcpCalls} via MCP\n  ${m.coverageReviews} revisões de cobertura\n  ${m.gaps} lacunas identificadas\n\nOPÇÕES\n  1. Atividades recentes\n  2. Logs\n  3. Métricas\n  4. Evidências\n  5. Conexões\n  0. Sair\n`);
+  };
+  painel();if(json||!process.stdin.isTTY||!process.stdout.isTTY)return;
+  const rl=createInterface({input:process.stdin,output:process.stdout});rl.setPrompt('Opção: ');rl.prompt();
+  try {for await(const op of rl){
+    if(op.trim()==='0')break;
+    try {switch(op.trim()) {
+      case '1':comandoAtividade(p);break;case '2':await comandoLogs(p,false,false);break;case '3':comandoMetricas(p);break;
+      case '4':await comandoEvidencias(p);break;
+      case '5':await comandoConectar(p,'codex',contrato,false,false);console.log('Para confirmar a configuração use prumo conectar codex com esta mesma raiz.');break;
+      default:console.log('Escolha uma opção de 0 a 5.');
+    }}catch(e){console.error(textoSeguroNoTerminal((e as Error).message));}
+    painel();rl.prompt();
+  }}finally{rl.close();}
+}
+
+// --- contratos ---
+/** Textos de ajuda dos comandos do Prumo no terminal. */
+export const ajuda = {
+  usage: 'prumo [--root <raiz-absoluta>] | atividade | logs [--follow] | metricas | evidencias | conectar codex | doctor | prompts [nome]',
+  automation: '--json em consultas. Mantidos context, review <plano.json>, run <capability>, approve <capability>, evidence [jobId].',
+  approval: 'approve exige autenticação humana Windows; conectar exige confirmação no terminal antes de alterar a configuração do cliente.',
+  prompts: 'prompts lista os roteiros do Prumo (os mesmos prompts do servidor MCP); prompts <nome> imprime o texto, sem executar nada.'
+};

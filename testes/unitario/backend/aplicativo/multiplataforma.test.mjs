@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { plataformaDoInstalador } from '../../../../dist/atualizacoes/servicoInstalacao.js';
 import { nomeDoInstalador } from '../../../../dist/atualizacoes/servicoInstalacao.js';
-import { protetorDoSistema } from '../../../../dist/conexoes/regras/protetorDoSistema.js';
+import { protetorDoSistema } from '../../../../dist/conexoes/servicoContas.js';
 import { diretorioDados } from '../../../../dist/compartilhado/banco/diretorioDados.js';
 
 test('cada sistema recebe o seu instalador; sistemas sem instalador oficial ficam sem atualização automática', () => {

@@ -1,9 +1,33 @@
-/** Formato da conversa do chat (turnos, estilos, provedores, resposta) e o guia de respostas do orquestrador. */
-import { AgenteChat, Experiencia, Papel } from './persona.js';
-import { Fonte } from '../../inicio/servico.js';
-import { TipoTeste } from '../../testes/tipos/catalogoDeTestes.js';
-import { Orquestracao } from './orquestracao.js';
+/** chat: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
+import { AgenteChat, Experiencia, Papel } from "./persona.js";
+import { Fonte } from "../../inicio/servico.js";
+import { TipoTeste } from "../../testes/tipos/catalogoDeTestes.js";
+import { Perfil } from "./conhecimento.js";
 
+// --- orquestracao ---
+/** Formato da orquestração observável: quais agentes participaram, em que ordem, quanto tempo cada etapa levou e o que consultou. */
+
+/** Uma etapa: um agente respondendo com os dados locais. SEM_DADOS = rodou e não achou nada; FALHOU = a consulta deu erro. */
+type EstadoEtapa = 'CONCLUIDA' | 'SEM_DADOS' | 'FALHOU';
+
+export type EtapaDaOrquestracao = { ordem: number; agente: string; inicio: string; fim: string; duracaoMs: number; estado: EstadoEtapa; fontes: string[]; fatos: string[]; linhas: number; erro?: string };
+
+/**
+ * Registro de uma orquestração (sem a pergunta e sem a resposta, como os atendimentos): o orquestrador escolhe as
+ * especializações pela pontuação do roteamento, delega uma etapa a cada uma, em ordem, e junta os resultados.
+ * As etapas são independentes (nenhuma usa o resultado de outra); isso fica explícito em `dependencias`.
+ */
+export type Orquestracao = {
+  id: string; em: string; espacoId: string | null; responsavel: 'orquestrador'; modo: 'LOCAL';
+  motivo: { agente: string; pontos: number }[]; agentes: string[]; dependencias: 'INDEPENDENTES';
+  etapas: EtapaDaOrquestracao[]; estado: 'CONCLUIDA' | 'PARCIAL' | 'FALHOU'; duracaoMs: number;
+};
+
+/** No máximo 3 especialistas por pergunta, cada um com pelo menos 3 pontos no roteamento (sinal forte da especialidade); 500 registros guardados. */
+export const limitesOrquestracao = { agentes: 3, pontosMinimos: 3, registros: 500, porConsulta: 50 } as const;
+
+// --- chat ---
+// --- chat ---
 const estilos = ['amigavel', 'direto', 'tecnico'] as const;
 
 export type Estilo = (typeof estilos)[number];
@@ -64,3 +88,19 @@ export type ExtrasPrompt = { perfil?: PerfilParaIa | null; conta?: { nome: strin
 export type Opcoes = { espacoId: string | null; pergunta: string; agente?: string | null; estilo?: Estilo; nome?: string; provedor?: Provedor; primeira?: boolean;
   historico?: Turno[]; contexto?: ContextoChat | null;
   executavel?: (p: Exclude<Provedor, 'local'>) => string | null; executor?: Executor; autorizados?: Partial<Record<Exclude<Provedor, 'local'>, boolean>>; base?: string };
+
+// --- ContextoDelegacao ---
+export type ContextoDelegacao = {
+  o: Opcoes;
+  agente: AgenteChat;
+  pergunta: string;
+  local: Coleta;
+  estilo: Estilo;
+  nome: string;
+  perfil: Perfil | null;
+  historico: Turno[];
+  comum: Pick<Resposta, 'rota' | 'continuou' | 'proximos'>;
+  provedor: Exclude<Provedor, 'local'>;
+  montar: (agente: AgenteChat, coleta: Coleta, modo: Resposta['modo'], extra?: Partial<Resposta> & { rota?: Resposta['rota'] }) => Resposta;
+  vestido: () => string[];
+};

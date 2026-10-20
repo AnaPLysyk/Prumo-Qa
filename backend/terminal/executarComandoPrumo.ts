@@ -2,12 +2,12 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { contextoCompleto } from '../agentes/mcp/consultasDoProjeto.js';
-import { textoDoPrompt } from '../agentes/mcp/roteirosMcp.js';
+import { textoDoPrompt } from '../agentes/servicoPropostasMcp.js';
 import { promptsPrumo } from '../agentes/tipos/roteiros.js';
 import { carregarProjeto } from '../compartilhado/projeto/carregarProjeto.js';
 import { Projeto } from '../compartilhado/projeto/contratos.js';
 import { executarValidacao } from '../testes/regras/executarValidacao.js';
-import { consultarAtividades } from '../logs/banco/atividades.js';
+import { consultarAtividades } from '../logs/regras/iniciarAtividade.js';
 import { calcularMetricas } from '../metricas/servico.js';
 import { avisarHistoricoIncompleto } from './consultasDoTerminal.js';
 import { chamadaRegistrada } from './consultasDoTerminal.js';
@@ -17,10 +17,10 @@ import { comandoEvidencias } from './consultasDoTerminal.js';
 import { comandoLogs } from './consultasDoTerminal.js';
 import { comandoMetricas } from './consultasDoTerminal.js';
 import { imprimirJson } from './consultasDoTerminal.js';
-import { menuDoTerminal } from './menuDoTerminal.js';
-import { perguntarNoTerminal } from './perguntarNoTerminal.js';
+import { menuDoTerminal } from './consultasDoTerminal.js';
+import { perguntarNoTerminal } from './consultasDoTerminal.js';
 import { textoSeguroNoTerminal } from './consultasDoTerminal.js';
-import { ajuda } from './contratos.js';
+import { ajuda } from './consultasDoTerminal.js';
 import { revisarCobertura } from '../testes/regras/revisaoDeCobertura.js';
 
 export async function executarComandoPrumo() {

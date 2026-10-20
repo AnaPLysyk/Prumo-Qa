@@ -5,17 +5,17 @@ import { listarContas, lerContasDeServico, gravarContasDeServico } from "../banc
 import { enviarAoServico, lerDoServico } from "../integracoes/requisicoes.js";
 import { ContextoServico, OperacaoServico } from "../tipos/adaptador.js";
 import { ContextoDosServicos, conexaoEntrada } from "../tipos/contaDeServico.js";
-import { Protetor } from "../tipos/transporte.js";
+import { Protetor } from "../tipos/adaptador.js";
 import { Filtros } from "../tipos/adaptador.js";
-import { TransporteEscrita, TransporteServico, paginaSchema } from "../tipos/transporte.js";
+import { TransporteEscrita, TransporteServico, paginaSchema } from "../tipos/adaptador.js";
 import { Recurso, Servico } from "../../projetos/contratos.js";
 import { adicionarConta, adaptadorDaConta, contaAtiva, verificarVinculoDoServico, codigoDoErroDeServico, vinculoDoServico } from "../servicoContas.js";
 import { importarProjetosQase } from "./importarProjetosQase.js";
 import { obterEspaco, listarEspacos } from "../../projetos/banco/projetos.js";
 import { vincularServicoAoEspaco, atualizarEstadoDoVinculo, registrarConsultaExterna, configurarAceite } from "../../projetos/servicoProjetos.js";
-import { ErroServico } from "../integracoes/ErroServico.js";
+import { ErroServico } from "../integracoes/configuracaoDosServicos.js";
 import { safeStorage } from "electron";
-import { protetorDoSistema } from "./protetorDoSistema.js";
+import { protetorDoSistema } from "../servicoContas.js";
 
 // ── nucleoServicos ──
 async function comentarNoJira(c: ContextoDosServicos, espacoId: string, ticket: string, adf: unknown) {

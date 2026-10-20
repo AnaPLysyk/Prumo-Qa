@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {contaSessao} from '../../../../dist/login/controladorSessao.js';
 import {entrarRemotamente,sairRemotamente} from '../../../../dist/login/integracoes/autenticacaoRemota.js';
-import {entrarComIdentidadeRemota} from '../../../../dist/login/regras/entrarComIdentidadeRemota.js';
+import {entrarComIdentidadeRemota} from '../../../../dist/login/regras/entradaPorProvedor.js';
 import {encerrarSessao} from '../../../../dist/login/regras/sessao.js';
 
 test('polling detecta sessão revogada no servidor e invalida sessão local', async t => {

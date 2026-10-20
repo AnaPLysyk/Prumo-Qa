@@ -4,7 +4,7 @@ import { empilharAviso } from "../aplicativo/avisos/avisos.js";
 import { navegarPara } from "../aplicativo/janela/controleDaJanela.js";
 import { lerPreferencias, gravarPreferencias } from "../configuracoes/servico.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
-import { compararVersoes, analisarVersao, enderecoDaVersao } from "../ajuda/servicoVersoes.js";
+import { compararVersoes, analisarVersao, enderecoDaVersao } from "../ajuda/servicoAjuda.js";
 import { estadoDoAplicativo } from "../aplicativo/estadoDoAplicativo.js";
 import { versao } from "../aplicativo/tipos/aplicativo.js";
 import { mensagemOffline, urlConsulta, Resultado, limiteResposta, releaseSchema } from "./contratos.js";

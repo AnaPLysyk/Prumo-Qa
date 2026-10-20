@@ -6,7 +6,7 @@ import { z } from "zod";
 import { DefOperacao, Remoto } from "../../conexoes/tipos/operacao.js";
 import { associarTicket, esquemaCaso, editarCaso, criarSuite } from "../tipos/escritaQase.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
-import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
+import { ErroServico } from "../../conexoes/integracoes/configuracaoDosServicos.js";
 import { acharCasoNoQase, listarNoQase, tituloComparavel } from "./pesquisasQase.js";
 
 // ── vinculosComTickets ──

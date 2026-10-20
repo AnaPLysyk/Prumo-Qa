@@ -1,6 +1,6 @@
 /** Execução e classificação de evidências — arquivos relacionados agrupados para manutenção. */
 import { z } from "zod";
-import { Status, casoResultadoSchema, Evidencia, resultadoRunnerSchema } from "../tipos/evidencia.js";
+import { Status, casoResultadoSchema, Evidencia, resultadoRunnerSchema } from "../tipos/catalogoDeTestes.js";
 import { Projeto, Comando } from "../../compartilhado/projeto/contratos.js";
 import { hash } from "../../compartilhado/seguranca/hash.js";
 import { ErroQa } from "../../compartilhado/erros.js";
@@ -8,15 +8,15 @@ import { normalizarComando } from "../../compartilhado/projeto/carregarProjeto.j
 import { caminhoSeguro } from "../../compartilhado/seguranca/caminhoSeguro.js";
 import path from "node:path";
 import { inventariar } from "../../compartilhado/projeto/carregarProjeto.js";
-import { lerSeguro } from "../../compartilhado/seguranca/lerSeguro.js";
+import { lerSeguro } from "../../compartilhado/seguranca/caminhoSeguro.js";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
-import { salvarEvidencia } from "../banco/evidencias.js";
+import { salvarEvidencia } from "../banco/publicacoes.js";
 import { solicitarAprovacao } from "../servicoAprovacao.js";
-import { Delegada } from "../tipos/autorizacoes.js";
+import { Delegada } from "../tipos/catalogoDeTestes.js";
 
 // ── classificarResultado ──
 export function classificarResultado(exitCode:number|null, blockedReason?:string, cases:z.infer<typeof casoResultadoSchema>[] = []): Status {

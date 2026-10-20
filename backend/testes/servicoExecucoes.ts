@@ -1,20 +1,24 @@
-/** Ciclo das runs e publicação — arquivos relacionados agrupados para manutenção. */
+/** servicoExecucoes: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { obterEspaco, listarEspacos } from "../projetos/banco/projetos.js";
 import { alterarRunLocal, obterRunLocal, gravarRunsLocais, lerRunsLocais } from "./banco/runs.js";
 import { Dep, Execucao, RunLocal, runSchema } from "./tipos/runLocal.js";
-import { Evidencia } from "./tipos/evidencia.js";
+import { Evidencia, FiltroExecucoes, filtroExecucoes } from "./tipos/catalogoDeTestes.js";
 import { listarRotinas } from "../agendamentos/banco/agenda.js";
 import { listarTrabalhos, obterTrabalho } from "../agendamentos/banco/fila.js";
-import { Trabalho } from "../agendamentos/tipos/fila.js";
+import { Trabalho } from "../agendamentos/tipos/worker.js";
 import { Espaco } from "../projetos/contratos.js";
-import { FiltroExecucoes, filtroExecucoes } from "./tipos/evidencia.js";
 import { randomUUID } from "node:crypto";
-import { ErroServico } from "../conexoes/integracoes/ErroServico.js";
+import { ErroServico } from "../conexoes/integracoes/configuracaoDosServicos.js";
 import { politicaCobre } from "../agendamentos/autorizacoes/autorizarRotina.js";
-import { publicacaoDoTrabalho } from "./banco/publicacoes.js";
+import { publicacaoDoTrabalho, consultarEvidencias } from "./banco/publicacoes.js";
 import { montarComentario } from "./regras/propostasDeBugs.js";
+import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
+import { mascarar } from "../compartilhado/seguranca/mascarar.js";
+import { projetoVinculado } from "../projetos/servicoProjetos.js";
 
+// --- servicoExecucoes ---
+// --- servicoExecucoes ---
 // ── servicoExecucoes ──
 function aplicarEvidencia(run: RunLocal, capability: string, ev: Evidencia, agora: string) {
   const mesmos = run.casos.filter(c => c.capability === capability && c.resultado?.origem !== 'MANUAL'); const semCenario = mesmos.filter(c => !c.casoRunner);
@@ -149,3 +153,22 @@ export function prepararPublicacao(trabalhoId: string, b?: string) {
 /** Diz se vale tentar publicar de novo (tempo esgotado, serviço fora ou limite de consultas). */
 
 export const publicacaoPodeRepetir = (cod: string) => ['SERVICE_TIMEOUT', 'SERVICE_UNAVAILABLE', 'SERVICE_RATE_LIMIT'].includes(cod);
+
+// --- declararResultadoManual ---
+/** Resultado declarado pela pessoa (caso manual). Marcado MANUAL e com o nome de quem declarou; nunca sobrescreve resultado de execução. */
+export function declararResultadoManual(runLocalId: string, casoId: number, r: { status: 'PASS' | 'FAIL' | 'BLOCKED'; comentario: string }, por: string, b?: string, agora = new Date()) {
+  return alterarRunLocal(runLocalId, run => {
+    const c = run.casos.find(k => k.casoId === casoId); if (!c) throw new Error('RUN_CASE_NOT_FOUND'); if (c.resultado?.origem === 'EXECUCAO' && c.resultado.status !== 'NOT_RUN') throw new Error('RESULT_FROM_EXECUTION: já existe resultado de execução.');
+    c.resultado = { status: r.status, origem: 'MANUAL', granularidade: 'DECLARADO', comentario: r.comentario.slice(0, 2000), por, em: agora.toISOString() }; c.publicado = false;
+  }, b, agora);
+}
+
+// --- listarEvidenciasDoProjeto ---
+export async function listarEvidenciasDoProjeto(raiz: string, jobId?: string) {
+  const p = await projetoVinculado(raiz, diretorioDados());
+  const r = await consultarEvidencias(p, jobId);
+  return { status: 'status' in r ? r.status : undefined, reason: 'reason' in r ? r.reason : undefined, trust: 'trust' in r ? r.trust : undefined,
+    results: r.results.map(e => ({ jobId: e.jobId, capability: e.capability, status: e.status, reason: mascarar(e.reason), startedAt: e.startedAt, endedAt: e.endedAt,
+      executed: e.executed, exitCode: e.exitCode, evidenceScope: e.evidenceScope, cases: e.cases.map(c => ({ id: c.id, status: c.status })), evidencePath: e.evidencePath,
+      stdout: mascarar(e.stdout).slice(0, 4000), stderr: mascarar(e.stderr).slice(0, 4000) })) };
+}

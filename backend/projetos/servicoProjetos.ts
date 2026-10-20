@@ -4,7 +4,7 @@ import path from "node:path";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { PropostaContrato, CODIGO, DOCUMENTACAO, EXIGE_REVISAO, SCRIPT, STACKS, Stack, TESTES, associacaoSchema, servicoDaReferencia, Espaco, dadosEspaco, evento, Situacao, instrucoesManifesto, Servico, Recurso, vinculoSchema } from "./contratos.js";
 import { Manifesto, manifestoSchema, Projeto } from "../compartilhado/projeto/contratos.js";
-import { sensivel } from "../compartilhado/seguranca/sensivel.js";
+import { sensivel } from "../compartilhado/seguranca/caminhoSeguro.js";
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -13,7 +13,7 @@ import { listarPropostas } from "../tickets/banco/tickets.js";
 import { lerRepositorioLocal } from "../testes/banco/local.js";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { consultarAtividades } from "../logs/banco/atividades.js";
+import { consultarAtividades } from "../logs/regras/iniciarAtividade.js";
 import { calcularMetricas } from "../metricas/servico.js";
 
 // ── servicoContrato ──

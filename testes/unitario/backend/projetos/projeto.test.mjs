@@ -8,9 +8,9 @@ import { contextoProjeto } from '../../../../dist/agentes/mcp/consultasDoProjeto
 import { normalizarComando } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { caminhoSeguro } from '../../../../dist/compartilhado/seguranca/caminhoSeguro.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
-import { lerSeguro } from '../../../../dist/compartilhado/seguranca/lerSeguro.js';
+import { lerSeguro } from '../../../../dist/compartilhado/seguranca/caminhoSeguro.js';
 import { mascarar } from '../../../../dist/compartilhado/seguranca/mascarar.js';
-import { consultarEvidencias } from '../../../../dist/testes/banco/evidencias.js';
+import { consultarEvidencias } from '../../../../dist/testes/banco/publicacoes.js';
 import { classificarResultado as classificar } from '../../../../dist/testes/regras/executarValidacao.js';
 
 test('fixtures API, web e automação reconhecidas com fontes reais',async t=>{

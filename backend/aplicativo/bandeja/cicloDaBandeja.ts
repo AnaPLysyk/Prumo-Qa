@@ -1,16 +1,24 @@
-/** Ciclo da bandeja do aplicativo: criação, menu, ações e atualização. */
+/** cicloDaBandeja: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
+import { workerDoAplicativo } from "../../agendamentos/worker/workerDoAplicativo.js";
+import { empilharAviso } from "../avisos/avisos.js";
+import { estadoDoAplicativo } from "../estadoDoAplicativo.js";
+import { idiomaAtual } from "../../configuracoes/servico.js";
 import { nativeImage, Tray, Menu, app, dialog } from "electron";
 import path from "node:path";
-import { vigiarWorker } from "../../agendamentos/worker/vigiarWorker.js";
-import { estadoDoAplicativo } from "../estadoDoAplicativo.js";
 import { mostrarJanela, navegarPara } from "../janela/controleDaJanela.js";
 import { raizDoAplicativo } from "../../compartilhado/raizDoAplicativo.js";
-import { workerDoAplicativo } from "../../agendamentos/worker/workerDoAplicativo.js";
-import { idiomaAtual } from "../../configuracoes/servico.js";
 import { textoNoIdioma, resumoDoWorker } from "./conteudoDaBandeja.js";
 import { EstadoWorker, Idioma, ItemMenu } from "../tipos/textosDaBandeja.js";
 import { definirPausaGlobal } from "../../agendamentos/regras/cicloDaRotina.js";
 
+// --- vigiarWorker ---
+/** Vigia o worker: se ele parar sem o usuário pedir, tenta reiniciar e avisa; nunca finge que está ativo. */
+export function vigiarWorker() {
+  if (estadoDoAplicativo.saindo || workerDoAplicativo.estado().executando) return;
+  try { workerDoAplicativo.iniciar(); empilharAviso({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Worker', detalhe: idiomaAtual() === 'en' ? 'The worker had stopped and was restarted.' : 'O worker tinha parado e foi reiniciado.' }); } catch { /* outra instância detém a trava */ }
+}
+
+// --- cicloDaBandeja ---
 export function criarBandeja() {
   const icone = nativeImage.createFromPath(path.join(raizDoAplicativo, 'assets', 'prumo-icon.png')).resize({ width: 16, height: 16 });
   estadoDoAplicativo.bandeja = new Tray(icone); estadoDoAplicativo.bandeja.on('click', () => mostrarJanela()); estadoDoAplicativo.bandeja.on('double-click', () => mostrarJanela()); atualizarBandeja();

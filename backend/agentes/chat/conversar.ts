@@ -9,14 +9,14 @@ import { rotuloPapel, Papel, AgenteChat, agentesChat } from "../tipos/persona.js
 import { semAcentos } from "../../compartilhado/texto.js";
 import { randomUUID } from "node:crypto";
 import { responderComDadosLocais } from "./responderComDadosLocais.js";
-import { EtapaDaOrquestracao, Orquestracao } from "../tipos/orquestracao.js";
+import { EtapaDaOrquestracao, Orquestracao } from "../tipos/chat.js";
 import { Fonte } from "../../inicio/servico.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { nomeParaChamar, aplicarEstilo } from "../servicoEstiloDoChat.js";
 import { pesosAprendidos } from "../banco/atendimentos.js";
 import { registrarOrquestracao } from "../banco/orquestracao.js";
 import { consultarIaExterna } from "./consultarIaExterna.js";
-import { tentarOuPadrao } from "./tentarOuPadrao.js";
+import { tentarOuPadrao } from "./responderComDadosLocais.js";
 import { regrasDosAgentes } from "../../administracao/servico.js";
 import { conhecimentosRelevantes, listarConhecimentos, registrarConhecimento } from "../banco/conhecimento.js";
 import { obterEspaco } from "../../projetos/banco/projetos.js";

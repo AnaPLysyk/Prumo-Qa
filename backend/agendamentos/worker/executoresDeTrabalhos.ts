@@ -1,13 +1,13 @@
 /** Execução de rotinas e resultados de evidência — arquivos relacionados agrupados para manutenção. */
-import { Evidencia } from "../../testes/tipos/evidencia.js";
-import { ResultadoTrabalho, Trabalho } from "../tipos/fila.js";
+import { Evidencia } from "../../testes/tipos/catalogoDeTestes.js";
+import { ResultadoTrabalho, Trabalho } from "../tipos/worker.js";
 import { autorizacaoDelegada } from "../autorizacoes/autorizarRotina.js";
 import { executarK6, localizarK6 } from "../servicoK6.js";
 import { Rotina } from "../tipos/rotina.js";
 import { EstadoDoWorker, prioridade } from "../tipos/worker.js";
 import { obterEspaco } from "../../projetos/banco/projetos.js";
 import { projetoDaRotina } from "./apoioDoWorker.js";
-import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
+import { ErroServico } from "../../conexoes/integracoes/configuracaoDosServicos.js";
 import { Executor } from "../../conexoes/tipos/operacoesExternas.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";
 import { obterRunLocal } from "../../testes/banco/runs.js";

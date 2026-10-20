@@ -1,7 +1,7 @@
 /** Registra e consulta diagnósticos técnicos da execução do aplicativo. */
 import fs from "node:fs";
 import path from "node:path";
-import { eAtalho } from "./atividades.js";
+import { eAtalho } from "../regras/iniciarAtividade.js";
 import { nomeValido, EventoDiagnostico, eventoDiagnosticoSchema, limiteArquivo } from "../contratos.js";
 import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";
 

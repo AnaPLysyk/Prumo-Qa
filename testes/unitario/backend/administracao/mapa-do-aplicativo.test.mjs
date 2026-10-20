@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { gerarMapaDoAplicativo } from '../../../../docs/geradores/gerar-mapa-do-aplicativo.mjs';
-import { lerMapaDoAplicativo } from '../../../../dist/administracao/banco/administracao.js';
+import { lerMapaDoAplicativo } from '../../../../dist/administracao/servico.js';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 
 test('mapa: cada canal IPC do catálogo aparece uma vez, no controlador da sua tela, e sem código-fonte', () => {
@@ -32,7 +32,7 @@ test('leitor do mapa: ausente, grande demais, atalho ou fora do formato é recus
 });
 
 test('código da Documentação viva: só arquivos do mapa, caminho com .. recusado no contrato, arquivo grande encurtado', async (t) => {
-  const { lerCodigoDoAplicativo } = await import('../../../../dist/administracao/banco/administracao.js');
+  const { lerCodigoDoAplicativo } = await import('../../../../dist/administracao/servico.js');
   const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-codigo-')); t.after(() => fs.rmSync(raiz, { recursive: true, force: true }));
   fs.mkdirSync(path.join(raiz, 'dist', 'documentacao'), { recursive: true });
   const grande = 'x'.repeat(250 * 1024);

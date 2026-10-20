@@ -1,5 +1,5 @@
-/** Janela: criação e ciclo de vida — arquivos relacionados agrupados para manutenção. */
-import { BrowserWindow, app, Notification } from "electron";
+/** controleDaJanela: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
+import { BrowserWindow, app, Notification, dialog } from "electron";
 import path from "node:path";
 import { textoNoIdioma } from "../bandeja/conteudoDaBandeja.js";
 import { estadoDoAplicativo } from "../estadoDoAplicativo.js";
@@ -8,6 +8,7 @@ import { raizDoAplicativo } from "../../compartilhado/raizDoAplicativo.js";
 import { idiomaAtual } from "../../configuracoes/servico.js";
 import { empilharAviso } from "../avisos/avisos.js";
 
+// --- controleDaJanela ---
 // ── criarJanela ──
 export function criarJanela(): BrowserWindow {
   const janela = new BrowserWindow({
@@ -47,3 +48,6 @@ export function navegarPara(destino: string) {
   empilharAviso({ tipo: 'NAVEGAR', titulo: destino, detalhe: '', destino });
   mostrarJanela();
 }
+
+// --- confirmarNoWindows ---
+export const confirmarNoWindows = async (janela: BrowserWindow | null, titulo: string, mensagem: string, detalhe: string, botao: string) => (await dialog.showMessageBox(janela!, { type: 'warning', title: titulo, buttons: ['Cancelar', botao], defaultId: 0, cancelId: 0, noLink: true, message: mensagem, detail: detalhe })).response === 1;

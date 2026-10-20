@@ -3,7 +3,7 @@ import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { Recurso } from "../../projetos/contratos.js";
 import { z } from "zod";
 import { ContextoServico } from "../tipos/adaptador.js";
-import { ErroServico } from "../integracoes/ErroServico.js";
+import { ErroServico } from "../integracoes/configuracaoDosServicos.js";
 import { sha40, criarBranch, commitar, abrirPr, criarIssue } from "../tipos/escritaGithub.js";
 import { DefOperacao, Remoto } from "../tipos/operacao.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";

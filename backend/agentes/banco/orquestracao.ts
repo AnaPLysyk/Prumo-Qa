@@ -1,6 +1,6 @@
 /** Lê e grava o estado persistente da orquestração dos agentes. */
 import fs from "node:fs";
-import { Orquestracao, limitesOrquestracao } from "../tipos/orquestracao.js";
+import { Orquestracao, limitesOrquestracao } from "../tipos/chat.js";
 import { semLinks } from "../../compartilhado/seguranca/semLinks.js";
 import path from "node:path";
 import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";

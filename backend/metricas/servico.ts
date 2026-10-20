@@ -1,8 +1,8 @@
 /** Lógica e contratos de metricas: operações relacionadas no mesmo módulo. */
-import { consultarAtividades } from "../logs/banco/atividades.js";
+import { consultarAtividades } from "../logs/regras/iniciarAtividade.js";
 import { listarRotinas } from "../agendamentos/banco/agenda.js";
 import { listarTrabalhos } from "../agendamentos/banco/fila.js";
-import { proximoHorario } from "../agendamentos/servicoHorarios.js";
+import { proximoHorario } from "../agendamentos/regras/cicloDaRotina.js";
 import { Rotina } from "../agendamentos/tipos/rotina.js";
 
 export function calcularMetricas(h:ReturnType<typeof consultarAtividades>) {

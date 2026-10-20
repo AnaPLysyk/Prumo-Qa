@@ -1,7 +1,7 @@
 /** Cria, consulta, reivindica e conclui trabalhos da fila de execução de rotinas. */
 import { z } from "zod";
 import { gravarLocal, lerLocal } from "../../compartilhado/banco/persistenciaLocal.js";
-import { LIMITE, Registro, registro, Trabalho, trabalhoSchema, ResultadoTrabalho, resultadoSchema, NovoTrabalho, ESPERA_BASE_MS } from "../tipos/fila.js";
+import { LIMITE, Registro, registro, Trabalho, trabalhoSchema, ResultadoTrabalho, resultadoSchema, NovoTrabalho, ESPERA_BASE_MS } from "../tipos/worker.js";
 import { randomUUID } from "node:crypto";
 
 export const lerFila = (base?: string): Registro =>

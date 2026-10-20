@@ -21,7 +21,7 @@ if (v.status === 'publicada' && v.installer?.sha256 === sha && v.releaseUrl === 
 if (v.status === 'publicada' && v.installer && v.installer.sha256 !== sha) throw new Error(`${versao} já está publicada com outro SHA-256 (${v.installer.sha256}). Nada foi alterado.`);
 Object.assign(v, { status: 'publicada', date: v.date ?? data, releaseUrl, installer });
 // Validação completa do catálogo (esquema, ordem e coerência) antes de gravar.
-const { validarVersoes } = await import(new URL('../../dist/ajuda/servicoVersoes.js', import.meta.url).href).catch(() => ({ validarVersoes: null }));
-if (validarVersoes) validarVersoes(catalogo); else console.warn('dist/ajuda/servicoVersoes.js ausente (rode npm run build): gravado sem a validação completa.');
+const { validarVersoes } = await import(new URL('../../dist/ajuda/servicoAjuda.js', import.meta.url).href).catch(() => ({ validarVersoes: null }));
+if (validarVersoes) validarVersoes(catalogo); else console.warn('dist/ajuda/servicoAjuda.js ausente (rode npm run build): gravado sem a validação completa.');
 fs.writeFileSync(arquivo, JSON.stringify(catalogo, null, 2) + '\n');
 console.log(`${versao} marcada como publicada: ${releaseUrl} · SHA-256 ${sha} · ${v.date}`);

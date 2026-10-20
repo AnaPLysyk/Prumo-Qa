@@ -9,7 +9,7 @@ import { listarTrechosDeSkill } from "../banco/skills.js";
 import { sementeDasSkills } from "../banco/sementeDasSkills.js";
 import { SkillEscolhida, escolherTrechosDaSkill, validarEspecializacao } from "../regras/regrasDasSkills.js";
 import { falharCom } from "../../compartilhado/erros.js";
-import { limitesOrquestracao } from "../tipos/orquestracao.js";
+import { limitesOrquestracao } from "../tipos/chat.js";
 import { termosDaFrase } from "../regras/normalizacaoDoConhecimento.js";
 
 // ── roteamento ──

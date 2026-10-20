@@ -1,13 +1,13 @@
 /** Controlador da tela testes: concentra canais de entrada, organizados por área funcional. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { listarExecucoes, executarRunLocal, prepararRunLocal } from "./servicoExecucoes.js";
-import { listarEvidenciasDoProjeto } from "./regras/listarEvidenciasDoProjeto.js";
+import { listarEvidenciasDoProjeto } from "./servicoExecucoes.js";
 import { mapaDeVinculos } from "./regras/mapaDeVinculos.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";
 import { arquivoDeTeste, catalogoDeTestes, pareceArquivoDePipeline } from "./servicoClassificacao.js";
-import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
+import { confirmarNoWindows } from "../aplicativo/janela/controleDaJanela.js";
 import { escreverArquivoDeTeste } from "./regras/escreverArquivoDeTeste.js";
 import { listarPipelines } from "./regras/escreverArquivoDeTeste.js";
 import { propostasDeBugs } from "./regras/propostasDeBugs.js";
@@ -21,10 +21,10 @@ import { executarValidacao } from "./regras/executarValidacao.js";
 import { criarPoliticaEscrita } from "../agendamentos/autorizacoes/politicas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { publicarRunLocal } from "./integracoes/publicarRunLocal.js";
-import { declararResultadoManual } from "./regras/declararResultadoManual.js";
-import { revogarAutorizacao } from "../agendamentos/autorizacoes/estadoERevogacao.js";
+import { declararResultadoManual } from "./servicoExecucoes.js";
+import { revogarAutorizacao } from "../agendamentos/banco/autorizacoes.js";
 import { prepararPublicacao } from "./servicoExecucoes.js";
-import { publicarComentarioDeResultado } from "./integracoes/publicarComentarioDeResultado.js";
+import { publicarComentarioDeResultado } from "./integracoes/publicarRunLocal.js";
 import { salvarCasoLocal, listarRepositorioLocal, salvarSuiteLocal } from "./servicoCasos.js";
 
 // controlador — operações relacionadas
