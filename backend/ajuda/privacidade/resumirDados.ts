@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { categorias, limitesPrivacidade, naoTransmitido, politicaRetencao } from '../tipos/privacidade.js';
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
-import { listarVinculos } from '../../projetos/regras/listarVinculos.js';
+import { listarVinculos } from '../../projetos/regras/consultasDeVinculos.js';
 
 function medirPasta(dir: string, limite = { n: 0 }): { bytes: number; arquivos: number; truncado: boolean } {
   let bytes = 0, arquivos = 0, truncado = false;

@@ -1,6 +1,6 @@
 /** Cria as tabelas e vistas do banco de conhecimento e coloca o conhecimento inicial do Prumo. */
 import { DatabaseSync } from 'node:sqlite';
-import { falharConhecimento } from './falharConhecimento.js';
+import { falharConhecimento } from './validacoesDoConhecimento.js';
 import { impressaoDoConhecimento } from './impressaoDoConhecimento.js';
 import { vistaDoAgente } from './vistaDoAgente.js';
 import { SEMENTE, VERSAO_ESQUEMA } from '../tipos/conhecimento.js';

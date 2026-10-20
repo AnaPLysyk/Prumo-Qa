@@ -2,8 +2,8 @@
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';
 import { usuarioDoWindows } from '../../aplicativo/janela/usuarioDoWindows.js';
-import { desatualizarContextoDaPasta } from '../regras/desatualizarContextoDaPasta.js';
-import { obterContextoDaPasta } from '../regras/obterContextoDaPasta.js';
+import { desatualizarContextoDaPasta } from '../regras/operacoesDoContextoDaPasta.js';
+import { obterContextoDaPasta } from '../regras/operacoesDoContextoDaPasta.js';
 
 export const contextosDesatualizar: TratadorDoCanal<'contextos:desatualizar'> = async (a, janela) => {
   const c = await obterContextoDaPasta(a.root, a.id);

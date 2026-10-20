@@ -1,8 +1,8 @@
 /** Cria no Qase a run correspondente à run local, depois da confirmação. */
 import { executarOperacao } from '../../conexoes/escrita/executarOperacao.js';
 import { RegistroOperacao } from '../../conexoes/tipos/operacoesExternas.js';
-import { alterarRunLocal } from '../banco/alterarRunLocal.js';
-import { obterRunLocal } from '../banco/obterRunLocal.js';
+import { alterarRunLocal } from '../banco/armazenamentoDeRuns.js';
+import { obterRunLocal } from '../banco/armazenamentoDeRuns.js';
 import { CASO_LOCAL_MIN, Dep, RunLocal } from '../tipos/runLocal.js';
 
 const numeroDoId = (v?: string) => { const n = Number(v); return Number.isInteger(n) && n > 0 ? n : null; };

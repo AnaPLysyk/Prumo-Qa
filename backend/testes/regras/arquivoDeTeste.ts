@@ -1,8 +1,8 @@
 /** Lê um arquivo de teste (ou pipeline do GitHub Actions) para a IDE, só dentro da pasta do projeto. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { pareceArquivoDePipeline } from './pareceArquivoDePipeline.js';
-import { pareceArquivoDeTeste } from './pareceArquivoDeTeste.js';
+import { pareceArquivoDePipeline } from './identificarArquivosDeTeste.js';
+import { pareceArquivoDeTeste } from './identificarArquivosDeTeste.js';
 import { IGNORAR, limites } from '../tipos/catalogoDeTestes.js';
 
 /** Conteúdo de um arquivo de teste listado pelo catálogo (somente leitura, dentro da pasta vinculada, até 300 KB). */

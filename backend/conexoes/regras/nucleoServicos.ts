@@ -29,12 +29,12 @@ import { contaAtiva } from './contaAtiva.js';
 import { verificarVinculoDoServico } from './verificarVinculoDoServico.js';
 import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
 import { lerContasDeServico } from '../banco/contasDeServico.js';
-import { listarEspacos } from '../../projetos/banco/listarEspacos.js';
-import { atualizarEstadoDoVinculo } from '../../projetos/regras/atualizarEstadoDoVinculo.js';
-import { registrarConsultaExterna } from '../../projetos/regras/registrarConsultaExterna.js';
+import { listarEspacos } from '../../projetos/banco/armazenamentoDeEspacos.js';
+import { atualizarEstadoDoVinculo } from '../../projetos/regras/historicoDeVinculos.js';
+import { registrarConsultaExterna } from '../../projetos/regras/historicoDeVinculos.js';
 import { codigoDoErroDeServico } from './codigoDoErroDeServico.js';
 import { vinculoDoServico } from './vinculoDoServico.js';
-import { configurarAceite } from '../../projetos/regras/configurarAceite.js';
+import { configurarAceite } from '../../projetos/regras/edicaoDoEspaco.js';
 
 async function comentarNoJira(c: ContextoDosServicos, espacoId: string, ticket: string, adf: unknown) {
   try {

@@ -5,9 +5,9 @@ import path from 'node:path';
 import { anotarQase } from './anotarQase.js';
 
 import { CasoTeste, Catalogo, FeatureTestes, IGNORAR, TipoTeste, limites, tiposDeTeste } from '../tipos/catalogoDeTestes.js';
-import { pareceArquivoDeTeste } from './pareceArquivoDeTeste.js';
+import { pareceArquivoDeTeste } from './identificarArquivosDeTeste.js';
 import { classificarTeste } from './classificarTeste.js';
-import { etiquetasDoTeste } from './etiquetasDoTeste.js';
+import { etiquetasDoTeste } from './identificarArquivosDeTeste.js';
 
 function analisarArquivoFeature(rel: string, texto: string): { feature: string | null; casos: CasoTeste[] } {
   const linhas = texto.split(/\r?\n/); const casos: CasoTeste[] = []; let feature: string | null = null; let atual: CasoTeste | null = null; let tagsPend: string[] = []; const tagsFeature: string[] = [];

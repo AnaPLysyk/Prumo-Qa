@@ -1,9 +1,9 @@
 /** Tenta de novo os comentários no Jira que falharam por rede ou serviço (sem duplicar); depois de 3 tentativas, marca como falha. */
 import { publicarComentarioDeResultado } from '../../testes/integracoes/publicarComentarioDeResultado.js';
 import { publicacaoPodeRepetir } from '../../testes/regras/publicacaoPodeRepetir.js';
-import { definirEstadoJiraDoTrabalho } from '../banco/definirEstadoJiraDoTrabalho.js';
+import { definirEstadoJiraDoTrabalho } from '../banco/armazenamentoDaFila.js';
 import { listarTrabalhos } from '../banco/listarTrabalhos.js';
-import { obterTrabalho } from '../banco/obterTrabalho.js';
+import { obterTrabalho } from '../banco/armazenamentoDaFila.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
 
 export async function repetirPublicacoesPendentes(e: EstadoDoWorker) {

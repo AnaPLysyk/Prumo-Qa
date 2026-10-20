@@ -1,5 +1,5 @@
 /** Registra o resultado de um caso manual dito pela pessoa, sem apagar resultado de execução. */
-import { alterarRunLocal } from '../banco/alterarRunLocal.js';
+import { alterarRunLocal } from '../banco/armazenamentoDeRuns.js';
 
 /** Resultado declarado pela pessoa (caso manual). Marcado MANUAL e com o nome de quem declarou; nunca sobrescreve resultado de execução. */
 export function declararResultadoManual(runLocalId: string, casoId: number, r: { status: 'PASS' | 'FAIL' | 'BLOCKED'; comentario: string }, por: string, b?: string, agora = new Date()) {

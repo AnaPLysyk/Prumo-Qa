@@ -1,5 +1,5 @@
 /** Escreve uma operação do diário numa linha legível. */
-import { descreverAchados } from '../logs/regras/descreverAchados.js';
+import { descreverAchados } from '../logs/regras/resumoDoDiario.js';
 import { Evento } from '../logs/tipos/atividade.js';
 
 export function linhaDaOperacao(e:Evento) {

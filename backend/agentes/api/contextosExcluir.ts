@@ -1,8 +1,8 @@
 /** Canal contextos:excluir: Excluir definitivamente um contexto. */
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';
-import { excluirContextoDaPasta } from '../regras/excluirContextoDaPasta.js';
-import { obterContextoDaPasta } from '../regras/obterContextoDaPasta.js';
+import { excluirContextoDaPasta } from '../regras/operacoesDoContextoDaPasta.js';
+import { obterContextoDaPasta } from '../regras/operacoesDoContextoDaPasta.js';
 
 export const contextosExcluir: TratadorDoCanal<'contextos:excluir'> = async (a, janela) => {
   const c = await obterContextoDaPasta(a.root, a.id);

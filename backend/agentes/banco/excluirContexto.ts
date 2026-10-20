@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarContexto } from './carregarContexto.js';
-import { ultimaVersaoDoContexto } from '../regras/ultimaVersaoDoContexto.js';
+import { ultimaVersaoDoContexto } from '../regras/versoesDoContexto.js';
 
 /** Exclusão definitiva do contexto; fica só um registro mínimo (sem texto) de que existiu. */
 export function excluirContexto(p: Projeto, id: string, base?: string) {

@@ -3,7 +3,7 @@ import { DadosRotina, dadosRotinaSchema } from '../tipos/rotina.js';
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { obterRunLocal } from '../../testes/banco/obterRunLocal.js';
+import { obterRunLocal } from '../../testes/banco/armazenamentoDeRuns.js';
 
 /** Valida o que o esquema sozinho não vê: projeto existe, pasta de automação, capability declarada e vínculos exigidos. */
 export async function validarRotina(dados: DadosRotina, base?: string) {

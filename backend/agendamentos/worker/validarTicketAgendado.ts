@@ -6,9 +6,9 @@ import { autorizacaoDelegada } from '../autorizacoes/autorizacaoDelegada.js';
 import { ResultadoTrabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';
 import { EstadoDoWorker, prioridade } from '../tipos/worker.js';
-import { contarCasosDaEvidencia } from './contarCasosDaEvidencia.js';
+import { contarCasosDaEvidencia } from './resultadosDasEvidencias.js';
 import { projetoDaRotina } from './projetoDaRotina.js';
-import { resumoDasFalhas } from './resumoDasFalhas.js';
+import { resumoDasFalhas } from './resultadosDasEvidencias.js';
 
 export async function validarTicketAgendado(e: EstadoDoWorker, r: Rotina, manual: boolean): Promise<ResultadoTrabalho> {
   const esp = obterEspaco(r.espacoId, e.base);

@@ -1,6 +1,6 @@
 /** Registra falha de infraestrutura; tenta de novo mais tarde, com espera crescente, quando ainda há tentativas. */
-import { fecharTentativa } from './fecharTentativa.js';
-import { mudarTrabalho } from './mudarTrabalho.js';
+import { fecharTentativa } from './armazenamentoDaFila.js';
+import { mudarTrabalho } from './armazenamentoDaFila.js';
 import { ESPERA_BASE_MS, resultadoSchema } from '../tipos/fila.js';
 
 /**

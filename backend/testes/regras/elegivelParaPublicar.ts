@@ -1,5 +1,5 @@
 /** Diz se uma execução agendada pode publicar o comentário: concluída, com ticket e coberta por política aprovada. */
-import { politicaCobre } from '../../agendamentos/autorizacoes/politicaCobre.js';
+import { politicaCobre } from '../../agendamentos/autorizacoes/politicasDaAutorizacao.js';
 import { Trabalho } from '../../agendamentos/tipos/fila.js';
 
 /** Trabalhos agendados concluídos com ticket e política que cubra: prepara o registro; senão marca a razão (nunca publica sem política). */

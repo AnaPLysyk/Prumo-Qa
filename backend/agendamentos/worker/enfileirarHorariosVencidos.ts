@@ -3,7 +3,7 @@ import { enfileirar } from '../banco/enfileirar.js';
 import { listarRotinas } from '../banco/agenda.js';
 import { registrarPerdido } from '../banco/registrarPerdido.js';
 import { horariosVencidos } from '../regras/horariosVencidos.js';
-import { marcarHorarioTratado } from '../regras/marcarHorarioTratado.js';
+import { marcarHorarioTratado } from '../regras/operacoesDaRotina.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
 import { capacidadeDaRotinaAgendada } from './capacidadeDaRotinaAgendada.js';
 

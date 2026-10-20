@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { abrirBancoProtegido } from './abrirBancoProtegido.js';
 import { caminhoConhecimento } from './caminhoConhecimento.js';
 import { criarEsquemaDoConhecimento } from './criarEsquemaDoConhecimento.js';
-import { falharConhecimento } from './falharConhecimento.js';
+import { falharConhecimento } from './validacoesDoConhecimento.js';
 
 export function comBancoDeConhecimento<T>(base: string | undefined, fn: (db: DatabaseSync) => T): T {
   const db = abrirBancoProtegido(caminhoConhecimento(base), () => falharConhecimento('KNOWLEDGE_FILE_INVALID'), criarEsquemaDoConhecimento);

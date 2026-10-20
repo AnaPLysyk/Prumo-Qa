@@ -1,6 +1,6 @@
 /** Aprova ou descarta um conhecimento. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { falharConhecimento } from './falharConhecimento.js';
+import { falharConhecimento } from './validacoesDoConhecimento.js';
 import { linhaParaConhecimento } from './linhaParaConhecimento.js';
 import { Conhecimento, EstadoConhecimento, Linha } from '../tipos/conhecimento.js';
 

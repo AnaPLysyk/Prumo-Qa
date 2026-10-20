@@ -3,7 +3,7 @@ import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { escreverArquivoDeTeste } from '../regras/escreverArquivoDeTeste.js';
-import { pareceArquivoDePipeline } from '../regras/pareceArquivoDePipeline.js';
+import { pareceArquivoDePipeline } from '../regras/identificarArquivosDeTeste.js';
 
 export const testesGravar: TratadorDoCanal<'testes:gravar'> = async (a, j) => {
   const e = obterEspaco(a.espacoId); if (!e.pastaLocal) throw new Error('PASTA_AUSENTE');

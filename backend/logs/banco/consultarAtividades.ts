@@ -7,7 +7,7 @@ import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { arquivosDoDiario } from './arquivosDoDiario.js';
 import { pastaAtividades } from './pastaAtividades.js';
-import { achadoELacuna } from '../regras/achadoELacuna.js';
+import { achadoELacuna } from '../regras/resumoDoDiario.js';
 import { Evento, eventoSchema, limitesHistorico } from '../tipos/atividade.js';
 
 export function consultarAtividades(p:Projeto,base?:string) {

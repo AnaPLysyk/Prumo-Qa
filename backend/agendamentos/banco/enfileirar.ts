@@ -1,7 +1,7 @@
 /** Coloca um trabalho na fila uma única vez (a mesma chave nunca vira dois trabalhos). */
 import { randomUUID } from 'node:crypto';
-import { gravarFila } from './gravarFila.js';
-import { lerFila } from './lerFila.js';
+import { gravarFila } from './armazenamentoDaFila.js';
+import { lerFila } from './armazenamentoDaFila.js';
 import { NovoTrabalho, Trabalho, trabalhoSchema } from '../tipos/fila.js';
 
 /** Idempotente: a mesma chave nunca vira dois trabalhos. Retorna `criado:false` se já existir. */

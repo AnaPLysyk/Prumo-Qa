@@ -3,7 +3,7 @@ import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';
 import { usuarioDoWindows } from '../../aplicativo/janela/usuarioDoWindows.js';
 import { aprovarContextoDaPasta } from '../regras/aprovarContextoDaPasta.js';
-import { obterContextoDaPasta } from '../regras/obterContextoDaPasta.js';
+import { obterContextoDaPasta } from '../regras/operacoesDoContextoDaPasta.js';
 
 export const contextosAprovar: TratadorDoCanal<'contextos:aprovar'> = async (a, janela) => {
   const c = await obterContextoDaPasta(a.root, a.id);

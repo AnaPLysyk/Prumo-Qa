@@ -6,7 +6,7 @@ import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
 import { lerPermissaoDeContextosNoMcp } from '../banco/lerPermissaoDeContextosNoMcp.js';
 import { resumirContextos } from './resumirContextos.js';
-import { ultimaVersaoDoContexto } from './ultimaVersaoDoContexto.js';
+import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 
 function listarContextos(p: Projeto, filtro: Filtro = {}, base?: string) {
   const { itens, problemas } = carregarTodosOsContextos(p, base); const termo = filtro.busca?.trim().toLowerCase();

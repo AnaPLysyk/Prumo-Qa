@@ -3,7 +3,7 @@ import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
 import { resumirContextos } from './resumirContextos.js';
-import { ultimaVersaoDoContexto } from './ultimaVersaoDoContexto.js';
+import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 
 export function obterContexto(p: Projeto, id: string, base?: string) {
   const { itens } = carregarTodosOsContextos(p, base); const alvo = itens.find(i => i.arq.id === id); if (!alvo) throw new ErroQa('CONTEXT_NOT_FOUND', 'Contexto não encontrado neste projeto.');

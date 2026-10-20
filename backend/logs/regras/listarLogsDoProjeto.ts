@@ -1,8 +1,8 @@
 /** Lista os registros do diário de operações do projeto para a tela Logs, com filtro. */
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { consultarAtividades } from '../banco/consultarAtividades.js';
-import { apresentarRegistroDoDiario } from './apresentarRegistroDoDiario.js';
-import { filtrarRegistrosDoDiario } from './filtrarRegistrosDoDiario.js';
+import { apresentarRegistroDoDiario } from './resumoDoDiario.js';
+import { filtrarRegistrosDoDiario } from './resumoDoDiario.js';
 import { projetoVinculado } from '../../projetos/regras/projetoVinculado.js';
 import { Filtro, filtroSchema } from '../../projetos/tipos/painel.js';
 

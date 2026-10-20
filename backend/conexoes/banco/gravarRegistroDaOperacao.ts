@@ -1,7 +1,7 @@
 /** Cria ou atualiza o registro de uma operação externa. */
 import { randomUUID } from 'node:crypto';
-import { gravarRegistroDeOperacoes } from './gravarRegistroDeOperacoes.js';
-import { lerRegistroDeOperacoes } from './lerRegistroDeOperacoes.js';
+import { gravarRegistroDeOperacoes } from './armazenamentoDeOperacoes.js';
+import { lerRegistroDeOperacoes } from './armazenamentoDeOperacoes.js';
 import { Entrada, RegistroOperacao, itemSchema } from '../tipos/operacoesExternas.js';
 
 export function gravarRegistroDaOperacao(b: string | undefined, agora: () => Date, e: Entrada): RegistroOperacao {

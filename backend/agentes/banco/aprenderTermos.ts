@@ -1,6 +1,6 @@
 /** Ensina a um agente os termos de uma pergunta que deveria ter ido para ele. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { validarAgenteDoConhecimento } from './validarAgenteDoConhecimento.js';
+import { validarAgenteDoConhecimento } from './validacoesDoConhecimento.js';
 import { termosDaFrase } from '../regras/termosDaFrase.js';
 import { limitesConhecimento } from '../tipos/conhecimento.js';
 

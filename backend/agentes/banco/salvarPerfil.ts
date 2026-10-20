@@ -1,6 +1,6 @@
 /** Salva o perfil da pessoa da sessão: como chamar, papel, experiência, foco e a autorização de compartilhar com a IA externa. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { falharConhecimento } from './falharConhecimento.js';
+import { falharConhecimento } from './validacoesDoConhecimento.js';
 import { lerPerfil } from './lerPerfil.js';
 import { pessoaDoConhecimento } from './pessoaDoConhecimento.js';
 import { normalizarFoco } from '../regras/normalizarFoco.js';

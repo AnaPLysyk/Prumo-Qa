@@ -8,7 +8,7 @@ import { acharTicketCriadoPeloPrumo } from './acharTicketCriadoPeloPrumo.js';
 import { enderecoDoTicket } from './enderecoDoTicket.js';
 import { projetoDoTicket } from './projetoDoTicket.js';
 import { textoParaAdf } from './textoParaAdf.js';
-import { tiposDeCriacao } from './tiposDeCriacao.js';
+import { tiposDeCriacao } from './tiposDoTicketJira.js';
 import { criar } from '../tipos/escritaJira.js';
 
 export const criarTicket: DefOperacao<z.infer<typeof criar>> = {

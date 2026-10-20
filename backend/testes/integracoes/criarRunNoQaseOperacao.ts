@@ -4,7 +4,7 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { marcadorDaOperacao } from '../../conexoes/escrita/marcadorDaOperacao.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { conferirCasosNoQase } from './conferirCasosNoQase.js';
+import { conferirCasosNoQase } from './consultasDeCasosQase.js';
 import { conferirIdsDoObjetoQase } from './conferirIdsDoObjetoQase.js';
 import { idCriadoNoQase } from './idCriadoNoQase.js';
 import { listarNoQase } from './listarNoQase.js';

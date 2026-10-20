@@ -2,7 +2,7 @@
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { Executor } from '../../conexoes/tipos/operacoesExternas.js';
 import { executarValidacao } from '../../testes/regras/executarValidacao.js';
-import { obterRunLocal } from '../../testes/banco/obterRunLocal.js';
+import { obterRunLocal } from '../../testes/banco/armazenamentoDeRuns.js';
 import { publicarRunLocal } from '../../testes/integracoes/publicarRunLocal.js';
 import { executarRunLocal } from '../../testes/regras/executarRunLocal.js';
 import { autorizacaoDelegada } from '../autorizacoes/autorizacaoDelegada.js';

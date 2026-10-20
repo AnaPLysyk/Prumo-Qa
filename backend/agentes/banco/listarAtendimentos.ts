@@ -1,8 +1,8 @@
 /** Lista os atendimentos da pessoa da sessão num projeto e agente; sem sessão, nenhum. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
 import { pessoaDoConhecimento } from './pessoaDoConhecimento.js';
-import { validarAgenteDoConhecimento } from './validarAgenteDoConhecimento.js';
-import { validarProjetoDoConhecimento } from './validarProjetoDoConhecimento.js';
+import { validarAgenteDoConhecimento } from './validacoesDoConhecimento.js';
+import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
 import { Atendimento, Linha } from '../tipos/conhecimento.js';
 
 export function listarAtendimentos(espacoId: string | null, agente?: string | null, limite = 40, base?: string): Atendimento[] {

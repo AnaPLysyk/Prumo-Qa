@@ -2,8 +2,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { hash } from '../../compartilhado/seguranca/hash.js';
-import { pareceArquivoDePipeline } from './pareceArquivoDePipeline.js';
-import { pareceArquivoDeTeste } from './pareceArquivoDeTeste.js';
+import { pareceArquivoDePipeline } from './identificarArquivosDeTeste.js';
+import { pareceArquivoDeTeste } from './identificarArquivosDeTeste.js';
 import { IGNORAR, limites } from '../tipos/catalogoDeTestes.js';
 
 type ResultadoDaEscrita = { arquivo: string; linhas: number; hash: string; criado: boolean };

@@ -1,6 +1,6 @@
 /** Executa o item escolhido no menu da bandeja (abrir, agenda, pausar, estado, sair). */
 import { app, dialog } from 'electron';
-import { definirPausaGlobal } from '../../agendamentos/regras/definirPausaGlobal.js';
+import { definirPausaGlobal } from '../../agendamentos/regras/operacoesDaRotina.js';
 import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo.js';
 import { resumoDoWorker } from './resumoDoWorker.js';
 import { textoNoIdioma } from './textoNoIdioma.js';

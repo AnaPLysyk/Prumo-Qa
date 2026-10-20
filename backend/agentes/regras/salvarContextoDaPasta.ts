@@ -4,10 +4,10 @@ import { abrirProjetoVinculado } from '../../projetos/regras/abrirProjetoVincula
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
-import { novaVersaoDoContexto } from './novaVersaoDoContexto.js';
+import { novaVersaoDoContexto } from './versoesDoContexto.js';
 import { obterContexto } from './obterContexto.js';
-import { ultimaVersaoDoContexto } from './ultimaVersaoDoContexto.js';
-import { hashDoConteudoDoContexto } from './hashDoConteudoDoContexto.js';
+import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
+import { hashDoConteudoDoContexto } from './versoesDoContexto.js';
 import { Arquivo, conteudoSchema, limites } from '../tipos/contexto.js';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';

@@ -1,6 +1,6 @@
 /** Guarda se a resposta foi útil ou não; só a pessoa que foi atendida avalia. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { falharConhecimento } from './falharConhecimento.js';
+import { falharConhecimento } from './validacoesDoConhecimento.js';
 import { pessoaDoConhecimento } from './pessoaDoConhecimento.js';
 
 export function avaliarAtendimento(id: number, avaliacao: 'UTIL' | 'NAO_UTIL', base?: string) {

@@ -1,6 +1,6 @@
 /** Monta o resumo de cada contexto para a lista, apontando conflitos (mesma chave ou marcados pela pessoa) e alterações suspeitas. */
 
-import { ultimaVersaoDoContexto } from './ultimaVersaoDoContexto.js';
+import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 import { Arquivo, Estado, Resumo , ehInstrucao } from '../tipos/contexto.js';
 
 const suspeitaDeInstrucao = (texto: string) => ehInstrucao.test(texto);

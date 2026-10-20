@@ -1,6 +1,6 @@
 /** Cria a política que permite rotinas publicarem resultados numa run do Qase, com validade e limite. */
 import { randomUUID } from 'node:crypto';
-import { validadeDaAutorizacao } from './validadeDaAutorizacao.js';
+import { validadeDaAutorizacao } from './politicasDaAutorizacao.js';
 import { abrirEspacoDeAutorizacoes } from './abrirEspacoDeAutorizacoes.js';
 import { estadoDaAutorizacao } from './estadoDaAutorizacao.js';
 import { gravarAutorizacoes } from '../banco/autorizacoes.js';

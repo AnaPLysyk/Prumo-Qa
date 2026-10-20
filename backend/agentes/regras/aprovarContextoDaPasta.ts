@@ -4,9 +4,9 @@ import { abrirProjetoVinculado } from '../../projetos/regras/abrirProjetoVincula
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
-import { novaVersaoDoContexto } from './novaVersaoDoContexto.js';
+import { novaVersaoDoContexto } from './versoesDoContexto.js';
 import { obterContexto } from './obterContexto.js';
-import { ultimaVersaoDoContexto } from './ultimaVersaoDoContexto.js';
+import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 
 /** Aprovação: ação humana, só vale para o conteúdo exato aprovado. Exige origem e ausência de conflito. */
 function aprovarContexto(p: Projeto, id: string, por: string, base?: string) {

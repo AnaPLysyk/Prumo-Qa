@@ -4,7 +4,7 @@ import { textoNoIdioma } from '../../aplicativo/bandeja/textoNoIdioma.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';
 import { servicosDoAplicativo } from '../../conexoes/regras/servicosDoAplicativo.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
-import { obterRunLocal } from '../banco/obterRunLocal.js';
+import { obterRunLocal } from '../banco/armazenamentoDeRuns.js';
 import { publicarRunLocal } from '../integracoes/publicarRunLocal.js';
 
 export const runsPublicar: TratadorDoCanal<'runs:publicar'> = async (a, j) => {

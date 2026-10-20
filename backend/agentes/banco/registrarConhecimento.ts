@@ -1,11 +1,11 @@
 /** Registra um conhecimento: da pessoa já aprovado; da IA ou da conversa em rascunho (com limite por hora). */
 import { randomUUID } from 'node:crypto';
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { falharConhecimento } from './falharConhecimento.js';
+import { falharConhecimento } from './validacoesDoConhecimento.js';
 import { impressaoDoConhecimento } from './impressaoDoConhecimento.js';
 import { linhaParaConhecimento } from './linhaParaConhecimento.js';
-import { validarAgenteDoConhecimento } from './validarAgenteDoConhecimento.js';
-import { validarProjetoDoConhecimento } from './validarProjetoDoConhecimento.js';
+import { validarAgenteDoConhecimento } from './validacoesDoConhecimento.js';
+import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
 import { Conhecimento, EstadoConhecimento, Linha, NovoConhecimento, limitesConhecimento, tiposConhecimento } from '../tipos/conhecimento.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 

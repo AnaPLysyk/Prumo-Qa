@@ -1,9 +1,9 @@
 /** Faz o envio de fato: confere permissão e confirmação, reconcilia se já existe, envia, relê para confirmar e registra. */
-import { consumirPoliticaEscrita } from '../../agendamentos/autorizacoes/consumirPoliticaEscrita.js';
+import { consumirPoliticaEscrita } from '../../agendamentos/autorizacoes/politicasDaAutorizacao.js';
 import { OPERACOES_AGENDAVEIS } from '../../agendamentos/tipos/autorizacoes.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { gravarRegistroDaOperacao } from '../banco/gravarRegistroDaOperacao.js';
-import { lerRegistroDeOperacoes } from '../banco/lerRegistroDeOperacoes.js';
+import { lerRegistroDeOperacoes } from '../banco/armazenamentoDeOperacoes.js';
 import { chaveDaOperacao } from './chaveDaOperacao.js';
 
 import { escritaHabilitada } from './escritaHabilitada.js';
@@ -13,7 +13,7 @@ import { ErroServico } from '../integracoes/ErroServico.js';
 import { Remoto } from '../tipos/operacao.js';
 import { Executor, OpcoesOperacao, RegistroOperacao, semAux } from '../tipos/operacoesExternas.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { registrarEscritaExterna } from '../../projetos/regras/registrarEscritaExterna.js';
+import { registrarEscritaExterna } from '../../projetos/regras/historicoDeVinculos.js';
 
 const codigoDaFalhaDeOperacao = (e: unknown) => e instanceof ErroServico ? (e.detalhe ? `${e.codigo}: ${e.detalhe}` : e.codigo) : (/^([A-Z][A-Z_]{2,60})\b/.exec((e as Error)?.message ?? '')?.[1] ?? 'OPERATION_FAILED');
 

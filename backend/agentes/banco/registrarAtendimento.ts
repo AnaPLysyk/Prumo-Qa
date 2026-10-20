@@ -1,8 +1,8 @@
 /** Registra um atendimento do chat (agente, modo e fontes) em nome da pessoa da sessão, sem a pergunta nem a resposta. */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
 import { pessoaDoConhecimento } from './pessoaDoConhecimento.js';
-import { validarAgenteDoConhecimento } from './validarAgenteDoConhecimento.js';
-import { validarProjetoDoConhecimento } from './validarProjetoDoConhecimento.js';
+import { validarAgenteDoConhecimento } from './validacoesDoConhecimento.js';
+import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
 import { limitesConhecimento } from '../tipos/conhecimento.js';
 
 export function registrarAtendimento(a: { espacoId: string | null; agente: string; modo: 'LOCAL' | 'CLAUDE' | 'CODEX'; fontes: string[] }, base?: string, agora = new Date()): number {

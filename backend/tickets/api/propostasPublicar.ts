@@ -7,7 +7,7 @@ import { prepararOperacao } from '../../conexoes/escrita/prepararOperacao.js';
 import { servicosDoAplicativo } from '../../conexoes/regras/servicosDoAplicativo.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { obterProposta } from '../banco/obterProposta.js';
+import { obterProposta } from '../banco/armazenamentoDePropostas.js';
 import { podePublicar } from '../regras/podePublicar.js';
 import { parametrosDaIssueGithub, parametrosDoDefeitoQase, publicarProposta } from '../regras/publicarProposta.js';
 

@@ -1,7 +1,7 @@
 /** Registra um horário que não vai rodar (perdido ou substituído) sem confundir com execução. */
 import { randomUUID } from 'node:crypto';
-import { gravarFila } from './gravarFila.js';
-import { lerFila } from './lerFila.js';
+import { gravarFila } from './armazenamentoDaFila.js';
+import { lerFila } from './armazenamentoDaFila.js';
 import { NovoTrabalho, trabalhoSchema } from '../tipos/fila.js';
 
 /** Registra um slot que não será executado (PERDIDO/SUBSTITUIDO) sem confundir com execução. Idempotente pela chave. */

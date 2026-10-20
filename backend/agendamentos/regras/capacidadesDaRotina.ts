@@ -2,7 +2,7 @@
 import { capacidadeDoK6 } from '../k6/capacidadeDoK6.js';
 import { Rotina } from '../tipos/rotina.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { obterRunLocal } from '../../testes/banco/obterRunLocal.js';
+import { obterRunLocal } from '../../testes/banco/armazenamentoDeRuns.js';
 
 export function capacidadesDaRotina(r: Rotina, base?: string): string[] {
   if (r.tipo === 'smoke' || r.tipo === 'regressao') return r.capability ? [r.capability] : [];

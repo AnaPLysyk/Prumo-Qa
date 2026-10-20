@@ -1,8 +1,8 @@
 /** Vincula uma proposta de bug a um ticket que já existe no Jira, sem criar nada lá: guarda a chave e registra a ligação com o caso da falha. */
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { associarEspaco } from '../../projetos/regras/associarEspaco.js';
-import { alterarProposta } from '../banco/alterarProposta.js';
-import { obterProposta } from '../banco/obterProposta.js';
+import { alterarProposta } from '../banco/armazenamentoDePropostas.js';
+import { obterProposta } from '../banco/armazenamentoDePropostas.js';
 
 /**
  * Vínculo local (a pessoa informou a chave): o Prumo não consulta nem escreve no Jira. A relação ticket ↔ caso só é registrada quando a proposta nasceu

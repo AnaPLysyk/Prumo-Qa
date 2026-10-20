@@ -4,7 +4,7 @@ import { proporContrato } from './proporContrato.js';
 import { resumirContratoProposto } from './resumirContratoProposto.js';
 import { situacaoProjeto } from './situacaoProjeto.js';
 import { atualizarEspaco } from '../banco/atualizarEspaco.js';
-import { listarEspacos } from '../banco/listarEspacos.js';
+import { listarEspacos } from '../banco/armazenamentoDeEspacos.js';
 import { obterEspaco } from '../banco/obterEspaco.js';
 import { adicionarVinculo } from './adicionarVinculo.js';
 import { eventoEspaco } from './eventoEspaco.js';

@@ -9,7 +9,7 @@ import { EstadoDoWorker } from '../tipos/worker.js';
 import { executarK6Agendado } from './executarK6Agendado.js';
 import { executarRunQaseAgendada } from './executarRunQaseAgendada.js';
 import { projetoDaRotina } from './projetoDaRotina.js';
-import { resultadoDaEvidencia } from './resultadoDaEvidencia.js';
+import { resultadoDaEvidencia } from './resultadosDasEvidencias.js';
 import { validarTicketAgendado } from './validarTicketAgendado.js';
 import { gravarEstadoDasRotinas } from '../banco/estadoDasRotinas.js';
 import { lerEstadoDasRotinas } from '../banco/estadoDasRotinas.js';

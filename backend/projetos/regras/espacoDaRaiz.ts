@@ -1,6 +1,6 @@
 /** Descobre qual projeto do Prumo usa esta pasta. */
 import path from 'node:path';
-import { listarEspacos } from '../banco/listarEspacos.js';
+import { listarEspacos } from '../banco/armazenamentoDeEspacos.js';
 
 /** Projeto Prumo (espaço) a que uma raiz autorizada pertence: a pasta de contextos do projeto ou a pasta de automação vinculada. */
 export function espacoDaRaiz(raiz: string, b?: string) {

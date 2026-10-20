@@ -2,8 +2,8 @@
 import { randomUUID } from 'node:crypto';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { gravarPropostas } from '../banco/gravarPropostas.js';
-import { lerPropostas } from '../banco/lerPropostas.js';
+import { gravarPropostas } from '../banco/armazenamentoDePropostas.js';
+import { lerPropostas } from '../banco/armazenamentoDePropostas.js';
 import { validarDadosDaProposta } from './validarDadosDaProposta.js';
 import { MAX_IA_POR_HORA, MAX_PROPOSTAS, NovaProposta, Proposta, propostaSchema } from '../tipos/proposta.js';
 

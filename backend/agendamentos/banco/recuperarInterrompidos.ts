@@ -1,7 +1,7 @@
 /** Encontra trabalhos que ficaram "executando" sem batimento (o aplicativo caiu) e os devolve à fila ou encerra. */
-import { fecharTentativa } from './fecharTentativa.js';
-import { gravarFila } from './gravarFila.js';
-import { lerFila } from './lerFila.js';
+import { fecharTentativa } from './armazenamentoDaFila.js';
+import { gravarFila } from './armazenamentoDaFila.js';
+import { lerFila } from './armazenamentoDaFila.js';
 
 /** Início do worker: trabalho EXECUTANDO sem batimento recente foi interrompido (fechamento, queda, suspensão). Nunca vira PASS. */
 export function recuperarInterrompidos(base?: string, agora = new Date(), limiteMs = 120000) {

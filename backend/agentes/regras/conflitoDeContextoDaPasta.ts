@@ -4,8 +4,8 @@
 import { abrirProjetoVinculado } from '../../projetos/regras/abrirProjetoVinculado.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
-import { novaVersaoDoContexto } from './novaVersaoDoContexto.js';
-import { ultimaVersaoDoContexto } from './ultimaVersaoDoContexto.js';
+import { novaVersaoDoContexto } from './versoesDoContexto.js';
+import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { obterContexto } from './obterContexto.js';
 

@@ -1,6 +1,6 @@
 /** Canal agenda:excluir: Excluir uma rotina (histórico de execuções permanece). */
 import { obterRotina } from '../banco/agenda.js';
-import { excluirRotina } from '../regras/excluirRotina.js';
+import { excluirRotina } from '../regras/operacoesDaRotina.js';
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { textoNoIdioma } from '../../aplicativo/bandeja/textoNoIdioma.js';
 import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.js';

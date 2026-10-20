@@ -5,7 +5,7 @@ import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.j
 import { servicosDoAplicativo } from '../../conexoes/regras/servicosDoAplicativo.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
 import { executarValidacao } from '../regras/executarValidacao.js';
-import { obterRunLocal } from '../banco/obterRunLocal.js';
+import { obterRunLocal } from '../banco/armazenamentoDeRuns.js';
 import { executarRunLocal } from '../regras/executarRunLocal.js';
 
 export const runsExecutar: TratadorDoCanal<'runs:executar'> = async (a, j) => {

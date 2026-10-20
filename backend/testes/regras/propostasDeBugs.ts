@@ -1,6 +1,6 @@
 /** Cria rascunhos de bug para os casos que falharam na run. */
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { obterRunLocal } from '../banco/obterRunLocal.js';
+import { obterRunLocal } from '../banco/armazenamentoDeRuns.js';
 import { criarProposta } from '../../tickets/regras/criarProposta.js';
 import { classificacoesDeFalha } from '../../tickets/tipos/proposta.js';
 

@@ -10,7 +10,7 @@ import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { arquivosDoDiario } from '../banco/arquivosDoDiario.js';
 import { gravarNoDiario } from '../banco/gravarNoDiario.js';
 import { pastaAtividades } from '../banco/pastaAtividades.js';
-import { achadoELacuna } from './achadoELacuna.js';
+import { achadoELacuna } from './resumoDoDiario.js';
 
 import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema } from '../tipos/atividade.js';
 import { resumoSchema } from '../tipos/atividade.js';

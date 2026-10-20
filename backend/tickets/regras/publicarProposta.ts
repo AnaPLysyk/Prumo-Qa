@@ -3,11 +3,11 @@ import { executarOperacao } from '../../conexoes/escrita/executarOperacao.js';
 import { Executor } from '../../conexoes/tipos/operacoesExternas.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { associarEspaco } from '../../projetos/regras/associarEspaco.js';
-import { obterProposta } from '../banco/obterProposta.js';
+import { obterProposta } from '../banco/armazenamentoDePropostas.js';
 
 import { podePublicar } from './podePublicar.js';
 import { Proposta } from '../tipos/proposta.js';
-import { alterarProposta } from '../banco/alterarProposta.js';
+import { alterarProposta } from '../banco/armazenamentoDePropostas.js';
 
 const marcarPublicada = (id: string, remoto: { id?: string; chave?: string; url?: string }, b?: string) => alterarProposta(id, p => { p.estado = 'PUBLICADA'; p.remoto = remoto; }, b);
 

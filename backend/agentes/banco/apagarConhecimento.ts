@@ -1,6 +1,6 @@
 /** Apaga um conhecimento ensinado (o inicial do Prumo só pode ser descartado). */
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { falharConhecimento } from './falharConhecimento.js';
+import { falharConhecimento } from './validacoesDoConhecimento.js';
 import { Linha } from '../tipos/conhecimento.js';
 
 /** Apagar remove de vez; o conhecimento de origem PRUMO só pode ser descartado (volta se a pessoa reaprovar). */

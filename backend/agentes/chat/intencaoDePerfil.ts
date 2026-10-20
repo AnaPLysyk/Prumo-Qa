@@ -1,6 +1,6 @@
 /** Reconhece quando a pessoa diz como quer ser chamada ou qual é o papel dela, e salva. */
 import { salvarPerfil } from '../banco/salvarPerfil.js';
-import { palavrasDaPergunta } from './palavrasDaPergunta.js';
+import { palavrasDaPergunta } from './interpretarPergunta.js';
 import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { normalizarNome } from '../regras/normalizarNome.js';
 import { Meta, Turno , PAPEIS } from '../tipos/chat.js';

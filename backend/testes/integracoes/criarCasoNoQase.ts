@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao, Remoto } from '../../conexoes/tipos/operacao.js';
-import { acharCasoNoQase } from './acharCasoNoQase.js';
+import { acharCasoNoQase } from './consultasDeCasosQase.js';
 import { associarCasoAoTicket } from './associarCasoAoTicket.js';
 import { automacaoLida } from './automacaoNoQase.js';
 import { corpoDoCasoQase } from './corpoDoCasoQase.js';

@@ -3,7 +3,7 @@ import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
 import { lerPermissaoDeContextosNoMcp } from '../banco/lerPermissaoDeContextosNoMcp.js';
 import { resumirContextos } from './resumirContextos.js';
-import { ultimaVersaoDoContexto } from './ultimaVersaoDoContexto.js';
+import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 
 /** Uso em revisar_cobertura: o contexto referenciado, se a pessoa permitiu. */
 export function contextoParaRevisao(p: Projeto, id: string, base?: string) {

@@ -1,7 +1,7 @@
 /** Consulta metadados no serviço correspondente, mantendo as validações de resposta e autorização. */
 import { ParametrosConsulta } from '../tipos/ParametrosConsulta.js';
 import { ResultadoConsulta } from '../tipos/ResultadoConsulta.js';
-import { tiposDeCriacao } from '../../tickets/integracoes/tiposDeCriacao.js';
+import { tiposDeCriacao } from '../../tickets/integracoes/tiposDoTicketJira.js';
 
 export async function consultarMetadadosJira(parametros: ParametrosConsulta): Promise<ResultadoConsulta | null> {
   const { ctx, rec } = parametros;

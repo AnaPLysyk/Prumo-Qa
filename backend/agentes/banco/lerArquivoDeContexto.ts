@@ -3,9 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { hashDoConteudoDoContexto } from '../regras/hashDoConteudoDoContexto.js';
+import { hashDoConteudoDoContexto } from '../regras/versoesDoContexto.js';
 import { idDeContextoValido } from '../regras/idDeContextoValido.js';
-import { seloDaVersaoDoContexto } from '../regras/seloDaVersaoDoContexto.js';
+import { seloDaVersaoDoContexto } from '../regras/versoesDoContexto.js';
 import { Arquivo, arquivoSchema } from '../tipos/contexto.js';
 
 /** Lê e valida um arquivo; `integro` é falso se o encadeamento ou algum hash não conferir. */

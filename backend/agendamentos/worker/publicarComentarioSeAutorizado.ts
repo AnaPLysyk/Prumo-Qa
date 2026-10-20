@@ -1,7 +1,7 @@
 /** Depois de uma execução agendada, publica o comentário de resultado no Jira só se uma política aprovada cobrir o ticket; sem política, deixa preparado. */
 import { publicarComentarioDeResultado } from '../../testes/integracoes/publicarComentarioDeResultado.js';
 import { elegivelParaPublicar } from '../../testes/regras/elegivelParaPublicar.js';
-import { definirEstadoJiraDoTrabalho } from '../banco/definirEstadoJiraDoTrabalho.js';
+import { definirEstadoJiraDoTrabalho } from '../banco/armazenamentoDaFila.js';
 import { Trabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';
 import { EstadoDoWorker } from '../tipos/worker.js';

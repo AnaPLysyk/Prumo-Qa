@@ -1,6 +1,6 @@
 /** Pega o próximo trabalho pendente para executar, um de cada vez. */
-import { gravarFila } from './gravarFila.js';
-import { lerFila } from './lerFila.js';
+import { gravarFila } from './armazenamentoDaFila.js';
+import { lerFila } from './armazenamentoDaFila.js';
 import { Trabalho } from '../tipos/fila.js';
 
 /** Pega o próximo trabalho elegível. No máximo um em execução por projeto e um no total (concorrência 1). */

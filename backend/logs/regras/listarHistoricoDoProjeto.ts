@@ -1,8 +1,8 @@
 /** Lista as operações do projeto já consolidadas (início + término) para a tela Histórico. */
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { consultarAtividades } from '../banco/consultarAtividades.js';
-import { apresentarRegistroDoDiario } from './apresentarRegistroDoDiario.js';
-import { filtrarRegistrosDoDiario } from './filtrarRegistrosDoDiario.js';
+import { apresentarRegistroDoDiario } from './resumoDoDiario.js';
+import { filtrarRegistrosDoDiario } from './resumoDoDiario.js';
 import { projetoVinculado } from '../../projetos/regras/projetoVinculado.js';
 import { Filtro, filtroSchema } from '../../projetos/tipos/painel.js';
 
