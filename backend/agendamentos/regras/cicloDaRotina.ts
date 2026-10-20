@@ -2,7 +2,7 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { Rotina, evento, DadosRotina, dadosRotinaSchema, rotinaSchema } from '../tipos/rotina.js';
-import { gravarAgenda, lerAgenda, alterarRotina } from '../repositorioAgenda.js';
+import { gravarAgenda, lerAgenda, alterarRotina } from '../banco/agenda.js';
 
 /** Anota a ação e preserva somente os últimos 200 eventos. */
 export function anotarNaRotina(rotina: Rotina, acao: z.infer<typeof evento>['acao']) {

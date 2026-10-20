@@ -10,7 +10,7 @@ const propostas = [
   { id: ticketId, espacoId, tipo: 'bug', origem: 'PESSOA', remoto: null, estado: 'RASCUNHO' },
   { id: casoOutro, espacoId: outroId, tipo: 'caso', origem: 'PESSOA', remoto: null, estado: 'RASCUNHO' }
 ];
-mock.module('../../../../dist/projetos/repositorio.js', { exports: {
+mock.module('../../../../dist/projetos/banco/projetos.js', { exports: {
   atualizarEspaco: (id, fn) => { assert.equal(id, espacoId); fn(espaco); return espaco; },
   gravarEspacos: () => { throw new Error('UNEXPECTED_REPOSITORY_WRITE'); },
   lerEspacos: () => { throw new Error('UNEXPECTED_REPOSITORY_READ'); },
@@ -19,10 +19,10 @@ mock.module('../../../../dist/projetos/repositorio.js', { exports: {
   lerPastasVinculadas: () => { throw new Error('UNEXPECTED_LINK_READ'); },
   obterEspaco: () => { throw new Error('UNEXPECTED_WORKSPACE_READ'); }
 } });
-mock.module('../../../../dist/tickets/repositorio.js', { exports: {
+mock.module('../../../../dist/tickets/banco/tickets.js', { exports: {
   listarPropostas: id => propostas.filter(p => p.espacoId === id)
 } });
-mock.module('../../../../dist/testes/repositorioLocal.js', { exports: {
+mock.module('../../../../dist/testes/banco/local.js', { exports: {
   lerRepositorioLocal: () => ({ version: 1, casos: [], suites: [] })
 } });
 const { associarEspaco } = await import('../../../../dist/projetos/servicoProjetos.js');

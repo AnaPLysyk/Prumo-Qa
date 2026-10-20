@@ -4,8 +4,8 @@ import { conferirCodigo, emailValido, emitirCodigo } from './codigosPorEmail.js'
 import { enviarCodigoPorEmail } from '../integracoes/envioEmail.js';
 import { conferirForcaDaSenha, conferirSegredo, resumirSegredo } from './senhas.js';
 import { contaParaJanela, encerrarSessao, iniciarSessao, loginLigado, sessaoParaJanela, situacaoDaSessao } from './sessao.js';
-import { gravarContas } from '../repositorioContas.js';
-import { lerContas } from '../repositorioContas.js';
+import { gravarContas } from '../banco/contas.js';
+import { lerContas } from '../banco/contas.js';
 import { RegistroDeContas, Usuario, nomeDaPessoaSchema } from '../tipos/contas.js';
 
 // Freio geral contra adivinhação: além do bloqueio por conta, no máximo 20 tentativas erradas por minuto no aplicativo inteiro.

@@ -1,13 +1,13 @@
 /** Lógica e contratos de inicio: operações relacionadas no mesmo módulo. */
-import { listarTrabalhos } from "../agendamentos/repositorioFila.js";
+import { listarTrabalhos } from "../agendamentos/banco/fila.js";
 import { dataEmPortugues } from "../compartilhado/texto.js";
 import { semAcentos } from "../compartilhado/texto.js";
 import { listarContextosDaPasta } from "../agentes/regras/consultasDeContextos.js";
 import { Fonte, Resposta, pare } from "./contratos.js";
 import { metricasDasExecucoes } from "../metricas/servico.js";
-import { obterEspaco } from "../projetos/repositorio.js";
-import { listarRunsLocais } from "../testes/repositorioRuns.js";
-import { listarPropostas } from "../tickets/repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
+import { listarRunsLocais } from "../testes/banco/runs.js";
+import { listarPropostas } from "../tickets/banco/tickets.js";
 
 /** Identifica palavras-chave no texto normalizado da pergunta sem consultar serviços externos. */
 const perguntaTemPalavra = (p: string, ...palavras: string[]) => palavras.some((palavra) => p.includes(palavra));

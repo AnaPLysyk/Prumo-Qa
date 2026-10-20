@@ -10,7 +10,7 @@ Após alterar uma Skill, atualize seu campo `versao` com `sha256:` seguido do ha
 
 ## Banco de Skills (skills.db)
 
-Os arquivos de `backend/agentes/skills/` continuam sendo a fonte das Skills que acompanham o aplicativo e o que clientes MCP podem instalar. Para o chat, o Prumo guarda cada Skill no banco local `skills.db` (separado do `conhecimento.db`), dividida em trechos (`backend/agentes/regras/dividirSkillEmTrechos.ts`). Os trechos do aplicativo são sincronizados a cada versão (`backend/agentes/banco/comBancoDeSkills.ts`).
+Os arquivos de `backend/agentes/skills/` continuam sendo a fonte das Skills que acompanham o aplicativo e o que clientes MCP podem instalar. Para o chat, o Prumo guarda cada Skill no banco local `skills.db` (separado do `conhecimento.db`), dividida em trechos (`backend/agentes/regras/dividirSkillEmTrechos.ts`). Os trechos do aplicativo são sincronizados a cada versão (`backend/agentes/banco/skills.ts`).
 
 O prompt da IA externa leva só os trechos APROVADOS da especialização que combinam com a pergunta, até 8 KB (`backend/agentes/regras/escolherTrechosDaSkill.ts`), em vez do arquivo inteiro. Isso mantém o texto bem abaixo do limite de linha de comando do Windows (cerca de 32 KB).
 

@@ -2,8 +2,8 @@
 import path from 'node:path';
 import { ErroQa } from '../../compartilhado/erros.js';
 import { Projeto } from '../../compartilhado/projeto/contratos.js';
-import { carregarContexto } from './consultarContextos.js';
-import { gravarArquivoDeContexto } from './arquivosDeContexto.js';
+import { carregarContexto } from './contextos.js';
+import { gravarArquivoDeContexto } from './contextos.js';
 import { obterContexto } from '../regras/consultasDeContextos.js';
 import { Arquivo, Entrada, limites } from '../tipos/contexto.js';
 

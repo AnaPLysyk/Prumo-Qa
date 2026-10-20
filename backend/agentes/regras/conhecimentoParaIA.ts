@@ -1,6 +1,6 @@
 /** Prepara o perfil e os conhecimentos aprovados para enviar à IA conectada. */
-import { lerPerfil } from '../repositorioPerfil.js';
-import { listarConhecimentos } from '../banco/operacoesDeConhecimento.js';
+import { lerPerfil } from '../banco/perfil.js';
+import { listarConhecimentos } from '../banco/conhecimento.js';
 
 /** Para a IA externa (MCP): perfil e conhecimentos APROVADOS do projeto, como dados. */
 export function conhecimentoParaIA(espacoId: string | null, base?: string) {

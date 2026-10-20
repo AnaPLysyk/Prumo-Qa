@@ -2,7 +2,7 @@
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { servicosDoAplicativo } from "./regras/servicosDoAplicativo.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
-import { obterEspaco } from "../projetos/repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
 import { removerVinculoServico } from "../projetos/servicoProjetos.js";
 
 export const servicosAceite: TratadorDoCanal<'servicos:aceite'> = a=>servicosDoAplicativo.campoAceite(a.espacoId,a.campo);

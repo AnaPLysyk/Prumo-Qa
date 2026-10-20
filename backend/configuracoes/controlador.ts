@@ -2,7 +2,7 @@
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { versao } from "../aplicativo/tipos/aplicativo.js";
 import { avisoDeVersaoPendente } from "../atualizacoes/servicoVerificacao.js";
-import { lerPreferencias } from "./repositorio.js";
+import { lerPreferencias } from "./banco/configuracoes.js";
 import { app } from "electron";
 import { alterarPreferencias } from "./servico.js";
 import { iniciarComOSistema } from "./servico.js";

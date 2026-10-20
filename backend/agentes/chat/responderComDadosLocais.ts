@@ -1,6 +1,6 @@
 /** Monta a resposta do agente com os dados locais do projeto (sem IA): prepara a pergunta, chama a parte do agente certo e devolve linhas, fontes e fatos usados. */
-import { listarRotinas } from '../../agendamentos/repositorioAgenda.js';
-import { listarTrabalhos } from '../../agendamentos/repositorioFila.js';
+import { listarRotinas } from '../../agendamentos/banco/agenda.js';
+import { listarTrabalhos } from '../../agendamentos/banco/fila.js';
 import { Trabalho } from '../../agendamentos/tipos/fila.js';
 
 import { Coleta, GUIA_MANUAL, guia } from '../tipos/chat.js';
@@ -13,11 +13,11 @@ import { perguntarAoAssistenteLocal } from '../../inicio/servico.js';
 import { situacaoDoProjeto } from '../../inicio/servico.js';
 import { Fonte } from '../../inicio/contratos.js';
 import { metricasDasExecucoes } from '../../metricas/servico.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
 import { Espaco } from '../../projetos/contratos.js';
-import { listarRunsLocais } from '../../testes/repositorioRuns.js';
+import { listarRunsLocais } from '../../testes/banco/runs.js';
 import { catalogoDeTestes } from '../../testes/servicoClassificacao.js';
-import { listarPropostas } from '../../tickets/repositorio.js';
+import { listarPropostas } from '../../tickets/banco/tickets.js';
 
 /** Classificação inicial de uma falha pelo texto do resultado. É hipótese: confirmar reproduzindo. */
 function classificarFalha(texto: string): { classe: 'automacao' | 'ambiente' | 'produto' | 'inconclusiva'; rotulo: string; motivo: string } {

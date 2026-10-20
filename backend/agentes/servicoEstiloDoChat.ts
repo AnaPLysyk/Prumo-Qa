@@ -1,7 +1,7 @@
 /** Personaliza saudações, nomes e estilos das respostas do assistente. */
 import { Estilo, PerfilParaIa, Pendente, Proximo } from "./tipos/chat.js";
 import { AgenteChat, personalidades, agentesChat, enfasePorPapel, personaBase, rotuloExperiencia, rotuloPapel } from "./tipos/persona.js";
-import { lerPerfil } from "./repositorioPerfil.js";
+import { lerPerfil } from "./banco/perfil.js";
 import { proximosPassosSugeridos } from "./chat/proximosPassosSugeridos.js";
 import { tentarOuPadrao } from "./chat/tentarOuPadrao.js";
 import { situacaoDoProjeto } from "../inicio/servico.js";

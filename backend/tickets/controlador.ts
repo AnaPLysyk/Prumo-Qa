@@ -2,15 +2,15 @@
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { criarProposta } from "./servicoPropostas.js";
 import { descartarProposta, editarProposta, revisarProposta } from "./servicoPropostas.js";
-import { listarPropostas } from "./repositorio.js";
+import { listarPropostas } from "./banco/tickets.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { nomeServico } from "../aplicativo/tipos/aplicativo.js";
 import { prepararOperacao } from "../conexoes/escrita/prepararOperacao.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
-import { obterEspaco } from "../projetos/repositorio.js";
-import { obterProposta } from "./repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
+import { obterProposta } from "./banco/tickets.js";
 import { podePublicar } from "./servicoPropostas.js";
 import { parametrosDaIssueGithub, parametrosDoDefeitoQase, publicarProposta } from "./servicoPropostas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";

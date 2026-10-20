@@ -7,9 +7,9 @@ import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Projeto } from '../../compartilhado/projeto/contratos.js';
-import { arquivosDoDiario } from '../banco/arquivosDoDiario.js';
-import { gravarNoDiario } from '../banco/gravarNoDiario.js';
-import { pastaAtividades } from '../banco/pastaAtividades.js';
+import { arquivosDoDiario } from '../banco/atividades.js';
+import { gravarNoDiario } from '../banco/atividades.js';
+import { pastaAtividades } from '../banco/atividades.js';
 import { achadoELacuna } from './resumoDoDiario.js';
 
 import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema } from '../contratos.js';

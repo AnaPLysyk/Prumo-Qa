@@ -1,14 +1,14 @@
 /** Lógica e contratos de administracao: operações relacionadas no mesmo módulo. */
 import { contaDaSessao, contaParaJanela, ehAdmin, situacaoDaSessao } from "../login/regras/sessao.js";
-import { gravarAgentesDaPlataforma, lerAgentesDaPlataforma } from "./repositorio.js";
+import { gravarAgentesDaPlataforma, lerAgentesDaPlataforma } from "./banco/administracao.js";
 import { AgentesDaPlataforma, agentesDaPlataformaPadrao } from "./contratos.js";
 import { agentesChat } from "../agentes/tipos/persona.js";
 import { especializacoes } from "../agentes/tipos/politicas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { randomUUID } from "node:crypto";
 import { gerarSenhaTemporaria, resumirSegredo } from "../login/regras/senhas.js";
-import { gravarContas } from "../login/repositorioContas.js";
-import { lerContas } from "../login/repositorioContas.js";
+import { gravarContas } from "../login/banco/contas.js";
+import { lerContas } from "../login/banco/contas.js";
 import { ContaVisivel, RegistroDeContas, Usuario, estadosDaConta, loginSchema, nomeDaPessoaSchema, ConfiguracaoDeAcesso, IdModulo, NivelDeAcesso, Papel, configuracaoDeAcessoSchema, modulosDoMenu, niveisDeAcesso } from "../login/tipos/contas.js";
 import { semAcentos } from "../compartilhado/texto.js";
 

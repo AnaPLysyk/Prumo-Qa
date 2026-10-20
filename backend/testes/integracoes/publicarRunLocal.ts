@@ -3,9 +3,9 @@ import path from 'node:path';
 import { executarOperacao } from '../../conexoes/escrita/executarOperacao.js';
 import { Auxiliar } from '../../conexoes/tipos/operacao.js';
 import { RegistroOperacao } from '../../conexoes/tipos/operacoesExternas.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
-import { alterarRunLocal } from '../repositorioRuns.js';
-import { obterRunLocal } from '../repositorioRuns.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
+import { alterarRunLocal } from '../banco/runs.js';
+import { obterRunLocal } from '../banco/runs.js';
 import { Dep, paraQase } from '../tipos/runLocal.js';
 
 /** Publica os resultados ainda não publicados (nunca NOT_RUN) e relê a run no Qase. */

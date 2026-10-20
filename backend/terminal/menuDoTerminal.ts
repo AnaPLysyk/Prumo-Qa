@@ -2,7 +2,7 @@
 import { createInterface } from 'node:readline/promises';
 import { Projeto } from '../compartilhado/projeto/contratos.js';
 import { versaoDoPacote } from '../compartilhado/versaoDoPacote.js';
-import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
+import { consultarAtividades } from '../logs/banco/atividades.js';
 import { calcularMetricas } from '../metricas/servico.js';
 import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
 import { comandoAtividade } from './consultasDoTerminal.js';

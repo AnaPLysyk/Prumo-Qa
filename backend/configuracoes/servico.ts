@@ -1,5 +1,5 @@
 /** Lógica e contratos de configuracoes: operações relacionadas no mesmo módulo. */
-import { gravarPreferencias, lerPreferencias } from "./repositorio.js";
+import { gravarPreferencias, lerPreferencias } from "./banco/configuracoes.js";
 import { alteracaoSchema } from "./contratos.js";
 import { Idioma } from "../aplicativo/tipos/textosDaBandeja.js";
 import fs from "node:fs";

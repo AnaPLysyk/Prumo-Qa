@@ -9,10 +9,10 @@ import { apresentarVersoes } from "./servicoVersoes.js";
 import { carregarVersoes } from "./servicoVersoes.js";
 import { conferirInstalada } from "./servicoVersoes.js";
 import { dialog, shell } from "electron";
-import { excluirTodosContextos } from "../agentes/banco/excluirContextos.js";
-import { excluirEvidencias } from "../testes/repositorioEvidencias.js";
-import { excluirAtividades } from "../logs/banco/excluirAtividades.js";
-import { excluirDiagnostico } from "../logs/repositorioDiagnostico.js";
+import { excluirTodosContextos } from "../agentes/banco/contextos.js";
+import { excluirEvidencias } from "../testes/banco/evidencias.js";
+import { excluirAtividades } from "../logs/banco/atividades.js";
+import { excluirDiagnostico } from "../logs/banco/diagnostico.js";
 import { projetoVinculado } from "../projetos/servicoProjetos.js";
 import { resumirDados } from "./servicoPrivacidade.js";
 

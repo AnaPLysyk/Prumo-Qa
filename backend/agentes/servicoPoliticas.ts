@@ -3,7 +3,7 @@ import { lerConfiguracaoDosAgentes } from "./banco/lerConfiguracaoDosAgentes.js"
 import { Configuracao, idsEsp, EstadoCapacidade, capacidades, registro } from "./tipos/politicas.js";
 import { especializacaoLigada } from "../administracao/servico.js";
 import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
-import { obterEspaco } from "../projetos/repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
 
 /** Sem configuração salva vale o padrão: todas as especializações habilitadas e as políticas padrão (comportamento anterior à 2.9). */
 export function configuracaoDoEspaco(espacoId: string, b?: string): Configuracao {

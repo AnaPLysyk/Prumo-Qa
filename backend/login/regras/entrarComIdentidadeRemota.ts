@@ -1,8 +1,8 @@
 /** Projeta o usuário verificado pelo Better Auth numa conta local isolada; autorização admin nunca vem do cliente. */
 import {createHash} from 'node:crypto';
 import {contaNova} from './contas.js';
-import {lerContas} from '../repositorioContas.js';
-import {gravarContas} from '../repositorioContas.js';
+import {lerContas} from '../banco/contas.js';
+import {gravarContas} from '../banco/contas.js';
 import {iniciarSessao,sessaoParaJanela} from './sessao.js';
 import type {UsuarioRemoto} from '../integracoes/autenticacaoRemota.js';
 

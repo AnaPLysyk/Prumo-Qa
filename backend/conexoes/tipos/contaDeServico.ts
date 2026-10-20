@@ -1,7 +1,7 @@
 /** Formato de uma conta de Jira, Qase ou GitHub (sem a credencial) e dos dados para adicioná-la. */
 import { z } from 'zod';
 import { servicoSchema } from '../../projetos/contratos.js';
-import type { cofreCredenciais } from '../banco/cofreCredenciais.js';
+import type { cofreCredenciais } from '../banco/credenciais.js';
 import type { Protetor } from './credenciais.js';
 import type { TransporteEscrita, TransporteServico } from './transporte.js';
 

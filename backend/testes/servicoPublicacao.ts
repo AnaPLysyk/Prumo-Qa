@@ -2,10 +2,10 @@
 import { ErroServico } from "../conexoes/integracoes/ErroServico.js";
 import { politicaCobre } from "../agendamentos/autorizacoes/politicasDaAutorizacao.js";
 import { Trabalho } from "../agendamentos/tipos/fila.js";
-import { obterTrabalho } from "../agendamentos/repositorioFila.js";
-import { publicacaoDoTrabalho } from "./repositorioPublicacoes.js";
+import { obterTrabalho } from "../agendamentos/banco/fila.js";
+import { publicacaoDoTrabalho } from "./banco/publicacoes.js";
 import { montarComentario } from "./regras/montarComentario.js";
-import { obterEspaco } from "../projetos/repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
 
 export const codigoDoErroDePublicacao = (e: unknown) => e instanceof ErroServico ? e.codigo : (e as Error)?.message?.match(/^[A-Z_]{3,60}/)?.[0] ?? 'JIRA_PUBLISH_FAILED';
 

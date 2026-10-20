@@ -12,7 +12,7 @@ import { hash } from '../../compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { Comando, Projeto } from '../../compartilhado/projeto/contratos.js';
-import { salvarEvidencia } from '../repositorioEvidencias.js';
+import { salvarEvidencia } from '../banco/evidencias.js';
 import { classificarResultado } from './classificarResultado.js';
 import { criarEvidenciaInicial } from './criarEvidenciaInicial.js';
 import { Evidencia, resultadoRunnerSchema } from '../tipos/evidencia.js';

@@ -3,7 +3,7 @@ import net from "node:net";
 import { z } from "zod";
 import { diretorioBase } from "../../compartilhado/banco/diretorioDados.js";
 import { lerLocal } from "../../compartilhado/banco/persistenciaLocal.js";
-import { lerContas } from "../../login/repositorioContas.js";
+import { lerContas } from "../../login/banco/contas.js";
 import { loginLigado, nivelDaConta, papelDaConta } from "../../login/regras/sessao.js";
 import { ErroQa } from "../../compartilhado/erros.js";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";

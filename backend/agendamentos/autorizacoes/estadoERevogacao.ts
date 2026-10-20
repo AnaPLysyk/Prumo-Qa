@@ -1,6 +1,6 @@
 /** Ciclo de vida das autorizações: limite, validade, esgotamento e revogação. */
 import { AutorizacaoExecucao, PoliticaEscrita, PoliticaPublicacao, Registro } from '../tipos/autorizacoes.js';
-import { gravarAutorizacoes, lerAutorizacoes } from '../repositorioAutorizacoes.js';
+import { gravarAutorizacoes, lerAutorizacoes } from '../banco/autorizacoes.js';
 
 /** Libera espaço somente removendo autorizações antigas que não estão mais vigentes. */
 export function abrirEspacoDeAutorizacoes<T extends { criadaEm: string }>(

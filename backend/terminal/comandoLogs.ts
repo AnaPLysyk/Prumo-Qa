@@ -1,6 +1,6 @@
 /** Comando "prumo logs": mostra o diário ou acompanha ao vivo com --follow. */
 import { Projeto } from '../compartilhado/projeto/contratos.js';
-import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
+import { consultarAtividades } from '../logs/banco/atividades.js';
 import { acompanharLogs } from '../logs/regras/acompanharLogs.js';
 import { Evento } from '../logs/contratos.js';
 import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';

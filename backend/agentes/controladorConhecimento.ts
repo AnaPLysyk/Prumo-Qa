@@ -1,15 +1,15 @@
 /** Controlador da funcionalidade agentes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { dialog, shell } from "electron";
-import { apagarConhecimento } from "./banco/operacoesDeConhecimento.js";
+import { apagarConhecimento } from "./banco/conhecimento.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { registrarConhecimento } from "./banco/operacoesDeConhecimento.js";
-import { decidirConhecimento } from "./repositorioAprendizados.js";
-import { esquecerTermo } from "./repositorioAprendizados.js";
+import { registrarConhecimento } from "./banco/conhecimento.js";
+import { decidirConhecimento } from "./banco/aprendizados.js";
+import { esquecerTermo } from "./banco/aprendizados.js";
 import { estadoConhecimento } from "./banco/estadoConhecimento.js";
-import { listarConhecimentos } from "./banco/operacoesDeConhecimento.js";
+import { listarConhecimentos } from "./banco/conhecimento.js";
 import { caminhoConhecimento } from "./banco/baseDoConhecimento.js";
-import { lerPerfil } from "./repositorioPerfil.js";
-import { vocabularioDoAgente } from "./repositorioAprendizados.js";
+import { lerPerfil } from "./banco/perfil.js";
+import { vocabularioDoAgente } from "./banco/aprendizados.js";
 
 export const conhecimentoApagar: TratadorDoCanal<'conhecimento:apagar'> = async (a, janela) => { const r = await dialog.showMessageBox(janela!, { type: 'warning', buttons: ['Cancelar', 'Apagar'], defaultId: 0, cancelId: 0, title: 'Apagar conhecimento', message: 'Apagar este conhecimento do banco deste computador?', detail: 'Os agentes deixam de usá-lo. O conhecimento inicial do Prumo não pode ser apagado, só descartado.' }); return r.response === 1 ? apagarConhecimento(a.id) : { apagado: false, canceled: true }; };
 

@@ -49,7 +49,7 @@ test('ordem dos scripts carrega o painel de Agentes antes da tela Conexões', ()
 test('formulário de serviços e login têm pastas e responsabilidades distintas', () => {
   const conexoes = ler('frontend/conexoes/mostrarConexoes.js');
   const login = ler('frontend/login/entrarNaConta.js');
-  const cofre = ler('backend/conexoes/banco/cofreCredenciais.ts');
+  const cofre = ler('backend/conexoes/banco/credenciais.ts');
   assert.match(conexoes, /api\.servicoAdicionar|api\.qasePrever/);
   assert.doesNotMatch(conexoes, /api\.contaEntrar\(/);
   assert.match(login, /PrumoLoginRemoto/);

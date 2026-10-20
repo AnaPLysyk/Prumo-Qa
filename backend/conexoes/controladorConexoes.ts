@@ -16,9 +16,9 @@ import { idiomaAtual } from "../configuracoes/servico.js";
 import { executarOperacao } from "./escrita/executarOperacao.js";
 import { prepararOperacao } from "./escrita/prepararOperacao.js";
 import { servicosDoAplicativo } from "./regras/servicosDoAplicativo.js";
-import { obterEspaco } from "../projetos/repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
 import { resolverAnexo } from "../tickets/servicoPropostas.js";
-import { listarOperacoes } from "./repositorioOperacoes.js";
+import { listarOperacoes } from "./banco/operacoes.js";
 import { situacaoDasConexoesDeIa } from "./ia/situacaoDasConexoesDeIa.js";
 
 // Alterar configuração de outro programa exige uma caixa de confirmação nativa, que a página não consegue simular.

@@ -1,7 +1,7 @@
 /** Códigos de 6 dígitos mandados por e-mail para confirmar o cadastro, definir senha nova ou entrar (duas etapas): só na memória, valem 10 minutos, uma vez, com até 5 tentativas. */
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { loginLigado } from './sessao.js';
-import { lerContas } from '../repositorioContas.js';
+import { lerContas } from '../banco/contas.js';
 import { enviarCodigoPorEmail, PedidoDeCodigo } from '../integracoes/envioEmail.js';
 import { codigoPorEmailSchema, emailSchema } from '../tipos/contas.js';
 

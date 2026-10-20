@@ -1,11 +1,11 @@
 /** Salva e consulta casos e suítes locais, mantendo seus vínculos. */
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { obterEspaco } from "../projetos/repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { lerRepositorioLocal, gravarRepositorioLocal } from "./repositorioLocal.js";
+import { lerRepositorioLocal, gravarRepositorioLocal } from "./banco/local.js";
 import { entradaCasoLocal, type CasoLocal, entradaSuiteLocal, dadosCasoLocal } from "./tipos/repositorioLocal.js";
-import { listarPropostas } from "../tickets/repositorio.js";
+import { listarPropostas } from "../tickets/banco/tickets.js";
 
 export function salvarCasoLocal(entrada: z.input<typeof entradaCasoLocal>, base?: string) {
   const p = entradaCasoLocal.parse(entrada);

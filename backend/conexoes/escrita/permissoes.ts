@@ -1,8 +1,8 @@
 /** Controla concessões de escrita por projeto e confere as rotas autorizadas. */
-import { lerPermissoesDeEscrita } from '../repositorioOperacoes.js';
+import { lerPermissoesDeEscrita } from '../banco/operacoes.js';
 import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { Servico } from '../../projetos/contratos.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
 import { permSchema } from '../tipos/operacoesExternas.js';
 import { rotas } from '../tipos/rotasDeEscrita.js';
 

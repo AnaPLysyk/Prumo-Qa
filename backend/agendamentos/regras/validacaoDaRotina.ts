@@ -1,8 +1,8 @@
 /** Verifica os limites e capacidades disponíveis para rotinas agendadas. */
 import { capacidadeDoK6 } from "../servicoK6.js";
 import { Rotina, DadosRotina, dadosRotinaSchema } from "../tipos/rotina.js";
-import { obterEspaco } from "../../projetos/repositorio.js";
-import { obterRunLocal } from "../../testes/repositorioRuns.js";
+import { obterEspaco } from "../../projetos/banco/projetos.js";
+import { obterRunLocal } from "../../testes/banco/runs.js";
 import { ErroQa } from "../../compartilhado/erros.js";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
 

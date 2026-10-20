@@ -2,8 +2,8 @@
 import { consumirPoliticaEscrita } from '../../agendamentos/autorizacoes/politicasDaAutorizacao.js';
 import { OPERACOES_AGENDAVEIS } from '../../agendamentos/tipos/autorizacoes.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { gravarRegistroDaOperacao } from '../repositorioOperacoes.js';
-import { lerRegistroDeOperacoes } from '../repositorioOperacoes.js';
+import { gravarRegistroDaOperacao } from '../banco/operacoes.js';
+import { lerRegistroDeOperacoes } from '../banco/operacoes.js';
 import { chaveDaOperacao } from './chaveDaOperacao.js';
 
 import { escritaHabilitada } from './permissoes.js';
@@ -12,7 +12,7 @@ import { operacaoPorId } from './operacaoPorId.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { Remoto } from '../tipos/operacao.js';
 import { Executor, OpcoesOperacao, RegistroOperacao, semAux } from '../tipos/operacoesExternas.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
 import { registrarEscritaExterna } from '../../projetos/servicoProjetos.js';
 
 const codigoDaFalhaDeOperacao = (e: unknown) => e instanceof ErroServico ? (e.detalhe ? `${e.codigo}: ${e.detalhe}` : e.codigo) : (/^([A-Z][A-Z_]{2,60})\b/.exec((e as Error)?.message ?? '')?.[1] ?? 'OPERATION_FAILED');

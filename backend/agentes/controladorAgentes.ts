@@ -3,8 +3,8 @@ import { configuracaoDoEspaco } from "./servicoPoliticas.js";
 import { matrizDePoliticas } from "./servicoCapacidades.js";
 import { especializacoes } from "./tipos/politicas.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { listarPropostas } from "../tickets/repositorio.js";
-import { listarOrquestracoes } from "./repositorioOrquestracao.js";
+import { listarPropostas } from "../tickets/banco/tickets.js";
+import { listarOrquestracoes } from "./banco/orquestracao.js";
 import { listarAgentesPessoais, importarPreviasAntigas, excluirAgentePessoal, salvarAgentePessoal } from "./regras/agentesPessoais.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { rastrearPergunta } from "./chat/rastrearPergunta.js";
@@ -16,7 +16,7 @@ import { idiomaAtual } from "../configuracoes/servico.js";
 import { textoRemoto } from "../conexoes/integracoesFormatos.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
 import { salvarContextoDaPasta } from "./regras/cicloDosContextos.js";
-import { obterEspaco } from "../projetos/repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
 
 export const agentesEstado: TratadorDoCanal<'agentes:estado'> = a => ({ configuracao: configuracaoDoEspaco(a.espacoId), matriz: matrizDePoliticas(a.espacoId), especializacoes: especializacoes, propostasIA: listarPropostas(a.espacoId).filter(p => p.origem === 'IA').length });
 

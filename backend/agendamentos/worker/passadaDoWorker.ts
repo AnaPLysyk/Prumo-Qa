@@ -1,7 +1,7 @@
 /** Uma passada do worker: bate o coração, transforma horários vencidos em trabalhos, executa um trabalho e tenta publicações pendentes. */
-import { agendaPausada } from '../repositorioAgenda.js';
-import { listarRotinas } from '../repositorioAgenda.js';
-import { pegarProximoTrabalho } from '../repositorioFila.js';
+import { agendaPausada } from '../banco/agenda.js';
+import { listarRotinas } from '../banco/agenda.js';
+import { pegarProximoTrabalho } from '../banco/fila.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
 import { enfileirarHorariosVencidos } from './enfileirarHorariosVencidos.js';
 import { gravarTravaDoWorker } from './travaDoWorker.js';

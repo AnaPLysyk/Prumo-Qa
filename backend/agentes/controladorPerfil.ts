@@ -2,10 +2,10 @@
 import { dialog } from "electron";
 import { autorizarDelegacaoDeIa } from "./regras/autorizarDelegacaoDeIa.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { lerPreferencias } from "../configuracoes/repositorio.js";
+import { lerPreferencias } from "../configuracoes/banco/configuracoes.js";
 import { regrasDosAgentes } from "../administracao/servico.js";
-import { lerPerfil } from "./repositorioPerfil.js";
-import { salvarPerfil } from "./repositorioPerfil.js";
+import { lerPerfil } from "./banco/perfil.js";
+import { salvarPerfil } from "./banco/perfil.js";
 
 export const iaDelegacao: TratadorDoCanal<'ia:delegacao'> = async (a, janela) => {
   if (a.valor && !regrasDosAgentes().iaExterna) throw new Error('EXTERNAL_AI_DISABLED: a Administração desligou o uso de Claude Code e Codex nesta instalação.');

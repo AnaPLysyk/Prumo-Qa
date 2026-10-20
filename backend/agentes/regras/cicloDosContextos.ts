@@ -1,18 +1,18 @@
 /** Ciclo de vida dos contextos de projeto: criação, edição, revisão, conflito e substituição. */
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
-import { excluirContexto } from '../banco/excluirContextos.js';
+import { excluirContexto } from '../banco/contextos.js';
 import { abrirProjetoVinculado } from '../../projetos/servicoProjetos.js';
 import { obterContexto } from './consultasDeContextos.js';
-import { gravarPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
+import { gravarPermissaoDeContextosNoMcp } from '../banco/contextos.js';
 import { ErroQa } from '../../compartilhado/erros.js';
 import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
 import { novaVersaoDoContexto, ultimaVersaoDoContexto, hashDoConteudoDoContexto } from './validacoesDeContexto.js';
 import { Arquivo, conteudoSchema, limites } from '../tipos/contexto.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
-import { carregarTodosOsContextos } from '../banco/consultarContextos.js';
-import { gravarArquivoDeContexto, pastaContextos } from '../banco/arquivosDeContexto.js';
+import { carregarTodosOsContextos } from '../banco/contextos.js';
+import { gravarArquivoDeContexto, pastaContextos } from '../banco/contextos.js';
 
 /** Ações da tela: recebem a pasta vinculada e só depois consultam o contexto local. */
 export const excluirContextoDaPasta = async (raiz: string, id: string) =>

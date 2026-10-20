@@ -1,6 +1,6 @@
 /** Pede a autenticação do Windows e cria a autorização prévia para a rotina rodar sozinha (escopo exato, validade e limite de usos). */
 import { autorizarEscopo } from './autorizarEscopo.js';
-import { obterRotina } from '../repositorioAgenda.js';
+import { obterRotina } from '../banco/agenda.js';
 import { capacidadeDoK6 } from '../servicoK6.js';
 import { escopoDoK6 } from '../servicoK6.js';
 import { localizarK6 } from '../servicoK6.js';
@@ -10,7 +10,7 @@ import { ExecutavelK6 } from '../tipos/k6.js';
 import { ErroQa } from '../../compartilhado/erros.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { escopoDeCapability } from '../../testes/regras/escopoDeCapability.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
 
 /** Pede ao broker nativo o consentimento para cada automação da rotina (escopo exato) e grava as autorizações. */
 export async function autorizarRotina(rotinaId: string, opcoes: { dias: number; maxUsos: number }, solicitar: Solicitador, base?: string, exe?: ExecutavelK6 | null) {

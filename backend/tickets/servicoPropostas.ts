@@ -1,8 +1,8 @@
 /** Lógica e contratos de tickets: operações relacionadas no mesmo módulo. */
 import { randomUUID } from "node:crypto";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { obterEspaco } from "../projetos/repositorio.js";
-import { gravarPropostas, lerPropostas, alterarProposta, obterProposta } from "./repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
+import { gravarPropostas, lerPropostas, alterarProposta, obterProposta } from "./banco/tickets.js";
 import { MAX_IA_POR_HORA, MAX_PROPOSTAS, NovaProposta, Proposta, propostaSchema, dadosBug } from "./contratos.js";
 import { executarOperacao } from "../conexoes/escrita/executarOperacao.js";
 import { Executor } from "../conexoes/tipos/operacoesExternas.js";

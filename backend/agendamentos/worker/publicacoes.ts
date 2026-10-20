@@ -1,7 +1,7 @@
 /** Publicação agendada no Jira, com política explícita e tentativas controladas. */
 import { publicarComentarioDeResultado } from '../../testes/integracoes/publicarComentarioDeResultado.js';
 import { elegivelParaPublicar, publicacaoPodeRepetir } from '../../testes/servicoPublicacao.js';
-import { definirEstadoJiraDoTrabalho, listarTrabalhos, obterTrabalho } from '../repositorioFila.js';
+import { definirEstadoJiraDoTrabalho, listarTrabalhos, obterTrabalho } from '../banco/fila.js';
 import { Trabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';
 import { EstadoDoWorker } from '../tipos/worker.js';

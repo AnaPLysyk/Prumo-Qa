@@ -1,7 +1,7 @@
 /** Cria a verificação que o worker usa: só executa se houver autorização vigente para exatamente o mesmo escopo, e gasta um uso. */
 import { estadoDaAutorizacao } from './estadoERevogacao.js';
-import { gravarAutorizacoes } from '../repositorioAutorizacoes.js';
-import { lerAutorizacoes } from '../repositorioAutorizacoes.js';
+import { gravarAutorizacoes } from '../banco/autorizacoes.js';
+import { lerAutorizacoes } from '../banco/autorizacoes.js';
 import { Delegada } from '../../testes/tipos/autorizacoes.js';
 
 /** Delegada para o executor. Consome um uso de forma atômica ao reconhecer o escopo; qualquer divergência devolve null (BLOCKED). */

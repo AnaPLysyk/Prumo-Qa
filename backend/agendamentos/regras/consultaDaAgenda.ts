@@ -1,8 +1,8 @@
 /** Consulta agenda e permissões efetivas das rotinas. */
 import { estadoDaAutorizacao } from "../autorizacoes/estadoERevogacao.js";
-import { lerAutorizacoes } from "../repositorioAutorizacoes.js";
-import { listarRotinas } from "../repositorioAgenda.js";
-import { listarTrabalhos } from "../repositorioFila.js";
+import { lerAutorizacoes } from "../banco/autorizacoes.js";
+import { listarRotinas } from "../banco/agenda.js";
+import { listarTrabalhos } from "../banco/fila.js";
 import { capacidadesDaRotina } from "./validacaoDaRotina.js";
 import { proximoHorario } from "../servicoHorarios.js";
 import { Rotina } from "../tipos/rotina.js";

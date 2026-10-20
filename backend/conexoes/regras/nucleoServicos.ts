@@ -1,6 +1,6 @@
 /** Reúne tudo o que a tela Conexões faz com Jira, Qase e GitHub: adicionar e validar conta, listar recursos, vincular, consultar e escrever com a credencial protegida. */
 import { z } from 'zod';
-import { cofreCredenciais } from '../banco/cofreCredenciais.js';
+import { cofreCredenciais } from '../banco/credenciais.js';
 import { listarContas } from '../banco/contasDeServico.js';
 import { enviarAoServico } from '../integracoes/requisicoes.js';
 import { lerDoServico } from '../integracoes/requisicoes.js';
@@ -21,7 +21,7 @@ import { importarProjetosQase } from './importarProjetosQase.js';
 
 
 
-import { obterEspaco } from '../../projetos/repositorio.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
 import { vincularServicoAoEspaco } from '../../projetos/servicoProjetos.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { adaptadorDaConta } from '../servicoContas.js';
@@ -29,7 +29,7 @@ import { contaAtiva } from '../servicoContas.js';
 import { verificarVinculoDoServico } from '../servicoContas.js';
 import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { lerContasDeServico } from '../banco/contasDeServico.js';
-import { listarEspacos } from '../../projetos/repositorio.js';
+import { listarEspacos } from '../../projetos/banco/projetos.js';
 import { atualizarEstadoDoVinculo } from '../../projetos/servicoProjetos.js';
 import { registrarConsultaExterna } from '../../projetos/servicoProjetos.js';
 import { codigoDoErroDeServico } from '../servicoContas.js';

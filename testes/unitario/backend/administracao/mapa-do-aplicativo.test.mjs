@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { gerarMapaDoAplicativo } from '../../../../docs/geradores/gerar-mapa-do-aplicativo.mjs';
-import { lerMapaDoAplicativo } from '../../../../dist/administracao/repositorio.js';
+import { lerMapaDoAplicativo } from '../../../../dist/administracao/banco/administracao.js';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 
 test('mapa: cada canal IPC do catálogo aparece uma vez, no controlador da sua tela, e sem código-fonte', () => {
@@ -16,7 +16,7 @@ test('mapa: cada canal IPC do catálogo aparece uma vez, no controlador da sua t
   assert.ok(!JSON.stringify(mapa).includes('"codigo"'), 'o mapa não leva o código-fonte');
   const agentes = mapa.telas.find((t) => t.id === 'agentes');
   assert.ok(agentes.frontend.some((a) => a.caminho === 'frontend/agentes/tela-agentes.parte.js'));
-  assert.ok(agentes.backend.banco.some((a) => a.caminho === 'backend/agentes/banco/operacoesDeSkills.ts'));
+  assert.ok(agentes.backend.banco.some((a) => a.caminho === 'backend/agentes/banco/skills.ts'));
   assert.ok(agentes.testes.some((x) => x.caminho.endsWith('banco-de-skills.test.mjs')));
 });
 
@@ -32,7 +32,7 @@ test('leitor do mapa: ausente, grande demais, atalho ou fora do formato é recus
 });
 
 test('código da Documentação viva: só arquivos do mapa, caminho com .. recusado no contrato, arquivo grande encurtado', async (t) => {
-  const { lerCodigoDoAplicativo } = await import('../../../../dist/administracao/repositorio.js');
+  const { lerCodigoDoAplicativo } = await import('../../../../dist/administracao/banco/administracao.js');
   const raiz = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-codigo-')); t.after(() => fs.rmSync(raiz, { recursive: true, force: true }));
   fs.mkdirSync(path.join(raiz, 'dist', 'documentacao'), { recursive: true });
   const grande = 'x'.repeat(250 * 1024);

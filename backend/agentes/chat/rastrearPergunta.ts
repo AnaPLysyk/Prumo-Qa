@@ -1,8 +1,8 @@
 /** Simula o caminho de uma pergunta no chat, sem responder: palavras, pontuação de cada agente, orquestração e o que o agente em foco usaria. */
-import { conhecimentosRelevantes } from '../banco/operacoesDeConhecimento.js';
-import { listarTrechosDeSkill } from '../banco/operacoesDeSkills.js';
-import { pesosAprendidos } from '../repositorioAprendizados.js';
-import { sementeDasSkills } from '../banco/sementeDasSkills.js';
+import { conhecimentosRelevantes } from '../banco/conhecimento.js';
+import { listarTrechosDeSkill } from '../banco/skills.js';
+import { pesosAprendidos } from '../banco/aprendizados.js';
+import { sementeDasSkills } from "../banco/sementeDasSkills.js";
 import { escolherAgente } from './selecaoDoAgente.js';
 import { palavrasDaPergunta } from './roteamentoDePerguntas.js';
 import { planejarOrquestracao } from './roteamentoDePerguntas.js';

@@ -44,5 +44,5 @@ test('identidade do Prumo permanece separada das contas conectadas', () => {
   const formulario = ler('formularios/abrirFormularioConexao.js');
   assert.doesNotMatch(principal + formulario, /contaEntrar\(|contaCadastrar\(|contaSair\(/);
   assert.match(formulario, /api\.servicoAdicionar\(/);
-  assert.match(fs.readFileSync('backend/conexoes/banco/cofreCredenciais.ts','utf8'), /salvarCredencial/);
+  assert.match(fs.readFileSync('backend/conexoes/banco/credenciais.ts','utf8'), /salvarCredencial/);
 });

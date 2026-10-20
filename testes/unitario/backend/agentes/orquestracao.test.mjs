@@ -7,8 +7,8 @@ import path from 'node:path';
 import { planejarOrquestracao } from '../../../../dist/agentes/chat/roteamentoDePerguntas.js';
 import { orquestrar } from '../../../../dist/agentes/chat/orquestrar.js';
 import { conversar } from '../../../../dist/agentes/chat/conversar.js';
-import { registrarOrquestracao, arquivoDeOrquestracoes } from '../../../../dist/agentes/repositorioOrquestracao.js';
-import { listarOrquestracoes } from '../../../../dist/agentes/repositorioOrquestracao.js';
+import { registrarOrquestracao, arquivoDeOrquestracoes } from '../../../../dist/agentes/banco/orquestracao.js';
+import { listarOrquestracoes } from '../../../../dist/agentes/banco/orquestracao.js';
 import { agentesChat } from '../../../../dist/agentes/tipos/persona.js';
 
 const base = (t) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-orq-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };

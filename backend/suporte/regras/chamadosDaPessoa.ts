@@ -4,7 +4,7 @@ import os from 'node:os';
 import { anexosDoEnvio, esquecerAnexos } from './anexosDoChamado.js';
 import { prepararRelato } from '../servicoRelato.js';
 import { resumoDoDiagnosticoParaRelato } from './resumoDoDiagnosticoParaRelato.js';
-import { lerMeusChamados, gravarMeusChamados } from '../repositorio.js';
+import { lerMeusChamados, gravarMeusChamados } from '../banco/suporte.js';
 import { servicoDeChamados } from '../integracoes.js';
 import { solicitacaoSchema } from '../contratos.js';
 import type { Protetor } from '../../conexoes/tipos/credenciais.js';

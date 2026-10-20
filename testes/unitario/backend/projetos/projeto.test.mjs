@@ -10,7 +10,7 @@ import { caminhoSeguro } from '../../../../dist/compartilhado/seguranca/caminhoS
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../../../dist/compartilhado/seguranca/lerSeguro.js';
 import { mascarar } from '../../../../dist/compartilhado/seguranca/mascarar.js';
-import { consultarEvidencias } from '../../../../dist/testes/repositorioEvidencias.js';
+import { consultarEvidencias } from '../../../../dist/testes/banco/evidencias.js';
 import { classificarResultado as classificar } from '../../../../dist/testes/regras/classificarResultado.js';
 
 test('fixtures API, web e automação reconhecidas com fontes reais',async t=>{

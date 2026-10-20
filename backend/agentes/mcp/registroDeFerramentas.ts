@@ -1,6 +1,6 @@
 /** Registro das ferramentas MCP de consulta, revisão e execução autorizada da qualidade. */
 import { z } from "zod";
-import { consultarEvidencias } from "../../testes/repositorioEvidencias.js";
+import { consultarEvidencias } from "../../testes/banco/evidencias.js";
 import { MeiosDoServidorMcp, somenteLeitura } from "../tipos/mcp.js";
 import { contextoCompleto } from "./consultasDoProjeto.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";

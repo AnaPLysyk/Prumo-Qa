@@ -1,15 +1,15 @@
 /** Publica o comentário de resultado no Jira uma única vez (confere se já existe pelo marcador) e registra o resultado. */
 import { createHash } from 'node:crypto';
 import { consumirPublicacao } from '../../agendamentos/autorizacoes/politicasDaAutorizacao.js';
-import { definirEstadoJiraDoTrabalho } from '../../agendamentos/repositorioFila.js';
-import { obterTrabalho } from '../../agendamentos/repositorioFila.js';
-import { gravarPublicacoesJira } from '../repositorioPublicacoes.js';
-import { lerPublicacoesJira } from '../repositorioPublicacoes.js';
+import { definirEstadoJiraDoTrabalho } from '../../agendamentos/banco/fila.js';
+import { obterTrabalho } from '../../agendamentos/banco/fila.js';
+import { gravarPublicacoesJira } from '../banco/publicacoes.js';
+import { lerPublicacoesJira } from '../banco/publicacoes.js';
 import { codigoDoErroDePublicacao } from '../servicoPublicacao.js';
 import { montarComentario } from '../regras/montarComentario.js';
 import { publicacaoPodeRepetir } from '../servicoPublicacao.js';
 import { Pub, PublicadorJira, registroPub } from '../tipos/comentarioJira.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
 
 /**
  * Publica (ou confirma que já está publicado) o comentário da execução. `modo` MANUAL exige `confirmado` (a confirmação nativa

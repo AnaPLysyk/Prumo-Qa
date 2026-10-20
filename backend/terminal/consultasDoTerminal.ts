@@ -1,10 +1,10 @@
 /** Comandos de consulta do terminal: atividades, evidências e indicadores. */
 import { Projeto } from '../compartilhado/projeto/contratos.js';
-import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
+import { consultarAtividades } from '../logs/banco/atividades.js';
 import {
   avisarHistoricoIncompleto, imprimirJson, linhaDaOperacao, textoSeguroNoTerminal
 } from './saidaDoTerminal.js';
-import { consultarEvidencias } from '../testes/repositorioEvidencias.js';
+import { consultarEvidencias } from '../testes/banco/evidencias.js';
 import { chamadaRegistrada } from './chamadaRegistrada.js';
 import { calcularMetricas } from '../metricas/servico.js';
 

@@ -1,7 +1,7 @@
 /** Atende uma pergunta do chat: entende intenções, escolhe o agente, responde localmente e, se autorizado, consulta Claude ou Codex. */
-import { lerPerfil } from '../repositorioPerfil.js';
+import { lerPerfil } from '../banco/perfil.js';
 import { nomeParaChamar } from '../servicoEstiloDoChat.js';
-import { pesosAprendidos } from '../repositorioAprendizados.js';
+import { pesosAprendidos } from '../banco/aprendizados.js';
 import { aplicarEstilo } from '../servicoEstiloDoChat.js';
 import { escolherAgente } from './selecaoDoAgente.js';
 
@@ -12,7 +12,7 @@ import { responderComDadosLocais } from './responderComDadosLocais.js';
 
 import { orquestrar } from './orquestrar.js';
 import { planejarOrquestracao } from './roteamentoDePerguntas.js';
-import { registrarOrquestracao } from '../repositorioOrquestracao.js';
+import { registrarOrquestracao } from '../banco/orquestracao.js';
 import { Orquestracao } from '../tipos/orquestracao.js';
 import { Coleta, ContextoChat, Estilo, Meta, Opcoes, Resposta, agentePorTipo } from '../tipos/chat.js';
 import { consultarIaExterna } from './consultarIaExterna.js';
@@ -21,14 +21,14 @@ import { AgenteChat, agentesChat } from '../tipos/persona.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { regrasDosAgentes } from '../../administracao/servico.js';
 import { Conhecimento, TipoConhecimento } from '../tipos/conhecimento.js';
-import { conhecimentosRelevantes } from '../banco/operacoesDeConhecimento.js';
+import { conhecimentosRelevantes } from '../banco/conhecimento.js';
 import { semAcentos } from '../../compartilhado/texto.js';
-import { listarConhecimentos } from '../banco/operacoesDeConhecimento.js';
+import { listarConhecimentos } from '../banco/conhecimento.js';
 import { Fonte } from '../../inicio/contratos.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
 import { catalogoDeTestes } from '../../testes/servicoClassificacao.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { registrarConhecimento } from '../banco/operacoesDeConhecimento.js';
+import { registrarConhecimento } from '../banco/conhecimento.js';
 
 function intencaoDeAprender(pergunta: string, espacoId: string | null, forcado: string | null | undefined, base?: string): Meta | null {
   const m = pergunta.match(/^\s*(?:por favor,?\s*)?(?:lembr[ae](?:-se)?|anot[ae]|guard[ae]|aprend[ae]|memoriz[ae])\s*(?:que|isso|:)?\s*:?\s+(.{4,})$/i); if (!m) return null;

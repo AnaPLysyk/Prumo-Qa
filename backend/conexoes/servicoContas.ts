@@ -10,7 +10,7 @@ import { instanciaServico } from "./integracoes/configuracaoDosServicos.js";
 import { ErroServico } from "./integracoes/ErroServico.js";
 import { atualizarEstadoDoVinculo } from "../projetos/servicoProjetos.js";
 import { Servico } from "../projetos/contratos.js";
-import { obterEspaco } from "../projetos/repositorio.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
 
 export function adaptadorDaConta(c: ContextoDosServicos, conta: Conta) {
   return new AdaptadorServico({ ...conta, token: c.cofre.ler(conta.id) }, c.transporte, c.escrita);

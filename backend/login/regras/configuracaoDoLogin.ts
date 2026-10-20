@@ -1,11 +1,11 @@
 /** Configuração do login por GitHub e Google neste computador: Client ID em acessos.json, segredo só no cofre do sistema, e as ligações reais de cada fluxo. */
 import { BrowserWindow, safeStorage, shell } from 'electron';
-import { cofreCredenciais } from '../../conexoes/banco/cofreCredenciais.js';
+import { cofreCredenciais } from '../../conexoes/banco/credenciais.js';
 import { protetorDoSistema } from '../../conexoes/regras/protetorDoSistema.js';
 import { lerPerfilDoGithub, trocarCodigoNoGithub } from '../integracoes/githubOauth.js';
 import { lerPerfilDoGoogle, trocarCodigoNoGoogle } from '../integracoes/googleOauth.js';
-import { gravarContas } from '../repositorioContas.js';
-import { lerContas } from '../repositorioContas.js';
+import { gravarContas } from '../banco/contas.js';
+import { lerContas } from '../banco/contas.js';
 import { DependenciasDeEntrada, Provedor } from './entradaPorProvedor.js';
 
 /** Ids fixos das credenciais dos segredos no cofre (o cofre exige um UUID). */

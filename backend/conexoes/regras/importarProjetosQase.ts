@@ -5,7 +5,7 @@ import { ContextoDosServicos } from '../tipos/contaDeServico.js';
 import { instanciaServico } from '../integracoes/configuracaoDosServicos.js';
 import { Recurso } from '../../projetos/contratos.js';
 import { lerContasDeServico } from '../banco/contasDeServico.js';
-import { lerEspacos } from '../../projetos/repositorio.js';
+import { lerEspacos } from '../../projetos/banco/projetos.js';
 import { adicionarConta } from '../servicoContas.js';
 import { criarEspaco } from '../../projetos/servicoProjetos.js';
 import { vincularServicoAoEspaco } from '../../projetos/servicoProjetos.js';

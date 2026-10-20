@@ -1,7 +1,7 @@
 /** Controlador da funcionalidade administracao: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
-import { lerCodigoDoAplicativo } from "./repositorio.js";
+import { lerCodigoDoAplicativo } from "./banco/administracao.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { lerMapaDoAplicativo } from "./repositorio.js";
+import { lerMapaDoAplicativo } from "./banco/administracao.js";
 import { agentesDaPlataformaParaJanela, salvarAgentesDaPlataforma } from "./servico.js";
 
 export const administracaoCodigo: TratadorDoCanal<'administracao:codigo'> = a => lerCodigoDoAplicativo(a.caminho);

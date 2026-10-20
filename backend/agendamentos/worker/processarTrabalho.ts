@@ -2,11 +2,11 @@
 import { ErroQa } from '../../compartilhado/erros.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { publicacaoPodeRepetir } from '../../testes/servicoPublicacao.js';
-import { concluirTrabalho } from '../repositorioFila.js';
-import { definirEstadoJiraDoTrabalho } from '../repositorioFila.js';
-import { falharPorInfraestrutura } from '../repositorioFila.js';
-import { obterRotina } from '../repositorioAgenda.js';
-import { registrarBatimento } from '../repositorioFila.js';
+import { concluirTrabalho } from '../banco/fila.js';
+import { definirEstadoJiraDoTrabalho } from '../banco/fila.js';
+import { falharPorInfraestrutura } from '../banco/fila.js';
+import { obterRotina } from '../banco/agenda.js';
+import { registrarBatimento } from '../banco/fila.js';
 import { Trabalho } from '../tipos/fila.js';
 import { EstadoDoWorker, TipoEvento } from '../tipos/worker.js';
 import { emitirEventoDoWorker } from './apoioDoWorker.js';

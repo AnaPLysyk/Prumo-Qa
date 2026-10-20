@@ -1,11 +1,11 @@
 /** Prepara, executa e lista runs locais conforme o projeto selecionado. */
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
-import { obterEspaco, listarEspacos } from "../projetos/repositorio.js";
-import { alterarRunLocal, obterRunLocal, gravarRunsLocais, lerRunsLocais } from "./repositorioRuns.js";
+import { obterEspaco, listarEspacos } from "../projetos/banco/projetos.js";
+import { alterarRunLocal, obterRunLocal, gravarRunsLocais, lerRunsLocais } from "./banco/runs.js";
 import { Dep, Execucao, RunLocal, runSchema } from "./tipos/runLocal.js";
 import { Evidencia } from "./tipos/evidencia.js";
-import { listarRotinas } from "../agendamentos/repositorioAgenda.js";
-import { listarTrabalhos } from "../agendamentos/repositorioFila.js";
+import { listarRotinas } from "../agendamentos/banco/agenda.js";
+import { listarTrabalhos } from "../agendamentos/banco/fila.js";
 import { Trabalho } from "../agendamentos/tipos/fila.js";
 import { Espaco } from "../projetos/contratos.js";
 import { FiltroExecucoes, filtroExecucoes } from "./tipos/historicoDeExecucoes.js";

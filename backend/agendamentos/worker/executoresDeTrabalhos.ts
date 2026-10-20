@@ -9,11 +9,11 @@ import { resultadoDaEvidencia } from "./resultadosDasEvidencias.js";
 import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
 import { Executor } from "../../conexoes/tipos/operacoesExternas.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";
-import { obterRunLocal } from "../../testes/repositorioRuns.js";
+import { obterRunLocal } from "../../testes/banco/runs.js";
 import { publicarRunLocal } from "../../testes/integracoes/publicarRunLocal.js";
 import { executarRunLocal } from "../../testes/servicoExecucoes.js";
 import { validarTicketAgendado } from "./validarTicketAgendado.js";
-import { gravarEstadoDasRotinas, lerEstadoDasRotinas } from "../repositorioAgenda.js";
+import { gravarEstadoDasRotinas, lerEstadoDasRotinas } from "../banco/agenda.js";
 
 export async function executarK6Agendado(e: EstadoDoWorker, r: Rotina, manual: boolean): Promise<ResultadoTrabalho> {
   const p = await projetoDaRotina(e, r.espacoId);

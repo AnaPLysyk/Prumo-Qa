@@ -1,7 +1,7 @@
 /** Acompanha o diário ao vivo (prumo logs --follow) até a pessoa interromper. */
 import { setTimeout as esperar } from 'node:timers/promises';
 import { Projeto } from '../../compartilhado/projeto/contratos.js';
-import { consultarAtividades } from '../banco/consultarAtividades.js';
+import { consultarAtividades } from '../banco/atividades.js';
 import { Evento } from '../contratos.js';
 
 export async function acompanharLogs(p:Projeto,emitir:(e:Evento)=>void,opcoes:{signal:AbortSignal;base?:string;intervalMs?:number;problemas?:(p:ReturnType<typeof consultarAtividades>['problems'])=>void}) {

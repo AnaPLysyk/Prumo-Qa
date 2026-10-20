@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
-import { lerContas } from '../../login/repositorioContas.js';
+import { lerContas } from '../../login/banco/contas.js';
 
 const ARQUIVO = 'agentes-pessoais.json';
 const LIMITE_POR_PESSOA_E_PROJETO = 50;

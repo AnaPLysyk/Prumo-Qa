@@ -1,8 +1,8 @@
 /** Prepara os contextos que podem ir para a IA (se permitido), com texto limitado, segredos mascarados e aviso de que são dados, não ordens. */
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { Projeto } from '../../compartilhado/projeto/contratos.js';
-import { carregarTodosOsContextos } from '../banco/consultarContextos.js';
-import { lerPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
+import { carregarTodosOsContextos } from '../banco/contextos.js';
+import { lerPermissaoDeContextosNoMcp } from '../banco/contextos.js';
 import { resumirContextos } from './consultasDeContextos.js';
 import { ultimaVersaoDoContexto } from './validacoesDeContexto.js';
 import { limites } from '../tipos/contexto.js';

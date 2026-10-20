@@ -1,12 +1,12 @@
 /** Desenha o mapa de ligações do projeto (Jira, Qase, repositório, tickets, casos, runs, execuções e evidências) e mostra o que falta ligar. */
-import { listarOperacoes } from '../../conexoes/repositorioOperacoes.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
+import { listarOperacoes } from '../../conexoes/banco/operacoes.js';
+import { obterEspaco } from '../../projetos/banco/projetos.js';
 import { GrafoDeVinculos, LacunaDoMapa } from '../tipos/mapaDeVinculos.js';
 import { Espaco } from '../../projetos/contratos.js';
 import { catalogoDeTestes } from '../servicoClassificacao.js';
-import { listarRunsLocais } from '../repositorioRuns.js';
-import { listarTrabalhos } from '../../agendamentos/repositorioFila.js';
-import { listarPropostas } from '../../tickets/repositorio.js';
+import { listarRunsLocais } from '../banco/runs.js';
+import { listarTrabalhos } from '../../agendamentos/banco/fila.js';
+import { listarPropostas } from '../../tickets/banco/tickets.js';
 import { listarRepositorioLocal } from '../servicoCasos.js';
 
 export function mapaDeVinculos(espacoId: string, b?: string) {

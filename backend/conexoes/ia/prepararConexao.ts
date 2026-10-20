@@ -6,7 +6,7 @@ import { hash } from '../../compartilhado/seguranca/hash.js';
 import { Projeto } from '../../compartilhado/projeto/contratos.js';
 import { comandoParaOTerminal } from './comandoParaOTerminal.js';
 import { localizarClienteDeIa } from './localizarClienteDeIa.js';
-import { pastaAtividades } from '../../logs/banco/pastaAtividades.js';
+import { pastaAtividades } from '../../logs/banco/atividades.js';
 
 export function prepararConexao(p:Projeto,cliente:string,contrato?:string) {
   if(cliente!=='codex'&&cliente!=='claude')throw new Error('Use conectar codex ou conectar claude.');

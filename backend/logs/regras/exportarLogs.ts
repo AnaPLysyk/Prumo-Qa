@@ -1,6 +1,6 @@
 /** Gera o texto JSON com todos os registros do diário do projeto para salvar em arquivo. */
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
-import { consultarAtividades } from '../banco/consultarAtividades.js';
+import { consultarAtividades } from '../banco/atividades.js';
 import { projetoVinculado } from '../../projetos/servicoProjetos.js';
 
 /** Exporta o histórico bruto do projeto (somente campos do esquema, sem texto livre). */
