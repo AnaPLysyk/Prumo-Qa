@@ -1,15 +1,15 @@
-/** Consulta cadastros, campos e planos de teste remotos do Qase. */
+/** Consulta e converte dados externos da integração com Qase. */
 import { z } from "zod";
-import { codificarParaUrl } from "../compartilhado/texto.js";
-import { ParametrosConsulta } from "./tipos/ParametrosConsulta.js";
-import { ResultadoConsulta } from "./tipos/ResultadoConsulta.js";
-import { camposDeSistema } from "../testes/integracaoFormatosQase.js";
-import { parametrosDaUrl, idNumericoDaConsulta } from "./integracoesFormatos.js";
-import { Recurso } from "../projetos/contratos.js";
-import { OperacaoServico, PlanoDaConsulta } from "./tipos/adaptador.js";
-import { Filtros } from "./tipos/leituras.js";
-import { paginaSchema } from "./tipos/transporte.js";
-import { ErroServico } from "./integracoes/ErroServico.js";
+import { codificarParaUrl } from "../../compartilhado/texto.js";
+import { ParametrosConsulta } from "../tipos/ParametrosConsulta.js";
+import { ResultadoConsulta } from "../tipos/ResultadoConsulta.js";
+import { camposDeSistema } from "../../testes/integracoes/formatosQase.js";
+import { parametrosDaUrl, idNumericoDaConsulta } from "./formatos.js";
+import { Recurso } from "../../projetos/contratos.js";
+import { OperacaoServico, PlanoDaConsulta } from "../tipos/adaptador.js";
+import { Filtros } from "../tipos/leituras.js";
+import { paginaSchema } from "../tipos/transporte.js";
+import { ErroServico } from "./ErroServico.js";
 
 const pagina = <T extends z.ZodTypeAny>(item: T) => z.object({ result: z.object({ entities: z.array(item).default([]), total: z.number().optional(), filtered: z.number().optional() }).passthrough() }).passthrough();
 

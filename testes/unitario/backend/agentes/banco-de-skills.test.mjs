@@ -14,7 +14,7 @@ import { importarPastaDeSkill } from "../../../../dist/agentes/banco/importarPas
 import { registrarTrechosDeSkill } from '../../../../dist/agentes/banco/skills.js';
 import { listarTrechosDeSkill } from '../../../../dist/agentes/banco/skills.js';
 import { decidirTrechoDeSkill } from '../../../../dist/agentes/banco/skills.js';
-import { skillDoAgente } from '../../../../dist/agentes/chat/selecaoDoAgente.js';
+import { skillDoAgente } from '../../../../dist/agentes/chat/roteamento.js';
 import { montarPrompt } from '../../../../dist/agentes/chat/consultarIaExterna.js';
 import { agentesChat } from '../../../../dist/agentes/tipos/persona.js';
 import { especializacoes } from '../../../../dist/agentes/tipos/politicas.js';

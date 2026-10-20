@@ -17,9 +17,9 @@ import { classificarResultado } from './classificarResultado.js';
 import { criarEvidenciaInicial } from './criarEvidenciaInicial.js';
 import { Evidencia, resultadoRunnerSchema } from '../tipos/evidencia.js';
 import { solicitarAprovacao } from '../servicoAprovacao.js';
-import { ambienteMinimo } from './ambienteMinimo.js';
+import { ambienteMinimo } from './validarExecucao.js';
 
-import { escopoDaExecucao } from './escopoDaExecucao.js';
+import { escopoDaExecucao } from './validarExecucao.js';
 
 import { Delegada } from '../tipos/autorizacoes.js';
 import path from 'node:path';

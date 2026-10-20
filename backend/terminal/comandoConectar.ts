@@ -1,7 +1,7 @@
 /** Comando "prumo conectar": mostra a proposta e, com a confirmação digitada, configura o Codex. */
 import { Projeto } from '../compartilhado/projeto/contratos.js';
-import { aplicarConexao } from '../conexoes/ia/aplicarConexao.js';
-import { prepararConexao } from '../conexoes/ia/prepararConexao.js';
+import { aplicarConexao } from '../conexoes/ia/conectarIa.js';
+import { prepararConexao } from '../conexoes/ia/conectarIa.js';
 import { imprimirJson } from './saidaDoTerminal.js';
 import { perguntarNoTerminal } from './perguntarNoTerminal.js';
 import { textoSeguroNoTerminal } from './saidaDoTerminal.js';

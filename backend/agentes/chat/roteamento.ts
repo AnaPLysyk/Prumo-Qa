@@ -1,16 +1,15 @@
-/** Seleção de agente e Skill adequada à pergunta, respeitando políticas e preferências. */
-import { matrizDePoliticas } from '../servicoCapacidades.js';
-import { agentesChat } from '../tipos/persona.js';
-import { especializacoes } from '../tipos/politicas.js';
-import { regrasDosAgentes } from '../../administracao/servico.js';
-import { palavrasDaPergunta, termoCasaComPergunta } from './roteamentoDePerguntas.js';
-import { SEGUIMENTO, Turno } from '../tipos/chat.js';
-import { semAcentos } from '../../compartilhado/texto.js';
-import { listarTrechosDeSkill } from '../banco/skills.js';
+/** Escolhe agentes, Skills e caminhos de atendimento conforme a pergunta. */
+import { matrizDePoliticas } from "../servicoCapacidades.js";
+import { agentesChat } from "../tipos/persona.js";
+import { especializacoes } from "../tipos/politicas.js";
+import { regrasDosAgentes } from "../../administracao/servico.js";
+import { SEGUIMENTO, Turno } from "../tipos/chat.js";
+import { semAcentos } from "../../compartilhado/texto.js";
+import { listarTrechosDeSkill } from "../banco/skills.js";
 import { sementeDasSkills } from "../banco/sementeDasSkills.js";
-import { SkillEscolhida, escolherTrechosDaSkill } from '../regras/regrasDasSkills.js';
-import { validarEspecializacao } from '../regras/regrasDasSkills.js';
-import { falharCom } from '../../compartilhado/erros.js';
+import { SkillEscolhida, escolherTrechosDaSkill, validarEspecializacao } from "../regras/regrasDasSkills.js";
+import { falharCom } from "../../compartilhado/erros.js";
+import { limitesOrquestracao } from "../tipos/orquestracao.js";
 
 /** Apresenta na interface somente agentes habilitados e capacidades efetivas do projeto. */
 export function agentesDoChat(espacoId: string | null, base?: string) {
@@ -134,4 +133,22 @@ export function skillDoAgente(
     falharCom('SKILL_UNAVAILABLE: nenhuma instrução aprovada desta especialização; resposta local.');
   }
   return resultado;
+}
+
+export const palavrasDaPergunta = (p: string) => semAcentos(p).split(/[^a-z0-9@]+/).filter(Boolean);
+
+/** Diz se um termo aparece na pergunta (frase exata, prefixo~ ou palavra). */
+
+/** Termo simples = palavra inteira (com plural); "~" = início de palavra; com espaço = expressão a partir do início de uma palavra. */
+export function termoCasaComPergunta(termo: string, palavras: string[], frase: string) {
+  if (termo.includes(' ')) return (' ' + frase).includes(' ' + termo);
+  if (termo.endsWith('~')) { const r = termo.slice(0, -1); return palavras.some((w) => w.startsWith(r)); }
+  return palavras.some((w) => w === termo || w === termo + 's' || w === termo + 'es');
+}
+
+/** Devolve os ids dos especialistas, na ordem da pontuação, ou null quando um agente só basta. */
+export function planejarOrquestracao(rota: { agente: string; pontos: number }[]): string[] | null {
+  const fortes = rota.filter((r) => r.agente !== 'orquestrador' && r.pontos >= limitesOrquestracao.pontosMinimos)
+    .sort((a, b) => b.pontos - a.pontos).slice(0, limitesOrquestracao.agentes).map((r) => r.agente);
+  return fortes.length >= 2 ? fortes : null;
 }

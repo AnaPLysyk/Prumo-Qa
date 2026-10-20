@@ -1,13 +1,13 @@
-/** Consulta arquivos, issues, commits, workflows e revisões do GitHub. */
-import { ParametrosConsulta } from "./tipos/ParametrosConsulta.js";
-import { ResultadoConsulta } from "./tipos/ResultadoConsulta.js";
+/** Consulta e converte dados externos da integração com GitHub. */
+import { ParametrosConsulta } from "../tipos/ParametrosConsulta.js";
+import { ResultadoConsulta } from "../tipos/ResultadoConsulta.js";
 import { z } from "zod";
-import { codificarParaUrl } from "../compartilhado/texto.js";
-import { ErroServico } from "./integracoes/ErroServico.js";
-import { parametrosDaUrl, idNumericoDaConsulta } from "./integracoesFormatos.js";
-import { Recurso } from "../projetos/contratos.js";
-import { OperacaoServico, PlanoDaConsulta } from "./tipos/adaptador.js";
-import { paginaSchema } from "./tipos/transporte.js";
+import { codificarParaUrl } from "../../compartilhado/texto.js";
+import { ErroServico } from "./ErroServico.js";
+import { parametrosDaUrl, idNumericoDaConsulta } from "./formatos.js";
+import { Recurso } from "../../projetos/contratos.js";
+import { OperacaoServico, PlanoDaConsulta } from "../tipos/adaptador.js";
+import { paginaSchema } from "../tipos/transporte.js";
 
 export async function consultarArquivosGithub(parametros: ParametrosConsulta): Promise<ResultadoConsulta | null> {
   const { ctx, id, f, repo } = parametros;

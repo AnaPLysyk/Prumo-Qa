@@ -1,9 +1,9 @@
-/** Normaliza IDs, campos e payloads recebidos das operações Qase. */
+/** Converte e valida os formatos do Qase utilizados pela funcionalidade de testes. */
 import { z } from "zod";
-import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { esquemaCaso } from "./tipos/escritaQase.js";
-import { flagsDeAutomacao } from "./integracoes/automacaoNoQase.js";
-import { ContextoServico } from "../conexoes/tipos/adaptador.js";
+import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
+import { esquemaCaso } from "../tipos/escritaQase.js";
+import { flagsDeAutomacao } from "./automacaoNoQase.js";
+import { ContextoServico } from "../../conexoes/tipos/adaptador.js";
 
 /** Confere casos do plano/run releitos do Qase: IDs, não apenas quantidade. */
 export const conferirIdsDoObjetoQase = (valor: unknown, esperados: number[]): boolean => {

@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { skillDoAgente } from '../../../../dist/agentes/chat/selecaoDoAgente.js';
+import { skillDoAgente } from '../../../../dist/agentes/chat/roteamento.js';
 import { listarTrechosDeSkill } from '../../../../dist/agentes/banco/skills.js';
 import { decidirTrechoDeSkill } from '../../../../dist/agentes/banco/skills.js';
 import { montarPrompt } from '../../../../dist/agentes/chat/consultarIaExterna.js';

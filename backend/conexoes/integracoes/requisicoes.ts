@@ -5,7 +5,7 @@ import { TransporteEscrita, TransporteServico } from '../tipos/transporte.js';
 import { PartesDoAdaptador, itemQase } from '../tipos/adaptador.js';
 import { cabecalhosDoServico } from './configuracaoDosServicos.js';
 import { codificarParaUrl } from '../../compartilhado/texto.js';
-import { recursoDaResposta } from '../integracoesFormatos.js';
+import { recursoDaResposta } from './formatos.js';
 
 /** Limita a 12 MB o envio e delega as rotas permitidas ao transporte do serviço. */
 export const enviarAoServico: TransporteEscrita = pedido => {

@@ -5,7 +5,7 @@ import { OperacaoServico, nome, obj, ContextoServico, PartesDoAdaptador, objetos
 import { ErroServico } from "./ErroServico.js";
 import { cabecalhosDoServico } from "./configuracaoDosServicos.js";
 import { lerComCredencial } from "./requisicoes.js";
-import { limparRespostaDoServico, parametrosDaUrl, recursoDaResposta } from "../integracoesFormatos.js";
+import { limparRespostaDoServico, parametrosDaUrl, recursoDaResposta } from "./formatos.js";
 import { paginaSchema } from "../tipos/transporte.js";
 
 export function conferirEscopoDaConsulta(r: Recurso, operacao: OperacaoServico, dados: unknown, id?: string): unknown {

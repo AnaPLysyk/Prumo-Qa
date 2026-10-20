@@ -2,7 +2,7 @@
 import { Recurso } from '../../projetos/contratos.js';
 import { PartesDoAdaptador } from '../tipos/adaptador.js';
 import { consultarNoServico } from './consultarNoServico.js';
-import { textoRemoto } from '../integracoesFormatos.js';
+import { textoRemoto } from './formatos.js';
 
 export async function procurarComentarioNoTicket(a: PartesDoAdaptador, r: Recurso, ticket: string, marcador: string): Promise<string | null> {
   let offset = 0;

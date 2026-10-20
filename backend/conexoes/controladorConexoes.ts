@@ -1,8 +1,8 @@
 /** Controlador da funcionalidade conexoes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { dialog } from "electron";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { aplicarConexao } from "./ia/aplicarConexao.js";
-import { prepararConexao } from "./ia/prepararConexao.js";
+import { aplicarConexao } from "./ia/conectarIa.js";
+import { prepararConexao } from "./ia/conectarIa.js";
 import { projetoVinculado } from "../projetos/servicoProjetos.js";
 import { testarIntegracao } from "./servicoIaDiagnostico.js";
 import { catalogoOperacoes } from "./escrita/catalogoOperacoes.js";

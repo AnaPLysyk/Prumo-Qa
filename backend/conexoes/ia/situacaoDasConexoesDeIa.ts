@@ -1,7 +1,7 @@
 /** Mostra, para Codex e Claude, se o servidor MCP do Prumo está configurado e o comando proposto para configurar. */
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { diagnosticarIntegracao } from '../servicoIaDiagnostico.js';
-import { prepararConexao } from './prepararConexao.js';
+import { prepararConexao } from './conectarIa.js';
 import { projetoVinculado } from '../../projetos/servicoProjetos.js';
 
 /** Propõe a configuração; nada é alterado aqui. */

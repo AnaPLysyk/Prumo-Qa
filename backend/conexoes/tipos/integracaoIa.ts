@@ -1,6 +1,6 @@
 /** Clientes de IA conhecidos (Codex, Claude), ferramentas MCP esperadas e formato dos registros de teste de integração. */
 import { z } from 'zod';
-import { prepararConexao } from '../ia/prepararConexao.js';
+import { prepararConexao } from '../ia/conectarIa.js';
 
 export const clientes = ['codex', 'claude'] as const;
 

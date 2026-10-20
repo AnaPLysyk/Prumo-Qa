@@ -1,9 +1,9 @@
-/** Normaliza parâmetros, IDs, textos e respostas de serviços externos. */
-import { codificarParaUrl } from "../compartilhado/texto.js";
-import { ErroServico } from "./integracoes/ErroServico.js";
-import { Recurso, identidadeRecurso } from "../projetos/contratos.js";
-import { ConfigServico, nome, obj, sid } from "./tipos/adaptador.js";
-import { mascarar } from "../compartilhado/seguranca/mascarar.js";
+/** Formata, valida e normaliza dados recebidos de integrações externas. */
+import { codificarParaUrl } from "../../compartilhado/texto.js";
+import { ErroServico } from "./ErroServico.js";
+import { Recurso, identidadeRecurso } from "../../projetos/contratos.js";
+import { ConfigServico, nome, obj, sid } from "../tipos/adaptador.js";
+import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 
 export function idNumericoDaConsulta(id?: string) {
   if (!id || !/^\d{1,15}$/.test(id)) throw new ErroServico('SERVICE_RESPONSE_INVALID');

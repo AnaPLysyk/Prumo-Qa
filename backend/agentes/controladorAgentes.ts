@@ -13,7 +13,7 @@ import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
-import { textoRemoto } from "../conexoes/integracoesFormatos.js";
+import { textoRemoto } from "../conexoes/integracoes/formatos.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
 import { salvarContextoDaPasta } from "./regras/cicloDosContextos.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";

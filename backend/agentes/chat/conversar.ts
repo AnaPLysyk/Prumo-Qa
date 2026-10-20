@@ -3,7 +3,7 @@ import { lerPerfil } from '../banco/perfil.js';
 import { nomeParaChamar } from '../servicoEstiloDoChat.js';
 import { pesosAprendidos } from '../banco/aprendizados.js';
 import { aplicarEstilo } from '../servicoEstiloDoChat.js';
-import { escolherAgente } from './selecaoDoAgente.js';
+import { escolherAgente } from './roteamento.js';
 
 import { intencaoDePerfil } from './intencaoDePerfil.js';
 
@@ -11,7 +11,7 @@ import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { responderComDadosLocais } from './responderComDadosLocais.js';
 
 import { orquestrar } from './orquestrar.js';
-import { planejarOrquestracao } from './roteamentoDePerguntas.js';
+import { planejarOrquestracao } from './roteamento.js';
 import { registrarOrquestracao } from '../banco/orquestracao.js';
 import { Orquestracao } from '../tipos/orquestracao.js';
 import { Coleta, ContextoChat, Estilo, Meta, Opcoes, Resposta, agentePorTipo } from '../tipos/chat.js';

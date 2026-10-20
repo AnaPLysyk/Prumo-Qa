@@ -10,10 +10,10 @@ import { ErroServico } from './ErroServico.js';
 import { lerComCredencial } from './requisicoes.js';
 import { lerDetalheDoServico } from './lerDetalheDoServico.js';
 import { lerEnvelopeDaConsulta } from './leiturasDeServicos.js';
-import { planoDaConsultaGithub } from '../integracoesGithub.js';
-import { planoDaConsultaJira } from './planoDaConsultaJira.js';
-import { planoDaConsultaQase } from '../integracoesQase.js';
-import { saidaDaConsulta } from '../integracoesFormatos.js';
+import { planoDaConsultaGithub } from './github.js';
+import { planoDaConsultaJira } from './consultasJira.js';
+import { planoDaConsultaQase } from './qase.js';
+import { saidaDaConsulta } from './formatos.js';
 
 export async function consultarNoServico(a: PartesDoAdaptador, r: Recurso, operacao: OperacaoServico, pagina: z.input<typeof paginaSchema> = {}, id?: string, campoAceite?: string, filtros?: Filtros) {
   if (r.instancia !== a.c.instancia || r.contaId !== a.c.contaId) throw new ErroServico('SERVICE_SCOPE_CHANGED');

@@ -7,7 +7,7 @@ import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { registrosIntegracao, pastaDosTestesDeIntegracao } from "./banco/integracoes.js";
 import { assinaturaDaConfiguracao } from "./ia/validacaoDeConfiguracao.js";
-import { prepararConexao } from "./ia/prepararConexao.js";
+import { prepararConexao } from "./ia/conectarIa.js";
 import { consultarAtividades } from "../logs/banco/atividades.js";
 import { spawnSync } from "node:child_process";
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";

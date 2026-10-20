@@ -64,7 +64,7 @@ test('iniciar com o sistema: Windows e macOS usam o item de login; Linux grava e
 });
 
 test('comando de conexão com a IA: PowerShell no Windows, aspas de shell no macOS e Linux, sem interpretar apóstrofos', async () => {
-  const { comandoParaOTerminal } = await import('../../../../dist/conexoes/ia/comandoParaOTerminal.js');
+  const { comandoParaOTerminal } = await import('../../../../dist/conexoes/ia/conectarIa.js');
   assert.equal(comandoParaOTerminal('C:\\Users\\Ana\\codex.exe', ['mcp', 'add', "o'q"], 'win32'), "& 'C:\\Users\\Ana\\codex.exe' 'mcp' 'add' 'o''q'");
   assert.equal(comandoParaOTerminal('/usr/local/bin/claude', ['mcp', 'add', "o'q $HOME"], 'linux'), "'/usr/local/bin/claude' 'mcp' 'add' 'o'\\''q $HOME'");
   assert.equal(comandoParaOTerminal('claude', ['mcp'], 'darwin'), "'claude' 'mcp'");

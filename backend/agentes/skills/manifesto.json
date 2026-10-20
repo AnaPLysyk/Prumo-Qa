@@ -8,7 +8,7 @@
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
-        "backend/agentes/chat/selecaoDoAgente.ts"
+        "backend/agentes/chat/roteamento.ts"
       ],
       "capacidades": [
         "consultar_contexto",
@@ -33,7 +33,7 @@
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
-        "backend/agentes/chat/selecaoDoAgente.ts"
+        "backend/agentes/chat/roteamento.ts"
       ],
       "capacidades": [
         "consultar_contexto",
@@ -56,7 +56,7 @@
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
-        "backend/agentes/chat/selecaoDoAgente.ts"
+        "backend/agentes/chat/roteamento.ts"
       ],
       "capacidades": [
         "consultar_contexto",
@@ -81,7 +81,7 @@
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
-        "backend/agentes/chat/selecaoDoAgente.ts"
+        "backend/agentes/chat/roteamento.ts"
       ],
       "capacidades": [
         "consultar_contexto",
@@ -106,7 +106,7 @@
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
-        "backend/agentes/chat/selecaoDoAgente.ts"
+        "backend/agentes/chat/roteamento.ts"
       ],
       "capacidades": [
         "consultar_contexto",
@@ -129,7 +129,7 @@
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
-        "backend/agentes/chat/selecaoDoAgente.ts"
+        "backend/agentes/chat/roteamento.ts"
       ],
       "capacidades": [
         "consultar_contexto",
@@ -152,7 +152,7 @@
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
-        "backend/agentes/chat/selecaoDoAgente.ts"
+        "backend/agentes/chat/roteamento.ts"
       ],
       "capacidades": [
         "executar_testes",
@@ -175,7 +175,7 @@
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
-        "backend/agentes/chat/selecaoDoAgente.ts"
+        "backend/agentes/chat/roteamento.ts"
       ],
       "capacidades": [
         "consultar_contexto",

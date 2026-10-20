@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { PartesDoAdaptador, nome, obj, paginaQase, sid } from '../tipos/adaptador.js';
 import { ErroServico } from './ErroServico.js';
 import { lerComCredencial } from './requisicoes.js';
-import { limparRespostaDoServico } from '../integracoesFormatos.js';
+import { limparRespostaDoServico } from './formatos.js';
 
 export async function autenticarNoServico(a: PartesDoAdaptador) {
   try {
