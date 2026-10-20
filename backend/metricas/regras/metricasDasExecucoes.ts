@@ -1,5 +1,5 @@
 /** Calcula os números reais das execuções: PASS/FAIL/BLOCKED/NOT_RUN, última e próxima execução, rotinas e falhas recentes. */
-import { listarRotinas } from '../../agendamentos/banco/listarRotinas.js';
+import { listarRotinas } from '../../agendamentos/banco/agenda.js';
 import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
 import { proximoHorario } from '../../agendamentos/regras/proximoHorario.js';
 import { Rotina } from '../../agendamentos/tipos/rotina.js';

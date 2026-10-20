@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { lerContasDeServico } from '../banco/lerContasDeServico.js';
+import { lerContasDeServico } from '../banco/contasDeServico.js';
 import { AdaptadorServico } from '../integracoes/AdaptadorServico.js';
 import { instanciaServico } from '../integracoes/instanciaServico.js';
 import { ContextoDosServicos, conexaoEntrada, contaSchema } from '../tipos/contaDeServico.js';

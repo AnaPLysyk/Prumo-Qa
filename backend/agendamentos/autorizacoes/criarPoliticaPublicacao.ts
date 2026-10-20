@@ -3,8 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { validadeDaAutorizacao } from './validadeDaAutorizacao.js';
 import { abrirEspacoDeAutorizacoes } from './abrirEspacoDeAutorizacoes.js';
 import { estadoDaAutorizacao } from './estadoDaAutorizacao.js';
-import { gravarAutorizacoes } from '../banco/gravarAutorizacoes.js';
-import { lerAutorizacoes } from '../banco/lerAutorizacoes.js';
+import { gravarAutorizacoes } from '../banco/autorizacoes.js';
+import { lerAutorizacoes } from '../banco/autorizacoes.js';
 import { PoliticaPublicacao, pubSchema } from '../tipos/autorizacoes.js';
 
 export function criarPoliticaPublicacao(espacoId: string, d: { tickets: string[]; tipos: PoliticaPublicacao['tipos']; dias: number; maxPublicacoes: number }, aprovadoPor: string, base?: string, agora = new Date()): PoliticaPublicacao {

@@ -1,5 +1,5 @@
 /** Edita uma rotina (o projeto não pode mudar) e recomeça a contagem dos horários a partir de agora. */
-import { alterarRotina } from '../banco/alterarRotina.js';
+import { alterarRotina } from '../banco/agenda.js';
 import { anotarNaRotina } from './anotarNaRotina.js';
 import { DadosRotina, dadosRotinaSchema } from '../tipos/rotina.js';
 

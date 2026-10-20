@@ -9,7 +9,7 @@ import { EstadoDoWorker } from '../tipos/worker.js';
 import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';
 import { randomUUID } from 'node:crypto';
 import { enfileirar } from '../banco/enfileirar.js';
-import { obterRotina } from '../banco/obterRotina.js';
+import { obterRotina } from '../banco/agenda.js';
 import { capacidadeDaRotinaAgendada } from './capacidadeDaRotinaAgendada.js';
 
 function criarEstadoDoWorker(d: DepsWorker): EstadoDoWorker {

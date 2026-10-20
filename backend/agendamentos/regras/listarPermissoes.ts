@@ -1,6 +1,6 @@
 /** Lista autorizações de execução e políticas de publicação com o estado de cada uma (vigente, expirada, revogada, esgotada). */
 import { estadoDaAutorizacao } from '../autorizacoes/estadoDaAutorizacao.js';
-import { lerAutorizacoes } from '../banco/lerAutorizacoes.js';
+import { lerAutorizacoes } from '../banco/autorizacoes.js';
 
 export function listarPermissoes(espacoId?: string, base?: string, agora = new Date()) {
   const a = lerAutorizacoes(base);

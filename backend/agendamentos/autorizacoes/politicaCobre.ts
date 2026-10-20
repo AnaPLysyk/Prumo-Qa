@@ -1,6 +1,6 @@
 /** Busca a política vigente que cobre este ticket e este tipo de rotina. */
 import { estadoDaAutorizacao } from './estadoDaAutorizacao.js';
-import { lerAutorizacoes } from '../banco/lerAutorizacoes.js';
+import { lerAutorizacoes } from '../banco/autorizacoes.js';
 
 /** Verifica (sem consumir) se a política cobre ticket e tipo. */
 export function politicaCobre(espacoId: string, ticket: string, tipo: string, base?: string, agora = new Date()) {

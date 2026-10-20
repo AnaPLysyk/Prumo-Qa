@@ -1,6 +1,6 @@
 /** Canal agenda:autorizar: Autorizar previamente execuções agendadas de um escopo exato, com validade e limite de usos. */
 import { autorizarRotina } from '../autorizacoes/autorizarRotina.js';
-import { obterRotina } from '../banco/obterRotina.js';
+import { obterRotina } from '../banco/agenda.js';
 import { permissoesDaRotina } from '../regras/permissoesDaRotina.js';
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 import { textoNoIdioma } from '../../aplicativo/bandeja/textoNoIdioma.js';

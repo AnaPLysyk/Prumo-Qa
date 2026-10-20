@@ -1,7 +1,7 @@
 /** Configuração geral dos agentes da plataforma: quais respondem, se a IA externa pode ser usada e se o Orchestrator combina agentes. */
 import { contaDaSessao } from '../../login/regras/sessao.js';
-import { gravarAgentesDaPlataforma } from '../banco/gravarAgentesDaPlataforma.js';
-import { lerAgentesDaPlataforma } from '../banco/lerAgentesDaPlataforma.js';
+import { gravarAgentesDaPlataforma } from '../banco/agentesDaPlataforma.js';
+import { lerAgentesDaPlataforma } from '../banco/agentesDaPlataforma.js';
 import { AgentesDaPlataforma, agentesDaPlataformaPadrao } from '../tipos/agentesDaPlataforma.js';
 import { agentesChat } from '../../agentes/tipos/persona.js';
 import { especializacoes } from '../../agentes/tipos/politicas.js';

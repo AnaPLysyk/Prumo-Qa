@@ -1,5 +1,5 @@
 /** Monta a resposta do agente com os dados locais do projeto (sem IA): prepara a pergunta, chama a parte do agente certo e devolve linhas, fontes e fatos usados. */
-import { listarRotinas } from '../../agendamentos/banco/listarRotinas.js';
+import { listarRotinas } from '../../agendamentos/banco/agenda.js';
 import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
 import { Trabalho } from '../../agendamentos/tipos/fila.js';
 

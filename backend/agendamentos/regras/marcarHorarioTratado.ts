@@ -1,5 +1,5 @@
 /** Anota que um horário da rotina já foi tratado; rotina de execução única passa a concluída. */
-import { alterarRotina } from '../banco/alterarRotina.js';
+import { alterarRotina } from '../banco/agenda.js';
 import { anotarNaRotina } from './anotarNaRotina.js';
 
 /** Marca o slot tratado (executado, pulado ou perdido). Rotina única conclui. */

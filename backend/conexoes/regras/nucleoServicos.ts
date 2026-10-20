@@ -1,7 +1,7 @@
 /** Reúne tudo o que a tela Conexões faz com Jira, Qase e GitHub: adicionar e validar conta, listar recursos, vincular, consultar e escrever com a credencial protegida. */
 import { z } from 'zod';
 import { cofreCredenciais } from '../banco/cofreCredenciais.js';
-import { listarContas } from '../banco/listarContas.js';
+import { listarContas } from '../banco/contasDeServico.js';
 import { enviarAoServico } from '../integracoes/enviarAoServico.js';
 import { lerDoServico } from '../integracoes/lerDoServico.js';
 import { ContextoServico, OperacaoServico } from '../tipos/adaptador.js';
@@ -28,7 +28,7 @@ import { adaptadorDaConta } from './adaptadorDaConta.js';
 import { contaAtiva } from './contaAtiva.js';
 import { verificarVinculoDoServico } from './verificarVinculoDoServico.js';
 import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
-import { lerContasDeServico } from '../banco/lerContasDeServico.js';
+import { lerContasDeServico } from '../banco/contasDeServico.js';
 import { listarEspacos } from '../../projetos/banco/listarEspacos.js';
 import { atualizarEstadoDoVinculo } from '../../projetos/regras/atualizarEstadoDoVinculo.js';
 import { registrarConsultaExterna } from '../../projetos/regras/registrarConsultaExterna.js';

@@ -1,6 +1,6 @@
 /** Revoga uma autorização de execução, uma política de escrita no Qase ou uma política de publicação no Jira. */
-import { gravarAutorizacoes } from '../banco/gravarAutorizacoes.js';
-import { lerAutorizacoes } from '../banco/lerAutorizacoes.js';
+import { gravarAutorizacoes } from '../banco/autorizacoes.js';
+import { lerAutorizacoes } from '../banco/autorizacoes.js';
 import { Registro } from '../tipos/autorizacoes.js';
 
 export function revogarAutorizacao<L extends 'execucoes' | 'escritas' | 'publicacoes'>(lista: L, id: string, base?: string, agora = new Date()): Registro[L][number] {

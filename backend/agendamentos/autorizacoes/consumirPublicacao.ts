@@ -1,7 +1,7 @@
 /** Gasta uma publicação da política antes de publicar. */
 import { estadoDaAutorizacao } from './estadoDaAutorizacao.js';
-import { gravarAutorizacoes } from '../banco/gravarAutorizacoes.js';
-import { lerAutorizacoes } from '../banco/lerAutorizacoes.js';
+import { gravarAutorizacoes } from '../banco/autorizacoes.js';
+import { lerAutorizacoes } from '../banco/autorizacoes.js';
 
 /** Consome uma publicação da política que cobre ticket+tipo. Retorna null se nenhuma cobrir. */
 export function consumirPublicacao(espacoId: string, ticket: string, tipo: string, base?: string, agora = new Date()) {

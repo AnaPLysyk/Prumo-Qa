@@ -1,6 +1,6 @@
 /** Pede a autenticação do Windows e cria a autorização prévia para a rotina rodar sozinha (escopo exato, validade e limite de usos). */
 import { autorizarEscopo } from './autorizarEscopo.js';
-import { obterRotina } from '../banco/obterRotina.js';
+import { obterRotina } from '../banco/agenda.js';
 import { capacidadeDoK6 } from '../k6/capacidadeDoK6.js';
 import { escopoDoK6 } from '../k6/escopoDoK6.js';
 import { localizarK6 } from '../k6/localizarK6.js';

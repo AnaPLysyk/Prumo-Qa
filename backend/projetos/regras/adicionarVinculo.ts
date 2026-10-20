@@ -1,6 +1,6 @@
 /** Vincula uma pasta ao Prumo se ela tiver contrato válido; não repete pastas já vinculadas. */
-import { gravarPastasVinculadas } from '../banco/gravarPastasVinculadas.js';
-import { lerPastasVinculadas } from '../banco/lerPastasVinculadas.js';
+import { gravarPastasVinculadas } from '../banco/pastasVinculadas.js';
+import { lerPastasVinculadas } from '../banco/pastasVinculadas.js';
 import { caminhoComparavel } from './caminhoComparavel.js';
 import { situacaoProjeto } from './situacaoProjeto.js';
 

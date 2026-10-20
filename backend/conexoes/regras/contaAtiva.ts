@@ -1,5 +1,5 @@
 /** Busca uma conta de serviço ativa pelo id; se não existe ou foi removida, avisa CREDENTIAL_UNAVAILABLE. */
-import { lerContasDeServico } from '../banco/lerContasDeServico.js';
+import { lerContasDeServico } from '../banco/contasDeServico.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { ContextoDosServicos } from '../tipos/contaDeServico.js';
 

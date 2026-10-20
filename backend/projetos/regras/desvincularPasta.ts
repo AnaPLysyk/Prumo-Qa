@@ -1,7 +1,7 @@
 /** Desvincula uma pasta de projeto (nada é apagado nela). */
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
-import { gravarPastasVinculadas } from '../banco/gravarPastasVinculadas.js';
-import { lerPastasVinculadas } from '../banco/lerPastasVinculadas.js';
+import { gravarPastasVinculadas } from '../banco/pastasVinculadas.js';
+import { lerPastasVinculadas } from '../banco/pastasVinculadas.js';
 import { caminhoComparavel } from './caminhoComparavel.js';
 
 /** Remove apenas o vínculo; histórico, evidências e arquivos do projeto permanecem. */

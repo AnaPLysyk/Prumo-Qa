@@ -5,7 +5,7 @@ import { publicacaoPodeRepetir } from '../../testes/regras/publicacaoPodeRepetir
 import { concluirTrabalho } from '../banco/concluirTrabalho.js';
 import { definirEstadoJiraDoTrabalho } from '../banco/definirEstadoJiraDoTrabalho.js';
 import { falharPorInfraestrutura } from '../banco/falharPorInfraestrutura.js';
-import { obterRotina } from '../banco/obterRotina.js';
+import { obterRotina } from '../banco/agenda.js';
 import { registrarBatimento } from '../banco/registrarBatimento.js';
 import { Trabalho } from '../tipos/fila.js';
 import { EstadoDoWorker, TipoEvento } from '../tipos/worker.js';

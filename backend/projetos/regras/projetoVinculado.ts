@@ -1,7 +1,7 @@
 /** Abre o contrato de uma pasta só se ela estiver na lista de vinculadas; senão recusa. */
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { lerPastasVinculadas } from '../banco/lerPastasVinculadas.js';
+import { lerPastasVinculadas } from '../banco/pastasVinculadas.js';
 import { caminhoComparavel } from './caminhoComparavel.js';
 
 /** Exige que a raiz tenha sido vinculada: a interface nunca abre pastas arbitrárias. */

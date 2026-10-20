@@ -1,6 +1,6 @@
 /** Resume o estado real do worker para a janela e a bandeja: ligado, pausado, trava, pendentes, em execução, próxima execução e último erro. */
-import { agendaPausada } from '../banco/agendaPausada.js';
-import { listarRotinas } from '../banco/listarRotinas.js';
+import { agendaPausada } from '../banco/agenda.js';
+import { listarRotinas } from '../banco/agenda.js';
 import { listarTrabalhos } from '../banco/listarTrabalhos.js';
 import { proximoHorario } from '../regras/proximoHorario.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
