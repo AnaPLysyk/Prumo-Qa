@@ -9,13 +9,13 @@ import { salvarPerfil as salvarPerfilDaBase } from '../../../../dist/agentes/ban
 import { registrarAtendimento } from '../../../../dist/agentes/banco/atendimentos.js';
 import { listarAtendimentos } from '../../../../dist/agentes/banco/atendimentos.js';
 import { avaliarAtendimento } from '../../../../dist/agentes/banco/atendimentos.js';
-import { pessoaDoConhecimento } from '../../../../dist/agentes/banco/baseDoConhecimento.js';
+import { pessoaDoConhecimento } from '../../../../dist/agentes/banco/comBancoDeConhecimento.js';
 import { entrarNaConta, sairDaConta } from '../../../../dist/login/regras/contas.js';
 import { criarContaPelaAdministracao } from '../../../../dist/administracao/servico.js';
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';
 import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
 import { LIMITE_FOCO, normalizarFoco } from '../../../../dist/agentes/regras/normalizacaoDoConhecimento.js';
-import { criarEsquemaDoConhecimento } from "../../../../dist/agentes/banco/criarEsquemaDoConhecimento.js";
+import { criarEsquemaDoConhecimento } from "../../../../dist/agentes/banco/comBancoDeConhecimento.js";
 import { personalidadeParaIa } from '../../../../dist/agentes/servicoEstiloDoChat.js';
 import { conhecimentoParaIA } from '../../../../dist/agentes/regras/conhecimentoParaIA.js';
 import { saudacao } from '../../../../dist/agentes/servicoEstiloDoChat.js';

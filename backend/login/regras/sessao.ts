@@ -1,6 +1,6 @@
 /** Sessão de quem entrou no Prumo: fica só na memória do processo principal e termina ao sair, ao fechar o Prumo ou por inatividade. */
 import { lerContas } from '../banco/contas.js';
-import { definirUsuarioDoEscopo } from '../../compartilhado/banco/escopoDeUsuario.js';
+import { definirUsuarioDoEscopo } from '../../compartilhado/banco/diretorioDados.js';
 import { renovarCredencialMcp, revogarCredencialMcp } from '../../aplicativo/ponteDaSessaoMcp.js';
 import { usarAutenticacaoRemota } from '../integracoes/envioEmail.js';
 import { ContaVisivel, IdModulo, NivelDeAcesso, Papel, RegistroDeContas, Usuario, modulosDoMenu } from '../tipos/contas.js';

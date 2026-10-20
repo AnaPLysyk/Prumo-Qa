@@ -9,7 +9,7 @@ import { workerDoAplicativo } from "../../agendamentos/worker/workerDoAplicativo
 import { idiomaAtual } from "../../configuracoes/servico.js";
 import { textoNoIdioma, resumoDoWorker } from "./conteudoDaBandeja.js";
 import { EstadoWorker, Idioma, ItemMenu } from "../tipos/textosDaBandeja.js";
-import { definirPausaGlobal } from "../../agendamentos/regras/operacoesDaRotina.js";
+import { definirPausaGlobal } from "../../agendamentos/regras/cicloDaRotina.js";
 
 export function criarBandeja() {
   const icone = nativeImage.createFromPath(path.join(raizDoAplicativo, 'assets', 'prumo-icon.png')).resize({ width: 16, height: 16 });

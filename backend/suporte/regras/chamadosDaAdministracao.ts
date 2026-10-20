@@ -3,7 +3,7 @@
 import { cofreCredenciais } from '../../conexoes/banco/credenciais.js';
 import { servicoDeChamados } from '../integracoes.js';
 import { estadoDoChamadoSchema } from '../contratos.js';
-import type { Protetor } from '../../conexoes/tipos/credenciais.js';
+import type { Protetor } from '../../conexoes/tipos/transporte.js';
 
 /** Id fixo da chave de administração no cofre (o cofre exige um UUID). */
 const ID_DA_CHAVE = '3f8a1c2e-9b4d-4e6f-8a17-5c2d9e0b7a41';

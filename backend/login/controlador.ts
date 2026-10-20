@@ -7,7 +7,7 @@ import { entrarComIdentidadeRemota } from "./regras/entrarComIdentidadeRemota.js
 import { estadoDaEntrada, iniciarEntrada } from "./regras/entradaPorProvedor.js";
 import { dependenciasDoGithub, dependenciasDoGoogle } from "./regras/configuracaoDoLogin.js";
 import { workerDoAplicativo } from "../agendamentos/worker/workerDoAplicativo.js";
-import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
+import { servicosDoAplicativo } from "../conexoes/regras/nucleoServicos.js";
 import { revogarCredencialMcp } from "../aplicativo/ponteDaSessaoMcp.js";
 
 export const contaCadastrar: TratadorDoCanal<'conta:cadastrar'> = a =>

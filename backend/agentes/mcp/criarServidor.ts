@@ -4,22 +4,22 @@ import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js'
 import { versaoDoPacote } from '../../compartilhado/versaoDoPacote.js';
 import { espacoDaRaiz } from '../../projetos/servicoProjetos.js';
 import { projetoVinculado } from '../../projetos/servicoProjetos.js';
-import { exigirCapacidade } from '../servicoCapacidades.js';
+import { exigirCapacidade } from '../servicoPoliticas.js';
 import { MeiosDoServidorMcp } from '../tipos/mcp.js';
 import { projetoAindaVinculado } from './segurancaDaSessao.js';
-import { registrarConsultarEvidencias } from './registroDeFerramentas.js';
-import { registrarContextoProjeto } from './registroDeFerramentas.js';
-import { registrarExecutarValidacao } from './registroDeFerramentas.js';
-import { registrarListarPoliticas } from './registroDeFerramentas.js';
+import { registrarConsultarEvidencias } from './consultasDoProjeto.js';
+import { registrarContextoProjeto } from './consultasDoProjeto.js';
+import { registrarExecutarValidacao } from './consultasDoProjeto.js';
+import { registrarListarPoliticas } from './consultasDoProjeto.js';
 import { registrarProporAprendizado } from '../servicoPropostasMcp.js';
 import { registrarProporBug } from '../servicoPropostasMcp.js';
 import { registrarProporCaso } from '../servicoPropostasMcp.js';
-import { registrarRevisarCobertura } from './registroDeFerramentas.js';
+import { registrarRevisarCobertura } from './consultasDoProjeto.js';
 import { registrarRoteirosMcp } from './roteirosMcp.js';
 import { respostaDaFerramentaMcp } from './formatoDasFerramentas.js';
 import { transporteObservado } from './transporteObservado.js';
 import { contaAutorizadaMcp, conferirAcessoMcp } from './segurancaDaSessao.js';
-import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from '../../compartilhado/banco/escopoDeUsuario.js';
+import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from '../../compartilhado/banco/diretorioDados.js';
 
 export async function criarServidor(raiz: string, contratoLeitura?: string) {
   const dono = await contaAutorizadaMcp();

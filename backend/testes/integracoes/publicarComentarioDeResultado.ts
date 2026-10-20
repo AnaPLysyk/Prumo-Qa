@@ -1,14 +1,14 @@
 /** Publica o comentário de resultado no Jira uma única vez (confere se já existe pelo marcador) e registra o resultado. */
 import { createHash } from 'node:crypto';
-import { consumirPublicacao } from '../../agendamentos/autorizacoes/politicasDaAutorizacao.js';
+import { consumirPublicacao } from '../../agendamentos/autorizacoes/autorizarRotina.js';
 import { definirEstadoJiraDoTrabalho } from '../../agendamentos/banco/fila.js';
 import { obterTrabalho } from '../../agendamentos/banco/fila.js';
 import { gravarPublicacoesJira } from '../banco/publicacoes.js';
 import { lerPublicacoesJira } from '../banco/publicacoes.js';
-import { codigoDoErroDePublicacao } from '../servicoPublicacao.js';
-import { montarComentario } from '../regras/montarComentario.js';
-import { publicacaoPodeRepetir } from '../servicoPublicacao.js';
-import { Pub, PublicadorJira, registroPub } from '../tipos/comentarioJira.js';
+import { codigoDoErroDePublicacao } from '../servicoExecucoes.js';
+import { montarComentario } from '../regras/propostasDeBugs.js';
+import { publicacaoPodeRepetir } from '../servicoExecucoes.js';
+import { Pub, PublicadorJira, registroPub } from '../tipos/escritaQase.js';
 import { obterEspaco } from '../../projetos/banco/projetos.js';
 
 /**

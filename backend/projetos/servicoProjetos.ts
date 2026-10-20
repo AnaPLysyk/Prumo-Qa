@@ -1,21 +1,103 @@
-/** Lógica e contratos de projetos: operações relacionadas no mesmo módulo. */
+/** Ciclo de projetos e validação de contratos — arquivos relacionados agrupados para manutenção. */
+import fs from "node:fs";
+import path from "node:path";
+import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
+import { PropostaContrato, CODIGO, DOCUMENTACAO, EXIGE_REVISAO, SCRIPT, STACKS, Stack, TESTES, associacaoSchema, servicoDaReferencia, Espaco, dadosEspaco, evento, Situacao, instrucoesManifesto, Servico, Recurso, vinculoSchema } from "./contratos.js";
+import { Manifesto, manifestoSchema, Projeto } from "../compartilhado/projeto/contratos.js";
+import { sensivel } from "../compartilhado/seguranca/sensivel.js";
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { atualizarEspaco, gravarEspacos, lerEspacos, listarEspacos, gravarPastasVinculadas, lerPastasVinculadas, obterEspaco } from "./banco/projetos.js";
 import { listarPropostas } from "../tickets/banco/tickets.js";
 import { lerRepositorioLocal } from "../testes/banco/local.js";
-import { associacaoSchema, servicoDaReferencia, Espaco, dadosEspaco, evento, Situacao, instrucoesManifesto, Servico, Recurso, vinculoSchema } from "./contratos.js";
-import fs from "node:fs";
-import path from "node:path";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
-import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { consultarAtividades } from "../logs/banco/atividades.js";
 import { calcularMetricas } from "../metricas/servico.js";
-import { Projeto } from "../compartilhado/projeto/contratos.js";
-import { gravarContratoProposto, proporContrato, resumirContratoProposto } from "./servicoContrato.js";
 
+// ── servicoContrato ──
+/** Grava a proposta aprovada sem sobrescrever nada e confere com o mesmo validador do núcleo; se não passar, desfaz. */
+export async function gravarContratoProposto(p: PropostaContrato) {
+  const alvo = path.join(p.raiz, 'qa.project.json');
+  fs.writeFileSync(alvo, JSON.stringify(p.manifesto, null, 2) + '\n', { flag: 'wx' });
+  try { return await carregarProjeto(p.raiz); }
+  catch (e) { fs.rmSync(alvo, { force: true }); throw e; }
+}
+
+/** Lê só a raiz da pasta escolhida. Links, itens sensíveis e pastas geradas (node_modules, dist…) ficam de fora. */
+function listarRaizDoProjeto(raiz: string) {
+  return fs.readdirSync(raiz, { withFileTypes: true }).filter((d) => !d.isSymbolicLink() && !sensivel(d.name)).map((d) => ({ nome: d.name, pasta: d.isDirectory() }));
+}
+
+/** Gera um identificador simples (letras, números e hífen) a partir do nome da pasta. */
+
+const idDoProjetoPeloNome = (nome: string): string => {
+  const identificador = nome
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 76);
+  return /^[a-z]/.test(identificador) ? identificador : 'p-' + (identificador || 'projeto');
+};
+
+export function proporContrato(raizInformada: string): PropostaContrato {
+  const raiz = fs.realpathSync(raizInformada);
+  if (fs.existsSync(path.join(raiz, 'qa.project.json'))) throw new Error('CONTRACT_EXISTS: a pasta já tem qa.project.json; o Prumo não sobrescreve o contrato.');
+  const itens = listarRaizDoProjeto(raiz).sort((a, b) => a.nome.localeCompare(b.nome));
+  const stacks: Stack[] = STACKS.map((s) => ({ s, ev: itens.filter((i) => !i.pasta && s.arquivos.test(i.nome)).map((i) => i.nome) })).filter((x) => x.ev.length)
+    .map(({ s, ev }) => ({ id: s.id, nome: s.nome, evidencias: ev.slice(0, 5), comandoNativo: s.comando, executavelPeloPrumo: s.executavel }));
+  const pastaOuArquivo = (re: RegExp) => itens.filter((i) => re.test(i.nome)).map((i) => i.nome).slice(0, 50);
+  const documentation = pastaOuArquivo(DOCUMENTACAO);
+  const tests = itens.filter((i) => i.pasta && TESTES.test(i.nome)).map((i) => i.nome);
+  // Maven/Gradle guardam testes em src/test: entra como testes quando existe de fato.
+  if (fs.existsSync(path.join(raiz, 'src', 'test')) && !fs.lstatSync(path.join(raiz, 'src', 'test')).isSymbolicLink() && fs.statSync(path.join(raiz, 'src', 'test')).isDirectory()) tests.push('src/test');
+  const code = [...itens.filter((i) => i.pasta && CODIGO.test(i.nome)).map((i) => i.nome), ...stacks.flatMap((s) => s.evidencias)].filter((v, i, a) => a.indexOf(v) === i).slice(0, 50);
+  const observacoes: string[] = [];
+  let nome = path.basename(raiz); const commands: Manifesto['commands'] = {}; const bloqueados: string[] = [];
+  if (stacks.some((s) => s.id === 'node')) {
+    let pkg: { name?: unknown; scripts?: Record<string, unknown> } = {};
+    try { const st = fs.statSync(path.join(raiz, 'package.json')); if (st.size <= 262144) pkg = JSON.parse(fs.readFileSync(path.join(raiz, 'package.json'), 'utf8')); } catch { observacoes.push('package.json ilegível: nenhum comando proposto.'); }
+    if (typeof pkg.name === 'string' && pkg.name.trim()) nome = pkg.name.trim().slice(0, 200);
+    for (const [script, valor] of Object.entries(pkg.scripts ?? {})) {
+      if (typeof valor !== 'string' || !SCRIPT.test(script) || !/^[\w:-]+$/.test(script) || Object.keys(commands).length >= 10) continue;
+      const cap = idDoProjetoPeloNome(script); if (commands[cap]) continue;
+      commands[cap] = { executable: 'npm', args: ['run', script], cwd: '.', env: {}, requiredFiles: [], requiredEnv: [] };
+      if (EXIGE_REVISAO.test(script)) bloqueados.push(cap);
+    }
+    if (!Object.keys(commands).length) observacoes.push('Nenhum script de teste, build ou lint no package.json: o contrato fica somente leitura.');
+    if (bloqueados.length) observacoes.push(`Bloqueados até revisão (podem tocar banco, servidor ou publicar): ${bloqueados.join(', ')}.`);
+  }
+  for (const s of stacks.filter((x) => !x.executavelPeloPrumo)) observacoes.push(`${s.nome}: o Prumo lê o código e os testes; executar "${s.comandoNativo}" pelo Prumo ainda não é suportado (planejado para a 2.11).`);
+  if (!stacks.length) observacoes.push('Nenhuma stack conhecida na raiz: o contrato fica somente leitura, com as pastas encontradas.');
+  if (!tests.length) observacoes.push('Nenhuma pasta de testes encontrada na raiz.');
+  const somenteLeitura = !Object.keys(commands).length;
+  const manifesto = manifestoSchema.parse({
+    schemaVersion: 2, id: idDoProjetoPeloNome(nome.replace(/^@[^/]+\//, '')), name: nome,
+    context: { documentation, tests: tests.slice(0, 50), code },
+    commands,
+    execution: { requireApproval: true, blockedByDefault: bloqueados, environment: 'host', readOnly: somenteLeitura, envAllowlist: [], timeoutMs: 300000, maxOutputBytes: 1048576 }
+  });
+  return { raiz, manifesto, stacks, observacoes };
+}
+
+/** Texto do diálogo de aprovação: o que será gravado, em linguagem simples. */
+export function resumirContratoProposto(p: PropostaContrato) {
+  const m = p.manifesto; const lista = (a: string[]) => (a.length ? a.join(', ') : 'nenhuma');
+  return [
+    `Pasta: ${p.raiz}`,
+    `Stack detectada: ${p.stacks.length ? p.stacks.map((s) => `${s.nome} (${s.evidencias.join(', ')})`).join('; ') : 'nenhuma conhecida'}`,
+    `Documentação: ${lista(m.context.documentation)}`, `Testes: ${lista(m.context.tests)}`, `Código: ${lista(m.context.code)}`,
+    `Comandos: ${Object.keys(m.commands).length ? Object.entries(m.commands).map(([k, c]) => `${k} = ${typeof c === 'string' ? c : c.executable + ' ' + c.args.join(' ')}`).join('; ') : 'nenhum (somente leitura)'}`,
+    ...p.observacoes,
+    '',
+    'Será criado só o arquivo qa.project.json na raiz da pasta. Nenhum outro arquivo é alterado e nada é executado agora: cada execução continua pedindo a sua aprovação. Você pode editar o arquivo depois.'
+  ].join('\n');
+}
+
+// ── servicoProjetos ──
 export const abrirProjetoVinculado = (raiz: string) => projetoVinculado(raiz, diretorioDados());
 
 /** `registradoPeloPrumo`: vínculo criado por um fluxo do Prumo (ex.: bug aberto a partir de uma falha), nunca deduzido por nome. */

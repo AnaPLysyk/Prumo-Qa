@@ -4,7 +4,7 @@ import { z } from "zod";
 import { obterEspaco } from "../projetos/banco/projetos.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { lerRepositorioLocal, gravarRepositorioLocal } from "./banco/local.js";
-import { entradaCasoLocal, type CasoLocal, entradaSuiteLocal, dadosCasoLocal } from "./tipos/repositorioLocal.js";
+import { entradaCasoLocal, type CasoLocal, entradaSuiteLocal, dadosCasoLocal } from "./tipos/escritaQase.js";
 import { listarPropostas } from "../tickets/banco/tickets.js";
 
 export function salvarCasoLocal(entrada: z.input<typeof entradaCasoLocal>, base?: string) {

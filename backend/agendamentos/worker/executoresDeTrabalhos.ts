@@ -1,22 +1,31 @@
-/** Executa trabalhos agendados de validação, Qase e carga K6 conforme a autorização. */
-import { autorizacaoDelegada } from "../autorizacoes/autorizacaoDelegada.js";
-import { executarK6, localizarK6 } from "../servicoK6.js";
+/** Execução de rotinas e resultados de evidência — arquivos relacionados agrupados para manutenção. */
+import { Evidencia } from "../../testes/tipos/evidencia.js";
 import { ResultadoTrabalho, Trabalho } from "../tipos/fila.js";
+import { autorizacaoDelegada } from "../autorizacoes/autorizarRotina.js";
+import { executarK6, localizarK6 } from "../servicoK6.js";
 import { Rotina } from "../tipos/rotina.js";
 import { EstadoDoWorker, prioridade } from "../tipos/worker.js";
-import { Evidencia } from "../../testes/tipos/evidencia.js";
 import { obterEspaco } from "../../projetos/banco/projetos.js";
 import { projetoDaRotina } from "./apoioDoWorker.js";
-import { resultadoDaEvidencia, contarCasosDaEvidencia, resumoDasFalhas } from "./resultadosDasEvidencias.js";
 import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
 import { Executor } from "../../conexoes/tipos/operacoesExternas.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";
 import { obterRunLocal } from "../../testes/banco/runs.js";
 import { publicarRunLocal } from "../../testes/integracoes/publicarRunLocal.js";
 import { executarRunLocal } from "../../testes/servicoExecucoes.js";
-
 import { gravarEstadoDasRotinas, lerEstadoDasRotinas } from "../banco/agenda.js";
 
+// ── resultadosDasEvidencias ──
+export const contarCasosDaEvidencia = (e: Pick<Evidencia, 'cases'>) => ({ pass: e.cases.filter(c => c.status === 'PASS').length, fail: e.cases.filter(c => c.status === 'FAIL').length, blocked: e.cases.filter(c => c.status === 'BLOCKED').length, notRun: e.cases.filter(c => c.status === 'NOT_RUN').length });
+
+export function resultadoDaEvidencia(e: Evidencia & { evidencePath?: string }): ResultadoTrabalho {
+  const c = contarCasosDaEvidencia(e); const f = resumoDasFalhas(e.cases);
+  return { status: e.status, motivo: e.reason.slice(0, 600), contagem: c, evidenciaId: e.jobId, ...(f ? { detalhes: f } : {}) };
+}
+
+export const resumoDasFalhas = (cases: Evidencia['cases']) => cases.filter(c => c.status === 'FAIL').slice(0, 5).map(c => `${c.id}: ${c.evidence}`.slice(0, 300)).join('\n');
+
+// ── executoresDeTrabalhos ──
 export async function executarK6Agendado(e: EstadoDoWorker, r: Rotina, manual: boolean): Promise<ResultadoTrabalho> {
   const p = await projetoDaRotina(e, r.espacoId);
   const exe = e.d.localizarK6 ? await e.d.localizarK6() : await localizarK6().then(c => c ? { executable: c } : null);

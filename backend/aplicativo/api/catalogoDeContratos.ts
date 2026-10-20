@@ -5,24 +5,24 @@ import { ambientes, dadosRotinaSchema } from '../../agendamentos/tipos/rotina.js
 import { tiposConhecimento } from '../../agentes/tipos/conhecimento.js';
 import { papeis } from '../../agentes/tipos/persona.js';
 import { especializacoes } from '../../agentes/tipos/politicas.js';
-import { estadosTrecho, idTrecho } from '../../agentes/tipos/skills.js';
+import { estadosTrecho, idTrecho } from '../../agentes/tipos/conhecimento.js';
 import { configuracaoDeAcessoSchema, idPapelSchema, niveisDeAcesso } from '../../login/tipos/contas.js';
 import { arquivosDosCanais } from './arquivosDosCanais.js';
 import { operacoesServico } from '../../conexoes/tipos/adaptador.js';
 import { conexaoEntrada } from '../../conexoes/tipos/contaDeServico.js';
-import { filtrosSchema } from '../../conexoes/tipos/leituras.js';
+import { filtrosSchema } from '../../conexoes/tipos/adaptador.js';
 import { idsDeOperacao } from '../../conexoes/tipos/operacoesExternas.js';
 import { codigosServico, paginaSchema } from '../../conexoes/tipos/transporte.js';
-import { alteracaoSchema } from '../../configuracoes/contratos.js';
+import { alteracaoSchema } from '../../configuracoes/servico.js';
 import { conteudoSchema, estados, tipos } from '../../agentes/tipos/contexto.js';
-import { filtroExecucoes } from '../../testes/tipos/historicoDeExecucoes.js';
+import { filtroExecucoes } from '../../testes/tipos/evidencia.js';
 import { associacaoSchema, dadosEspaco, identidadeRecurso, servicoSchema } from '../../projetos/contratos.js';
 import { filtroSchema } from '../../projetos/contratos.js';
 import { numeroChamado, solicitacaoSchema } from '../../suporte/contratos.js';
 import { estadosDoChamado } from '../../suporte/contratos.js';
 import { dadosDoAgentePessoal } from '../../agentes/regras/agentesPessoais.js';
 import { esquemaCaso } from '../../testes/tipos/escritaQase.js';
-import { entradaCasoLocal, entradaSuiteLocal } from '../../testes/tipos/repositorioLocal.js';
+import { entradaCasoLocal, entradaSuiteLocal } from '../../testes/tipos/escritaQase.js';
 
 /**
  * Fonte única dos contratos técnicos: o que a janela (IPC) e os agentes de IA (MCP) podem pedir ao Prumo.

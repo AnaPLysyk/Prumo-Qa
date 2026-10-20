@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { anexosDoEnvio, guardarAnexos, tipoPelaAssinatura } from '../../../../dist/suporte/regras/anexosDoChamado.js';
+import { anexosDoEnvio, guardarAnexos, tipoPelaAssinatura } from '../../../../dist/suporte/regras/chamadosDaPessoa.js';
 import { enviarChamado, meuChamado, meusChamados } from '../../../../dist/suporte/regras/chamadosDaPessoa.js';
 import { chamadosDaAdministracao, lerChaveDeAdministracao, salvarChaveDeAdministracao } from '../../../../dist/suporte/regras/chamadosDaAdministracao.js';
 import { servicoDeChamados } from '../../../../dist/suporte/integracoes.js';

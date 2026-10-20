@@ -1,10 +1,16 @@
-/** Monta o caminho completo de um arquivo do projeto conferindo, pasta por pasta, que ele fica dentro da raiz e não passa por atalhos (links). */
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { ErroQa } from '../erros.js';
-import { sensivel } from './sensivel.js';
-import { validarRelativo } from './validarRelativo.js';
+/** Proteção de caminhos e validação relativa — arquivos relacionados agrupados para manutenção. */
+import path from "node:path";
+import { ErroQa } from "../erros.js";
+import { promises as fs } from "node:fs";
+import { sensivel } from "./sensivel.js";
 
+// ── validarRelativo ──
+export function validarRelativo(p: string) {
+  if (path.isAbsolute(p) || /^[a-z]:/i.test(p) || p.startsWith('\\') || p.split(/[\\/]/).includes('..') || /[:\x00-\x1f]/.test(p))
+    throw new ErroQa('PATH_FORBIDDEN', 'Caminho deve ser relativo e permanecer na raiz.');
+}
+
+// ── caminhoSeguro ──
 export async function caminhoSeguro(raiz: string, relativo: string, interno = false, novo = false): Promise<string> {
   validarRelativo(relativo);
   if (!interno && sensivel(relativo)) throw new ErroQa('SECRET_FORBIDDEN', 'Arquivo sensível ou diretório excluído.');

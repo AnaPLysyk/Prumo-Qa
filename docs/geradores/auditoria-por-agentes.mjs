@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { agentesChat } from '../../dist/agentes/tipos/persona.js';
-import { orquestrar } from '../../dist/agentes/chat/orquestrar.js';
+import { orquestrar } from '../../dist/agentes/chat/conversar.js';
 import { verificarDependencias } from './dependencias.mjs';
 
 const raizPadrao = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

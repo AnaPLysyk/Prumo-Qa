@@ -1,23 +1,22 @@
-/** Usa Claude ou Codex somente após autorização; retorna ao chat local quando faltar permissão ou a IA falhar. */
-import { conhecimentosRelevantes } from '../banco/conhecimento.js';
+/** Executar CLI e interpretar resposta das IAs — arquivos relacionados agrupados para manutenção. */
+import { conhecimentosRelevantes, registrarConhecimento } from "../banco/conhecimento.js";
+import { skillDoAgente } from "./roteamento.js";
+import { ContextoDelegacao } from "../tipos/ContextoDelegacao.js";
+import { Resposta, Acao, Opcoes, Provedor, Coleta, Estilo, ExtrasPrompt, Executor } from "../tipos/chat.js";
+import { Conhecimento, limitesConhecimento } from "../tipos/conhecimento.js";
+import { tentarOuPadrao } from "./tentarOuPadrao.js";
+import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
+import { obterEspaco } from "../../projetos/banco/projetos.js";
+import { AgenteChat } from "../tipos/persona.js";
+import { personalidadeParaIa } from "../servicoEstiloDoChat.js";
+import { situacaoDaSessao } from "../../login/regras/sessao.js";
+import { execFile } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { localizarClienteDeIa } from "../../conexoes/ia/conectarIa.js";
 
-import { skillDoAgente } from './roteamento.js';
-
-
-
-import { ContextoDelegacao } from '../tipos/ContextoDelegacao.js';
-import { Resposta } from '../tipos/chat.js';
-import { Conhecimento, limitesConhecimento } from '../tipos/conhecimento.js';
-import { tentarOuPadrao } from './tentarOuPadrao.js';
-import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { obterEspaco } from '../../projetos/banco/projetos.js';
-import { registrarConhecimento } from '../banco/conhecimento.js';
-import { Acao, Opcoes, Provedor } from '../tipos/chat.js';
-import { AgenteChat } from '../tipos/persona.js';
-import { personalidadeParaIa } from '../servicoEstiloDoChat.js';
-import { Coleta, Estilo, ExtrasPrompt } from '../tipos/chat.js';
-import { situacaoDaSessao } from '../../login/regras/sessao.js';
-
+// ── consultarIaExterna ──
 export function argumentosDoProvedorDeIa(provedor: Exclude<Provedor, 'local'>, prompt: string) {
   // A delegação do chat autoriza uma resposta, nunca edição, execução ou publicação.
   // Flags incompatíveis falham fechadas e conversar volta para a resposta local.
@@ -26,11 +25,9 @@ export function argumentosDoProvedorDeIa(provedor: Exclude<Provedor, 'local'>, p
     : ['exec', '--skip-git-repo-check', '--sandbox', 'read-only', '--ephemeral', '--ignore-user-config', '--disable', 'hooks', '--disable', 'apps', '--disable', 'plugins', '--disable', 'remote_plugin', '--disable', 'shell_tool', '--disable', 'unified_exec', '-c', 'approval_policy="never"', '--', prompt];
 }
 
-
 function contaParaIa(base?: string): { nome: string; acesso: string } | null {
   try { const s = situacaoDaSessao(base, Date.now(), false); return s.tipo === 'ATIVA' ? { nome: s.usuario.nome, acesso: s.papel?.nome ?? s.usuario.papel } : null; } catch { return null; }
 }
-
 
 export function montarPrompt(agente: AgenteChat, pergunta: string, local: Coleta, estilo: Estilo, nomeAssistente: string, extras: ExtrasPrompt = {}) {
   const skill = extras.skill ?? skillDoAgente(agente.especializacao, pergunta, extras.base).texto;
@@ -45,14 +42,12 @@ export function montarPrompt(agente: AgenteChat, pergunta: string, local: Coleta
     `--- Pergunta ---\n${pergunta}`].filter(Boolean).join('\n\n');
 }
 
-
 export function registrarSugestoesDaIa(o: Opcoes, agente: AgenteChat, provedor: Exclude<Provedor, 'local'>, aprendizados: string[]): { acoes: Acao[]; sugeridos: number; naoRegistrados: number } {
     const acoes: Acao[] = []; let sugeridos = 0; let naoRegistrados = 0;
     for (const a of aprendizados) { try { const { item, duplicado } = registrarConhecimento({ espacoId: o.espacoId, agente: agente.id === 'orquestrador' ? null : agente.id, tipo: 'fato', titulo: a.slice(0, 80), texto: a, origem: 'IA', cliente: provedor }, o.base);
       if (!duplicado && item.estado === 'RASCUNHO') { sugeridos++; acoes.push({ tipo: 'aprovar_conhecimento', id: item.id, rotulo: 'Aprovar: ' + item.titulo.slice(0, 40) }, { tipo: 'descartar_conhecimento', id: item.id, rotulo: 'Descartar' }); } } catch { naoRegistrados++; } }
     return { acoes, sugeridos, naoRegistrados };
 }
-
 
 /** Separa as linhas "APRENDIZADO:" do texto da IA externa (no máximo duas). */
 export function separarAprendizados(texto: string) {
@@ -91,3 +86,58 @@ export async function consultarIaExterna({ o, agente, pergunta, local, estilo, n
     return montar(agente, { ...local, linhas }, provedor === 'claude' ? 'CLAUDE' : 'CODEX', { ...comum, acoes, ...(naoRegistrados || avisoSkill ? { aviso: [naoRegistrados ? `${naoRegistrados} aprendizado(s) não foram registrados (limite ou armazenamento indisponível). A resposta da IA foi preservada.` : '', avisoSkill ?? ''].filter(Boolean).join(' ') } : {}) });
   } catch { return voltar('Falha ao chamar a IA externa; resposta local.'); }
 }
+
+// ── execucaoCli ──
+const variaveisPermitidas = [
+  'PATH', 'SystemRoot', 'WINDIR', 'USERPROFILE', 'HOME', 'APPDATA',
+  'LOCALAPPDATA', 'TEMP', 'TMP', 'CODEX_HOME', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY'
+];
+
+/** Aceita executável real; shims ou atalhos que exigem shell ficam bloqueados. */
+export const executavelDaIa = (provedor: 'claude' | 'codex') => {
+  const cliente = localizarClienteDeIa(provedor);
+  return cliente && !cliente.shim ? cliente.executable : null;
+};
+
+function ambienteDaIa() {
+  return Object.fromEntries(
+    variaveisPermitidas
+      .filter(nome => process.env[nome])
+      .map(nome => [nome, process.env[nome] as string])
+  );
+}
+
+/** Executa numa pasta temporária vazia, com limites de tempo e buffer. */
+export const executarCliDeIa: Executor = (comando, args, opcoes) => new Promise(resolver => {
+  const temporario = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-chat-'));
+
+  execFile(comando, args, {
+    timeout: opcoes.timeoutMs,
+    maxBuffer: 1024 * 1024,
+    windowsHide: true,
+    shell: false,
+    cwd: temporario,
+    env: ambienteDaIa()
+  }, (erro, saida, stderr) => {
+    // Apaga somente a pasta criada pelo próprio processo, dentro de os.tmpdir().
+    const relativo = path.relative(os.tmpdir(), temporario);
+    if (
+      !path.isAbsolute(relativo) &&
+      !relativo.startsWith('..') &&
+      path.basename(temporario).startsWith('prumo-chat-')
+    ) {
+      try {
+        fs.rmSync(temporario, { recursive: true, force: true });
+      } catch {
+        // Falha na limpeza não altera a resposta do provedor.
+      }
+    }
+
+    const codigo = erro
+      ? typeof (erro as NodeJS.ErrnoException & { code?: unknown }).code === 'number'
+        ? (erro as unknown as { code: number }).code
+        : null
+      : 0;
+    resolver({ codigo, saida: String(saida ?? ''), erro: String(stderr ?? '') });
+  });
+});

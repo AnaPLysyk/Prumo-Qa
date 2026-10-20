@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { gravarContratoProposto } from '../../../../dist/projetos/servicoContrato.js';
-import { proporContrato } from '../../../../dist/projetos/servicoContrato.js';
-import { resumirContratoProposto as resumoProposta } from '../../../../dist/projetos/servicoContrato.js';
+import { gravarContratoProposto } from '../../../../dist/projetos/servicoProjetos.js';
+import { proporContrato } from '../../../../dist/projetos/servicoProjetos.js';
+import { resumirContratoProposto as resumoProposta } from '../../../../dist/projetos/servicoProjetos.js';
 import { situacaoProjeto } from '../../../../dist/projetos/servicoProjetos.js';
 
 /** Pastas temporárias montadas no teste: nenhum repositório real é lido. */

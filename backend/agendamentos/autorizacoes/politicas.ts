@@ -1,6 +1,6 @@
 /** Prepara políticas aprováveis de escrita e publicação para execuções agendadas. */
 import { randomUUID } from "node:crypto";
-import { validadeDaAutorizacao } from "./politicasDaAutorizacao.js";
+import { validadeDaAutorizacao } from "./autorizarRotina.js";
 import { abrirEspacoDeAutorizacoes } from "./estadoERevogacao.js";
 import { estadoDaAutorizacao } from "./estadoERevogacao.js";
 import { gravarAutorizacoes, lerAutorizacoes } from "../banco/autorizacoes.js";

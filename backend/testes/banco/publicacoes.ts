@@ -1,7 +1,7 @@
 /** Consulta e registra publicações dos resultados de teste. */
 import { z } from "zod";
 import { lerLocal, gravarLocal } from "../../compartilhado/banco/persistenciaLocal.js";
-import { Registro, registro } from "../tipos/comentarioJira.js";
+import { Registro, registro } from "../tipos/escritaQase.js";
 
 export const publicacaoDoTrabalho = (id: string, b?: string) => lerPublicacoesJira(b).itens.find(x => x.trabalhoId === id) ?? null;
 

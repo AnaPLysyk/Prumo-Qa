@@ -9,7 +9,7 @@ import { registrarDiagnostico } from '../../logs/banco/diagnostico.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
 import { conferirAcessoAoCanal } from '../../login/regras/conferirAcessoAoCanal.js';
 import { contaDaSessao } from '../../login/regras/sessao.js';
-import { executarNoEscopoDoUsuario } from '../../compartilhado/banco/escopoDeUsuario.js';
+import { executarNoEscopoDoUsuario } from '../../compartilhado/banco/diretorioDados.js';
 import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo.js';
 import {usarAutenticacaoRemota,validarSessaoRemota} from '../../login/integracoes/autenticacaoRemota.js';
 import {acessoDosCanais} from '../../login/tipos/acessoDosCanais.js';

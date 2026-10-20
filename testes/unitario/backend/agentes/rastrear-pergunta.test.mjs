@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { rastrearPergunta } from '../../../../dist/agentes/chat/rastrearPergunta.js';
+import { rastrearPergunta } from '../../../../dist/agentes/chat/conversar.js';
 import { escolherAgente } from '../../../../dist/agentes/chat/roteamento.js';
 import { planejarOrquestracao } from '../../../../dist/agentes/chat/roteamento.js';
 import { skillDoAgente } from '../../../../dist/agentes/chat/roteamento.js';

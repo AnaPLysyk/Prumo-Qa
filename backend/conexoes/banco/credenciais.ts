@@ -1,5 +1,5 @@
 /** Abre o cofre protegido, consulta e grava credenciais das integrações. */
-import { Protetor, schema } from "../tipos/credenciais.js";
+import { Protetor, schema } from "../tipos/transporte.js";
 import { lerLocal, gravarLocal } from "../../compartilhado/banco/persistenciaLocal.js";
 import { z } from "zod";
 

@@ -9,7 +9,7 @@ import { sementeDasSkills } from "../../dist/agentes/banco/sementeDasSkills.js";
 import { validarEspecializacao } from '../../dist/agentes/regras/regrasDasSkills.js';
 import { mascarar } from '../../dist/compartilhado/seguranca/mascarar.js';
 // A mesma regra do banco real (2.17): perfil e atendimentos são da conta da sessão; sem sessão, nada pessoal.
-import { pessoaDoConhecimento } from '../../dist/agentes/banco/baseDoConhecimento.js';
+import { pessoaDoConhecimento } from '../../dist/agentes/banco/comBancoDeConhecimento.js';
 
 // Funções puras reais (não tocam o banco), usadas pela versão em memória.
 const real = { norm: semAcentos, normalizarNome, termos: termosDaFrase };

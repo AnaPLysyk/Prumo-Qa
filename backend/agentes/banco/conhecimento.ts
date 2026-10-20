@@ -1,6 +1,6 @@
 /** Persistência do conhecimento dos agentes: registrar, listar, recuperar trechos relevantes e apagar. */
 import { comBancoDeConhecimento } from "./comBancoDeConhecimento.js";
-import { falharConhecimento, validarAgenteDoConhecimento, validarProjetoDoConhecimento } from "./baseDoConhecimento.js";
+import { falharConhecimento, validarAgenteDoConhecimento, validarProjetoDoConhecimento } from "./comBancoDeConhecimento.js";
 import { Linha, Conhecimento, Filtro, estadosConhecimento, limitesConhecimento, EstadoConhecimento, NovoConhecimento, tiposConhecimento } from "../tipos/conhecimento.js";
 import { raizDaPalavra, termosDaFrase } from "../regras/normalizacaoDoConhecimento.js";
 import { semAcentos } from "../../compartilhado/texto.js";

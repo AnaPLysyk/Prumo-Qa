@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { planejarOrquestracao } from '../../../../dist/agentes/chat/roteamento.js';
-import { orquestrar } from '../../../../dist/agentes/chat/orquestrar.js';
+import { orquestrar } from '../../../../dist/agentes/chat/conversar.js';
 import { conversar } from '../../../../dist/agentes/chat/conversar.js';
 import { registrarOrquestracao, arquivoDeOrquestracoes } from '../../../../dist/agentes/banco/orquestracao.js';
 import { listarOrquestracoes } from '../../../../dist/agentes/banco/orquestracao.js';

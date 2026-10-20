@@ -1,35 +1,87 @@
-/** Atende uma pergunta do chat: entende intenções, escolhe o agente, responde localmente e, se autorizado, consulta Claude ou Codex. */
-import { lerPerfil } from '../banco/perfil.js';
-import { nomeParaChamar } from '../servicoEstiloDoChat.js';
-import { pesosAprendidos } from '../banco/aprendizados.js';
-import { aplicarEstilo } from '../servicoEstiloDoChat.js';
-import { escolherAgente } from './roteamento.js';
+/** Conversação e rastreamento do agente — arquivos relacionados agrupados para manutenção. */
+import { salvarPerfil, lerPerfil } from "../banco/perfil.js";
+import { palavrasDaPergunta, escolherAgente, planejarOrquestracao, termoCasaComPergunta } from "./roteamento.js";
+import { proximosPassosSugeridos } from "./roteamento.js";
+import { normalizarNome, raizDaPalavra, termosDaFrase } from "../regras/normalizacaoDoConhecimento.js";
+import { Meta, Turno, PAPEIS, Coleta, ContextoChat, Estilo, Opcoes, Resposta, agentePorTipo } from "../tipos/chat.js";
+import { Perfil, Conhecimento, TipoConhecimento } from "../tipos/conhecimento.js";
+import { rotuloPapel, Papel, AgenteChat, agentesChat } from "../tipos/persona.js";
+import { semAcentos } from "../../compartilhado/texto.js";
+import { randomUUID } from "node:crypto";
+import { responderComDadosLocais } from "./responderComDadosLocais.js";
+import { EtapaDaOrquestracao, Orquestracao } from "../tipos/orquestracao.js";
+import { Fonte } from "../../inicio/servico.js";
+import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
+import { nomeParaChamar, aplicarEstilo } from "../servicoEstiloDoChat.js";
+import { pesosAprendidos } from "../banco/atendimentos.js";
+import { registrarOrquestracao } from "../banco/orquestracao.js";
+import { consultarIaExterna } from "./consultarIaExterna.js";
+import { tentarOuPadrao } from "./tentarOuPadrao.js";
+import { regrasDosAgentes } from "../../administracao/servico.js";
+import { conhecimentosRelevantes, listarConhecimentos, registrarConhecimento } from "../banco/conhecimento.js";
+import { obterEspaco } from "../../projetos/banco/projetos.js";
+import { catalogoDeTestes } from "../../testes/servicoClassificacao.js";
+import { listarTrechosDeSkill } from "../banco/skills.js";
+import { sementeDasSkills } from "../banco/sementeDasSkills.js";
+import { escolherTrechosDaSkill } from "../regras/regrasDasSkills.js";
 
-import { intencaoDePerfil } from './intencaoDePerfil.js';
+// ── conversar ──
+// ── intencaoDePerfil ──
+const papelNoTexto = (t: string): Papel | null => { for (const [re, p] of PAPEIS) if (re.test(t)) return p; return null; };
 
-import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
-import { responderComDadosLocais } from './responderComDadosLocais.js';
+export function intencaoDePerfil(pergunta: string, historico: Turno[], perfil: Perfil | null, base?: string): Meta | null {
+  const t = semAcentos(pergunta); const pend = historico.at(-1)?.pendente ?? null; const palavras = palavrasDaPergunta(pergunta);
+  const explicito = pergunta.match(/(?:pode me chamar de|me chame de|me chama de|meu nome [ée]|prefiro ser chamad[oa] de|quero ser chamad[oa] de)\s+([^,.!?;]+)/i);
+  const papelExpl = /\b(sou|trabalho com|trabalho como|atuo como|meu papel e)\b/.test(t) ? papelNoTexto(t.replace(/.*\b(sou|trabalho com|trabalho como|atuo como|meu papel e)\b/, '')) : null;
+  let nome: string | null = explicito ? normalizarNome(explicito[1]!.trim()) : null;
+  if (!nome && pend === 'nome' && !pergunta.includes('?') && palavras.length <= 4 && !papelExpl) {
+    if (/^(prefiro nao|tanto faz|nao precisa|pula|depois)/.test(t)) return { linhas: ['Sem problema. Se mudar de ideia, diga "pode me chamar de…".'] };
+    nome = normalizarNome(pergunta.replace(/^\s*(pode ser|[ée]|eu sou|sou( o| a)?|me chama de)\s+/i, '').trim());
+  }
+  let papel = papelExpl; if (!papel && pend === 'papel' && palavras.length <= 5) papel = papelNoTexto(t) ?? (/\b(desenvolv|program)/.test(t) ? 'dev' : /\b(teste|qualidade)/.test(t) ? 'qa' : /\b(negocio|requisit|analis)/.test(t) ? 'analista' : null);
+  if (!nome && !papel) return null;
+  const linhas: string[] = []; let salvo = perfil;
+  try { salvo = salvarPerfil({ ...(nome ? { comoChamar: nome } : {}), ...(papel ? { papel } : {}) }, base); } catch { return { linhas: ['Não consegui guardar isso agora no banco de conhecimento. Tente de novo em Ajustes › Assistente.'] }; }
+  if (nome) linhas.push(`Combinado, ${nome}. Vou te chamar assim daqui pra frente.`);
+  if (papel) linhas.push(`Anotado: você trabalha com ${rotuloPapel[papel]}. Vou ajustar a forma de explicar.`);
+  if (!salvo?.papel) return { linhas: [...linhas, 'E qual é o seu papel no time: QA, desenvolvimento, produto (PO) ou análise?'], pendente: 'papel' };
+  return { linhas: [...linhas, 'Por onde começamos?'], proximos: proximosPassosSugeridos('orquestrador', [], salvo.papel, '') };
+}
 
-import { orquestrar } from './orquestrar.js';
-import { planejarOrquestracao } from './roteamento.js';
-import { registrarOrquestracao } from '../banco/orquestracao.js';
-import { Orquestracao } from '../tipos/orquestracao.js';
-import { Coleta, ContextoChat, Estilo, Meta, Opcoes, Resposta, agentePorTipo } from '../tipos/chat.js';
-import { consultarIaExterna } from './consultarIaExterna.js';
+// ── orquestrar ──
+type Responder = typeof responderComDadosLocais;
 
-import { AgenteChat, agentesChat } from '../tipos/persona.js';
-import { tentarOuPadrao } from './tentarOuPadrao.js';
-import { regrasDosAgentes } from '../../administracao/servico.js';
-import { Conhecimento, TipoConhecimento } from '../tipos/conhecimento.js';
-import { conhecimentosRelevantes } from '../banco/conhecimento.js';
-import { semAcentos } from '../../compartilhado/texto.js';
-import { listarConhecimentos } from '../banco/conhecimento.js';
-import { Fonte } from '../../inicio/contratos.js';
-import { obterEspaco } from '../../projetos/banco/projetos.js';
-import { catalogoDeTestes } from '../../testes/servicoClassificacao.js';
-import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { registrarConhecimento } from '../banco/conhecimento.js';
+/**
+ * Cada etapa roda mesmo que a anterior falhe: a falha fica registrada (FALHOU, com o motivo mascarado) e entra na resposta.
+ * O registro guarda só metadados; a pergunta e as respostas não são gravadas.
+ */
+export async function orquestrar(agentes: AgenteChat[], motivo: { agente: string; pontos: number }[], pergunta: string, espacoId: string | null, base?: string, responder: Responder = responderComDadosLocais, agora: () => Date = () => new Date()): Promise<{ coleta: Coleta; registro: Orquestracao }> {
+  const inicio = agora(); const etapas: EtapaDaOrquestracao[] = []; const partes: string[] = []; const fontes: Fonte[] = []; const fatos: string[] = [];
+  for (const [i, agente] of agentes.entries()) {
+    const t0 = agora();
+    try {
+      const r = await responder(agente, pergunta, espacoId, base);
+      const fim = agora(); const vazio = !!r.vazio;
+      etapas.push({ ordem: i + 1, agente: agente.id, inicio: t0.toISOString(), fim: fim.toISOString(), duracaoMs: fim.getTime() - t0.getTime(), estado: vazio ? 'SEM_DADOS' : 'CONCLUIDA', fontes: r.fontes.map((f) => f.rotulo).slice(0, 10), fatos: r.fatos.slice(0, 20), linhas: r.linhas.length });
+      partes.push(`${agente.nome}: ${vazio ? 'não encontrou dados sobre isso neste projeto.' : r.linhas.slice(0, 2).join(' ')}`);
+      for (const f of r.fontes) if (!fontes.some((x) => x.aba === f.aba)) fontes.push(f);
+      fatos.push(...r.fatos.map((f) => `${agente.id}:${f}`));
+    } catch (e) {
+      const fim = agora(); const erro = mascarar(String((e as Error)?.message ?? e)).slice(0, 200);
+      etapas.push({ ordem: i + 1, agente: agente.id, inicio: t0.toISOString(), fim: fim.toISOString(), duracaoMs: fim.getTime() - t0.getTime(), estado: 'FALHOU', fontes: [], fatos: [], linhas: 0, erro });
+      partes.push(`${agente.nome}: não consegui consultar agora (${erro}).`);
+    }
+  }
+  const concluidas = etapas.filter((e) => e.estado === 'CONCLUIDA').length; const fim = agora();
+  const registro: Orquestracao = {
+    id: randomUUID(), em: inicio.toISOString(), espacoId, responsavel: 'orquestrador', modo: 'LOCAL', motivo: motivo.slice(0, 6), agentes: agentes.map((a) => a.id),
+    dependencias: 'INDEPENDENTES', etapas, estado: concluidas === etapas.length ? 'CONCLUIDA' : concluidas ? 'PARCIAL' : 'FALHOU', duracaoMs: fim.getTime() - inicio.getTime()
+  };
+  const coleta: Coleta = { linhas: [`Consultei ${agentes.length} especialistas, um de cada vez:`, ...partes], fontes, fatos, generico: false, vazio: concluidas === 0 };
+  return { coleta, registro };
+}
 
+// ── conversar ──
 function intencaoDeAprender(pergunta: string, espacoId: string | null, forcado: string | null | undefined, base?: string): Meta | null {
   const m = pergunta.match(/^\s*(?:por favor,?\s*)?(?:lembr[ae](?:-se)?|anot[ae]|guard[ae]|aprend[ae]|memoriz[ae])\s*(?:que|isso|:)?\s*:?\s+(.{4,})$/i); if (!m) return null;
   const texto = m[1]!.trim(); const alvo = forcado ?? escolherAgente(texto).agente.id; const agente = alvo === 'orquestrador' ? null : alvo; const n = semAcentos(texto);
@@ -123,4 +175,42 @@ export async function conversar(o: Opcoes): Promise<Resposta> {
   if (provedor === 'local') return montar(agente, { ...local, linhas: vestido() }, 'LOCAL', comum);
 
   return consultarIaExterna({ o, agente, pergunta, local, estilo, nome, perfil, historico, comum, provedor, montar, vestido });
+}
+
+// ── rastrearPergunta ──
+type Rastro = {
+  pergunta: string; palavras: string[]; termos: string[];
+  escolhido: { id: string; nome: string; porPadrao: boolean };
+  rota: { agente: string; nome: string; pontos: number; casou: { termo: string; pontos: number }[]; mencao: boolean; aprendidos: number }[];
+  orquestracao: string[] | null;
+  foco: { agente: string; responderia: boolean; conhecimentos: { id: string; titulo: string }[]; skill: { usados: string[]; omitidos: number; origem: 'BANCO' | 'ARQUIVOS' } } | null;
+};
+
+/**
+ * Usa as mesmas funções do chat (escolherAgente, planejarOrquestracao, conhecimentosRelevantes, escolherTrechosDaSkill),
+ * então o rastro mostra o que o chat faria agora. Não chama IA, não grava conversa, atendimento nem aprendizado.
+ * Fora do rastro: histórico da sessão e pedidos sobre a própria relação (nome, papel, "lembre que", "o que você sabe").
+ */
+export function rastrearPergunta(pergunta: string, espacoId: string | null, foco: string | null, base?: string): Rastro {
+  const texto = pergunta.trim(); const palavras = palavrasDaPergunta(texto); const frase = palavras.join(' '); const p = semAcentos(texto);
+  const aprendidos = tentarOuPadrao(() => pesosAprendidos(texto, base), {} as Record<string, number>);
+  const r = escolherAgente(texto, null, { aprendidos });
+  const rota = agentesChat.map((a) => {
+    const casou = a.palavras.map((k) => { const forte = k.startsWith('!'), w = forte ? k.slice(1) : k; return termoCasaComPergunta(w, palavras, frase) ? { termo: w.replace('~', ''), pontos: forte ? 3 : w.replace('~', '').length > 5 ? 2 : 1 } : null; })
+      .filter((x): x is { termo: string; pontos: number } => !!x);
+    const mencao = p.includes('@' + a.id) || p.includes('agente ' + semAcentos(a.nome)) || (a.nome.includes(' ') && p.includes(semAcentos(a.nome)));
+    const extra = Math.min(6, aprendidos[a.id] ?? 0);
+    return { agente: a.id, nome: a.nome, pontos: casou.reduce((n, c) => n + c.pontos, 0) + (mencao ? 10 : 0) + extra, casou, mencao, aprendidos: extra };
+  }).filter((x) => x.pontos > 0).sort((a, b) => b.pontos - a.pontos);
+  const agenteFoco = foco ? agentesChat.find((a) => a.id === foco) : undefined;
+  let focoRastro: Rastro['foco'] = null;
+  if (agenteFoco) {
+    const esp = agenteFoco.especializacao ?? 'qa-geral';
+    const conhecimentos = tentarOuPadrao(() => conhecimentosRelevantes(espacoId, agenteFoco.id, texto, 5, base), []).map((c) => ({ id: c.id, titulo: c.titulo }));
+    let skill: NonNullable<Rastro['foco']>['skill'];
+    try { const e = escolherTrechosDaSkill(listarTrechosDeSkill({ especializacao: esp, estados: ['APROVADO'] }, base), texto); skill = { usados: e.usados, omitidos: e.omitidos, origem: 'BANCO' }; }
+    catch { const e = escolherTrechosDaSkill(sementeDasSkills().filter((t) => t.especializacao === esp), texto); skill = { usados: e.usados, omitidos: e.omitidos, origem: 'ARQUIVOS' }; }
+    focoRastro = { agente: agenteFoco.id, responderia: r.agente.id === agenteFoco.id, conhecimentos, skill };
+  }
+  return { pergunta: texto, palavras, termos: termosDaFrase(texto).map(raizDaPalavra), escolhido: { id: r.agente.id, nome: r.agente.nome, porPadrao: !r.rota.length }, rota, orquestracao: planejarOrquestracao(r.rota), foco: focoRastro };
 }

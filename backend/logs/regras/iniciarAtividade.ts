@@ -1,22 +1,18 @@
-/** Registra o início de uma operação (ferramenta, origem, contagens da entrada) e devolve como registrar o término. */
-import { randomUUID } from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
-import { z } from 'zod';
-import { falharCom } from '../../compartilhado/erros.js';
-import { hash } from '../../compartilhado/seguranca/hash.js';
-import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { Projeto } from '../../compartilhado/projeto/contratos.js';
-import { arquivosDoDiario } from '../banco/atividades.js';
-import { gravarNoDiario } from '../banco/atividades.js';
-import { pastaAtividades } from '../banco/atividades.js';
-import { achadoELacuna } from './resumoDoDiario.js';
+/** Registro e acompanhamento de operações — arquivos relacionados agrupados para manutenção. */
+import { randomUUID } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { z } from "zod";
+import { falharCom } from "../../compartilhado/erros.js";
+import { hash } from "../../compartilhado/seguranca/hash.js";
+import { semLinks } from "../../compartilhado/seguranca/semLinks.js";
+import { Projeto } from "../../compartilhado/projeto/contratos.js";
+import { arquivosDoDiario, gravarNoDiario, pastaAtividades } from "../banco/atividades.js";
+import { achadoELacuna } from "./resumoDoDiario.js";
+import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema, resumoSchema } from "../contratos.js";
 
-import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema } from '../contratos.js';
-import { resumoSchema } from '../contratos.js';
-
+// ── iniciarAtividade ──
 const resumoVazio = ():z.infer<typeof resumoSchema> => ({findings:0,recommendations:0,gaps:0,candidateRedundancies:0,types:[]});
-
 
 const comoLista = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
 
@@ -67,4 +63,11 @@ export function iniciarAtividade(p:Projeto,tool:string,origem:Origem,entrada:unk
     try { if(alvo)gravarNoDiario(alvo,{...e,phase:'end',at:new Date().toISOString(),durationMs:Math.round((performance.now()-inicio)*1000)/1000,state,summary},false); }
     catch { avisar('end',id); }
   }};
+}
+
+// ── observar ──
+export async function observar<T>(p:Projeto,tool:string,origem:Origem,entrada:unknown,fn:()=>Promise<T>,opcoes:Parameters<typeof iniciarAtividade>[4]={}) {
+  const atividade=iniciarAtividade(p,tool,origem,entrada,opcoes);
+  try { const r=await fn();atividade.finalizar(r);return r; }
+  catch(e) { atividade.finalizar(e,true);throw e; }
 }

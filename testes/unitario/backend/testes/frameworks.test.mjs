@@ -4,11 +4,11 @@ import fs from 'node:fs';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { contextoCompleto } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
-import { analisarPlaywright } from '../../../../dist/testes/regras/analisarPlaywright.js';
-import { detectarFrameworks } from '../../../../dist/testes/regras/detectarFrameworks.js';
+import { analisarPlaywright } from '../../../../dist/testes/regras/revisaoDeCobertura.js';
+import { detectarFrameworks } from '../../../../dist/testes/regras/revisaoDeCobertura.js';
 import { ehTestePlaywright } from '../../../../dist/testes/regras/revisaoDeCobertura.js';
 import { revisarCobertura } from '../../../../dist/testes/regras/revisaoDeCobertura.js';
-import { conhecimento } from '../../../../dist/testes/tipos/frameworks.js';
+import { conhecimento } from '../../../../dist/testes/tipos/catalogoDeTestes.js';
 
 const pkg = (deps) => JSON.stringify({ name: 'x', devDependencies: deps });
 const spec = (corpo) => `import { test, expect } from '@playwright/test';\n${corpo}`;

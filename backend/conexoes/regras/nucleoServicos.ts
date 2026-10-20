@@ -1,41 +1,23 @@
-/** Reúne tudo o que a tela Conexões faz com Jira, Qase e GitHub: adicionar e validar conta, listar recursos, vincular, consultar e escrever com a credencial protegida. */
-import { z } from 'zod';
-import { cofreCredenciais } from '../banco/credenciais.js';
-import { listarContas } from '../banco/contasDeServico.js';
-import { enviarAoServico } from '../integracoes/requisicoes.js';
-import { lerDoServico } from '../integracoes/requisicoes.js';
-import { ContextoServico, OperacaoServico } from '../tipos/adaptador.js';
-import { ContextoDosServicos, conexaoEntrada } from '../tipos/contaDeServico.js';
-import { Protetor } from '../tipos/credenciais.js';
-import { Filtros } from '../tipos/leituras.js';
-import { TransporteEscrita, TransporteServico, paginaSchema } from '../tipos/transporte.js';
-import { Recurso, Servico } from '../../projetos/contratos.js';
-import { adicionarConta } from '../servicoContas.js';
-import { importarProjetosQase } from './importarProjetosQase.js';
+/** Núcleo das conexões e fachada de aplicação — arquivos relacionados agrupados para manutenção. */
+import { z } from "zod";
+import { cofreCredenciais } from "../banco/credenciais.js";
+import { listarContas, lerContasDeServico, gravarContasDeServico } from "../banco/contasDeServico.js";
+import { enviarAoServico, lerDoServico } from "../integracoes/requisicoes.js";
+import { ContextoServico, OperacaoServico } from "../tipos/adaptador.js";
+import { ContextoDosServicos, conexaoEntrada } from "../tipos/contaDeServico.js";
+import { Protetor } from "../tipos/transporte.js";
+import { Filtros } from "../tipos/adaptador.js";
+import { TransporteEscrita, TransporteServico, paginaSchema } from "../tipos/transporte.js";
+import { Recurso, Servico } from "../../projetos/contratos.js";
+import { adicionarConta, adaptadorDaConta, contaAtiva, verificarVinculoDoServico, codigoDoErroDeServico, vinculoDoServico } from "../servicoContas.js";
+import { importarProjetosQase } from "./importarProjetosQase.js";
+import { obterEspaco, listarEspacos } from "../../projetos/banco/projetos.js";
+import { vincularServicoAoEspaco, atualizarEstadoDoVinculo, registrarConsultaExterna, configurarAceite } from "../../projetos/servicoProjetos.js";
+import { ErroServico } from "../integracoes/ErroServico.js";
+import { safeStorage } from "electron";
+import { protetorDoSistema } from "./protetorDoSistema.js";
 
-
-
-
-
-
-
-
-
-import { obterEspaco } from '../../projetos/banco/projetos.js';
-import { vincularServicoAoEspaco } from '../../projetos/servicoProjetos.js';
-import { ErroServico } from '../integracoes/ErroServico.js';
-import { adaptadorDaConta } from '../servicoContas.js';
-import { contaAtiva } from '../servicoContas.js';
-import { verificarVinculoDoServico } from '../servicoContas.js';
-
-import { lerContasDeServico, gravarContasDeServico } from '../banco/contasDeServico.js';
-import { listarEspacos } from '../../projetos/banco/projetos.js';
-import { atualizarEstadoDoVinculo } from '../../projetos/servicoProjetos.js';
-import { registrarConsultaExterna } from '../../projetos/servicoProjetos.js';
-import { codigoDoErroDeServico } from '../servicoContas.js';
-import { vinculoDoServico } from '../servicoContas.js';
-import { configurarAceite } from '../../projetos/servicoProjetos.js';
-
+// ── nucleoServicos ──
 async function comentarNoJira(c: ContextoDosServicos, espacoId: string, ticket: string, adf: unknown) {
   try {
     const v = await verificarVinculoDoServico(c, espacoId, 'jira');
@@ -46,7 +28,6 @@ async function comentarNoJira(c: ContextoDosServicos, espacoId: string, ticket: 
   } catch (e) { registrarConsultaExterna(espacoId, 'jira', codigoDoErroDeServico(e), c.base); throw e; }
 }
 
-
 async function consultarServico(c: ContextoDosServicos, espacoId: string, servico: Servico, operacao: OperacaoServico, pagina: z.input<typeof paginaSchema> = {}, id?: string, filtros?: Filtros) {
   try {
     const v = await verificarVinculoDoServico(c, espacoId, servico);
@@ -55,13 +36,11 @@ async function consultarServico(c: ContextoDosServicos, espacoId: string, servic
   } catch (e) { registrarConsultaExterna(espacoId, servico, codigoDoErroDeServico(e), c.base); throw e; }
 }
 
-
 async function escolherCampoAceite(c: ContextoDosServicos, espacoId: string, campo: string) {
   const v = await verificarVinculoDoServico(c, espacoId, 'jira'); const r = await v.adaptador.consultar(v.recurso, 'campos');
   if (!Array.isArray(r.dados) || !r.dados.some(x => x.id === campo && x.custom === true)) throw new Error('JIRA_FIELD_NOT_AVAILABLE');
   return configurarAceite(espacoId, campo, c.base);
 }
-
 
 async function executarComServico<T>(c: ContextoDosServicos, espacoId: string, servico: Servico, fn: (ctx: ContextoServico, recurso: Recurso, info: { vinculoId: string; conexaoId: string }) => Promise<T>): Promise<T> {
   const v = await verificarVinculoDoServico(c, espacoId, servico); const vi = vinculoDoServico(c, espacoId, servico);
@@ -69,17 +48,14 @@ async function executarComServico<T>(c: ContextoDosServicos, espacoId: string, s
   catch (e) { registrarConsultaExterna(espacoId, servico, codigoDoErroDeServico(e), c.base); throw e; }
 }
 
-
 async function listarRecursosDaConta(c: ContextoDosServicos, id: string, pagina: z.input<typeof paginaSchema> = {}) {
   return adaptadorDaConta(c, contaAtiva(c, id)).listar(pagina);
 }
-
 
 async function procurarComentarioNoJira(c: ContextoDosServicos, espacoId: string, ticket: string, marcador: string) {
   const v = await verificarVinculoDoServico(c, espacoId, 'jira');
   return v.adaptador.procurarComentario(v.recurso, ticket, marcador);
 }
-
 
 function removerConta(c: ContextoDosServicos, id: string) {
   const r = lerContasDeServico(c.base); const conta = r.contas.find(x => x.id === id); if (!conta) throw new Error('CONNECTION_NOT_FOUND');
@@ -88,7 +64,6 @@ function removerConta(c: ContextoDosServicos, id: string) {
   return { removida: true };
 }
 
-
 async function validarConta(c: ContextoDosServicos, id: string) {
   const conta = contaAtiva(c, id); const atual = await adaptadorDaConta(c, conta).autenticar();
   if (atual.contaId !== conta.contaId) throw new ErroServico('SERVICE_SCOPE_CHANGED');
@@ -96,12 +71,10 @@ async function validarConta(c: ContextoDosServicos, id: string) {
   return contaAtiva(c, id);
 }
 
-
 async function validarVinculoDoServico(c: ContextoDosServicos, espacoId: string, servico: Servico) {
   await verificarVinculoDoServico(c, espacoId, servico, true);
   return obterEspaco(espacoId, c.base);
 }
-
 
 async function vincularRecursoAoEspaco(c: ContextoDosServicos, espacoId: string, conexaoId: string, recurso: Recurso) {
   obterEspaco(espacoId, c.base); const conta = contaAtiva(c, conexaoId);
@@ -109,8 +82,6 @@ async function vincularRecursoAoEspaco(c: ContextoDosServicos, espacoId: string,
   if (JSON.stringify(atual) !== JSON.stringify(recurso)) throw new ErroServico('SERVICE_SCOPE_CHANGED');
   return vincularServicoAoEspaco(espacoId, conta.servico, conta.id, atual, c.base);
 }
-
-
 
 /** Dependências só do processo principal. Testes fornecem doubles; nenhum toggle em produção. Cada ação fica no seu arquivo. */
 export function nucleoServicos(protetor: Protetor, transporte: TransporteServico = lerDoServico, base?: string, escrita: TransporteEscrita = enviarAoServico) {
@@ -136,3 +107,6 @@ export function nucleoServicos(protetor: Protetor, transporte: TransporteServico
     campoAceite: (espacoId: string, campo: string) => escolherCampoAceite(c, espacoId, campo),
   };
 }
+
+// ── servicosDoAplicativo ──
+export const servicosDoAplicativo=nucleoServicos(protetorDoSistema(safeStorage));

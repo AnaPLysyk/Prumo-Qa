@@ -12,10 +12,10 @@ import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { caminhoSeguro } from "../compartilhado/seguranca/caminhoSeguro.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { salvarEvidencia } from "../testes/banco/evidencias.js";
-import { classificarResultado } from "../testes/regras/classificarResultado.js";
+import { classificarResultado } from "../testes/regras/executarValidacao.js";
 import { Evidencia } from "../testes/tipos/evidencia.js";
 import { solicitarAprovacao } from "../testes/servicoAprovacao.js";
-import { criarEvidenciaInicial } from "../testes/regras/criarEvidenciaInicial.js";
+import { criarEvidenciaInicial } from "../testes/regras/executarValidacao.js";
 import { Delegada } from "../testes/tipos/autorizacoes.js";
 
 export const capacidadeDoK6 = (c: ConfigK6) => ('k6:' + c.script.replaceAll('\\', '/')).slice(0, 80);

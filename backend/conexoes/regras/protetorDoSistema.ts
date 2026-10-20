@@ -1,5 +1,5 @@
 /** Protetor de credenciais do sistema (Windows DPAPI, Keychain do macOS, cofre de senhas do Linux) sobre o safeStorage do Electron. */
-import { Protetor } from '../tipos/credenciais.js';
+import { Protetor } from '../tipos/transporte.js';
 
 type CofreDoSistema = { isEncryptionAvailable: () => boolean; encryptString: (s: string) => Buffer; decryptString: (b: Buffer) => string; getSelectedStorageBackend?: () => string };
 

@@ -1,29 +1,74 @@
-/** Executa uma capacidade do projeto depois da aprovação humana, com tempo e saída limitados, e grava a evidência (PASS, FAIL, BLOCKED ou NOT_RUN). */
-import { spawn } from 'node:child_process';
+/** Execução e classificação de evidências — arquivos relacionados agrupados para manutenção. */
+import { z } from "zod";
+import { Status, casoResultadoSchema, Evidencia, resultadoRunnerSchema } from "../tipos/evidencia.js";
+import { Projeto, Comando } from "../../compartilhado/projeto/contratos.js";
+import { hash } from "../../compartilhado/seguranca/hash.js";
+import { ErroQa } from "../../compartilhado/erros.js";
+import { normalizarComando } from "../../compartilhado/projeto/carregarProjeto.js";
+import { caminhoSeguro } from "../../compartilhado/seguranca/caminhoSeguro.js";
+import path from "node:path";
+import { inventariar } from "../../compartilhado/projeto/carregarProjeto.js";
+import { lerSeguro } from "../../compartilhado/seguranca/lerSeguro.js";
+import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { promises as fs } from "node:fs";
+import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
+import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
+import { salvarEvidencia } from "../banco/evidencias.js";
+import { solicitarAprovacao } from "../servicoAprovacao.js";
+import { Delegada } from "../tipos/autorizacoes.js";
 
+// ── classificarResultado ──
+export function classificarResultado(exitCode:number|null, blockedReason?:string, cases:z.infer<typeof casoResultadoSchema>[] = []): Status {
+  if (blockedReason) return 'BLOCKED';
+  if (exitCode === null) return 'NOT_RUN';
+  if (exitCode !== 0 || cases.some(c => c.status === 'FAIL')) return 'FAIL';
+  if (cases.some(c => c.status === 'BLOCKED')) return 'BLOCKED';
+  if (cases.some(c => c.status === 'NOT_RUN')) return 'NOT_RUN';
+  return 'PASS';
+}
 
-import { randomUUID } from 'node:crypto';
-import { promises as fs } from 'node:fs';
-import { ErroQa } from '../../compartilhado/erros.js';
-import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
-import { normalizarComando } from '../../compartilhado/projeto/normalizarComando.js';
-import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';
-import { hash } from '../../compartilhado/seguranca/hash.js';
-import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';
-import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { Comando, Projeto } from '../../compartilhado/projeto/contratos.js';
-import { salvarEvidencia } from '../banco/evidencias.js';
-import { classificarResultado } from './classificarResultado.js';
-import { criarEvidenciaInicial } from './criarEvidenciaInicial.js';
-import { Evidencia, resultadoRunnerSchema } from '../tipos/evidencia.js';
-import { solicitarAprovacao } from '../servicoAprovacao.js';
-import { ambienteMinimo } from './validarExecucao.js';
+// ── criarEvidenciaInicial ──
+export function criarEvidenciaInicial(p: Projeto, capability: string, jobId: string, inicio: string): Evidencia {
+  return {kind:'execution_evidence',jobId,projectId:p.manifesto.id,rootHash:hash(p.raiz),manifestHash:p.manifestoHash,scopeHash:null,capability,status:'BLOCKED',reason:'',startedAt:inicio,endedAt:inicio,executed:false,exitCode:null,command:null,approval:null,cases:[],stdout:'',stderr:'',logSha256:hash('\n'),resultArtifact:null,evidenceScope:'round',provenance:'local-process'};
+}
 
-import { escopoDaExecucao } from './validarExecucao.js';
+// ── validarExecucao ──
+/** Escopo atual de uma capability, sem executar nada: usado para pedir e reconhecer autorizações agendadas. */
+export async function escopoDeCapability(p:Projeto,capability:string) {
+  if(p.manifesto.execution.readOnly) throw new ErroQa('POLICY_BLOCKED','Projeto autorizado estritamente para leitura.');
+  if(!Object.hasOwn(p.manifesto.commands,capability)) throw new ErroQa('CAPABILITY_NOT_ALLOWED','Capability inexistente.');
+  if(p.manifesto.execution.blockedByDefault.includes(capability)) throw new ErroQa('POLICY_BLOCKED','Execução bloqueada pelo contrato.');
+  const c=normalizarComando(p.manifesto.commands[capability]!); const command=JSON.stringify({...c,env:Object.fromEntries(Object.keys(c.env).map(n=>[n,'[DECLARED]']))});
+  await caminhoSeguro(p.raiz,c.cwd); const env=ambienteMinimo(p,c,'escopo'); for(const f of c.requiredFiles) await caminhoSeguro(p.raiz,f);
+  return { scopeHash:await escopoDaExecucao(p,c,env), command };
+}
 
-import { Delegada } from '../tipos/autorizacoes.js';
-import path from 'node:path';
+export async function escopoDaExecucao(p:Projeto,c:Comando,env:NodeJS.ProcessEnv) {
+  const inv=await inventariar(p); const fontes=inv.fontes.map(({path,sha256})=>({path,sha256}));
+  for(const arg of c.executable==='node' ? c.args.filter(v=>v!=='--test') : ['package.json']) {
+    const rel=path.join(c.cwd,arg); fontes.push({path:rel,sha256:hash(await lerSeguro(p.raiz,rel))});
+  }
+  // O PRUMO_JOB_ID muda a cada execução; fora do hash o escopo fica estável e uma autorização prévia pode ser reconhecida.
+  const { PRUMO_JOB_ID:_ignorado, ...envEstavel }=env;
+  return hash(JSON.stringify({root:p.raiz,manifest:p.manifestoHash,command:c,env:envEstavel,fontes}));
+}
 
+export function ambienteMinimo(p:Projeto,c:Comando,jobId:string) {
+  const env:NodeJS.ProcessEnv={};
+  // Não repassa PATH, HOME, NODE_OPTIONS, NODE_TEST_CONTEXT nem configurações npm.
+  if (process.platform==='win32' && process.env.SystemRoot) { env.SystemRoot=process.env.SystemRoot; env.WINDIR=process.env.SystemRoot; }
+  for (const n of p.manifesto.execution.envAllowlist) {
+    const valor=c.env[n] ?? process.env[n]; if (valor!==undefined) env[n]=valor;
+  }
+  if(c.executable==='npm') env.PATH=[path.dirname(process.execPath),...(process.platform==='win32'&&process.env.SystemRoot?[path.join(process.env.SystemRoot,'System32')]:[])].join(path.delimiter);
+  // Aplicativo empacotado: process.execPath é o Electron; sem isto o filho abriria a janela do Prumo.
+  if(c.executable==='node' && process.versions.electron) env.ELECTRON_RUN_AS_NODE='1';
+  env.PRUMO_JOB_ID=jobId;
+  return env;
+}
+
+// ── executarValidacao ──
 async function encerrarArvoreDeProcessos(pid:number|undefined) {
   if (!pid) return;
   if (process.platform==='win32' && process.env.SystemRoot) {
@@ -33,7 +78,6 @@ async function encerrarArvoreDeProcessos(pid:number|undefined) {
     });
   } else { try { process.kill(-pid,'SIGKILL'); } catch { try { process.kill(pid,'SIGKILL'); } catch {} } }
 }
-
 
 export async function gravarRelatorioRedigido(p:Projeto,e:Evidencia,jobId:string,resultadoRel:string):Promise<void> {
   // Artefato bruto pode conter segredos: só persistir versão redigida.
@@ -46,7 +90,6 @@ export async function gravarRelatorioRedigido(p:Projeto,e:Evidencia,jobId:string
   else { try { const resultadoPath=await caminhoSeguro(p.raiz,resultadoRel,true);await fs.unlink(resultadoPath); } catch {} }
 }
 
-
 export function mascararLogsDaExecucao(p: Projeto, env: NodeJS.ProcessEnv, stdout: Buffer[], stderr: Buffer[]) {
   const segredos=[...Object.entries(process.env).filter(([n])=>/token|secret|password|api.?key/i.test(n)).map(([,v])=>v!),...p.manifesto.execution.envAllowlist.map(n=>env[n]!)].filter(Boolean);
   return {
@@ -56,14 +99,12 @@ export function mascararLogsDaExecucao(p: Projeto, env: NodeJS.ProcessEnv, stdou
   };
 }
 
-
 async function resolverExecutavel(c:Comando) {
   if(c.executable==='node') return { executable:process.execPath,args:c.args };
   const candidatos=[path.join(path.dirname(process.execPath),'node_modules/npm/bin/npm-cli.js'),path.join(path.dirname(process.execPath),'../lib/node_modules/npm/bin/npm-cli.js')];
   for(const f of candidatos) { try { await fs.access(f); return { executable:process.execPath,args:[await fs.realpath(f),...c.args] }; } catch {} }
   throw new ErroQa('RUNTIME_MISSING','npm-cli.js não encontrado junto ao Node. Use comando node ou instale Node com npm.');
 }
-
 
 export async function executarValidacao(p:Projeto,capability:string,solicitar=false,delegada?:Delegada,signal?:AbortSignal) {
   const jobId=randomUUID(); const inicio=new Date().toISOString();

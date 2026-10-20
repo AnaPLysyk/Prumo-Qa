@@ -1,16 +1,21 @@
-/** Prepara, executa e lista runs locais conforme o projeto selecionado. */
+/** Ciclo das runs e publicação — arquivos relacionados agrupados para manutenção. */
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { obterEspaco, listarEspacos } from "../projetos/banco/projetos.js";
 import { alterarRunLocal, obterRunLocal, gravarRunsLocais, lerRunsLocais } from "./banco/runs.js";
 import { Dep, Execucao, RunLocal, runSchema } from "./tipos/runLocal.js";
 import { Evidencia } from "./tipos/evidencia.js";
 import { listarRotinas } from "../agendamentos/banco/agenda.js";
-import { listarTrabalhos } from "../agendamentos/banco/fila.js";
+import { listarTrabalhos, obterTrabalho } from "../agendamentos/banco/fila.js";
 import { Trabalho } from "../agendamentos/tipos/fila.js";
 import { Espaco } from "../projetos/contratos.js";
-import { FiltroExecucoes, filtroExecucoes } from "./tipos/historicoDeExecucoes.js";
+import { FiltroExecucoes, filtroExecucoes } from "./tipos/evidencia.js";
 import { randomUUID } from "node:crypto";
+import { ErroServico } from "../conexoes/integracoes/ErroServico.js";
+import { politicaCobre } from "../agendamentos/autorizacoes/autorizarRotina.js";
+import { publicacaoDoTrabalho } from "./banco/publicacoes.js";
+import { montarComentario } from "./regras/propostasDeBugs.js";
 
+// ── servicoExecucoes ──
 function aplicarEvidencia(run: RunLocal, capability: string, ev: Evidencia, agora: string) {
   const mesmos = run.casos.filter(c => c.capability === capability && c.resultado?.origem !== 'MANUAL'); const semCenario = mesmos.filter(c => !c.casoRunner);
   for (const c of mesmos) {
@@ -123,3 +128,24 @@ export function prepararRunLocal(espacoId: string, d: { titulo: string; ambiente
   const run = runSchema.parse({ id: randomUUID(), espacoId, titulo: d.titulo.trim().slice(0, 255), ambiente: d.ambiente, runIdRemoto: null, planoId: d.planoId ?? null, marcoId: d.marcoId ?? null, ambienteQaseId: d.ambienteQaseId ?? null, estado: 'PREPARADA', confirmadaNoQase: false, criadaEm: t, atualizadaEm: t, casos, execucoes: [], publicacoes: [] });
   const reg = lerRunsLocais(b); reg.itens.push(run); gravarRunsLocais(reg, b); return run;
 }
+
+// ── servicoPublicacao ──
+export const codigoDoErroDePublicacao = (e: unknown) => e instanceof ErroServico ? e.codigo : (e as Error)?.message?.match(/^[A-Z_]{3,60}/)?.[0] ?? 'JIRA_PUBLISH_FAILED';
+
+/** Trabalhos agendados concluídos com ticket e política que cubra: prepara o registro; senão marca a razão (nunca publica sem política). */
+export function elegivelParaPublicar(t: Trabalho, b?: string, agora = new Date()): 'SIM' | 'NAO_APLICAVEL' | 'SEM_POLITICA' {
+  if (t.estado !== 'CONCLUIDO' || !t.ticket || (t.resultado?.status !== 'PASS' && t.resultado?.status !== 'FAIL')) return 'NAO_APLICAVEL';
+  if (t.jira.estado === 'PUBLICADO') return 'NAO_APLICAVEL';
+  return politicaCobre(t.espacoId, t.ticket, t.tipo, b, agora) ? 'SIM' : 'SEM_POLITICA';
+}
+
+/** Prévia: nada é gravado nem enviado. */
+export function prepararPublicacao(trabalhoId: string, b?: string) {
+  const t = obterTrabalho(trabalhoId, b); const c = montarComentario(t, obterEspaco(t.espacoId, b).nome);
+  const existente = publicacaoDoTrabalho(t.id, b);
+  return { ticket: t.ticket!, texto: c.texto, estado: existente?.estado ?? 'NAO_PUBLICADO', comentarioId: existente?.comentarioId ?? null };
+}
+
+/** Diz se vale tentar publicar de novo (tempo esgotado, serviço fora ou limite de consultas). */
+
+export const publicacaoPodeRepetir = (cod: string) => ['SERVICE_TIMEOUT', 'SERVICE_UNAVAILABLE', 'SERVICE_RATE_LIMIT'].includes(cod);

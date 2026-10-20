@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { MeiosDoServidorMcp } from '../tipos/mcp.js';
 import { promptsPrumo, sempre } from '../tipos/roteiros.js';
 import { contaAutorizadaMcp, conferirAcessoMcp } from './segurancaDaSessao.js';
-import { exigirCapacidade } from '../servicoCapacidades.js';
+import { exigirCapacidade } from '../servicoPoliticas.js';
 import { personalidadeParaIa } from '../servicoEstiloDoChat.js';
 
 /** Prepara as entradas disponíveis e verifica as autorizações exigidas por cada roteiro. */

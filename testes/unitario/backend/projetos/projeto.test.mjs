@@ -5,13 +5,13 @@ import path from 'node:path';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { contextoProjeto } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
-import { normalizarComando } from '../../../../dist/compartilhado/projeto/normalizarComando.js';
+import { normalizarComando } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { caminhoSeguro } from '../../../../dist/compartilhado/seguranca/caminhoSeguro.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../../../dist/compartilhado/seguranca/lerSeguro.js';
 import { mascarar } from '../../../../dist/compartilhado/seguranca/mascarar.js';
 import { consultarEvidencias } from '../../../../dist/testes/banco/evidencias.js';
-import { classificarResultado as classificar } from '../../../../dist/testes/regras/classificarResultado.js';
+import { classificarResultado as classificar } from '../../../../dist/testes/regras/executarValidacao.js';
 
 test('fixtures API, web e automação reconhecidas com fontes reais',async t=>{
   for(const [dep,tipo] of [['express','api'],['@angular/core','web'],['@playwright/test','automacao']]){

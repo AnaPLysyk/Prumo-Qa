@@ -1,3 +1,7 @@
+/** Tipos de automação, cobertura e vínculos — arquivos relacionados agrupados para manutenção. */
+import { z } from "zod";
+
+// ── catalogoDeTestes ──
 /** Tipos de teste, formato do catálogo e as pastas e limites usados ao procurar testes. */
 
 /**
@@ -34,3 +38,72 @@ export const QASE_PADROES: RegExp[] = [
   /@qase[-_(]\s*['"]?(?<ids>\d{1,9})/gi,
   /\bqase(?:[ _-]?id)?\s*[:=#]\s*(?:(?<projeto>[A-Z][A-Z0-9]*)-)?(?<ids>\d{1,9})/gi
 ];
+
+// ── frameworks ──
+/** Formato de um framework detectado e de um achado de teste, com as fontes oficiais do Playwright. */
+
+/**
+ * Conhecimento especializado de engenharia de testes: detecção do framework por evidências reais e análise estática
+ * determinística de arquivos de teste. Não há modelo de IA aqui: a IA hospedeira usa estes achados e a Skill do framework.
+ * Só lê o que o inventário autorizado do projeto já trouxe; nunca altera testes nem executa código do projeto.
+ */
+export type Fonte = { path: string; content: string };
+
+export type Framework = { id: 'playwright' | 'api-rest'; nome: string; estado: 'CONFIRMADO' | 'PROVAVEL' | 'INCERTO'; evidencias: string[]; skill: string; observacao?: string };
+
+export const doc = 'https://playwright.dev/docs';
+
+export const conhecimento = {
+  playwright: { id: 'playwright', nome: 'Playwright (TypeScript/JavaScript)', skill: 'backend/agentes/skills/playwright/SKILL.md', fontes: [`${doc}/best-practices`, `${doc}/locators`, `${doc}/test-assertions`, `${doc}/test-retries`, `${doc}/actionability`, `${doc}/writing-tests`, `${doc}/api-testing`] },
+  'api-rest': { id: 'api-rest', nome: 'Fundamentos de testes de API REST', skill: 'backend/agentes/skills/api-rest/SKILL.md', fontes: [`${doc}/api-testing`] }
+} as const;
+
+export const config = /(^|[\\/])playwright\.config\.(ts|js|mjs|cjs)$/;
+
+export type AchadoTeste = { regra: string; severidade: 'high' | 'medium' | 'low'; arquivo: string; linha: number; trecho: string; orientacao: string; fonte: string };
+
+// ── revisaoDeCobertura ──
+const texto = z.string().max(4000);
+
+const cenarioSchema = z.object({
+  id: z.string().min(1).max(80), behavior: texto, source: texto.optional(), risk: texto.optional(),
+  expected: texto.optional(), oracle: texto.optional(), technique: z.enum(['equivalence','boundary','decision_table','state_transition','white_box','experience']).optional(),
+  partition: texto.optional(), conditions: texto.optional(), boundary: z.number().optional(),
+  testPath: texto.optional(), blockedReason: texto.optional()
+}).strict();
+
+export const revisaoSchema = z.object({
+  requirement: texto, source: texto, sourcePath: texto.optional(),
+  existingTests: z.array(cenarioSchema).max(100), candidates: z.array(cenarioSchema).max(100),
+  contradictions: z.array(z.object({ source: texto, statement: texto }).strict()).max(20).default([]),
+  contextoId: z.string().uuid().optional()
+}).strict();
+
+export type Revisao = z.infer<typeof revisaoSchema>;
+
+/** Um achado da revisão: tipo (ex.: MISSING_ORACLE), severidade, cenário, fonte, recomendação e evidências. */
+type AchadoDeCobertura = { type: string; severity: string; scenario?: string; source: string; recommendation: string; evidence: unknown[] };
+
+/** O caderno da revisão, preenchido etapa por etapa: achados, fatos lidos, hipóteses e o que falta. */
+export type AnaliseDeCobertura = {
+  findings: AchadoDeCobertura[]; facts: unknown[]; hypotheses: unknown[]; missing: string[];
+  registrar: (type: string, recommendation: string, scenario?: string, severity?: string) => void;
+};
+
+// ── mapaDeVinculos ──
+/** Formato dos nós e ligações do mapa de rastreabilidade. */
+
+/**
+ * Mapa de vínculos do projeto: Projeto Prumo <-> Jira <-> Qase <-> repositório <-> ticket <-> caso <-> plano <-> run <-> execução <-> evidência.
+ * Só mostra o que foi CADASTRADO pela pessoa, REGISTRADO por um fluxo do Prumo OBSERVADO numa execução ou OBSERVADO_NO_CODIGO por leitura estática. Relação cadastrada não prova cobertura;
+ * "lacunas" listam apenas ausência de cadastro. Nada é deduzido por semelhança de nomes.
+ */
+type No = { id: string; tipo: string; rotulo: string; detalhe?: string; estado?: string };
+
+type Aresta = { de: string; para: string; tipo: string; origem: 'DECLARADO_PELO_USUARIO' | 'REGISTRADO_PELO_PRUMO' | 'OBSERVADO' | 'OBSERVADO_NO_CODIGO'; nota?: string };
+
+/** O grafo em construção: nós e ligações já anotados, e como acrescentar cada um sem repetir. */
+export type GrafoDeVinculos = { nos: Map<string, No>; arestas: Aresta[]; no: (n: No) => string; ar: (a: Aresta) => void };
+
+/** Uma lacuna de cadastro: caso sem automação, caso sem ticket ou ticket sem caso. */
+export type LacunaDoMapa = { tipo: string; id: string; mensagem: string };

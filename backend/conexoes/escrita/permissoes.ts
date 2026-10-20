@@ -4,7 +4,7 @@ import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { Servico } from '../../projetos/contratos.js';
 import { obterEspaco } from '../../projetos/banco/projetos.js';
 import { permSchema } from '../tipos/operacoesExternas.js';
-import { rotas } from '../tipos/rotasDeEscrita.js';
+import { rotas } from '../tipos/escritaGithub.js';
 
 /** A escrita começa desativada, inclusive para contas com credenciais válidas. */
 export function escritaHabilitada(espacoId: string, servico: Servico, base?: string) {

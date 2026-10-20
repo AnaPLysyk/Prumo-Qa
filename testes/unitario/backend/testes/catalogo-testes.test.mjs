@@ -6,7 +6,7 @@ import path from 'node:path';
 import { arquivoDeTeste } from '../../../../dist/testes/servicoClassificacao.js';
 import { catalogoDeTestes } from '../../../../dist/testes/servicoClassificacao.js';
 import { classificarTeste as classificar } from '../../../../dist/testes/servicoClassificacao.js';
-import { idsQase } from '../../../../dist/testes/regras/anotarQase.js';
+import { idsQase } from '../../../../dist/testes/regras/propostasDeBugs.js';
 
 // Repositório 100% sintético em diretório temporário: nada de projeto real.
 function repo(t, arquivos) {

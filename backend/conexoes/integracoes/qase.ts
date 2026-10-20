@@ -1,13 +1,13 @@
 /** Consulta e converte dados externos da integração com Qase. */
 import { z } from "zod";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
-import { ParametrosConsulta } from "../tipos/ParametrosConsulta.js";
-import { ResultadoConsulta } from "../tipos/ParametrosConsulta.js";
-import { camposDeSistema } from "../../testes/integracoes/formatosQase.js";
-import { parametrosDaUrl, idNumericoDaConsulta } from "./formatos.js";
+import { ParametrosConsulta } from "../tipos/adaptador.js";
+import { ResultadoConsulta } from "../tipos/adaptador.js";
+import { camposDeSistema } from "../../testes/integracoes/casosQase.js";
+import { parametrosDaUrl, idNumericoDaConsulta } from "./configuracaoDosServicos.js";
 import { Recurso } from "../../projetos/contratos.js";
 import { OperacaoServico, PlanoDaConsulta } from "../tipos/adaptador.js";
-import { Filtros } from "../tipos/leituras.js";
+import { Filtros } from "../tipos/adaptador.js";
 import { paginaSchema } from "../tipos/transporte.js";
 import { ErroServico } from "./ErroServico.js";
 

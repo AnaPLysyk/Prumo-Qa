@@ -1,6 +1,6 @@
 /** Lê e grava o perfil individual de cada conta no banco de conhecimento. */
 import { comBancoDeConhecimento } from "./comBancoDeConhecimento.js";
-import { pessoaDoConhecimento, falharConhecimento } from "./baseDoConhecimento.js";
+import { pessoaDoConhecimento, falharConhecimento } from "./comBancoDeConhecimento.js";
 import { Linha, Perfil } from "../tipos/conhecimento.js";
 import { Experiencia, Papel, experiencias, papeis } from "../tipos/persona.js";
 import { normalizarFoco, normalizarNome } from "../regras/normalizacaoDoConhecimento.js";

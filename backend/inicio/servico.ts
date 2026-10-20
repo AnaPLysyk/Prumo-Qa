@@ -1,14 +1,29 @@
-/** Lógica e contratos de inicio: operações relacionadas no mesmo módulo. */
+/** Painel inicial: dados e contratos — arquivos relacionados agrupados para manutenção. */
 import { listarTrabalhos } from "../agendamentos/banco/fila.js";
-import { dataEmPortugues } from "../compartilhado/texto.js";
-import { semAcentos } from "../compartilhado/texto.js";
+import { dataEmPortugues, semAcentos } from "../compartilhado/texto.js";
 import { listarContextosDaPasta } from "../agentes/regras/consultasDeContextos.js";
-import { Fonte, Resposta, pare } from "./contratos.js";
 import { metricasDasExecucoes } from "../metricas/servico.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";
 import { listarRunsLocais } from "../testes/banco/runs.js";
 import { listarPropostas } from "../tickets/banco/tickets.js";
 
+// ── contratos ──
+/** Lógica e contratos de inicio: operações relacionadas no mesmo módulo. */
+
+
+/** Formato da resposta do assistente local do Início (linhas e fontes) e as palavras ignoradas nas perguntas. */
+
+/**
+ * Assistente local do Prumo: responde só com o que existe neste computador (contextos aprovados, propostas, runs,
+ * execuções, agenda). Não é um modelo de IA, não consulta a rede e não inventa: sem dado, diz que não encontrou.
+ */
+export type Fonte = { rotulo: string; aba: string };
+
+export type Resposta = { linhas: string[]; fontes: Fonte[]; modo: 'LOCAL' };
+
+export const pare = new Set(['qual', 'quais', 'como', 'onde', 'quando', 'sobre', 'para', 'com', 'que', 'uma', 'uns', 'dos', 'das', 'tem', 'tenho', 'este', 'esta', 'esse', 'essa', 'projeto', 'prumo', 'tudo', 'algum', 'alguma', 'esta', 'esse']);
+
+// ── servico ──
 /** Identifica palavras-chave no texto normalizado da pergunta sem consultar serviços externos. */
 const perguntaTemPalavra = (p: string, ...palavras: string[]) => palavras.some((palavra) => p.includes(palavra));
 

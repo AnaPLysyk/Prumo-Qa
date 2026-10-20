@@ -1,13 +1,57 @@
-/** Comandos de consulta do terminal: atividades, evidências e indicadores. */
-import { Projeto } from '../compartilhado/projeto/contratos.js';
-import { consultarAtividades } from '../logs/banco/atividades.js';
-import {
-  avisarHistoricoIncompleto, imprimirJson, linhaDaOperacao, textoSeguroNoTerminal
-} from './saidaDoTerminal.js';
-import { consultarEvidencias } from '../testes/banco/evidencias.js';
-import { chamadaRegistrada } from './chamadaRegistrada.js';
-import { calcularMetricas } from '../metricas/servico.js';
+/** CLI: consultas, logs e conexões — arquivos relacionados agrupados para manutenção. */
+import { mascarar } from "../compartilhado/seguranca/mascarar.js";
+import { descreverAchados } from "../logs/regras/resumoDoDiario.js";
+import { Evento } from "../logs/contratos.js";
+import { Projeto } from "../compartilhado/projeto/contratos.js";
+import { observar } from "../logs/regras/iniciarAtividade.js";
+import { consultarAtividades } from "../logs/banco/atividades.js";
+import { consultarEvidencias } from "../testes/banco/evidencias.js";
+import { calcularMetricas } from "../metricas/servico.js";
+import { aplicarConexao, prepararConexao } from "../conexoes/ia/conectarIa.js";
+import { perguntarNoTerminal } from "./perguntarNoTerminal.js";
+import { setTimeout as esperar } from "node:timers/promises";
 
+// ── saidaDoTerminal ──
+export const avisarHistoricoIncompleto = (registros: unknown[]) => {
+  if (registros.length) {
+    console.error('HISTORY_INCOMPLETE: registros inválidos/truncados excluídos; métricas são parciais.');
+    process.exitCode = 3;
+  }
+};
+
+export const imprimirJson = (valor: unknown) =>
+  console.log(JSON.stringify(valor, null, 2));
+
+/** Linha do diário, sempre com indicação de evidências e achados reais. */
+export function linhaDaOperacao(evento: Evento) {
+  const e = evento;
+  return `${e.at} · ${e.tool} · ${e.origin}/${e.client} (identidade declarada) · ${e.phase === 'start' ? 'SEM TÉRMINO OBSERVADO' : e.state} · ${e.durationMs} ms
+  ${e.summary.findings} achados · ${e.summary.recommendations} recomendações · ${e.summary.gaps} lacunas · ${e.summary.candidateRedundancies} redundâncias candidatas
+  operação ${e.operationId}${e.summary.code ? ' · ' + e.summary.code : ''}${e.summary.evidenceJobId ? ' · evidência ' + e.summary.evidenceJobId + (e.summary.evidencePersisted === false ? ' (não persistida)' : '') : ''}${e.summary.types.length ? '\n  ' + descreverAchados(e) : ''}`;
+}
+
+export const textoSeguroNoTerminal = (texto: string) =>
+  mascarar(texto).replace(/[\x00-\x1f\x7f-\x9f]/g, ' ');
+
+// ── chamadaRegistrada ──
+/** Erros ao registrar o diário não descartam a resposta da operação. */
+const avisarFalhaDeRegistroNoTerminal = (fase: string, id: string): void => {
+  console.error(
+    `PRUMO_OBSERVABILITY_ERROR phase=${fase} operationId=${id}; resultado do núcleo preservado. Confira diretório de dados, permissões e limites.`
+  );
+  if (!process.exitCode) process.exitCode = 3;
+};
+
+export const chamadaRegistrada = <T>(
+  projeto: Projeto,
+  ferramenta: string,
+  entrada: unknown,
+  executar: () => Promise<T>
+) => observar(projeto, ferramenta, { origin: 'CLI' }, entrada, executar, {
+  diagnostico: avisarFalhaDeRegistroNoTerminal
+});
+
+// ── consultasDoTerminal ──
 /** Resume as últimas 20 atividades, sem apresentar um histórico parcial como completo. */
 export function comandoAtividade(projeto: Projeto, json = false) {
   const historico = consultarAtividades(projeto);
@@ -81,4 +125,34 @@ export function comandoMetricas(projeto: Projeto, json = false) {
     'Tokens/custos: ' + metricas.providerMetrics,
     'Alterações aplicadas pela IA: não observadas pelo Prumo.'
   ].join('\n'));
+}
+
+// ── comandoConectar ──
+export async function comandoConectar(p:Projeto,cliente:string,contrato?:string,json=false,interagir=true) {
+  const plano=prepararConexao(p,cliente,contrato);
+  if(json){imprimirJson(plano);return;}
+  console.log(`CONEXÃO · ${cliente}\nProjeto validado: ${textoSeguroNoTerminal(p.manifesto.name)}\nRaiz: ${p.raiz}\nDestino: ${plano.destination}\nNome: ${plano.name}\nCliente ${plano.installed?'localizado':'não instalado'}\n\n${plano.command}\n\n${plano.notice}`);
+  if(!interagir||!process.stdin.isTTY||!process.stdout.isTTY||!plano.installed||plano.manualOnly||cliente!=='codex'){console.log('Revise e execute o comando acima quando desejar configurar o cliente.');return;}
+  const confirmacao=await perguntarNoTerminal(`Para adicionar SEM sobrescrever, digite "${plano.confirmation}" (Enter cancela): `);
+  imprimirJson(aplicarConexao(plano,confirmacao));
+}
+
+// ── comandoLogs ──
+export async function comandoLogs(p:Projeto,json:boolean,follow:boolean) {
+  const emitir=(e:Evento)=>console.log(json?JSON.stringify(e):`${e.phase==='start'?'INÍCIO':'TÉRMINO'} · ${linhaDaOperacao(e)}`);
+  if(!follow){const h=consultarAtividades(p);avisarHistoricoIncompleto(h.problems);h.events.forEach(emitir);if(!json&&!h.events.length)console.log('Não existem logs registrados.');return;}
+  if(!json)console.log('Acompanhando logs locais. Ctrl+C encerra. Aguardando operações...');
+  const ctrl=new AbortController();const parar=()=>ctrl.abort();process.on('SIGINT',parar);process.on('SIGTERM',parar);
+  try{await acompanharLogs(p,emitir,{signal:ctrl.signal,problemas: avisarHistoricoIncompleto});}finally{process.off('SIGINT',parar);process.off('SIGTERM',parar);}
+}
+
+/** Acompanha somente os eventos locais até a interrupção solicitada. */
+export async function acompanharLogs(p:Projeto,emitir:(e:Evento)=>void,opcoes:{signal:AbortSignal;base?:string;intervalMs?:number;problemas?:(p:ReturnType<typeof consultarAtividades>['problems'])=>void}) {
+  const vistos=new Set<string>();let ultimosProblemas='';
+  while(!opcoes.signal.aborted) {
+    const h=consultarAtividades(p,opcoes.base);
+    for(const e of h.events) {const chave=e.operationId+e.phase;if(!vistos.has(chave)){vistos.add(chave);emitir(e);}}
+    const problemas=JSON.stringify(h.problems);if(problemas!==ultimosProblemas&&h.problems.length)opcoes.problemas?.(h.problems);ultimosProblemas=problemas;
+    try{await esperar(opcoes.intervalMs??1000,undefined,{signal:opcoes.signal});}catch(e){if(!opcoes.signal.aborted)throw e;}
+  }
 }

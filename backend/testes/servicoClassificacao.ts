@@ -1,7 +1,7 @@
 /** Identifica arquivos, organiza catálogos e classifica casos de teste. */
 import fs from "node:fs";
 import path from "node:path";
-import { anotarQase } from "./regras/anotarQase.js";
+import { anotarQase } from "./regras/propostasDeBugs.js";
 import { CasoTeste, Catalogo, FeatureTestes, IGNORAR, TipoTeste, limites, tiposDeTeste, Confianca, porTag } from "./tipos/catalogoDeTestes.js";
 
 function analisarArquivoFeature(rel: string, texto: string): { feature: string | null; casos: CasoTeste[] } {

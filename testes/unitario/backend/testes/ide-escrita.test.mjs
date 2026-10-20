@@ -57,7 +57,7 @@ test('não segue atalho de pasta nem de arquivo para fora do projeto', (t) => {
 });
 
 test('pipelines do GitHub Actions: lista nome, eventos e jobs; grava só em .github/workflows e recusa o resto', async (t) => {
-  const { listarPipelines } = await import('../../../../dist/testes/regras/listarPipelines.js');
+  const { listarPipelines } = await import('../../../../dist/testes/regras/escreverArquivoDeTeste.js');
   const raiz = pasta(t);
   assert.deepEqual(listarPipelines(raiz), [], 'sem pasta de workflows não há pipelines');
   const novo = escreverArquivoDeTeste(raiz, '.github/workflows/ci.yml', "name: CI do projeto\non:\n  push:\n    branches: [main]\n  pull_request:\njobs:\n  testes:\n    runs-on: ubuntu-latest\n  lint:\n    runs-on: ubuntu-latest\n", null);

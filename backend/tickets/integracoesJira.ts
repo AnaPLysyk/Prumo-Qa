@@ -10,8 +10,8 @@ import { anexar, comentar, criar, editar, tipos, transicionar, vincular } from "
 import { marcadorDaOperacao } from "../conexoes/escrita/chaveDaOperacao.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { ErroServico } from "../conexoes/integracoes/ErroServico.js";
-import { textoEntreAspasJql } from "../conexoes/integracoes/formatos.js";
-import { Filtros } from "../conexoes/tipos/leituras.js";
+import { textoEntreAspasJql } from "../conexoes/integracoes/configuracaoDosServicos.js";
+import { Filtros } from "../conexoes/tipos/adaptador.js";
 import fs from "node:fs";
 
 export const acharTicketCriadoPeloPrumo = async (ctx: ContextoServico, rec: Recurso, rot: string): Promise<Remoto | null> => {

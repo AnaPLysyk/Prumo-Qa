@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { localizarClienteDeIa } from '../../../../dist/conexoes/ia/localizarClienteDeIa.js';
+import { localizarClienteDeIa } from '../../../../dist/conexoes/ia/conectarIa.js';
 
 // Pasta de usuário e PATH sintéticos: nenhum CLI real é procurado nem executado.
 const emPerfilFalso = (t, montar) => {

@@ -1,7 +1,7 @@
 /** Garante que o início de uma execução ainda não simula autorização nem resultado. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { criarEvidenciaInicial } from '../../../../dist/testes/regras/criarEvidenciaInicial.js';
+import { criarEvidenciaInicial } from '../../../../dist/testes/regras/executarValidacao.js';
 
 test('evidência começa bloqueada, sem execução, autorização ou resultado inventado', () => {
   const projeto = { raiz: 'C:/fixture-projeto', manifestoHash: 'hash-do-contrato', manifesto: { id: 'projeto-fixture' } };

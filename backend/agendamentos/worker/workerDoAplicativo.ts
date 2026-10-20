@@ -1,7 +1,7 @@
 /** Mantém o worker de agendamentos independente da janela; o aplicativo conecta os avisos ao iniciar. */
 import { Worker } from './Worker.js';
 import { type EventoWorker } from '../tipos/worker.js';
-import { servicosDoAplicativo } from '../../conexoes/regras/servicosDoAplicativo.js';
+import { servicosDoAplicativo } from '../../conexoes/regras/nucleoServicos.js';
 
 let notificar: ((evento: EventoWorker) => void) | null = null;
 

@@ -1,15 +1,86 @@
-/** Cria e edita casos e suítes no Qase, mantendo validações e contratos de escrita. */
-import { z } from "zod";
+/** Casos Qase, formatos, vínculo e automação — arquivos relacionados agrupados para manutenção. */
 import { codificarParaUrl } from "../../compartilhado/texto.js";
-import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
+import { ContextoServico } from "../../conexoes/tipos/adaptador.js";
+import { Recurso } from "../../projetos/contratos.js";
+import { z } from "zod";
 import { DefOperacao, Remoto } from "../../conexoes/tipos/operacao.js";
-import { acharCasoNoQase, listarNoQase, tituloComparavel } from "./pesquisasQase.js";
-import { associarCasoAoTicket } from "./vinculosComTickets.js";
-import { automacaoLida, flagsDeAutomacao } from "./automacaoNoQase.js";
-import { corpoDoCasoQase, idCriadoNoQase } from "./formatosQase.js";
-import { esquemaCaso, editarCaso, criarSuite } from "../tipos/escritaQase.js";
+import { associarTicket, esquemaCaso, editarCaso, criarSuite } from "../tipos/escritaQase.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
+import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
+import { acharCasoNoQase, listarNoQase, tituloComparavel } from "./pesquisasQase.js";
 
+// ── vinculosComTickets ──
+export const associarCasoAoTicket = (ctx: ContextoServico, rec: Recurso, casoId: string, t: string) =>
+  ctx.enviar('POST', `/v1/case/${codificarParaUrl(rec.chave)}/external-issue/attach`, JSON.stringify({ type: 'jira-cloud', links: [{ case_id: Number(casoId), external_issues: [t] }] }));
+
+export const associarTicketAoCasoNoQase: DefOperacao<z.infer<typeof associarTicket>> = {
+  id: 'qase.associar_ticket', servico: 'qase', rotulo: 'Associar caso do Qase a ticket do Jira', efeito: 'Registra no Qase o ticket Jira (jira-cloud) de origem do caso.', exigeConfirmacao: true, schema: associarTicket,
+  resumo: p => `Associar caso ${p.casoId} ao ticket ${p.ticket}`,
+  async executar(ctx, rec, p) { await ctx.ler(`/v1/case/${codificarParaUrl(rec.chave)}/${p.casoId}`); await associarCasoAoTicket(ctx, rec, String(p.casoId), p.ticket); return { id: String(p.casoId), chave: p.ticket }; },
+  async reconciliar(ctx, rec, p) {
+    const c = z.object({ result: z.object({ external_issues: z.array(z.object({ type: z.string().optional(), issues: z.array(z.object({ id: z.string() }).passthrough()).default([]) }).passthrough()).default([]) }).passthrough() }).passthrough().parse(await ctx.ler(`/v1/case/${codificarParaUrl(rec.chave)}/${p.casoId}?include=external_issues`));
+    return c.result.external_issues.some(g => g.type === 'jira-cloud' && g.issues.some(i => i.id === p.ticket)) ? { id: String(p.casoId), chave: p.ticket } : null;
+  },
+  async confirmar(ctx, rec, p) {
+    const c = z.object({ result: z.object({
+      external_issues: z.array(z.object({
+        type: z.string().optional(), issues: z.array(z.object({ id: z.string() }).passthrough()).default([])
+      }).passthrough()).default([])
+    }).passthrough() }).passthrough().parse(
+      await ctx.ler(`/v1/case/${codificarParaUrl(rec.chave)}/${p.casoId}?include=external_issues`)
+    );
+    return c.result.external_issues.some(g => g.type === 'jira-cloud' && g.issues.some(i => i.id === p.ticket));
+  }
+};
+
+// ── automacaoNoQase ──
+/** Converte o tipo de automação do caso para o formato do Qase (0/1 no envio) e lê qualquer formato que o Qase devolva. */
+// A documentação descreve isManual/isToBeAutomated como boolean, mas a API real (homologada em 15/10/2026) recusa true/false:
+// "Allowed values: 0, 1". A leitura aceita boolean, 0/1 ou o campo antigo `automation` (0 manual, 1 a automatizar, 2 automatizado).
+type Automacao = 'manual' | 'a-automatizar' | 'automatizado';
+
+export const flagsDeAutomacao = (a: Automacao) => ({ isManual: a === 'automatizado' ? 0 : 1, isToBeAutomated: a === 'a-automatizar' ? 1 : 0 });
+
+const comoBool = (v: unknown) => (v === true || v === 1 ? true : v === false || v === 0 ? false : undefined);
+
+export function automacaoLida(c: { isManual?: unknown; isToBeAutomated?: unknown; automation?: unknown }): Automacao | undefined {
+  const manual = comoBool(c.isManual), aAutomatizar = comoBool(c.isToBeAutomated);
+  if (manual !== undefined) return !manual ? 'automatizado' : aAutomatizar ? 'a-automatizar' : 'manual';
+  return c.automation === 0 ? 'manual' : c.automation === 1 ? 'a-automatizar' : c.automation === 2 ? 'automatizado' : undefined;
+}
+
+// ── formatosQase ──
+/** Confere casos do plano/run releitos do Qase: IDs, não apenas quantidade. */
+export const conferirIdsDoObjetoQase = (valor: unknown, esperados: number[]): boolean => {
+  if (!Array.isArray(valor)) return false;
+  const ids = valor.map((x: unknown): number | null => {
+    const candidato = typeof x === 'number' || typeof x === 'string'
+      ? x
+      : x !== null && typeof x === 'object' && ('id' in x || 'case_id' in x)
+        ? ('case_id' in x ? x.case_id : x.id) : null;
+    if ((typeof candidato !== 'number' && typeof candidato !== 'string') || String(candidato).trim() === '') return null;
+    const id = Number(candidato);
+    return Number.isSafeInteger(id) && id > 0 ? id : null;
+  });
+  if (ids.includes(null)) return false;
+  const esperadosUnicos = new Set(esperados);
+  const lidosUnicos = new Set(ids);
+  return ids.length === lidosUnicos.size && lidosUnicos.size === esperadosUnicos.size &&
+    [...esperadosUnicos].every(id => lidosUnicos.has(id));
+};
+
+export const corpoDoCasoQase = (p: z.infer<typeof esquemaCaso>) => ({
+  title: mascarar(p.titulo), description: mascarar(p.descricao), preconditions: mascarar(p.preCondicoes), postconditions: mascarar(p.posCondicoes),
+  steps: p.passos.map(s => ({ action: mascarar(s.acao), expected_result: mascarar(s.esperado), data: mascarar(s.dados) })), steps_type: 'classic',
+  ...flagsDeAutomacao(p.automacao), tags: p.tags,
+  ...(p.suiteId ? { suite_id: p.suiteId } : {}), ...(p.prioridade !== undefined ? { priority: p.prioridade } : {}), ...(p.severidade !== undefined ? { severity: p.severidade } : {}), ...(p.tipo !== undefined ? { type: p.tipo } : {})
+});
+
+export const camposDeSistema = async (ctx: ContextoServico) => z.object({ result: z.array(z.record(z.unknown())).default([]) }).passthrough().parse(await ctx.ler('/v1/system_field')).result.slice(0, 40).map(c => ctx.limpar(c));
+
+export const idCriadoNoQase = (v: unknown) => z.object({ result: z.object({ id: z.union([z.number(), z.string()]).transform(String) }).passthrough() }).passthrough().parse(v).result.id;
+
+// ── casosQase ──
 export const criarCasoNoQase: DefOperacao<z.infer<typeof esquemaCaso>> = {
   id: 'qase.criar_caso', servico: 'qase', rotulo: 'Criar caso de teste no Qase', efeito: 'Cria um caso (com passos e resultado esperado) no projeto Qase vinculado e, se informado, o associa ao ticket Jira de origem. Casos com o mesmo título na mesma suite não são duplicados.', exigeConfirmacao: true, schema: esquemaCaso,
   resumo: p => `Criar caso "${p.titulo}" (${p.passos.length} passo(s), ${p.automacao})${p.ticket ? ` para ${p.ticket}` : ''}`,

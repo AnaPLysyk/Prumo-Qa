@@ -1,13 +1,38 @@
-/** Prepara e aplica a conexão de clientes de IA com o Prumo, incluindo o comando de terminal. */
+/** Configuração de Codex e Claude — arquivos relacionados agrupados para manutenção. */
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { hash } from "../../compartilhado/seguranca/hash.js";
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
-import { localizarClienteDeIa } from "./localizarClienteDeIa.js";
 import { pastaAtividades } from "../../logs/banco/atividades.js";
 import { spawnSync } from "node:child_process";
 
+// ── localizarClienteDeIa ──
+export function localizarClienteDeIa(cliente:'codex'|'claude') {
+  const pastas=(process.env.PATH??'').split(path.delimiter).filter(d=>path.isAbsolute(d));
+  // Instalação oficial do Codex Desktop também oferece CLI fora do PATH.
+  if(cliente==='codex'&&process.platform==='win32'&&process.env.LOCALAPPDATA) {
+    const pasta=path.join(process.env.LOCALAPPDATA,'OpenAI','Codex','bin');
+    try { for(const d of fs.readdirSync(pasta).sort().reverse())pastas.push(path.join(pasta,d)); } catch { /* Não instalado aqui. */ }
+  }
+  // A extensão Claude Code do VS Code traz o claude.exe dentro da própria pasta, fora do PATH (usa a versão mais nova instalada).
+  if(cliente==='claude'&&process.platform==='win32') {
+    const extensoes=path.join(process.env.USERPROFILE??os.homedir(),'.vscode','extensions');
+    try { for(const d of fs.readdirSync(extensoes).filter(n=>n.startsWith('anthropic.claude-code-')).sort((a,b)=>b.localeCompare(a,undefined,{numeric:true})))pastas.push(path.join(extensoes,d,'resources','native-binary')); } catch { /* VS Code não instalado aqui. */ }
+  }
+  // macOS e Linux: aplicativos abertos pelo Dock ou pelo menu recebem um PATH mínimo; procura também onde os CLIs costumam ficar.
+  if(process.platform!=='win32') for(const d of ['.local/bin','.claude/local','.npm-global/bin','.bun/bin','.volta/bin'])pastas.push(path.join(os.homedir(),d));
+  if(process.platform!=='win32') pastas.push('/usr/local/bin','/opt/homebrew/bin','/usr/bin','/snap/bin');
+  let shim:string|undefined;
+  for(const d of pastas)for(const ext of process.platform==='win32'?['.exe','.cmd']:['']) {
+    const exe=path.join(d,cliente+ext);
+    try { if(fs.statSync(exe).isFile()) {if(ext==='.cmd')shim??=exe;else return {executable:exe,shim:false};} } catch { /* Próximo diretório explícito do PATH. */ }
+  }
+  return shim?{executable:shim,shim:true}:null;
+}
+
+// ── conectarIa ──
 export function prepararConexao(p:Projeto,cliente:string,contrato?:string) {
   if(cliente!=='codex'&&cliente!=='claude')throw new Error('Use conectar codex ou conectar claude.');
   const nome=`prumo-${p.manifesto.id}-${hash(p.raiz).slice(0,8)}`;

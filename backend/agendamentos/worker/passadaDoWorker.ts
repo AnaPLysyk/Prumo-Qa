@@ -2,12 +2,12 @@
 import { enfileirar, registrarPerdido, pegarProximoTrabalho } from "../banco/fila.js";
 import { listarRotinas, agendaPausada } from "../banco/agenda.js";
 import { horariosVencidos } from "../servicoHorarios.js";
-import { marcarHorarioTratado } from "../regras/operacoesDaRotina.js";
+import { marcarHorarioTratado } from "../regras/cicloDaRotina.js";
 import { EstadoDoWorker } from "../tipos/worker.js";
 import { capacidadeDaRotinaAgendada } from "./apoioDoWorker.js";
 import { gravarTravaDoWorker } from "./travaDoWorker.js";
 import { processarTrabalho } from "./processarTrabalho.js";
-import { repetirPublicacoesPendentes } from "./publicacoes.js";
+import { repetirPublicacoesPendentes } from "./processarTrabalho.js";
 
 // enfileirarHorariosVencidos — responsabilidade deste trecho
 export function enfileirarHorariosVencidos(e: EstadoDoWorker, agora: Date) {

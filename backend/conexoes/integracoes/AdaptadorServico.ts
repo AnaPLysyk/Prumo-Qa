@@ -3,12 +3,12 @@ import { z } from "zod";
 import { PartesDoAdaptador, nome, obj, paginaQase, sid, ConfigServico, ContextoServico, OperacaoServico } from "../tipos/adaptador.js";
 import { ErroServico } from "./ErroServico.js";
 import { lerComCredencial, enviarAoServico, lerDoServico, obterRecursoDoServico } from "./requisicoes.js";
-import { limparRespostaDoServico, textoRemoto } from "./formatos.js";
+import { limparRespostaDoServico, textoRemoto } from "./configuracaoDosServicos.js";
 import { Recurso } from "../../projetos/contratos.js";
-import { consultarNoServico } from "./consultarNoServico.js";
+import { consultarNoServico } from "./leiturasDeServicos.js";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { cabecalhosDoServico, instanciaServico } from "./configuracaoDosServicos.js";
-import { Filtros } from "../tipos/leituras.js";
+import { Filtros } from "../tipos/adaptador.js";
 import { TransporteEscrita, TransporteServico, paginaSchema } from "../tipos/transporte.js";
 import { contextoDoAdaptador, listarRecursosDoServico } from "./leiturasDeServicos.js";
 

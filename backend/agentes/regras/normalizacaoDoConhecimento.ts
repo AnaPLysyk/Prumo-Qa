@@ -1,5 +1,5 @@
 /** Normaliza termos, nomes e foco usados no conhecimento dos agentes. */
-import { falharConhecimento } from "../banco/baseDoConhecimento.js";
+import { falharConhecimento } from "../banco/comBancoDeConhecimento.js";
 import { nomeValido, pare } from "../tipos/conhecimento.js";
 import { semAcentos } from "../../compartilhado/texto.js";
 

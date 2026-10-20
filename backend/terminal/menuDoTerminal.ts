@@ -4,14 +4,14 @@ import { Projeto } from '../compartilhado/projeto/contratos.js';
 import { versaoDoPacote } from '../compartilhado/versaoDoPacote.js';
 import { consultarAtividades } from '../logs/banco/atividades.js';
 import { calcularMetricas } from '../metricas/servico.js';
-import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
+import { avisarHistoricoIncompleto } from './consultasDoTerminal.js';
 import { comandoAtividade } from './consultasDoTerminal.js';
-import { comandoConectar } from './comandoConectar.js';
+import { comandoConectar } from './consultasDoTerminal.js';
 import { comandoEvidencias } from './consultasDoTerminal.js';
-import { comandoLogs } from './comandoLogs.js';
+import { comandoLogs } from './consultasDoTerminal.js';
 import { comandoMetricas } from './consultasDoTerminal.js';
-import { imprimirJson } from './saidaDoTerminal.js';
-import { textoSeguroNoTerminal } from './saidaDoTerminal.js';
+import { imprimirJson } from './consultasDoTerminal.js';
+import { textoSeguroNoTerminal } from './consultasDoTerminal.js';
 
 export async function menuDoTerminal(p:Projeto,contrato?:string,json=false) {
   const painel=()=>{

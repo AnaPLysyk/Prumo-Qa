@@ -1,8 +1,8 @@
 /** Lista todas as operações de escrita conhecidas (Jira, Qase e GitHub). */
 import { abrirPullRequestNoGithub, criarBranchNoGithub, gravarTesteNoGithub } from '../github/fluxoRepositorio.js';
-import { criarIssueNoGithub } from '../github/criarIssueNoGithub.js';
+import { criarIssueNoGithub } from '../github/fluxoRepositorio.js';
 import { DefOperacao } from '../tipos/operacao.js';
-import { operacoesQase } from '../../testes/integracoes/operacoesQase.js';
+import { operacoesQase } from '../../testes/integracoes/enviarAnexoAoQase.js';
 import { operacoesJira } from '../../tickets/integracoesJira.js';
 
 /**

@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { dividirSkillEmTrechos } from '../../../../dist/agentes/regras/regrasDasSkills.js';
 import { escolherTrechosDaSkill } from '../../../../dist/agentes/regras/regrasDasSkills.js';
-import { licencaAberta } from '../../../../dist/agentes/regras/licencaAberta.js';
+import { licencaAberta } from '../../../../dist/agentes/regras/regrasDasSkills.js';
 import { lerPastaDeSkill } from "../../../../dist/agentes/banco/lerPastaDeSkill.js";
 import { sementeDasSkills } from "../../../../dist/agentes/banco/sementeDasSkills.js";
 import { importarPastaDeSkill } from "../../../../dist/agentes/banco/importarPastaDeSkill.js";

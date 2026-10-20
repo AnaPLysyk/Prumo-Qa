@@ -1,13 +1,13 @@
-/** Publica no Qase os resultados ainda não enviados e confere relendo a run. */
-import path from 'node:path';
-import { executarOperacao } from '../../conexoes/escrita/executarOperacao.js';
-import { Auxiliar } from '../../conexoes/tipos/operacao.js';
-import { RegistroOperacao } from '../../conexoes/tipos/operacoesExternas.js';
-import { obterEspaco } from '../../projetos/banco/projetos.js';
-import { alterarRunLocal } from '../banco/runs.js';
-import { obterRunLocal } from '../banco/runs.js';
-import { Dep, paraQase } from '../tipos/runLocal.js';
+/** Publicação e criação de runs Qase — arquivos relacionados agrupados para manutenção. */
+import path from "node:path";
+import { executarOperacao } from "../../conexoes/escrita/executarOperacao.js";
+import { Auxiliar } from "../../conexoes/tipos/operacao.js";
+import { RegistroOperacao } from "../../conexoes/tipos/operacoesExternas.js";
+import { obterEspaco } from "../../projetos/banco/projetos.js";
+import { alterarRunLocal, obterRunLocal } from "../banco/runs.js";
+import { Dep, paraQase, CASO_LOCAL_MIN, RunLocal } from "../tipos/runLocal.js";
 
+// ── publicarRunLocal ──
 /** Publica os resultados ainda não publicados (nunca NOT_RUN) e relê a run no Qase. */
 export async function publicarRunLocal(d: Dep, runLocalId: string, o: { confirmado: boolean; origem?: 'MANUAL' | 'AGENDADO'; anexarEvidencia?: boolean; aux?: Auxiliar }) {
   const run = obterRunLocal(runLocalId, d.base); if (!run.runIdRemoto) throw new Error('RUN_NOT_CREATED: crie a run no Qase antes de publicar.');
@@ -29,4 +29,19 @@ export async function publicarRunLocal(d: Dep, runLocalId: string, o: { confirma
     return { operacao: reg, publicados: enviados.size };
   }
   return { operacao: reg, publicados: 0 };
+}
+
+// ── criarRunNoQase ──
+const numeroDoId = (v?: string) => { const n = Number(v); return Number.isInteger(n) && n > 0 ? n : null; };
+
+/** Parâmetros da operação qase.criar_run a partir da run local: os mesmos na prévia confirmada e no envio. */
+export const parametrosDaRunQase = (run: RunLocal) => ({ titulo: run.titulo, casos: run.casos.map(c => c.casoId), ...(run.planoId ? { planoId: run.planoId } : {}), ...(run.marcoId ? { marcoId: run.marcoId } : {}), ...(run.ambienteQaseId ? { ambienteId: run.ambienteQaseId } : {}) });
+
+/** Cria a run no Qase (operação externa com confirmação). Criar não executa nada nem registra resultado. */
+export async function criarRunNoQase(d: Dep, runLocalId: string, o: { confirmado: boolean }): Promise<RegistroOperacao & { reutilizada: boolean }> {
+  const run = obterRunLocal(runLocalId, d.base); if (run.runIdRemoto) throw new Error('RUN_ALREADY_CREATED');
+  if (run.casos.some(c => c.casoId >= CASO_LOCAL_MIN)) throw new Error('RUN_HAS_LOCAL_CASES: esta run tem casos que só existem neste computador; o Qase não os conhece. Crie os casos no Qase e prepare outra run.');
+  const reg = await executarOperacao(d.executor, run.espacoId, 'qase.criar_run', parametrosDaRunQase(run), { base: d.base, confirmado: o.confirmado, agora: d.agora });
+  const id = reg.estado === 'CONFIRMADA' || reg.estado === 'ENVIADA' ? numeroDoId(reg.remoto?.id) : null; if (id) alterarRunLocal(runLocalId, r => { r.runIdRemoto = id; r.estado = 'CRIADA'; r.confirmadaNoQase = reg.estado === 'CONFIRMADA'; }, d.base);
+  return reg;
 }

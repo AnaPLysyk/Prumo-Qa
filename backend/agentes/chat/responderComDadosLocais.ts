@@ -11,7 +11,7 @@ import { listarContextosDaPasta } from '../regras/consultasDeContextos.js';
 import { listarHistoricoDoProjeto } from '../../logs/regras/consultasDoDiario.js';
 import { perguntarAoAssistenteLocal } from '../../inicio/servico.js';
 import { situacaoDoProjeto } from '../../inicio/servico.js';
-import { Fonte } from '../../inicio/contratos.js';
+import { Fonte } from '../../inicio/servico.js';
 import { metricasDasExecucoes } from '../../metricas/servico.js';
 import { obterEspaco } from '../../projetos/banco/projetos.js';
 import { Espaco } from '../../projetos/contratos.js';

@@ -1,9 +1,30 @@
-/** Pasta de dados do Prumo neste computador (LOCALAPPDATA\PrumoQA ou PRUMO_DATA_DIR), sempre absoluta e sem atalhos. */
-import os from 'node:os';
-import path from 'node:path';
-import { falharCom } from '../erros.js';
-import { usuarioDoEscopo } from './escopoDeUsuario.js';
+/** Pasta de dados e escopo de usuário — arquivos relacionados agrupados para manutenção. */
+import { AsyncLocalStorage } from "node:async_hooks";
+import os from "node:os";
+import path from "node:path";
+import { falharCom } from "../erros.js";
 
+// ── escopoDeUsuario ──
+let usuarioAtivo:string|null=null;
+
+const escopoPorPedido=new AsyncLocalStorage<string|null>();
+
+export function definirUsuarioDoEscopo(id:string|null) {
+  if(id!==null&&!/^[a-f0-9-]{36}$/i.test(id))throw new Error('USER_SCOPE_INVALID');
+  usuarioAtivo=id;
+}
+
+export function usuarioDoEscopo(){
+  const pedido=escopoPorPedido.getStore();
+  return pedido===undefined?usuarioAtivo:pedido;
+}
+
+export function executarNoEscopoDoUsuario<T>(usuarioId:string|null,tarefa:()=>T):T {
+  if(usuarioId!==null&&!/^[a-f0-9-]{36}$/i.test(usuarioId))throw new Error('USER_SCOPE_INVALID');
+  return escopoPorPedido.run(usuarioId,tarefa);
+}
+
+// ── diretorioDados ──
 /** Pasta padrão de cada sistema: LOCALAPPDATA no Windows, Application Support no macOS e XDG (~/.local/share) no Linux. */
 function pastaPadrao():string {
   if(process.platform==='win32') return path.join(process.env.LOCALAPPDATA || path.join(os.homedir(),'AppData','Local'),'PrumoQA');
@@ -17,6 +38,7 @@ export function diretorioBase():string {
   if(!path.isAbsolute(dados))falharCom('HISTORY_ABSOLUTE_PATH_REQUIRED');
   return dados;
 }
+
 /** Dados de trabalho separados pelo ID autenticado. Sem sessão, apenas escopo público vazio. */
 export function diretorioDados(base?:string):string {
   if(base!==undefined){if(!path.isAbsolute(base))falharCom('HISTORY_ABSOLUTE_PATH_REQUIRED');return base;}

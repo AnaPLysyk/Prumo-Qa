@@ -10,17 +10,15 @@ module.exports = {
     "apagarConhecimento": "apagarConhecimento",
     "conhecimentosRelevantes": "relevantes"
   },
-  "agentes/banco/aprendizados.js": {
+  "agentes/banco/atendimentos.js": {
+    "registrarAtendimento": "registrarAtendimento",
+    "avaliarAtendimento": "avaliarAtendimento",
+    "listarAtendimentos": "listarAtendimentos",
     "decidirConhecimento": "decidirConhecimento",
     "aprenderTermos": "aprenderTermos",
     "pesosAprendidos": "pesosAprendidos",
     "vocabularioDoAgente": "vocabularioDoAgente",
     "esquecerTermo": "esquecerTermo"
-  },
-  "agentes/banco/atendimentos.js": {
-    "registrarAtendimento": "registrarAtendimento",
-    "avaliarAtendimento": "avaliarAtendimento",
-    "listarAtendimentos": "listarAtendimentos"
   },
   "agentes/banco/estadoConhecimento.js": {
     "estadoConhecimento": "estadoConhecimento"

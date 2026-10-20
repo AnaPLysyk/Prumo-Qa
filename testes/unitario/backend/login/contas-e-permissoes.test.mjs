@@ -13,7 +13,7 @@ import { alterarContaPelaAdministracao, criarContaPelaAdministracao, desbloquear
 import { excluirPapel, salvarConfiguracaoDeAcesso, salvarPapel } from '../../../../dist/administracao/servico.js';
 import { conferirAcessoAoCanal } from '../../../../dist/login/regras/conferirAcessoAoCanal.js';
 import { encerrarSessao, sessaoParaJanela } from '../../../../dist/login/regras/sessao.js';
-import { conferirForcaDaSenha } from '../../../../dist/login/regras/senhas.js';
+import { conferirForcaDaSenha } from '../../../../dist/login/regras/contas.js';
 import { acessoDosCanais } from '../../../../dist/login/tipos/acessoDosCanais.js';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 

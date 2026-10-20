@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { falharCom } from '../../compartilhado/erros.js';
-import { limitesSkills } from '../tipos/skills.js';
+import { limitesSkills } from '../tipos/conhecimento.js';
 
 /** Um arquivo da Skill: caminho relativo à pasta (com /) e conteúdo em texto. */
 type ArquivoDaSkill = { relativo: string; conteudo: string };

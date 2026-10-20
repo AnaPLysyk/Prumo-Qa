@@ -5,8 +5,8 @@ import { lerPastaDeSkill } from './lerPastaDeSkill.js';
 import { registrarTrechosDeSkill } from './skills.js';
 import { validarEspecializacao } from '../regras/regrasDasSkills.js';
 import { dividirSkillEmTrechos } from '../regras/regrasDasSkills.js';
-import { licencaAberta } from '../regras/licencaAberta.js';
-import { NovoTrecho } from '../tipos/skills.js';
+import { licencaAberta } from '../regras/regrasDasSkills.js';
+import { NovoTrecho } from '../tipos/conhecimento.js';
 import { falharCom } from '../../compartilhado/erros.js';
 
 /**

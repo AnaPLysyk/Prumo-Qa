@@ -1,12 +1,32 @@
-# Aplicativo desktop (Windows) — Prumo QA 2.6
+# Aplicativo desktop — arquitetura e manutenção do Prumo QA
 
-Na 2.6, Conexões usa `backend/conexoes/ia/` (`diagnosticarIntegracao`, `testarProtocolo`): inspeciona metadados compatíveis, testa o MCP do próprio produto via SDK e mostra separadamente chamadas observadas com classificação atual. O núcleo e as quatro ferramentas permanecem os mesmos. Evidências de protocolo ficam em `integracoes/<hash>/<uuid>.json`; o teste chama somente consultar_evidencias.
+Conexões concentra os adaptadores de Jira, Qase e GitHub em `backend/conexoes/integracoes/` e as integrações de IA em `backend/conexoes/ia/`. O controlador da tela fica em `backend/conexoes/controlador.ts`.
 
-Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `backend/suporte/integracoes/consultarChamado.ts` usa os rótulos definidos em `docs/catalogo/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
+Suporte concentra seus fluxos em `backend/suporte/controlador.ts`, `servicoRelato.ts`, `integracoes.ts` e `regras/`. O texto remoto deve ser tratado como dado, não como HTML ou comando.
 
-O gerador `site/gerar.mjs`, chamado pela entrada compatível `site/gerar.mjs`, usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes de uso em [Ajuda](ajuda/17-plataforma.md) e no site.
+O site usa `site/gerar.mjs` e o catálogo de versões do projeto; não duplica o núcleo do aplicativo. Detalhes de utilização estão na [Ajuda](ajuda/17-plataforma.md).
 
-A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama o arquivo `api/` da tela (ex.: `backend/logs/api/projetoLogs.ts`), que delega às regras da própria tela.
+A janela é uma camada de **apresentação**. Seus canais chegam ao registrador IPC (`backend/aplicativo/api/registrarCanaisIpc.ts`), que chama o **controlador da funcionalidade** (por exemplo, `backend/logs/controlador.ts`), sem criar um arquivo intermediário por canal.
+
+## Manutenção manual: por onde começar
+
+Para corrigir uma operação, comece pela pasta da tela. A lógica central fica em `controlador.ts` e `servico*.ts`; `banco/` concentra leitura e gravação, `integracoes/` conversa com serviços externos, e `tipos/` guarda contratos compartilhados. Evite um arquivo por função curta ou uma pasta por verbo.
+
+| Funcionalidade | Arquivo inicial | Implementação relacionada |
+|---|---|---|
+| Login e permissões | `backend/login/controlador.ts` | `regras/contas.ts`, `regras/sessao.ts`, `banco/contas.ts` |
+| OAuth GitHub e Google | `backend/login/regras/entradaPorProvedor.ts` | `integracoes/oauthDosProvedores.ts` |
+| Agentes e Skills | `backend/agentes/controlador.ts` | `chat/conversar.ts`, `banco/skills.ts`, `banco/contextos.ts` |
+| Projetos | `backend/projetos/controlador.ts` | `servicoProjetos.ts`, `banco/projetos.ts` |
+| Conexões Jira/Qase/GitHub | `backend/conexoes/controlador.ts` | `regras/nucleoServicos.ts`, `integracoes/`, `github/fluxoRepositorio.ts` |
+| Casos e execuções | `backend/testes/controlador.ts` | `servicoCasos.ts`, `servicoExecucoes.ts`, `regras/executarValidacao.ts` |
+| Agenda e worker | `backend/agendamentos/controlador.ts` | `regras/cicloDaRotina.ts`, `banco/agenda.ts`, `worker/Worker.ts` |
+| Logs e métricas | `backend/logs/controlador.ts` | `banco/atividades.ts`, `regras/consultasDoDiario.ts` |
+| Suporte | `backend/suporte/controlador.ts` | `servicoRelato.ts`, `regras/chamadosDaPessoa.ts` |
+| Atualizações | `backend/atualizacoes/controlador.ts` | `servicoVerificacao.ts`, `servicoInstalacao.ts` |
+| Janela Electron | `backend/aplicativo.ts` | `aplicativo/janela/`, `aplicativo/bandeja/`, `aplicativo/api/` |
+
+Separações técnicas são mantidas quando necessárias: funções puras não carregam Electron, o worker não importa a interface e o SQLite é independente das funções de leitura de Skills usadas nos testes. A Documentação Viva, acessível pela Ajuda do aplicativo, fornece o mapa navegável atualizado de arquivos e canais.
 
 ## Arquitetura
 
@@ -17,9 +37,11 @@ Janela (dist/renderer: HTML+CSS+JS, sandbox, CSP, sem rede)
 Processo principal Electron (backend/aplicativo.ts; canais em backend/aplicativo/api/registrarCanaisIpc.ts)
    │  canais IPC `prumo:*`: confere remetente, valida com zod, devolve {ok,data|error}
    ▼
-Arquivos api/ de cada tela (backend/<tela>/api/<canal>.ts)  — um por canal
+Controlador da tela (backend/<tela>/controlador.ts) — agrupa os canais por funcionalidade
    ▼
-Regras, banco e integrações de cada tela (backend/<tela>/) — puro Node, testado sem janela
+Serviço e regras da tela (backend/<tela>/servico*.ts e regras/)
+   ├── banco/ — persistência
+   └── integracoes/ — comunicação externa
 ```
 
 O **servidor MCP não roda dentro da janela**. Cada cliente de IA inicia o seu processo (`mcp.js`, stdio); fechar a janela não o afeta (há teste para isso).
@@ -28,7 +50,7 @@ O **servidor MCP não roda dentro da janela**. Cada cliente de IA inicia o seu p
 
 - O app instalado não depende de Node.js. O `Prumo QA.exe` é o Electron; com a variável `ELECTRON_RUN_AS_NODE=1` ele se comporta como um Node puro, sem abrir janela.
 - `backend/conexoes/ia/conectarIa.ts` detecta `process.versions.electron` e propõe `command = Prumo QA.exe`, `args = [<instalação>\resources\app\dist\mcp.js, <projeto>]`, `env ELECTRON_RUN_AS_NODE=1`. Em desenvolvimento a proposta usa o `electron.exe` do projeto da mesma forma.
-- `backend/testes/regras/validarExecucao.ts` faz o mesmo para capacidades `node`: o filho recebe `ELECTRON_RUN_AS_NODE=1` (senão abriria uma janela do Prumo).
+- `backend/testes/regras/executarValidacao.ts` faz o mesmo para capacidades `node`: o filho recebe `ELECTRON_RUN_AS_NODE=1` (senão abriria uma janela do Prumo).
 - O build usa `asar: false` para que `dist/mcp.js` e `dist/aprovar.exe` existam como arquivos reais (um executável não roda de dentro de um `.asar`).
 - O pacote **não inclui npm**: capacidades `npm run` continuam exigindo Node com npm na máquina (falha como `RUNTIME_MISSING`, nunca como PASS).
 
@@ -50,7 +72,7 @@ A aba **Suporte** prepara bug, melhoria ou sugestão (`backend/suporte/regras/`)
 
 - **Estados:** RASCUNHO, APROVADO, CONFLITANTE, DESATUALIZADO. Aprovar é um ato humano (confirmação nativa; o aprovador é o usuário do Windows lido no processo principal) que vale só para o texto exato; editar volta a RASCUNHO; aprovar exige origem e ausência de conflito. Conflito é **derivado** (mesma chave com contextos vivos diferentes) ou marcado pela pessoa; o Prumo nunca escolhe um lado.
 - **MCP:** por padrão **nada** é entregue ao agente. Com "Disponibilizar ao agente" habilitado (confirmação nativa), `contexto_projeto` devolve referências estruturadas (id, chave, versão, hash, estado, origem, texto mascarado e limitado a 4000 caracteres, alerta de texto que parece instrução) e `revisar_cobertura` aceita `contextoId`, registrando o contexto usado como fato e apontando `CONTEXT_NOT_APPROVED`, `CONTEXT_OUTDATED`, `CONTEXT_CONFLICT`, `CONTEXT_SOURCE_MISSING`, `CONTEXT_MISMATCH`, `CONTEXT_TAMPERED`, `CONTEXT_UNAVAILABLE` ou `CONTEXT_SUSPICIOUS_INSTRUCTION`. Nenhuma ferramenta MCP cria, edita, aprova ou exclui contextos (teste verifica).
-- **Frameworks e Playwright:** `backend/testes/regras/detectarFrameworks.ts` detecta Playwright por evidência (dependência `@playwright/test` em package.json mais configuração ou teste que importa o pacote → CONFIRMADO; evidência parcial → PROVAVEL; só nome de pasta → INCERTO) e analisa arquivos de teste com 12 regras `PW_*`, cada uma com linha, trecho e a fonte oficial da documentação. A análise é textual e determinística: pode errar e não sabe se há validação de persistência. As Skills `backend/agentes/skills/playwright` e `backend/agentes/skills/api-rest` orientam a IA; `contextoCompleto.ts` compõe a resposta de `contexto_projeto` (MCP e CLI).
+- **Frameworks e Playwright:** `backend/testes/regras/revisaoDeCobertura.ts` detecta Playwright por evidência (dependência `@playwright/test` em package.json mais configuração ou teste que importa o pacote → CONFIRMADO; evidência parcial → PROVAVEL; só nome de pasta → INCERTO) e analisa arquivos de teste com 12 regras `PW_*`, cada uma com linha, trecho e a fonte oficial da documentação. A análise é textual e determinística: pode errar e não sabe se há validação de persistência. As Skills `backend/agentes/skills/playwright` e `backend/agentes/skills/api-rest` orientam a IA; `contextoCompleto.ts` compõe a resposta de `contexto_projeto` (MCP e CLI).
 
 ### Versões e atualização
 
