@@ -3,7 +3,7 @@ import { Notification } from 'electron';
 import { EventoWorker } from '../../agendamentos/tipos/worker.js';
 import { empilharAviso } from './avisos.js';
 import { atualizarBandeja } from '../bandeja/atualizarBandeja.js';
-import { navegarPara } from '../janela/navegarPara.js';
+import { navegarPara } from '../janela/controleDaJanela.js';
 import { lerPreferencias } from '../../configuracoes/repositorio.js';
 
 export function publicarEventoDoWorker(e: EventoWorker) {

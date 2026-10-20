@@ -7,7 +7,7 @@ import { mudarContexto } from '../banco/mudarContexto.js';
 import { novaVersaoDoContexto } from './versoesDoContexto.js';
 import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 import { ErroQa } from '../../compartilhado/erros.js';
-import { obterContexto } from './obterContexto.js';
+import { obterContexto } from './consultasDeContextos.js';
 
 function marcarConflito(p: Projeto, id: string, outroId: string, por: string, base?: string) {
   if (id === outroId) throw new ErroQa('CONTEXT_CONFLICT', 'Um contexto não conflita consigo mesmo.'); obterContexto(p, outroId, base);

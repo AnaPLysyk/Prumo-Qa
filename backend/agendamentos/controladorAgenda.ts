@@ -3,7 +3,7 @@ import { autorizarRotina } from "./autorizacoes/autorizarRotina.js";
 import { obterRotina } from "./repositorioAgenda.js";
 import { permissoesDaRotina } from "./regras/permissoes.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
+import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
 import { solicitarAprovacao } from "../testes/servicoAprovacao.js";
@@ -15,8 +15,8 @@ import { criarPoliticaPublicacao } from "./autorizacoes/politicas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { obterEspaco } from "../projetos/repositorio.js";
 import { revogarAutorizacao } from "./autorizacoes/estadoERevogacao.js";
-import { criarRotina } from "./regras/criarRotina.js";
-import { editarRotina } from "./regras/editarRotina.js";
+import { criarRotina } from "./regras/cicloDaRotina.js";
+import { editarRotina } from "./regras/cicloDaRotina.js";
 import { validarRotina } from "./regras/validarRotina.js";
 
 export const agendaAutorizar: TratadorDoCanal<'agenda:autorizar'> = async (a, j) => {

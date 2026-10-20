@@ -1,7 +1,7 @@
 /** Lógica e contratos de atualizacoes: operações relacionadas no mesmo módulo. */
 import { app, Notification } from "electron";
 import { empilharAviso } from "../aplicativo/avisos/avisos.js";
-import { navegarPara } from "../aplicativo/janela/navegarPara.js";
+import { navegarPara } from "../aplicativo/janela/controleDaJanela.js";
 import { lerPreferencias, gravarPreferencias } from "../configuracoes/repositorio.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
 import { compararVersoes, analisarVersao, enderecoDaVersao } from "../ajuda/servicoVersoes.js";

@@ -4,7 +4,7 @@ import { ErroQa } from '../../compartilhado/erros.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarContexto } from './carregarContexto.js';
 import { gravarArquivoDeContexto } from './arquivosDeContexto.js';
-import { obterContexto } from '../regras/obterContexto.js';
+import { obterContexto } from '../regras/consultasDeContextos.js';
 import { Arquivo, Entrada, limites } from '../tipos/contexto.js';
 
 export const mudarContexto = (p: Projeto, id: string, f: (a: Arquivo) => Entrada, base?: string) => {

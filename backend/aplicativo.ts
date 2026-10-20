@@ -8,7 +8,7 @@ import { publicarEventoDoWorker } from './aplicativo/avisos/publicarEventoDoWork
 import { atualizarBandeja } from './aplicativo/bandeja/atualizarBandeja.js';
 import { criarBandeja } from './aplicativo/bandeja/criarBandeja.js';
 import { estadoDoAplicativo } from './aplicativo/estadoDoAplicativo.js';
-import { mostrarJanela } from './aplicativo/janela/mostrarJanela.js';
+import { mostrarJanela } from './aplicativo/janela/controleDaJanela.js';
 import { SEIS_HORAS, iniciouOculto } from './aplicativo/tipos/aplicativo.js';
 import { avisoAutomaticoDeVersao } from './atualizacoes/servicoVerificacao.js';
 import { diretorioBase } from './compartilhado/banco/diretorioDados.js';

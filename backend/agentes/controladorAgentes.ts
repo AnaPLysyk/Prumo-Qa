@@ -9,7 +9,7 @@ import { listarAgentesPessoais, importarPreviasAntigas, excluirAgentePessoal, sa
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { rastrearPergunta } from "./chat/rastrearPergunta.js";
 import { salvarConfiguracao } from "./servicoPoliticas.js";
-import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
+import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { idiomaAtual } from "../configuracoes/servico.js";

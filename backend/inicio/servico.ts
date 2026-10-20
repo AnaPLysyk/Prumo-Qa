@@ -2,7 +2,7 @@
 import { listarTrabalhos } from "../agendamentos/repositorioFila.js";
 import { dataEmPortugues } from "../compartilhado/texto.js";
 import { semAcentos } from "../compartilhado/texto.js";
-import { listarContextosDaPasta } from "../agentes/regras/listarContextosDaPasta.js";
+import { listarContextosDaPasta } from "../agentes/regras/consultasDeContextos.js";
 import { Fonte, Resposta, pare } from "./contratos.js";
 import { metricasDasExecucoes } from "../metricas/servico.js";
 import { obterEspaco } from "../projetos/repositorio.js";

@@ -11,7 +11,7 @@ process.env.PRUMO_DATA_DIR = dados;
 await import('../../../apoio/conhecimento-memoria.mjs');
 const { conversar } = await import('../../../../dist/agentes/chat/conversar.js'); const { escolherAgente: rotear } = await import('../../../../dist/agentes/chat/selecaoDoAgente.js'); const { agentesChat } = await import('../../../../dist/agentes/tipos/persona.js'); const { aplicarEstilo } = await import('../../../../dist/agentes/servicoEstiloDoChat.js'); const { montarPrompt } = await import('../../../../dist/agentes/chat/consultarIaExterna.js'); const { argumentosDoProvedorDeIa: argumentosProvedor } = await import('../../../../dist/agentes/chat/consultarIaExterna.js'); const { agentesDoChat: rosterDoChat } = await import('../../../../dist/agentes/chat/selecaoDoAgente.js');
 const { criarEspaco } = await import('../../../../dist/projetos/servicoProjetos.js');
-const { criarRotina } = await import('../../../../dist/agendamentos/regras/criarRotina.js');
+const { criarRotina } = await import('../../../../dist/agendamentos/regras/cicloDaRotina.js');
 const { enfileirar } = await import('../../../../dist/agendamentos/repositorioFila.js'); const { pegarProximoTrabalho: reivindicar } = await import('../../../../dist/agendamentos/repositorioFila.js'); const { concluirTrabalho: concluir } = await import('../../../../dist/agendamentos/repositorioFila.js');
 const { lerPreferencias } = await import('../../../../dist/configuracoes/repositorio.js'); const { alterarPreferencias } = await import('../../../../dist/configuracoes/servico.js'); const { autorizarDelegacaoDeIa: autorizarDelegacao } = await import('../../../../dist/agentes/regras/autorizarDelegacaoDeIa.js');
 const { falhasConhecimento } = await import('../../../apoio/conhecimento-falso.mjs');

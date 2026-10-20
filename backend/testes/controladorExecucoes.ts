@@ -1,7 +1,7 @@
 /** Controlador da funcionalidade testes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { propostasDeBugs } from "./regras/propostasDeBugs.js";
-import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
+import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { prepararOperacao } from "../conexoes/escrita/prepararOperacao.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";

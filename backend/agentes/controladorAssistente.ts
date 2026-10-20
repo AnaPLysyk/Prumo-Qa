@@ -1,6 +1,6 @@
 /** Controlador da funcionalidade agentes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { agentesDoChat } from "./chat/selecaoDoAgente.js";
-import { executavelDaIa } from "./chat/executavelDaIa.js";
+import { executavelDaIa } from "./chat/execucaoCli.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { localizarClienteDeIa } from "../conexoes/ia/localizarClienteDeIa.js";
 import { lerPreferencias } from "../configuracoes/repositorio.js";
@@ -9,7 +9,7 @@ import { aprenderTermos } from "./repositorioAprendizados.js";
 import { avaliarAtendimento } from "./repositorioAtendimentos.js";
 import { registrarAtendimento } from "./repositorioAtendimentos.js";
 import { conversar } from "./chat/conversar.js";
-import { executarCliDeIa } from "./chat/executarCliDeIa.js";
+import { executarCliDeIa } from "./chat/execucaoCli.js";
 import { listarAtendimentos } from "./repositorioAtendimentos.js";
 
 export const assistenteAgentes: TratadorDoCanal<'assistente:agentes'> = a => { const ia = lerPreferencias().ia; return { agentes: agentesDoChat(a.espacoId), assistente: { nome: ia.nome, estilo: ia.estilo }, provedores: (['claude', 'codex'] as const).map(p => { const l = localizarClienteDeIa(p); return { id: p, encontrado: !!l, atalho: !!l?.shim, disponivel: regrasDosAgentes().iaExterna && !!executavelDaIa(p), autorizado: ia.delegacao[p], desligadaPelaAdministracao: !regrasDosAgentes().iaExterna }; }) }; };

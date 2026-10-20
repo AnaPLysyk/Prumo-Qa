@@ -5,7 +5,7 @@ import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { aprovarContextoDaPasta } from "./regras/aprovarContextoDaPasta.js";
 import { obterContextoDaPasta, desatualizarContextoDaPasta, excluirContextoDaPasta, permitirContextosNoMcp } from "./regras/operacoesDoContextoDaPasta.js";
 import { conflitoDeContextoDaPasta } from "./regras/conflitoDeContextoDaPasta.js";
-import { listarContextosDaPasta } from "./regras/listarContextosDaPasta.js";
+import { listarContextosDaPasta } from "./regras/consultasDeContextos.js";
 import { salvarContextoDaPasta } from "./regras/salvarContextoDaPasta.js";
 
 export const contextosAprovar: TratadorDoCanal<'contextos:aprovar'> = async (a, janela) => {

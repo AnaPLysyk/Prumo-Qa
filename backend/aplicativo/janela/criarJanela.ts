@@ -1,7 +1,7 @@
 /** Cria a janela segura do Prumo (sem Node na página, sem navegação, sem novas janelas); fechar só esconde. */
 import { BrowserWindow, app, Notification } from 'electron';
 import path from 'node:path';
-import { textoNoIdioma } from '../bandeja/textoNoIdioma.js';
+import { textoNoIdioma } from '../bandeja/conteudoDaBandeja.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
 import { origemPermitida, rendererDir } from '../tipos/aplicativo.js';
 import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';

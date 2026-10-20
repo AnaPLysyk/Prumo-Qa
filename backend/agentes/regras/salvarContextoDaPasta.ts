@@ -5,7 +5,7 @@ import { ErroQa } from '../../compartilhado/erros.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
 import { novaVersaoDoContexto } from './versoesDoContexto.js';
-import { obterContexto } from './obterContexto.js';
+import { obterContexto } from './consultasDeContextos.js';
 import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 import { hashDoConteudoDoContexto } from './versoesDoContexto.js';
 import { Arquivo, conteudoSchema, limites } from '../tipos/contexto.js';

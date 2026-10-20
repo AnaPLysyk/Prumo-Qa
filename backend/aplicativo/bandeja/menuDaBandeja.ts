@@ -4,8 +4,8 @@ import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo
 import { acaoDoMenuDaBandeja } from './acaoDoMenuDaBandeja.js';
 
 import { idiomaAtual } from '../../configuracoes/servico.js';
-import { resumoDoWorker } from './resumoDoWorker.js';
-import { textoNoIdioma } from './textoNoIdioma.js';
+import { resumoDoWorker } from './conteudoDaBandeja.js';
+import { textoNoIdioma } from './conteudoDaBandeja.js';
 import { EstadoWorker, Idioma, ItemMenu } from '../tipos/textosDaBandeja.js';
 
 /** Modelo puro do menu da bandeja. Pausar e Retomar nunca aparecem juntos; o item de estado reflete o worker real. */

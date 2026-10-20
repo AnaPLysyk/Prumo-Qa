@@ -3,7 +3,7 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
 import { lerPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
-import { resumirContextos } from './resumirContextos.js';
+import { resumirContextos } from './consultasDeContextos.js';
 import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 import { limites } from '../tipos/contexto.js';
 

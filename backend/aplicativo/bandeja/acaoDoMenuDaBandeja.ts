@@ -2,11 +2,11 @@
 import { app, dialog } from 'electron';
 import { definirPausaGlobal } from '../../agendamentos/regras/operacoesDaRotina.js';
 import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo.js';
-import { resumoDoWorker } from './resumoDoWorker.js';
-import { textoNoIdioma } from './textoNoIdioma.js';
+import { resumoDoWorker } from './conteudoDaBandeja.js';
+import { textoNoIdioma } from './conteudoDaBandeja.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
-import { mostrarJanela } from '../janela/mostrarJanela.js';
-import { navegarPara } from '../janela/navegarPara.js';
+import { mostrarJanela } from '../janela/controleDaJanela.js';
+import { navegarPara } from '../janela/controleDaJanela.js';
 import { ItemMenu } from '../tipos/textosDaBandeja.js';
 import { idiomaAtual } from '../../configuracoes/servico.js';
 

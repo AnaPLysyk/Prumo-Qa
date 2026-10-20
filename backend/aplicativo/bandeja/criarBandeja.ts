@@ -4,7 +4,7 @@ import path from 'node:path';
 import { vigiarWorker } from '../../agendamentos/worker/vigiarWorker.js';
 import { atualizarBandeja } from './atualizarBandeja.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
-import { mostrarJanela } from '../janela/mostrarJanela.js';
+import { mostrarJanela } from '../janela/controleDaJanela.js';
 import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';
 
 export function criarBandeja() {
