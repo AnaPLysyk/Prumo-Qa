@@ -6,22 +6,25 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { _electron as electron } from 'playwright-core';
 import electronPath from 'electron';
 import { servidorFixture } from './servicos-fixtures.mjs';
-import { caixaDeEmail } from '../../testes/unitario/infra/caixa-de-email.mjs';
+import { localizarMontador } from '../../testes/unitario/executar.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const { montarRecursosUnitarios } = await import(pathToFileURL(localizarMontador()).href);
+const limparRecursos = montarRecursosUnitarios(repo);
 const saida = path.join(repo, 'site', 'imagens');
 fs.mkdirSync(saida, { recursive: true });
 const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-site-captura-'));
 let s, app;
 const limpezas = [];
 // O código de confirmação do e-mail vai para a caixa local (serviço de envio em 127.0.0.1), nunca para o Resend.
-const caixa = await caixaDeEmail();
-const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO: caixa.url }; delete env.ELECTRON_RUN_AS_NODE;
 try {
+  const { caixaDeEmail } = await import(pathToFileURL(path.join(repo, 'testes/unitario/infra/caixa-de-email.mjs')).href);
+  const caixa = await caixaDeEmail();
+  const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO: caixa.url }; delete env.ELECTRON_RUN_AS_NODE;
   s = await servidorFixture();
   app = await electron.launch({ executablePath: electronPath, args: [path.join(repo, 'site/scripts/desktop-entry.cjs')], env, timeout: 30000 });
   await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
@@ -106,7 +109,10 @@ try {
       await s?.fechar();
     } finally {
       try { for (const limpar of limpezas.reverse()) await limpar(); }
-      finally { fs.rmSync(dados, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); }
+      finally {
+        try { fs.rmSync(dados, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); }
+        finally { limparRecursos(); }
+      }
     }
   }
 }

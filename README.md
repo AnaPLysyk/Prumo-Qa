@@ -7,7 +7,7 @@ Prumo QA é um aplicativo desktop para gestão local de projetos, integrações,
 - `frontend/`: telas, componentes visuais e interações da interface.
 - `backend/`: regras, APIs IPC, persistência local e lógica de negócio.
 - `testes/`: apenas testes unitários e auxiliares necessários ao build e CI/CD. Smoke, regressão e automação ficam no repositório independente `Prumo-QA-Lab/automacao/prumo-qa/`.
-- `frontend/construcao/`: geração e sincronização da interface. Scripts de build e conferência ficam em `docs/geradores/` e `site/release/`; as fixtures de unidade ficam em `testes/unitario/infra/`. Homologação e automação externa ficam no Prumo QA Lab.
+- `frontend/construcao/`: geração e sincronização da interface. Scripts de build e conferência ficam em `docs/geradores/` e `site/release/`; as simulações dos testes ficam no Prumo QA Lab e são disponibilizadas temporariamente durante `npm run test:unitarios`. Homologação e automação externa também ficam no Lab.
 - `docs/`: documentação oficial, origem do projeto e arquitetura.
 - `site/`: geração do site público e documentação estatica.
 - `assets/`: ativos visuais e imagens de apoio.
