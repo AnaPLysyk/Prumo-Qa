@@ -47,7 +47,7 @@ test('script é local, compilado e não usa CDN nem expõe tokens',async()=>{
   assert.ok(r.conteudo.length>500,'bundle presente');
   assert.doesNotMatch(r.conteudo,/https?:\/\/cdn\.|GITHUB_CLIENT_SECRET|GOOGLE_CLIENT_SECRET/);
   const fonte=fs.readFileSync(new URL('../../../../frontend/login/web/entrar-social-fonte.mjs',import.meta.url),'utf8');
-  const sha=createHash('sha256').update(fonte).digest('hex');
+  const sha=createHash('sha256').update(fonte.replace(/\r\n/g,'\n')).digest('hex');
   assert.ok(r.conteudo.includes('PRUMO_LOGIN_SOCIAL_SHA256='+sha),'bundle corresponde ao fonte editável');
   assert.match(fonte,/ensureElectronRedirect\(/);
   assert.match(fonte,/code_challenge/);

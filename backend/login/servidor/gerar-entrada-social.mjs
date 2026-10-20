@@ -8,7 +8,8 @@ import {fileURLToPath} from 'node:url';
 
 const entrada=fileURLToPath(new URL('../../../frontend/login/web/entrar-social-fonte.mjs', import.meta.url));
 const saida=fileURLToPath(new URL('../../../frontend/login/web/entrar-social.js', import.meta.url));
-const shaFonte=createHash('sha256').update(readFileSync(entrada)).digest('hex');
+// Normalizar CRLF para o mesmo hash em Windows, macOS e Linux.
+const shaFonte=createHash('sha256').update(readFileSync(entrada,'utf8').replace(/\r\n/g,'\n')).digest('hex');
 await build({
   entryPoints:[entrada],
   nodePaths:[fileURLToPath(new URL('./node_modules/', import.meta.url))],
