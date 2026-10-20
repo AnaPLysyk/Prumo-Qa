@@ -1,5 +1,5 @@
 /** Liga um caso do Qase ao ticket do Jira de origem. */
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
 import { Recurso } from '../../projetos/contratos.js';
 

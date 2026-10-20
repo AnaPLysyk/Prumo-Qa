@@ -1,7 +1,7 @@
 /** Abre a pasta de um projeto, lê e valida o qa.project.json e devolve o contrato com sua impressão digital. */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { ErroQa } from '../erros/ErroQa.js';
+import { ErroQa } from '../erros.js';
 import { normalizarComando } from './normalizarComando.js';
 import { validarComando } from './validarComando.js';
 import { caminhoSeguro } from '../seguranca/caminhoSeguro.js';

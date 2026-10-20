@@ -1,6 +1,6 @@
 /** Monta a consulta no Jira (tickets com filtros, campos, um ticket ou seus comentários); ticket de outro projeto é recusado. */
 import { z } from 'zod';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { parametrosDaUrl } from '../integracoesFormatos.js';
 import { Recurso } from '../../projetos/contratos.js';
 import { jqlDeTickets } from '../../tickets/integracoesJira.js';

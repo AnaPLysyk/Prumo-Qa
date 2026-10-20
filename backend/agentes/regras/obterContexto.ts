@@ -1,5 +1,5 @@
 /** Abre um contexto com todas as versões do histórico. */
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
 import { resumirContextos } from './resumirContextos.js';

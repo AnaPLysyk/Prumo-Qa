@@ -3,7 +3,7 @@ import { listarConhecimentos } from './listarConhecimentos.js';
 import { raizDaPalavra } from '../regras/textosDoConhecimento.js';
 import { termosDaFrase } from '../regras/textosDoConhecimento.js';
 import { Conhecimento } from '../tipos/conhecimento.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+import { semAcentos } from '../../compartilhado/texto.js';
 
 /** Conhecimentos APROVADOS do agente (ou gerais) mais ligados à pergunta. Pontua título em dobro; exige ao menos 2 pontos. */
 export function conhecimentosRelevantes(espacoId: string | null, agente: string | null, pergunta: string, limite = 2, base?: string): Conhecimento[] {

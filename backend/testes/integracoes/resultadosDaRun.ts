@@ -1,5 +1,5 @@
 /** Lê os resultados já registrados numa run do Qase (até 1.000). */
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
 import { Recurso } from '../../projetos/contratos.js';
 import { itensDaPaginaQase } from './itensDaPaginaQase.js';

@@ -1,5 +1,5 @@
 /** Abre um contexto deste projeto pelo id, recusando contextos de outro projeto. */
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { lerArquivoDeContexto } from './lerArquivoDeContexto.js';

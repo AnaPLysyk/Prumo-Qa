@@ -7,10 +7,10 @@ import { especializacoes } from "../agentes/tipos/politicas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { randomUUID } from "node:crypto";
 import { gerarSenhaTemporaria, resumirSegredo } from "../login/regras/senhas.js";
-import { gravarContas } from "../login/banco/gravarContas.js";
-import { lerContas } from "../login/banco/lerContas.js";
+import { gravarContas } from "../login/repositorioContas.js";
+import { lerContas } from "../login/repositorioContas.js";
 import { ContaVisivel, RegistroDeContas, Usuario, estadosDaConta, loginSchema, nomeDaPessoaSchema, ConfiguracaoDeAcesso, IdModulo, NivelDeAcesso, Papel, configuracaoDeAcessoSchema, modulosDoMenu, niveisDeAcesso } from "../login/tipos/contas.js";
-import { semAcentos } from "../compartilhado/texto/semAcentos.js";
+import { semAcentos } from "../compartilhado/texto.js";
 
 /** Arquivo ilegível não derruba o chat nem o MCP: vale o padrão e a tela da Administração mostra o problema ao abrir. */
 export function regrasDosAgentes(b?: string): AgentesDaPlataforma {

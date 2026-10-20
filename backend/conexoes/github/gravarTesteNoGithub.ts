@@ -1,7 +1,7 @@
 /** Operação "Gravar arquivo de teste em branch de trabalho" (commit só em prumo/...). */
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { caminhoDoRepositorio } from './dadosDoGithub.js';
 import { commitAtualDoBranch } from './dadosDoGithub.js';
 import { dadosDoRepositorio } from './dadosDoGithub.js';

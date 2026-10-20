@@ -1,5 +1,5 @@
 /** Confere se um comando do contrato é permitido: só "npm run <script>" ou "node <arquivo local>", sem variáveis secretas. */
-import { ErroQa } from '../erros/ErroQa.js';
+import { ErroQa } from '../erros.js';
 import { validarRelativo } from '../seguranca/validarRelativo.js';
 import { Comando, Manifesto } from '../tipos/projeto.js';
 

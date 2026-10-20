@@ -1,6 +1,6 @@
 /** Operação "Mudar status de defeito no Qase" (em andamento, resolvido ou inválido), com conferência por GET. */
 import { z } from 'zod';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';

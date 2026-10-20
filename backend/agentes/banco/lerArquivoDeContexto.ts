@@ -1,7 +1,7 @@
 /** Lê o arquivo de um contexto e confere se o histórico está íntegro (nenhuma versão alterada fora do Prumo). */
 import fs from 'node:fs';
 import path from 'node:path';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { hashDoConteudoDoContexto } from '../regras/versoesDoContexto.js';
 import { idDeContextoValido } from '../regras/idDeContextoValido.js';

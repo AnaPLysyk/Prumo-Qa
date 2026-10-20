@@ -2,7 +2,7 @@
 import { ParametrosConsulta } from "../tipos/ParametrosConsulta.js";
 import { ResultadoConsulta } from "../tipos/ResultadoConsulta.js";
 import { z } from "zod";
-import { codificarParaUrl } from "../../compartilhado/texto/codificarParaUrl.js";
+import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { projetoDoTicket } from "../../tickets/integracoesJira.js";
 import { camposDoTipo, tiposDeCriacao } from "../../tickets/integracoesJira.js";
 import { transicoesDoTicket } from "../../tickets/integracoesJira.js";

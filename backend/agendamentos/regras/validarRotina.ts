@@ -1,6 +1,6 @@
 /** Confere uma rotina antes de salvar: projeto, capacidade declarada, run do mesmo projeto, k6 e produção bloqueada. */
 import { DadosRotina, dadosRotinaSchema } from '../tipos/rotina.js';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
 import { obterRunLocal } from '../../testes/repositorioRuns.js';

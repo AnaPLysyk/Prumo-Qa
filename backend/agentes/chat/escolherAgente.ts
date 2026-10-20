@@ -3,7 +3,7 @@ import { palavrasDaPergunta } from './interpretarPergunta.js';
 import { termoCasaComPergunta } from './interpretarPergunta.js';
 import { SEGUIMENTO, Turno } from '../tipos/chat.js';
 import { agentesChat } from '../tipos/persona.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+import { semAcentos } from '../../compartilhado/texto.js';
 
 /**
  * Pontua cada agente pelas palavras da pergunta. Menção explícita (@id ou nome) decide; termos que a pessoa ensinou ao

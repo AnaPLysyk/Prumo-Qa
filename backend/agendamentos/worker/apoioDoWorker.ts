@@ -2,7 +2,7 @@
 import { capacidadeDoK6 } from "../servicoK6.js";
 import { Rotina } from "../tipos/rotina.js";
 import { EstadoDoWorker, TipoEvento } from "../tipos/worker.js";
-import { ErroQa } from "../../compartilhado/erros/ErroQa.js";
+import { ErroQa } from "../../compartilhado/erros.js";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
 import { Projeto } from "../../compartilhado/tipos/projeto.js";
 import { obterEspaco } from "../../projetos/repositorio.js";

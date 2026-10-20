@@ -1,6 +1,6 @@
 /** Lê todos os contextos do projeto e anota os arquivos com problema. */
 import fs from 'node:fs';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { lerArquivoDeContexto } from './lerArquivoDeContexto.js';

@@ -1,5 +1,5 @@
 /** Executa um trabalho da fila do começo ao fim: batimento, aviso de início, execução, registro do resultado e publicação; falhas viram BLOCKED ou nova tentativa, nunca PASS. */
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { publicacaoPodeRepetir } from '../../testes/servicoPublicacao.js';
 import { concluirTrabalho } from '../repositorioFila.js';
@@ -11,7 +11,7 @@ import { Trabalho } from '../tipos/fila.js';
 import { EstadoDoWorker, TipoEvento } from '../tipos/worker.js';
 import { emitirEventoDoWorker } from './apoioDoWorker.js';
 import { executarTrabalhoDaRotina } from './executarTrabalhoDaRotina.js';
-import { publicarComentarioSeAutorizado } from './publicarComentarioSeAutorizado.js';
+import { publicarComentarioSeAutorizado } from './publicacoes.js';
 
 export async function processarTrabalho(e: EstadoDoWorker, t: Trabalho) {
   let erroLeitura: unknown = null;

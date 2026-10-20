@@ -1,7 +1,7 @@
 /** Monta o caminho completo de um arquivo do projeto conferindo, pasta por pasta, que ele fica dentro da raiz e não passa por atalhos (links). */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { ErroQa } from '../erros/ErroQa.js';
+import { ErroQa } from '../erros.js';
 import { sensivel } from './sensivel.js';
 import { validarRelativo } from './validarRelativo.js';
 

@@ -1,7 +1,7 @@
 /** Operação "Publicar issue no GitHub" (bug ou melhoria), com marcador de idempotência e confirmação por GET. */
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { marcadorDaOperacao } from '../escrita/marcadorDaOperacao.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { ContextoServico } from '../tipos/adaptador.js';

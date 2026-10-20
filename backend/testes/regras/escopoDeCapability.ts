@@ -1,5 +1,5 @@
 /** Confere se a capacidade pode rodar (declarada, não bloqueada, projeto não somente leitura) e calcula seu escopo. */
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { normalizarComando } from '../../compartilhado/projeto/normalizarComando.js';
 import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';

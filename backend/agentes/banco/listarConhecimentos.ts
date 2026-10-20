@@ -4,7 +4,7 @@ import { linhaParaConhecimento } from './formatosDoConhecimento.js';
 import { validarAgenteDoConhecimento } from './validacoesDoConhecimento.js';
 import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
 import { Conhecimento, Filtro, Linha, estadosConhecimento, limitesConhecimento } from '../tipos/conhecimento.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+import { semAcentos } from '../../compartilhado/texto.js';
 
 /** Escopo: conhecimentos gerais (sem projeto) e os do projeto informado; nunca os de outro projeto. Sem agente: todos. */
 export function listarConhecimentos(f: Filtro, base?: string): Conhecimento[] {

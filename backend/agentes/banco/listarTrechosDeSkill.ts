@@ -2,7 +2,7 @@
 import { comBancoDeSkills, linhaParaTrecho } from './comBancoDeSkills.js';
 import { validarEspecializacao } from '../regras/validarEspecializacao.js';
 import { EstadoTrecho, TrechoDeSkill, estadosTrecho, limitesSkills } from '../tipos/skills.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+import { semAcentos } from '../../compartilhado/texto.js';
 
 export function listarTrechosDeSkill(f: { especializacao?: string | null; estados?: EstadoTrecho[]; busca?: string }, base?: string): TrechoDeSkill[] {
   const esp = f.especializacao ? validarEspecializacao(f.especializacao) : null;

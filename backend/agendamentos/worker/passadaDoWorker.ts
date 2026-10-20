@@ -4,9 +4,9 @@ import { listarRotinas } from '../repositorioAgenda.js';
 import { pegarProximoTrabalho } from '../repositorioFila.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
 import { enfileirarHorariosVencidos } from './enfileirarHorariosVencidos.js';
-import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';
+import { gravarTravaDoWorker } from './travaDoWorker.js';
 import { processarTrabalho } from './processarTrabalho.js';
-import { repetirPublicacoesPendentes } from './repetirPublicacoesPendentes.js';
+import { repetirPublicacoesPendentes } from './publicacoes.js';
 
 export async function passadaDoWorker(e: EstadoDoWorker) {
   if (e.emTick) return; e.emTick = true;

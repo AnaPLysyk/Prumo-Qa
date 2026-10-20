@@ -7,7 +7,7 @@ import { localizarK6 } from '../servicoK6.js';
 import { capacidadesDaRotina } from '../regras/capacidadesDaRotina.js';
 import { Solicitador } from '../tipos/autorizacoes.js';
 import { ExecutavelK6 } from '../tipos/k6.js';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { escopoDeCapability } from '../../testes/regras/escopoDeCapability.js';
 import { obterEspaco } from '../../projetos/repositorio.js';

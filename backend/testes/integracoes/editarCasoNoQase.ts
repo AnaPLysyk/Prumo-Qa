@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { automacaoLida, flagsDeAutomacao } from './automacaoNoQase.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { editarCaso } from '../tipos/escritaQase.js';
 

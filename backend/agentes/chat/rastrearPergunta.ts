@@ -12,7 +12,7 @@ import { raizDaPalavra } from '../regras/textosDoConhecimento.js';
 import { termosDaFrase } from '../regras/textosDoConhecimento.js';
 import { agentesChat } from '../tipos/persona.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+import { semAcentos } from '../../compartilhado/texto.js';
 
 type Rastro = {
   pergunta: string; palavras: string[]; termos: string[];

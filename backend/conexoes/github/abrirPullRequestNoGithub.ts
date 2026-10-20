@@ -8,7 +8,7 @@ import { dadosDoRepositorio } from './dadosDoGithub.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { abrirPr } from '../tipos/escritaGithub.js';
 import { DefOperacao } from '../tipos/operacao.js';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ContextoServico } from '../tipos/adaptador.js';
 import { Recurso } from '../../projetos/contratos.js';
 

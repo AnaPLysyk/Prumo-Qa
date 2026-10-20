@@ -1,5 +1,5 @@
 /** Executa uma ferramenta MCP e devolve o resultado em JSON; se der erro, devolve a mensagem com segredos mascarados. */
-import { mensagemComCodigo } from '../../compartilhado/erros/mensagemComCodigo.js';
+import { mensagemComCodigo } from '../../compartilhado/erros.js';
 import { RespostaMcp } from '../tipos/mcp.js';
 
 export async function respostaDaFerramentaMcp(fn: () => Promise<unknown>): Promise<RespostaMcp> {

@@ -1,5 +1,5 @@
 /** Lê de novo um projeto ou repositório pelo id, para conferir que o vínculo continua apontando para o mesmo recurso. */
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { PartesDoAdaptador, itemQase } from '../tipos/adaptador.js';
 import { ErroServico } from './ErroServico.js';
 import { lerComCredencial } from './lerComCredencial.js';

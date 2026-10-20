@@ -4,8 +4,8 @@ import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { contaNova } from './contas.js';
 import { iniciarSessao, loginLigado, sessaoParaJanela } from './sessao.js';
-import { gravarContas } from '../banco/gravarContas.js';
-import { lerContas } from '../banco/lerContas.js';
+import { gravarContas } from '../repositorioContas.js';
+import { lerContas } from '../repositorioContas.js';
 import { RegistroDeContas, Usuario, emailSchema } from '../tipos/contas.js';
 
 export type Provedor = 'github' | 'google';

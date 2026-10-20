@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';

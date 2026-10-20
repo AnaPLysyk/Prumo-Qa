@@ -1,7 +1,7 @@
 /** Lê o diário do projeto conferindo formato e integridade; arquivos inválidos ficam de fora com aviso. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';

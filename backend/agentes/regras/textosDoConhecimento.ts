@@ -1,6 +1,6 @@
 /** Reúne textos do conhecimento da funcionalidade, mantendo cada operação identificável pelo nome. */
 import { nomeValido, pare } from "../tipos/conhecimento.js";
-import { semAcentos } from "../../compartilhado/texto/semAcentos.js";
+import { semAcentos } from "../../compartilhado/texto.js";
 
 export function normalizarNome(bruto: string): string | null {
   const n = bruto.replace(/[.!?,;:]+$/g, '').replace(/\s+/g, ' ').trim(); if (!nomeValido.test(n)) return null;

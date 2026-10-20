@@ -2,7 +2,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
-import { ErroQa } from "../compartilhado/erros/ErroQa.js";
+import { ErroQa } from "../compartilhado/erros.js";
 import { caminhoSeguro } from "../compartilhado/seguranca/caminhoSeguro.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
 import { lerSeguro } from "../compartilhado/seguranca/lerSeguro.js";

@@ -1,7 +1,7 @@
 /** Pasta do diário de operações do projeto (fora da pasta do projeto). */
 import path from 'node:path';
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';

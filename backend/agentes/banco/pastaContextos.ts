@@ -1,7 +1,7 @@
 /** Devolve a pasta onde ficam os contextos deste projeto (fora da pasta do projeto, na pasta de dados do usuário). */
 import path from 'node:path';
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';

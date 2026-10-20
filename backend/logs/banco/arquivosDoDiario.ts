@@ -1,6 +1,6 @@
 /** Lista os arquivos do diário de uma pasta, com limite de 10.000. */
 import fs from 'node:fs';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { limitesHistorico } from '../contratos.js';
 

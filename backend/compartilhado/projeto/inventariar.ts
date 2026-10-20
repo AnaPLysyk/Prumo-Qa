@@ -1,7 +1,7 @@
 /** Percorre as pastas de documentação, testes e código declaradas no contrato e lista os arquivos que podem ser lidos, com limites. */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { ErroQa } from '../erros/ErroQa.js';
+import { ErroQa } from '../erros.js';
 import { caminhoSeguro } from '../seguranca/caminhoSeguro.js';
 import { hash } from '../seguranca/hash.js';
 import { lerSeguro } from '../seguranca/lerSeguro.js';

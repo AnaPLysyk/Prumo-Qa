@@ -1,7 +1,7 @@
 /** Grava o início ou o término de uma operação no arquivo próprio dela, com nível, impressão digital e fsync. */
 import fs from 'node:fs';
 import { pino } from 'pino';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Evento, limitesHistorico } from '../contratos.js';

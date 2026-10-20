@@ -1,7 +1,7 @@
 /** Pasta de dados do Prumo neste computador (LOCALAPPDATA\PrumoQA ou PRUMO_DATA_DIR), sempre absoluta e sem atalhos. */
 import os from 'node:os';
 import path from 'node:path';
-import { falharCom } from '../erros/falharCom.js';
+import { falharCom } from '../erros.js';
 import { usuarioDoEscopo } from './escopoDeUsuario.js';
 
 /** Pasta padrão de cada sistema: LOCALAPPDATA no Windows, Application Support no macOS e XDG (~/.local/share) no Linux. */

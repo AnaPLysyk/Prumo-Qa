@@ -6,7 +6,7 @@ import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
 import { novaVersaoDoContexto } from './versoesDoContexto.js';
 import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { obterContexto } from './obterContexto.js';
 
 function marcarConflito(p: Projeto, id: string, outroId: string, por: string, base?: string) {

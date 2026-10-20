@@ -1,7 +1,7 @@
 /** Operação "Criar suite no Qase", sem repetir suite com o mesmo nome. */
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { idCriadoNoQase } from '../integracaoFormatosQase.js';

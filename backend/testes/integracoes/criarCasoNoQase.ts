@@ -1,6 +1,6 @@
 /** Operação "Criar caso de teste no Qase", ligando ao ticket de origem quando informado. */
 import { z } from 'zod';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao, Remoto } from '../../conexoes/tipos/operacao.js';
 import { acharCasoNoQase } from './consultasDeCasosQase.js';

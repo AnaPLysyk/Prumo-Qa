@@ -9,7 +9,7 @@ import { excluirAgentePessoal, importarPreviasAntigas, listarAgentesPessoais, sa
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 import { acessoDosCanais } from '../../../../dist/login/tipos/acessoDosCanais.js';
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';
-import { lerContas } from '../../../../dist/login/banco/lerContas.js';
+import { lerContas } from '../../../../dist/login/repositorioContas.js';
 import { criarContaPelaAdministracao } from '../../../../dist/administracao/servico.js';
 import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
 

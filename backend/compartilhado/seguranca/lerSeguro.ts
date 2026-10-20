@@ -1,6 +1,6 @@
 /** Lê um arquivo de texto do projeto com limite de tamanho, recusando arquivos binários e caminhos proibidos. */
 import { promises as fs } from 'node:fs';
-import { ErroQa } from '../erros/ErroQa.js';
+import { ErroQa } from '../erros.js';
 import { caminhoSeguro } from './caminhoSeguro.js';
 
 export async function lerSeguro(raiz: string, relativo: string, interno = false, limite = 262144) {

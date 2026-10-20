@@ -5,7 +5,7 @@ import { abrirBancoProtegido } from './abrirBancoProtegido.js';
 import { sementeDasSkills } from './sementeDasSkills.js';
 import { TrechoDeSkill, VERSAO_ESQUEMA_SKILLS } from '../tipos/skills.js';
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 
 /** Onde fica o banco: skills.db na pasta de dados do Prumo, separada por conta. */

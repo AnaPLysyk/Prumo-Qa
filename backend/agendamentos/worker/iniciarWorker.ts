@@ -1,11 +1,11 @@
 /** Liga o worker: assume a trava de instância única (ou recusa se outro estiver vivo), recupera execuções interrompidas e agenda a primeira passada. */
-import { lerTravaDoWorker } from '../banco/lerTravaDoWorker.js';
+import { lerTravaDoWorker } from './travaDoWorker.js';
 import { recuperarInterrompidos } from '../repositorioFila.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
 
 import { emitirEventoDoWorker } from './apoioDoWorker.js';
-import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';
-import { processoVivo } from './processoVivo.js';
+import { gravarTravaDoWorker } from './travaDoWorker.js';
+import { processoVivo } from './travaDoWorker.js';
 import { passadaDoWorker } from './passadaDoWorker.js';
 
 function agendarProximaPassada(e: EstadoDoWorker, ms: number) {

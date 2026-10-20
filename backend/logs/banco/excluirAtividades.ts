@@ -1,7 +1,7 @@
 /** Apaga o diário de operações do projeto (Ajuda › Privacidade e dados), informando falhas. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { arquivosDoDiario } from './arquivosDoDiario.js';

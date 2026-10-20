@@ -1,7 +1,7 @@
 /** Lógica e contratos de agendamentos: operações relacionadas no mesmo módulo. */
 import { ConfigK6, ExecutavelK6, LIMITE_DURACAO_S, LIMITE_USUARIOS } from "./tipos/k6.js";
 import { promises as fs } from "node:fs";
-import { ErroQa } from "../compartilhado/erros/ErroQa.js";
+import { ErroQa } from "../compartilhado/erros.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
 import { lerSeguro } from "../compartilhado/seguranca/lerSeguro.js";
 import { Projeto } from "../compartilhado/tipos/projeto.js";

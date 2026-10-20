@@ -4,7 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { comBancoDeSkills, linhaParaTrecho } from './comBancoDeSkills.js';
 import { NovoTrecho, TrechoDeSkill, limitesSkills } from '../tipos/skills.js';
 import { validarEspecializacao } from '../regras/validarEspecializacao.js';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 

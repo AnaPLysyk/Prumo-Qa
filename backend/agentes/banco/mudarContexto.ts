@@ -1,6 +1,6 @@
 /** Aplica uma mudança a um contexto e grava a nova versão, recusando históricos adulterados ou cheios. */
 import path from 'node:path';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarContexto } from './carregarContexto.js';
 import { gravarArquivoDeContexto } from './gravarArquivoDeContexto.js';

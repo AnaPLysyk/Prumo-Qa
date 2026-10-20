@@ -2,7 +2,7 @@
 import { termosDaFrase } from '../regras/textosDoConhecimento.js';
 import { Proximo } from '../tipos/chat.js';
 import { Papel } from '../tipos/persona.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+import { semAcentos } from '../../compartilhado/texto.js';
 
 const sugestaoPorPapel: Record<Papel, Proximo> = {
   po: { rotulo: 'Riscos para a entrega', pergunta: 'quais os riscos para a entrega?' },

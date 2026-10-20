@@ -3,7 +3,7 @@ import { listarTrechosDeSkill } from '../banco/listarTrechosDeSkill.js';
 import { sementeDasSkills } from '../banco/sementeDasSkills.js';
 import { SkillEscolhida, escolherTrechosDaSkill } from '../regras/escolherTrechosDaSkill.js';
 import { validarEspecializacao } from '../regras/validarEspecializacao.js';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 
 /**
  * Sem especialização (orquestrador), usa a Skill de QA geral. Especialização desconhecida é recusada antes de ler qualquer

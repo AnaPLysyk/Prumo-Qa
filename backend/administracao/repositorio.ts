@@ -4,7 +4,7 @@ import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
 import { AgentesDaPlataforma, agentesDaPlataformaPadrao, agentesDaPlataformaSchema, CodigoDoArquivo, LIMITE_CODIGO_ARQUIVO, LIMITE_CODIGO_TOTAL, LIMITE_MAPA, MapaDoAplicativo, mapaDoAplicativoSchema } from "./contratos.js";
 import fs from "node:fs";
 import path from "node:path";
-import { falharCom } from "../compartilhado/erros/falharCom.js";
+import { falharCom } from "../compartilhado/erros.js";
 import { raizDoAplicativo } from "../compartilhado/raizDoAplicativo.js";
 
 export const lerAgentesDaPlataforma = (base?: string): AgentesDaPlataforma =>

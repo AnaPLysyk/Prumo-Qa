@@ -4,7 +4,7 @@ import { validarAgenteDoConhecimento, falharConhecimento } from "./banco/validac
 import { termosDaFrase } from "./regras/textosDoConhecimento.js";
 import { limitesConhecimento, Conhecimento, EstadoConhecimento, Linha } from "./tipos/conhecimento.js";
 import { linhaParaConhecimento } from "./banco/formatosDoConhecimento.js";
-import { semAcentos } from "../compartilhado/texto/semAcentos.js";
+import { semAcentos } from "../compartilhado/texto.js";
 
 export function aprenderTermos(agente: string, frase: string, base?: string, agora = new Date()) {
   validarAgenteDoConhecimento(agente); const ts = termosDaFrase(frase); if (!ts.length) return { termos: [] as string[] };

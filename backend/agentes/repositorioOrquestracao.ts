@@ -4,7 +4,7 @@ import { Orquestracao, limitesOrquestracao } from "./tipos/orquestracao.js";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import path from "node:path";
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
-import { falharCom } from "../compartilhado/erros/falharCom.js";
+import { falharCom } from "../compartilhado/erros.js";
 
 export function listarOrquestracoes(espacoId: string | null, base?: string): { orquestracoes: Orquestracao[]; invalidas: number } {
   const alvo = arquivoDeOrquestracoes(base); semLinks(alvo);

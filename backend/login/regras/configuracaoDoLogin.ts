@@ -4,8 +4,8 @@ import { cofreCredenciais } from '../../conexoes/banco/cofreCredenciais.js';
 import { protetorDoSistema } from '../../conexoes/regras/protetorDoSistema.js';
 import { lerPerfilDoGithub, trocarCodigoNoGithub } from '../integracoes/githubOauth.js';
 import { lerPerfilDoGoogle, trocarCodigoNoGoogle } from '../integracoes/googleOauth.js';
-import { gravarContas } from '../banco/gravarContas.js';
-import { lerContas } from '../banco/lerContas.js';
+import { gravarContas } from '../repositorioContas.js';
+import { lerContas } from '../repositorioContas.js';
 import { DependenciasDeEntrada, Provedor } from './entradaPorProvedor.js';
 
 /** Ids fixos das credenciais dos segredos no cofre (o cofre exige um UUID). */

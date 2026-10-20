@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 
 import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { normalizarComando } from '../../compartilhado/projeto/normalizarComando.js';
 import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';

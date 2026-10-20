@@ -9,8 +9,8 @@ import { entrarNaConta } from '../../../../dist/login/regras/contas.js';
 import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
 import { estadoDaEntrada as estadoDaEntradaGithub, iniciarEntrada } from '../../../../dist/login/regras/entradaPorProvedor.js';
 import { encerrarSessao, situacaoDaSessao } from '../../../../dist/login/regras/sessao.js';
-import { gravarContas } from '../../../../dist/login/banco/gravarContas.js';
-import { lerContas } from '../../../../dist/login/banco/lerContas.js';
+import { gravarContas } from '../../../../dist/login/repositorioContas.js';
+import { lerContas } from '../../../../dist/login/repositorioContas.js';
 
 const iniciarEntradaGithub = (d, modo) => iniciarEntrada('github', d, modo);
 

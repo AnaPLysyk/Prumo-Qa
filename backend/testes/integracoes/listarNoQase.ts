@@ -1,5 +1,5 @@
 /** Percorre as paginas da consulta Qase sem concluir falsamente que um caso/run/suite não existe. */
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { Recurso } from '../../projetos/contratos.js';

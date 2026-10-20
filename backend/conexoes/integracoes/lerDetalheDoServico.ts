@@ -1,5 +1,5 @@
 /** Faz as consultas de detalhe (metadados, transições, histórico, anexos, workflows, commits...) de Jira, Qase e GitHub. */
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ErroServico } from './ErroServico.js';
 import { ContextoServico } from '../tipos/adaptador.js';
 import { Filtros, OperacaoExtra, Pg } from '../tipos/leituras.js';

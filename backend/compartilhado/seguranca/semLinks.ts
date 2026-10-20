@@ -1,7 +1,7 @@
 /** Recusa caminhos que passam por atalhos (links simbólicos ou junctions) em qualquer pasta do caminho. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { falharCom } from '../erros/falharCom.js';
+import { falharCom } from '../erros.js';
 
 /** Recusa links em todos os componentes, inclusive ancestrais do diretório de dados. */
 export function semLinks(alvo:string) {

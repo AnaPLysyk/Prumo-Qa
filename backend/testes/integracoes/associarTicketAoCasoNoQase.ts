@@ -1,6 +1,6 @@
 /** Operação "Associar caso do Qase a ticket do Jira". */
 import { z } from 'zod';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { associarCasoAoTicket } from './associarCasoAoTicket.js';
 import { associarTicket } from '../tipos/escritaQase.js';

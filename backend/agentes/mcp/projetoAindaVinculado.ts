@@ -1,5 +1,5 @@
 /** Reabre o contrato da pasta a cada chamada da IA e recusa (PROJECT_BINDING_CHANGED) se o projeto passou a ter outra identidade. */
-import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
+import { ErroQa } from '../../compartilhado/erros.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 

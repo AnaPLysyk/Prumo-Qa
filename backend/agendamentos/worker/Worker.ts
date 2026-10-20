@@ -2,15 +2,15 @@
 import { randomUUID } from 'node:crypto';
 import { agendaPausada, listarRotinas, obterRotina } from '../repositorioAgenda.js';
 import { enfileirar } from '../repositorioFila.js';
-import { lerTravaDoWorker } from '../banco/lerTravaDoWorker.js';
+import { lerTravaDoWorker } from './travaDoWorker.js';
 import { listarTrabalhos } from '../repositorioFila.js';
 import { proximoHorario } from '../servicoHorarios.js';
 import { DepsWorker, EstadoDoWorker } from '../tipos/worker.js';
 import { capacidadeDaRotinaAgendada } from './apoioDoWorker.js';
-import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';
+import { gravarTravaDoWorker } from './travaDoWorker.js';
 import { iniciarWorker } from './iniciarWorker.js';
 import { passadaDoWorker } from './passadaDoWorker.js';
-import { processoVivo } from './processoVivo.js';
+import { processoVivo } from './travaDoWorker.js';
 
 /** A trava só está viva quando o processo existe e o último batimento é recente. */
 function estadoDaTravaDoWorker(base?: string, agora = new Date()) {

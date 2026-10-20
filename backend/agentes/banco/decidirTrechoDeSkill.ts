@@ -1,7 +1,7 @@
 /** Aprova ou descarta um trecho de Skill. Aprovar é sempre ato da pessoa; descartar vale também para os trechos do Prumo. */
 import { comBancoDeSkills, linhaParaTrecho } from './comBancoDeSkills.js';
 import { EstadoTrecho, TrechoDeSkill } from '../tipos/skills.js';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 
 export function decidirTrechoDeSkill(id: string, estado: Exclude<EstadoTrecho, 'RASCUNHO'>, base?: string, agora = new Date()): TrechoDeSkill {
   if (!['APROVADO', 'DESCARTADO'].includes(estado)) falharCom('SKILL_STATE_INVALID');

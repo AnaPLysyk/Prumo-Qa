@@ -1,5 +1,5 @@
 /** Reúne interpretar pergunta da funcionalidade, mantendo cada operação identificável pelo nome. */
-import { semAcentos } from "../../compartilhado/texto/semAcentos.js";
+import { semAcentos } from "../../compartilhado/texto.js";
 
 export const palavrasDaPergunta = (p: string) => semAcentos(p).split(/[^a-z0-9@]+/).filter(Boolean);
 

@@ -1,7 +1,7 @@
 /** Publica defeito Qase autorizado, com marcador de idempotência e confirmação por GET. */
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { marcadorDaOperacao } from '../../conexoes/escrita/marcadorDaOperacao.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';

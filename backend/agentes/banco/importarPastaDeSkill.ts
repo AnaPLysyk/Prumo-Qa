@@ -7,7 +7,7 @@ import { validarEspecializacao } from '../regras/validarEspecializacao.js';
 import { dividirSkillEmTrechos } from '../regras/dividirSkillEmTrechos.js';
 import { licencaAberta } from '../regras/licencaAberta.js';
 import { NovoTrecho } from '../tipos/skills.js';
-import { falharCom } from '../../compartilhado/erros/falharCom.js';
+import { falharCom } from '../../compartilhado/erros.js';
 
 /**
  * Regras: só com licença aberta reconhecida (no SKILL.md ou num LICENSE da pasta ou de até duas pastas acima);

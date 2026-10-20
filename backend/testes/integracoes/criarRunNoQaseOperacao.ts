@@ -1,7 +1,7 @@
 /** Operação "Criar test run no Qase" (não executa nada). */
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { marcadorDaOperacao } from '../../conexoes/escrita/marcadorDaOperacao.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { conferirCasosNoQase } from './consultasDeCasosQase.js';

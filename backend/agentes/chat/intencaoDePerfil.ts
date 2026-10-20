@@ -6,7 +6,7 @@ import { normalizarNome } from '../regras/textosDoConhecimento.js';
 import { Meta, Turno , PAPEIS } from '../tipos/chat.js';
 import { Perfil } from '../tipos/conhecimento.js';
 import { rotuloPapel, Papel } from '../tipos/persona.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+import { semAcentos } from '../../compartilhado/texto.js';
 
 const papelNoTexto = (t: string): Papel | null => { for (const [re, p] of PAPEIS) if (re.test(t)) return p; return null; };
 

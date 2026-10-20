@@ -1,6 +1,6 @@
 /** Lógica e contratos de tickets: operações relacionadas no mesmo módulo. */
 import { z } from "zod";
-import { codificarParaUrl } from "../compartilhado/texto/codificarParaUrl.js";
+import { codificarParaUrl } from "../compartilhado/texto.js";
 import { ContextoServico } from "../conexoes/tipos/adaptador.js";
 import { Remoto, DefOperacao, Auxiliar } from "../conexoes/tipos/operacao.js";
 import { Recurso } from "../projetos/contratos.js";

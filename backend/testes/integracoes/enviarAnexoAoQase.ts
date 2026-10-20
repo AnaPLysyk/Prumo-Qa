@@ -1,7 +1,7 @@
 /** Operação "Enviar anexo ao Qase". */
 import path from 'node:path';
 import { z } from 'zod';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
+import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { montarEnvioDeArquivo } from '../../conexoes/integracoes/montarEnvioDeArquivo.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { anexar } from '../tipos/escritaQase.js';

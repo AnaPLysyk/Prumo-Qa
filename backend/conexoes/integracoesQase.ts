@@ -1,6 +1,6 @@
 /** Consulta cadastros, campos e planos de teste remotos do Qase. */
 import { z } from "zod";
-import { codificarParaUrl } from "../compartilhado/texto/codificarParaUrl.js";
+import { codificarParaUrl } from "../compartilhado/texto.js";
 import { ParametrosConsulta } from "./tipos/ParametrosConsulta.js";
 import { ResultadoConsulta } from "./tipos/ResultadoConsulta.js";
 import { camposDeSistema } from "../testes/integracaoFormatosQase.js";

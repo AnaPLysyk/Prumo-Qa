@@ -3,7 +3,7 @@ import { BrowserWindow, ipcMain, type IpcMainInvokeEvent } from 'electron';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { CanalIpc, canaisFrequentes, esquemasIpc } from './catalogoDeContratos.js';
-import { mensagemComCodigo } from '../../compartilhado/erros/mensagemComCodigo.js';
+import { mensagemComCodigo } from '../../compartilhado/erros.js';
 import { Resposta, origemPermitida } from '../tipos/aplicativo.js';
 import { registrarDiagnostico } from '../../logs/repositorioDiagnostico.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
