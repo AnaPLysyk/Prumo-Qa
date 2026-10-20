@@ -1,7 +1,7 @@
 /** Executa uma operação externa confirmada, uma de cada vez por chave, sem duplicar. */
 import { chaveDaOperacao } from './chaveDaOperacao.js';
 import { executarOperacaoUmaVez } from './executarOperacaoUmaVez.js';
-import { operacaoPorId } from './operacaoPorId.js';
+import { operacaoPorId } from './catalogoOperacoes.js';
 import { Executor, OpcoesOperacao, RegistroOperacao, emCurso } from '../tipos/operacoesExternas.js';
 
 export async function executarOperacao(ex: Executor, espacoId: string, operacaoId: string, bruto: unknown, o: OpcoesOperacao = {}): Promise<RegistroOperacao & { reutilizada: boolean }> {

@@ -3,7 +3,7 @@ import { lookup } from 'node:dns/promises';
 import https from 'node:https';
 import type { LookupFunction } from 'node:net';
 import { rotaEscritaPermitida } from '../escrita/permissoes.js';
-import { enderecoPublico } from './enderecoPublico.js';
+import { isIP } from 'node:net';
 import { ErroServico } from './ErroServico.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { instanciaServico } from './configuracaoDosServicos.js';
@@ -14,6 +14,14 @@ import { PedidoServico } from '../tipos/transporte.js';
  * lookup que devolve sempre o IP já conferido. O Node atual (autoSelectFamily) chama com {all:true} e espera uma lista;
  * devolver um endereço só nesse caso dava "Invalid IP address: undefined" e derrubava toda conexão real com Qase, Jira e GitHub.
  */
+/** Bloqueia localhost, redes internas e IPs especiais antes de estabelecer HTTPS. */
+function enderecoPublico(ip:string){
+  // Conjunto conservador: descarta IPv6 no transporte inicial e todas as faixas especiais IPv4.
+  if(isIP(ip)!==4)return false;const a=ip.split('.').map(Number);const[x,y]=a;
+  const terceiro=a[2]!;
+  return x!>=1&&x!<224&&x!==10&&x!==127&&!(x===169&&y===254)&&!(x===172&&y!>=16&&y!<=31)&&!(x===100&&y!>=64&&y!<=127)&&!(x===192&&(y===168||y===0||y===88))&&!(x===198&&(y===18||y===19||(y===51&&terceiro===100)))&&!(x===203&&y===0&&terceiro===113);
+}
+
 export const fixarIp=(ip:string):LookupFunction=>(_h,o,cb)=>(o as {all?:boolean})?.all?(cb as unknown as (e:null,l:{address:string;family:number}[])=>void)(null,[{address:ip,family:4}]):cb(null,ip,4);
 
 /** Motivo da recusa em JSON do Qase (errorMessage, errorFields), do Jira (errorMessages, errors) ou do GitHub (message, errors). */

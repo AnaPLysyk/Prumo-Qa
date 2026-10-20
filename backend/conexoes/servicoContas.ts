@@ -3,9 +3,9 @@ import { AdaptadorServico } from "./integracoes/AdaptadorServico.js";
 import { Conta, ContextoDosServicos, conexaoEntrada, contaSchema } from "./tipos/contaDeServico.js";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
+
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { lerContasDeServico } from "./banco/contasDeServico.js";
+import { lerContasDeServico, gravarContasDeServico } from "./banco/contasDeServico.js";
 import { instanciaServico } from "./integracoes/configuracaoDosServicos.js";
 import { ErroServico } from "./integracoes/ErroServico.js";
 import { atualizarEstadoDoVinculo } from "../projetos/servicoProjetos.js";
@@ -25,7 +25,7 @@ export async function adicionarConta(c: ContextoDosServicos, entrada: z.input<ty
   if (d.servico === 'qase' && r.contas.some(x => { if (!x.ativa || x.servico !== 'qase') return false; try { return c.cofre.ler(x.id) === d.token; } catch { return false; } })) throw new Error('CONNECTION_DUPLICATE');
   const conta = contaSchema.parse({ id, servico: d.servico, nome: mascarar(d.nome, [d.token]), instancia, usuario: d.usuario, contaId: identidade.contaId, identidade: identidade.nome, criadaEm: new Date().toISOString(), validadaEm: new Date().toISOString(), ativa: true });
   c.cofre.salvar(id, d.token);
-  try { r.contas.push(conta); gravarLocal('contas.json', r, c.base); } catch (e) { c.cofre.remover(id); throw e; }
+  try { r.contas.push(conta); gravarContasDeServico(r, c.base); } catch (e) { c.cofre.remover(id); throw e; }
   return conta;
 }
 

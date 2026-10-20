@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { codificarParaUrl } from '../../compartilhado/texto.js';
-import { marcadorDaOperacao } from '../escrita/marcadorDaOperacao.js';
+import { marcadorDaOperacao } from '../escrita/chaveDaOperacao.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { ContextoServico } from '../tipos/adaptador.js';
 import { criarIssue } from '../tipos/escritaGithub.js';

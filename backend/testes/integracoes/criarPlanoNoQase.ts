@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { codificarParaUrl } from '../../compartilhado/texto.js';
-import { marcadorDaOperacao } from '../../conexoes/escrita/marcadorDaOperacao.js';
+import { marcadorDaOperacao } from '../../conexoes/escrita/chaveDaOperacao.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { conferirCasosNoQase } from './pesquisasQase.js';
 import { conferirIdsDoObjetoQase } from './formatosQase.js';

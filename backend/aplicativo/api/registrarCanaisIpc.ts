@@ -1,37 +1,22 @@
-/** Liga os canais IPC aos controladores por funcionalidade e mantém validação e autorização por canal. */
-import { agendaAutorizar, agendaEstado, agendaExcluir, agendaExecutar, agendaListar, agendaPermissoes, agendaPolitica, agendaRevogar, agendaRevogarPolitica, agendaSalvar } from "../../agendamentos/controladorAgenda.js";
-import { workerEstado, workerEventos, workerPausa } from "../../agendamentos/controladorWorker.js";
-import { agentesEstado, agentesSalvar, agentesPessoais, agentesPessoalsalvar, agentesPessoalexcluir, agentesPessoaisimportar, agentesOrquestracoes, agentesRastrear, servicosImportar } from "../../agentes/controladorAgentes.js";
-import { assistenteAgentes, assistenteAvaliar, assistenteConversar, conversasListar } from "../../agentes/controladorAssistente.js";
-import { conhecimentoApagar, conhecimentoCriar, conhecimentoDecidir, conhecimentoEsquecer, conhecimentoEstado, conhecimentoListar, conhecimentoMostrar, conhecimentoVocabulario } from "../../agentes/controladorConhecimento.js";
-import { administracaoCodigo, administracaoMapa, plataformaAgentes, plataformaSalvar } from "../../administracao/controlador.js";
-import { contaEntrar, contaSessao } from "../../login/controladorSessao.js";
+/** Registra os canais IPC do aplicativo e mantém contrato e autorização por canal. */
+import { agendaAutorizar, agendaEstado, agendaExcluir, agendaExecutar, agendaListar, agendaPermissoes, agendaPolitica, agendaRevogar, agendaRevogarPolitica, agendaSalvar, workerEstado, workerEventos, workerPausa } from "../../agendamentos/controlador.js";
+import { agentesEstado, agentesSalvar, agentesPessoais, agentesPessoalsalvar, agentesPessoalexcluir, agentesPessoaisimportar, agentesOrquestracoes, agentesRastrear, servicosImportar, assistenteAgentes, assistenteAvaliar, assistenteConversar, conversasListar, conhecimentoApagar, conhecimentoCriar, conhecimentoDecidir, conhecimentoEsquecer, conhecimentoEstado, conhecimentoListar, conhecimentoMostrar, conhecimentoVocabulario, skillsCriar, skillsDecidir, skillsImportar, skillsListar, iaDelegacao, perfilObter, perfilSalvar, contextosAprovar, contextosConflito, contextosDesatualizar, contextosExcluir, contextosListar, contextosMcp, contextosObter, contextosSalvar } from "../../agentes/controlador.js";
+import { administracaoCodigo, administracaoMapa, plataformaAgentes, plataformaSalvar, chamadosConfiguracao, chamadosChave, chamadosListar, chamadosDetalhe, chamadosAnexo, chamadosResponder, chamadosEstado, usuariosAtivar, usuariosListar, usuariosCriar, usuariosAlterar, usuariosSenha, usuariosDesbloquear, usuariosExcluir, papeisListar, papeisSalvar, papeisExcluir, acessoConfiguracao, acessoGithub, acessoGoogle, acessoSalvar } from "../../administracao/controlador.js";
 import { contaSair, contaCadastrar, contaRecuperar, contaCodigo, contaConfirmarentrada, contaReenviarentrada, contaDuasetapas, contaSenha, contaPerfil, contaGoogleestado, contaGoogleiniciar, contaGithubestado, contaGithubiniciar } from "../../login/controlador.js";
+import { contaEntrar, contaSessao } from "../../login/controladorSessao.js";
 import { suporteAnexar, suporteEnviar, suporteMeus, suporteMeu, suporteAbrir, suporteChamado, suporteConsultar, suporteExportar, suportePreparar } from "../../suporte/controlador.js";
-import { chamadosConfiguracao, chamadosChave, chamadosListar, chamadosDetalhe, chamadosAnexo, chamadosResponder, chamadosEstado } from "../../administracao/controladorChamados.js";
-import { usuariosAtivar, usuariosListar, usuariosCriar, usuariosAlterar, usuariosSenha, usuariosDesbloquear, usuariosExcluir } from "../../administracao/controladorUsuarios.js";
-import { papeisListar, papeisSalvar, papeisExcluir } from "../../administracao/controladorPapeis.js";
-import { acessoConfiguracao, acessoGithub, acessoGoogle, acessoSalvar } from "../../administracao/controladorAcesso.js";
-import { skillsCriar, skillsDecidir, skillsImportar, skillsListar } from "../../agentes/controladorSkills.js";
-import { iaDelegacao, perfilObter, perfilSalvar } from "../../agentes/controladorPerfil.js";
 import { ajudaDocumentos, ajudaIntegracoes, ajudaVersoes, dadosExcluir, dadosResumo, siteAbrir } from "../../ajuda/controlador.js";
 import { appInfo } from "../controlador.js";
 import { registrarCanal } from "./registrarCanal.js";
 import { atualizacaoAbrir, atualizacaoInstalar, atualizacaoVerificar, preferenciasVisualizada } from "../../atualizacoes/controlador.js";
 import { interfaceExportar } from "../../compartilhado/controlador.js";
-import { conexaoAplicar, conexaoTestar, escritaEstado, escritaHabilitar, operacoesExecutar, operacoesListar, projetoConexoes } from "../../conexoes/controladorConexoes.js";
-import { servicosAceite, servicosAdicionar, servicosQaseprevia, servicosQasepreviaconta, servicosQaseimportar, servicosQasecancelar, servicosConferir, servicosConsultar, servicosDesvincular, servicosListar, servicosRecursos, servicosRemover, servicosValidar, servicosVincular } from "../../conexoes/controladorServicos.js";
+import { conexaoAplicar, conexaoTestar, escritaEstado, escritaHabilitar, operacoesExecutar, operacoesListar, projetoConexoes, servicosAceite, servicosAdicionar, servicosQaseprevia, servicosQasepreviaconta, servicosQaseimportar, servicosQasecancelar, servicosConferir, servicosConsultar, servicosDesvincular, servicosListar, servicosRecursos, servicosRemover, servicosValidar, servicosVincular } from "../../conexoes/controlador.js";
 import { preferenciasObter, preferenciasSalvar } from "../../configuracoes/controlador.js";
-import { contextosAprovar, contextosConflito, contextosDesatualizar, contextosExcluir, contextosListar, contextosMcp, contextosObter, contextosSalvar } from "../../agentes/controladorContextos.js";
-import { projetoEvidencias, execucoesListar, vinculosMapa } from "../../testes/controlador.js";
-import { jiraPrevia, jiraPublicar } from "../../testes/controladorJira.js";
+import { projetoEvidencias, execucoesListar, vinculosMapa, jiraPrevia, jiraPublicar, runsBugs, runsCriar, runsExecutar, runsListar, runsPolitica, runsPreparar, runsPublicar, runsResultado, runsRevogar, testesArquivo, testesGravar, testesPipelines, testesCatalogo, repositorioListar, repositorioCaso, repositorioSuite } from "../../testes/controlador.js";
 import { projetoHistorico, diagnosticoListar, logsExportar, projetoLogs } from "../../logs/controlador.js";
 import { assistenteAbertura } from "../../inicio/controlador.js";
 import { execucoesMetricas } from "../../metricas/controlador.js";
 import { espacosAssociar, espacosAutomacoes, espacosCriar, espacosEditar, espacosListar, espacosObter, espacosPasta, espacosTrazer, projetosDemo, projetosDesvincular, projetosEscolher, projetosListar, projetoVisao } from "../../projetos/controlador.js";
-import { runsBugs, runsCriar, runsExecutar, runsListar, runsPolitica, runsPreparar, runsPublicar, runsResultado, runsRevogar } from "../../testes/controladorExecucoes.js";
-import { testesArquivo, testesGravar, testesPipelines, testesCatalogo } from "../../testes/controladorArquivos.js";
-import { repositorioListar, repositorioCaso, repositorioSuite } from "../../testes/controladorRepositorio.js";
 import { propostasCriar, propostasDescartar, propostasVincular, propostasEditar, propostasListar, propostasPublicar, propostasRevisar } from "../../tickets/controlador.js";
 
 export function registrarCanaisIpc(): void {

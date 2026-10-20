@@ -2,8 +2,7 @@
 import { dialog, shell, safeStorage } from "electron";
 import { repositorio } from "../ajuda/contratos.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { enderecoOficialDoRelato } from "./servicoRelato.js";
-import { prepararRelatoDaJanela } from "./regras/prepararRelatoDaJanela.js";
+import { enderecoOficialDoRelato, prepararRelato, resumoDoDiagnosticoParaRelato } from "./servicoRelato.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { guardarAnexos } from "./regras/anexosDoChamado.js";
 import { consultarChamado } from "./integracoes.js";
@@ -11,6 +10,16 @@ import { versao } from "../aplicativo/tipos/aplicativo.js";
 import { protetorDoSistema } from "../conexoes/regras/protetorDoSistema.js";
 import { enviarChamado, meuChamado, meusChamados } from "./regras/chamadosDaPessoa.js";
 import fs from "node:fs";
+
+/** Complementa o relato da janela com a versão instalada e o diagnóstico autorizado. */
+function prepararRelatoDaJanela(a: Parameters<typeof prepararRelato>[0]) {
+  return prepararRelato(a, {
+    versao,
+    diagnostico: (a as { incluirDiagnostico?: boolean }).incluirDiagnostico
+      ? resumoDoDiagnosticoParaRelato()
+      : undefined
+  });
+}
 
 export const suporteAbrir: TratadorDoCanal<'suporte:abrir'> = async (a, janela) => {
   const p = prepararRelatoDaJanela(a);

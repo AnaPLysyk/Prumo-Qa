@@ -1,6 +1,6 @@
 /** Consulta detalhes do Jira e prepara o plano seguro de leitura dos dados. */
 import { ParametrosConsulta } from "../tipos/ParametrosConsulta.js";
-import { ResultadoConsulta } from "../tipos/ResultadoConsulta.js";
+import { ResultadoConsulta } from "../tipos/ParametrosConsulta.js";
 import { z } from "zod";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { projetoDoTicket, camposDoTipo, tiposDeCriacao, transicoesDoTicket, jqlDeTickets } from "../../tickets/integracoesJira.js";

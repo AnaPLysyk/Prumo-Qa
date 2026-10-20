@@ -2,8 +2,8 @@
 import { BrowserWindow, safeStorage, shell } from 'electron';
 import { cofreCredenciais } from '../../conexoes/banco/credenciais.js';
 import { protetorDoSistema } from '../../conexoes/regras/protetorDoSistema.js';
-import { lerPerfilDoGithub, trocarCodigoNoGithub } from '../integracoes/githubOauth.js';
-import { lerPerfilDoGoogle, trocarCodigoNoGoogle } from '../integracoes/googleOauth.js';
+import { lerPerfilDoGithub, trocarCodigoNoGithub } from '../integracoes/oauthDosProvedores.js';
+import { lerPerfilDoGoogle, trocarCodigoNoGoogle } from '../integracoes/oauthDosProvedores.js';
 import { gravarContas } from '../banco/contas.js';
 import { lerContas } from '../banco/contas.js';
 import { DependenciasDeEntrada, Provedor } from './entradaPorProvedor.js';

@@ -1,6 +1,6 @@
 /** Controlador da funcionalidade ajuda: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import path from "node:path";
-import { lerDocumentosDaAjuda } from "./servicoDocumentos.js";
+import { lerDocumentosDaAjuda } from "./servicoAjuda.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { versao, arquivoVersoes, textoExclusao } from "../aplicativo/tipos/aplicativo.js";
 import { raizDoAplicativo } from "../compartilhado/raizDoAplicativo.js";
@@ -14,7 +14,7 @@ import { excluirEvidencias } from "../testes/banco/evidencias.js";
 import { excluirAtividades } from "../logs/banco/atividades.js";
 import { excluirDiagnostico } from "../logs/banco/diagnostico.js";
 import { projetoVinculado } from "../projetos/servicoProjetos.js";
-import { resumirDados } from "./servicoPrivacidade.js";
+import { resumirDados } from "./servicoAjuda.js";
 
 export const ajudaDocumentos: TratadorDoCanal<'ajuda:documentos'> = () => lerDocumentosDaAjuda(path.join(raizDoAplicativo, 'docs', 'ajuda'), versao);
 

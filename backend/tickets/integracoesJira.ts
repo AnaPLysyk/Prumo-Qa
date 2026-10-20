@@ -7,7 +7,7 @@ import { Recurso } from "../projetos/contratos.js";
 import path from "node:path";
 import { montarEnvioDeArquivo } from "../conexoes/integracoes/montarEnvioDeArquivo.js";
 import { anexar, comentar, criar, editar, tipos, transicionar, vincular } from "./contratos.js";
-import { marcadorDaOperacao } from "../conexoes/escrita/marcadorDaOperacao.js";
+import { marcadorDaOperacao } from "../conexoes/escrita/chaveDaOperacao.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { ErroServico } from "../conexoes/integracoes/ErroServico.js";
 import { textoEntreAspasJql } from "../conexoes/integracoes/formatos.js";

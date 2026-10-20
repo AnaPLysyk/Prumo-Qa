@@ -2,7 +2,7 @@
 import { Protetor, schema } from "../tipos/credenciais.js";
 import { lerLocal, gravarLocal } from "../../compartilhado/banco/persistenciaLocal.js";
 import { z } from "zod";
-import { exigirProtecaoDoWindows } from "./exigirProtecaoDoWindows.js";
+
 
 // Cada ação está no seu arquivo; aqui só se fixa o protetor do Windows e a pasta de dados.
 export function cofreCredenciais(protetor: Protetor, base?: string) {
@@ -59,4 +59,9 @@ export function removerCredencial(id: string, base?: string) {
   const registro = lerArquivoDeCredenciais(base);
   delete registro.entradas[id];
   gravarLocal('credenciais.json', registro, base);
+}
+
+/** Recusa acesso às credenciais sem proteção nativa. */
+export function exigirProtecaoDoWindows(protetor: Protetor) {
+  if (!protetor.disponivel()) throw new Error('CREDENTIAL_PROTECTION_UNAVAILABLE');
 }

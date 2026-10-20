@@ -4,7 +4,7 @@ import { ErroServico } from './ErroServico.js';
 import { ContextoServico } from '../tipos/adaptador.js';
 import { Filtros, OperacaoExtra, Pg } from '../tipos/leituras.js';
 import { ParametrosConsulta } from '../tipos/ParametrosConsulta.js';
-import { ResultadoConsulta } from '../tipos/ResultadoConsulta.js';
+import { ResultadoConsulta } from '../tipos/ParametrosConsulta.js';
 import { consultarMetadadosJira } from './consultasJira.js';
 import { consultarCamposTipoJira } from './consultasJira.js';
 import { consultarTransicoesJira } from './consultasJira.js';

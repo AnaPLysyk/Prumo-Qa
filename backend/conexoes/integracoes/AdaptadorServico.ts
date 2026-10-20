@@ -1,21 +1,51 @@
-/** Conversa com um serviço (Jira, Qase ou GitHub): valida a conta, lista recursos e faz cada consulta da tela com o endereço certo. */
-import { z } from 'zod';
-import { ConfigServico, ContextoServico, OperacaoServico } from '../tipos/adaptador.js';
-import { Filtros } from '../tipos/leituras.js';
-import { TransporteEscrita, TransporteServico, paginaSchema } from '../tipos/transporte.js';
-import { Recurso } from '../../projetos/contratos.js';
-import { autenticarNoServico } from './autenticarNoServico.js';
-import { consultarNoServico } from './consultarNoServico.js';
-import { contextoDoAdaptador } from './leiturasDeServicos.js';
-import { enviarAoServico } from './requisicoes.js';
-import { ErroServico } from './ErroServico.js';
-import { instanciaServico } from './configuracaoDosServicos.js';
-import { lerDoServico } from './requisicoes.js';
-import { listarRecursosDoServico } from './leiturasDeServicos.js';
-import { obterRecursoDoServico } from './requisicoes.js';
-import { procurarComentarioNoTicket } from './procurarComentarioNoTicket.js';
-import { publicarComentarioNoTicket } from './publicarComentarioNoTicket.js';
+/** Adaptador das integrações: autenticação, leitura, comentário e publicação. */
+import { z } from "zod";
+import { PartesDoAdaptador, nome, obj, paginaQase, sid, ConfigServico, ContextoServico, OperacaoServico } from "../tipos/adaptador.js";
+import { ErroServico } from "./ErroServico.js";
+import { lerComCredencial, enviarAoServico, lerDoServico, obterRecursoDoServico } from "./requisicoes.js";
+import { limparRespostaDoServico, textoRemoto } from "./formatos.js";
+import { Recurso } from "../../projetos/contratos.js";
+import { consultarNoServico } from "./consultarNoServico.js";
+import { codificarParaUrl } from "../../compartilhado/texto.js";
+import { cabecalhosDoServico, instanciaServico } from "./configuracaoDosServicos.js";
+import { Filtros } from "../tipos/leituras.js";
+import { TransporteEscrita, TransporteServico, paginaSchema } from "../tipos/transporte.js";
+import { contextoDoAdaptador, listarRecursosDoServico } from "./leiturasDeServicos.js";
 
+// autenticarNoServico — responsabilidade deste trecho
+export async function autenticarNoServico(a: PartesDoAdaptador) {
+  try {
+    if (a.c.servico === 'jira') { const r = obj.parse(await lerComCredencial(a, '/rest/api/3/myself')); const contaId = z.string().regex(/^[A-Za-z0-9:-]{1,128}$/).parse(r.accountId); if (contaId === a.c.token) throw new Error(); return { contaId, nome: limparRespostaDoServico(a.c, nome.parse(r.displayName)) as string }; }
+    if (a.c.servico === 'github') { const r = obj.parse(await lerComCredencial(a, '/user')); const contaId = sid.parse(r.id); if (!/^\d{1,20}$/.test(contaId) || contaId === a.c.token) throw new Error(); return { contaId, nome: limparRespostaDoServico(a.c, nome.parse(r.login)) as string }; }
+    // API v1 Qase não fornece /me nem ID de conta em Project. Não inventar principal remoto.
+    paginaQase.parse(await lerComCredencial(a, '/v1/project?limit=1&offset=0'));
+    return { contaId: 'conexao-local:' + a.c.id, nome: 'Qase (escopo desta conexão; conta não informada pelo Qase)' };
+  } catch (e) { if (e instanceof ErroServico) throw e; throw new ErroServico('SERVICE_RESPONSE_INVALID'); }
+}
+
+// procurarComentarioNoTicket — responsabilidade deste trecho
+export async function procurarComentarioNoTicket(a: PartesDoAdaptador, r: Recurso, ticket: string, marcador: string): Promise<string | null> {
+  let offset = 0;
+  for (let i = 0; i < 5; i++) {
+    const pag = await consultarNoServico(a, r, 'comentarios', { offset, limite: 100 }, ticket);
+    for (const c of pag.dados as Record<string, unknown>[]) { if (textoRemoto(c.body).includes(marcador)) return String(c.id); }
+    if (typeof pag.proxima !== 'number') return null; offset = pag.proxima;
+  }
+  return null;
+}
+
+// publicarComentarioNoTicket — responsabilidade deste trecho
+export async function publicarComentarioNoTicket(a: PartesDoAdaptador, r: Recurso, ticket: string, adf: unknown): Promise<{ id: string }> {
+  if (a.c.servico !== 'jira' || !a.c.token) throw new ErroServico('SERVICE_WRITE_BLOCKED');
+  if (!/^[A-Z][A-Z0-9_]*-\d+$/.test(ticket)) throw new ErroServico('SERVICE_RESPONSE_INVALID');
+  await consultarNoServico(a, r, 'ticket', {}, ticket);
+  let resposta: unknown;
+  try { resposta = await a.escrita({ servico: 'jira', instancia: a.c.instancia, caminho: '/rest/api/3/issue/' + codificarParaUrl(ticket) + '/comment', headers: cabecalhosDoServico(a.c), corpo: JSON.stringify({ body: adf }) }); }
+  catch (e) { if (e instanceof ErroServico) throw e; throw new ErroServico('SERVICE_UNAVAILABLE'); }
+  try { return { id: z.string().regex(/^\d{1,20}$/).parse(obj.parse(resposta).id) }; } catch { throw new ErroServico('SERVICE_RESPONSE_INVALID'); }
+}
+
+// AdaptadorServico — responsabilidade deste trecho
 // Cada método só chama o arquivo que faz o trabalho; a credencial fica em this.c e nunca é devolvida.
 export class AdaptadorServico {
   constructor(readonly c: ConfigServico, readonly transporte: TransporteServico = lerDoServico, readonly escrita: TransporteEscrita = enviarAoServico) {

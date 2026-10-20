@@ -1,10 +1,21 @@
-/** Lógica e contratos de ajuda: operações relacionadas no mesmo módulo. */
+/** Serviço da Ajuda: documentos e privacidade dos dados. */
 import fs from "node:fs";
 import path from "node:path";
+import { documentosAjuda } from "../projetos/contratos.js";
 import { categorias, limitesPrivacidade, naoTransmitido, politicaRetencao } from "./contratos.js";
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
 import { listarVinculos } from "../projetos/servicoProjetos.js";
 
+// servicoDocumentos — responsabilidade deste trecho
+export function lerDocumentosDaAjuda(pasta: string, versao: string) {
+  return documentosAjuda.map(arq => {
+    const arquivo=arq==='SERVICOS.md'?path.resolve(pasta,'../../docs/SERVICOS.md'):path.join(pasta,arq);
+    const texto = fs.readFileSync(arquivo, 'utf8').replaceAll('{{VERSAO}}', versao);
+    return { id: arq.replace(/\.md$/, ''), title: /^# (.+)$/m.exec(texto)?.[1] ?? arq, body: texto };
+  });
+}
+
+// servicoPrivacidade — responsabilidade deste trecho
 function medirPasta(dir: string, limite = { n: 0 }): { bytes: number; arquivos: number; truncado: boolean } {
   let bytes = 0, arquivos = 0, truncado = false;
   let itens: fs.Dirent[]; try { itens = fs.readdirSync(dir, { withFileTypes: true }); } catch { return { bytes, arquivos, truncado }; }

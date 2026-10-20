@@ -8,7 +8,7 @@ import { AgenteChat } from '../tipos/persona.js';
 import { dataEmPortugues } from '../../compartilhado/texto.js';
 import { semAcentos } from '../../compartilhado/texto.js';
 import { listarContextosDaPasta } from '../regras/consultasDeContextos.js';
-import { listarHistoricoDoProjeto } from '../../logs/regras/listarHistoricoDoProjeto.js';
+import { listarHistoricoDoProjeto } from '../../logs/regras/consultasDoDiario.js';
 import { perguntarAoAssistenteLocal } from '../../inicio/servico.js';
 import { situacaoDoProjeto } from '../../inicio/servico.js';
 import { Fonte } from '../../inicio/contratos.js';

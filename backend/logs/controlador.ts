@@ -3,9 +3,9 @@ import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { lerDiagnostico } from "./banco/diagnostico.js";
 import { dialog } from "electron";
 import fs from "node:fs";
-import { exportarLogs } from "./regras/exportarLogs.js";
-import { listarHistoricoDoProjeto } from "./regras/listarHistoricoDoProjeto.js";
-import { listarLogsDoProjeto } from "./regras/listarLogsDoProjeto.js";
+import { exportarLogs } from "./regras/consultasDoDiario.js";
+import { listarHistoricoDoProjeto } from "./regras/consultasDoDiario.js";
+import { listarLogsDoProjeto } from "./regras/consultasDoDiario.js";
 
 export const diagnosticoListar: TratadorDoCanal<'diagnostico:listar'> = () => lerDiagnostico();
 

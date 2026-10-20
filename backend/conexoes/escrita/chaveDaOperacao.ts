@@ -20,3 +20,6 @@ export const chaveDaOperacao = (espacoId: string, operacao: string, parametros: 
   createHash('sha256')
     .update(`${espacoId}|${operacao}|${textoCanonico(parametros)}`)
     .digest('hex');
+
+/** Marca o recurso externo para reconciliação sem duplicar o envio. */
+export const marcadorDaOperacao = (chave: string) => "prumo-" + chave.slice(0, 10);

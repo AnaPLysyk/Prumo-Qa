@@ -1,9 +1,14 @@
 /** Escreve o comentário de resultado (PASS/FAIL, contagens, duração, evidência) a partir de uma execução concluída. */
 import { Trabalho } from '../../agendamentos/tipos/fila.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { marcadorDaExecucao } from '../integracoes/helpersDeComentario.js';
-import { paragrafoDoComentario } from '../integracoes/helpersDeComentario.js';
+
 import { Comentario, rotulo } from '../tipos/comentarioJira.js';
+
+const marcadorDaExecucao = (trabalhoId: string) => `Prumo-Execução: ${trabalhoId}`;
+
+/** Monta um parágrafo do comentário no formato do Jira. */
+
+const paragrafoDoComentario = (t: string) => ({ type: 'paragraph', content: [{ type: 'text', text: t }] });
 
 export function montarComentario(t: Trabalho, nomeProjeto: string): Comentario {
   const res = t.resultado; if (!res || (res.status !== 'PASS' && res.status !== 'FAIL')) throw new Error('JIRA_COMMENT_NOT_APPLICABLE');

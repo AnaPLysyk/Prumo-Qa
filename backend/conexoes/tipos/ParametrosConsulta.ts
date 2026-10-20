@@ -15,3 +15,6 @@ export type ParametrosConsulta = {
   ticket: () => string;
   numero: () => string;
 };
+
+/** Estrutura padronizada do retorno da consulta. */
+export type ResultadoConsulta = { dados: unknown; proxima: number | null; endpoint: string };

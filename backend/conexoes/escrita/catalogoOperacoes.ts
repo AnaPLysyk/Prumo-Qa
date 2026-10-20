@@ -1,5 +1,6 @@
 /** Lista todas as operações de escrita conhecidas (Jira, Qase e GitHub). */
-import { operacoesGithub } from '../github/operacoesGithub.js';
+import { abrirPullRequestNoGithub, criarBranchNoGithub, gravarTesteNoGithub } from '../github/fluxoRepositorio.js';
+import { criarIssueNoGithub } from '../github/criarIssueNoGithub.js';
 import { DefOperacao } from '../tipos/operacao.js';
 import { operacoesQase } from '../../testes/integracoes/operacoesQase.js';
 import { operacoesJira } from '../../tickets/integracoesJira.js';
@@ -13,4 +14,9 @@ import { operacoesJira } from '../../tickets/integracoesJira.js';
  *     o serviço é consultado (reconciliação) antes de reenviar; o efeito é relido para confirmar;
  *  5. tudo fica no livro-razão local (operacoes-externas.json), sem corpo remoto nem segredo.
  */
+const operacoesGithub = [criarBranchNoGithub, gravarTesteNoGithub, abrirPullRequestNoGithub, criarIssueNoGithub] as unknown as DefOperacao<unknown>[];
+
 export const catalogoOperacoes: DefOperacao<unknown>[] = [...operacoesJira, ...operacoesQase, ...operacoesGithub];
+
+/** Procura uma operação conhecida no catálogo fechado. */
+export const operacaoPorId = (id: string) => catalogoOperacoes.find(o => o.id === id);

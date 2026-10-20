@@ -3,16 +3,18 @@ import { autorizacaoDelegada } from "../autorizacoes/autorizacaoDelegada.js";
 import { executarK6, localizarK6 } from "../servicoK6.js";
 import { ResultadoTrabalho, Trabalho } from "../tipos/fila.js";
 import { Rotina } from "../tipos/rotina.js";
-import { EstadoDoWorker } from "../tipos/worker.js";
+import { EstadoDoWorker, prioridade } from "../tipos/worker.js";
+import { Evidencia } from "../../testes/tipos/evidencia.js";
+import { obterEspaco } from "../../projetos/banco/projetos.js";
 import { projetoDaRotina } from "./apoioDoWorker.js";
-import { resultadoDaEvidencia } from "./resultadosDasEvidencias.js";
+import { resultadoDaEvidencia, contarCasosDaEvidencia, resumoDasFalhas } from "./resultadosDasEvidencias.js";
 import { ErroServico } from "../../conexoes/integracoes/ErroServico.js";
 import { Executor } from "../../conexoes/tipos/operacoesExternas.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";
 import { obterRunLocal } from "../../testes/banco/runs.js";
 import { publicarRunLocal } from "../../testes/integracoes/publicarRunLocal.js";
 import { executarRunLocal } from "../../testes/servicoExecucoes.js";
-import { validarTicketAgendado } from "./validarTicketAgendado.js";
+
 import { gravarEstadoDasRotinas, lerEstadoDasRotinas } from "../banco/agenda.js";
 
 export async function executarK6Agendado(e: EstadoDoWorker, r: Rotina, manual: boolean): Promise<ResultadoTrabalho> {
@@ -74,4 +76,18 @@ export async function executarTrabalhoDaRotina(e: EstadoDoWorker, t: Trabalho, r
     case 'consulta-jira': return consultarJiraAgendada(e, r);
     case 'analise-mudancas': return analisarMudancasAgendada(e, r);
   }
+}
+
+/** Executa validação por ticket a partir dos vínculos confirmados do projeto. */
+async function validarTicketAgendado(e: EstadoDoWorker, r: Rotina, manual: boolean): Promise<ResultadoTrabalho> {
+  const esp = obterEspaco(r.espacoId, e.base);
+  const caps = [...new Set(esp.relacoes.filter(x => x.de.tipo === 'jira' && x.de.id === r.ticket && x.para.tipo === 'automacao').map(x => x.para.id))].slice(0, 5);
+  if (!caps.length) return { status: 'BLOCKED', motivo: `NO_VERIFIED_LINK: não há automação associada a ${r.ticket} nas relações declaradas do projeto. Nada foi executado.`, ticket: r.ticket };
+  const executar = e.d.executar ?? executarValidacao;
+  const p = await projetoDaRotina(e, r.espacoId); const evs: Evidencia[] = [];
+  for (const cap of caps) { if (e.abort.signal.aborted) break; evs.push(await executar(p, cap, manual, manual ? undefined : autorizacaoDelegada(r.espacoId, r.ambiente, e.base, e.agora), e.abort.signal)); }
+  const pior = evs.reduce<keyof typeof prioridade>((a, ev) => prioridade[ev.status] > prioridade[a] ? ev.status : a, 'PASS');
+  const soma = evs.map(contarCasosDaEvidencia).reduce((a, c) => ({ pass: a.pass + c.pass, fail: a.fail + c.fail, blocked: a.blocked + c.blocked, notRun: a.notRun + c.notRun }), { pass: 0, fail: 0, blocked: 0, notRun: 0 });
+  const f = resumoDasFalhas(evs.flatMap(ev => ev.cases));
+  return { status: evs.length ? pior : 'NOT_RUN', motivo: `${evs.length} automação(ões) associada(s) a ${r.ticket}: ${evs.map(ev => `${ev.capability}=${ev.status}`).join(', ')}`.slice(0, 600), contagem: soma, evidenciaId: evs.at(-1)?.jobId, ticket: r.ticket, ...(f ? { detalhes: f } : {}) };
 }

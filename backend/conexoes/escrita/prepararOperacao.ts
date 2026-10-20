@@ -2,7 +2,7 @@
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { chaveDaOperacao } from './chaveDaOperacao.js';
 import { escritaHabilitada } from './permissoes.js';
-import { operacaoPorId } from './operacaoPorId.js';
+import { operacaoPorId } from './catalogoOperacoes.js';
 import { obterEspaco } from '../../projetos/banco/projetos.js';
 
 /** Prévia: valida, calcula a chave e devolve o texto que a pessoa vai confirmar. Não grava nem envia nada. */

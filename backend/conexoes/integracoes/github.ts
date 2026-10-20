@@ -1,6 +1,6 @@
 /** Consulta e converte dados externos da integração com GitHub. */
 import { ParametrosConsulta } from "../tipos/ParametrosConsulta.js";
-import { ResultadoConsulta } from "../tipos/ResultadoConsulta.js";
+import { ResultadoConsulta } from "../tipos/ParametrosConsulta.js";
 import { z } from "zod";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { ErroServico } from "./ErroServico.js";

@@ -27,8 +27,8 @@ import { ErroServico } from '../integracoes/ErroServico.js';
 import { adaptadorDaConta } from '../servicoContas.js';
 import { contaAtiva } from '../servicoContas.js';
 import { verificarVinculoDoServico } from '../servicoContas.js';
-import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
-import { lerContasDeServico } from '../banco/contasDeServico.js';
+
+import { lerContasDeServico, gravarContasDeServico } from '../banco/contasDeServico.js';
 import { listarEspacos } from '../../projetos/banco/projetos.js';
 import { atualizarEstadoDoVinculo } from '../../projetos/servicoProjetos.js';
 import { registrarConsultaExterna } from '../../projetos/servicoProjetos.js';
@@ -83,7 +83,7 @@ async function procurarComentarioNoJira(c: ContextoDosServicos, espacoId: string
 
 function removerConta(c: ContextoDosServicos, id: string) {
   const r = lerContasDeServico(c.base); const conta = r.contas.find(x => x.id === id); if (!conta) throw new Error('CONNECTION_NOT_FOUND');
-  conta.ativa = false; gravarLocal('contas.json', r, c.base); c.cofre.remover(id);
+  conta.ativa = false; gravarContasDeServico(r, c.base); c.cofre.remover(id);
   for (const e of listarEspacos(c.base)) for (const v of e.vinculos) if (v.conexaoId === id) atualizarEstadoDoVinculo(e.id, v.servico, 'SEM_CREDENCIAL', 'CREDENTIAL_UNAVAILABLE', undefined, c.base);
   return { removida: true };
 }
@@ -92,7 +92,7 @@ function removerConta(c: ContextoDosServicos, id: string) {
 async function validarConta(c: ContextoDosServicos, id: string) {
   const conta = contaAtiva(c, id); const atual = await adaptadorDaConta(c, conta).autenticar();
   if (atual.contaId !== conta.contaId) throw new ErroServico('SERVICE_SCOPE_CHANGED');
-  const r = lerContasDeServico(c.base); r.contas.find(x => x.id === id)!.validadaEm = new Date().toISOString(); gravarLocal('contas.json', r, c.base);
+  const r = lerContasDeServico(c.base); r.contas.find(x => x.id === id)!.validadaEm = new Date().toISOString(); gravarContasDeServico(r, c.base);
   return contaAtiva(c, id);
 }
 

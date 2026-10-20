@@ -1,5 +1,6 @@
 /** Lógica e contratos de suporte: operações relacionadas no mesmo módulo. */
 import { repositorio } from "../ajuda/contratos.js";
+import { lerDiagnostico } from "../logs/banco/diagnostico.js";
 import os from "node:os";
 import { hash } from "../compartilhado/seguranca/hash.js";
 import { Contexto, Solicitacao, rotulo, AVISO_PUBLICO, limiteUrl, modelo, solicitacaoSchema, urlBase, Achado } from "./contratos.js";
@@ -68,4 +69,11 @@ export function revisarPrivacidadeDoRelato(textos: Record<string, string | undef
     for (const r of regras) { const m = r.re.exec(texto); if (m) (r.grave ? bloqueios : avisos).push({ tipo: `${r.tipo} (${campo})`, trecho: r.grave?'[REDACTED]':mascarar(m[0]).slice(0, 60) }); }
   }
   return { bloqueios, avisos };
+}
+
+/** Resume somente os metadados recentes do diagnóstico para anexar ao relato autorizado. */
+export function resumoDoDiagnosticoParaRelato() {
+  return lerDiagnostico(undefined, 20).events
+    .map(e => [e.at, e.channel, e.state, e.code ?? '', e.durationMs + 'ms'].filter(Boolean).join(' '))
+    .join('\n');
 }

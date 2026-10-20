@@ -1,23 +1,30 @@
-/** Inspeciona configurações, testa protocolos e diagnostica conexões de IA. */
-import { mesmoCaminho } from "./ia/validacaoDeConfiguracao.js";
+/** Diagnóstico das conexões de IA: status, inspeção e teste do protocolo. */
+import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
+import { prepararConexao } from "./ia/conectarIa.js";
+import { projetoVinculado } from "../projetos/servicoProjetos.js";
+
 import { Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools } from "./tipos/integracaoIa.js";
 import fs from "node:fs";
 import path from "node:path";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { registrosIntegracao, pastaDosTestesDeIntegracao } from "./banco/integracoes.js";
-import { assinaturaDaConfiguracao } from "./ia/validacaoDeConfiguracao.js";
-import { prepararConexao } from "./ia/conectarIa.js";
 import { consultarAtividades } from "../logs/banco/atividades.js";
 import { spawnSync } from "node:child_process";
-import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
-import { projetoVinculado } from "../projetos/servicoProjetos.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { randomUUID } from "node:crypto";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
 
+// situacaoDasConexoesDeIa — responsabilidade deste trecho
+/** Propõe a configuração; nada é alterado aqui. */
+export async function situacaoDasConexoesDeIa(raiz: string) {
+  const p = await projetoVinculado(raiz, diretorioDados());
+  return (['codex', 'claude'] as const).map(c => { const x = prepararConexao(p, c); const d=diagnosticarIntegracao(p,c); return { ...d, name: x.name, installed: x.installed, destination: x.destination, command: x.command, configuration:x.configuration, notice:x.notice+' '+d.notice, automatic: c === 'codex' && x.installed && !x.manualOnly }; });
+}
+
+// servicoIaDiagnostico — responsabilidade deste trecho
 function comandoEhNodeDoPrumo(command:unknown) {
   if(typeof command!=='string')return false;
   const exe=process.platform==='win32'?'node.exe':'node';
@@ -138,4 +145,21 @@ export async function testarProtocolo(p: Projeto, client: Cliente) {
   const payload = JSON.stringify(r);
   fs.writeFileSync(path.join(dir, r.id + '.json'), JSON.stringify({ payload, sha256: hash(payload) }), { flag: 'wx', mode: 0o600 });
   return r;
+}
+
+// Validação dos planos usados pelo próprio diagnóstico.
+export function assinaturaDaConfiguracao(plano: Plano) {
+  return hash(JSON.stringify(plano.configuration));
+}
+
+function caminhoNormalizado(caminho: string): string {
+  const absoluto = path.resolve(caminho);
+  return process.platform === 'win32' ? absoluto.toLowerCase() : absoluto;
+}
+
+/** Somente caminhos absolutos podem ser comparados; no Windows ignora diferenças de caixa. */
+export function mesmoCaminho(valor: unknown, esperado: string): boolean {
+  return typeof valor === 'string' &&
+    path.isAbsolute(valor) &&
+    caminhoNormalizado(valor) === caminhoNormalizado(esperado);
 }

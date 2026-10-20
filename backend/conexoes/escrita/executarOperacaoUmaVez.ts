@@ -8,7 +8,7 @@ import { chaveDaOperacao } from './chaveDaOperacao.js';
 
 import { escritaHabilitada } from './permissoes.js';
 
-import { operacaoPorId } from './operacaoPorId.js';
+import { operacaoPorId } from './catalogoOperacoes.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { Remoto } from '../tipos/operacao.js';
 import { Executor, OpcoesOperacao, RegistroOperacao, semAux } from '../tipos/operacoesExternas.js';

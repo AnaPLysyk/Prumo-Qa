@@ -21,7 +21,7 @@ Tudo é Node puro (sem Electron) e testado fora da janela. Só `backend/aplicati
 | `agendamentos/banco/` (fila e agenda gravadas) | Fila persistente: reivindicação única, batimento, recuperação, retentativa de infraestrutura, idempotência por chave |
 | `agendamentos/autorizacoes/` | Autorização prévia de execução por escopo exato e política de publicação no Jira |
 | `agendamentos/worker/` (`Worker.ts`) | Laço do worker, trava de instância única, tipos de rotina, parada controlada |
-| `agendamentos/k6/`, `testes/regras/converterRelatorioPlaywright.ts`, `reporters/` | Adaptador do k6 oficial, conversão de relatório Playwright e reporter do Prumo |
+| `agendamentos/k6/`, `reporters/` | Adaptador do k6 oficial e reporter estruturado do Playwright |
 | `execucoes/regras/montarComentario.ts`, `execucoes/integracoes/publicarComentarioDeResultado.ts` | Texto do comentário, publicação idempotente, rastreabilidade |
 | `execucoes/regras/listarExecucoes.ts`, `metricas/regras/metricasDasExecucoes.ts` | Histórico por projeto, repositório, ticket, rotina, estado e período; métricas |
 | `agendamentos/regras/` (`validarRotina`, `listarAgenda`, `permissoesDaRotina`) e `agendamentos/autorizacoes/autorizarRotina.ts` | Operações de aplicação (validar rotina, listar com permissões, autorizar) |
@@ -71,7 +71,7 @@ A rotina nunca recebe comando livre: o esquema é estrito e a capability precisa
 
 ## Playwright
 
-O Prumo não impõe organização ao repositório. Ele executa a capability declarada e lê o resultado estruturado: o reporter incluído (`backend/testes/reporters/prumo-playwright-reporter.cjs`) grava `PRUMO_RESULT_FILE`, ou `backend/testes/regras/converterRelatorioPlaywright.ts` converte o JSON nativo (`passed`, `failed`, `timedOut`, `skipped`, `interrupted`, `flaky`). Teste ignorado vira `NOT_RUN`, interrompido vira `NOT_RUN`, falha vira `FAIL`. Sem relatório estruturado a rodada fica sem cenários individuais; o exit code não inventa cenários. A execução real do Playwright depende do projeto do usuário (dependências e navegadores) e não foi exercitada no laboratório.
+O Prumo não impõe organização ao repositório. Ele executa a capability declarada e lê o resultado estruturado: o reporter incluído (`backend/testes/reporters/prumo-playwright-reporter.cjs`) grava `PRUMO_RESULT_FILE`. Teste ignorado vira `NOT_RUN`, interrompido vira `NOT_RUN`, falha vira `FAIL`. Sem relatório estruturado a rodada fica sem cenários individuais; o exit code não inventa cenários. A execução real do Playwright depende do projeto do usuário (dependências e navegadores) e não foi exercitada no laboratório.
 
 ## k6
 
