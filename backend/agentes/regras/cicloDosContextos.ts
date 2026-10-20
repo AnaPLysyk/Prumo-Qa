@@ -1,19 +1,16 @@
-/** Ciclo de vida dos contextos de projeto: criação, edição, revisão, conflito e substituição. */
-import { randomUUID } from 'node:crypto';
-import path from 'node:path';
-import { excluirContexto } from '../banco/contextos.js';
-import { abrirProjetoVinculado } from '../../projetos/servicoProjetos.js';
-import { obterContexto } from './consultasDeContextos.js';
-import { gravarPermissaoDeContextosNoMcp } from '../banco/contextos.js';
-import { ErroQa } from '../../compartilhado/erros.js';
-import { Projeto } from '../../compartilhado/projeto/contratos.js';
-import { mudarContexto } from '../banco/mudarContexto.js';
-import { novaVersaoDoContexto, ultimaVersaoDoContexto, hashDoConteudoDoContexto } from './validacoesDeContexto.js';
-import { Arquivo, conteudoSchema, limites } from '../tipos/contexto.js';
-import { hash } from '../../compartilhado/seguranca/hash.js';
-import { carregarTodosOsContextos } from '../banco/contextos.js';
-import { gravarArquivoDeContexto, pastaContextos } from '../banco/contextos.js';
+/** cicloDosContextos: fluxo completo por responsabilidade. */
+import { randomUUID } from "node:crypto";
+import path from "node:path";
+import { excluirContexto, gravarPermissaoDeContextosNoMcp, carregarTodosOsContextos, gravarArquivoDeContexto, pastaContextos, carregarContexto } from "../banco/contextos.js";
+import { abrirProjetoVinculado } from "../../projetos/servicoProjetos.js";
+import { obterContexto } from "./consultasDeContextos.js";
+import { ErroQa } from "../../compartilhado/erros.js";
+import { Projeto } from "../../compartilhado/projeto/contratos.js";
+import { novaVersaoDoContexto, ultimaVersaoDoContexto, hashDoConteudoDoContexto } from "./validacoesDeContexto.js";
+import { Arquivo, conteudoSchema, limites, Entrada } from "../tipos/contexto.js";
+import { hash } from "../../compartilhado/seguranca/hash.js";
 
+// cicloDosContextos
 /** Ações da tela: recebem a pasta vinculada e só depois consultam o contexto local. */
 export const excluirContextoDaPasta = async (raiz: string, id: string) =>
   excluirContexto(await abrirProjetoVinculado(raiz), id);
@@ -167,4 +164,11 @@ export const salvarContextoDaPasta = async (
   return entrada.substituir
     ? substituirContexto(projeto, entrada.id, entrada.dados, por)
     : editarContexto(projeto, entrada.id, entrada.dados, por);
+};
+
+// mudarContexto
+export const mudarContexto = (p: Projeto, id: string, f: (a: Arquivo) => Entrada, base?: string) => {
+  const { dir, arq, integro } = carregarContexto(p, id, base); if (!integro) throw new ErroQa('CONTEXT_TAMPERED', 'O histórico deste contexto foi alterado fora do Prumo; recuse-o ou exclua-o.');
+  if (arq.historico.length >= limites.historico) throw new ErroQa('CONTEXT_LIMIT', 'Histórico do contexto atingiu o limite.');
+  const e = f(arq); arq.historico.push(e); gravarArquivoDeContexto(path.join(dir, id + '.json'), arq); return obterContexto(p, id, base);
 };

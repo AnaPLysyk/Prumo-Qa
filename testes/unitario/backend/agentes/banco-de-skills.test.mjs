@@ -9,7 +9,7 @@ import { dividirSkillEmTrechos } from '../../../../dist/agentes/regras/regrasDas
 import { escolherTrechosDaSkill } from '../../../../dist/agentes/regras/regrasDasSkills.js';
 import { licencaAberta } from '../../../../dist/agentes/regras/regrasDasSkills.js';
 import { lerPastaDeSkill } from "../../../../dist/agentes/banco/lerPastaDeSkill.js";
-import { sementeDasSkills } from "../../../../dist/agentes/banco/sementeDasSkills.js";
+import { sementeDasSkills } from "../../../../dist/agentes/banco/lerPastaDeSkill.js";
 import { importarPastaDeSkill } from "../../../../dist/agentes/banco/importarPastaDeSkill.js";
 import { registrarTrechosDeSkill } from '../../../../dist/agentes/banco/skills.js';
 import { listarTrechosDeSkill } from '../../../../dist/agentes/banco/skills.js';

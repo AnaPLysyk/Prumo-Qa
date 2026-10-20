@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { escreverArquivoDeTeste } from '../../../../dist/testes/regras/escreverArquivoDeTeste.js';
+import { escreverArquivoDeTeste } from '../../../../dist/testes/servicoClassificacao.js';
 
 const sha = (t) => createHash('sha256').update(t).digest('hex');
 const pasta = (t) => { const p = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-ide-')); t.after(() => fs.rmSync(p, { recursive: true, force: true })); return p; };
@@ -57,7 +57,7 @@ test('não segue atalho de pasta nem de arquivo para fora do projeto', (t) => {
 });
 
 test('pipelines do GitHub Actions: lista nome, eventos e jobs; grava só em .github/workflows e recusa o resto', async (t) => {
-  const { listarPipelines } = await import('../../../../dist/testes/regras/escreverArquivoDeTeste.js');
+  const { listarPipelines } = await import('../../../../dist/testes/servicoClassificacao.js');
   const raiz = pasta(t);
   assert.deepEqual(listarPipelines(raiz), [], 'sem pasta de workflows não há pipelines');
   const novo = escreverArquivoDeTeste(raiz, '.github/workflows/ci.yml', "name: CI do projeto\non:\n  push:\n    branches: [main]\n  pull_request:\njobs:\n  testes:\n    runs-on: ubuntu-latest\n  lint:\n    runs-on: ubuntu-latest\n", null);

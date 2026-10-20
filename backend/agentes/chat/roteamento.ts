@@ -6,7 +6,7 @@ import { regrasDosAgentes } from "../../administracao/servico.js";
 import { SEGUIMENTO, Turno, Proximo } from "../tipos/chat.js";
 import { semAcentos } from "../../compartilhado/texto.js";
 import { listarTrechosDeSkill } from "../banco/skills.js";
-import { sementeDasSkills } from "../banco/sementeDasSkills.js";
+import { sementeDasSkills } from "../banco/lerPastaDeSkill.js";
 import { SkillEscolhida, escolherTrechosDaSkill, validarEspecializacao } from "../regras/regrasDasSkills.js";
 import { falharCom } from "../../compartilhado/erros.js";
 import { limitesOrquestracao } from "../tipos/chat.js";

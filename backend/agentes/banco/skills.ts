@@ -6,7 +6,7 @@ import { validarEspecializacao } from "../regras/regrasDasSkills.js";
 import { hash } from "../../compartilhado/seguranca/hash.js";
 import { DatabaseSync } from "node:sqlite";
 import { abrirBancoProtegido } from "./comBancoDeConhecimento.js";
-import { sementeDasSkills } from "./sementeDasSkills.js";
+import { sementeDasSkills } from "./lerPastaDeSkill.js";
 import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";
 import { semAcentos } from "../../compartilhado/texto.js";
 import { randomUUID } from "node:crypto";

@@ -22,7 +22,7 @@ import { conhecimentosRelevantes, listarConhecimentos, registrarConhecimento } f
 import { obterEspaco } from "../../projetos/banco/projetos.js";
 import { catalogoDeTestes } from "../../testes/servicoClassificacao.js";
 import { listarTrechosDeSkill } from "../banco/skills.js";
-import { sementeDasSkills } from "../banco/sementeDasSkills.js";
+import { sementeDasSkills } from "../banco/lerPastaDeSkill.js";
 import { escolherTrechosDaSkill } from "../regras/regrasDasSkills.js";
 
 // ── conversar ──

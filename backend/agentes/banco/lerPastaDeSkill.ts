@@ -1,9 +1,14 @@
-/** Lê uma pasta de Skill (SKILL.md e references/*.md) sem seguir atalhos, sem binários e com limite de tamanho por arquivo. */
-import fs from 'node:fs';
-import path from 'node:path';
-import { falharCom } from '../../compartilhado/erros.js';
-import { limitesSkills } from '../tipos/conhecimento.js';
+/** lerPastaDeSkill: fluxo completo por responsabilidade. */
+import fs from "node:fs";
+import path from "node:path";
+import { falharCom } from "../../compartilhado/erros.js";
+import { limitesSkills, TrechoDeSkill } from "../tipos/conhecimento.js";
+import { dividirSkillEmTrechos } from "../regras/regrasDasSkills.js";
+import { especializacoes } from "../tipos/persona.js";
+import { raizDoAplicativo } from "../../compartilhado/raizDoAplicativo.js";
+import { hash } from "../../compartilhado/seguranca/hash.js";
 
+// lerPastaDeSkill
 /** Um arquivo da Skill: caminho relativo à pasta (com /) e conteúdo em texto. */
 type ArquivoDaSkill = { relativo: string; conteudo: string };
 
@@ -28,4 +33,26 @@ export function lerPastaDeSkill(pasta: string): ArquivoDaSkill[] {
   try { if (!fs.lstatSync(referencias).isSymbolicLink()) nomes = fs.readdirSync(referencias).filter((n) => n.endsWith('.md')).sort(); } catch { nomes = []; }
   for (const nome of nomes.slice(0, 20)) ler(path.join('references', nome), false);
   return arquivos;
+}
+
+// sementeDasSkills
+let guardada: TrechoDeSkill[] | null = null;
+
+/** Lida uma vez por processo: os arquivos só mudam com uma nova versão do aplicativo. Uma Skill ilegível fica de fora. */
+export function sementeDasSkills(raiz: string = raizDoAplicativo): TrechoDeSkill[] {
+  if (guardada && raiz === raizDoAplicativo) return guardada;
+  const trechos: TrechoDeSkill[] = []; const em = '1970-01-01T00:00:00.000Z';
+  for (const e of especializacoes) {
+    let arquivos;
+    try { arquivos = lerPastaDeSkill(path.join(raiz, e.skill)); } catch { continue; }
+    for (const a of arquivos) {
+      const fonte = `${e.skill}/${a.relativo}`;
+      for (const p of dividirSkillEmTrechos(a.conteudo)) {
+        const id = `prumo:${e.id}:${hash(`${fonte}\n${p.ordem}\n${p.titulo}\n${p.texto}`).slice(0, 12)}`;
+        trechos.push({ id, especializacao: e.id, titulo: p.titulo, texto: p.texto, ordem: p.ordem, origem: 'PRUMO', estado: 'APROVADO', fonte, licenca: null, criadoEm: em, decididoEm: em });
+      }
+    }
+  }
+  if (raiz === raizDoAplicativo) guardada = trechos;
+  return trechos;
 }
