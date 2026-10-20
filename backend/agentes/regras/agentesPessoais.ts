@@ -2,8 +2,8 @@
 // Agentes criados pela própria pessoa (os fixos do núcleo continuam geridos pela Administração). Cada agente tem dono e projeto: só o dono vê, edita e exclui. Marcado como público, as outras contas deste computador também o veem, só para leitura. Ninguém mais o vê, nem a Administração. Ficam em plataforma/agentes-pessoais.json.
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { lerLocal } from '../../compartilhado/banco/lerLocal.js';
-import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
+import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
+import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { lerContas } from '../../login/repositorioContas.js';
 
 const ARQUIVO = 'agentes-pessoais.json';

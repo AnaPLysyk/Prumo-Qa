@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { iniciarPonteDaSessaoMcp, renovarCredencialMcp, revogarCredencialMcp, fecharPonteDaSessaoMcp } from '../../../../dist/aplicativo/ponteDaSessaoMcp.js';
 import { contaAutorizadaMcp, conferirAcessoMcp } from '../../../../dist/agentes/mcp/contaAutorizadaMcp.js';
-import { gravarLocal } from '../../../../dist/compartilhado/banco/gravarLocal.js';
+import { gravarLocal } from '../../../../dist/compartilhado/banco/persistenciaLocal.js';
 
 test('MCP só recebe a conta ativa: troca de conta invalida segredo antigo, sair e fechar revogam', async t => {
   const anterior = process.env.PRUMO_DATA_DIR;

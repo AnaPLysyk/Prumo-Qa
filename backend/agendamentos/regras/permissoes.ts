@@ -1,6 +1,15 @@
-/** Explica em frases o que a rotina pode fazer (ler Jira, executar testes, publicar comentário...), para a pessoa aprovar. */
-import { capacidadesDaRotina } from './capacidadesDaRotina.js';
-import { Rotina } from '../tipos/rotina.js';
+/** Calcula e apresenta as permissões aplicáveis às rotinas agendadas. */
+import { estadoDaAutorizacao } from "../autorizacoes/estadoDaAutorizacao.js";
+import { lerAutorizacoes } from "../banco/autorizacoes.js";
+import { capacidadesDaRotina } from "./capacidadesDaRotina.js";
+import { Rotina } from "../tipos/rotina.js";
+
+export function listarPermissoes(espacoId?: string, base?: string, agora = new Date()) {
+  const a = lerAutorizacoes(base);
+  return { execucoes: a.execucoes.filter(x => !espacoId || x.espacoId === espacoId).map(x => ({ ...x, estado: estadoDaAutorizacao(x, agora) })), publicacoes: a.publicacoes.filter(x => !espacoId || x.espacoId === espacoId).map(x => ({ ...x, estado: estadoDaAutorizacao(x, agora) })),
+    // Políticas de escrita agendada (resultados no Qase): visíveis para poderem ser revogadas, não só expirar.
+    escritas: a.escritas.filter(x => !espacoId || x.espacoId === espacoId).map(x => ({ ...x, estado: estadoDaAutorizacao(x, agora) })) };
+}
 
 /** O que a rotina pode fazer, em palavras simples, para a pessoa conferir antes de autorizar. */
 export function permissoesDaRotina(r: Rotina, base?: string) {

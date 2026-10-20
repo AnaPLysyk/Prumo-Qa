@@ -15,7 +15,7 @@ import { registrarProporAprendizado } from '../servicoPropostasMcp.js';
 import { registrarProporBug } from '../servicoPropostasMcp.js';
 import { registrarProporCaso } from '../servicoPropostasMcp.js';
 import { registrarRevisarCobertura } from './registrarFerramentasQa.js';
-import { registrarRoteirosMcp } from './registrarRoteirosMcp.js';
+import { registrarRoteirosMcp } from './roteirosMcp.js';
 import { respostaDaFerramentaMcp } from './respostaDaFerramentaMcp.js';
 import { transporteObservado } from './transporteObservado.js';
 import { contaAutorizadaMcp, conferirAcessoMcp } from './contaAutorizadaMcp.js';

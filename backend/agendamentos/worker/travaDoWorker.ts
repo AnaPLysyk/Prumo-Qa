@@ -1,8 +1,8 @@
 /** Trava local do agendador: leitura, batimentos, integridade e verificação do processo. */
 import fs from 'node:fs';
-import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
-import { arquivoLocal } from '../../compartilhado/banco/arquivoLocal.js';
-import { lerLocal } from '../../compartilhado/banco/lerLocal.js';
+import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
+import { arquivoLocal } from '../../compartilhado/banco/persistenciaLocal.js';
+import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { EstadoDoWorker, travaSchema } from '../tipos/worker.js';
 
 /** Confere se o PID ainda existe; falta de permissão não significa processo encerrado. */

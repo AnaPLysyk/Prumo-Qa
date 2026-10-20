@@ -1,7 +1,7 @@
 /** Persistência de contas e permissões de acesso em acessos.json. */
 import { RegistroDeContas, registroDeContasSchema, registroDeContasVazio } from './tipos/contas.js';
-import { lerLocal } from '../compartilhado/banco/lerLocal.js';
-import { gravarLocal } from '../compartilhado/banco/gravarLocal.js';
+import { lerLocal } from '../compartilhado/banco/persistenciaLocal.js';
+import { gravarLocal } from '../compartilhado/banco/persistenciaLocal.js';
 import { diretorioBase } from '../compartilhado/banco/diretorioDados.js';
 
 /** Sem arquivo de contas, mantém o registro inicial vazio e o login desativado. */

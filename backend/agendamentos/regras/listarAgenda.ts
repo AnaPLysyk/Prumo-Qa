@@ -4,7 +4,7 @@ import { lerAutorizacoes } from '../banco/autorizacoes.js';
 import { listarRotinas } from '../repositorioAgenda.js';
 import { listarTrabalhos } from '../repositorioFila.js';
 import { capacidadesDaRotina } from './capacidadesDaRotina.js';
-import { permissoesDaRotina } from './permissoesDaRotina.js';
+import { permissoesDaRotina } from './permissoes.js';
 import { proximoHorario } from '../servicoHorarios.js';
 
 export function listarAgenda(espacoId?: string, base?: string, agora = new Date()) {

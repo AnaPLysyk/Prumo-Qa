@@ -11,7 +11,7 @@ import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { responderComDadosLocais } from './responderComDadosLocais.js';
 
 import { orquestrar } from './orquestrar.js';
-import { planejarOrquestracao } from './planejarOrquestracao.js';
+import { planejarOrquestracao } from './roteamentoDePerguntas.js';
 import { registrarOrquestracao } from '../repositorioOrquestracao.js';
 import { Orquestracao } from '../tipos/orquestracao.js';
 import { Coleta, ContextoChat, Estilo, Meta, Opcoes, Resposta, agentePorTipo } from '../tipos/chat.js';

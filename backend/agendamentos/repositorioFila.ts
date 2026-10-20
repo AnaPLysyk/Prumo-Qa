@@ -1,7 +1,7 @@
 /** Persistência de agendamentos: operações relacionadas no mesmo módulo. */
 import { z } from "zod";
-import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
-import { lerLocal } from "../compartilhado/banco/lerLocal.js";
+import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
+import { lerLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { LIMITE, Registro, registro, Trabalho, trabalhoSchema, ResultadoTrabalho, resultadoSchema, NovoTrabalho, ESPERA_BASE_MS } from "./tipos/fila.js";
 import { randomUUID } from "node:crypto";
 

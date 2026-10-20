@@ -8,8 +8,8 @@ import {z} from 'zod';
 import {entrarComIdentidadeRemota,idLocalDeIdentidadeRemota} from '../../../../dist/login/regras/entrarComIdentidadeRemota.js';
 import {encerrarSessao} from '../../../../dist/login/regras/sessao.js';
 import {diretorioDados} from '../../../../dist/compartilhado/banco/diretorioDados.js';
-import {lerLocal} from '../../../../dist/compartilhado/banco/lerLocal.js';
-import {gravarLocal} from '../../../../dist/compartilhado/banco/gravarLocal.js';
+import {lerLocal} from '../../../../dist/compartilhado/banco/persistenciaLocal.js';
+import {gravarLocal} from '../../../../dist/compartilhado/banco/persistenciaLocal.js';
 import {executarNoEscopoDoUsuario} from '../../../../dist/compartilhado/banco/escopoDeUsuario.js';
 
 test('sair, entrar em outra conta e operação tardia nunca misturam arquivos de usuários',async t=>{

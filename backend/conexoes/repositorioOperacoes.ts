@@ -1,7 +1,7 @@
 /** Lê, grava e consulta o registro local de operações e permissões de escrita. */
-import { lerLocal } from "../compartilhado/banco/lerLocal.js";
+import { lerLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { Razao, razaoSchema, Entrada, RegistroOperacao, itemSchema, Perm, permSchema } from "./tipos/operacoesExternas.js";
-import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
+import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { randomUUID } from "node:crypto";
 
 export const lerRegistroDeOperacoes = (b?: string) => lerLocal<Razao>('operacoes-externas.json', razaoSchema, { version: 1, itens: [] }, b);

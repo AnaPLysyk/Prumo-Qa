@@ -1,8 +1,8 @@
 /** Persistência de projetos: operações relacionadas no mesmo módulo. */
-import { lerLocal } from "../compartilhado/banco/lerLocal.js";
+import { lerLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { registro, Espaco, arquivoSchema } from "./contratos.js";
 import { z } from "zod";
-import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
+import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";

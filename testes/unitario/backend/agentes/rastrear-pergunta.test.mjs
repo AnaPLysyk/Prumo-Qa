@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { rastrearPergunta } from '../../../../dist/agentes/chat/rastrearPergunta.js';
 import { escolherAgente } from '../../../../dist/agentes/chat/escolherAgente.js';
-import { planejarOrquestracao } from '../../../../dist/agentes/chat/planejarOrquestracao.js';
+import { planejarOrquestracao } from '../../../../dist/agentes/chat/roteamentoDePerguntas.js';
 import { skillDoAgente } from '../../../../dist/agentes/chat/skillDoAgente.js';
 
 const base = (t) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-rastro-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { planejarOrquestracao } from '../../../../dist/agentes/chat/planejarOrquestracao.js';
+import { planejarOrquestracao } from '../../../../dist/agentes/chat/roteamentoDePerguntas.js';
 import { orquestrar } from '../../../../dist/agentes/chat/orquestrar.js';
 import { conversar } from '../../../../dist/agentes/chat/conversar.js';
 import { registrarOrquestracao, arquivoDeOrquestracoes } from '../../../../dist/agentes/repositorioOrquestracao.js';

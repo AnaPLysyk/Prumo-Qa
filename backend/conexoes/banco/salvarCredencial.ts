@@ -1,5 +1,5 @@
 /** Cifra a credencial com a proteção do Windows e a guarda em credenciais.json; recusa valor vazio, grande demais ou com caracteres de controle. */
-import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
+import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { Protetor } from '../tipos/credenciais.js';
 import { exigirProtecaoDoWindows } from './exigirProtecaoDoWindows.js';
 import { lerArquivoDeCredenciais } from './lerArquivoDeCredenciais.js';

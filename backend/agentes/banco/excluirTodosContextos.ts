@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { pastaContextos } from './pastaContextos.js';
+import { pastaContextos } from './arquivosDeContexto.js';
 
 /** Exclui os contextos do projeto um a um; falhas parciais (arquivo em uso, permissão) são devolvidas, nunca escondidas. */
 export function excluirTodosContextos(p: Projeto, base?: string) {

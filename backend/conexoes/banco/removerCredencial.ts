@@ -1,5 +1,5 @@
 /** Apaga a credencial cifrada de uma conta de credenciais.json. */
-import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
+import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { lerArquivoDeCredenciais } from './lerArquivoDeCredenciais.js';
 import { validarIdDaCredencial } from './validarIdDaCredencial.js';
 

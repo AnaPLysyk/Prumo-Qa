@@ -8,7 +8,7 @@ import { OperacaoServico, PartesDoAdaptador, PlanoDaConsulta, obj } from '../tip
 import { Filtros } from '../tipos/leituras.js';
 import { paginaSchema } from '../tipos/transporte.js';
 import { ErroServico } from './ErroServico.js';
-import { lerComCredencial } from './lerComCredencial.js';
+import { lerComCredencial } from './requisicoes.js';
 import { saidaDaConsulta } from '../integracoesFormatos.js';
 
 export async function planoDaConsultaJira(a: PartesDoAdaptador, r: Recurso, operacao: OperacaoServico, p: z.output<typeof paginaSchema>, id?: string, campoAceite?: string, filtros?: Filtros): Promise<PlanoDaConsulta | { pronto: ReturnType<typeof saidaDaConsulta> }> {

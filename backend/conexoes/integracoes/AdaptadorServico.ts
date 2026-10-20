@@ -7,12 +7,12 @@ import { Recurso } from '../../projetos/contratos.js';
 import { autenticarNoServico } from './autenticarNoServico.js';
 import { consultarNoServico } from './consultarNoServico.js';
 import { contextoDoAdaptador } from './contextoDoAdaptador.js';
-import { enviarAoServico } from './enviarAoServico.js';
+import { enviarAoServico } from './requisicoes.js';
 import { ErroServico } from './ErroServico.js';
 import { instanciaServico } from './instanciaServico.js';
-import { lerDoServico } from './lerDoServico.js';
+import { lerDoServico } from './requisicoes.js';
 import { listarRecursosDoServico } from './listarRecursosDoServico.js';
-import { obterRecursoDoServico } from './obterRecursoDoServico.js';
+import { obterRecursoDoServico } from './requisicoes.js';
 import { procurarComentarioNoTicket } from './procurarComentarioNoTicket.js';
 import { publicarComentarioNoTicket } from './publicarComentarioNoTicket.js';
 

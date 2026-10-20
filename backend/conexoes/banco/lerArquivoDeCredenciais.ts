@@ -1,5 +1,5 @@
 /** Lê o arquivo credenciais.json (só valores cifrados); se ainda não existe, começa vazio. */
-import { lerLocal } from '../../compartilhado/banco/lerLocal.js';
+import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { schema } from '../tipos/credenciais.js';
 
 export function lerArquivoDeCredenciais(base?: string) {

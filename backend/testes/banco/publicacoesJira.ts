@@ -1,7 +1,7 @@
 /** Lê e grava o histórico local de publicações no Jira, limitado às últimas 1.000. */
 import { z } from 'zod';
-import { lerLocal } from '../../compartilhado/banco/lerLocal.js';
-import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
+import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
+import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { Registro, registro } from '../tipos/comentarioJira.js';
 
 export const lerPublicacoesJira = (base?: string): Registro =>

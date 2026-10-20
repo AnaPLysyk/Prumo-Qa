@@ -2,7 +2,7 @@
 import { lookup } from 'node:dns/promises';
 import https from 'node:https';
 import type { LookupFunction } from 'node:net';
-import { rotaEscritaPermitida } from '../escrita/rotaEscritaPermitida.js';
+import { rotaEscritaPermitida } from '../escrita/permissoes.js';
 import { enderecoPublico } from './enderecoPublico.js';
 import { ErroServico } from './ErroServico.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';

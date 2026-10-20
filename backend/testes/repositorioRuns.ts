@@ -1,7 +1,7 @@
 /** Lê, grava, lista e atualiza execuções de testes locais. */
 import { z } from "zod";
-import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
-import { lerLocal } from "../compartilhado/banco/lerLocal.js";
+import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
+import { lerLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { Registro, registro, RunLocal, runSchema } from "./tipos/runLocal.js";
 
 export const lerRunsLocais = (base?: string) =>

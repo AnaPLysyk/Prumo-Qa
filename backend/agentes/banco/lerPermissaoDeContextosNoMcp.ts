@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { pastaContextos } from './pastaContextos.js';
+import { pastaContextos } from './arquivosDeContexto.js';
 import { configSchema } from '../tipos/contexto.js';
 
 export function lerPermissaoDeContextosNoMcp(p: Projeto, base?: string): { disponibilizarAoMcp: boolean } {

@@ -1,6 +1,6 @@
 /** Persistência de suporte: operações relacionadas no mesmo módulo. */
-import { lerLocal } from "../compartilhado/banco/lerLocal.js";
-import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
+import { lerLocal } from "../compartilhado/banco/persistenciaLocal.js";
+import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { meusChamadosSchema } from "./contratos.js";
 import type { z } from "zod";
 

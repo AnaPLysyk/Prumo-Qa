@@ -7,7 +7,7 @@ import { paginaSchema } from '../tipos/transporte.js';
 import { conferirEscopoDaConsulta } from './conferirEscopoDaConsulta.js';
 import { contextoDoAdaptador } from './contextoDoAdaptador.js';
 import { ErroServico } from './ErroServico.js';
-import { lerComCredencial } from './lerComCredencial.js';
+import { lerComCredencial } from './requisicoes.js';
 import { lerDetalheDoServico } from './lerDetalheDoServico.js';
 import { lerEnvelopeDaConsulta } from './lerEnvelopeDaConsulta.js';
 import { planoDaConsultaGithub } from '../integracoesGithub.js';

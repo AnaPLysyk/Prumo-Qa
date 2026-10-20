@@ -1,5 +1,5 @@
 /** Consulta contas de serviços vinculadas sem expor as credenciais armazenadas. */
-import { lerLocal } from '../../compartilhado/banco/lerLocal.js';
+import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { registro } from '../tipos/contaDeServico.js';
 
 export const lerContasDeServico = (base?: string) =>

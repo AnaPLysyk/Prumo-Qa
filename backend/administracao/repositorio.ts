@@ -1,6 +1,6 @@
 /** Persistência de administracao: operações relacionadas no mesmo módulo. */
-import { lerLocal } from "../compartilhado/banco/lerLocal.js";
-import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
+import { lerLocal } from "../compartilhado/banco/persistenciaLocal.js";
+import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { AgentesDaPlataforma, agentesDaPlataformaPadrao, agentesDaPlataformaSchema, CodigoDoArquivo, LIMITE_CODIGO_ARQUIVO, LIMITE_CODIGO_TOTAL, LIMITE_MAPA, MapaDoAplicativo, mapaDoAplicativoSchema } from "./contratos.js";
 import fs from "node:fs";
 import path from "node:path";

@@ -6,7 +6,7 @@ import { gravarRegistroDaOperacao } from '../repositorioOperacoes.js';
 import { lerRegistroDeOperacoes } from '../repositorioOperacoes.js';
 import { chaveDaOperacao } from './chaveDaOperacao.js';
 
-import { escritaHabilitada } from './escritaHabilitada.js';
+import { escritaHabilitada } from './permissoes.js';
 
 import { operacaoPorId } from './operacaoPorId.js';
 import { ErroServico } from '../integracoes/ErroServico.js';

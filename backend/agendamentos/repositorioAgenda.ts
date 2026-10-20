@@ -1,7 +1,7 @@
 /** Persistência de agendamentos: operações relacionadas no mesmo módulo. */
 import { z } from "zod";
-import { lerLocal } from "../compartilhado/banco/lerLocal.js";
-import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
+import { lerLocal } from "../compartilhado/banco/persistenciaLocal.js";
+import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { Registro, registro, Rotina, rotinaSchema } from "./tipos/rotina.js";
 import { EstadoRot, estadoRot } from "./tipos/worker.js";
 

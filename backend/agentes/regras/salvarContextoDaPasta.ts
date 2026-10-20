@@ -13,8 +13,8 @@ import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
-import { gravarArquivoDeContexto } from '../banco/gravarArquivoDeContexto.js';
-import { pastaContextos } from '../banco/pastaContextos.js';
+import { gravarArquivoDeContexto } from '../banco/arquivosDeContexto.js';
+import { pastaContextos } from '../banco/arquivosDeContexto.js';
 
 function criarContexto(p: Projeto, entrada: unknown, por: string, opcoes: { substitui?: string } = {}, base?: string) {
   const c = conteudoSchema.parse(entrada); const dir = pastaContextos(p, base);

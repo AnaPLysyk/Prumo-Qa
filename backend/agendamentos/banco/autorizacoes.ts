@@ -1,7 +1,7 @@
 /** Lê e grava autorizações de execução, publicação e escrita das rotinas. */
 import { z } from 'zod';
-import { lerLocal } from '../../compartilhado/banco/lerLocal.js';
-import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
+import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
+import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
 import { Registro, registro } from '../tipos/autorizacoes.js';
 
 export const lerAutorizacoes = (base?: string): Registro =>

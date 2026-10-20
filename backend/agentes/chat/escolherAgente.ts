@@ -1,6 +1,6 @@
 /** Escolhe o agente que responde: o escolhido pela pessoa, o da conversa anterior ou o de palavras mais parecidas. */
-import { palavrasDaPergunta } from './interpretarPergunta.js';
-import { termoCasaComPergunta } from './interpretarPergunta.js';
+import { palavrasDaPergunta } from './roteamentoDePerguntas.js';
+import { termoCasaComPergunta } from './roteamentoDePerguntas.js';
 import { SEGUIMENTO, Turno } from '../tipos/chat.js';
 import { agentesChat } from '../tipos/persona.js';
 import { semAcentos } from '../../compartilhado/texto.js';

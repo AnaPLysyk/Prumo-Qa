@@ -12,7 +12,7 @@ import { criarRunNoQase, parametrosDaRunQase } from "./integracoes/criarRunNoQas
 import { executarValidacao } from "./regras/executarValidacao.js";
 import { executarRunLocal } from "./servicoExecucoes.js";
 import { listarRunsLocais } from "./repositorioRuns.js";
-import { criarPoliticaEscrita } from "../agendamentos/autorizacoes/criarPoliticaEscrita.js";
+import { criarPoliticaEscrita } from "../agendamentos/autorizacoes/politicas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { prepararRunLocal } from "./servicoExecucoes.js";
 import { publicarRunLocal } from "./integracoes/publicarRunLocal.js";

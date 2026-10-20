@@ -1,7 +1,7 @@
 /** Mostra a prévia de uma operação externa: resumo, efeito e chave, sem enviar nada. */
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { chaveDaOperacao } from './chaveDaOperacao.js';
-import { escritaHabilitada } from './escritaHabilitada.js';
+import { escritaHabilitada } from './permissoes.js';
 import { operacaoPorId } from './operacaoPorId.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
 

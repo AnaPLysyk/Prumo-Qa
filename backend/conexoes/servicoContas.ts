@@ -3,7 +3,7 @@ import { AdaptadorServico } from "./integracoes/AdaptadorServico.js";
 import { Conta, ContextoDosServicos, conexaoEntrada, contaSchema } from "./tipos/contaDeServico.js";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";
+import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { lerContasDeServico } from "./banco/contasDeServico.js";
 import { instanciaServico } from "./integracoes/instanciaServico.js";

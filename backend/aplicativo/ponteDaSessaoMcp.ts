@@ -5,8 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { diretorioBase } from '../compartilhado/banco/diretorioDados.js';
-import { arquivoLocal } from '../compartilhado/banco/arquivoLocal.js';
-import { gravarLocal } from '../compartilhado/banco/gravarLocal.js';
+import { arquivoLocal } from '../compartilhado/banco/persistenciaLocal.js';
+import { gravarLocal } from '../compartilhado/banco/persistenciaLocal.js';
 
 let servidor: Server | null = null;
 let endereco: string | null = null;
