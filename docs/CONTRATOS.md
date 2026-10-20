@@ -2447,7 +2447,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Saber se o login está ligado, quem está na sessão e o nível de cada tela para o papel dessa pessoa.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
-- **Destino:** backend/login/api/contaSessao.ts > sessaoParaJanela, usarAutenticacaoRemota
+- **Destino:** backend/login/api/contaSessao.ts > contaDaSessao, encerrarSessao, sessaoParaJanela, validarSessaoRemota, usarAutenticacaoRemota
 - **Entrada:** Nenhuma
 - **Saída:** loginAtivo, conta visível (sem resumos), telas e regras de cadastro
 - **Permissões:** Nenhuma (atende antes do login)
