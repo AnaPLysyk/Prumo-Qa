@@ -20,6 +20,7 @@
   function painelLogs(x, ev) {
     const blocos = [];
     if (ev && !ev.erro) for (const e of ev.results) { if (e.stdout) blocos.push(DS.bloco(tr('stdout · {c}', { c: e.capability }), h('pre', { class: 'ds-codigo' }, e.stdout))); if (e.stderr) blocos.push(DS.bloco(tr('stderr · {c}', { c: e.capability }), h('pre', { class: 'ds-codigo' }, e.stderr))); }
+    if (ev?.erro) blocos.unshift(DS.alerta('Não foi possível consultar os arquivos de log desta execução.', 'falha'));
     if (x.erro) blocos.unshift(DS.alerta(x.erro, 'falha'));
     if (x.resultado?.detalhes) blocos.unshift(DS.bloco('Detalhes do resultado', h('pre', { class: 'ds-codigo' }, x.resultado.detalhes)));
     return blocos.length ? blocos : [DS.estadoTela('vazio', 'Nenhum log registrado para esta execução.', null, [], { compacto: true })];
@@ -56,7 +57,14 @@
   abas.evidencias = async (el) => {
     const e = estado.espaco; const raiz = e?.pastaLocal || estado.root; const alvo = estado.jobId; estado.jobId = undefined;
     if (!raiz) { el.append(DS.estadoTela('vazio', 'Nenhuma pasta de projeto vinculada', 'Vincule a pasta do repositório em Projetos para consultar evidências locais.', [], { compacto: true })); return; }
-    const r = await chamar(() => api.evidencias(raiz, alvo)); if (!r) { el.append(DS.estadoTela('erro', 'Não foi possível consultar a evidência.', null, [], { compacto: true })); return; }
+    const r = await chamar(() => api.evidencias(raiz, alvo));
+    if (!r) {
+      el.append(DS.estadoTela('erro', 'Não foi possível consultar a evidência',
+        'Os registros não foram carregados; nenhuma evidência foi alterada.',
+        [DS.acao('Tentar novamente', () => { estado.jobId = alvo; el.replaceChildren(); return abas.evidencias(el); }, { icone: 'atualizar' })],
+        { compacto: true, id: 'evidencias-falha-consulta' }));
+      return;
+    }
     el.append(alvo ? h('p', { class: 'suave' }, tr('Filtrada pela evidência {id}', { id: alvo })) : DS.info('Resultados reais preservados em .prumo/evidencias do projeto. Código de saída 0 valida a rodada, não cada cenário.'), ...painelEvidencias(r, { vazio: 'Nenhuma evidência para esta consulta.' }));
   };
   async function abrirEvidencia(e, jobId) {

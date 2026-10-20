@@ -1,6 +1,11 @@
 /** Reúne trecho visual da função runs para o bundle fluxos-v40. */
   async function novoPlano(e, esc) {
     const mem = memoriaDaTela('testes', e.id); const casos = mem.casos || (mem.casos = await carregarQase(e, mem, 'casos'));
+    if (casos.erro) {
+      DS.modal('Novo plano no Qase', DS.estadoTela('erro', 'Não foi possível consultar os casos do Qase', casos.erro,
+        [DS.acao('Tentar novamente', async () => { delete mem.casos; await novoPlano(e, esc); }, { icone: 'atualizar' })]));
+      return;
+    }
     const titulo = h('input', { id: 'plano-titulo', maxlength: 255 }); const marcados = new Set(); const saida = h('div', { id: 'plano-saida' });
     DS.modal('Novo plano no Qase', [!esc ? DS.alerta('Escrita no Qase desligada. Habilite em Conexões para criar planos.', 'aviso', 'cadeado') : null, h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Título do plano', titulo, { inteiro: true }),
       h('div', { class: 'ds-campo inteiro' }, h('span', {}, tr('Casos ({n})', { n: casos.itens.length })), casos.itens.length ? h('div', { class: 'ds-opcoes coluna', id: 'plano-casos' }, casos.itens.map((c) => h('label', {}, h('input', { type: 'checkbox', 'data-caso': c.id, onchange: (ev) => (ev.target.checked ? marcados.add(c.id) : marcados.delete(c.id)) }), `${c.id} · ${c.title}`))) : h('p', { class: 'suave' }, vinc(e, 'qase') ? tr('Nenhum caso retornado pelo Qase.') : tr('Nenhum teste encontrado no código. Vincule a pasta do repositório ou conecte o Qase.')))), saida,
@@ -9,7 +14,8 @@
   async function telaPlanos(e, mem, corpo) {
     const area = h('div', { id: 'planos-area' }, DS.esqueleto(5)); const fonte = h('div'); corpo.append(DS.barra(DS.acao('Atualizar', async () => { delete mem.planos; await carregar(); }, { id: 'planos-atualizar', icone: 'atualizar' })), fonte, area);
     async function carregar() {
-      area.replaceChildren(DS.esqueleto(5)); const p = (mem.planos = mem.planos || await carregarQase(e, mem, 'planos')); fonte.replaceChildren(fonteQase(p, 'plano(s)'));
+      area.replaceChildren(DS.esqueleto(5)); const p = (mem.planos = mem.planos || await carregarQase(e, mem, 'planos'));
+      fonte.replaceChildren(fonteQase(p, 'plano(s)'), p.erro && p.itens.length ? DS.alerta('Consulta parcial do Qase: alguns planos podem não aparecer. Atualize para tentar novamente.', 'falha') : null);
       if (p.erro && !p.itens.length) { area.replaceChildren(DS.estadoTela('erro', 'Não foi possível consultar os planos', p.erro)); return; }
       if (!p.itens.length) { area.replaceChildren(DS.estadoTela('vazio', 'Nenhum plano retornado pelo Qase')); return; }
       area.replaceChildren(DS.tabela({ id: 'planos-tabela', colunas: ['ID', 'Plano', 'Casos', 'Atualizado'], linhas: p.itens.map((x) => ({ attrs: { 'data-plano': String(x.id) }, abrir: () => abrirPlano(e, x), rotuloAcessivel: tr('Abrir plano {id}', { id: x.id }), celulas: [{ no: String(x.id), classe: 'ds-id' }, h('div', {}, x.title || '—', x.description ? h('span', { class: 'ds-sub' }, String(x.description).slice(0, 160)) : null), x.cases_count != null ? String(x.cases_count) : '—', hora(x.updated_at || x.updated)] })) }));
@@ -58,15 +64,21 @@
       const linhasQase = remotas.itens.filter((x) => !ligadas.has(String(x.id)) && passa('qase', situacaoQase(x))).map((x) => ({ attrs: { 'data-run-qase': String(x.id) }, abrir: () => abrirRunQase(e, x), rotuloAcessivel: tr('Abrir run do Qase {id}', { id: x.id }), celulas: [h('div', {}, h('strong', {}, x.title || tr('Run {id}', { id: x.id })), h('span', { class: 'ds-sub' }, tr('Qase #{id}', { id: x.id, c: '' }))), DS.origem('qase', 'Qase'), x.environment?.title || '—', x.cases_count != null ? String(x.cases_count) : '—', x.stats ? barraResultado({ total: x.stats.total || 0, pass: x.stats.passed || 0, fail: x.stats.failed || 0, blocked: x.stats.blocked || 0, notRun: x.stats.untested || 0 }) : '—', x.status != null ? estadoRunQase(x) : '—'] }));
       const linhas = [...linhasExec, ...linhasPrumo, ...linhasQase];
       area.replaceChildren(linhas.length ? DS.tabela({ id: 'runs-tabela', colunas: ['Run', 'Origem', { t: 'Ambiente', classe: 'ds-opcional' }, { t: 'Casos', classe: 'ds-opcional' }, 'Resultados', 'Estado'], linhas })
+        : dados.erros.length ? DS.estadoTela('erro', 'Não foi possível consultar todas as runs', dados.erros.join(' '),
+            [DS.acao('Tentar novamente', async () => { delete mem.runsQase; await carregar(); }, { icone: 'atualizar' })], { id: 'runs-falha-consulta' })
         : DS.estadoTela('vazio', 'Nenhuma run encontrada', filtro.origem || filtro.situacao ? 'Nenhuma run combina com os filtros escolhidos.' : 'Execuções aparecem aqui quando uma rotina roda ou é executada agora; use "Preparar run" para escolher casos do Qase.', [], { id: 'runs-vazio' }));
     }
     async function carregar() {
       area.replaceChildren(DS.esqueleto(5));
       const [locais, remotas, lista, m] = await Promise.all([e ? api.runs(e.id) : Promise.resolve({ ok: true, data: [] }), vq ? (mem.runsQase || carregarQase(e, mem, 'runs', { limite: 50 })) : Promise.resolve({ itens: [], em: null }), chamar(() => api.execucoes({ espacoId: e?.id, rotinaId, limite: 100 })), chamar(() => api.metricasExecucoes(e?.id))]); if (vq) mem.runsQase = remotas;
-      const rl = locais.ok ? locais.data : []; const ligadas = new Set(rl.map((r) => String(r.runIdRemoto)).filter((x) => x !== 'null' && x !== 'undefined'));
-      dados = { rl, remotas, execs: lista?.execucoes || [], ligadas };
+      const rl = locais?.ok ? locais.data : []; const ligadas = new Set(rl.map((r) => String(r.runIdRemoto)).filter((x) => x !== 'null' && x !== 'undefined'));
+      const erros = [!locais?.ok && e ? 'Runs locais indisponíveis.' : null,
+        !lista ? 'Execuções não puderam ser consultadas.' : null,
+        remotas.erro ? 'Runs do Qase indisponíveis.' : null].filter(Boolean);
+      dados = { rl, remotas, execs: lista?.execucoes || [], ligadas, erros };
       resumo.replaceChildren(m ? DS.resumo([[m.execucoes, 'execuções'], [m.pass, 'PASS', 'ok'], [m.fail, 'FAIL', 'falha'], [m.blocked, 'BLOCKED', 'aviso'], [m.notRun, 'NOT_RUN'], ...[[m.consultas, 'consultas (INFO)'], [m.falhasDeAgendamento, 'falhas de agendamento', 'falha'], [m.comentariosPendentes, 'comentários pendentes', 'aviso']].filter(([n]) => n)], { id: 'metricas-exec' }) : '');
-      fonte.replaceChildren(h('div', { class: 'ds-fontes' }, h('span', { role: 'status' }, DS.origem('prumo', 'Prumo'), tr('{n} execução(ões) e {r} run(s) preparada(s) neste computador', { n: dados.execs.length, r: rl.length })), !vq ? null : remotas.erro ? h('span', { role: 'status' }, DS.origem('qase', 'Qase'), ' ', DS.chip(remotas.erro, 'falha')) : h('span', { role: 'status' }, DS.origem('qase', 'Qase'), tr('{n} run(s) · consultado {q}', { n: remotas.itens.length, q: hora(remotas.em) }))));
+      fonte.replaceChildren(h('div', { class: 'ds-fontes' }, h('span', { role: 'status' }, DS.origem('prumo', 'Prumo'), tr('{n} execução(ões) e {r} run(s) preparada(s) neste computador', { n: dados.execs.length, r: rl.length })), !vq ? null : remotas.erro ? h('span', { role: 'status' }, DS.origem('qase', 'Qase'), ' ', DS.chip(remotas.erro, 'falha')) : h('span', { role: 'status' }, DS.origem('qase', 'Qase'), tr('{n} run(s) · consultado {q}', { n: remotas.itens.length, q: hora(remotas.em) }))),
+        erros.length ? DS.alerta(erros.join(' ') + ' As informações disponíveis podem estar incompletas.', 'falha') : null);
       desenhar();
     }
     await carregar();
