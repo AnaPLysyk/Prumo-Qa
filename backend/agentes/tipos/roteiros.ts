@@ -17,6 +17,15 @@ export const sempre = [
 ];
 
 export const promptsPrumo: DefPrompt[] = [
+  { nome: 'auditar-codigo', titulo: 'Auditar arquitetura e qualidade do código', descricao: 'Roteiro MCP de auditoria do código por especialidades, com revisão independente e sem alterações automáticas.', agente: 'investigacao-bugs',
+    argumentos: [{ nome: 'area', descricao: 'Pasta ou módulo autorizado para revisão (opcional)', obrigatorio: false }],
+    passos: (a) => [
+      `Área solicitada: ${valorOuPadrao(a.area, 'todo o projeto autorizado')}.`,
+      'Reúna Investigação de Bugs, QA Geral e Regressão em etapas separadas: identificação, revisão crítica independente e avaliação do risco de mudança. Os nomes representam papéis de análise; não afirme que subagentes foram executados se o cliente não os invocou.',
+      'Verifique, por evidências e referências de arquivos, importações, duplicações reais, código sem uso, segurança, autenticação, responsabilidades de frontend/backend, testes e dependências de build. Não mova arquivos apenas por nome ou tamanho.',
+      'Separe scripts de desenvolvimento (build, empacotamento, CI, release) de funcionalidades executadas no aplicativo. Preserve arquivos e contratos usados no build, instaladores e deploy.',
+      'Não execute comandos, não edite, não faça commit nem publique pelo prompt MCP. Entregue achados, risco, evidência, proposta mínima e verificações necessárias; classifique o que não foi verificado como NOT_RUN.'
+    ] },
   { nome: 'conversar-com-prumo', titulo: 'Conversar com o Prumo', descricao: 'Abre uma conversa de QA com a personalidade do Prumo, ajustada ao seu papel.', agente: 'orquestrador',
     argumentos: [{ nome: 'papel', descricao: 'Seu papel: qa, dev, po ou analista (opcional)', obrigatorio: false }],
     passos: (a) => [`Converse como colega de qualidade. Papel informado: ${valorOuPadrao(a.papel, 'não informado (pergunte, uma vez)')}.`, 'Se não souber como chamar a pessoa (aprendizados.perfil.comoChamar vazio), pergunte uma vez, sem insistir.', 'Ofereça no máximo três próximos passos concretos, ligados aos dados do projeto.'] },
