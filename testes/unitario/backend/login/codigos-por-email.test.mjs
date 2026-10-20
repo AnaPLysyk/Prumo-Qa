@@ -1,15 +1,12 @@
-// Códigos por e-mail no aplicativo: validade, uso único, tentativas, espera entre envios e o cliente do serviço de envio.
-// O envio é injetado ou vai para o serviço em 127.0.0.1 com caixa em memória; nada sai do computador.
+// Unidade: validade, uso único, tentativas e espera entre códigos, com envio falso injetado.
+// O teste HTTP do cliente de envio fica no Prumo QA Lab, sem acesso a serviços externos.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { conferirCodigo, esquecerCodigos, pedirCodigo } from '../../../../dist/login/regras/codigosPorEmail.js';
-import { enviarCodigoPorEmail } from '../../../../dist/login/integracoes/enviarCodigoPorEmail.js';
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';
-import { criarServico } from '../../../../backend/aplicativo/servidor/servidor.mjs';
 
 const pasta = (t) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-codigos-')); t.after(() => { encerrarSessao(); esquecerCodigos(); fs.rmSync(d, { recursive: true, force: true }); }); return d; };
 const caixa = () => { const enviados = []; return { enviados, enviar: async (p) => { enviados.push(p); } }; };
@@ -50,20 +47,4 @@ test('falha no envio não deixa código pendente', async (t) => {
   assert.throws(() => conferirCodigo('CADASTRO', 'dora@exemplo.com', '123456', T0), /CODE_EXPIRED/);
   const c = caixa(); await pedirCodigo({ email: 'dora@exemplo.com', finalidade: 'CADASTRO' }, b, c.enviar, T0 + 1000);
   assert.equal(c.enviados.length, 1, 'pode tentar de novo na hora');
-});
-
-test('cliente do serviço: fala com o serviço local e traduz as respostas; endereço fora de HTTPS e de 127.0.0.1 é recusado sem rede', async (t) => {
-  const mensagens = []; let falhar = false;
-  const servidor = http.createServer(criarServico({ enviar: async (m) => { if (falhar) throw new Error('fora'); mensagens.push(m); }, registrar: () => {}, limites: { porEmail10min: 1, porEmailDia: 10, porIpHora: 10, totalHora: 10 } }));
-  await new Promise((ok) => servidor.listen(0, '127.0.0.1', ok)); t.after(() => servidor.close());
-  const antes = process.env.PRUMO_SERVICO; t.after(() => { if (antes === undefined) delete process.env.PRUMO_SERVICO; else process.env.PRUMO_SERVICO = antes; });
-  process.env.PRUMO_SERVICO = 'http://127.0.0.1:' + servidor.address().port;
-  await enviarCodigoPorEmail({ email: 'eli@exemplo.com', codigo: '765432', finalidade: 'SENHA', idioma: 'pt-BR' });
-  assert.equal(mensagens.length, 1); assert.match(mensagens[0].texto, /765432/);
-  await assert.rejects(enviarCodigoPorEmail({ email: 'eli@exemplo.com', codigo: '765432', finalidade: 'SENHA', idioma: 'pt-BR' }), /^Error: EMAIL_RATE_LIMIT/);
-  falhar = true; await assert.rejects(enviarCodigoPorEmail({ email: 'fabi@exemplo.com', codigo: '765432', finalidade: 'SENHA', idioma: 'pt-BR' }), /^Error: EMAIL_SEND_FAILED/);
-  for (const url of ['http://exemplo.com', 'http://localhost:9', 'ftp://127.0.0.1', 'não é url']) {
-    process.env.PRUMO_SERVICO = url;
-    await assert.rejects(enviarCodigoPorEmail({ email: 'eli@exemplo.com', codigo: '765432', finalidade: 'SENHA', idioma: 'pt-BR' }), /^Error: EMAIL_SERVICE_UNAVAILABLE: endereço/, url);
-  }
 });

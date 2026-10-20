@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           repository: AnaPLysyk/Prumo-QA-Lab
-          ref: e6be1c7825c7ad4af08c706f174c05f611750d7f
+          ref: 42c1f9c2b03c67b3db682b425517a9ffb50f4cfb
           path: .lab
       - uses: actions/setup-node@v5
         with:
@@ -48,11 +48,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:unitarios
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Homologar smoke e regressao antes da release
+      - name: Homologar smoke, integração, E2E e regressão antes da release
         if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         run: |
           node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo smoke
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo integracao
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo e2e
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo regressao
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -63,7 +67,7 @@ jobs:
         shell: pwsh
         run: |
           $env:PRUMO_APP_EXE = (Resolve-Path 'release/win-unpacked/Prumo QA.exe').Path
-          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo smoke --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado
+          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo e2e --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: SHA-256 do instalador
         shell: pwsh

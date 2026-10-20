@@ -31,6 +31,15 @@ test('apenas unitarios e auxiliares ficam no repositorio do aplicativo', () => {
   assert.ok(fs.readdirSync(path.join(raiz, 'testes', 'unitario', 'infra')).every(n => !n.endsWith('.test.mjs')));
 });
 
+test('servidores HTTP reais e Electron pertencem ao Lab, não aos unitários', () => {
+  const proibidos = [];
+  for (const nome of arquivosDeTeste()) {
+    const codigo = fs.readFileSync(path.join(raiz, nome), 'utf8');
+    if (/\b(?:http|https)\.createServer\s*\(|\b(?:servidor|server)\.listen\s*\(|\belectron\.launch\s*\(/.test(codigo)) proibidos.push(nome);
+  }
+  assert.deepEqual(proibidos, []);
+});
+
 test('filtros de unidade combinam natureza, camada e modulo e recusam natureza externa', () => {
   const { filtros, listar } = argumentos(['--natureza', 'unitario', '--camada', 'frontend', '--modulo', 'projetos', '--listar']);
   assert.equal(listar, true);
