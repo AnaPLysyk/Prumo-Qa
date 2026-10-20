@@ -1,14 +1,14 @@
-// Simuladores exclusivamente unitários, agrupados pelo módulo real. Todos ficam no Prumo QA.
+// Simuladores exclusivamente unitários: identificados por módulos reais do backend.
 module.exports = {
   "agentes/repositorioPerfil.js": {
     "lerPerfil": "lerPerfil",
     "salvarPerfil": "salvarPerfil"
   },
-  "agentes/banco/listarConhecimentos.js": {
-    "listarConhecimentos": "listarConhecimentos"
-  },
-  "agentes/banco/registrarConhecimento.js": {
-    "registrarConhecimento": "registrarConhecimento"
+  "agentes/banco/operacoesDeConhecimento.js": {
+    "listarConhecimentos": "listarConhecimentos",
+    "registrarConhecimento": "registrarConhecimento",
+    "apagarConhecimento": "apagarConhecimento",
+    "conhecimentosRelevantes": "relevantes"
   },
   "agentes/repositorioAprendizados.js": {
     "decidirConhecimento": "decidirConhecimento",
@@ -16,12 +16,6 @@ module.exports = {
     "pesosAprendidos": "pesosAprendidos",
     "vocabularioDoAgente": "vocabularioDoAgente",
     "esquecerTermo": "esquecerTermo"
-  },
-  "agentes/banco/apagarConhecimento.js": {
-    "apagarConhecimento": "apagarConhecimento"
-  },
-  "agentes/banco/conhecimentosRelevantes.js": {
-    "conhecimentosRelevantes": "relevantes"
   },
   "agentes/repositorioAtendimentos.js": {
     "registrarAtendimento": "registrarAtendimento",
@@ -31,13 +25,9 @@ module.exports = {
   "agentes/banco/estadoConhecimento.js": {
     "estadoConhecimento": "estadoConhecimento"
   },
-  "agentes/banco/listarTrechosDeSkill.js": {
-    "listarTrechosDeSkill": "listarTrechosDeSkill"
-  },
-  "agentes/banco/registrarTrechosDeSkill.js": {
-    "registrarTrechosDeSkill": "registrarTrechosDeSkill"
-  },
-  "agentes/banco/decidirTrechoDeSkill.js": {
+  "agentes/banco/operacoesDeSkills.js": {
+    "listarTrechosDeSkill": "listarTrechosDeSkill",
+    "registrarTrechosDeSkill": "registrarTrechosDeSkill",
     "decidirTrechoDeSkill": "decidirTrechoDeSkill"
   },
   "agentes/regras/conhecimentoParaIA.js": {

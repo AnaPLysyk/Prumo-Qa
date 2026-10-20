@@ -1,12 +1,12 @@
 /** Controlador da funcionalidade agentes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { dialog, shell } from "electron";
-import { apagarConhecimento } from "./banco/apagarConhecimento.js";
+import { apagarConhecimento } from "./banco/operacoesDeConhecimento.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { registrarConhecimento } from "./banco/registrarConhecimento.js";
+import { registrarConhecimento } from "./banco/operacoesDeConhecimento.js";
 import { decidirConhecimento } from "./repositorioAprendizados.js";
 import { esquecerTermo } from "./repositorioAprendizados.js";
 import { estadoConhecimento } from "./banco/estadoConhecimento.js";
-import { listarConhecimentos } from "./banco/listarConhecimentos.js";
+import { listarConhecimentos } from "./banco/operacoesDeConhecimento.js";
 import { caminhoConhecimento } from "./banco/baseDoConhecimento.js";
 import { lerPerfil } from "./repositorioPerfil.js";
 import { vocabularioDoAgente } from "./repositorioAprendizados.js";

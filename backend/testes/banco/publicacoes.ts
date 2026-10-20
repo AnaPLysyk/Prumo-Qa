@@ -1,8 +1,9 @@
-/** Lê e grava o histórico local de publicações no Jira, limitado às últimas 1.000. */
-import { z } from 'zod';
-import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
-import { gravarLocal } from '../../compartilhado/banco/persistenciaLocal.js';
-import { Registro, registro } from '../tipos/comentarioJira.js';
+/** Persistência das publicações de resultados e do vínculo dos trabalhos com o Jira. */
+import { z } from "zod";
+import { lerLocal, gravarLocal } from "../../compartilhado/banco/persistenciaLocal.js";
+import { Registro, registro } from "../tipos/comentarioJira.js";
+
+export const publicacaoDoTrabalho = (id: string, b?: string) => lerPublicacoesJira(b).itens.find(x => x.trabalhoId === id) ?? null;
 
 export const lerPublicacoesJira = (base?: string): Registro =>
   lerLocal<Registro>(

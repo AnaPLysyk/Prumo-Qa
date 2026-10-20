@@ -4,7 +4,7 @@ import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { estadoDoAplicativo } from "../aplicativo/estadoDoAplicativo.js";
 import { avisosDaJanela } from "../aplicativo/avisos/avisos.js";
 import { definirPausaGlobal } from "./regras/operacoesDaRotina.js";
-import { atualizarBandeja } from "../aplicativo/bandeja/atualizarBandeja.js";
+import { atualizarBandeja } from "../aplicativo/bandeja/cicloDaBandeja.js";
 
 export const workerEstado: TratadorDoCanal<'worker:estado'> = () => ({ ...workerDoAplicativo.estado(), bandeja: estadoDoAplicativo.bandeja !== null });
 

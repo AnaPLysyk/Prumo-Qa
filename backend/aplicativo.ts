@@ -5,8 +5,8 @@ import { conectarAvisosDoWorker, workerDoAplicativo } from './agendamentos/worke
 import { registrarCanaisIpc } from './aplicativo/api/registrarCanaisIpc.js';
 import { empilharAviso } from './aplicativo/avisos/avisos.js';
 import { publicarEventoDoWorker } from './aplicativo/avisos/publicarEventoDoWorker.js';
-import { atualizarBandeja } from './aplicativo/bandeja/atualizarBandeja.js';
-import { criarBandeja } from './aplicativo/bandeja/criarBandeja.js';
+import { atualizarBandeja } from './aplicativo/bandeja/cicloDaBandeja.js';
+import { criarBandeja } from './aplicativo/bandeja/cicloDaBandeja.js';
 import { estadoDoAplicativo } from './aplicativo/estadoDoAplicativo.js';
 import { mostrarJanela } from './aplicativo/janela/controleDaJanela.js';
 import { SEIS_HORAS, iniciouOculto } from './aplicativo/tipos/aplicativo.js';

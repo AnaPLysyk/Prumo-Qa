@@ -1,5 +1,5 @@
 /** Usa Claude ou Codex somente após autorização; retorna ao chat local quando faltar permissão ou a IA falhar. */
-import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
+import { conhecimentosRelevantes } from '../banco/operacoesDeConhecimento.js';
 
 import { skillDoAgente } from './selecaoDoAgente.js';
 
@@ -11,7 +11,7 @@ import { Conhecimento, limitesConhecimento } from '../tipos/conhecimento.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
-import { registrarConhecimento } from '../banco/registrarConhecimento.js';
+import { registrarConhecimento } from '../banco/operacoesDeConhecimento.js';
 import { Acao, Opcoes, Provedor } from '../tipos/chat.js';
 import { AgenteChat } from '../tipos/persona.js';
 import { personalidadeParaIa } from '../servicoEstiloDoChat.js';

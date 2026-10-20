@@ -1,12 +1,36 @@
-/** Acrescenta trechos a uma Skill: da equipe já aprovados; importados ou de IA em rascunho. Iguais não duplicam; vários numa única transação (se um falhar, nenhum é gravado). */
-import { randomUUID } from 'node:crypto';
-import { DatabaseSync } from 'node:sqlite';
-import { comBancoDeSkills, linhaParaTrecho } from './comBancoDeSkills.js';
-import { NovoTrecho, TrechoDeSkill, limitesSkills } from '../tipos/skills.js';
-import { validarEspecializacao } from '../regras/validarEspecializacao.js';
-import { falharCom } from '../../compartilhado/erros.js';
-import { hash } from '../../compartilhado/seguranca/hash.js';
-import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
+/** Persistência dos trechos de Skills: registrar, consultar e aprovar ou descartar alterações. */
+import { comBancoDeSkills, linhaParaTrecho } from "./comBancoDeSkills.js";
+import { EstadoTrecho, TrechoDeSkill, estadosTrecho, limitesSkills, NovoTrecho } from "../tipos/skills.js";
+import { falharCom } from "../../compartilhado/erros.js";
+import { validarEspecializacao } from "../regras/regrasDasSkills.js";
+import { semAcentos } from "../../compartilhado/texto.js";
+import { randomUUID } from "node:crypto";
+import { DatabaseSync } from "node:sqlite";
+import { hash } from "../../compartilhado/seguranca/hash.js";
+import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
+
+export function decidirTrechoDeSkill(id: string, estado: Exclude<EstadoTrecho, 'RASCUNHO'>, base?: string, agora = new Date()): TrechoDeSkill {
+  if (!['APROVADO', 'DESCARTADO'].includes(estado)) falharCom('SKILL_STATE_INVALID');
+  return comBancoDeSkills(base, (db) => {
+    const r = db.prepare('UPDATE trechos SET estado = ?, decidido_em = ? WHERE id = ?').run(estado, agora.toISOString(), id);
+    if (!r.changes) falharCom('SKILL_NOT_FOUND');
+    return linhaParaTrecho(db.prepare('SELECT * FROM trechos WHERE id = ?').get(id) as Record<string, unknown>);
+  });
+}
+
+export function listarTrechosDeSkill(f: { especializacao?: string | null; estados?: EstadoTrecho[]; busca?: string }, base?: string): TrechoDeSkill[] {
+  const esp = f.especializacao ? validarEspecializacao(f.especializacao) : null;
+  const estados = (f.estados?.length ? f.estados : [...estadosTrecho]).filter((e) => estadosTrecho.includes(e));
+  return comBancoDeSkills(base, (db) => {
+    const cond = [`estado IN (${estados.map(() => '?').join(',')})`]; const params: string[] = [...estados];
+    if (esp) { cond.push('especializacao = ?'); params.push(esp); }
+    const linhas = db.prepare(`SELECT * FROM trechos WHERE ${cond.join(' AND ')}
+      ORDER BY CASE estado WHEN 'RASCUNHO' THEN 0 WHEN 'APROVADO' THEN 1 ELSE 2 END, especializacao,
+        CASE origem WHEN 'PRUMO' THEN 0 WHEN 'PESSOA' THEN 1 WHEN 'IMPORTADO' THEN 2 ELSE 3 END, fonte, ordem`).all(...params) as Record<string, unknown>[];
+    const b = f.busca ? semAcentos(f.busca) : '';
+    return linhas.map(linhaParaTrecho).filter((t) => !b || semAcentos(t.titulo + ' ' + t.texto).includes(b)).slice(0, limitesSkills.porConsulta);
+  });
+}
 
 export function registrarTrechosDeSkill(novos: NovoTrecho[], base?: string, agora = new Date()): { item: TrechoDeSkill; duplicado: boolean }[] {
   const prontos = novos.map(preparar);

@@ -21,14 +21,14 @@ import { AgenteChat, agentesChat } from '../tipos/persona.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { regrasDosAgentes } from '../../administracao/servico.js';
 import { Conhecimento, TipoConhecimento } from '../tipos/conhecimento.js';
-import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
+import { conhecimentosRelevantes } from '../banco/operacoesDeConhecimento.js';
 import { semAcentos } from '../../compartilhado/texto.js';
-import { listarConhecimentos } from '../banco/listarConhecimentos.js';
+import { listarConhecimentos } from '../banco/operacoesDeConhecimento.js';
 import { Fonte } from '../../inicio/contratos.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
 import { catalogoDeTestes } from '../../testes/servicoClassificacao.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { registrarConhecimento } from '../banco/registrarConhecimento.js';
+import { registrarConhecimento } from '../banco/operacoesDeConhecimento.js';
 
 function intencaoDeAprender(pergunta: string, espacoId: string | null, forcado: string | null | undefined, base?: string): Meta | null {
   const m = pergunta.match(/^\s*(?:por favor,?\s*)?(?:lembr[ae](?:-se)?|anot[ae]|guard[ae]|aprend[ae]|memoriz[ae])\s*(?:que|isso|:)?\s*:?\s+(.{4,})$/i); if (!m) return null;

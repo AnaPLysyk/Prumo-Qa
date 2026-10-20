@@ -2,9 +2,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { lerPastaDeSkill } from './lerPastaDeSkill.js';
-import { registrarTrechosDeSkill } from './registrarTrechosDeSkill.js';
-import { validarEspecializacao } from '../regras/validarEspecializacao.js';
-import { dividirSkillEmTrechos } from '../regras/dividirSkillEmTrechos.js';
+import { registrarTrechosDeSkill } from './operacoesDeSkills.js';
+import { validarEspecializacao } from '../regras/regrasDasSkills.js';
+import { dividirSkillEmTrechos } from '../regras/regrasDasSkills.js';
 import { licencaAberta } from '../regras/licencaAberta.js';
 import { NovoTrecho } from '../tipos/skills.js';
 import { falharCom } from '../../compartilhado/erros.js';

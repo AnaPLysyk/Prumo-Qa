@@ -1,11 +1,11 @@
 /** Controlador da funcionalidade agentes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
-import { registrarTrechosDeSkill } from "./banco/registrarTrechosDeSkill.js";
+import { registrarTrechosDeSkill } from "./banco/operacoesDeSkills.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { decidirTrechoDeSkill } from "./banco/decidirTrechoDeSkill.js";
+import { decidirTrechoDeSkill } from "./banco/operacoesDeSkills.js";
 import { dialog } from "electron";
 import { importarPastaDeSkill } from "./banco/importarPastaDeSkill.js";
-import { validarEspecializacao } from "./regras/validarEspecializacao.js";
-import { listarTrechosDeSkill } from "./banco/listarTrechosDeSkill.js";
+import { validarEspecializacao } from "./regras/regrasDasSkills.js";
+import { listarTrechosDeSkill } from "./banco/operacoesDeSkills.js";
 
 export const skillsCriar: TratadorDoCanal<'skills:criar'> = a => registrarTrechosDeSkill([{ especializacao: a.especializacao, titulo: a.titulo, texto: a.texto, origem: 'PESSOA' }])[0];
 

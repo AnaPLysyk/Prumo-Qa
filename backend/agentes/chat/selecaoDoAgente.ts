@@ -6,10 +6,10 @@ import { regrasDosAgentes } from '../../administracao/servico.js';
 import { palavrasDaPergunta, termoCasaComPergunta } from './roteamentoDePerguntas.js';
 import { SEGUIMENTO, Turno } from '../tipos/chat.js';
 import { semAcentos } from '../../compartilhado/texto.js';
-import { listarTrechosDeSkill } from '../banco/listarTrechosDeSkill.js';
+import { listarTrechosDeSkill } from '../banco/operacoesDeSkills.js';
 import { sementeDasSkills } from '../banco/sementeDasSkills.js';
-import { SkillEscolhida, escolherTrechosDaSkill } from '../regras/escolherTrechosDaSkill.js';
-import { validarEspecializacao } from '../regras/validarEspecializacao.js';
+import { SkillEscolhida, escolherTrechosDaSkill } from '../regras/regrasDasSkills.js';
+import { validarEspecializacao } from '../regras/regrasDasSkills.js';
 import { falharCom } from '../../compartilhado/erros.js';
 
 /** Apresenta na interface somente agentes habilitados e capacidades efetivas do projeto. */

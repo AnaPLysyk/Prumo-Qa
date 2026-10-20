@@ -6,7 +6,7 @@ import { normalizarFoco } from '../../dist/agentes/regras/normalizarFoco.js';
 import { experiencias, papeis } from '../../dist/agentes/tipos/persona.js';
 import { termosDaFrase } from '../../dist/agentes/regras/textosDoConhecimento.js';
 import { sementeDasSkills } from '../../dist/agentes/banco/sementeDasSkills.js';
-import { validarEspecializacao } from '../../dist/agentes/regras/validarEspecializacao.js';
+import { validarEspecializacao } from '../../dist/agentes/regras/regrasDasSkills.js';
 import { mascarar } from '../../dist/compartilhado/seguranca/mascarar.js';
 // A mesma regra do banco real (2.17): perfil e atendimentos são da conta da sessão; sem sessão, nada pessoal.
 import { pessoaDoConhecimento } from '../../dist/agentes/banco/baseDoConhecimento.js';

@@ -1,6 +1,6 @@
 /** Registra propostas de aprendizado, casos e bugs recebidas pelas ferramentas MCP. */
 import { z } from "zod";
-import { registrarConhecimento } from "./banco/registrarConhecimento.js";
+import { registrarConhecimento } from "./banco/operacoesDeConhecimento.js";
 import { tiposConhecimento } from "./tipos/conhecimento.js";
 import { MeiosDoServidorMcp, rascunhoLocal, avisoDeRascunho } from "./tipos/mcp.js";
 import { criarProposta } from "../tickets/servicoPropostas.js";

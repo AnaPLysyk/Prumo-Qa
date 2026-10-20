@@ -16,7 +16,7 @@ test('mapa: cada canal IPC do catálogo aparece uma vez, no controlador da sua t
   assert.ok(!JSON.stringify(mapa).includes('"codigo"'), 'o mapa não leva o código-fonte');
   const agentes = mapa.telas.find((t) => t.id === 'agentes');
   assert.ok(agentes.frontend.some((a) => a.caminho === 'frontend/agentes/tela-agentes.parte.js'));
-  assert.ok(agentes.backend.banco.some((a) => a.caminho === 'backend/agentes/banco/listarTrechosDeSkill.ts'));
+  assert.ok(agentes.backend.banco.some((a) => a.caminho === 'backend/agentes/banco/operacoesDeSkills.ts'));
   assert.ok(agentes.testes.some((x) => x.caminho.endsWith('banco-de-skills.test.mjs')));
 });
 

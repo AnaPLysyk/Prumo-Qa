@@ -6,12 +6,12 @@ import { TransporteEscrita, TransporteServico, paginaSchema } from '../tipos/tra
 import { Recurso } from '../../projetos/contratos.js';
 import { autenticarNoServico } from './autenticarNoServico.js';
 import { consultarNoServico } from './consultarNoServico.js';
-import { contextoDoAdaptador } from './contextoDoAdaptador.js';
+import { contextoDoAdaptador } from './leiturasDeServicos.js';
 import { enviarAoServico } from './requisicoes.js';
 import { ErroServico } from './ErroServico.js';
 import { instanciaServico } from './configuracaoDosServicos.js';
 import { lerDoServico } from './requisicoes.js';
-import { listarRecursosDoServico } from './listarRecursosDoServico.js';
+import { listarRecursosDoServico } from './leiturasDeServicos.js';
 import { obterRecursoDoServico } from './requisicoes.js';
 import { procurarComentarioNoTicket } from './procurarComentarioNoTicket.js';
 import { publicarComentarioNoTicket } from './publicarComentarioNoTicket.js';

@@ -1,7 +1,7 @@
 /** Trechos das Skills que acompanham o aplicativo (pasta backend/agentes/skills/), já divididos e com identificador estável pelo conteúdo. */
 import path from 'node:path';
 import { lerPastaDeSkill } from './lerPastaDeSkill.js';
-import { dividirSkillEmTrechos } from '../regras/dividirSkillEmTrechos.js';
+import { dividirSkillEmTrechos } from '../regras/regrasDasSkills.js';
 import { TrechoDeSkill } from '../tipos/skills.js';
 import { especializacoes } from '../tipos/politicas.js';
 import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';

@@ -5,11 +5,11 @@ import { versaoDoPacote } from '../compartilhado/versaoDoPacote.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
 import { calcularMetricas } from '../metricas/servico.js';
 import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
-import { comandoAtividade } from './comandoAtividade.js';
+import { comandoAtividade } from './consultasDoTerminal.js';
 import { comandoConectar } from './comandoConectar.js';
-import { comandoEvidencias } from './comandoEvidencias.js';
+import { comandoEvidencias } from './consultasDoTerminal.js';
 import { comandoLogs } from './comandoLogs.js';
-import { comandoMetricas } from './comandoMetricas.js';
+import { comandoMetricas } from './consultasDoTerminal.js';
 import { imprimirJson } from './saidaDoTerminal.js';
 import { textoSeguroNoTerminal } from './saidaDoTerminal.js';
 

@@ -1,4 +1,4 @@
-/** Reúne registrar ferramentas qa da funcionalidade, mantendo cada operação identificável pelo nome. */
+/** Registro das ferramentas MCP de consulta, revisão e execução autorizada da qualidade. */
 import { z } from "zod";
 import { consultarEvidencias } from "../../testes/repositorioEvidencias.js";
 import { MeiosDoServidorMcp, somenteLeitura } from "../tipos/mcp.js";
@@ -6,6 +6,9 @@ import { contextoCompleto } from "./contextosDoMcp.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";
 import { revisarCobertura } from "../../testes/regras/revisarCobertura.js";
 import { revisaoSchema } from "../../testes/tipos/revisaoDeCobertura.js";
+import { configuracaoDoEspaco } from "../servicoPoliticas.js";
+import { matrizDePoliticas } from "../politicas/avaliarCapacidades.js";
+import { especializacoes } from "../tipos/politicas.js";
 
 export function registrarConsultarEvidencias(m: MeiosDoServidorMcp) {
   m.servidor.registerTool('consultar_evidencias', { description: 'Consulta jobs locais com integridade e isolamento. Sem evidência retorna NOT_RUN.', inputSchema: z.object({ jobId: z.string().uuid().optional(), criterio: z.string().max(100).optional() }).strict(), annotations: somenteLeitura },
@@ -25,4 +28,13 @@ export function registrarExecutarValidacao(m: MeiosDoServidorMcp) {
 export function registrarRevisarCobertura(m: MeiosDoServidorMcp) {
   m.servidor.registerTool('revisar_cobertura', { description: 'Análise estrutural de requisito, riscos, oráculos e redundâncias candidatas. Sempre NOT_VERIFIED; interpretação semântica é da IA.', inputSchema: revisaoSchema, annotations: somenteLeitura },
     (args) => m.guarda('revisar_cobertura', async () => revisarCobertura(await m.projeto(), args)));
+}
+
+export function registrarListarPoliticas(m: MeiosDoServidorMcp) {
+  m.servidor.registerTool('listar_politicas', { description: 'Mostra o que você (a IA) pode e não pode pedir ao Prumo neste projeto: especializações habilitadas e o estado de cada capacidade, com o motivo. Somente leitura.', inputSchema: z.object({}).strict(), annotations: somenteLeitura },
+    () => m.resposta(async () => {
+      const e = m.espaco(); const c = e ? configuracaoDoEspaco(e.id) : null;
+      return { projetoPrumo: e?.nome ?? null, configuracao: c ? (c.padrao ? 'padrão (nada personalizado)' : 'personalizada pela pessoa') : 'projeto sem espaço Prumo: padrão', especializacoesHabilitadas: especializacoes.filter(x => !c || c.especializacoes.includes(x.id)).map(x => ({ id: x.id, nome: x.rotulo, skill: x.skill })), capacidades: matrizDePoliticas(e?.id ?? null),
+        aviso: 'SOMENTE_PESSOA significa que a ação existe, mas só a pessoa a executa na janela do Prumo, com confirmação. Você pode apenas propor.' };
+    }));
 }
