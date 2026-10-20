@@ -4,7 +4,7 @@ import { prepararPublicacao } from "./regras/prepararPublicacao.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
-import { idiomaAtual } from "../configuracoes/regras/idiomaAtual.js";
+import { idiomaAtual } from "../configuracoes/servico.js";
 import { publicarComentarioDeResultado } from "./integracoes/publicarComentarioDeResultado.js";
 
 export const jiraPrevia: TratadorDoCanal<'jira:previa'> = a => prepararPublicacao(a.trabalhoId);

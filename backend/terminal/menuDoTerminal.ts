@@ -3,7 +3,7 @@ import { createInterface } from 'node:readline/promises';
 import { Projeto } from '../compartilhado/tipos/projeto.js';
 import { versaoDoPacote } from '../compartilhado/versaoDoPacote.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
-import { calcularMetricas } from '../metricas/regras/calcularMetricas.js';
+import { calcularMetricas } from '../metricas/servico.js';
 import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
 import { comandoAtividade } from './comandoAtividade.js';
 import { comandoConectar } from './comandoConectar.js';

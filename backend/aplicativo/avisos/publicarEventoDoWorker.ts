@@ -4,7 +4,7 @@ import { EventoWorker } from '../../agendamentos/tipos/worker.js';
 import { empilharAviso } from './avisos.js';
 import { atualizarBandeja } from '../bandeja/atualizarBandeja.js';
 import { navegarPara } from '../janela/navegarPara.js';
-import { lerPreferencias } from '../../configuracoes/banco/lerPreferencias.js';
+import { lerPreferencias } from '../../configuracoes/repositorio.js';
 
 export function publicarEventoDoWorker(e: EventoWorker) {
   empilharAviso({ tipo: e.tipo, titulo: e.titulo, detalhe: e.detalhe, rotinaId: e.rotinaId || undefined });

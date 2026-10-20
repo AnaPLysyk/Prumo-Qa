@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { plataformaDoInstalador } from '../../../../dist/atualizacoes/regras/plataformaDoInstalador.js';
-import { nomeDoInstalador } from '../../../../dist/atualizacoes/regras/nomeDoInstalador.js';
+import { plataformaDoInstalador } from '../../../../dist/atualizacoes/servicoInstalacao.js';
+import { nomeDoInstalador } from '../../../../dist/atualizacoes/servicoInstalacao.js';
 import { protetorDoSistema } from '../../../../dist/conexoes/regras/protetorDoSistema.js';
 import { diretorioDados } from '../../../../dist/compartilhado/banco/diretorioDados.js';
 
@@ -46,7 +46,7 @@ test('pasta de dados: Windows em LOCALAPPDATA, macOS em Application Support, Lin
 });
 
 test('iniciar com o sistema: Windows e macOS usam o item de login; Linux grava e remove o atalho de autostart', async () => {
-  const { iniciarComOSistema, atalhoDeAutostart } = await import('../../../../dist/configuracoes/regras/iniciarComOSistema.js');
+  const { iniciarComOSistema, atalhoDeAutostart } = await import('../../../../dist/configuracoes/servico.js');
   const fs = await import('node:fs'); const os = await import('node:os'); const path = await import('node:path');
   const chamadas = []; const app = { setLoginItemSettings: (o) => chamadas.push(o) };
   iniciarComOSistema(true, app, 'darwin'); iniciarComOSistema(false, app, 'win32');

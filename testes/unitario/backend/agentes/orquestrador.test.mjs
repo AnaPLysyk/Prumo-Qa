@@ -13,7 +13,7 @@ const { conversar } = await import('../../../../dist/agentes/chat/conversar.js')
 const { criarEspaco } = await import('../../../../dist/projetos/regras/criarEspaco.js');
 const { criarRotina } = await import('../../../../dist/agendamentos/regras/criarRotina.js');
 const { enfileirar } = await import('../../../../dist/agendamentos/banco/enfileirar.js'); const { pegarProximoTrabalho: reivindicar } = await import('../../../../dist/agendamentos/banco/pegarProximoTrabalho.js'); const { concluirTrabalho: concluir } = await import('../../../../dist/agendamentos/banco/concluirTrabalho.js');
-const { lerPreferencias } = await import('../../../../dist/configuracoes/banco/lerPreferencias.js'); const { alterarPreferencias } = await import('../../../../dist/configuracoes/regras/alterarPreferencias.js'); const { autorizarDelegacaoDeIa: autorizarDelegacao } = await import('../../../../dist/agentes/regras/autorizarDelegacaoDeIa.js');
+const { lerPreferencias } = await import('../../../../dist/configuracoes/repositorio.js'); const { alterarPreferencias } = await import('../../../../dist/configuracoes/servico.js'); const { autorizarDelegacaoDeIa: autorizarDelegacao } = await import('../../../../dist/agentes/regras/autorizarDelegacaoDeIa.js');
 const { falhasConhecimento } = await import('../../infra/conhecimento-falso.mjs');
 test.after(() => fs.rmSync(dados, { recursive: true, force: true }));
 

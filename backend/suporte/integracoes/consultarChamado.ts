@@ -1,6 +1,6 @@
 /** Consulta no GitHub, a pedido, o estado de uma issue oficial do Prumo (rótulos e eventos), sem credencial. */
 import { z } from 'zod';
-import { repositorio } from '../../ajuda/tipos/versoes.js';
+import { repositorio } from '../../ajuda/contratos.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { buscarDadosDoChamado } from './buscarDadosDoChamado.js';
 import { eventoSchema, issueSchema, numeroChamado, statusChamados } from '../tipos/suporte.js';

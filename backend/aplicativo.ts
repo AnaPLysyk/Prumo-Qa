@@ -10,7 +10,7 @@ import { criarBandeja } from './aplicativo/bandeja/criarBandeja.js';
 import { estadoDoAplicativo } from './aplicativo/estadoDoAplicativo.js';
 import { mostrarJanela } from './aplicativo/janela/mostrarJanela.js';
 import { SEIS_HORAS, iniciouOculto } from './aplicativo/tipos/aplicativo.js';
-import { avisoAutomaticoDeVersao } from './atualizacoes/regras/avisoAutomaticoDeVersao.js';
+import { avisoAutomaticoDeVersao } from './atualizacoes/servicoVerificacao.js';
 import { diretorioBase } from './compartilhado/banco/diretorioDados.js';
 import { contaDaSessao } from './login/regras/sessao.js';
 import { validarSessaoRemota } from './login/integracoes/autenticacaoRemota.js';

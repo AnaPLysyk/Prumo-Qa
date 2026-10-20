@@ -1,10 +1,9 @@
-/** Resume os dados do Prumo neste computador por categoria (tamanho e arquivos), para Ajuda › Privacidade e dados. */
-import fs from 'node:fs';
-import path from 'node:path';
-
-import { categorias, limitesPrivacidade, naoTransmitido, politicaRetencao } from '../tipos/privacidade.js';
-import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
-import { listarVinculos } from '../../projetos/regras/consultasDeVinculos.js';
+/** Lógica e contratos de ajuda: operações relacionadas no mesmo módulo. */
+import fs from "node:fs";
+import path from "node:path";
+import { categorias, limitesPrivacidade, naoTransmitido, politicaRetencao } from "./contratos.js";
+import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
+import { listarVinculos } from "../projetos/regras/consultasDeVinculos.js";
 
 function medirPasta(dir: string, limite = { n: 0 }): { bytes: number; arquivos: number; truncado: boolean } {
   let bytes = 0, arquivos = 0, truncado = false;
@@ -18,7 +17,6 @@ function medirPasta(dir: string, limite = { n: 0 }): { bytes: number; arquivos: 
   }
   return { bytes, arquivos, truncado };
 }
-
 
 export async function resumirDados(base?: string) {
   const dir = diretorioDados(base); const por: Record<string, { bytes: number; files: number }> = {};

@@ -4,7 +4,7 @@ import { responderComDadosLocais } from './responderComDadosLocais.js';
 import { Coleta } from '../tipos/chat.js';
 import { EtapaDaOrquestracao, Orquestracao } from '../tipos/orquestracao.js';
 import { AgenteChat } from '../tipos/persona.js';
-import { Fonte } from '../../inicio/tipos/assistenteLocal.js';
+import { Fonte } from '../../inicio/contratos.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 
 type Responder = typeof responderComDadosLocais;

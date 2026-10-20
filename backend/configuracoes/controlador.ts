@@ -1,11 +1,11 @@
 /** Controlador da funcionalidade configuracoes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { versao } from "../aplicativo/tipos/aplicativo.js";
-import { avisoDeVersaoPendente } from "../atualizacoes/regras/avisoDeVersaoPendente.js";
-import { lerPreferencias } from "./banco/lerPreferencias.js";
+import { avisoDeVersaoPendente } from "../atualizacoes/servicoVerificacao.js";
+import { lerPreferencias } from "./repositorio.js";
 import { app } from "electron";
-import { alterarPreferencias } from "./regras/alterarPreferencias.js";
-import { iniciarComOSistema } from "./regras/iniciarComOSistema.js";
+import { alterarPreferencias } from "./servico.js";
+import { iniciarComOSistema } from "./servico.js";
 
 export const preferenciasObter: TratadorDoCanal<'preferencias:obter'> = () => ({ preferencias: lerPreferencias(), aviso: avisoDeVersaoPendente(versao), instalada: versao });
 

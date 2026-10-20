@@ -12,7 +12,7 @@ import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { nomeServico } from "../aplicativo/tipos/aplicativo.js";
 import { habilitarEscrita } from "./escrita/habilitarEscrita.js";
-import { idiomaAtual } from "../configuracoes/regras/idiomaAtual.js";
+import { idiomaAtual } from "../configuracoes/servico.js";
 import { executarOperacao } from "./escrita/executarOperacao.js";
 import { prepararOperacao } from "./escrita/prepararOperacao.js";
 import { servicosDoAplicativo } from "./regras/servicosDoAplicativo.js";

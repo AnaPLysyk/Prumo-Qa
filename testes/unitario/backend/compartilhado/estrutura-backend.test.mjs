@@ -71,7 +71,7 @@ test('backend: controladores agrupam canais por lógica e mantêm funções púb
     if (!exportadas.length) problemas.push(`${a}: precisa exportar ao menos uma função, classe ou declaração nomeada`);
     const ehApi = a.includes('/api/');
     if (ehApi && exportadas.length !== 1) problemas.push(`${a}: API deve ter exatamente uma declaração exportada`);
-    if (!path.basename(a).startsWith('controlador') && (ehApi || exportadas.length === 1) && exportadas[0]?.nome !== base) {
+    if (!/^(controlador|servico|repositorio|contratos)/.test(base) && (ehApi || exportadas.length === 1) && exportadas[0]?.nome !== base) {
       problemas.push(`${a}: a única exportação deve ter o nome do arquivo (${exportadas[0]?.nome ?? 'nenhuma'})`);
     }
     if (ehApi && d.some((x) => !x.exportado)) problemas.push(`${a}: canal IPC não pode ter declarações internas ocultas; delegue às regras`);

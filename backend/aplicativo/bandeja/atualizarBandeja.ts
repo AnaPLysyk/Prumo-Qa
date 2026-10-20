@@ -3,7 +3,7 @@ import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo
 
 import { menuDaBandeja } from './menuDaBandeja.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
-import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
+import { idiomaAtual } from '../../configuracoes/servico.js';
 import { textoNoIdioma } from './textoNoIdioma.js';
 import { EstadoWorker, Idioma } from '../tipos/textosDaBandeja.js';
 

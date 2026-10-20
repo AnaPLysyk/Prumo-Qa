@@ -5,7 +5,7 @@ import { textoNoIdioma } from '../bandeja/textoNoIdioma.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
 import { origemPermitida, rendererDir } from '../tipos/aplicativo.js';
 import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';
-import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
+import { idiomaAtual } from '../../configuracoes/servico.js';
 
 export function criarJanela(): BrowserWindow {
   const janela = new BrowserWindow({

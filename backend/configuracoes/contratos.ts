@@ -1,5 +1,5 @@
-/** Formato das preferências da pessoa (tema, idioma, avisos, IA) e seus valores padrão. */
-import { z } from 'zod';
+/** Lógica e contratos de configuracoes: operações relacionadas no mesmo módulo. */
+import { z } from "zod";
 
 const versaoTxt = z.string().regex(/^\d+\.\d+\.\d+$/);
 

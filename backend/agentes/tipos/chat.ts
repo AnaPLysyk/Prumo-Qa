@@ -1,6 +1,6 @@
 /** Formato da conversa do chat (turnos, estilos, provedores, resposta) e o guia de respostas do orquestrador. */
 import { AgenteChat, Experiencia, Papel } from './persona.js';
-import { Fonte } from '../../inicio/tipos/assistenteLocal.js';
+import { Fonte } from '../../inicio/contratos.js';
 import { TipoTeste } from '../../testes/tipos/catalogoDeTestes.js';
 import { Orquestracao } from './orquestracao.js';
 

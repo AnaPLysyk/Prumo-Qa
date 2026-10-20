@@ -3,7 +3,7 @@ import { Menu } from 'electron';
 import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo.js';
 import { acaoDoMenuDaBandeja } from './acaoDoMenuDaBandeja.js';
 
-import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
+import { idiomaAtual } from '../../configuracoes/servico.js';
 import { resumoDoWorker } from './resumoDoWorker.js';
 import { textoNoIdioma } from './textoNoIdioma.js';
 import { EstadoWorker, Idioma, ItemMenu } from '../tipos/textosDaBandeja.js';

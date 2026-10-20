@@ -24,7 +24,7 @@ export function gerarMapaDoAplicativo() {
   const telas = ids.map((id) => {
     const doBackend = lista.filter((a) => a.caminho.startsWith(`backend/${id}/`) && /\.(?:ts|mjs|js)$/.test(a.caminho));
     const backend = Object.fromEntries([...PAPEIS, 'outros'].map((p) => [p, []]));
-    for (const a of doBackend) { const trecho = a.caminho.split('/')[2]; const papel = trecho.startsWith('controlador') && trecho.endsWith('.ts') ? 'controlador' : trecho; (PAPEIS.includes(papel) ? backend[papel] : backend.outros).push(resumo(a)); }
+    for (const a of doBackend) { const trecho = a.caminho.split('/')[2]; const papel = ['controlador', 'servico', 'repositorio', 'contratos'].find(tipo => trecho.startsWith(tipo) && trecho.endsWith('.ts')) ?? trecho; (PAPEIS.includes(papel) ? backend[papel] : backend.outros).push(resumo(a)); }
     const usaTela = (texto) => texto.includes(`dist/${id}/`) || texto.includes(`frontend/${id}/`) || texto.includes(`backend/${id}/`);
     return {
       id, descricao: frasesDasTelas[id] ?? null,

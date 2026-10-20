@@ -1,7 +1,7 @@
-/** Lê os documentos da Ajuda (Markdown) e troca {{VERSAO}} pela versão instalada. */
-import fs from 'node:fs';
-import path from 'node:path';
-import { documentosAjuda } from '../../projetos/tipos/painel.js';
+/** Lógica e contratos de ajuda: operações relacionadas no mesmo módulo. */
+import fs from "node:fs";
+import path from "node:path";
+import { documentosAjuda } from "../projetos/tipos/painel.js";
 
 export function lerDocumentosDaAjuda(pasta: string, versao: string) {
   return documentosAjuda.map(arq => {

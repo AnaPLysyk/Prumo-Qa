@@ -1,8 +1,8 @@
 // Gera as notas de release de uma versão a partir da fonte única docs/catalogo/versoes.json.
 // Uso: node site/release/notas-versao.mjs 2.3.1 > notas.md   (falha se a versão não existir no histórico)
 // PRUMO_ASSINADO=true só deve ser definido pelo CI DEPOIS de confirmar Authenticode "Valid"; sem isso, as notas dizem NÃO ASSINADO.
-import { carregarVersoes } from '../../dist/ajuda/versoes/carregarVersoes.js';
-import { notasDaVersao } from '../../dist/ajuda/versoes/notasDaVersao.js';
+import { carregarVersoes } from '../../dist/ajuda/servicoVersoes.js';
+import { notasDaVersao } from '../../dist/ajuda/servicoVersoes.js';
 
 const alvo = process.argv[2];
 const versao = carregarVersoes(new URL('../../docs/catalogo/versoes.json', import.meta.url)).find((v) => v.version === alvo);

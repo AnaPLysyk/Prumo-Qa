@@ -8,7 +8,7 @@ import { carregarProjeto } from '../compartilhado/projeto/carregarProjeto.js';
 import { Projeto } from '../compartilhado/tipos/projeto.js';
 import { executarValidacao } from '../testes/regras/executarValidacao.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
-import { calcularMetricas } from '../metricas/regras/calcularMetricas.js';
+import { calcularMetricas } from '../metricas/servico.js';
 import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
 import { chamadaRegistrada } from './chamadaRegistrada.js';
 import { comandoAtividade } from './comandoAtividade.js';

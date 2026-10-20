@@ -4,7 +4,7 @@ import { nomeParaChamar } from './nomeParaChamar.js';
 import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { Pendente, Proximo } from '../tipos/chat.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
-import { situacaoDoProjeto } from '../../inicio/regras/situacaoDoProjeto.js';
+import { situacaoDoProjeto } from '../../inicio/servico.js';
 
 /** Abertura da conversa: cumprimenta pelo nome (o do Meu perfil ou o da conta que entrou), resume a situação e pergunta o que ainda falta saber. */
 export function saudacao(espacoId: string | null, nomeAssistente = 'Prumo', base?: string): { linhas: string[]; pendente: Pendente; proximos: Proximo[]; pessoa: string | null } {

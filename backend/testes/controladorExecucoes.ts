@@ -5,7 +5,7 @@ import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { prepararOperacao } from "../conexoes/escrita/prepararOperacao.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
-import { idiomaAtual } from "../configuracoes/regras/idiomaAtual.js";
+import { idiomaAtual } from "../configuracoes/servico.js";
 import { obterEspaco } from "../projetos/banco/obterEspaco.js";
 import { obterRunLocal } from "./banco/armazenamentoDeRuns.js";
 import { criarRunNoQase, parametrosDaRunQase } from "./integracoes/criarRunNoQase.js";

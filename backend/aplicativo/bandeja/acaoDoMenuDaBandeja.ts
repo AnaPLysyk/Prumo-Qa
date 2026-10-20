@@ -8,7 +8,7 @@ import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
 import { mostrarJanela } from '../janela/mostrarJanela.js';
 import { navegarPara } from '../janela/navegarPara.js';
 import { ItemMenu } from '../tipos/textosDaBandeja.js';
-import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
+import { idiomaAtual } from '../../configuracoes/servico.js';
 
 export function acaoDoMenuDaBandeja(id: ItemMenu['id'], atualizar: () => void) {
   if (id === 'abrir') { mostrarJanela(); return; }

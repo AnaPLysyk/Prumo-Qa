@@ -1,7 +1,7 @@
 /** Comando "prumo metricas": mostra os indicadores do diário. */
 import { Projeto } from '../compartilhado/tipos/projeto.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
-import { calcularMetricas } from '../metricas/regras/calcularMetricas.js';
+import { calcularMetricas } from '../metricas/servico.js';
 import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
 import { imprimirJson } from './saidaDoTerminal.js';
 import { textoSeguroNoTerminal } from './saidaDoTerminal.js';

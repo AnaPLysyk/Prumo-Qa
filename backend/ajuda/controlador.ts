@@ -1,20 +1,20 @@
 /** Controlador da funcionalidade ajuda: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import path from "node:path";
-import { lerDocumentosDaAjuda } from "./regras/lerDocumentosDaAjuda.js";
+import { lerDocumentosDaAjuda } from "./servicoDocumentos.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { versao, arquivoVersoes, textoExclusao } from "../aplicativo/tipos/aplicativo.js";
 import { raizDoAplicativo } from "../compartilhado/raizDoAplicativo.js";
 import { catalogo } from "../aplicativo/api/catalogoDeContratos.js";
-import { apresentarVersoes } from "./versoes/apresentarVersoes.js";
-import { carregarVersoes } from "./versoes/carregarVersoes.js";
-import { conferirInstalada } from "./versoes/conferirInstalada.js";
+import { apresentarVersoes } from "./servicoVersoes.js";
+import { carregarVersoes } from "./servicoVersoes.js";
+import { conferirInstalada } from "./servicoVersoes.js";
 import { dialog, shell } from "electron";
 import { excluirTodosContextos } from "../agentes/banco/excluirTodosContextos.js";
 import { excluirEvidencias } from "../testes/banco/excluirEvidencias.js";
 import { excluirAtividades } from "../logs/banco/excluirAtividades.js";
 import { excluirDiagnostico } from "../logs/banco/excluirDiagnostico.js";
 import { projetoVinculado } from "../projetos/regras/projetoVinculado.js";
-import { resumirDados } from "./privacidade/resumirDados.js";
+import { resumirDados } from "./servicoPrivacidade.js";
 
 export const ajudaDocumentos: TratadorDoCanal<'ajuda:documentos'> = () => lerDocumentosDaAjuda(path.join(raizDoAplicativo, 'docs', 'ajuda'), versao);
 

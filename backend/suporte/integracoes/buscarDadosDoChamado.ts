@@ -1,5 +1,5 @@
 /** Busca no GitHub os dados públicos de uma issue, com limite de resposta, sem credencial nem redirecionamento. */
-import { repositorio } from '../../ajuda/tipos/versoes.js';
+import { repositorio } from '../../ajuda/contratos.js';
 
 export async function buscarDadosDoChamado(numero:number,sufixo:string,buscar:typeof fetch=fetch){
     const r=await buscar(`https://api.github.com/repos/${repositorio}/issues/${numero}${sufixo}`,{method:'GET',redirect:'error',credentials:'omit',cache:'no-store',headers:{Accept:'application/vnd.github+json','User-Agent':'PrumoQA-suporte'},signal:AbortSignal.timeout(8000)});

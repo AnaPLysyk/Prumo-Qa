@@ -1,6 +1,6 @@
 /** Controlador da funcionalidade suporte: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { dialog, shell, safeStorage } from "electron";
-import { repositorio } from "../ajuda/tipos/versoes.js";
+import { repositorio } from "../ajuda/contratos.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { enderecoOficialDoRelato } from "./regras/enderecoOficialDoRelato.js";
 import { prepararRelatoDaJanela } from "./regras/prepararRelatoDaJanela.js";

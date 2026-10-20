@@ -1,3 +1,6 @@
+/** Lógica e contratos de inicio: operações relacionadas no mesmo módulo. */
+
+
 /** Formato da resposta do assistente local do Início (linhas e fontes) e as palavras ignoradas nas perguntas. */
 
 /**

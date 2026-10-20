@@ -12,7 +12,7 @@ import { salvarConfiguracao } from "./politicas/salvarConfiguracao.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
-import { idiomaAtual } from "../configuracoes/regras/idiomaAtual.js";
+import { idiomaAtual } from "../configuracoes/servico.js";
 import { textoRemoto } from "../conexoes/integracoes/textoRemoto.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
 import { salvarContextoDaPasta } from "./regras/salvarContextoDaPasta.js";

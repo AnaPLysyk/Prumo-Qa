@@ -24,7 +24,7 @@ import { Conhecimento, TipoConhecimento } from '../tipos/conhecimento.js';
 import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 import { listarConhecimentos } from '../banco/listarConhecimentos.js';
-import { Fonte } from '../../inicio/tipos/assistenteLocal.js';
+import { Fonte } from '../../inicio/contratos.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { catalogoDeTestes } from '../../testes/regras/catalogoDeTestes.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';

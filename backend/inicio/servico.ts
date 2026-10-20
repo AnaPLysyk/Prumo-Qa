@@ -1,13 +1,13 @@
-/** Responde uma pergunta do Início com os dados locais do projeto (contextos, propostas, execuções, agenda), sem IA e sem internet. */
-import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
-import { dataEmPortugues } from '../../compartilhado/texto/dataEmPortugues.js';
-import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
-import { listarContextosDaPasta } from '../../agentes/regras/listarContextosDaPasta.js';
-import { Fonte, Resposta, pare } from '../tipos/assistenteLocal.js';
-import { metricasDasExecucoes } from '../../metricas/regras/metricasDasExecucoes.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { listarRunsLocais } from '../../testes/banco/listarRunsLocais.js';
-import { listarPropostas } from '../../tickets/banco/listarPropostas.js';
+/** Lógica e contratos de inicio: operações relacionadas no mesmo módulo. */
+import { listarTrabalhos } from "../agendamentos/banco/listarTrabalhos.js";
+import { dataEmPortugues } from "../compartilhado/texto/dataEmPortugues.js";
+import { semAcentos } from "../compartilhado/texto/semAcentos.js";
+import { listarContextosDaPasta } from "../agentes/regras/listarContextosDaPasta.js";
+import { Fonte, Resposta, pare } from "./contratos.js";
+import { metricasDasExecucoes } from "../metricas/servico.js";
+import { obterEspaco } from "../projetos/banco/obterEspaco.js";
+import { listarRunsLocais } from "../testes/banco/listarRunsLocais.js";
+import { listarPropostas } from "../tickets/banco/listarPropostas.js";
 
 /** Identifica palavras-chave no texto normalizado da pergunta sem consultar serviços externos. */
 const perguntaTemPalavra = (p: string, ...palavras: string[]) => palavras.some((palavra) => p.includes(palavra));
@@ -43,4 +43,20 @@ export async function perguntarAoAssistenteLocal(espacoId: string | null, pergun
   }
   if (!linhas.length) linhas.push('Não encontrei nada sobre isso nos dados locais deste projeto. Tente perguntar sobre falhas, próxima rotina, features, propostas ou contextos.');
   return { linhas, fontes, modo: 'LOCAL' };
+}
+
+/** Resumo curto do que está acontecendo agora no projeto; alimenta a abertura do painel inicial. */
+export function situacaoDoProjeto(espacoId: string | null, base?: string): string[] {
+  const m = metricasDasExecucoes(espacoId ?? undefined, base); const linhas: string[] = [];
+  if (!espacoId) { linhas.push('Selecione um projeto para eu acompanhar o que acontece nele.'); }
+  const props = espacoId ? listarPropostas(espacoId, base).filter(p => p.estado === 'RASCUNHO' || p.estado === 'REVISADA') : [];
+  const runs = espacoId ? listarRunsLocais(espacoId, base).filter(r => r.estado !== 'PUBLICADA') : [];
+  if (m.execucoes) linhas.push(`${m.execucoes} ${m.execucoes === 1 ? 'execução registrada' : 'execuções registradas'}: ${m.pass} PASS, ${m.fail} FAIL, ${m.blocked} BLOCKED.`);
+  else if (espacoId) linhas.push('Ainda não há execuções registradas neste projeto.');
+  if (m.fail) linhas.push('Há falhas recentes. Pergunte "o que falhou?" para ver.');
+  if (m.proximaExecucao) linhas.push(`Próxima rotina agendada: ${dataEmPortugues(m.proximaExecucao)}.`); else if (espacoId) linhas.push('Nenhuma rotina agendada.');
+  if (props.length) linhas.push(`${props.length} ${props.length === 1 ? 'proposta aguardando revisão' : 'propostas aguardando revisão'}.`);
+  if (runs.length) linhas.push(`${runs.length} ${runs.length === 1 ? 'execução de feature em andamento' : 'execuções de feature em andamento'}.`);
+  if (m.comentariosPendentes) linhas.push(`${m.comentariosPendentes} ${m.comentariosPendentes === 1 ? 'comentário do Jira pendente' : 'comentários do Jira pendentes'}.`);
+  return linhas.slice(0, 5);
 }

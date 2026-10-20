@@ -1,7 +1,7 @@
 /** Monta a visão geral de um projeto: contrato, capacidades, métricas e a última chamada de IA observada. */
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { consultarAtividades } from '../../logs/banco/consultarAtividades.js';
-import { calcularMetricas } from '../../metricas/regras/calcularMetricas.js';
+import { calcularMetricas } from '../../metricas/servico.js';
 import { projetoVinculado } from './projetoVinculado.js';
 
 export async function visaoGeralDoProjeto(raiz: string) {

@@ -1,20 +1,20 @@
 /** Controlador da funcionalidade atualizacoes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { dialog, shell, app } from "electron";
-import { repositorio } from "../ajuda/tipos/versoes.js";
+import { repositorio } from "../ajuda/contratos.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { estadoDoAplicativo } from "../aplicativo/estadoDoAplicativo.js";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { workerDoAplicativo } from "../agendamentos/worker/workerDoAplicativo.js";
-import { baixarAtualizacao } from "./regras/baixarAtualizacao.js";
-import { entregarInstalador, instrucaoDeInstalacao } from "./regras/entregarInstalador.js";
-import { plataformaDoInstalador } from "./regras/plataformaDoInstalador.js";
-import { argumentosInstalador } from "./tipos/instalador.js";
-import { consultarAtualizacao } from "./regras/consultarAtualizacao.js";
+import { baixarAtualizacao } from "./servicoInstalacao.js";
+import { entregarInstalador, instrucaoDeInstalacao } from "./servicoInstalacao.js";
+import { plataformaDoInstalador } from "./servicoInstalacao.js";
+import { argumentosInstalador } from "./contratos.js";
+import { consultarAtualizacao } from "./servicoVerificacao.js";
 import { versao } from "../aplicativo/tipos/aplicativo.js";
-import { avisoDeVersaoPendente } from "./regras/avisoDeVersaoPendente.js";
-import { marcarVersaoVista } from "./regras/marcarVersaoVista.js";
+import { avisoDeVersaoPendente } from "./servicoVerificacao.js";
+import { marcarVersaoVista } from "./servicoVerificacao.js";
 
 export const atualizacaoAbrir: TratadorDoCanal<'atualizacao:abrir'> = async (_a, janela) => {
   if (!estadoDoAplicativo.ultimaRelease || !new RegExp(`^https://github\\.com/${repositorio}/releases/tag/v\\d+\\.\\d+\\.\\d+$`).test(estadoDoAplicativo.ultimaRelease)) throw new Error('NO_VERIFIED_RELEASE: verifique as atualizações antes.');

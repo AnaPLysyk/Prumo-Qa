@@ -3,7 +3,7 @@ import { agentesDoChat } from "./chat/agentesDoChat.js";
 import { executavelDaIa } from "./chat/executavelDaIa.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { localizarClienteDeIa } from "../conexoes/ia/localizarClienteDeIa.js";
-import { lerPreferencias } from "../configuracoes/banco/lerPreferencias.js";
+import { lerPreferencias } from "../configuracoes/repositorio.js";
 import { regrasDosAgentes } from "../administracao/regras/agentesDaPlataforma.js";
 import { aprenderTermos } from "./banco/aprenderTermos.js";
 import { avaliarAtendimento } from "./banco/avaliarAtendimento.js";

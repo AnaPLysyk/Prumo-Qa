@@ -1,7 +1,7 @@
 /** Categorias, modelos e limites do relato de suporte, o formato da solicitação e o de uma issue consultada no GitHub. */
 import fs from 'node:fs';
 import { z } from 'zod';
-import { repositorio } from '../../ajuda/tipos/versoes.js';
+import { repositorio } from '../../ajuda/contratos.js';
 
 export const numeroChamado = z.number().int().min(1).max(999999999);
 

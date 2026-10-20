@@ -2,7 +2,7 @@
 import { workerDoAplicativo } from './workerDoAplicativo.js';
 import { empilharAviso } from '../../aplicativo/avisos/avisos.js';
 import { estadoDoAplicativo } from '../../aplicativo/estadoDoAplicativo.js';
-import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
+import { idiomaAtual } from '../../configuracoes/servico.js';
 
 /** Vigia o worker: se ele parar sem o usuário pedir, tenta reiniciar e avisa; nunca finge que está ativo. */
 export function vigiarWorker() {

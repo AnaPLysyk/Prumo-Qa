@@ -1,7 +1,17 @@
-/** Liga ou desliga "iniciar com o sistema": item de login no Windows e no macOS, arquivo de autostart no Linux. */
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
+/** Lógica e contratos de configuracoes: operações relacionadas no mesmo módulo. */
+import { gravarPreferencias, lerPreferencias } from "./repositorio.js";
+import { alteracaoSchema } from "./contratos.js";
+import { Idioma } from "../aplicativo/tipos/textosDaBandeja.js";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+export function alterarPreferencias(alteracao: unknown, base?: string) {
+  const a = alteracaoSchema.parse(alteracao); const atual = lerPreferencias(base);
+  return gravarPreferencias({ ...atual, ...a, ia: { ...atual.ia, ...(a.ia ?? {}), delegacao: atual.ia.delegacao } }, base);
+}
+
+export const idiomaAtual = (): Idioma => lerPreferencias().idioma;
 
 type ItemDeLogin = { setLoginItemSettings: (o: { openAtLogin: boolean; args: string[] }) => void };
 

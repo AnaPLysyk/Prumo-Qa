@@ -13,7 +13,7 @@ import { conexaoEntrada } from '../../conexoes/tipos/contaDeServico.js';
 import { filtrosSchema } from '../../conexoes/tipos/leituras.js';
 import { idsDeOperacao } from '../../conexoes/tipos/operacoesExternas.js';
 import { codigosServico, paginaSchema } from '../../conexoes/tipos/transporte.js';
-import { alteracaoSchema } from '../../configuracoes/tipos/configuracoes.js';
+import { alteracaoSchema } from '../../configuracoes/contratos.js';
 import { conteudoSchema, estados, tipos } from '../../agentes/tipos/contexto.js';
 import { filtroExecucoes } from '../../testes/tipos/historicoDeExecucoes.js';
 import { associacaoSchema, dadosEspaco, identidadeRecurso, servicoSchema } from '../../projetos/tipos/espacos.js';
