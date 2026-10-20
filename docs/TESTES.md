@@ -15,13 +15,15 @@ Os filtros combinam com AND e valores desconhecidos falham. `--listar` apenas l�
 
 A execução usa `node:test`, concorrência 1, module mocks e o hook atual `testes/apoio/conhecimento-hook.cjs`, que substitui conhecimento por memória. Não existe build implícito: os testes que importam `dist/` exigem build prévio. Não há interface para comandos arbitrários ou caminhos de teste fornecidos pelo usuário.
 
-Sem filtros, o runner seleciona todos os arquivos que não usam perfil real. Com filtros explícitos, selecionar uma migração de perfil real falha; ela pertence exclusivamente ao workflow de instalação isolado. A presença de qualquer valor em `PRUMO_APP_EXE` ou `PRUMO_MIGRACAO*` bloqueia a execução normal, mesmo que um arquivo de migração não tenha sido selecionado. Nenhuma flag deste seletor desativa essa proteção.
+O runner exclui testes `migracao*.test.mjs` da execução normal, com ou sem filtros, e registra cada um como `NOT_RUN|MIGRACAO_PERFIL_REAL`. O teste de migração do perfil instalado exige uma execução separada e autorizada; não há autorização para rodá-lo pelo seletor. A presença de qualquer valor em `PRUMO_APP_EXE` ou `PRUMO_MIGRACAO*` bloqueia a execução normal. O plano também rejeita migrações caso sejam passadas diretamente a ele. Nenhuma opção deste seletor remove essas barreiras.
 
 Os testes reais de UI continuam dependendo da janela e das fixtures existentes; serviços externos não são autorização para testes contra contas reais. O hook não fornece sandbox de sistema operacional. Estes comandos não devem receber segredos ou acesso a banco real. `npm.cmd run check` continua sendo o gate principal após alterações.
 
 Verificação do seletor: `node --test testes/unitario/backend/compartilhado/seletor-testes.test.mjs`. Esses testes conferem a organização real, filtros com fixtures em memória, argumentos do runner e recusa de perfil real sem executar a seleção. O seletor não inventa aprovação humana e preserva códigos de saída e falhas do Node.
 
-Os scripts npm `test:unitarios`, `test:smoke`, `test:regressao`, `test:backend` e `test:frontend` usam esse mesmo seletor; `test:selecionar -- --modulo agentes` permite combinações. Faça o build antes de executar os testes que usam `dist/`.
+`npm run check:isolado` (ou `test:selecionar -- --isolado`) roda só o que não precisa de janela: arquivos que usam o Electron ou de migração ficam `NOT_RUN|motivo|arquivo`, e `ferramentas/testes/bloquear-efeitos.cjs` recusa abrir navegador, carregar driver SQLite e conectar fora de localhost. Não é sandbox do sistema, e a falha de um teste selecionado continua falha; `--isolado --listar` mostra a divisão sem executar.
+
+O `npm test` também usa esse seletor após o build, sem ignorar os bloqueios de migração. Os scripts npm `test:unitarios`, `test:smoke`, `test:regressao`, `test:backend` e `test:frontend` usam esse mesmo seletor; `test:selecionar -- --modulo agentes` permite combinações. Faça o build antes de executar os testes que usam `dist/`.
 
 No contrato do próprio Prumo, `nucleo` executa arquivos sem janela, incluindo contratos, integração e persistência sintética; não significa apenas testes unitários. `unidade` permanece como alias compatível. `janela-1`…`janela-3` distribuem os arquivos Electron existentes. Todos continuam sujeitos à autenticação humana ao serem executados pelo produto.
 

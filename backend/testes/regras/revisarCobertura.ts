@@ -78,7 +78,7 @@ async function conferirTestesExistentes(p: Projeto, r: Revisao, a: AnaliseDeCobe
       if (ignoradas.length) {
         // A detecção é por arquivo (não sabemos qual teste o cenário representa). Se o comportamento do cenário aparece numa
         // linha ignorada, a associação é direta; senão o aviso é de severidade menor e diz que não houve associação.
-        // Nos dois casos o cenário NÃO conta como cobertura comprovada (decisão conservadora, inalterada).
+        // Nos dois casos o cenário não conta como cobertura comprovada (decisão conservadora).
         const associado = !!textoParaComparar(t.behavior) && ignoradas.some(l => textoParaComparar(l).includes(textoParaComparar(t.behavior)));
         a.registrar('WEAK_TEST', associado ? 'Teste pendente/ignorado associado a este cenário; não contar como cobertura.' : 'O arquivo contém teste pendente/ignorado que não foi associado a este cenário; conferir antes de contar cobertura.', t.id, associado ? 'medium' : 'low');
       } else existentes.add(t.id);

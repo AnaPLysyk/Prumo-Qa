@@ -1,6 +1,6 @@
 /** Monta a resposta da ferramenta MCP contexto_projeto: contexto autorizado, frameworks detectados, contextos e aprendizados permitidos. */
 import { aprendizadosParaMcp } from './aprendizadosParaMcp.js';
-import { contextoProjeto } from '../../compartilhado/projeto/contextoProjeto.js';
+import { contextoProjeto } from './contextoProjeto.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { contextosParaMcp } from '../regras/contextosParaMcp.js';
 import { detectarFrameworks } from '../../testes/regras/detectarFrameworks.js';
@@ -10,8 +10,8 @@ import { conhecimento } from '../../testes/tipos/frameworks.js';
  * Resposta de `contexto_projeto` (MCP) e de `prumo context` (CLI): o contexto autorizado do projeto acrescido de
  * frameworks detectados por evidência real, do conhecimento especializado aplicável e dos contextos persistentes
  * (só se a pessoa os habilitou para o MCP). Mantém todos os campos anteriores: apenas acrescenta.
- * 2.10: `aprendizados` traz o perfil (como chamar, papel) e o conhecimento APROVADO dos agentes para o projeto Prumo desta raiz,
- * sob a MESMA permissão dos contextos (sem ela, nada é enviado).
+ * `aprendizados` traz o perfil (como chamar, papel) e o conhecimento aprovado dos agentes para o projeto Prumo desta raiz,
+ * sob a mesma permissão dos contextos (sem ela, nada é enviado).
  */
 export async function contextoCompleto(p: Projeto, base?: string) {
   const b = await contextoProjeto(p);

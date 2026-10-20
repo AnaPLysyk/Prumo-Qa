@@ -5,7 +5,7 @@ import { falharCom } from '../../compartilhado/erros/falharCom.js';
 import { limitesSkills } from '../tipos/skills.js';
 
 /** Um arquivo da Skill: caminho relativo à pasta (com /) e conteúdo em texto. */
-export type ArquivoDaSkill = { relativo: string; conteudo: string };
+type ArquivoDaSkill = { relativo: string; conteudo: string };
 
 export function lerPastaDeSkill(pasta: string): ArquivoDaSkill[] {
   const arquivos: ArquivoDaSkill[] = [];

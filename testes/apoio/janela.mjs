@@ -5,7 +5,7 @@ import { _electron as electron } from 'playwright-core';
 import electronPath from 'electron';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { caixaDeEmail } from './caixa-de-email.mjs';
+import { caixaDeEmail, emailDa } from './caixa-de-email.mjs';
 
 /**
  * Apoio comum aos testes da janela (Playwright sobre o Electron real). Não é um teste.
@@ -29,8 +29,12 @@ export const novoDados = (t) => {
  * O login nasce da parte do e-mail antes do @ (admin-teste); a pessoa entra com o e-mail ou com o login.
  */
 export const CONTA_DE_TESTE = { email: 'admin-teste@prumo.test', login: 'admin-teste', nome: 'Admin Teste', senha: 'Senha-de-teste-2026' };
-/** E-mail de uma conta de teste: quem não informou usa <login>@prumo.test, e o login nasce igual. */
-export const emailDa = (conta) => conta.email || conta.login + '@prumo.test';
+/** Local de dados usado pelo aplicativo depois de autenticar a conta de teste. */
+export async function dadosDaConta(page, dados) {
+  const resposta = await page.evaluate(() => window.prumo.contaSessao());
+  if (!resposta?.ok || !resposta.data?.usuario?.id) throw new Error('TEST_ACCOUNT_SESSION_REQUIRED');
+  return path.join(dados, 'usuarios', resposta.data.usuario.id);
+}
 /** Primeiro acesso pela tela, como a pessoa faria: nome, e-mail e senha, o código que chega na caixa de e-mail e pronto, já dentro. */
 export async function primeiroAcesso(page, conta = CONTA_DE_TESTE) {
   const caixa = await caixaDeEmail(); const email = emailDa(conta);
@@ -51,11 +55,11 @@ export async function ativarPelaApi(page, conta = CONTA_DE_TESTE) {
 export async function abrir(t, dados, extra = [], envExtra = {}, opcoes = {}) {
   // VS Code/Claude definem ELECTRON_RUN_AS_NODE; com ele o Electron viraria Node puro e não abriria janela.
   // O envio de e-mail vai sempre para a caixa local dos testes, nunca para o serviço real.
-  const env = { ...process.env, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO: (await caixaDeEmail()).url, ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ...envExtra }; delete env.ELECTRON_RUN_AS_NODE; if (!dados) delete env.PRUMO_DATA_DIR; // sem dados: diretório padrão do usuário
+  const env = { ...process.env, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO: (await caixaDeEmail()).url, PRUMO_DATA_DIR: dados, ...envExtra }; delete env.ELECTRON_RUN_AS_NODE;
   const app = await electron.launch({ executablePath: exe ?? electronPath, args: exe ? extra : [path.join(repo, 'testes/apoio/desktop-entry.cjs'), ...extra], env });
   let fechado = false;
   const fechar = async () => { if (!fechado) { fechado = true; await app.close(); } };
-  if (dados) abertos.get(dados).push(fechar);
+  abertos.get(dados).push(fechar);
   const page = await app.firstWindow();
   const erros = []; page.on('pageerror', (e) => erros.push(e.message)); page.on('console', (m) => { if (m.type() === 'error') erros.push(m.text()); });
   await page.waitForSelector('#nav button', { state: 'attached' });
@@ -93,14 +97,15 @@ export async function mcp(root, dados, chamadas) {
   const transport = exe
     ? new StdioClientTransport({ command: exe, args: [path.join(path.dirname(exe), 'resources', 'app', 'dist', 'mcp.js'), root], env: { ...(dados ? { PRUMO_DATA_DIR: dados } : {}), ELECTRON_RUN_AS_NODE: '1' } })
     : new StdioClientTransport({ command: process.execPath, args: ['--require', path.join(repo, 'testes/apoio/conhecimento-hook.cjs'), path.join(repo, 'dist/mcp.js'), root], env: dados ? { PRUMO_DATA_DIR: dados } : {} });
-  await client.connect(transport);
-  try { const out = []; for (const [name, args] of chamadas) out.push(await client.callTool({ name, arguments: args })); return out; } finally { await client.close(); }
-}
-/** Abre o app no diretório de dados PADRÃO do usuário (testes de migração do instalador); fecha ao final do teste. */
-export async function abrirPadrao(t) {
-  const r = await abrir(t, null);
-  t.after(() => r.fechar());
-  return r;
+  try {
+    await client.connect(transport);
+    const out = []; for (const [name, args] of chamadas) out.push(await client.callTool({ name, arguments: args }));
+    return out;
+  } finally {
+    // Um handshake recusado também precisa encerrar o subprocesso MCP, sem deixar processo pendurado no teste.
+    await client.close().catch(() => {});
+    await transport.close().catch(() => {});
+  }
 }
 
 /** Abre o popover de ajustes (tema, idioma, cor) se ainda não estiver aberto. */

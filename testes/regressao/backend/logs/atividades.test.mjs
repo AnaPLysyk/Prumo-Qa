@@ -8,7 +8,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
-import { contextoProjeto } from '../../../../dist/compartilhado/projeto/contextoProjeto.js';
+import { contextoProjeto } from '../../../../dist/agentes/mcp/contextoProjeto.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
 import { aplicarConexao } from '../../../../dist/conexoes/ia/aplicarConexao.js';
 import { prepararConexao } from '../../../../dist/conexoes/ia/prepararConexao.js';

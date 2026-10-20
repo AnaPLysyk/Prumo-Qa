@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { enderecoOficialDoRelato as urlOficial } from '../../../../dist/suporte/regras/enderecoOficialDoRelato.js';
-import { linkDeIssueValido } from '../../../../dist/suporte/regras/linkDeIssueValido.js';
+
 import { prepararRelato as prepararSolicitacao } from '../../../../dist/suporte/regras/prepararRelato.js';
 import { revisarPrivacidadeDoRelato as revisarPrivacidade } from '../../../../dist/suporte/regras/revisarPrivacidadeDoRelato.js';
-import { urlBase } from '../../../../dist/suporte/tipos/suporte.js';
+import { urlBase, padraoLink } from '../../../../dist/suporte/tipos/suporte.js';
 
 const ctx = { versao: '2.5.0', diagnostico: '2026-10-10T10:00:00.000Z projeto:visao OK 3ms' };
 const bug = { categoria: 'bug', titulo: 'Botão não responde', descricao: 'Ao clicar em Verificar nada acontece.', passos: '1. Abrir Ajuda\n2. Clicar', esperado: 'Mostrar o resultado', consentimento: true };
@@ -53,8 +53,8 @@ test('só o formulário oficial do repositório é aceito; texto longo é encurt
   const longo = prepararSolicitacao({ ...bug, descricao: 'ação '.repeat(790), passos: 'passo '.repeat(330) }, ctx);
   assert.equal(longo.truncado, true); assert.ok(longo.url.length <= 7100); assert.ok(urlOficial(longo.url));
   assert.match(longo.markdown, /ação ação/, 'a exportação local guarda o texto completo');
-  assert.equal(linkDeIssueValido('https://github.com/AnaPLysyk/Prumo-Qa/issues/12'), true);
-  assert.equal(linkDeIssueValido('https://github.com/AnaPLysyk/Prumo-Qa/issues/12/../x'), false);
+  assert.equal(padraoLink.test('https://github.com/AnaPLysyk/Prumo-Qa/issues/12'), true);
+  assert.equal(padraoLink.test('https://github.com/AnaPLysyk/Prumo-Qa/issues/12/../x'), false);
 });
 
 test('texto de issue é dado: instruções dentro do relato nunca são executadas nem alteram o endereço', () => {

@@ -2,9 +2,9 @@
 import { z } from 'zod';
 
 /**
- * Histórico centralizado (2.8): une os trabalhos da fila (execuções, consultas, horários perdidos) com rotina, projeto,
+ * Histórico centralizado: une os trabalhos da fila (execuções, consultas, horários perdidos) com rotina, projeto,
  * ticket e repositório vinculado. Consulta apenas dados locais já registrados; nada é recalculado nem inventado.
- * Métricas contam EXECUÇÕES de QA reais (PASS/FAIL/BLOCKED/NOT_RUN). Consultas (INFO) e horários perdidos ficam à parte,
+ * Métricas contam execuções de QA reais (PASS/FAIL/BLOCKED/NOT_RUN). Consultas (INFO) e horários perdidos ficam à parte,
  * e abrir a interface nunca conta como execução.
  */
 export const filtroExecucoes = z.object({

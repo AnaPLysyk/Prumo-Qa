@@ -5,7 +5,6 @@ import { validarAgenteDoConhecimento } from './validarAgenteDoConhecimento.js';
 import { validarProjetoDoConhecimento } from './validarProjetoDoConhecimento.js';
 import { limitesConhecimento } from '../tipos/conhecimento.js';
 
-// ---------------- Atendimentos: metadados, sem texto ----------------
 export function registrarAtendimento(a: { espacoId: string | null; agente: string; modo: 'LOCAL' | 'CLAUDE' | 'CODEX'; fontes: string[] }, base?: string, agora = new Date()): number {
   validarProjetoDoConhecimento(a.espacoId); validarAgenteDoConhecimento(a.agente);
   const pessoa = pessoaDoConhecimento(base);

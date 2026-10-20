@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função compartilhado para o bundle interfaces-v36. */
+/** Adapta as interfaces a janelas menores e movimento reduzido. */
 /* ---------- Reflow, zoom e movimento reduzido ---------- */
 @media(max-width:1250px){.v36l-ferramentas{flex-wrap:wrap}.v36l-ferramentas input{flex:1 1 100%}.v36l-ferramentas select{flex:1 1 125px}.v36l-detalhe dl{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:1080px){.v36m-secao{grid-column:span 12}}

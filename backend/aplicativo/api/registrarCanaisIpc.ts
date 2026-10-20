@@ -1,4 +1,5 @@
-/** Liga cada canal da janela (IPC) à função da tela que o atende. */
+/** Liga cada canal IPC à função da tela, implementada em backend/<tela>/api. */
+// Para localizar uma operação, procure pelo nome do canal neste registro.
 import { agendaAutorizar } from '../../agendamentos/api/agendaAutorizar.js';
 import { agendaEstado } from '../../agendamentos/api/agendaEstado.js';
 import { agendaExcluir } from '../../agendamentos/api/agendaExcluir.js';
@@ -79,7 +80,6 @@ import { skillsCriar } from '../../agentes/api/skillsCriar.js';
 import { skillsDecidir } from '../../agentes/api/skillsDecidir.js';
 import { skillsImportar } from '../../agentes/api/skillsImportar.js';
 import { skillsListar } from '../../agentes/api/skillsListar.js';
-import { conversasApagar } from '../../agentes/api/conversasApagar.js';
 import { conversasListar } from '../../agentes/api/conversasListar.js';
 import { iaDelegacao } from '../../agentes/api/iaDelegacao.js';
 import { perfilObter } from '../../agentes/api/perfilObter.js';
@@ -103,7 +103,6 @@ import { escritaEstado } from '../../conexoes/api/escritaEstado.js';
 import { escritaHabilitar } from '../../conexoes/api/escritaHabilitar.js';
 import { operacoesExecutar } from '../../conexoes/api/operacoesExecutar.js';
 import { operacoesListar } from '../../conexoes/api/operacoesListar.js';
-import { operacoesPrevia } from '../../conexoes/api/operacoesPrevia.js';
 import { projetoConexoes } from '../../conexoes/api/projetoConexoes.js';
 import { servicosAceite } from '../../conexoes/api/servicosAceite.js';
 import { servicosAdicionar } from '../../conexoes/api/servicosAdicionar.js';
@@ -136,8 +135,6 @@ import { jiraPrevia } from '../../testes/api/jiraPrevia.js';
 import { jiraPublicar } from '../../testes/api/jiraPublicar.js';
 import { projetoHistorico } from '../../logs/api/projetoHistorico.js';
 import { assistenteAbertura } from '../../inicio/api/assistenteAbertura.js';
-import { assistentePerguntar } from '../../inicio/api/assistentePerguntar.js';
-import { assistenteSituacao } from '../../inicio/api/assistenteSituacao.js';
 import { diagnosticoListar } from '../../logs/api/diagnosticoListar.js';
 import { logsExportar } from '../../logs/api/logsExportar.js';
 import { projetoLogs } from '../../logs/api/projetoLogs.js';
@@ -186,6 +183,7 @@ import { propostasPublicar } from '../../tickets/api/propostasPublicar.js';
 import { propostasRevisar } from '../../tickets/api/propostasRevisar.js';
 
 export function registrarCanaisIpc(): void {
+  // Janela, navegação e dados básicos
   registrarCanal('app:info', appInfo);
   registrarCanal('interface:exportar', interfaceExportar);
   registrarCanal('projetos:listar', projetosListar);
@@ -218,6 +216,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('suporte:preparar', suportePreparar);
   registrarCanal('suporte:abrir', suporteAbrir);
   registrarCanal('suporte:exportar', suporteExportar);
+  // Projetos e espaços de trabalho
   registrarCanal('espacos:listar', espacosListar);
   registrarCanal('espacos:criar', espacosCriar);
   registrarCanal('espacos:obter', espacosObter);
@@ -226,6 +225,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('espacos:trazer', espacosTrazer);
   registrarCanal('espacos:automacoes', espacosAutomacoes);
   registrarCanal('espacos:associar', espacosAssociar);
+  // Conexões com serviços externos
   registrarCanal('servicos:listar', servicosListar);
   registrarCanal('servicos:adicionar', servicosAdicionar);
   registrarCanal('servicos:qaseprevia', servicosQaseprevia);
@@ -241,6 +241,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('servicos:consultar', servicosConsultar);
   registrarCanal('servicos:aceite', servicosAceite);
   registrarCanal('servicos:importar', servicosImportar);
+  // Contextos liberados para agentes
   registrarCanal('contextos:listar', contextosListar);
   registrarCanal('contextos:obter', contextosObter);
   registrarCanal('contextos:salvar', contextosSalvar);
@@ -249,14 +250,16 @@ export function registrarCanaisIpc(): void {
   registrarCanal('contextos:conflito', contextosConflito);
   registrarCanal('contextos:excluir', contextosExcluir);
   registrarCanal('contextos:mcp', contextosMcp);
-  registrarCanal('operacoes:previa', operacoesPrevia);
+  // Operações externas com aprovação
   registrarCanal('operacoes:listar', operacoesListar);
   registrarCanal('escrita:estado', escritaEstado);
   registrarCanal('escrita:habilitar', escritaHabilitar);
   registrarCanal('operacoes:executar', operacoesExecutar);
+  // Casos e suítes locais
   registrarCanal('repositorio:listar', repositorioListar);
   registrarCanal('repositorio:caso', repositorioCaso);
   registrarCanal('repositorio:suite', repositorioSuite);
+  // Propostas de casos e defeitos
   registrarCanal('propostas:listar', propostasListar);
   registrarCanal('propostas:criar', propostasCriar);
   registrarCanal('propostas:editar', propostasEditar);
@@ -264,6 +267,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('propostas:descartar', propostasDescartar);
   registrarCanal('propostas:vincular', propostasVincular);
   registrarCanal('propostas:publicar', propostasPublicar);
+  // Execuções e publicações de testes
   registrarCanal('runs:listar', runsListar);
   registrarCanal('runs:preparar', runsPreparar);
   registrarCanal('runs:criar', runsCriar);
@@ -273,18 +277,19 @@ export function registrarCanaisIpc(): void {
   registrarCanal('runs:bugs', runsBugs);
   registrarCanal('runs:politica', runsPolitica);
   registrarCanal('runs:revogar', runsRevogar);
+  // Vínculos e arquivos de automação
   registrarCanal('vinculos:mapa', vinculosMapa);
   registrarCanal('testes:arquivo', testesArquivo);
   registrarCanal('testes:gravar', testesGravar);
   registrarCanal('testes:pipelines', testesPipelines);
   registrarCanal('testes:catalogo', testesCatalogo);
-  registrarCanal('assistente:perguntar', assistentePerguntar);
-  registrarCanal('assistente:situacao', assistenteSituacao);
+  // Assistente e conversas
   registrarCanal('assistente:conversar', assistenteConversar);
   registrarCanal('assistente:abertura', assistenteAbertura);
   registrarCanal('assistente:avaliar', assistenteAvaliar);
   registrarCanal('assistente:agentes', assistenteAgentes);
   registrarCanal('conversas:listar', conversasListar);
+  // Conhecimento dos agentes
   registrarCanal('conhecimento:estado', conhecimentoEstado);
   registrarCanal('conhecimento:listar', conhecimentoListar);
   registrarCanal('conhecimento:criar', conhecimentoCriar);
@@ -294,6 +299,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('conhecimento:esquecer', conhecimentoEsquecer);
   registrarCanal('conhecimento:mostrar', conhecimentoMostrar);
   registrarCanal('administracao:mapa', administracaoMapa);
+  // Entrada, sessão e cadastro
   registrarCanal('conta:sessao', contaSessao);
   registrarCanal('conta:entrar', contaEntrar);
   registrarCanal('conta:sair', contaSair);
@@ -304,13 +310,16 @@ export function registrarCanaisIpc(): void {
   registrarCanal('agentes:pessoalsalvar', agentesPessoalsalvar);
   registrarCanal('agentes:pessoalexcluir', agentesPessoalexcluir);
   registrarCanal('agentes:pessoaisimportar', agentesPessoaisimportar);
+  // Verificação em duas etapas e agentes pessoais
   registrarCanal('conta:confirmarentrada', contaConfirmarentrada);
   registrarCanal('conta:reenviarentrada', contaReenviarentrada);
   registrarCanal('conta:duasetapas', contaDuasetapas);
+  // Chamados de suporte
   registrarCanal('suporte:anexar', suporteAnexar);
   registrarCanal('suporte:enviar', suporteEnviar);
   registrarCanal('suporte:meus', suporteMeus);
   registrarCanal('suporte:meu', suporteMeu);
+  // Administração dos chamados
   registrarCanal('chamados:configuracao', chamadosConfiguracao);
   registrarCanal('chamados:chave', chamadosChave);
   registrarCanal('chamados:listar', chamadosListar);
@@ -320,6 +329,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('chamados:estado', chamadosEstado);
   registrarCanal('conta:senha', contaSenha);
   registrarCanal('conta:perfil', contaPerfil);
+  // Usuários e papéis
   registrarCanal('usuarios:ativar', usuariosAtivar);
   registrarCanal('usuarios:listar', usuariosListar);
   registrarCanal('usuarios:criar', usuariosCriar);
@@ -330,6 +340,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('papeis:listar', papeisListar);
   registrarCanal('papeis:salvar', papeisSalvar);
   registrarCanal('papeis:excluir', papeisExcluir);
+  // Acesso e provedores OAuth
   registrarCanal('acesso:configuracao', acessoConfiguracao);
   registrarCanal('acesso:salvar', acessoSalvar);
   registrarCanal('acesso:github', acessoGithub);
@@ -338,9 +349,11 @@ export function registrarCanaisIpc(): void {
   registrarCanal('conta:googleestado', contaGoogleestado);
   registrarCanal('conta:githubiniciar', contaGithubiniciar);
   registrarCanal('conta:githubestado', contaGithubestado);
+  // Configurações dos agentes da plataforma
   registrarCanal('plataforma:agentes', plataformaAgentes);
   registrarCanal('plataforma:salvar', plataformaSalvar);
   registrarCanal('administracao:codigo', administracaoCodigo);
+  // Orquestração e habilidades
   registrarCanal('agentes:orquestracoes', agentesOrquestracoes);
   registrarCanal('agentes:rastrear', agentesRastrear);
   registrarCanal('skills:listar', skillsListar);
@@ -349,13 +362,14 @@ export function registrarCanaisIpc(): void {
   registrarCanal('skills:importar', skillsImportar);
   registrarCanal('perfil:obter', perfilObter);
   registrarCanal('perfil:salvar', perfilSalvar);
-  registrarCanal('conversas:apagar', conversasApagar);
   registrarCanal('ia:delegacao', iaDelegacao);
   registrarCanal('agentes:estado', agentesEstado);
   registrarCanal('agentes:salvar', agentesSalvar);
+  // Worker e execução em segundo plano
   registrarCanal('worker:eventos', workerEventos);
   registrarCanal('worker:estado', workerEstado);
   registrarCanal('worker:pausa', workerPausa);
+  // Agendamentos
   registrarCanal('agenda:listar', agendaListar);
   registrarCanal('agenda:salvar', agendaSalvar);
   registrarCanal('agenda:estado', agendaEstado);
@@ -366,8 +380,10 @@ export function registrarCanaisIpc(): void {
   registrarCanal('agenda:permissoes', agendaPermissoes);
   registrarCanal('agenda:politica', agendaPolitica);
   registrarCanal('agenda:revogarpolitica', agendaRevogarPolitica);
+  // Histórico de execuções e métricas
   registrarCanal('execucoes:listar', execucoesListar);
   registrarCanal('execucoes:metricas', execucoesMetricas);
+  // Publicações no Jira
   registrarCanal('jira:previa', jiraPrevia);
   registrarCanal('jira:publicar', jiraPublicar);
 }

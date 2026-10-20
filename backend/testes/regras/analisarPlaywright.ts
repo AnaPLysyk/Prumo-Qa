@@ -6,7 +6,7 @@ import { recorteDaLinha } from './recorteDaLinha.js';
 import { seletorFragil } from './seletorFragil.js';
 import { AchadoTeste, doc } from '../tipos/frameworks.js';
 
-/** Análise estática de UM arquivo de teste Playwright. Cada regra cita a fonte oficial; falsos positivos possíveis estão descritos na orientação. */
+/** Análise estática de um arquivo de teste Playwright. Cada regra cita a fonte oficial; falsos positivos possíveis estão descritos na orientação. */
 export function analisarPlaywright(arquivo: string, conteudo: string): AchadoTeste[] {
   const out: AchadoTeste[] = []; const linhas = codigoSemComentarios(conteudo); const add = (regra: string, severidade: AchadoTeste['severidade'], i: number, orientacao: string, fonte: string) => out.push({ regra, severidade, arquivo: arquivo.replaceAll('\\', '/'), linha: i + 1, trecho: recorteDaLinha(linhas[i]!), orientacao, fonte });
   linhas.forEach((l, i) => {

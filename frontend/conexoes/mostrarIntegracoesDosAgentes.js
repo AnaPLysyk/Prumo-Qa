@@ -1,17 +1,14 @@
 'use strict';
 /** Conexões como ponto de distribuição: serviços de teste e tickets (linhas da tela base) e, abaixo, a IA por MCP (Claude Code e Codex). */
-// `agentesLegados` (usarTelaAgentes.js) guarda a página original de configuração e teste do MCP.
-const conexoesSemIntegracoes = abas.conexoes;
-abas.conexoes = async (el) => {
-  await conexoesSemIntegracoes(el);
-  const quieto = async (fn) => { try { const r = await fn(); return r && r.ok ? r.data : null; } catch { return null; } };
+// A configuracao MCP fica em frontend/agentes/mostrarConfiguracaoMcp.js.
+async function mostrarIntegracoesDosAgentes(el) {
   const e = estado.espaco;
   const centro = h('div', { id: 'integracoes-agentes', class: 'ds-integracoes' });
   // As linhas de Qase, Jira e GitHub já vêm da tela base: entram no mesmo bloco, antes da IA, sem repetir os serviços.
   const servicos = el.querySelector('#cx-servicos'); if (servicos) { servicos.replaceWith(centro); centro.append(servicos); } else el.append(centro);
-  const clientes = estado.root ? await quieto(() => api.conexoes(estado.root)) : null;
+  const clientes = estado.root ? await chamarSemAviso(() => api.conexoes(estado.root)) : null;
   const painelMcp = h('div', { id: 'conexao-mcp-painel' }); let carregado = false;
-  const mcp = h('details', { id: 'conexao-mcp', ontoggle: async (ev) => { if (!ev.currentTarget.open || carregado) return; carregado = true; await agentesLegados(painelMcp); painelMcp.querySelector('h1')?.remove(); } },
+  const mcp = h('details', { id: 'conexao-mcp', ontoggle: async (ev) => { if (!ev.currentTarget.open || carregado) return; carregado = true; await mostrarConfiguracaoMcp(painelMcp); painelMcp.querySelector('h1')?.remove(); } },
     h('summary', {}, tr('Configurar e testar Claude Code e Codex (MCP)')), painelMcp);
   const abrirMcp = () => { mcp.open = true; mcp.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   const linha = (atributos, nome, detalhe, situacao, ...acoes) => h('div', { class: 'ds-integra', ...atributos }, h('strong', { 'data-i18n-ignore': '' }, nome), h('span', { class: 'suave' }, detalhe), h('span', { class: 'ds-integra-estado' }, situacao), h('span', { class: 'ds-integra-acoes' }, acoes));

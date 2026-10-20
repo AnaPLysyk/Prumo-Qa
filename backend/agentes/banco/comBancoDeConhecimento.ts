@@ -1,5 +1,11 @@
-/** Abre o banco, faz a operação e fecha sempre. */
+/** Abre o banco de conhecimento (conhecimento.db), garante as tabelas, faz a operação e fecha sempre. */
 import { DatabaseSync } from 'node:sqlite';
-import { abrirBancoDeConhecimento } from './abrirBancoDeConhecimento.js';
+import { abrirBancoProtegido } from './abrirBancoProtegido.js';
+import { caminhoConhecimento } from './caminhoConhecimento.js';
+import { criarEsquemaDoConhecimento } from './criarEsquemaDoConhecimento.js';
+import { falharConhecimento } from './falharConhecimento.js';
 
-export function comBancoDeConhecimento<T>(base: string | undefined, fn: (db: DatabaseSync) => T): T { const db = abrirBancoDeConhecimento(base); try { return fn(db); } finally { db.close(); } }
+export function comBancoDeConhecimento<T>(base: string | undefined, fn: (db: DatabaseSync) => T): T {
+  const db = abrirBancoProtegido(caminhoConhecimento(base), () => falharConhecimento('KNOWLEDGE_FILE_INVALID'), criarEsquemaDoConhecimento);
+  try { return fn(db); } finally { db.close(); }
+}

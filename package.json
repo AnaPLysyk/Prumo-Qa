@@ -11,25 +11,15 @@
   "bin": {
     "prumo": "dist/cli.js"
   },
-  "files": [
-    "dist",
-    "backend/agentes/skills",
-    "docs",
-    "backend/aplicativo/preload.cjs",
-    "assets",
-    "ferramentas/empacotamento/aprovar.cs",
-    "README.md"
-  ],
   "scripts": {
-    "build": "node ferramentas/arquitetura/dependencias.mjs && node ferramentas/frontend/sincronizar-frontend.mjs && node ferramentas/frontend/gerar-telas-modulares.mjs && tsc && node ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs && node ferramentas/empacotamento/gerar-status.mjs && node ferramentas/empacotamento/build-broker.mjs",
+    "build": "node ferramentas/arquitetura/dependencias.mjs && node ferramentas/frontend/sincronizar-frontend.mjs && node ferramentas/frontend/gerar-telas-modulares.mjs && node ferramentas/documentacao/catalogo-documentacao-viva.mjs && node ferramentas/empacotamento/limpar-compilados.mjs && tsc && node ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs && node ferramentas/empacotamento/gerar-status.mjs && node ferramentas/empacotamento/build-broker.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --require ./testes/apoio/conhecimento-hook.cjs --experimental-test-module-mocks --test --test-concurrency=1 \"testes/**/*.test.mjs\"",
-    "qa": "node dist/cli.js",
-    "mcp": "node dist/mcp.js",
+    "test": "npm run build && node ferramentas/testes/executar.mjs",
     "demo": "node ferramentas/demonstracao/demonstrar.mjs",
     "check": "npm run dependencias && npm run typecheck && npm test",
     "check:isolado": "npm run dependencias && npm run typecheck && npm run build && node ferramentas/testes/executar.mjs --isolado",
     "dependencias": "node ferramentas/arquitetura/dependencias.mjs",
+    "auditoria:agentes": "node ferramentas/arquitetura/auditoria-por-agentes.mjs",
     "test:selecionar": "node ferramentas/testes/executar.mjs",
     "test:unitarios": "node ferramentas/testes/executar.mjs --natureza unitario",
     "test:smoke": "node ferramentas/testes/executar.mjs --natureza smoke",
@@ -37,18 +27,17 @@
     "test:backend": "node ferramentas/testes/executar.mjs --camada backend",
     "test:frontend": "node ferramentas/testes/executar.mjs --camada frontend",
     "prumo": "node dist/cli.js",
-    "prepack": "npm run build",
     "app": "npm run build && electron .",
-    "icone": "electron ferramentas/empacotamento/gerar-icone-orb.cjs",
+    "icone": "electron ferramentas/empacotamento/gerar-icones.cjs",
     "dist": "npm run build && electron-builder --win nsis --publish never",
     "dist:mac": "npm run build && electron-builder --mac dmg --arm64 --x64 --publish never",
     "dist:linux": "npm run build && electron-builder --linux AppImage deb --publish never",
     "contratos": "npm run build && node ferramentas/documentacao/gerar-contratos.mjs",
     "site": "node site/gerar.mjs",
-    "leia-me": "node ferramentas/documentacao/gerar-leia-me-backend.mjs",
     "arquitetura": "node ferramentas/arquitetura/gerar-arquitetura.mjs",
     "frontend:check": "node ferramentas/frontend/sincronizar-frontend.mjs --check",
-    "frontend:sync": "node ferramentas/frontend/sincronizar-frontend.mjs"
+    "frontend:sync": "node ferramentas/frontend/sincronizar-frontend.mjs",
+    "documentacao:viva": "node ferramentas/documentacao/catalogo-documentacao-viva.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
@@ -60,7 +49,6 @@
     "electron": "44.7.0",
     "electron-builder": "26.15.3",
     "playwright-core": "1.64.0",
-    "three": "0.159.0",
     "typescript": "^5.9.3"
   },
   "author": {

@@ -1,26 +1,19 @@
 /** Abre o banco de Skills (skills.db, separado do conhecimento), garante as tabelas e os trechos do Prumo, faz a operação e fecha sempre. */
-import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { abrirBancoProtegido } from './abrirBancoProtegido.js';
 import { sementeDasSkills } from './sementeDasSkills.js';
 import { TrechoDeSkill, VERSAO_ESQUEMA_SKILLS } from '../tipos/skills.js';
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { falharCom } from '../../compartilhado/erros/falharCom.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
-import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
 
-/** Onde fica o banco: skills.db na pasta de dados do Prumo (por usuário do Windows). */
-export const caminhoSkills = (base?: string) => path.join(diretorioDados(base), 'skills.db');
+/** Onde fica o banco: skills.db na pasta de dados do Prumo, separada por conta. */
+const caminhoSkills = (base?: string) => path.join(diretorioDados(base), 'skills.db');
 
 export function comBancoDeSkills<T>(base: string | undefined, fn: (db: DatabaseSync) => T): T {
-  const alvo = caminhoSkills(base); fs.mkdirSync(path.dirname(alvo), { recursive: true, mode: 0o700 }); semLinks(alvo);
-  if (fs.existsSync(alvo)) { const st = fs.lstatSync(alvo); if (!st.isFile() || st.nlink !== 1) falharCom('SKILLS_FILE_INVALID'); }
-  const db = new DatabaseSync(alvo);
-  try {
-    criarEsquema(db); sincronizarSemente(db);
-    try { fs.chmodSync(alvo, 0o600); } catch { /* ACL herdada no Windows */ }
-    return fn(db);
-  } finally { db.close(); }
+  const db = abrirBancoProtegido(caminhoSkills(base), () => falharCom('SKILLS_FILE_INVALID'), (d) => { criarEsquema(d); sincronizarSemente(d); });
+  try { return fn(db); } finally { db.close(); }
 }
 
 /** Converte uma linha do banco no formato usado pelo resto do Prumo. */

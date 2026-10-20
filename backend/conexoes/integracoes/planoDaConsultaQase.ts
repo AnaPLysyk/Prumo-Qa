@@ -1,7 +1,7 @@
 /** Monta a consulta no Qase (defeitos, suites, casos, planos, runs e resultados) só no projeto vinculado. */
 import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
-import { parametrosDaUrl } from '../../compartilhado/texto/parametrosDaUrl.js';
+import { parametrosDaUrl } from './parametrosDaUrl.js';
 import { Recurso } from '../../projetos/tipos/espacos.js';
 import { OperacaoServico, PlanoDaConsulta } from '../tipos/adaptador.js';
 import { Filtros } from '../tipos/leituras.js';

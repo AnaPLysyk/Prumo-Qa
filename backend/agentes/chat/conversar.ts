@@ -19,7 +19,7 @@ import { consultarIaExterna } from './consultarIaExterna.js';
 import { montarResposta } from './montarResposta.js';
 import { juntarConhecimentos } from './juntarConhecimentos.js';
 import { AgenteChat, agentesChat } from '../tipos/persona.js';
-import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
+import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { regrasDosAgentes } from '../../administracao/regras/agentesDaPlataforma.js';
 
 export async function conversar(o: Opcoes): Promise<Resposta> {
@@ -36,7 +36,7 @@ export async function conversar(o: Opcoes): Promise<Resposta> {
 
   // 2) Roteamento (com memória da sessão e vocabulário aprendido) e resposta local com dados reais.
   const aprendidos = tentarOuPadrao(() => pesosAprendidos(pergunta, o.base), {});
-  // Administração (2.11): agentes desligados não respondem, a orquestração pode ser desligada e a IA externa também.
+  // Administração: agentes desligados não respondem, a orquestração pode ser desligada e a IA externa também.
   const plataforma = regrasDosAgentes(o.base);
   const teste = o.contexto?.tipo === 'teste' ? responderSobreTeste(o.contexto, o.espacoId, o.base) : null;
   const r = teste ? { agente: teste.agente!, rota: [], continuou: false } : escolherAgente(pergunta, o.agente, { historico, aprendidos, desligados: plataforma.desligados });

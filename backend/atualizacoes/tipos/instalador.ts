@@ -1,7 +1,7 @@
 /** Endereços permitidos, limites e argumentos do instalador baixado na atualização. */
 
 /**
- * 2.10.2: atualizar com um clique. Só depois da confirmação da pessoa, baixa o instalador OFICIAL da release (URL montada
+ * Atualizar com um clique: só depois da confirmação da pessoa, baixa o instalador oficial da release (URL montada
  * aqui a partir da versão validada, nunca recebida da janela), baixa o .sha256 publicado pelo CI na mesma release e só
  * devolve o arquivo se o resumo conferir. Redirecionamentos só para os hosts de download do GitHub, sempre HTTPS.
  * O SHA-256 vem da mesma release: protege contra download corrompido ou trocado no caminho, não contra a conta do

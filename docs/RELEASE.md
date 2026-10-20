@@ -5,7 +5,7 @@ Toda versão nova segue os mesmos passos. Do passo 1 ao 4 o trabalho é no repos
 ## 1. Número da versão
 
 - `package.json` e `package-lock.json` (dois lugares no lock).
-- `README.md`: título e linha "Versão atual".
+- `package.json` e `docs/catalogo/versoes.json`: versão atual e versões publicadas.
 
 ## 2. Catálogo de versões (`docs/catalogo/versoes.json`)
 
@@ -13,14 +13,14 @@ Entrada nova no topo com `status: "repositorio"`, `date: null`, `releaseUrl: nul
 
 ## 3. Ajuda e site
 
-- Páginas de ajuda em `docs/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `backend/projetos/tipos/painel.ts` (`documentosAjuda`) e no índice da fonte `frontend/ajuda/mostrarAjuda.js`; sincronizar a cópia Electron.
+- Páginas de ajuda em `docs/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `backend/projetos/tipos/painel.ts` (`documentosAjuda`) e no índice da fonte `frontend/ajuda/busca-e-indice.parte.js`; sincronizar a cópia Electron.
 - Textos novos da interface com tradução em `frontend/compartilhado/runtime/i18n-en-*.js`; sincronizar as cópias distribuídas com `npm run frontend:sync`.
 - Capturas do site: `node ferramentas/site/capturar-site.mjs` (aplicativo real, dados sintéticos). Textos do site: `site/gerar.mjs`.
 - `npm run site` e conferir `site/public` (escuro, claro e celular). O site e a ajuda do aplicativo leem os mesmos arquivos de `docs/ajuda`.
 
 ## 4. Verificação e main
 
-`npm run check` sem falhas (os pulados são só instalador e migração, que rodam no CI). Commit e push para `main`. O push dispara o CI do Windows e o deploy do site (que passa a mostrar a versão nova no histórico como "código, sem release").
+`npm run check` sem falhas (os de migração ficam `NOT_RUN`: exigem o executável e o perfil instalados e não rodam mais no CI). Commit e push para `main`. O push dispara o CI do Windows e o deploy do site (que passa a mostrar a versão nova no histórico como "código, sem release").
 
 ## 5. Tag
 
@@ -33,7 +33,7 @@ git push origin vX.Y.Z
 
 `.github/workflows/windows.yml`, numa máquina Windows limpa:
 
-1. Suíte completa, instalador NSIS, atualização sobre a 2.2, 2.6 e 2.7 publicadas com dados preservados, janela e MCP do programa instalado, desinstalação.
+1. Testes unitários, smoke e regressão, instalador NSIS e smoke de todas as telas no executável empacotado (`release/win-unpacked`). A atualização sobre versões publicadas e a desinstalação não rodam mais no CI.
 2. SHA-256 do instalador e estado real da assinatura.
 3. Release `vX.Y.Z` com o `.exe`, o `.sha256` e as notas geradas do catálogo; confere que o arquivo publicado é idêntico ao gerado.
 4. `node ferramentas/release/publicar-versao.mjs X.Y.Z <sha256> <data>`: o catálogo passa a `publicada` (data, link da release e SHA-256), num commit na `main`.
@@ -59,7 +59,7 @@ As publicações do site rodam em fila, uma por vez (`concurrency` sem cancelame
 
 ## Conferência final
 
-- `https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/vX.Y.Z`: instalador e `.sha256`.
+- `https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/vX.Y.Z`: instalador e `.sha256`. Para conferir o download sem executar: `.\ferramentas\release\verificar-download.ps1 -Versao X.Y.Z` (baixa o `.exe` e o `.sha256`, confere o SHA-256 e mostra o estado da assinatura).
 - Site: Início ("Baixar a versão X.Y.Z") e Download (SHA-256 igual ao da release).
 - Aplicativo: Ajuda › Versões mostra a versão como publicada; um aplicativo de versão anterior mostra o aviso.
 

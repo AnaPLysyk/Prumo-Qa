@@ -40,6 +40,11 @@ test('login: primeiro acesso, criar conta com senha temporária, permissão por 
   await p.getByRole('tab', { name: 'Agentes' }).click(); await p.waitForSelector('#plataforma-agentes [data-agente=orquestrador]');
   assert.equal(await p.isDisabled('#agente-orquestrador'), true, 'o Orchestrator fica sempre ligado');
   await capturar(p, 'administracao-agentes');
+  // O padrão atual permite cadastro sem aprovação. Ative a regra para testar o fluxo pendente.
+  await p.getByRole('tab', { name: 'Configurações gerais' }).click();
+  await p.waitForSelector('#geral-aprovar');
+  await p.check('#geral-aprovar'); await p.click('#geral-salvar');
+  await p.waitForFunction(() => /Configurações salvas/.test(document.querySelector('#aviso')?.textContent || ''));
 
   // 4. Sair: a janela volta para a entrada e nada responde sem sessão.
   await p.click('#conta-botao'); await Promise.all([p.waitForEvent('load'), p.click('#conta-sair')]); await recarregou(p);

@@ -1,12 +1,12 @@
 'use strict';
 /** Administração › Usuários, Permissões, Agentes e Configurações gerais: contas, papéis por tela e regras gerais dos agentes da plataforma. */
+// Usado também por chamadosDeSuporte.js: alterar exige acesso de uso, não só de consulta.
+const podeAlterarAdministracao = () => !window.PrumoConta || window.PrumoConta.pode('administracao') && !window.PrumoConta.soVer('administracao');
 window.PrumoAdministracaoAcessos = (() => {
   const ROTULO_NIVEL = { NENHUM: 'Sem acesso', VER: 'Ver', USAR: 'Usar' };
   const ROTULO_ESTADO = { ATIVO: 'Ativa', PENDENTE: 'Aguarda aprovação', DESATIVADO: 'Desativada' };
   const TOM_ESTADO = { ATIVO: 'ok', PENDENTE: 'info', DESATIVADO: 'aviso' };
-  const dado = (texto) => h('span', { 'data-i18n-ignore': '' }, texto);
   const quando = (iso) => (iso ? new Date(iso).toLocaleString() : tr('nunca'));
-  const podeAlterar = () => !window.PrumoConta || window.PrumoConta.pode('administracao') && !window.PrumoConta.soVer('administracao');
 
   /** Senha temporária mostrada uma única vez, com botão de copiar. */
   function segredoUmaVez(titulo, explicacao, valor, depois) {
@@ -34,7 +34,7 @@ window.PrumoAdministracaoAcessos = (() => {
     area.replaceChildren(DS.carregando());
     const [lista, papeis] = await Promise.all([chamar(() => api.usuariosListar()), chamar(() => api.papeisListar())]);
     if (!lista || !papeis) return area.replaceChildren(DS.falhaConsulta('administracao'));
-    const recarregar = () => usuarios(area); const alterar = podeAlterar();
+    const recarregar = () => usuarios(area); const alterar = podeAlterarAdministracao();
     const agir = (fn, ok) => async () => { const r = await chamar(fn); if (r) { if (ok) avisar(tr(ok)); void recarregar(); } };
     const linhas = lista.contas.map((c) => {
       const eu = c.id === lista.voce;
@@ -53,7 +53,7 @@ window.PrumoAdministracaoAcessos = (() => {
         !eu && c.estado !== 'ATIVO' ? DS.acao('Excluir', agir(() => api.usuariosExcluir(c.id), 'Conta excluída.'), { compacto: true, classe: 'perigo', id: 'excluir-' + c.login }) : null
       ].filter(Boolean) : [];
       return { attrs: { 'data-conta': c.login }, celulas: [
-        h('div', {}, h('strong', { 'data-i18n-ignore': '' }, c.nome), eu ? [' ', DS.chip('você', 'info')] : null, h('div', { class: 'suave' }, dado(c.login))),
+        h('div', {}, h('strong', { 'data-i18n-ignore': '' }, c.nome), eu ? [' ', DS.chip('você', 'info')] : null, h('div', { class: 'suave' }, semTraducao(c.login))),
         { no: papel }, { no: h('label', { class: 'adm-admin' }, admin) }, { no: h('div', { class: 'adm-estado' }, DS.chip(ROTULO_ESTADO[c.estado], TOM_ESTADO[c.estado]), c.bloqueada ? DS.chip('Bloqueada', 'falha') : null, c.trocarSenha ? DS.chip('Senha temporária', 'aviso') : null) },
         quando(c.ultimoAcesso), { no: h('div', { class: 'adm-acoes' }, ...acoes), classe: 'ds-acao' }] };
     });
@@ -69,7 +69,7 @@ window.PrumoAdministracaoAcessos = (() => {
   async function permissoes(area) {
     area.replaceChildren(DS.carregando());
     const d = await chamar(() => api.papeisListar()); if (!d) return area.replaceChildren(DS.falhaConsulta('administracao'));
-    const alterar = podeAlterar(); const editados = new Map(d.papeis.map((p) => [p.id, { ...p.telas }]));
+    const alterar = podeAlterarAdministracao(); const editados = new Map(d.papeis.map((p) => [p.id, { ...p.telas }]));
     const sujos = new Set(); const salvar = DS.acao('Salvar permissões', async () => {
       for (const id of sujos) { const p = d.papeis.find((x) => x.id === id); const r = await chamar(() => api.papeisSalvar({ id, nome: p.nome, descricao: p.descricao, telas: editados.get(id) })); if (!r) return; }
       avisar(tr('Permissões salvas. Valem no próximo pedido de cada pessoa.')); void permissoes(area);
@@ -109,7 +109,7 @@ window.PrumoAdministracaoAcessos = (() => {
   async function agentes(area) {
     area.replaceChildren(DS.carregando());
     const d = await chamar(() => api.plataformaAgentes()); if (!d) return area.replaceChildren(DS.falhaConsulta('administracao'));
-    const alterar = podeAlterar();
+    const alterar = podeAlterarAdministracao();
     const caixa = (id, marcado, desabilitado) => h('input', { type: 'checkbox', id, checked: marcado, disabled: desabilitado || !alterar });
     const ligados = new Map(d.agentes.map((a) => [a.id, caixa('agente-' + a.id, a.ligado, a.fixo)]));
     const externa = caixa('plataforma-ia-externa', d.iaExterna); const orquestracao = caixa('plataforma-orquestracao', d.orquestracao);
@@ -125,7 +125,7 @@ window.PrumoAdministracaoAcessos = (() => {
         h('label', { class: 'opcao', for: 'plataforma-orquestracao' }, orquestracao, tr('O Orchestrator pode combinar vários agentes numa mesma resposta')),
         h('label', { class: 'opcao', for: 'plataforma-ia-externa' }, externa, tr('Permitir Claude Code e Codex no chat (cada pessoa ainda autoriza o próprio cliente)')),
         h('p', { class: 'suave' }, tr('Desligar a IA externa não afeta o resto do Prumo: as respostas usam só os dados deste computador.')),
-        d.alteradoEm ? h('p', { class: 'suave', id: 'plataforma-alterado' }, tr('Última alteração: '), dado(quando(d.alteradoEm) + (d.por ? ' · ' + d.por : ''))) : null,
+        d.alteradoEm ? h('p', { class: 'suave', id: 'plataforma-alterado' }, tr('Última alteração: '), semTraducao(quando(d.alteradoEm) + (d.por ? ' · ' + d.por : ''))) : null,
         alterar ? DS.rodape(DS.acao('Salvar regras dos agentes', async () => {
           const desligados = d.agentes.filter((a) => !a.fixo && !ligados.get(a.id).checked).map((a) => a.id);
           const r = await chamar(() => api.plataformaSalvar({ desligados, iaExterna: externa.checked, orquestracao: orquestracao.checked })); if (!r) return;
@@ -139,24 +139,19 @@ window.PrumoAdministracaoAcessos = (() => {
     area.replaceChildren(DS.carregando());
     const [c, d] = await Promise.all([chamar(() => api.acessoConfiguracao()), chamar(() => api.papeisListar())]);
     if (!c || !d) return area.replaceChildren(DS.falhaConsulta('administracao'));
-    const alterar = podeAlterar();
+    const alterar = podeAlterarAdministracao();
+    const modoEmail = window.PrumoConta?.sessao?.()?.identidadeRemota === true;
     const caixa = (id, v) => h('input', { type: 'checkbox', id, checked: v, disabled: !alterar });
     const numero = (id, v, min, max) => h('input', { type: 'number', id, value: v, min, max, step: 1, disabled: !alterar });
     const aberto = caixa('geral-cadastro', c.cadastroAberto); const aprovar = caixa('geral-aprovar', c.aprovarCadastros); const duasEtapas = caixa('geral-duas-etapas', !!c.exigirDuasEtapas);
     const papel = DS.selecao({ id: 'geral-papel', rotulo: 'Papel de novos cadastros', opcoes: d.papeis.filter((p) => p.id !== 'administrador').map((p) => [p.id, p.nome]), valor: c.papelDoCadastro }); papel.disabled = !alterar;
     const inatividade = numero('geral-inatividade', c.minutosDeInatividade, 5, 720); const tentativas = numero('geral-tentativas', c.tentativasAntesDoBloqueio, 3, 20); const bloqueio = numero('geral-bloqueio', c.minutosDeBloqueio, 1, 240);
-    const ghId = h('input', { id: 'geral-github-id', type: 'text', value: c.githubClientId || '', maxlength: 60, autocomplete: 'off', spellcheck: 'false', disabled: !alterar });
-    const ghSegredo = h('input', { id: 'geral-github-segredo', type: 'password', maxlength: 200, autocomplete: 'off', placeholder: c.githubClientId ? tr('(já guardado; deixe vazio para manter)') : '', disabled: !alterar });
-    const ghSalvar = DS.acao('Salvar', async () => { const r = await chamar(() => api.acessoGithub(ghId.value, ghSegredo.value)); ghSegredo.value = ''; if (r) { avisar(r.configurado ? tr('GitHub configurado.') : tr('GitHub desligado.')); void geral(area); } }, { id: 'geral-github-salvar', compacto: true });
-    const goId = h('input', { id: 'geral-google-id', type: 'text', value: c.googleClientId || '', maxlength: 120, autocomplete: 'off', spellcheck: 'false', disabled: !alterar });
-    const goSegredo = h('input', { id: 'geral-google-segredo', type: 'password', maxlength: 200, autocomplete: 'off', placeholder: c.googleClientId ? tr('(já guardado; deixe vazio para manter)') : '', disabled: !alterar });
-    const goSalvar = DS.acao('Salvar', async () => { const r = await chamar(() => api.acessoGoogle(goId.value, goSegredo.value)); goSegredo.value = ''; if (r) { avisar(r.configurado ? tr('Google configurado.') : tr('Google desligado.')); void geral(area); } }, { id: 'geral-google-salvar', compacto: true });
+    // OAuth é integrado ao aplicativo desktop; o usuário nunca registra Client ID ou segredo aqui.
     area.replaceChildren(
       DS.secao('Cadastro pela tela de entrada', [h('label', { class: 'opcao', for: 'geral-cadastro' }, aberto, tr('Permitir que a pessoa crie a própria conta')), h('label', { class: 'opcao', for: 'geral-aprovar' }, aprovar, tr('Novos cadastros precisam de aprovação da Administração')), DS.campo('Papel de novos cadastros', papel, { ajuda: 'Nunca administrador: esse papel só a Administração dá.' })]),
       DS.secao('Sessão e bloqueio', [h('div', { class: 'adm-form' }, DS.campo('Minutos sem uso até pedir login de novo', inatividade), DS.campo('Tentativas erradas antes de bloquear a conta', tentativas), DS.campo('Minutos de bloqueio', bloqueio)),
         h('label', { class: 'opcao', for: 'geral-duas-etapas' }, duasEtapas, tr('Exigir verificação em duas etapas (código por e-mail ao entrar) de todas as contas com e-mail')), DS.info('Contas sem e-mail (criadas aqui ou pelo GitHub/Google) entram só com a senha. Sem o serviço do Prumo no ar, quem precisa do código não consegue entrar.', { rotulo: 'Sobre as duas etapas' })]),
-      DS.secao('Entrar com o GitHub', [DS.info('OAuth App em github.com/settings/developers, com a callback http://127.0.0.1/callback. O segredo fica no cofre do sistema.', { rotulo: 'Como configurar' }), h('div', { class: 'adm-form' }, DS.campo('Client ID', ghId), DS.campo('Client Secret', ghSegredo)), alterar ? ghSalvar : null]),
-      DS.secao('Entrar com o Google', [DS.info('Credencial OAuth do tipo "Aplicativo para computador", no Google Cloud Console. O segredo fica no cofre do sistema.', { rotulo: 'Como configurar' }), h('div', { class: 'adm-form' }, DS.campo('Client ID', goId), DS.campo('Client Secret', goSegredo)), alterar ? goSalvar : null]),
+      modoEmail ? DS.secao('Acesso do MVP', [DS.info('O acesso utiliza e-mail e código único. GitHub e Google não fazem parte do login desta etapa; as integrações de trabalho ficam em Conexões.', { rotulo: 'Como funciona' })]) : null,
       alterar ? DS.rodape(DS.acao('Salvar configurações', async () => {
         const r = await chamar(() => api.acessoSalvar({ cadastroAberto: aberto.checked, aprovarCadastros: aprovar.checked, papelDoCadastro: papel.value, minutosDeInatividade: Number(inatividade.value), tentativasAntesDoBloqueio: Number(tentativas.value), minutosDeBloqueio: Number(bloqueio.value), exigirDuasEtapas: duasEtapas.checked }));
         if (r) avisar(tr('Configurações salvas.'));

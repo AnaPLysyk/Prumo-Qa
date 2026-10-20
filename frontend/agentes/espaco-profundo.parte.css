@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
+/** Camadas de fundo e movimento das telas de agentes e cerebro. */
 /* ---------- Agentes no espaço profundo (mesmo visual nos temas claro e escuro) ---------- */
 .v36a{position:relative;isolation:isolate;color:var(--texto)}
 body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
@@ -17,9 +17,6 @@ body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
 .v36a-astro-figura{position:relative;display:grid;place-items:center;width:170px;height:190px;margin-bottom:6px}
 .v36a-astro .v36-portrait{width:150px;height:178px}
 .v36a-astro .v36-portrait img{filter:saturate(1.12) contrast(1.05) drop-shadow(0 0 18px color-mix(in srgb,var(--face-color) 45%,transparent))}
-.v36a-orbita-anel{position:absolute;left:50%;bottom:6px;width:168px;height:44px;margin-left:-84px;border-radius:50%;border:1px solid color-mix(in srgb,var(--face-color) 55%,transparent);border-top-color:transparent;opacity:.45;box-shadow:0 6px 24px -10px var(--face-color);transition:opacity .35s,transform .35s}
-.v36a-orbita-anel::after{content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:var(--face-color);box-shadow:0 0 10px var(--face-color);offset-path:ellipse(84px 22px at 84px 22px);animation:v36a-satelite 7s linear infinite;animation-delay:var(--atraso,0s)}
-.v36a-astro:hover .v36a-orbita-anel{opacity:.95;transform:scale(1.06)}
 .v36a-astro-nome{font-size:14px;font-weight:650;letter-spacing:-.005em;color:var(--texto)}
 .v36a-astro-sub{font-size:11px;color:var(--suave);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v36a-astro-estado{display:inline-flex;align-items:center;gap:7px;margin-top:6px;font-size:11px;color:var(--texto)}
@@ -30,7 +27,6 @@ body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
 .v36a-orbe{position:relative;display:grid;place-items:center;width:170px;height:120px;margin-top:30px}
 .v36a-orbe img{position:relative;z-index:2;width:118px;height:118px;object-fit:contain;animation:v36-flutua 8.8s ease-in-out infinite}
 @keyframes v36a-deriva{0%,100%{translate:0 0}50%{translate:0 -5px}}
-@keyframes v36a-satelite{to{offset-distance:100%}}
 /* Detalhe, Cérebro e fluxo sobre o mesmo céu */
 .v36a-detalhe{border:0;border-radius:0;background:none;backdrop-filter:none}
 .v36a-perfil{background:radial-gradient(ellipse 65% 50% at 50% 42%,color-mix(in srgb,var(--face-color) 22%,transparent),transparent 72%)}
@@ -38,11 +34,9 @@ body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
 .v36a-form{background:none;backdrop-filter:none;border-left:1px solid var(--linha)}
 .v36-field input,.v36-field textarea,.v36a-cap select{background:var(--ds-superficie);border-color:var(--linha)}
 .v36-stage.v36a-cerebro{background:radial-gradient(ellipse 42% 52% at 38% 50%,color-mix(in srgb,var(--face-color) 14%,transparent),transparent 72%);border:0;border-radius:0}
-.v36a-mapa{background:radial-gradient(ellipse 50% 70% at 50% 50%,rgba(var(--qc-azul),.12),transparent 75%);border:1px solid var(--ds-linha-suave)}
-.v36-activity-node{background:var(--ds-superficie);backdrop-filter:blur(8px)}
 .v36a-secao-extra{border-top-color:var(--ds-linha-suave)}
 .v36a .estado{background:var(--ds-hover)}
-@media(prefers-reduced-motion:reduce){.v36a-astro,.v36a-orbita-anel::after,.v36a-orbe img{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.v36a-astro,.v36a-orbe img{animation:none!important}}
 
 /* ---------- Robôs 3D, portal e neurônios de conhecimento ---------- */
 .v36-robo{position:relative;display:block}
@@ -78,8 +72,6 @@ body[data-tela=agentes] main#conteudo{min-height:100vh;min-height:100dvh}
 .v36-neuron-rotulo strong{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--texto);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v36-neuron-rotulo small{font-size:10.5px;color:var(--suave);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v36-neuron.mudou .v36-neuron-rotulo strong{color:var(--aviso)}
-.v36a-cerebro-rodape{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--ds-linha-suave);padding-top:12px}
-.v36a-cerebro-rodape .v36-brain-inspect{flex:1 1 360px;border:0;padding:0}
 .v36a-legenda-neural{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:10.5px;color:var(--suave)}
 .v36a-legenda-neural i,.v36a-insp-grupo i{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;vertical-align:0}
 .v36a-insp-grupo{display:flex;align-items:center;gap:4px;margin-bottom:6px;font-size:10.5px;letter-spacing:.06em;color:var(--suave)}

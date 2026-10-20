@@ -1,7 +1,7 @@
 /** Formato da orquestração observável: quais agentes participaram, em que ordem, quanto tempo cada etapa levou e o que consultou. */
 
 /** Uma etapa: um agente respondendo com os dados locais. SEM_DADOS = rodou e não achou nada; FALHOU = a consulta deu erro. */
-export type EstadoEtapa = 'CONCLUIDA' | 'SEM_DADOS' | 'FALHOU';
+type EstadoEtapa = 'CONCLUIDA' | 'SEM_DADOS' | 'FALHOU';
 
 export type EtapaDaOrquestracao = { ordem: number; agente: string; inicio: string; fim: string; duracaoMs: number; estado: EstadoEtapa; fontes: string[]; fatos: string[]; linhas: number; erro?: string };
 

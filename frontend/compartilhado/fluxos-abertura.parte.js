@@ -5,9 +5,6 @@
 // deduzida por nome; escrita externa continua desligada por padrão e confirmada pelo processo principal.
 (() => {
   const vinc = (e, s) => e?.vinculos.find((v) => v.servico === s) || null;
-  const memoria = (tela, id) => ((estado.ds ||= {})[tela + ':' + id] ||= {});
-  const quando = (iso) => (iso ? hora(iso) : '—');
-  const duracao = (n) => (n === null || n === undefined ? '—' : n < 1000 ? n + ' ms' : Math.round(n / 100) / 10 + ' s');
   const semProjetoDS = (titulo) => [DS.cabecalho({ titulo }), DS.estadoTela('vazio', 'Nenhum projeto selecionado', 'Selecione ou crie um projeto para continuar.', [DS.acao('Ir para Projetos', () => mostrar('projetos'))])];
   const relacoesDe = (e, tipos, id) => (e?.relacoes || []).filter((r) => [r.de, r.para].some((x) => tipos.includes(x.tipo) && String(x.id) === String(id)));
   const outroLado = (r, tipos, id) => ([r.de, r.para].find((x) => !(tipos.includes(x.tipo) && String(x.id) === String(id))) || r.para);

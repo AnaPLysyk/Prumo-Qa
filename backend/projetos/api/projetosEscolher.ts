@@ -11,7 +11,7 @@ import { situacaoProjeto } from '../regras/situacaoProjeto.js';
 export const projetosEscolher: TratadorDoCanal<'projetos:escolher'> = async (_a, janela) => {
   const r = await dialog.showOpenDialog(janela!, { title: 'Selecionar a pasta do projeto', properties: ['openDirectory'] });
   if (r.canceled || !r.filePaths[0]) return { canceled: true };
-  // 2.10.2: mesma proposta de contrato do vínculo de projeto Prumo, com aprovação nativa antes de gravar.
+  // Mesma proposta de contrato do vínculo de projeto Prumo, com aprovação nativa antes de gravar.
   const s = await situacaoProjeto(r.filePaths[0]);
   if (s.state === 'SEM_MANIFESTO') {
     const p = proporContrato(s.root);

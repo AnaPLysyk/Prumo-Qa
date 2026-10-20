@@ -4,7 +4,7 @@ import { travaSchema } from '../tipos/worker.js';
 import { arquivoLocal } from '../../compartilhado/banco/arquivoLocal.js';
 import { lerLocal } from '../../compartilhado/banco/lerLocal.js';
 
-// 2.10.2: uma trava ilegível (ex.: arquivo zerado por queda de energia) não pode impedir o aplicativo de abrir. Ela é
+// Uma trava ilegível (ex.: arquivo zerado por queda de energia) não pode impedir o aplicativo de abrir. Ela é
 // posta de lado (renomeada, para diagnóstico) e tratada como ausente; o worker grava uma nova ao assumir.
 export const lerTravaDoWorker = (b?: string) => {
   try { return lerLocal('worker-trava.json', travaSchema.nullable(), null, b); }

@@ -10,16 +10,16 @@ const propostas = [
   { id: ticketId, espacoId, tipo: 'bug', origem: 'PESSOA', remoto: null, estado: 'RASCUNHO' },
   { id: casoOutro, espacoId: outroId, tipo: 'caso', origem: 'PESSOA', remoto: null, estado: 'RASCUNHO' }
 ];
-mock.module('../../../../dist/projetos/banco/atualizarEspaco.js', { namedExports: {
+mock.module('../../../../dist/projetos/banco/atualizarEspaco.js', { exports: {
   atualizarEspaco: (id, fn) => { assert.equal(id, espacoId); fn(espaco); return espaco; }
 } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { namedExports: {
+mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: {
   listarPropostas: id => propostas.filter(p => p.espacoId === id)
 } });
-mock.module('../../../../dist/testes/banco/lerRepositorioLocal.js', { namedExports: {
+mock.module('../../../../dist/testes/banco/lerRepositorioLocal.js', { exports: {
   lerRepositorioLocal: () => ({ version: 1, casos: [], suites: [] })
 } });
-mock.module('../../../../dist/projetos/regras/eventoEspaco.js', { namedExports: {
+mock.module('../../../../dist/projetos/regras/eventoEspaco.js', { exports: {
   eventoEspaco: () => {}
 } });
 const { associarEspaco } = await import('../../../../dist/projetos/regras/associarEspaco.js');

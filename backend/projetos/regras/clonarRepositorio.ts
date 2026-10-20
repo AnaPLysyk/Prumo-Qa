@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-export type ResultadoDoClone = { acao: 'clonado' | 'atualizado'; pasta: string; ramo: string };
+type ResultadoDoClone = { acao: 'clonado' | 'atualizado'; pasta: string; ramo: string };
 type Opcoes = { protocolo?: 'https' | 'file'; limiteMs?: number };
 
 /** `dono/repositorio` como o GitHub escreve: sem barra extra, sem `..` e sem caracteres que mudem o endereço. */
@@ -20,7 +20,7 @@ const ambienteDoGit = (): NodeJS.ProcessEnv => {
 const seguras = (protocolo: 'https' | 'file') => ['-c', `core.hooksPath=${process.platform === 'win32' ? 'NUL' : '/dev/null'}`, '-c', 'core.fsmonitor=false', '-c', 'core.symlinks=false', '-c', 'core.autocrlf=false', '-c', 'protocol.allow=never', '-c', `protocol.${protocolo}.allow=always`, '-c', 'transfer.fsckObjects=true', '-c', 'submodule.recurse=false'];
 
 /** Caminho absoluto do git: primeiro as pastas fixas de instalação do Git para Windows, depois as pastas absolutas do PATH. Nunca executa `git` pelo nome. */
-export function localizarGit(): string | null {
+function localizarGit(): string | null {
   const exe = process.platform === 'win32' ? 'git.exe' : 'git';
   const bases = [process.env.ProgramFiles, process.env['ProgramFiles(x86)'], process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Programs') : undefined].filter((b): b is string => !!b && path.isAbsolute(b));
   const fixos = bases.flatMap((b) => [path.join(b, 'Git', 'cmd', exe), path.join(b, 'Git', 'bin', exe)]);

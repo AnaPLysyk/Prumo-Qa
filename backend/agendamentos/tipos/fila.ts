@@ -3,15 +3,15 @@ import { z } from 'zod';
 import { tiposRotina } from './rotina.js';
 
 /**
- * Fila persistente de trabalhos (2.8). Adapta de QA Orchestrator (fila/worker): reivindicação única,
+ * Fila persistente de trabalhos. Adapta do QA Orchestrator (fila/worker): reivindicação única,
  * heartbeat, recuperação de interrompidos, retentativa com espera crescente e idempotência por chave.
  * Escrita síncrona e atômica; o worker é o único escritor (travado em worker.ts).
  */
-export const estadosTrabalho = ['PENDENTE', 'EXECUTANDO', 'CONCLUIDO', 'ERRO', 'CANCELADO', 'PERDIDO'] as const;
+const estadosTrabalho = ['PENDENTE', 'EXECUTANDO', 'CONCLUIDO', 'ERRO', 'CANCELADO', 'PERDIDO'] as const;
 
-export const resultadoStatus = ['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'ERRO_INFRA', 'INFO'] as const;
+const resultadoStatus = ['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'ERRO_INFRA', 'INFO'] as const;
 
-export const tentativa = z.object({ n: z.number().int(), inicio: z.string().datetime(), fim: z.string().datetime().nullable(), estado: z.enum(['EXECUTANDO', 'CONCLUIDA', 'ERRO', 'INTERROMPIDA']), codigo: z.string().max(80).optional() }).strict();
+const tentativa = z.object({ n: z.number().int(), inicio: z.string().datetime(), fim: z.string().datetime().nullable(), estado: z.enum(['EXECUTANDO', 'CONCLUIDA', 'ERRO', 'INTERROMPIDA']), codigo: z.string().max(80).optional() }).strict();
 
 export const resultadoSchema = z.object({
   status: z.enum(resultadoStatus), motivo: z.string().max(600),

@@ -2,7 +2,7 @@
 
 /** Fornece textos e modelos de menus da bandeja do aplicativo. */
 /**
- * Textos do processo principal (bandeja, notificações e confirmações nativas da 2.8) em português e inglês.
+ * Textos do processo principal (bandeja, notificações e confirmações nativas) em português e inglês.
  * Puro Node, sem Electron: o modelo do menu da bandeja é testado fora do Electron. Códigos e identificadores técnicos não são traduzidos.
  */
 export type Idioma = 'pt-BR' | 'en';

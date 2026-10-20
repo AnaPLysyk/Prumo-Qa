@@ -6,7 +6,6 @@ import { Experiencia, Papel } from '../tipos/persona.js';
 
 const vazio: Perfil = { comoChamar: null, papel: null, experiencia: null, foco: null, compartilharComIa: false, atualizadoEm: null };
 
-// ---------------- Perfil (2.17: uma linha por conta; sem sessão, perfil vazio) ----------------
 export function lerPerfil(base?: string): Perfil {
   const pessoa = pessoaDoConhecimento(base); if (!pessoa) return { ...vazio };
   return comBancoDeConhecimento(base, (db) => { const r = db.prepare('SELECT como_chamar, papel, experiencia, foco, compartilhar_ia, atualizado_em FROM perfis WHERE usuario_id = ?').get(pessoa) as Linha | undefined;

@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
+/** Mostra mensagens, respostas e estado da conversa com o orquestrador. */
   const TOPICOS = {
     tests: { rot: 'Meus testes', icone: 'testes', pergunta: 'execuções e falhas recentes', aba: 'execucoes', rota: 'Execuções' },
     agents: { rot: 'Agentes', icone: 'agentes', texto: 'Os agentes são as especializações do núcleo. Em Agentes você consulta cada uma e ajusta as permissões do projeto.', aba: 'agentes', rota: 'Agentes' },

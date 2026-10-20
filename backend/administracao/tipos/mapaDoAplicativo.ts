@@ -10,7 +10,7 @@ export const mapaDoAplicativoSchema = z.object({
     id: z.string().regex(/^[a-z0-9-]{1,40}$/), descricao: z.string().max(400).nullable(),
     frontend: z.array(arquivo).max(500),
     canais: z.array(z.object({ canal: z.string().max(60), ponte: z.string().max(80).nullable(), api: z.string().max(300), chama: z.array(z.string().max(120)).max(100), telas: z.array(z.string().max(300)).max(100) }).strict()).max(300),
-    backend: z.record(z.enum(['api', 'regras', 'banco', 'integracoes', 'tipos', 'outros']), z.array(arquivo).max(1000)),
+    backend: z.record(z.enum(['api', 'regras', 'banco', 'integracoes', 'tipos', 'servidor', 'outros']), z.array(arquivo).max(1000)),
     testes: z.array(z.object({ caminho: z.string().max(300), descricao: z.string().max(2000).nullable() }).strict()).max(500)
   }).strict()).max(100),
   totais: z.object({ telas: z.number().int(), arquivosFrontend: z.number().int(), arquivosBackend: z.number().int(), canais: z.number().int(), testes: z.number().int() }).strict()

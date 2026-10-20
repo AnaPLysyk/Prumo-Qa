@@ -10,7 +10,7 @@ export type Plano = ReturnType<typeof prepararConexao>;
 
 export const tools = ['contexto_projeto', 'revisar_cobertura', 'executar_validacao', 'consultar_evidencias', 'listar_politicas', 'propor_caso', 'propor_bug', 'propor_aprendizado'];
 
-export const digest = z.string().regex(/^[a-f0-9]{64}$/);
+const digest = z.string().regex(/^[a-f0-9]{64}$/);
 
 export const registroSchema = z.object({
   id: z.string().uuid(), client: z.enum(clientes), rootHash: digest, projectHash: digest, manifestHash: digest,

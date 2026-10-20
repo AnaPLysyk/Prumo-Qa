@@ -1,5 +1,5 @@
 /**
- * Repositório de chamados em memória, com a mesma interface do cliente do GitHub do serviço (servico-do-prumo/github.mjs).
+ * Repositório de chamados em memória, com a mesma interface do cliente do GitHub do serviço (backend/suporte/servidor/github.mjs).
  * Não é um teste e nunca fala com o GitHub: issues, comentários e arquivos ficam em mapas.
  */
 export function repositorioDeSuporteFalso({ agora = () => new Date() } = {}) {

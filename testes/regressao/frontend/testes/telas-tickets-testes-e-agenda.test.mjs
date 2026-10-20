@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir, escolherPasta, abas } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir, escolherPasta, abas, dadosDaConta } from '../../../apoio/janela.mjs';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { servidorFixture } from '../../../apoio/servicos-fixtures.mjs';
 import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/concluirTrabalho.js';
@@ -112,7 +112,8 @@ test('defeito Qase → ticket Jira com confirmação nativa, vínculo registrado
 
 test('Agendamentos orquestra rotinas em modal (grupos, regras, autorização e execuções) e pausa/retoma sem inventar resultado', async (t) => {
   const a = await preparar(t);
-  criarRotina({ nome: 'Regressão sem autorização', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, a.dados);
+  const pastaDaConta = await dadosDaConta(a.page, a.dados);
+  criarRotina({ nome: 'Regressão sem autorização', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, pastaDaConta);
   await ir(a.page, 'agenda'); await a.page.click('#rotina-nova'); await modal(a.page).locator('#rotina-form').waitFor();
   assert.equal(await modal(a.page).locator('#rotina-form fieldset').count(), 3, 'fluxo, quando e horário perdido agrupados');
   await a.page.fill('#rotina-nome', 'Consulta diária'); await a.page.selectOption('#rotina-tipo', 'consulta-jira'); await a.page.selectOption('#rotina-freq', 'diario'); await a.page.fill('#rotina-hora', '08:30');
@@ -138,9 +139,10 @@ test('Agendamentos orquestra rotinas em modal (grupos, regras, autorização e e
 
 test('Execução em modal com Resumo, Etapas, Logs e Evidências reais; falha vira rascunho de bug sem envio', async (t) => {
   const a = await preparar(t, { pasta: true });
-  const r = criarRotina({ nome: 'Regressão V40', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, a.dados);
-  const { trabalho } = enfileirar({ chave: 'v40-fail', rotinaId: r.id, espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', origem: 'MANUAL', slot: null }, a.dados);
-  reivindicar(a.dados); concluir(trabalho.id, { status: 'FAIL', motivo: 'Falha do processo', contagem: { pass: 1, fail: 1, blocked: 0, notRun: 0 }, detalhes: 'C2: valor esperado não persistiu' }, a.dados);
+  const pastaDaConta = await dadosDaConta(a.page, a.dados);
+  const r = criarRotina({ nome: 'Regressão V40', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, pastaDaConta);
+  const { trabalho } = enfileirar({ chave: 'v40-fail', rotinaId: r.id, espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', origem: 'MANUAL', slot: null }, pastaDaConta);
+  reivindicar(pastaDaConta); concluir(trabalho.id, { status: 'FAIL', motivo: 'Falha do processo', contagem: { pass: 1, fail: 1, blocked: 0, notRun: 0 }, detalhes: 'C2: valor esperado não persistiu' }, pastaDaConta);
   await ir(a.page, 'execucoes'); const linha = a.page.locator(`#runs-tabela [data-exec="${trabalho.id}"]`); await linha.waitFor();
   assert.match(await linha.textContent(), /1 PASS · 1 FAIL/); assert.match(await a.page.textContent('#metricas-exec'), /1\s*FAIL/);
   await linha.getByRole('button', { name: 'Abrir execução Regressão V40', exact: true }).click(); await modal(a.page).waitFor();

@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
+/** Abre, fecha e posiciona a conversa flutuante. */
   const DICAS = {
     metricas: ['Quer explorar um gráfico ou comparar períodos?', 'Posso te ajudar a interpretar estas métricas.'],
     logs: ['Precisa investigar uma falha nos logs?', 'Posso te ajudar a localizar a etapa com problema.'],

@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função metricas para o bundle interfaces-v36. */
+/** Mostra indicadores, filtros e graficos do projeto. */
   const graficos = (() => {
     const tokens = () => { const c = getComputedStyle(document.documentElement); const g = (n, p) => c.getPropertyValue(n).trim() || p; return { texto: g('--texto', '#14233d'), suave: g('--suave', '#465875'), linha: g('--linha', '#cfd9ea'), acento: g('--acento', '#1f56b8'), fundo: g('--fundo', '#f5f8fc') }; };
     const passoBom = (max) => { if (max <= 6) return 1; const bruto = max / 5, p = 10 ** Math.floor(Math.log10(bruto)), n = bruto / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; };
@@ -147,7 +147,7 @@
       grade,
       h('div', { class: 'grade v36m-resumo' }, h('span', { class: 'v36m-resumo-titulo' }, tr('Totais do núcleo · todo o período')), totais.map(([n, t]) => h('div', {}, h('b', {}, String(n ?? 0)), h('span', {}, tr(t))))),
       h('p', { class: 'v36m-nota' }, DS.info('Os gráficos refletem os filtros selecionados. Uma consulta (INFO) não conta como teste PASS.', { rotulo: 'Sobre os gráficos' }), ' ',
-        h('span', {}, tr('Última atividade:')), ' ', ignorar(hora(m.lastActivity)), ' · ', h('span', {}, tr('Tokens e custos:')), ' ', ignorar(String(m.providerMetrics)), ' · ', h('span', {}, tr('Última chamada MCP de:')), ' ', ignorar(v.lastMcpClient || '—')));
+        h('span', {}, tr('Última atividade:')), ' ', semTraducao(hora(m.lastActivity)), ' · ', h('span', {}, tr('Tokens e custos:')), ' ', semTraducao(String(m.providerMetrics)), ' · ', h('span', {}, tr('Última chamada MCP de:')), ' ', semTraducao(v.lastMcpClient || '—')));
     function noPeriodo(at) { const d = diaIso(at); if (intervalo) return d >= intervalo[0] && d <= intervalo[1]; return Date.parse(at) >= Date.now() - dias * 86400000; }
     function filtrados() {
       const q = busca.value.trim().toLowerCase(), tk = fTicket.value.trim().toLowerCase();

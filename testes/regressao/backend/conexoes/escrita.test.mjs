@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { criarMundo } from '../../../apoio/mundo-servicos.mjs';
 import { criarPoliticaEscrita } from '../../../../dist/agendamentos/autorizacoes/criarPoliticaEscrita.js';
-import { estadoDaPoliticaDeEscrita as estadoEscrita } from '../../../../dist/agendamentos/autorizacoes/estadoDaPoliticaDeEscrita.js';
+import { estadoDaAutorizacao as estadoEscrita } from '../../../../dist/agendamentos/autorizacoes/estadoDaAutorizacao.js';
 import { listarOperacoes } from '../../../../dist/conexoes/banco/listarOperacoes.js';
 import { catalogoOperacoes } from '../../../../dist/conexoes/escrita/catalogoOperacoes.js';
 import { escritaHabilitada } from '../../../../dist/conexoes/escrita/escritaHabilitada.js';

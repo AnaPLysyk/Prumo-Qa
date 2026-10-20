@@ -10,7 +10,6 @@ const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo orquestrador '));
 process.env.PRUMO_DATA_DIR = dados;
 await import('../../../apoio/conhecimento-memoria.mjs');
 const { conversar } = await import('../../../../dist/agentes/chat/conversar.js'); const { escolherAgente: rotear } = await import('../../../../dist/agentes/chat/escolherAgente.js'); const { agentesChat } = await import('../../../../dist/agentes/tipos/persona.js'); const { aplicarEstilo } = await import('../../../../dist/agentes/chat/aplicarEstilo.js'); const { montarPrompt } = await import('../../../../dist/agentes/chat/montarPrompt.js'); const { argumentosDoProvedorDeIa: argumentosProvedor } = await import('../../../../dist/agentes/chat/argumentosDoProvedorDeIa.js'); const { agentesDoChat: rosterDoChat } = await import('../../../../dist/agentes/chat/agentesDoChat.js');
-const { registrarConversa } = await import('../../../../dist/agentes/banco/registrarConversa.js'); const { conversasDoAgente } = await import('../../../../dist/agentes/banco/conversasDoAgente.js'); const { lerConversas } = await import('../../../../dist/agentes/banco/lerConversas.js'); const { apagarConversas } = await import('../../../../dist/agentes/banco/apagarConversas.js'); const { limitesConversa } = await import('../../../../dist/agentes/tipos/conversas.js');
 const { criarEspaco } = await import('../../../../dist/projetos/regras/criarEspaco.js');
 const { criarRotina } = await import('../../../../dist/agendamentos/regras/criarRotina.js');
 const { enfileirar } = await import('../../../../dist/agendamentos/banco/enfileirar.js'); const { pegarProximoTrabalho: reivindicar } = await import('../../../../dist/agendamentos/banco/pegarProximoTrabalho.js'); const { concluirTrabalho: concluir } = await import('../../../../dist/agendamentos/banco/concluirTrabalho.js');
@@ -97,17 +96,6 @@ test('IA externa autorizada: CLI sem shell recebe skill, fatos locais e pergunta
   assert.equal(claude[claude.indexOf('--tools') + 1], '');
   assert.ok(claude.includes('--strict-mcp-config') && claude.includes('--no-session-persistence'));
   assert.match(montarPrompt(agentesChat.find((a) => a.id === 'playwright'), 'q', { linhas: ['f'], fontes: [], fatos: [] }, 'tecnico', 'Aurora'), /--- Skill [^\n]*---[\s\S]*playwright/i);
-});
-
-test('conversas: gravadas só localmente, por agente, com segredos mascarados, limite e exclusão', () => {
-  const r = registrarConversa(espaco.id, { agente: 'regressao', pergunta: 'token=ghp_123456789012345678901234567890123456 o que rodou?', linhas: ['ok'], fontes: [{ rotulo: 'Execuções', aba: 'execucoes' }], modo: 'LOCAL', estilo: 'direto' }, dados);
-  assert.doesNotMatch(r.pergunta, /ghp_1234/); assert.equal(conversasDoAgente(espaco.id, 'regressao', 40, dados)[0].id, r.id);
-  assert.equal(conversasDoAgente(espaco.id, 'outro', 40, dados).length, 0);
-  for (let i = 0; i < limitesConversa.registros + 20; i++) registrarConversa(null, { agente: 'orquestrador', pergunta: 'p' + i, linhas: ['r'], fontes: [], modo: 'LOCAL', estilo: 'amigavel' }, dados);
-  assert.ok(lerConversas(null, dados).length <= limitesConversa.registros);
-  fs.appendFileSync(path.join(dados, 'conversas', espaco.id + '.jsonl'), '{"quebrado":\n');
-  assert.equal(lerConversas(espaco.id, dados).length, 1, 'linha inválida é ignorada');
-  assert.equal(apagarConversas(espaco.id, dados).apagado, true); assert.equal(lerConversas(espaco.id, dados).length, 0);
 });
 
 test('preferências do assistente: nome, estilo e voz pela interface; delegação só pela autorização dedicada', () => {

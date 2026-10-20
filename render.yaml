@@ -25,17 +25,16 @@ services:
       - path: /*
         name: Content-Security-Policy
         value: "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action https://github.com"
-  # Serviço do Prumo: códigos de confirmação por e-mail e chamados de suporte (sem GitHub para quem abre). Ver servico-do-prumo/LEIA-ME.md.
+  # Serviço do Prumo: códigos de confirmação por e-mail e chamados de suporte (sem GitHub para quem abre). Ver Documentação Viva e docs/ajuda/21-acesso-e-permissoes.md.
   - type: web
     runtime: node
     name: prumo-qa-servico
     plan: free
     repo: https://github.com/AnaPLysyk/Prumo-Qa
     branch: main
-    rootDir: servico-do-prumo
-    buildCommand: node --version
-    startCommand: node servidor.mjs
-    healthCheckPath: /saude
+    buildCommand: cd backend/login/servidor && npm ci --omit=dev
+    startCommand: node backend/aplicativo/servidor/servidor.mjs
+    healthCheckPath: /saude/autenticacao
     autoDeployTrigger: "off"
     envVars:
       - key: RESEND_API_KEY
@@ -47,4 +46,11 @@ services:
       - key: PRUMO_SUPORTE_TOKEN
         sync: false
       - key: PRUMO_SUPORTE_CHAVE_ADMIN
+        generateValue: true
+      # Login central: banco existente do Render, sem senha no repositório.
+      - key: DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_URL
+        value: https://prumo-qa-servico.onrender.com
+      - key: BETTER_AUTH_SECRET
         generateValue: true

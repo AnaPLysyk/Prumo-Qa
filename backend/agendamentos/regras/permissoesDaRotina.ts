@@ -2,7 +2,7 @@
 import { capacidadesDaRotina } from './capacidadesDaRotina.js';
 import { Rotina } from '../tipos/rotina.js';
 
-/** O que a rotina PODE fazer, em palavras simples, para a pessoa conferir antes de autorizar. */
+/** O que a rotina pode fazer, em palavras simples, para a pessoa conferir antes de autorizar. */
 export function permissoesDaRotina(r: Rotina, base?: string) {
   const caps = capacidadesDaRotina(r, base); const p: string[] = [];
   if (r.tipo === 'consulta-jira') p.push('Lê tickets do Jira vinculado ao projeto (somente leitura).');

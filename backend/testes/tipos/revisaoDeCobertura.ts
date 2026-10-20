@@ -1,9 +1,9 @@
 /** Formato do plano enviado para revisão de cobertura (requisito, cenários, testes existentes, contradições). */
 import { z } from 'zod';
 
-export const texto = z.string().max(4000);
+const texto = z.string().max(4000);
 
-export const cenarioSchema = z.object({
+const cenarioSchema = z.object({
   id: z.string().min(1).max(80), behavior: texto, source: texto.optional(), risk: texto.optional(),
   expected: texto.optional(), oracle: texto.optional(), technique: z.enum(['equivalence','boundary','decision_table','state_transition','white_box','experience']).optional(),
   partition: texto.optional(), conditions: texto.optional(), boundary: z.number().optional(),
@@ -20,7 +20,7 @@ export const revisaoSchema = z.object({
 export type Revisao = z.infer<typeof revisaoSchema>;
 
 /** Um achado da revisão: tipo (ex.: MISSING_ORACLE), severidade, cenário, fonte, recomendação e evidências. */
-export type AchadoDeCobertura = { type: string; severity: string; scenario?: string; source: string; recommendation: string; evidence: unknown[] };
+type AchadoDeCobertura = { type: string; severity: string; scenario?: string; source: string; recommendation: string; evidence: unknown[] };
 
 /** O caderno da revisão, preenchido etapa por etapa: achados, fatos lidos, hipóteses e o que falta. */
 export type AnaliseDeCobertura = {

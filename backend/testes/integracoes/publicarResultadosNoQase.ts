@@ -8,7 +8,7 @@ import { resultadosDaRun } from './resultadosDaRun.js';
 import { publicar } from '../tipos/escritaQase.js';
 
 /** Espera base entre releituras (ms); exportada para os testes simularem o atraso sem esperar de verdade. */
-export let esperaDaConfirmacao = 1200;
+let esperaDaConfirmacao = 1200;
 export const definirEsperaDaConfirmacao = (ms: number) => { esperaDaConfirmacao = ms; };
 
 export const publicarResultadosNoQase: DefOperacao<z.infer<typeof publicar>> = {

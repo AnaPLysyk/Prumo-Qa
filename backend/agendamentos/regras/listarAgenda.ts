@@ -1,6 +1,6 @@
 /** Lista as rotinas para a tela Agendamentos, com próxima e última execução, permissões e autorizações. */
 import { estadoDaAutorizacao } from '../autorizacoes/estadoDaAutorizacao.js';
-import { listarAutorizacoes } from '../banco/listarAutorizacoes.js';
+import { lerAutorizacoes } from '../banco/lerAutorizacoes.js';
 import { listarRotinas } from '../banco/listarRotinas.js';
 import { listarTrabalhos } from '../banco/listarTrabalhos.js';
 import { capacidadesDaRotina } from './capacidadesDaRotina.js';
@@ -8,7 +8,7 @@ import { permissoesDaRotina } from './permissoesDaRotina.js';
 import { proximoHorario } from './proximoHorario.js';
 
 export function listarAgenda(espacoId?: string, base?: string, agora = new Date()) {
-  const trab = listarTrabalhos(base); const aut = listarAutorizacoes(base);
+  const trab = listarTrabalhos(base); const aut = lerAutorizacoes(base);
   return listarRotinas(base).filter(r => !espacoId || r.espacoId === espacoId).map(r => {
     const meus = trab.filter(t => t.rotinaId === r.id && t.estado !== 'PERDIDO'); const ultimo = meus.filter(t => t.terminadoEm).sort((a, b) => b.terminadoEm!.localeCompare(a.terminadoEm!))[0];
     const caps = capacidadesDaRotina(r, base);

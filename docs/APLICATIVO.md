@@ -4,7 +4,7 @@ Na 2.6, Conexões usa `backend/conexoes/ia/` (`diagnosticarIntegracao`, `testarP
 
 Suporte acrescenta `suporte:consultar` (GET explícito de issue/eventos públicos) e `suporte:chamado` (abertura da página oficial com confirmação nativa). `backend/suporte/integracoes/consultarChamado.ts` usa os rótulos definidos em `docs/catalogo/suporte-status.json`; não mantém banco ou estado paralelo. Texto remoto é exibido como texto, nunca HTML ou comando.
 
-O gerador `site/gerar.mjs`, chamado pela entrada compatível `site/gerar.mjs`, usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes em [../site/README.md](../site/README.md).
+O gerador `site/gerar.mjs`, chamado pela entrada compatível `site/gerar.mjs`, usa ajuda/versões/contratos existentes sem duplicar o núcleo. Render executa somente esse script Node; não compila o broker Windows e não recebe dados locais. Detalhes de uso em [Ajuda](ajuda/17-plataforma.md) e no site.
 
 A janela é uma camada de **apresentação** sobre o núcleo existente. Ela não classifica resultados, não calcula métricas e não executa comandos: chama o arquivo `api/` da tela (ex.: `backend/logs/api/projetoLogs.ts`), que delega às regras da própria tela.
 
@@ -100,12 +100,7 @@ npm.cmd run dist       # saída: release\Prumo-QA-Setup-<versão>.exe  (NSIS, po
 
 Configuração em `electron-builder.yml`. O instalador permite escolher a pasta, cria atalho no menu Iniciar **e** na área de trabalho, tem desinstalador convencional e **não** inicia com o Windows. A versão vem do `package.json`. O build é reproduzível a partir de `package-lock.json` (`npm ci`).
 
-O fluxo recomendado de release é o workflow `.github/workflows/windows.yml`: numa máquina Windows limpa ele roda `npm run check`, gera o instalador, instala em pasta com espaços e acentos (`C:\Prumo QA instalação`), roda a automação da janela e o cliente MCP real sobre o **executável instalado**, desinstala e confere que os dados do usuário permaneceram. Uma tag `v*` publica o instalador em GitHub Releases:
-
-```powershell
-git tag v2.2.0
-git push origin v2.2.0
-```
+O fluxo recomendado de release é o workflow `.github/workflows/windows.yml`, numa máquina Windows limpa: uma tag `v*` gera, confere e publica o instalador em GitHub Releases. Os passos estão em [RELEASE.md](RELEASE.md).
 
 ### Limitação do build local com Smart App Control
 
@@ -113,7 +108,7 @@ Com **Smart App Control** (ou Controle de Aplicativo) em modo ativo, o Windows b
 
 ## Atualizar de uma versão anterior
 
-Instale a nova versão sobre a antiga (mesma pasta). Projetos vinculados, histórico, métricas e evidências ficam em `%LOCALAPPDATA%\PrumoQA` e nos projetos, fora da pasta de instalação, e são preservados; isso é testado no CI instalando a 2.2.0 publicada, criando dados reais com ela e atualizando por cima (`testes/regressao/frontend/aplicativo/migracao.test.mjs`). Conexões MCP continuam válidas enquanto o executável permanecer na mesma pasta; se mudar, reconfigure em Conexões. Nada é reconfigurado em silêncio.
+Instale a nova versão sobre a antiga (mesma pasta). Projetos vinculados, histórico, métricas e evidências ficam em `%LOCALAPPDATA%\PrumoQA` e nos projetos, fora da pasta de instalação, e são preservados. Os testes de atualização sobre dados reais (`testes/regressao/frontend/aplicativo/migracao*.test.mjs`) exigem o executável e o perfil instalados e hoje não rodam no CI. Conexões MCP continuam válidas enquanto o executável permanecer na mesma pasta; se mudar, reconfigure em Conexões. Nada é reconfigurado em silêncio.
 
 ## Instalar em outra máquina
 
@@ -131,7 +126,7 @@ Desinstalar: Configurações › Aplicativos › Prumo QA. Para apagar também o
 
 ## Substituir o ícone
 
-Troque `assets/prumo-icon.png` (512×512) e `assets/prumo-icon.ico` (com 16, 32, 48 e 256 px) e rode `npm run dist`. O mesmo arquivo alimenta a janela, o executável, o instalador, o desinstalador e os atalhos. O ícone atual é **provisório**, gerado por `npm run icone` (não rode esse comando depois de colocar o seu).
+Troque `assets/prumo-icon.png` (256×256), `assets/prumo-icon.ico` (de 16 a 256 px) e `assets/prumo-icon-1024.png` (macOS e Linux) e rode `npm run dist`. O `.ico` alimenta o executável, o instalador, o desinstalador e os atalhos do Windows. O ícone atual é **provisório**: `npm run icone` (`ferramentas/empacotamento/gerar-icones.cjs`) gera os três a partir da esfera `assets/qc-orb.png` (não rode esse comando depois de colocar o seu).
 
 ## Diagnóstico de erros comuns
 

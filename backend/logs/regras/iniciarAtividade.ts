@@ -6,8 +6,6 @@ import { z } from 'zod';
 import { falharCom } from '../../compartilhado/erros/falharCom.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { comoLista } from '../../compartilhado/texto/comoLista.js';
-import { comoObjeto } from '../../compartilhado/texto/comoObjeto.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { arquivosDoDiario } from '../banco/arquivosDoDiario.js';
 import { gravarNoDiario } from '../banco/gravarNoDiario.js';
@@ -15,6 +13,10 @@ import { pastaAtividades } from '../banco/pastaAtividades.js';
 import { achadoELacuna } from './achadoELacuna.js';
 import { resumoVazio } from './resumoVazio.js';
 import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema } from '../tipos/atividade.js';
+
+const comoLista = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
+
+const comoObjeto = (v: unknown): Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : {};
 
 /** Registra falhas de observabilidade sem alterar o resultado da operação original. */
 const avisarFalhaDoDiario = (fase: string, id: string) => {

@@ -16,6 +16,8 @@ after(() => {
 });
 
 const a = randomUUID();
+const usuarioId = randomUUID();
+const pastaDaConta = path.join(base, 'usuarios', usuarioId, 'plataforma');
 const projeto = { id: a, vinculos: [] };
 const registrados = new Map();
 const diagnosticos = [];
@@ -23,29 +25,40 @@ const consultasSessao = [];
 let situacao = 'SEM_SESSAO';
 let nivel = 'VER';
 let trocarSenha = false;
-mock.module('electron', { namedExports: {
+mock.module('electron', { exports: {
   app: { getVersion: () => 'teste' }, BrowserWindow: class {}, Tray: class {},
+  dialog: {}, shell: {}, Menu: class {}, session: {}, nativeImage: {}, safeStorage: {}, Notification: class { static isSupported() { return false; } },
   ipcMain: { handle: (nome, fn) => registrados.set(nome, fn) }
 } });
-mock.module('../../../../dist/logs/banco/registrarDiagnostico.js', { namedExports: {
+mock.module('../../../../dist/logs/banco/registrarDiagnostico.js', { exports: {
   registrarDiagnostico: reg => diagnosticos.push(reg)
 } });
-mock.module('../../../../dist/login/regras/sessao.js', { namedExports: {
+mock.module('../../../../dist/login/regras/sessao.js', { exports: {
   situacaoDaSessao: (_base, _agora, renovar) => {
     consultasSessao.push(renovar);
     if (situacao !== 'ATIVA') return { tipo: situacao };
     return { tipo: 'ATIVA',
-      usuario: { papel: 'qa-teste', trocarSenha },
+      usuario: { id: usuarioId, papel: 'qa-teste', trocarSenha },
       papel: { id: 'qa-teste', nome: 'QA Teste', telas: { testes: nivel } } };
   },
   nivelNaTela: (papel, tela) => papel?.telas[tela] ?? 'NENHUM',
   // 2.15.1: o acesso passa pela conta (marca admin só na Administração); aqui a tela é Testes, então vale o papel.
-  nivelDaConta: (_usuario, papel, tela) => papel?.telas[tela] ?? 'NENHUM'
+  nivelDaConta: (_usuario, papel, tela) => papel?.telas[tela] ?? 'NENHUM',
+  encerrarSessao: () => {},
+  iniciarSessao: () => {},
+  contaDaSessao: () => situacao === 'ATIVA' ? { id: usuarioId, papel: 'qa-teste' } : null,
+  sessaoParaJanela: () => null,
+  contaParaJanela: () => null,
+  papelDaConta: () => null,
+  ehAdmin: () => false,
+  loginLigado: () => false,
+  telasDoPapel: () => ({}),
+  telasDaConta: () => ({})
 } });
-mock.module('../../../../dist/projetos/banco/obterEspaco.js', { namedExports: {
+mock.module('../../../../dist/projetos/banco/obterEspaco.js', { exports: {
   obterEspaco: id => { if (id !== a) throw new Error('WORKSPACE_NOT_FOUND'); return projeto; }
 } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { namedExports: { listarPropostas: () => [] } });
+mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: { listarPropostas: () => [] } });
 
 const { registrarCanal } = await import('../../../../dist/aplicativo/api/registrarCanal.js');
 const { estadoDoAplicativo } = await import('../../../../dist/aplicativo/estadoDoAplicativo.js');
@@ -75,7 +88,7 @@ test('canais privados são registrados e sem sessão não há leitura nem escrit
     assert.equal(r.ok, false);
     assert.match(r.error, /SESSION_REQUIRED/);
   }
-  assert.equal(fs.existsSync(path.join(base, 'plataforma', 'repositorio-testes-local.json')), false);
+  assert.equal(fs.existsSync(path.join(pastaDaConta, 'repositorio-testes-local.json')), false);
 });
 
 test('sem login inicial e sessão expirada recusam os três canais', async () => {
@@ -101,7 +114,7 @@ test('papel somente leitura lista; escrita em casos e suítes é negada sem alte
   const c = await chamar('repositorio:caso', { espacoId: a, dados: { titulo: 'Não deve salvar' } });
   const s = await chamar('repositorio:suite', { espacoId: a, titulo: 'Não deve salvar' });
   assert.match(c.error, /PERMISSION_DENIED/); assert.match(s.error, /PERMISSION_DENIED/);
-  assert.equal(fs.existsSync(path.join(base, 'plataforma', 'repositorio-testes-local.json')), false);
+  assert.equal(fs.existsSync(path.join(pastaDaConta, 'repositorio-testes-local.json')), false);
 });
 
 test('papel sem acesso não pode sequer consultar casos', async () => {
@@ -113,7 +126,7 @@ test('papel sem acesso não pode sequer consultar casos', async () => {
 
 test('papel com permissão usa handlers reais, grava JSON temporário e consulta resultado', async () => {
   const s = await chamar('repositorio:suite', { espacoId: a, titulo: 'Suíte funcional' });
-  assert.equal(s.ok, true); assert.equal(s.data.titulo, 'Suíte funcional');
+  assert.equal(s.ok, true, JSON.stringify(s)); assert.equal(s.data.titulo, 'Suíte funcional');
   const c = await chamar('repositorio:caso', { espacoId: a, suiteLocalId: s.data.id,
     dados: { titulo: 'Autenticação', passos: [{ acao: 'Entrar', esperado: 'Acesso liberado', dados: 'login=qa' }] } });
   assert.equal(c.ok, true);
@@ -121,8 +134,8 @@ test('papel com permissão usa handlers reais, grava JSON temporário e consulta
   assert.equal(l.ok, true); assert.equal(l.data.casos[0].id, c.data.id);
   assert.equal(l.data.casos[0].suiteLocalId, s.data.id);
   assert.equal(l.data.casos[0].dados.passos[0].dados, 'login=qa');
-  assert.equal(fs.existsSync(path.join(base, 'plataforma', 'repositorio-testes-local.json')), true);
-  assert.equal(fs.existsSync(path.join(base, 'plataforma', 'propostas.json')), false);
+  assert.equal(fs.existsSync(path.join(pastaDaConta, 'repositorio-testes-local.json')), true);
+  assert.equal(fs.existsSync(path.join(pastaDaConta, 'propostas.json')), false);
 });
 
 test('rebaixar permissão e exigir troca de senha bloqueia gravações imediatamente', async () => {

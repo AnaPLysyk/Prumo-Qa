@@ -2,17 +2,17 @@
 import { Experiencia, Papel, agentesChat } from './persona.js';
 
 /**
- * Banco de conhecimento dos agentes (2.10): um arquivo SQLite por usuário do Windows (`conhecimento.db` na pasta de dados
- * do Prumo), legível em qualquer gerenciador SQLite (por exemplo o Beekeeper Studio). Usa o SQLite embutido no Node/Electron,
+ * Banco de conhecimento dos agentes: um arquivo SQLite por conta (`conhecimento.db` na pasta de dados
+ * da conta), legível em qualquer gerenciador SQLite (por exemplo o Beekeeper Studio). Usa o SQLite embutido no Node/Electron,
  * sem dependência nativa.
  *
- * O que fica aqui é o que os agentes SABEM, não o que foi conversado:
+ * O que fica aqui é o que os agentes sabem, não o que foi conversado:
  * - perfil: como a pessoa quer ser chamada e o papel dela (QA, dev, PO, analista);
  * - conhecimentos: fatos, glossário, preferências, procedimentos e riscos, por agente (ou de todos) e por projeto (ou gerais),
  *   com estado RASCUNHO/APROVADO/DESCARTADO. Só APROVADO é usado nas respostas. O que a pessoa escreve no Cérebro nasce
  *   APROVADO; o que vem de conversa ou de IA nasce RASCUNHO e depende de uma ação da pessoa;
  * - vocabulario: termos que a pessoa ensinou ao corrigir o agente que respondeu (sem guardar a pergunta);
- * - atendimentos: metadados de cada resposta (agente, modo, fontes, avaliação), SEM pergunta nem resposta.
+ * - atendimentos: metadados de cada resposta (agente, modo, fontes, avaliação), sem pergunta nem resposta.
  * Cada agente tem uma view `agente_<id>` com o que ele enxerga. A tabela `agentes` espelha a personalidade definida no código.
  * Textos passam pela mesma máscara de segredos do restante do Prumo. Conteúdo é dado, nunca instrução.
  */
@@ -64,12 +64,12 @@ export const SEMENTE: { id: string; agente: string | null; tipo: TipoConheciment
 
 export type Linha = Record<string, unknown>;
 
-// ---------------- Conhecimentos ----------------
+// Conhecimentos.
 export type Filtro = { espacoId: string | null; agente?: string | null; estados?: EstadoConhecimento[]; busca?: string; limite?: number; somenteDoAgente?: boolean };
 
 export type NovoConhecimento = { espacoId: string | null; agente: string | null; tipo: TipoConhecimento; titulo: string; texto: string; origem: Exclude<OrigemConhecimento, 'PRUMO'>; cliente?: string | null };
 
-// ---------------- Relevância (para o chat e para a IA) ----------------
+// Relevância (para o chat e para a IA).
 export const pare = new Set(['qual', 'quais', 'como', 'onde', 'quando', 'sobre', 'para', 'com', 'que', 'uma', 'uns', 'umas', 'dos', 'das', 'tem', 'tenho', 'este', 'esta', 'esse', 'essa', 'isso', 'isto', 'aqui', 'projeto', 'prumo', 'tudo', 'algum', 'alguma', 'voce', 'mais', 'menos', 'muito', 'pode', 'posso', 'fazer', 'faco', 'quero', 'preciso', 'sobre', 'entre', 'depois', 'antes', 'ainda', 'agora', 'teste', 'testes', 'testar']);
 
 export type Atendimento = { id: number; em: string; agente: string; modo: string; fontes: string[]; avaliacao: string | null };

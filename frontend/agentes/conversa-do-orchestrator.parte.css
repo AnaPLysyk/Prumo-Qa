@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
+/** Estilos da conversa com o orquestrador: mensagens, campo de entrada e acoes. */
 /* ---------- Conversa do Orchestrator (Início e painel compacto compartilham o mesmo DOM) ---------- */
 .v36c{position:relative;display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;color:var(--texto);isolation:isolate}
 .v36c-topo{position:relative;flex:0 0 auto;height:233px}

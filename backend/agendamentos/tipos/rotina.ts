@@ -2,36 +2,32 @@
 import { z } from 'zod';
 
 /**
- * Agenda de rotinas (2.8). Conceitos adaptados do scheduler do QA Orchestrator (agenda, ancoragem, fuso e
- * idempotência por "slot"), reescritos para o núcleo atual. Não executa nada: só diz QUANDO uma rotina vence.
+ * Agenda de rotinas. Conceitos adaptados do scheduler do QA Orchestrator (agenda, ancoragem, fuso e
+ * idempotência por "slot"), reescritos para o núcleo atual. Não executa nada: só diz quando uma rotina vence.
  * Um "slot" é o instante UTC exato em que a rotina deveria rodar; ele é a chave de idempotência da fila.
  */
 export const tiposRotina = ['consulta-jira', 'smoke', 'regressao', 'validacao-ticket', 'analise-mudancas', 'k6', 'run-qase'] as const;
 
-export type TipoRotina = typeof tiposRotina[number];
-
 export const ambientes = ['local', 'teste', 'homologacao', 'producao'] as const;
 
-export const hora = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
+const hora = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
 
-export const frequenciaSchema = z.discriminatedUnion('tipo', [
+const frequenciaSchema = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('unico'), em: z.string().datetime({ offset: true }) }).strict(),
   z.object({ tipo: z.literal('intervalo'), minutos: z.number().int().min(1).max(60 * 24 * 31) }).strict(),
   z.object({ tipo: z.literal('diario'), hora }).strict(),
   z.object({ tipo: z.literal('semanal'), dias: z.array(z.number().int().min(0).max(6)).min(1).max(7), hora }).strict()
 ]);
 
-export type Frequencia = z.infer<typeof frequenciaSchema>;
+const fuso = z.string().min(1).max(64).refine(valor => { try { new Intl.DateTimeFormat('en-US', { timeZone: valor }).format(new Date()); return true; } catch { return false; } }, 'fuso inválido');
 
-export const fuso = z.string().min(1).max(64).refine(valor => { try { new Intl.DateTimeFormat('en-US', { timeZone: valor }).format(new Date()); return true; } catch { return false; } }, 'fuso inválido');
+const ticket = z.string().regex(/^[A-Z][A-Z0-9_]+-\d+$/);
 
-export const ticket = z.string().regex(/^[A-Z][A-Z0-9_]+-\d+$/);
+const identificador = z.string().regex(/^[a-zA-Z][a-zA-Z0-9_-]{0,79}$/);
 
-export const identificador = z.string().regex(/^[a-zA-Z][a-zA-Z0-9_-]{0,79}$/);
+const caminhoRelativo = z.string().min(1).max(300);
 
-export const caminhoRelativo = z.string().min(1).max(300);
-
-export const k6Schema = z.object({
+const k6Schema = z.object({
   script: caminhoRelativo, alvo: z.string().url().max(300),
   usuarios: z.number().int().min(1).max(50), duracaoSegundos: z.number().int().min(1).max(600)
 }).strict();

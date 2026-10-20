@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
+/** Estilos da lista, do formulario e dos detalhes de agentes. */
 /* ---------- Agentes ---------- */
 body[data-tela=agentes] main#conteudo{--v36a-gutter:clamp(18px,2.6vw,42px);max-width:none;width:100%;padding:0 var(--v36a-gutter) 40px}
 .v36-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:16px 0}
@@ -15,11 +15,6 @@ body[data-tela=agentes] main#conteudo{--v36a-gutter:clamp(18px,2.6vw,42px);max-w
 .v36-retrato-3d{position:relative;display:block;width:100%;height:100%;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .35s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
 .v36-portrait img{display:block;width:100%;height:100%;object-fit:contain;border:0;border-radius:0;mix-blend-mode:var(--ds-mistura-avatar);filter:saturate(1.08) contrast(1.04)}
 .v36-retrato-scan{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--face-color) 70%,transparent) 50%,transparent) 0 -40%/100% 26% no-repeat;mix-blend-mode:screen;opacity:.32;-webkit-mask-image:radial-gradient(ellipse 42% 48% at 50% 46%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 42% 48% at 50% 46%,#000 55%,transparent 100%);animation:v36-scan 6.5s cubic-bezier(.45,0,.55,1) infinite}
-.v36-portrait.mini{width:66px;height:66px}
-.v36-portrait.mini .v36-retrato-halo{inset:-4px;filter:blur(10px);opacity:.38}
-.v36-portrait.mini .v36-retrato-3d{border-radius:50%;overflow:hidden;background:#060b18;box-shadow:0 0 0 1px color-mix(in srgb,var(--face-color) 45%,transparent),0 10px 24px -10px var(--face-color)}
-:root .v36-portrait.mini .v36-retrato-3d img{object-fit:cover;object-position:50% 46%;transform:scale(1.55);mix-blend-mode:normal}
-.v36-portrait.mini .v36-retrato-scan{-webkit-mask-image:none;mask-image:none;opacity:.22;background-size:100% 40%}
 @keyframes v36-face{0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}50%{transform:translateY(-6px) rotate(1deg) scale(1.012)}}
 @keyframes v36-face-turn{0%,100%{transform:translateX(-3px) rotate(-1.6deg)}50%{transform:translateX(3px) rotate(1.6deg) scale(1.01)}}
 @keyframes v36-face-lean{0%,100%{transform:translateY(3px) rotate(1.2deg)}50%{transform:translateY(-4px) rotate(-1.2deg) scale(1.012)}}
@@ -45,31 +40,13 @@ main .v36a-titulo{margin:0;font:700 26px/1.15 var(--fonte-ui);letter-spacing:-.0
 .v36a-primario:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 .v36a-quieto{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:6px 12px;border:0;border-radius:9px;background:transparent;color:var(--suave);font:inherit;font-size:12px;cursor:pointer;flex-direction:row}
 .v36a-quieto:hover{color:var(--acento);background:rgba(var(--qc-azul),.07)}
-.v36a-cabecalho,.v36a-linha{display:grid;grid-template-columns:minmax(230px,2.1fr) minmax(150px,1.35fr) minmax(110px,1fr) minmax(150px,1.2fr) 28px;align-items:center;gap:16px}
-.v36a-cabecalho{padding:0 16px 11px;border-bottom:1px solid var(--linha);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--suave)}
-.v36a-linha{position:relative;width:100%;min-height:92px;padding:12px 16px;border:0;border-bottom:1px solid color-mix(in srgb,var(--linha) 78%,transparent);background:transparent;color:var(--texto);font:inherit;text-align:left;cursor:pointer;transition:background .18s}
-.v36a-linha::before{content:"";position:absolute;left:0;top:18%;bottom:18%;width:2px;border-radius:2px;background:var(--acento);transform:scaleY(0);transition:transform .2s}
-.v36a-linha:hover,.v36a-linha:focus-visible{background:linear-gradient(90deg,rgba(var(--qc-azul),.07),transparent 70%)}
-.v36a-linha:hover::before,.v36a-linha:focus-visible::before{transform:scaleY(1)}
-.v36a-agente{display:flex;align-items:center;gap:16px;min-width:0}
-.v36a-nome{display:flex;flex-direction:column;gap:3px;min-width:0}
-.v36a-nome strong{font-size:13.5px;font-weight:650;letter-spacing:-.005em}
-.v36a-nome small,.v36a-caps small{font-size:11px;color:var(--suave);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v36a-caps{display:flex;flex-direction:column;gap:3px;min-width:0}
-.v36a-caps strong{font-size:12.5px;font-weight:500}
 .v36a-caps .v36a-bloq{color:var(--falha)}
-.v36a-tipo{font-size:12px;color:var(--suave)}
-.v36a-disp{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--texto)}
-.v36a-disp i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--aviso)}
 .v36a-disp i.ok{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 18%,transparent)}
 .v36a-disp i.off{background:var(--suave);opacity:.5}
-.v36a-seta{font-size:20px;color:var(--suave);transition:transform .18s,color .18s}
-.v36a-linha:hover .v36a-seta{transform:translateX(3px);color:var(--acento)}
 .v36a-orb{position:relative;display:grid;place-items:center;width:66px;height:66px;flex:none}
 .v36a-orb::before{content:"";position:absolute;inset:3px;border-radius:50%;border:1px dashed rgba(var(--qc-azul),.4);animation:v36-gira 18s linear infinite}
 .v36a-orb img{width:100%;height:100%;object-fit:contain}
 .v36a-vazio{padding:36px 0;text-align:center;font-size:12px;color:var(--suave)}
-.v36a-nota{max-width:none;margin:14px 0 18px;font-size:11px;color:var(--suave)}
 .v36a-secao-extra{border:0;border-top:1px solid var(--linha);padding:14px 0}
 .v36a-secao-extra>summary{font-size:12.5px;font-weight:600;color:var(--texto)}
 .v36a-esps{display:flex;flex-wrap:wrap;gap:10px 20px;margin:12px 0 6px}
@@ -89,7 +66,6 @@ main .v36a-titulo{margin:0;font:700 26px/1.15 var(--fonte-ui);letter-spacing:-.0
 .v36a-barra{display:flex;align-items:center;flex-wrap:wrap;gap:12px 18px;min-height:56px}
 .v36a-voltar{padding:6px 8px;border:0;border-radius:8px;background:transparent;color:var(--suave);font:inherit;font-size:12.5px;cursor:pointer}
 .v36a-voltar:hover{color:var(--acento);background:rgba(var(--qc-azul),.07)}
-.v36a-fonte{flex:1;min-width:0;font-size:11px;color:var(--suave)}
 .v36a-barra-acoes{display:flex;align-items:center;gap:6px}
 .v36a-detalhe{display:grid;grid-template-columns:minmax(300px,.95fr) minmax(0,1.25fr);height:calc(100vh - 58px - 56px - 22px);height:calc(100dvh - 58px - 56px - 22px);min-height:540px;border:1px solid var(--linha);border-radius:22px;overflow:hidden;background:color-mix(in srgb,var(--painel) 55%,transparent)}
 .v36a-perfil{--face-color:#7abaff;position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;min-height:0;background:radial-gradient(ellipse 70% 55% at 50% 40%,color-mix(in srgb,var(--face-color) 26%,transparent),transparent 70%);color:var(--texto)}
@@ -133,8 +109,6 @@ main .v36a-confirmar h2,.v36a-confirmar h2{margin:8px 0;font-size:20px;text-tran
 .v36a-cerebro .v36a-voltar{color:var(--suave)}.v36a-cerebro .v36a-voltar:hover{color:var(--texto);background:rgba(var(--qc-azul),.1)}
 .v36a-cerebro-topo strong{font-size:14px}
 .v36a-cerebro-topo span{margin-left:auto;font-size:11px;color:var(--suave)}
-.v36a-cerebro-legenda{grid-column:1/-1;padding:18px 0 4px;font-size:10px;letter-spacing:.26em;color:#7f9bc8}
-.v36-brain-nodes{display:flex;flex-direction:column;justify-content:space-around;gap:14px;min-width:0;padding:10px 0}
 .v36a-nos-esq{grid-column:1;grid-row:3;align-items:flex-end}.v36a-nos-dir{grid-column:3;grid-row:3;align-items:flex-start}
 .v36-brain-face{grid-column:2;grid-row:3;display:grid;place-items:center;min-height:0}
 .v36a-cerebro .v36-brain-face .v36-portrait.large{height:min(62vh,580px)}
@@ -142,27 +116,11 @@ main .v36a-confirmar h2,.v36a-confirmar h2{margin:8px 0;font-size:20px;text-tran
 .v36-neuron:hover,.v36-neuron[aria-pressed=true]{border-color:var(--cor);background:color-mix(in srgb,var(--cor) 14%,#08101f);box-shadow:0 0 30px -4px var(--cor)}
 .v36a-nos-esq .v36-neuron:hover{transform:translateX(-3px)}.v36a-nos-dir .v36-neuron:hover{transform:translateX(3px)}
 .v36-neuron-ponto{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--cor);color:var(--cor);font-size:12px}
-.v36-neuron-texto{display:flex;flex-direction:column;gap:2px;min-width:0}
-.v36-neuron-texto strong{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v36-neuron-texto small{font-size:11px;color:#9fb4d6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v36-brain-inspect{grid-column:1/-1;min-width:0;padding:14px 0 0;border-top:1px solid var(--ds-linha-suave);color:var(--texto)}
 .v36-brain-inspect p.suave{max-width:60ch;margin:0;font-size:11.5px;color:var(--suave)}
 main .v36-brain-inspect h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--texto)}
 .v36-brain-inspect pre{max-height:200px;overflow:auto;margin:0;padding:0 0 0 12px;border:0;border-left:2px solid var(--ds-linha-suave);border-radius:0;background:none;color:var(--texto);white-space:pre-wrap;overflow-wrap:anywhere}
 /* Painel de atividades */
-.v36a-carregando{padding:30px 0}
-.v36a-mapa{position:relative;isolation:isolate;overflow:hidden;border-radius:22px;background:radial-gradient(ellipse 60% 70% at 50% 50%,#0d1d3b,#040816 75%);min-height:300px}
-.v36a-mapa-vazio{display:grid;place-items:center;min-height:300px;font-size:12px;color:#8ea6cc}
-.v36a-grafo-caixa{position:relative;z-index:1}
-.v36a-grafo{display:block;width:100%;height:auto;max-height:420px}
-.v36a-no rect{fill:rgba(10,20,42,.86);stroke:rgba(140,180,255,.35);stroke-width:1}
-.v36a-no-nome{fill:#dbe7fb;font:12px var(--fonte-ui)}
-.v36a-no-n{fill:#8fb4ff;font:700 12px var(--fonte-ui)}
-.v36a-nucleo{fill:#0c1c3c;stroke:#6ea8ff;stroke-width:1.5}
-.v36a-nucleo-halo{fill:none;stroke:rgba(110,168,255,.35);stroke-dasharray:3 6;transform-box:fill-box;transform-origin:center;animation:v36-gira 22s linear infinite}
-.v36a-nucleo-nome{fill:#eef4ff;font:600 12.5px var(--fonte-ui)}
-.v36a-nucleo-n{fill:#8fb4ff;font:11px var(--fonte-ui)}
-.v36a-grafo-legenda{display:flex;justify-content:space-between;padding:0 26px 16px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7f9bc8}
 .v36a-subtitulo{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px;margin:26px 0 12px}
 .v36a-subtitulo span{font-size:13.5px;font-weight:650}
 .v36a-subtitulo small{font-size:11px;color:var(--suave)}
@@ -176,7 +134,7 @@ main .v36-brain-inspect h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;te
 .v36a-cartao-meta{font-size:11px;color:var(--suave)}
 .v36a-sem{margin-top:20px}
 .v36-dialog{background:var(--painel);color:var(--texto);border:1px solid var(--linha);border-radius:16px;padding:24px;max-width:min(800px,90vw);max-height:85vh;box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}.v36-dialog::backdrop{background:rgba(2,6,16,.6);backdrop-filter:blur(3px)}.v36-dialog pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:55vh;overflow:auto}.v36-dialog button{margin-right:12px}
-@media(max-width:1100px){.v36a-detalhe{grid-template-columns:1fr;height:auto}.v36a-perfil{min-height:440px}.v36a-form{overflow-x:hidden}.v36-stage.v36a-cerebro{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto auto auto}.v36-brain-face{grid-column:1/-1;grid-row:3}.v36a-cerebro .v36-brain-face .v36-portrait.large{height:min(48vh,420px)}.v36a-nos-esq{grid-column:1;grid-row:4;align-items:stretch}.v36a-nos-dir{grid-column:2;grid-row:4;align-items:stretch}}
-@media(max-width:820px){.v36a-cabecalho{display:none}.v36a-linha{grid-template-columns:minmax(0,1fr) 20px;gap:10px}.v36a-linha>.v36a-caps,.v36a-linha>.v36a-tipo{display:none}.v36a-linha>.v36a-disp{grid-column:1;grid-row:2;padding-left:82px}.v36a-linha>.v36a-seta{grid-column:2;grid-row:1}.v36a-form-secao{grid-template-columns:1fr}.v36a-cap{grid-template-columns:1fr}.v36a-abas{padding-right:var(--v36a-gutter,18px)}}
-@media(max-width:600px){.v36-stage.v36a-cerebro{grid-template-columns:1fr;padding:0 14px 16px}.v36a-nos-esq,.v36a-nos-dir{grid-column:1}.v36a-nos-dir{grid-row:5}.v36a-cerebro-topo span{display:none}.v36-neuron{max-width:none}.v36a-busca{width:100%}.v36a-acoes{width:100%;flex-wrap:wrap}.v36a-grafo-legenda{padding:0 12px 12px}}
-@media(prefers-reduced-motion:reduce){.v36-portrait,.v36-retrato-halo,.v36-retrato-scan,.v36a-cerebro-btn,.v36a-orb::before,.v36a-nucleo-halo{animation:none!important}.v36-retrato-3d,.v36a-linha,.v36-neuron{transition:none!important}}
+@media(max-width:1100px){.v36a-detalhe{grid-template-columns:1fr;height:auto}.v36a-perfil{min-height:440px}.v36a-form{overflow-x:hidden}.v36-stage.v36a-cerebro{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto auto auto}.v36-brain-face{grid-column:1/-1;grid-row:3}.v36a-cerebro .v36-brain-face .v36-portrait.large{height:min(48vh,420px)}}
+@media(max-width:820px){.v36a-form-secao{grid-template-columns:1fr}.v36a-cap{grid-template-columns:1fr}.v36a-abas{padding-right:var(--v36a-gutter,18px)}}
+@media(max-width:600px){.v36-stage.v36a-cerebro{grid-template-columns:1fr;padding:0 14px 16px}.v36a-cerebro-topo span{display:none}.v36-neuron{max-width:none}.v36a-busca{width:100%}.v36a-acoes{width:100%;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.v36-portrait,.v36-retrato-halo,.v36-retrato-scan,.v36a-cerebro-btn,.v36a-orb::before{animation:none!important}.v36-retrato-3d,.v36-neuron{transition:none!important}}

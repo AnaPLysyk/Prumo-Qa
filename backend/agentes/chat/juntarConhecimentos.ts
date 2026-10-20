@@ -3,7 +3,7 @@ import { Opcoes, Coleta } from '../tipos/chat.js';
 import { AgenteChat } from '../tipos/persona.js';
 import { Conhecimento } from '../tipos/conhecimento.js';
 import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
-import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
+import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 
 export function juntarConhecimentos(o: Opcoes, agente: AgenteChat, pergunta: string, historico: NonNullable<Opcoes['historico']>, continuou: boolean, local: Coleta): void {

@@ -3,7 +3,7 @@ import { lerPerfil } from '../banco/lerPerfil.js';
 import { nomeParaChamar } from './nomeParaChamar.js';
 import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { Pendente, Proximo } from '../tipos/chat.js';
-import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
+import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { situacaoDoProjeto } from '../../inicio/regras/situacaoDoProjeto.js';
 
 /** Abertura da conversa: cumprimenta pelo nome (o do Meu perfil ou o da conta que entrou), resume a situação e pergunta o que ainda falta saber. */

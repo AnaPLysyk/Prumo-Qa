@@ -3,7 +3,7 @@ import { listarConhecimentos } from '../banco/listarConhecimentos.js';
 import { escolherAgente } from './escolherAgente.js';
 import { Meta } from '../tipos/chat.js';
 import { Conhecimento } from '../tipos/conhecimento.js';
-import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
+import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 
 export function intencaoDeSaber(pergunta: string, espacoId: string | null, forcado: string | null | undefined, base?: string): Meta | null {

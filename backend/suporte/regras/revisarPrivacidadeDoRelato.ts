@@ -2,7 +2,7 @@
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { Achado } from '../tipos/suporte.js';
 
-/** Revisão de privacidade: BLOQUEIA segredos; apenas AVISA dados pessoais e caminhos locais (a pessoa decide). Trechos já mascarados. */
+/** Revisão de privacidade: bloqueia segredos; apenas avisa dados pessoais e caminhos locais (a pessoa decide). Trechos já mascarados. */
 export function revisarPrivacidadeDoRelato(textos: Record<string, string | undefined>) {
   const bloqueios: Achado[] = []; const avisos: Achado[] = [];
   const regras: { tipo: string; re: RegExp; grave: boolean }[] = [

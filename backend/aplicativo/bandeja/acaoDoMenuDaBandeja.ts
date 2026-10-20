@@ -2,7 +2,6 @@
 import { app, dialog } from 'electron';
 import { definirPausaGlobal } from '../../agendamentos/regras/definirPausaGlobal.js';
 import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo.js';
-import { atualizarBandeja } from './atualizarBandeja.js';
 import { resumoDoWorker } from './resumoDoWorker.js';
 import { textoNoIdioma } from './textoNoIdioma.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
@@ -11,13 +10,34 @@ import { navegarPara } from '../janela/navegarPara.js';
 import { ItemMenu } from '../tipos/textosDaBandeja.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
 
-export function acaoDoMenuDaBandeja(id: ItemMenu['id']) {
-  if (id === 'abrir') mostrarJanela(); else if (id === 'agenda') navegarPara('agenda'); else if (id === 'execucoes') navegarPara('execucoes');
-  else if (id === 'pausar' || id === 'retomar') { definirPausaGlobal(id === 'pausar'); atualizarBandeja(); }
-  else if (id === 'sair') app.quit();
-  else if (id === 'estado') {
-    const e = workerDoAplicativo.estado(); const i = idiomaAtual(); const j = estadoDoAplicativo.janelaPrincipal && !estadoDoAplicativo.janelaPrincipal.isDestroyed() && estadoDoAplicativo.janelaPrincipal.isVisible() ? estadoDoAplicativo.janelaPrincipal : undefined;
-    const opcoes = { type: 'info' as const, title: textoNoIdioma('tituloEstado', i), message: resumoDoWorker(e, i), buttons: [textoNoIdioma('fechar', i)], detail: textoNoIdioma('detalheEstado', i, { n: e.proximaExecucao ?? textoNoIdioma('nenhuma', i), p: e.pendentes, z: e.pausado ? textoNoIdioma('sim', i) : textoNoIdioma('nao', i), u: e.ultimoErro ?? textoNoIdioma('nenhum', i) }) };
-    void (j ? dialog.showMessageBox(j, opcoes) : dialog.showMessageBox(opcoes));
+export function acaoDoMenuDaBandeja(id: ItemMenu['id'], atualizar: () => void) {
+  if (id === 'abrir') { mostrarJanela(); return; }
+  if (id === 'agenda') { navegarPara('agenda'); return; }
+  if (id === 'execucoes') { navegarPara('execucoes'); return; }
+
+  if (id === 'pausar' || id === 'retomar') {
+    definirPausaGlobal(id === 'pausar');
+    atualizar();
+    return;
   }
+  if (id === 'sair') { app.quit(); return; }
+  if (id !== 'estado') return;
+
+  const estado = workerDoAplicativo.estado();
+  const idioma = idiomaAtual();
+  const principal = estadoDoAplicativo.janelaPrincipal;
+  const janela = principal && !principal.isDestroyed() && principal.isVisible() ? principal : undefined;
+  const opcoes = {
+    type: 'info' as const,
+    title: textoNoIdioma('tituloEstado', idioma),
+    message: resumoDoWorker(estado, idioma),
+    buttons: [textoNoIdioma('fechar', idioma)],
+    detail: textoNoIdioma('detalheEstado', idioma, {
+      n: estado.proximaExecucao ?? textoNoIdioma('nenhuma', idioma),
+      p: estado.pendentes,
+      z: estado.pausado ? textoNoIdioma('sim', idioma) : textoNoIdioma('nao', idioma),
+      u: estado.ultimoErro ?? textoNoIdioma('nenhum', idioma)
+    })
+  };
+  void (janela ? dialog.showMessageBox(janela, opcoes) : dialog.showMessageBox(opcoes));
 }

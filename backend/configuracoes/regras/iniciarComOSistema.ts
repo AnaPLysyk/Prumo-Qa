@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-export type ItemDeLogin = { setLoginItemSettings: (o: { openAtLogin: boolean; args: string[] }) => void };
+type ItemDeLogin = { setLoginItemSettings: (o: { openAtLogin: boolean; args: string[] }) => void };
 
 /** Texto do atalho de autostart (freedesktop). O caminho do executável vai entre aspas; a pessoa que liga é quem o usa. */
 export function atalhoDeAutostart(executavel: string): string {

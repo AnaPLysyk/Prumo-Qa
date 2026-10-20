@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função compartilhado para o bundle interfaces-v36. */
+/** Disponibiliza icones e exportacao usados em mais de uma tela. */
   async function download(name, value, type = 'application/json') {
     const kind = type.startsWith('text/csv') ? 'metricas-csv' : name.includes('metricas') ? 'metricas-json' : 'agente';
     const r = await chamar(() => api.exportarTela(kind, value));
@@ -38,9 +38,7 @@
   const reduzido = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const local = () => (PrumoI18n.idioma === 'en' ? 'en-US' : 'pt-BR');
   const diaIso = (d) => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
-  const hm = (iso) => new Date(iso).toLocaleTimeString(local(), { hour: '2-digit', minute: '2-digit', hour12: false });
   const hms = (iso) => new Date(iso).toLocaleTimeString(local(), { hour12: false });
-  const ignorar = (texto) => h('span', { 'data-i18n-ignore': '' }, texto);
   function caixa(titulo, conteudo) {
     const d = h('dialog', { class: 'v36-dialog', 'aria-label': titulo }, h('h2', {}, titulo), ...conteudo, h('div', {}, button(tr('Fechar'), () => d.close())));
     document.body.append(d); d.addEventListener('close', () => d.remove(), { once: true }); d.showModal(); return d;

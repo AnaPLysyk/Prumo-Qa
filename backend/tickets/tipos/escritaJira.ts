@@ -3,17 +3,17 @@ import { z } from 'zod';
 
 /**
  * Escritas controladas no Jira Cloud (REST v3). Cada operação confere o projeto vinculado antes de escrever, usa só as rotas da
- * lista fechada (rotasEscrita.ts), verifica o efeito relendo o serviço e é idempotente por rótulo/anexo existente.
+ * lista fechada (rotasDeEscrita.ts), verifica o efeito relendo o serviço e é idempotente por rótulo/anexo existente.
  * Endpoints: POST /issue, PUT /issue/{key}, POST /issue/{key}/attachments (header X-Atlassian-Token: no-check, campo "file"),
  * GET/POST /issue/{key}/transitions, POST /issueLink, GET /issue/createmeta/{project}/issuetypes (substitui o createmeta antigo).
  */
-export const chave = /^[A-Z][A-Z0-9_]*-\d+$/;
+const chave = /^[A-Z][A-Z0-9_]*-\d+$/;
 
-export const idNum = z.string().regex(/^\d{1,12}$/);
+const idNum = z.string().regex(/^\d{1,12}$/);
 
-export const ticket = z.string().regex(chave);
+const ticket = z.string().regex(chave);
 
-export const rotulo = z.string().regex(/^[A-Za-z0-9_.-]{1,50}$/);
+const rotulo = z.string().regex(/^[A-Za-z0-9_.-]{1,50}$/);
 
 export const criar = z.object({ tipoId: idNum, resumo: z.string().trim().min(3).max(255), descricao: z.string().max(8000).default(''), rotulos: z.array(rotulo).max(10).default([]), origem: ticket.optional(), tipoVinculo: z.string().regex(/^[A-Za-z ]{2,40}$/).default('Relates') }).strict();
 

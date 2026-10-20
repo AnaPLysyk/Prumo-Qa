@@ -1,7 +1,7 @@
 /** Classifica o texto de uma falha de teste: automação, ambiente, produto ou inconclusiva, com o motivo. */
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 
-/** Classificação inicial de uma falha pelo texto do resultado. É HIPÓTESE: confirmar reproduzindo. */
+/** Classificação inicial de uma falha pelo texto do resultado. É hipótese: confirmar reproduzindo. */
 export function classificarFalha(texto: string): { classe: 'automacao' | 'ambiente' | 'produto' | 'inconclusiva'; rotulo: string; motivo: string } {
   const t = semAcentos(texto);
   if (/locator|selector|seletor|strict mode|element.*not found|elemento.*nao encontrado|fixture|waitfor|getby/.test(t)) return { classe: 'automacao', rotulo: 'provável erro de automação', motivo: 'o texto cita seletor, fixture ou espera' };

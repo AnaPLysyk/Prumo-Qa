@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir, escolherPasta, mcp } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir, escolherPasta, mcp, dadosDaConta } from '../../../apoio/janela.mjs';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { servidorFixture } from '../../../apoio/servicos-fixtures.mjs';
 import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/concluirTrabalho.js';
@@ -122,9 +122,10 @@ test('rotina configurada no modal, pausa/retomada e execução detalhada sem res
   let rotina = a.page.locator('#conteudo [data-rotina]').filter({ hasText: 'Consulta isolada' });
   await rotina.getByRole('button', { name: 'Pausar', exact: true }).click(); await rotina.getByRole('button', { name: 'Retomar', exact: true }).waitFor();
   await rotina.getByRole('button', { name: 'Retomar', exact: true }).click(); await rotina.getByRole('button', { name: 'Pausar', exact: true }).waitFor();
-  const r = criarRotina({ nome: 'Tentativa bloqueada V39', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, a.dados);
-  const { trabalho } = enfileirar({ chave: 'v39-bloqueada', rotinaId: r.id, espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', origem: 'MANUAL', slot: null }, a.dados);
-  reivindicar(a.dados); concluir(trabalho.id, { status: 'BLOCKED', motivo: 'HUMAN_APPROVAL_REQUIRED', detalhes: 'Fixture: execução impedida; nenhum cenário executado.' }, a.dados);
+  const pastaDaConta = await dadosDaConta(a.page, a.dados);
+  const r = criarRotina({ nome: 'Tentativa bloqueada V39', espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, pastaDaConta);
+  const { trabalho } = enfileirar({ chave: 'v39-bloqueada', rotinaId: r.id, espacoId: a.e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', origem: 'MANUAL', slot: null }, pastaDaConta);
+  reivindicar(pastaDaConta); concluir(trabalho.id, { status: 'BLOCKED', motivo: 'HUMAN_APPROVAL_REQUIRED', detalhes: 'Fixture: execução impedida; nenhum cenário executado.' }, pastaDaConta);
   await ir(a.page, 'execucoes'); await a.page.locator(`[data-exec="${trabalho.id}"] td.ds-acao button`).click();
   await modal(a.page).waitFor(); assert.match(await modal(a.page).textContent(), /nenhum cenário executado/); await captura(a, 'execucao-bloqueada'); await fechar(a.page);
   assert.equal(await a.page.locator('#nav [data-aba="evidencias"]:visible').count(), 0);

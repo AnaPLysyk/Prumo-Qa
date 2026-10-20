@@ -4,10 +4,6 @@ import { Rotina } from '../tipos/rotina.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { obterRunLocal } from '../../testes/banco/obterRunLocal.js';
 
-/**
- * Operações de aplicação sobre rotinas (2.8): o que a janela e a bandeja pedem, sem Electron, para ser testável.
- * A aprovação humana acontece pelo `solicitar` injetado (broker nativo do Windows em produção).
- */
 export function capacidadesDaRotina(r: Rotina, base?: string): string[] {
   if (r.tipo === 'smoke' || r.tipo === 'regressao') return r.capability ? [r.capability] : [];
   if (r.tipo === 'k6') return r.k6 ? [capacidadeDoK6(r.k6)] : [];

@@ -23,7 +23,7 @@ import { iniciarAtividade } from '../../../../dist/logs/regras/iniciarAtividade.
 import { calcularMetricas } from '../../../../dist/metricas/regras/calcularMetricas.js';
 import { adicionarVinculo } from '../../../../dist/projetos/regras/adicionarVinculo.js';
 import { listarPastasVinculadas } from '../../../../dist/projetos/regras/listarPastasVinculadas.js';
-import { vincularPasta } from '../../../../dist/projetos/regras/vincularPasta.js';
+import { adicionarVinculo as vincularPasta } from '../../../../dist/projetos/regras/adicionarVinculo.js';
 
 const registrar = async (root, n = 1) => { const p = await carregarProjeto(root); for (let i = 0; i < n; i++) iniciarAtividade(p, 'contexto_projeto', { origin: 'MCP', client: 'codex' }).finalizar({ state: 'NOT_VERIFIED' }); return p; };
 const gravaveis = { execution: { requireApproval: true, blockedByDefault: [], environment: 'host', readOnly: false, envAllowlist: [], timeoutMs: 3000, maxOutputBytes: 4096 } };

@@ -14,11 +14,11 @@ const legados = [
   { id: randomUUID(), espacoId: pB, tipo: 'caso', origem: 'PESSOA', estado: 'RASCUNHO', remoto: null, titulo: 'Outro projeto', dados: { titulo: 'Outro projeto' }, requisito: '', risco: '', criadaEm: '2026-10-01T00:00:00.000Z', atualizadaEm: '2026-10-01T00:00:00.000Z' },
   { id: randomUUID(), espacoId: pA, tipo: 'caso', origem: 'IA', estado: 'RASCUNHO', remoto: null, titulo: 'Sugestão de IA', dados: { titulo: 'Sugestão de IA' }, requisito: '', risco: '', criadaEm: '2026-10-01T00:00:00.000Z', atualizadaEm: '2026-10-01T00:00:00.000Z' }
 ];
-mock.module('../../../../dist/projetos/banco/obterEspaco.js', { namedExports: { obterEspaco: id => {
+mock.module('../../../../dist/projetos/banco/obterEspaco.js', { exports: { obterEspaco: id => {
   if (id !== pA && id !== pB) throw new Error('WORKSPACE_NOT_FOUND');
   return { ...projeto, id };
 } } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { namedExports: { listarPropostas: id => legados.filter(p => p.espacoId === id) } });
+mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: { listarPropostas: id => legados.filter(p => p.espacoId === id) } });
 const { listarRepositorioLocal } = await import('../../../../dist/testes/regras/listarRepositorioLocal.js');
 const { salvarCasoLocal } = await import('../../../../dist/testes/regras/salvarCasoLocal.js');
 const { salvarSuiteLocal } = await import('../../../../dist/testes/regras/salvarSuiteLocal.js');

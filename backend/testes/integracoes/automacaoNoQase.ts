@@ -1,7 +1,7 @@
 /** Converte o tipo de automação do caso para o formato do Qase (0/1 no envio) e lê qualquer formato que o Qase devolva. */
 // A documentação descreve isManual/isToBeAutomated como boolean, mas a API real (homologada em 15/10/2026) recusa true/false:
 // "Allowed values: 0, 1". A leitura aceita boolean, 0/1 ou o campo antigo `automation` (0 manual, 1 a automatizar, 2 automatizado).
-export type Automacao = 'manual' | 'a-automatizar' | 'automatizado';
+type Automacao = 'manual' | 'a-automatizar' | 'automatizado';
 
 export const flagsDeAutomacao = (a: Automacao) => ({ isManual: a === 'automatizado' ? 0 : 1, isToBeAutomated: a === 'a-automatizar' ? 1 : 0 });
 

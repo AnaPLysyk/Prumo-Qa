@@ -2,7 +2,39 @@
   "schemaVersion": 2,
   "id": "prumo-demo",
   "name": "Publicações sintéticas — demonstração isolada",
-  "context": { "documentation": ["README.md", "package.json"], "tests": ["testes/"], "code": ["publicacao.mjs"] },
-  "commands": { "unit": { "executable": "node", "args": ["testes/validar.mjs"], "requiredFiles": ["README.md"] }, "node-test": "node --test testes/publicacao.test.mjs", "e2e": "npm run test:e2e" },
-  "execution": { "requireApproval": true, "blockedByDefault": ["e2e"], "environment": "host", "envAllowlist": [], "timeoutMs": 10000, "maxOutputBytes": 65536 }
+  "context": {
+    "documentation": [
+      "requisitos.txt",
+      "package.json"
+    ],
+    "tests": [
+      "testes/"
+    ],
+    "code": [
+      "publicacao.mjs"
+    ]
+  },
+  "commands": {
+    "unit": {
+      "executable": "node",
+      "args": [
+        "testes/validar.mjs"
+      ],
+      "requiredFiles": [
+        "requisitos.txt"
+      ]
+    },
+    "node-test": "node --test testes/publicacao.test.mjs",
+    "e2e": "npm run test:e2e"
+  },
+  "execution": {
+    "requireApproval": true,
+    "blockedByDefault": [
+      "e2e"
+    ],
+    "environment": "host",
+    "envAllowlist": [],
+    "timeoutMs": 10000,
+    "maxOutputBytes": 65536
+  }
 }

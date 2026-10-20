@@ -4,11 +4,11 @@ import { Fonte } from '../../inicio/tipos/assistenteLocal.js';
 import { TipoTeste } from '../../testes/tipos/catalogoDeTestes.js';
 import { Orquestracao } from './orquestracao.js';
 
-export const estilos = ['amigavel', 'direto', 'tecnico'] as const;
+const estilos = ['amigavel', 'direto', 'tecnico'] as const;
 
 export type Estilo = (typeof estilos)[number];
 
-export const provedores = ['local', 'claude', 'codex'] as const;
+const provedores = ['local', 'claude', 'codex'] as const;
 
 export type Provedor = (typeof provedores)[number];
 
@@ -48,13 +48,13 @@ export const agentePorTipo: Record<TipoTeste, string> = { funcional: 'playwright
 
 export type Coleta = { linhas: string[]; fontes: Fonte[]; fatos: string[]; generico?: boolean; vazio?: boolean; agente?: AgenteChat };
 
-// ---------------- Perfil, aprendizado e memória ----------------
+// Perfil, aprendizado e memória.
 export const PAPEIS: [RegExp, Papel][] = [[/\b(qa|tester|testador[a]?|analista de testes?|analista de qualidade|quality assurance)\b/, 'qa'], [/\b(dev|desenvolvedor[a]?|programador[a]?|engenheir[oa] de software|developer)\b/, 'dev'],
   [/\b(po|product owner|dono do produto|produto|product manager|pm)\b/, 'po'], [/\b(analista|analista de negocio|analista de requisitos|analista de sistemas|ba)\b/, 'analista']];
 
 export type Meta = { linhas: string[]; pendente?: Pendente; acoes?: Acao[]; agente?: string; fontes?: Fonte[]; proximos?: Proximo[] };
 
-// ---------------- Delegação opcional ao Claude Code ou Codex (CLI local, com autorização prévia) ----------------
+// Delegação opcional ao Claude Code ou Codex (CLI local, com autorização prévia).
 export type Executor = (comando: string, args: string[], opcoes: { timeoutMs: number; cwd?: string }) => Promise<{ codigo: number | null; saida: string; erro: string }>;
 
 export type PerfilParaIa = { comoChamar: string | null; papel: Papel | null; experiencia?: Experiencia | null; foco?: string | null; compartilharComIa?: boolean };

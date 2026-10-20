@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import {abrir,novoDados,ir,mcp,exe} from '../../../apoio/janela.mjs';
+import {abrir,novoDados,ir,mcp,exe,dadosDaConta} from '../../../apoio/janela.mjs';
 import {servidorFixture} from '../../../apoio/servicos-fixtures.mjs';
 const confirmar=app=>app.evaluate(({dialog})=>{dialog.showMessageBox=async()=>({response:1});}); // decisões simuladas do runner; não aprova execução protegida
 const instrumentar=(app,port)=>app.evaluate((_,p)=>{
@@ -56,7 +56,7 @@ test('demonstração: vinte verificações na janela real, dois projetos e APIs 
   const escrita=await a.page.evaluate(id=>window.prumo.servicoConsultar(id,'jira','apagar',{}),smart.id);assert.equal(escrita.ok,false);assert.match(escrita.error,/INVALID_ARGUMENTS/);assert.ok(s.pedidos.every(p=>p.metodo==='GET'));passo(15,'Operação de escrita recusada e somente GET observado');
   await ir(a.page,'conexoes');const contaQase=(await a.page.evaluate(()=>window.prumo.servicos())).data.find(c=>c.servico==='qase');const rem=await a.page.evaluate(id=>window.prumo.servicoRemover(id),contaQase.id);assert.ok(rem.ok);await consultar('testes','casos',true);
   await a.page.waitForFunction(()=>document.querySelector('#fonte-remota')?.textContent.startsWith('Consulta falhou'));assert.match(await a.page.textContent('#fonte-remota'),/CREDENTIAL_UNAVAILABLE/);passo(16,'Credencial retirada gera diagnóstico explícito');
-  const hist=(await a.page.evaluate(id=>window.prumo.espacoObter(id),smart.id)).data.historico;assert.ok(hist.some(x=>x.acao==='CONSULTA'&&x.codigo==='OK'));assert.ok(hist.some(x=>x.codigo==='CREDENTIAL_UNAVAILABLE'));const logs=fs.readFileSync(path.join(dados,'plataforma','espacos.json'),'utf8');assert.doesNotMatch(logs,/fixture-secret-27|Requisito fictício/);assert.doesNotMatch(fs.readFileSync(path.join(dados,'plataforma','credenciais.json'),'utf8'),/fixture-secret-27/);passo(17,'Histórico só de metadados e vault sem token claro');
+  const hist=(await a.page.evaluate(id=>window.prumo.espacoObter(id),smart.id)).data.historico;assert.ok(hist.some(x=>x.acao==='CONSULTA'&&x.codigo==='OK'));assert.ok(hist.some(x=>x.codigo==='CREDENTIAL_UNAVAILABLE'));const logs=fs.readFileSync(path.join(await dadosDaConta(a.page,dados),'plataforma','espacos.json'),'utf8');assert.doesNotMatch(logs,/fixture-secret-27|Requisito fictício/);assert.doesNotMatch(fs.readFileSync(path.join(await dadosDaConta(a.page,dados),'plataforma','credenciais.json'),'utf8'),/fixture-secret-27/);passo(17,'Histórico só de metadados e vault sem token claro');
   const catalogo=await a.page.evaluate(()=>window.prumo.integracoes());assert.ok(catalogo.ok);assert.ok(JSON.stringify(catalogo).includes('servicos:consultar'));assert.ok(fs.readFileSync('docs/SERVICOS.md','utf8').includes('/rest/api/3/search/jql'));passo(18,'Catálogos IPC e REST separados e consultáveis');
   // A janela modal deve ser fechada antes de testar navegação de menu pelo teclado.
   // Focar um elemento atrás de <dialog> modal não equivale a uma navegação possível para a pessoa.

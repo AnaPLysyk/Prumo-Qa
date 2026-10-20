@@ -22,12 +22,12 @@
       DS.bloco(tr('Passos ({n})', { n: passos.length }), passos.length ? DS.tabela({ colunas: ['#', 'Ação', 'Dados', 'Resultado esperado'], linhas: passos.map((p, i) => ({ celulas: [String(p.position ?? i + 1), DS.texto(p.action), p.data ? DS.texto(p.data) : '—', DS.texto(p.expected_result, '—')] })) }) : h('p', { class: 'suave' }, tr('Nenhum passo cadastrado.'))),
       c.postconditions ? DS.bloco('Pós-condições', DS.texto(c.postconditions)) : null,
       window.PrumoTestes ? window.PrumoTestes.blocoCodigoDoCaso(e, id) : null,
-      DS.bloco('Resultados no Prumo', locais.length ? DS.tempo(locais.map((x) => ({ tom: DS.tom(x.status), titulo: h('span', {}, selo(x.status), ' ', x.run.titulo), sub: quando(x.em) + ' · ' + (x.origem === 'MANUAL' ? tr('declarado manualmente') : tr('execução de automação')) + (x.granularidade === 'RODADA' ? ' · ' + tr('escopo da rodada') : '') + (x.comentario ? ' · ' + x.comentario.slice(0, 160) : '') }))) : h('p', { class: 'suave' }, tr('Nenhum resultado registrado no Prumo para este caso.'))),
+      DS.bloco('Resultados no Prumo', locais.length ? DS.tempo(locais.map((x) => ({ tom: DS.tom(x.status), titulo: h('span', {}, selo(x.status), ' ', x.run.titulo), sub: hora(x.em) + ' · ' + (x.origem === 'MANUAL' ? tr('declarado manualmente') : tr('execução de automação')) + (x.granularidade === 'RODADA' ? ' · ' + tr('escopo da rodada') : '') + (x.comentario ? ' · ' + x.comentario.slice(0, 160) : '') }))) : h('p', { class: 'suave' }, tr('Nenhum resultado registrado no Prumo para este caso.'))),
       DS.recolher('Dados retornados pelo Qase', h('pre', { class: 'ds-codigo' }, JSON.stringify(c, null, 2))));
     const capSel = h('select', { id: 'caso-cap', 'aria-label': tr('Automação') }, ((aut.ok && aut.data.capacidades) || []).map((x) => h('option', { value: x }, x)));
     const tkIn = h('input', { id: 'caso-ticket', class: 'ds-w-sm', placeholder: 'SMART-123', maxlength: 40, 'aria-label': tr('Ticket Jira') });
-    const aside = h('aside', {}, DS.meta([['Origem', DS.origem('qase', 'Qase · ' + vq.recurso.chave)], ['Tipo de execução', chipTipoCaso(c)], ['Situação no Prumo', locais[0] ? h('span', {}, selo(locais[0].status), ' ', h('span', { class: 'suave' }, quando(locais[0].em))) : DS.chip('Sem resultado')], ['Suite', c.suite_id != null ? String(c.suite_id) : null], ['Prioridade', c.priority != null ? String(c.priority) : null], ['Severidade', c.severity != null ? String(c.severity) : null], ['Tags', (c.tags || []).map((x) => x.title || x).join(', ') || null], ['Atualizado', c.updated_at || c.updated ? quando(c.updated_at || c.updated) : null]]),
-      h('div', { class: 'ds-acoes-col' }, h('h3', { class: 'ds-h' }, tr('Automação relacionada')), e.pastaLocal ? DS.acao('Criar automação na IDE', () => { DS.fecharModal(); (memoria('testes', e.id).ide = { novo: { casoId: id, titulo: c.title || '' } }); (estado.sub ||= {}).testes = 'ide'; void mostrar('testes'); }, { id: 'caso-criar-automacao', compacto: true }) : null, autos.length ? h('div', { class: 'ds-celula-nos' }, autos.map((a) => noRef(e, a, a.id))) : h('p', { class: 'suave' }, tr('Nenhuma automação declarada no Prumo.')),
+    const aside = h('aside', {}, DS.meta([['Origem', DS.origem('qase', 'Qase · ' + vq.recurso.chave)], ['Tipo de execução', chipTipoCaso(c)], ['Situação no Prumo', locais[0] ? h('span', {}, selo(locais[0].status), ' ', h('span', { class: 'suave' }, hora(locais[0].em))) : DS.chip('Sem resultado')], ['Suite', c.suite_id != null ? String(c.suite_id) : null], ['Prioridade', c.priority != null ? String(c.priority) : null], ['Severidade', c.severity != null ? String(c.severity) : null], ['Tags', (c.tags || []).map((x) => x.title || x).join(', ') || null], ['Atualizado', c.updated_at || c.updated ? hora(c.updated_at || c.updated) : null]]),
+      h('div', { class: 'ds-acoes-col' }, h('h3', { class: 'ds-h' }, tr('Automação relacionada')), e.pastaLocal ? DS.acao('Criar automação na IDE', () => { DS.fecharModal(); (memoriaDaTela('testes', e.id).ide = { novo: { casoId: id, titulo: c.title || '' } }); (estado.sub ||= {}).testes = 'ide'; void mostrar('testes'); }, { id: 'caso-criar-automacao', compacto: true }) : null, autos.length ? h('div', { class: 'ds-celula-nos' }, autos.map((a) => noRef(e, a, a.id))) : h('p', { class: 'suave' }, tr('Nenhuma automação declarada no Prumo.')),
         DS.info('Automação vinculada não aprova o caso: só um resultado registrado comprova a execução.'),
         capSel.options.length ? h('div', { class: 'ds-cab-acoes' }, capSel, DS.acao('Declarar', async () => { const x = await chamar(() => api.espacoAssociar(e.id, { de: { tipo: 'qase', id: String(id), vinculoId: vq.id, origem: vq.recurso.chave }, para: { tipo: 'automacao', id: capSel.value, origem: 'qa.project.json' }, justificativa: tr('Declarado pela pessoa') })); if (x) { await atualizarEspaco(e); avisar(tr('Vínculo declarado.')); void abrirCaso(estado.espaco, id); } }, { id: 'caso-declarar', compacto: true })) : null),
       h('div', { class: 'ds-acoes-col' }, h('h3', { class: 'ds-h' }, tr('Tickets')), tks.length ? h('div', { class: 'ds-celula-nos' }, tks.map((k) => noRef(e, { tipo: 'jira', id: k, vinculoId: vinc(e, 'jira')?.id }, k))) : h('p', { class: 'suave' }, tr('Nenhum ticket associado.')),
@@ -51,7 +51,7 @@
         const novos = [...passos.children].map((l) => ({ acao: l.querySelector('.passo-acao').value, dados: l.querySelector('.passo-dados').value, esperado: l.querySelector('.passo-esperado').value })).filter((s) => s.acao.trim());
         const antigos = (c.steps || []).map((s) => ({ acao: s.action || '', dados: s.data || '', esperado: s.expected_result || '' })); if (JSON.stringify(novos) !== JSON.stringify(antigos)) p.passos = novos;
         if (Object.keys(p).length === 1) { saida.replaceChildren(DS.alerta('Nenhuma alteração para salvar.', 'aviso')); return; }
-        const r = await executarOperacao(e, 'qase.editar_caso', p); if (r?.estado === 'CONFIRMADA') { delete memoria('testes', e.id).casos; void abrirCaso(e, id); } else if (r) saida.replaceChildren(painelResultado(r));
+        const r = await executarOperacao(e, 'qase.editar_caso', p); if (r?.estado === 'CONFIRMADA') { delete memoriaDaTela('testes', e.id).casos; void abrirCaso(e, id); } else if (r) saida.replaceChildren(painelResultado(r));
       }, { id: 'caso-ed-salvar', primaria: true }))], { tamanho: 'md' });
   }
 
@@ -61,7 +61,7 @@
     if (!r.ok) { avisar(r.error, true); return { erro: r.error, itens: [] }; }
     return { itens: Array.isArray(r.data.dados) ? r.data.dados : [], proxima: r.data.proxima, em: r.data.consultadoEm, limitacao: r.data.limitacao || null };
   }
-  const fonteQase = (r, rotulo, mais) => h('div', { class: 'ds-fontes', 'aria-live': 'polite' }, r.erro ? h('span', { role: 'status' }, DS.origem('qase', 'Qase'), ' ', DS.chip(r.erro, 'falha')) : h('span', { role: 'status' }, DS.origem('qase', 'Qase'), tr('{n} {r} · consultado {q}', { n: r.itens.length, r: tr(rotulo), q: quando(r.em) }), r.proxima != null && mais ? DS.link('Carregar mais', mais, { seta: false }) : null));
+  const fonteQase = (r, rotulo, mais) => h('div', { class: 'ds-fontes', 'aria-live': 'polite' }, r.erro ? h('span', { role: 'status' }, DS.origem('qase', 'Qase'), ' ', DS.chip(r.erro, 'falha')) : h('span', { role: 'status' }, DS.origem('qase', 'Qase'), tr('{n} {r} · consultado {q}', { n: r.itens.length, r: tr(rotulo), q: hora(r.em) }), r.proxima != null && mais ? DS.link('Carregar mais', mais, { seta: false }) : null));
   async function avancadaQase(e) {
     const caixa = h('div', { class: 'ds-avancada' }, DS.info('Consulta direta ao Qase vinculado: suites, casos, detalhe com passos e planos, com os dados retornados.'));
     DS.modal('Consulta avançada · Qase', caixa, { tamanho: 'lg' }); await consultaManual(caixa, 'qase', { suites: 'Suites', casos: 'Casos manuais e automatizados', caso: 'Detalhe e passos do caso', planos: 'Planos' });
@@ -111,7 +111,7 @@
         const r = await executarOperacao(e, 'qase.criar_caso', p);
         if (!r) return;
         if (r.estado !== 'CONFIRMADA') { saida.replaceChildren(painelResultado(r)); return; }
-        const mem = memoria('testes', e.id); delete mem.casos; delete mem.suites;
+        const mem = memoriaDaTela('testes', e.id); delete mem.casos; delete mem.suites;
         if (chave && r.remoto?.detalhes?.ticket !== chave) {
           saida.replaceChildren(DS.alerta(tr('Caso criado no Qase, mas a associação ao Jira não foi confirmada. Abra o caso e tente associar o ticket novamente.'), 'aviso'));
           return;
@@ -165,7 +165,7 @@
         DS.bloco('Passos', passos.length ? DS.tabela({ colunas: ['Ação', 'Dados de teste', 'Resultado esperado'], linhas: passos.map(s => ({ celulas: [s.acao, s.dados || '—', s.esperado || '—'] })) }) : h('p', { class: 'suave' }, tr('Nenhum passo cadastrado.'))),
         DS.bloco('Tickets relacionados', lista), saida),
       h('aside', {},
-        DS.meta([['Origem', DS.origem('prumo', 'Prumo · local')], ['Estado', 'Caso local'], ['Suíte', repositorio.data.suites.find(s => s.id === caso.suiteLocalId)?.titulo || 'Sem suíte'], ['Automação', caso.dados.automacao || 'manual'], ['Criado', quando(caso.criadaEm)]]),
+        DS.meta([['Origem', DS.origem('prumo', 'Prumo · local')], ['Estado', 'Caso local'], ['Suíte', repositorio.data.suites.find(s => s.id === caso.suiteLocalId)?.titulo || 'Sem suíte'], ['Automação', caso.dados.automacao || 'manual'], ['Criado', hora(caso.criadaEm)]]),
         DS.acao('Editar caso', () => DS.modal('Editar caso local', formularioProposta(e, caso, () => { DS.fecharModal(); void mostrar('testes'); }, repositorio.data.suites), { tamanho: 'md' }), { id: 'caso-local-editar' }),
         disponiveis.length ? DS.bloco('Vincular ticket local', h('div', { class: 'ds-cab-acoes' }, seletor, DS.acao('Associar', () => {
           if (seletor.value) void associar({ tipo: 'ticket-local', id: seletor.value, origem: 'prumo' });
@@ -186,52 +186,6 @@
         }, { id: 'caso-local-associar-jira' }))) : null)),
     { tamanho: 'lg', subtitulo: [DS.origem('prumo', 'Repositório local')] });
   }
-  function formularioSuiteLocal(e, suites, atual = null) {
-    const titulo = h('input', { id: 'suite-local-titulo', maxlength: 255, value: atual?.titulo || '' });
-    const descricao = h('textarea', { id: 'suite-local-descricao', rows: 3, maxlength: 4000 }, atual?.descricao || '');
-    const pai = h('select', { id: 'suite-local-pai', 'aria-label': tr('Suíte pai') },
-      h('option', { value: '' }, tr('Raiz do projeto')), suites.filter(s => s.id !== atual?.id).map(s => h('option', { value: s.id, selected: s.id === atual?.paiId }, s.titulo)));
-    const saida = h('div', { id: 'suite-local-saida', role: 'status', 'aria-live': 'polite' });
-    const salvar = DS.acao(atual ? 'Salvar alterações' : 'Criar suíte local', async () => {
-      salvar.disabled = true;
-      try {
-        const r = await api.suiteLocalSalvar({ espacoId: e.id, ...(atual ? { id: atual.id } : {}), titulo: titulo.value.trim(),
-          descricao: descricao.value, paiId: pai.value || null });
-        if (!r.ok) { saida.replaceChildren(DS.alerta(r.error, 'falha')); return; }
-        avisar(tr('Suíte salva neste computador.')); DS.fecharModal(); void mostrar('testes');
-      } finally { salvar.disabled = false; }
-    }, { id: 'suite-local-salvar', primaria: true });
-    DS.modal(atual ? 'Editar suíte local' : 'Nova suíte local', [
-      DS.info('Suíte exclusiva deste projeto. Nada é enviado ao Qase.'),
-      h('form', { class: 'ds-form', onsubmit: ev => ev.preventDefault() },
-        DS.campo('Título', titulo, { inteiro: true }), DS.campo('Descrição', descricao, { inteiro: true }), DS.campo('Suíte pai', pai)),
-      saida, DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), salvar)
-    ], { tamanho: 'md' });
-    titulo.focus();
-  }
-  async function telaCasosLocais(e, _mem, corpo) {
-    if (vinc(e, 'qase')) return; // Qase é a fonte única dos casos no modo conectado.
-    const r = await api.repositorioLocal(e.id);
-    const casos = r.ok ? r.data.casos : [];
-    const suites = r.ok ? r.data.suites : [];
-    memoria('testes', e.id).totalCasosLocais = casos.length;
-    corpo.append(DS.secao('Suítes locais', [
-      DS.barra(DS.acao('Nova suíte local', () => formularioSuiteLocal(e, suites), { id: 'suite-local-nova', icone: 'mais' })),
-      !r.ok ? DS.estadoTela('erro', 'Não foi possível consultar as suítes locais', r.error) :
-      suites.length ? DS.tabela({ id: 'suites-locais', colunas: ['Suíte', 'Pai', 'Casos'], linhas: suites.map(s => ({
-        attrs: { 'data-suite-local': s.id }, abrir: () => formularioSuiteLocal(e, suites, s), rotuloAcessivel: tr('Editar suíte local') + ' ' + s.titulo,
-        celulas: [s.titulo, suites.find(p => p.id === s.paiId)?.titulo || '—', String(casos.filter(c => c.suiteLocalId === s.id).length)] })) }) :
-        DS.estadoTela('vazio', 'Nenhuma suíte local', 'Crie uma suíte para organizar seus casos.', [], { compacto: true })
-    ]));
-    corpo.append(DS.secao('Casos do repositório local', [
-      DS.info('Sem Qase vinculado: os casos ficam neste computador e pertencem somente ao projeto selecionado.'),
-      !r.ok ? DS.estadoTela('erro', 'Não foi possível ler os casos locais', r.error) :
-      casos.length ? DS.tabela({ id: 'casos-locais', colunas: ['Caso', 'Suíte', 'Automação', 'Passos', 'Atualizado'], linhas: casos.map(c => ({
-        attrs: { 'data-caso-local': c.id }, abrir: () => abrirCasoLocal(e, c), rotuloAcessivel: tr('Abrir caso local') + ' ' + c.titulo,
-        celulas: [h('span', {}, c.titulo), suites.find(s => s.id === c.suiteLocalId)?.titulo || '—', c.dados.automacao || 'manual', String(c.dados.passos?.length || 0), quando(c.atualizadaEm)] })) }) :
-        DS.estadoTela('vazio', 'Nenhum caso local cadastrado', 'Use Novo caso local para criar o primeiro.', [], { compacto: true })
-    ]));
-  }
   async function novaProposta(e) {
     const local = !vinc(e, 'qase');
     const r = local ? await api.repositorioLocal(e.id) : null;
@@ -249,7 +203,7 @@
   function novaSuite(e, esc) {
     const titulo = h('input', { id: 'su-titulo', maxlength: 255 }); const saida = h('div', { id: 'ts-saida' });
     DS.modal('Nova suite no Qase', [!esc ? DS.alerta('Escrita no Qase desligada. Habilite em Conexões para criar suites.', 'aviso', 'cadeado') : null, h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Título da suite', titulo, { inteiro: true })), saida,
-      DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar suite…', async () => { const r = await executarOperacao(e, 'qase.criar_suite', { titulo: titulo.value }); if (r) { saida.replaceChildren(painelResultado(r)); if (r.estado === 'CONFIRMADA') delete memoria('testes', e.id).suites; } }, { id: 'su-criar', primaria: true, desabilitado: !esc }))], { tamanho: 'sm' });
+      DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar suite…', async () => { const r = await executarOperacao(e, 'qase.criar_suite', { titulo: titulo.value }); if (r) { saida.replaceChildren(painelResultado(r)); if (r.estado === 'CONFIRMADA') delete memoriaDaTela('testes', e.id).suites; } }, { id: 'su-criar', primaria: true, desabilitado: !esc }))], { tamanho: 'sm' });
     titulo.focus();
   }
   async function telaSuites(e, mem, corpo) {

@@ -5,9 +5,9 @@ import { lerContas } from '../banco/lerContas.js';
 import { enviarCodigoPorEmail, PedidoDeCodigo } from '../integracoes/enviarCodigoPorEmail.js';
 import { codigoPorEmailSchema, emailSchema } from '../tipos/contas.js';
 
-export type FinalidadeDoCodigo = PedidoDeCodigo['finalidade'];
-export const MINUTOS_DE_VALIDADE = 10;
-export const SEGUNDOS_PARA_REENVIAR = 60;
+type FinalidadeDoCodigo = PedidoDeCodigo['finalidade'];
+const MINUTOS_DE_VALIDADE = 10;
+const SEGUNDOS_PARA_REENVIAR = 60;
 const TENTATIVAS = 5;
 
 type Pendente = { resumo: Buffer; expira: number; tentativas: number; enviadoEm: number };

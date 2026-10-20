@@ -1,7 +1,7 @@
 /** Lê os registros mais recentes do diagnóstico da janela. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { eAtalho } from '../../compartilhado/seguranca/eAtalho.js';
+import { eAtalho } from './eAtalho.js';
 import { pastaDoDiagnostico } from './pastaDoDiagnostico.js';
 import { EventoDiagnostico, eventoDiagnosticoSchema, nomeValido } from '../tipos/diagnostico.js';
 

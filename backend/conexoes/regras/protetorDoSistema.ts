@@ -1,7 +1,7 @@
 /** Protetor de credenciais do sistema (Windows DPAPI, Keychain do macOS, cofre de senhas do Linux) sobre o safeStorage do Electron. */
 import { Protetor } from '../tipos/credenciais.js';
 
-export type CofreDoSistema = { isEncryptionAvailable: () => boolean; encryptString: (s: string) => Buffer; decryptString: (b: Buffer) => string; getSelectedStorageBackend?: () => string };
+type CofreDoSistema = { isEncryptionAvailable: () => boolean; encryptString: (s: string) => Buffer; decryptString: (b: Buffer) => string; getSelectedStorageBackend?: () => string };
 
 /**
  * No Linux, sem Secret Service ou KWallet o Electron cai em "basic_text" (chave fixa, equivale a texto aberto). Isso é

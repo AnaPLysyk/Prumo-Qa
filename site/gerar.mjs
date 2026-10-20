@@ -37,12 +37,12 @@ export function markdown(s,origem='README.md') {
 // Mesma identidade do aplicativo (Quality Control): tokens, esfera, tipografia. Sem JavaScript: a demonstração usa CSS puro.
 const css=fs.readFileSync(new URL('./estilos/base.css',import.meta.url),'utf8');
 
-// Órbitas do agente com os MESMOS parâmetros do aplicativo (frontend/inicio/identidade/orbitas-v36.js), lidos da fonte única.
+// Órbitas do agente com os MESMOS parâmetros do aplicativo (frontend/inicio/identidade/orbitas.js), lidos da fonte única.
 // O app desenha em canvas com JavaScript; o site não usa script, então vira SVG e os arcos giram por CSS
 // (stroke-dashoffset). Sem a flexão das curvas, que depende de JavaScript.
 function orbitasDoApp() {
-  const fonte=fs.readFileSync(path.join(repo,'frontend/inicio/identidade/orbitas-v36.js'),'utf8');
-  const m=/const orbitas = (\[[\s\S]*?\]);/.exec(fonte);if(!m)throw new Error('Parâmetros das órbitas não encontrados em orbitas-v36.js');
+  const fonte=fs.readFileSync(path.join(repo,'frontend/inicio/identidade/orbitas.js'),'utf8');
+  const m=/const orbitas = (\[[\s\S]*?\]);/.exec(fonte);if(!m)throw new Error('Parâmetros das órbitas não encontrados em orbitas.js');
   const json=m[1].replace(/([{,]\s*)([a-zA-Z]+):/g,'$1"$2":').replace(/(:\s*)(-?)\./g,'$1$20.');
   return JSON.parse(json);
 }
@@ -180,7 +180,7 @@ export function gerarSite(out=path.join(repo,'site/public')) {
   }
   fs.writeFileSync(path.join(out,'estilo.css'),css+'\n'+orb.css);fs.copyFileSync(path.join(repo,'assets/prumo-icon.png'),path.join(out,'prumo.png'));
   // O agente do site é a MESMA imagem usada pelo aplicativo no Início, no chat e em Agentes.
-  fs.copyFileSync(path.join(repo,'assets/interfaces-v36/robo-original.png'),path.join(out,'agente.png'));
+  fs.copyFileSync(path.join(repo,'assets/agentes/robo-original.png'),path.join(out,'agente.png'));
   // Commit que gerou este site (Render informa RENDER_GIT_COMMIT): o CI espera ESTE commit no ar, não só a versão anunciada.
   fs.writeFileSync(path.join(out,'build.txt'),(process.env.RENDER_GIT_COMMIT||process.env.GITHUB_SHA||'local')+'\n');
   return {pages:docs.length+6,output:out,version:pkg.version,published:published.version};

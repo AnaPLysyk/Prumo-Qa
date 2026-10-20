@@ -8,7 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 
 test('repositório independente é usado na interface somente sem Qase', () => {
-  const t = read('frontend/testes/fluxos-casos-qase.parte.js');
+  const t = read('frontend/testes/fluxos-repositorio-local.parte.js');
   const v = read('frontend/testes/visao-geral-dos-testes.parte.js');
   assert.match(v, /if \(!vq\) await F\.telaCasosLocais\(e, mem, corpo\)/);
   assert.match(t, /async function telaCasosLocais\(e, _mem, corpo\)/);
@@ -18,7 +18,8 @@ test('repositório independente é usado na interface somente sem Qase', () => {
   assert.match(t, /r\.data\.suites/);
   assert.match(t, /data-caso-local/);
   assert.match(t, /abrirCasoLocal\(e, c\)/);
-  assert.match(t, /const vivas = \(ps \|\| \[\]\)\.filter\(p => p\.estado !== 'DESCARTADA' && \(vinc\(e, 'qase'\) \|\| p\.tipo === 'bug' \|\| p\.origem !== 'PESSOA'\)\)/);
+  const qase = read('frontend/testes/fluxos-casos-qase.parte.js');
+  assert.match(qase, /const vivas = \(ps \|\| \[\]\)\.filter\(p => p\.estado !== 'DESCARTADA' && \(vinc\(e, 'qase'\) \|\| p\.tipo === 'bug' \|\| p\.origem !== 'PESSOA'\)\)/);
 });
 
 test('o catálogo não apaga as seções locais de casos e suítes', () => {
@@ -39,7 +40,7 @@ test('casos locais persistem no novo núcleo, não em propostas nem Qase', () =>
 });
 
 test('suítes locais têm formulário próprio, edição e escopo do projeto', () => {
-  const t = read('frontend/testes/fluxos-casos-qase.parte.js');
+  const t = read('frontend/testes/fluxos-repositorio-local.parte.js');
   assert.match(t, /function formularioSuiteLocal\(e, suites, atual = null\)/);
   assert.match(t, /api\.suiteLocalSalvar\(\{ espacoId: e\.id/);
   assert.match(t, /'Nova suíte local'/);

@@ -18,13 +18,12 @@ export type Resposta = { ok: true; data: unknown } | { ok: false; error: string 
 export const textoExclusao = { historico: 'Excluir o histórico operacional (logs, histórico e métricas) deste projeto?', evidencias: 'Excluir as evidências de execução deste projeto (pasta .prumo\\evidencias)?', contextos: 'Excluir TODOS os contextos (requisitos, regras e decisões) deste projeto?', diagnostico: 'Excluir o diagnóstico técnico da interface?' } as const;
 
 /**
- * 2.10.1: aviso automático de versão nova (padrão ligado; desliga em Ajuda › Atualizações). Ao abrir e a cada 6 horas,
+ * Aviso automático de versão nova (padrão ligado; desliga em Ajuda › Atualizações). Ao abrir e a cada 6 horas,
  * inclusive só na bandeja. Mesmo destino fixo da consulta manual; nenhum dado da pessoa é enviado.
  * Fora do pacote só consulta o servidor de teste: desenvolvimento e testes nunca saem para a rede.
  */
 export const SEIS_HORAS = 6 * 60 * 60 * 1000;
 
-// ---- 2.9: operações externas, propostas, runs Qase, vínculos e agentes. Toda escrita remota passa por operacoesExternas.ts e por confirmação NATIVA. ----
 export const nomeServico = { jira: 'Jira', qase: 'Qase', github: 'GitHub' } as const;
 
 export type Aviso = { n: number; tipo: string; titulo: string; detalhe: string; rotinaId?: string; destino?: string; tocarSom?: boolean; at: string };

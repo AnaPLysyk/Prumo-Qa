@@ -6,9 +6,9 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { autorizarEscopo } from '../../../../dist/agendamentos/autorizacoes/autorizarEscopo.js';
-import { autorizarExecucao } from '../../../../dist/agendamentos/autorizacoes/autorizarExecucao.js';
+
 import { criarPoliticaPublicacao } from '../../../../dist/agendamentos/autorizacoes/criarPoliticaPublicacao.js';
-import { revogarExecucao } from '../../../../dist/agendamentos/autorizacoes/revogarExecucao.js';
+import { revogarAutorizacao } from '../../../../dist/agendamentos/autorizacoes/revogarAutorizacao.js';
 import { enfileirar } from '../../../../dist/agendamentos/banco/enfileirar.js';
 import { listarRotinas } from '../../../../dist/agendamentos/banco/listarRotinas.js';
 import { listarTrabalhos } from '../../../../dist/agendamentos/banco/listarTrabalhos.js';
@@ -38,6 +38,9 @@ const T0 = Date.parse('2026-10-10T12:00:00Z');
 const relogio = (inicio = T0) => { let t = inicio; return { agora: () => new Date(t), avancar: (min) => { t += min * 60000; }, ms: () => t }; };
 // Broker simulado: devolve exatamente o escopo pedido, como o broker real devolve ao ser aprovado por uma pessoa.
 const solicitador = (sujeito = 'pessoa-teste') => async (esc) => ({ subject: sujeito, method: 'Windows-CredUI-LogonUser', scopeHash: esc.scopeHash, at: new Date().toISOString() });
+// Compoe a autorizacao no teste usando apenas as regras de producao realmente executadas.
+const autorizarExecucao = async (p, espacoId, capability, ambiente, opcoes, base, solicitar, agora = new Date()) =>
+  autorizarEscopo(p, espacoId, capability, ambiente, await escopoDeCapability(p, capability), opcoes, base, solicitar, agora);
 
 async function projetoComEspaco(t, b, nome, manifestExtra = {}, arquivos = {}) {
   const fx = await fixture(t, manifestExtra);
@@ -74,7 +77,7 @@ test('sem autorização, expirada, revogada, esgotada ou com o comando alterado:
   const a = await autorizarExecucao(p, e.id, 'unit', 'local', { dias: 1, maxUsos: 1 }, b, solicitador());
   j = await passo(); assert.equal(j.resultado.status, 'PASS'); assert.equal(ran(), 1);
   j = await passo(); assert.equal(j.resultado.status, 'BLOCKED', 'uso único esgotado'); assert.equal(ran(), 1);
-  const a2 = await autorizarExecucao(p, e.id, 'unit', 'local', { dias: 1, maxUsos: 9 }, b, solicitador()); revogarExecucao(a2.id, b);
+  const a2 = await autorizarExecucao(p, e.id, 'unit', 'local', { dias: 1, maxUsos: 9 }, b, solicitador()); revogarAutorizacao('execucoes', a2.id, b);
   j = await passo(); assert.equal(j.resultado.status, 'BLOCKED', 'revogada'); assert.equal(ran(), 1);
   await autorizarExecucao(p, e.id, 'unit', 'local', { dias: 1, maxUsos: 9 }, b, solicitador());
   await fx.write('tests/test.mjs', 'console.log("alterado depois da aprovação");');

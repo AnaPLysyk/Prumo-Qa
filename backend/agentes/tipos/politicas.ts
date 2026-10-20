@@ -2,14 +2,14 @@
 import { z } from 'zod';
 
 /**
- * Especializações e políticas de capacidade das IAs conectadas (2.9). É o ponto ÚNICO de decisão: o servidor MCP consulta estas regras a cada
+ * Especializações e políticas de capacidade das IAs conectadas. É o ponto único de decisão: o servidor MCP consulta estas regras a cada
  * chamada, no backend, não na interface. Uma capacidade só está disponível se (a) a política do projeto não a bloqueia e (b) existe ao menos uma
  * especialização habilitada que a inclua. Leitura nunca vira escrita: criar casos, abrir bugs, publicar resultados, comentar e abrir PR só existem
- * como ação da PESSOA na janela (com confirmação); a IA só produz propostas em rascunho.
+ * como ação da pessoa na janela (com confirmação); a IA só produz propostas em rascunho.
  */
 export type EstadoCapacidade = 'PERMITIDO' | 'EXIGE_AUTORIZACAO' | 'BLOQUEADO' | 'SOMENTE_PESSOA';
 
-export type DefCap = { id: string; rotulo: string; ferramenta: string | null; editavel: EstadoCapacidade[]; padrao: EstadoCapacidade; explicacao: string };
+type DefCap = { id: string; rotulo: string; ferramenta: string | null; editavel: EstadoCapacidade[]; padrao: EstadoCapacidade; explicacao: string };
 
 export const capacidades: DefCap[] = [
   { id: 'consultar_contexto', rotulo: 'Ler o contexto do projeto', ferramenta: 'contexto_projeto', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Contexto autorizado e, se você habilitou, contextos do projeto. Somente leitura.' },
@@ -38,11 +38,9 @@ export const especializacoes = [
   { id: 'monitoramento', rotulo: 'Monitoramento de Alterações', skill: 'backend/agentes/skills/monitoramento', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_aprendizado'], profissao: 'Analista de Qualidade', especialidade: 'Histórico e alterações observadas' }
 ] as const;
 
-export const idsCap = capacidades.map(c => c.id);
-
 export const idsEsp = especializacoes.map(e => e.id);
 
-export const itemSchema = z.object({ espacoId: z.string().uuid(), especializacoes: z.array(z.string()).max(16), politicas: z.record(z.enum(['PERMITIDO', 'EXIGE_AUTORIZACAO', 'BLOQUEADO'])), alteradoEm: z.string().datetime(), por: z.string().max(200) }).strict();
+const itemSchema = z.object({ espacoId: z.string().uuid(), especializacoes: z.array(z.string()).max(16), politicas: z.record(z.enum(['PERMITIDO', 'EXIGE_AUTORIZACAO', 'BLOQUEADO'])), alteradoEm: z.string().datetime(), por: z.string().max(200) }).strict();
 
 export const registro = z.object({ version: z.literal(1), itens: z.array(itemSchema).max(200) }).strict();
 

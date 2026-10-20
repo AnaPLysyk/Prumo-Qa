@@ -3,7 +3,7 @@ import { gravarFila } from './gravarFila.js';
 import { lerFila } from './lerFila.js';
 import { Trabalho } from '../tipos/fila.js';
 
-/** Pega o próximo trabalho elegível. No máximo UM em execução por projeto e UM no total (concorrência 1). */
+/** Pega o próximo trabalho elegível. No máximo um em execução por projeto e um no total (concorrência 1). */
 export function pegarProximoTrabalho(base?: string, agora = new Date(), bloquear: (t: Trabalho) => boolean = () => false): Trabalho | null {
   const r = lerFila(base); if (r.trabalhos.some(t => t.estado === 'EXECUTANDO')) return null;
   const t = r.trabalhos.filter(x => x.estado === 'PENDENTE' && Date.parse(x.disponivelEm) <= agora.getTime() && !bloquear(x)).sort((a, b) => a.disponivelEm.localeCompare(b.disponivelEm))[0];

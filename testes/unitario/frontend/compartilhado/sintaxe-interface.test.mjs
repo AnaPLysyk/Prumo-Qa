@@ -12,7 +12,7 @@ const renderer = path.join(raiz, 'dist', 'renderer');
 
 test('interface: todo script da janela (dist/renderer/*.js) compila', () => {
   const scripts = fs.readdirSync(renderer).filter((n) => n.endsWith('.js'));
-  assert.ok(scripts.includes('interfaces-v36.js') && scripts.includes('ds.js'), 'os bundles foram gerados pelo build');
+  assert.ok(scripts.includes('interfaces.js') && scripts.includes('ds.js'), 'os bundles foram gerados pelo build');
   const falhas = [];
   for (const n of scripts) { try { new vm.Script(fs.readFileSync(path.join(renderer, n), 'utf8'), { filename: n }); } catch (e) { falhas.push(n + ': ' + e.message); } }
   assert.deepEqual(falhas, []);

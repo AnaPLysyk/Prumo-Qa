@@ -19,7 +19,7 @@ export function parametrosDaIssueGithub(p: Proposta) {
 }
 
 /** Opções do defeito Qase escolhidas no rascunho: severidade (ID do campo de sistema), milestone e campos personalizados. */
-export type OpcoesDefeitoQase = { severidadeQase?: number; marcoQase?: number; camposQase?: Record<string, string> };
+type OpcoesDefeitoQase = { severidadeQase?: number; marcoQase?: number; camposQase?: Record<string, string> };
 
 /** Parâmetros do defeito no Qase a partir do rascunho local: o mesmo objeto alimenta a prévia confirmada e o envio. */
 export function parametrosDoDefeitoQase(p: Proposta, o: OpcoesDefeitoQase) {

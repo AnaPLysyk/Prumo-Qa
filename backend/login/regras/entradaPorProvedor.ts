@@ -20,8 +20,8 @@ export type DependenciasDeEntrada = {
   base?: string; tempoMs?: number; agora?: () => Date;
 };
 /** entrar: login já ligado; ativar: instalação sem nenhuma conta, e a primeira conta (administradora) nasce da autorização. */
-export type ModoDaEntrada = 'entrar' | 'ativar';
-export type EstadoDaEntrada = { estado: 'NENHUMA' | 'AGUARDANDO' | 'CONCLUIDO' | 'PENDENTE' | 'ERRO'; mensagem?: string; sessao?: ReturnType<typeof sessaoParaJanela> };
+type ModoDaEntrada = 'entrar' | 'ativar';
+type EstadoDaEntrada = { estado: 'NENHUMA' | 'AGUARDANDO' | 'CONCLUIDO' | 'PENDENTE' | 'ERRO'; mensagem?: string; sessao?: ReturnType<typeof sessaoParaJanela> };
 
 /** Endereços e escopos fixos de cada provedor: nada disso vem da janela. */
 const PROVEDORES = {

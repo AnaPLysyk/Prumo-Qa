@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 /**
- * Diagnóstico técnico das chamadas IPC da interface. Fica em %LOCALAPPDATA%\PrumoQA\diagnostico, SEPARADO do
+ * Diagnóstico técnico das chamadas IPC da interface. Fica em %LOCALAPPDATA%\PrumoQA\diagnostico, separado do
  * histórico de operações de QA: não entra em métricas e consultar a tela não gera evento de qualidade.
  * Só metadados (canal, estado, duração, código, correlação). Nunca argumentos, caminhos, conteúdo ou segredos.
  */

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { falharCom } from '../erros/falharCom.js';
 
-/** Recusa links em TODOS os componentes, inclusive ancestrais do diretório de dados. */
+/** Recusa links em todos os componentes, inclusive ancestrais do diretório de dados. */
 export function semLinks(alvo:string) {
   const absoluto=path.resolve(alvo); let atual=path.parse(absoluto).root;
   for(const parte of absoluto.slice(atual.length).split(path.sep).filter(Boolean)) {

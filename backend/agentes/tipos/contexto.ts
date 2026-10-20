@@ -14,11 +14,11 @@ export const estados = ['RASCUNHO', 'APROVADO', 'CONFLITANTE', 'DESATUALIZADO'] 
 
 export const limites = { titulo: 200, texto: 20000, chave: 60, referencia: 500, contextos: 500, historico: 200, textoMcp: 4000 } as const;
 
-export type Tipo = (typeof tipos)[number];
+type Tipo = (typeof tipos)[number];
 
 export type Estado = (typeof estados)[number];
 
-export const origemSchema = z.object({ tipo: z.enum(['documento', 'pessoa', 'ia_sugerido', 'outro']), referencia: z.string().max(limites.referencia) }).strict();
+const origemSchema = z.object({ tipo: z.enum(['documento', 'pessoa', 'ia_sugerido', 'outro']), referencia: z.string().max(limites.referencia) }).strict();
 
 export const conteudoSchema = z.object({
   tipo: z.enum(tipos), titulo: z.string().trim().min(1).max(limites.titulo), texto: z.string().trim().min(1).max(limites.texto),
@@ -27,7 +27,7 @@ export const conteudoSchema = z.object({
 
 export type Conteudo = z.infer<typeof conteudoSchema>;
 
-export const entradaSchema = z.object({
+const entradaSchema = z.object({
   versao: z.number().int().min(1), em: z.string().datetime(), acao: z.enum(['criado', 'editado', 'aprovado', 'desatualizado', 'substituido', 'conflito', 'conflito_resolvido']),
   estado: z.enum(estados), por: z.string().max(100), conteudo: conteudoSchema, conteudoHash: z.string().regex(/^[a-f0-9]{64}$/),
   detalhe: z.object({ outroId: z.string().uuid().optional(), substituidoPor: z.string().uuid().optional() }).strict().optional(),

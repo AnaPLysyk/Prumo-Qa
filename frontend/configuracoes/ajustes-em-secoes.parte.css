@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função configuracoes para o bundle interfaces-v36. */
+/** Aparencia das secoes de configuracoes. */
 /* Painel de Configurações: cabeçalho, abas e seções com rótulo acima de cada campo; rola por dentro se a janela for baixa. */
 #controles.popover{display:block;width:min(460px,calc(100vw - 32px));max-height:calc(100vh - 80px);max-height:calc(100dvh - 80px);overflow:hidden;z-index:120;padding:0}
 #controles.popover[hidden]{display:none}

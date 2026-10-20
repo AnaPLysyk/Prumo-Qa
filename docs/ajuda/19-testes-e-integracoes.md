@@ -35,6 +35,23 @@ Esta lista reúne os casos do Qase e os testes manuais e automatizados do códig
 
 Cada linha mostra o tipo de teste, o nível, as tags e o último resultado. Abaixo aparecem as propostas que aguardam revisão, as suítes do Qase e os vínculos registrados entre tickets, casos e automações. Uma proposta é um rascunho criado por você, pelo Prumo ou por uma IA; revise-a antes de enviá-la ao Qase. No detalhe de um caso, você pode ver os passos, os resultados locais e o código, ou escolher **Criar automação na IDE**.
 
+### Manutenção da tela Testes
+
+O código da tela fica em `frontend/testes/` e as regras, contratos IPC e gravação ficam em `backend/testes/`. Não edite os arquivos gerados de `dist/renderer/`.
+
+- `visao-geral-dos-testes.parte.js`: organiza IDE, Repositório, Runs e Planos; combina os casos com o catálogo do código.
+- `editor-e-pipelines.parte.js`: editor de arquivos e pipelines CI/CD.
+- `ide-codigo.parte.js`: navegação pelos arquivos, consulta ao GitHub e vínculos de casos ao código.
+- `fluxos-casos-qase.parte.js`: consulta casos e suítes do Qase, apresenta detalhes e propostas de casos.
+- `fluxos-repositorio-local.parte.js`: edita suítes e lista casos exclusivos do projeto local, sem criar cópias dos casos do Qase.
+- `fluxos-planos-e-runs.parte.js`: planos de teste e resultados das execuções.
+- `fluxos-vinculos.parte.js`: relações entre tickets, casos e automações.
+- `formularios/`, `cartoes/` e `componentes/`: campos, cartões e controles de apresentação.
+
+Esses fragmentos são reunidos pelo manifesto `ferramentas/frontend/telas-modulares.json`; **o manifesto define a ordem**, e o build gera os bundles `dist/renderer/fluxos-v40.js` e `dist/renderer/testes-v40.js`. O nome histórico do bundle não é a origem a editar. A Documentação Viva permite localizar cada arquivo pela tela Testes.
+
+A verificação unitária e as jornadas de regressão usam perfis temporários e mocks, sem escrever em serviços reais. As suítes locais continuam no armazenamento isolado do projeto/usuário. Para confirmar o fluxo de ponta a ponta com Qase e Jira, ainda é preciso fazer homologação manual com integrações autorizadas.
+
 ### Runs
 
 Esta lista reúne as execuções locais (manuais ou agendadas), as execuções preparadas no Prumo e as execuções do Qase. Use os filtros para escolher a origem ou o estado.

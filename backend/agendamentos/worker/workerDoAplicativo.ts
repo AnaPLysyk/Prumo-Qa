@@ -1,6 +1,16 @@
-/** O worker de agendamentos deste aplicativo, ligado aos serviços e aos avisos da janela. */
+/** Mantém o worker de agendamentos independente da janela; o aplicativo conecta os avisos ao iniciar. */
 import { Worker } from './Worker.js';
-import { publicarEventoDoWorker } from '../../aplicativo/avisos/publicarEventoDoWorker.js';
+import { type EventoWorker } from '../tipos/worker.js';
 import { servicosDoAplicativo } from '../../conexoes/regras/servicosDoAplicativo.js';
 
-export const workerDoAplicativo = new Worker({ servicos: servicosDoAplicativo as never, aoEvento: e => publicarEventoDoWorker(e) });
+let notificar: ((evento: EventoWorker) => void) | null = null;
+
+/** Liga os avisos do Electron sem fazer o worker importar bandeja, janela ou notificações. */
+export function conectarAvisosDoWorker(publicar: (evento: EventoWorker) => void) {
+  notificar = publicar;
+}
+
+export const workerDoAplicativo = new Worker({
+  servicos: servicosDoAplicativo as never,
+  aoEvento: evento => notificar?.(evento)
+});

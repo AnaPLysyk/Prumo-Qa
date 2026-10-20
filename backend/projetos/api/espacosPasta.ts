@@ -5,7 +5,7 @@ import { confirmarNoWindows } from '../../aplicativo/janela/confirmarNoWindows.j
 import { obterEspaco } from '../banco/obterEspaco.js';
 import { vincularPastaDoDisco } from '../regras/vincularPastaDoDisco.js';
 
-// 2.10.2: qualquer pasta de código. Sem qa.project.json, o Prumo detecta a stack e propõe o contrato; só grava depois da
+// Qualquer pasta de código. Sem qa.project.json, o Prumo detecta a stack e propõe o contrato; só grava depois da
 // confirmação nativa. A pasta vem do diálogo do sistema, nunca do renderer. Contrato existente nunca é sobrescrito.
 export const espacosPasta: TratadorDoCanal<'espacos:pasta'> = async (a, j) => {
   obterEspaco(a.id); const r = await dialog.showOpenDialog(j!, { title: 'Pasta do repositório ou projeto de código', properties: ['openDirectory'] });

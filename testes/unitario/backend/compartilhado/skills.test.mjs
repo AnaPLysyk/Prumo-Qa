@@ -23,7 +23,7 @@ test('oito especializações têm profissão e área; interface distingue permis
   assert.ok(perfis.every(p => p[2].length > 8 && p[3].length > 8));
   const persona = fs.readFileSync(path.join(raiz, 'backend/agentes/tipos/persona.ts'), 'utf8');
   assert.match(persona, /profissao: perfil\?\.profissao/);
-  const tela = fs.readFileSync(path.join(raiz, 'frontend/agentes/mostrarAgentesIntegrados.js'), 'utf8');
+  const tela = fs.readFileSync(path.join(raiz, 'frontend/agentes/tela-agentes.parte.js'), 'utf8');
   assert.match(tela, /x\.profissao/); assert.match(tela, /x\.especialidade/);
-  assert.match(tela, /Permissões efetivas/); assert.match(tela, /s\.matriz\.map/);
+  assert.match(tela, /s\.matriz\.filter/); assert.match(tela, /api\.agentesSalvar/);
 });

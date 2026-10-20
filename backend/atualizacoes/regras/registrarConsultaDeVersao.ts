@@ -6,7 +6,7 @@ import { lerPreferencias } from '../../configuracoes/banco/lerPreferencias.js';
 /**
  * Registra uma consulta concluída. `disponivel` é a release mais nova que a instalada (ou null se já está atualizado).
  * - indicador: há versão a reconhecer (ainda não vista);
- * - tocarSom: som ligado, não silenciado, e a versão ainda não notificada: no máximo UMA vez por versão.
+ * - tocarSom: som ligado, não silenciado, e a versão ainda não notificada: no máximo uma vez por versão.
  * - notificar: versão ainda não vista nem notificada (notificação visual do Windows, uma vez por versão; "silenciar" só cala o som).
  * A decisão é gravada (versaoNotificada) para não repetir o som em consultas seguintes nem ao reabrir.
  */

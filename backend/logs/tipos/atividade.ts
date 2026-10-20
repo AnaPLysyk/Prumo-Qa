@@ -47,7 +47,7 @@ export const orientacoes: Record<string,string> = {
   OTHER_FINDING:'Consultar a resposta original; texto privado omitido do histórico.'
 };
 
-export const contagem = z.number().int().nonnegative().max(1000000);
+const contagem = z.number().int().nonnegative().max(1000000);
 
 export const referenciaSchema = z.object({ id:z.string().uuid(), versao:z.number().int().positive(), hash:z.string().regex(/^[a-f0-9]{64}$/), estado:z.enum(['RASCUNHO','APROVADO','CONFLITANTE','DESATUALIZADO']), uso:z.enum(['incluido_na_resposta','consultado_na_revisao']) }).strict();
 
@@ -59,7 +59,7 @@ export const resumoSchema = z.object({
   contextReferences:z.array(referenciaSchema).max(100).optional()
 }).strict();
 
-export const entradaSchema = z.object({candidates:contagem.optional(),existingTests:contagem.optional(),hasRequirement:z.boolean().optional(),hasSource:z.boolean().optional()}).strict();
+const entradaSchema = z.object({candidates:contagem.optional(),existingTests:contagem.optional(),hasRequirement:z.boolean().optional(),hasSource:z.boolean().optional()}).strict();
 
 export const eventoSchema = z.object({
   version:z.literal(1), operationId:z.string().uuid(), projectId:z.string().max(100), rootHash:z.string().regex(/^[a-f0-9]{64}$/),

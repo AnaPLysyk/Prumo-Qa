@@ -5,7 +5,7 @@ import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 
 /**
- * Exclusão controlada das evidências de execução de UM projeto. Escopo: .prumo/evidencias/<uuid>.json regulares,
+ * Exclusão controlada das evidências de execução de um projeto. Escopo: .prumo/evidencias/<uuid>.json regulares,
  * validados por caminhoSeguro (sem links nem fuga da raiz). Nunca toca código, documentos ou outros projetos.
  */
 export async function excluirEvidencias(p:Projeto) {

@@ -17,14 +17,15 @@ after(() => { if (anterior === undefined) delete process.env.PRUMO_DATA_DIR; els
   fs.rmSync(base, { recursive: true, force: true }); });
 const A = randomUUID(), B = randomUUID();
 const projetos = new Map([[A, { id: A, vinculos: [] }], [B, { id: B, vinculos: [] }]]);
-mock.module('../../../../dist/projetos/banco/obterEspaco.js', { namedExports: { obterEspaco: id => {
+mock.module('../../../../dist/projetos/banco/obterEspaco.js', { exports: { obterEspaco: id => {
   if (!projetos.has(id)) throw new Error('WORKSPACE_NOT_FOUND'); return projetos.get(id);
 } } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { namedExports: { listarPropostas: () => [] } });
+mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: { listarPropostas: () => [] } });
 const { esquemasIpc } = await import('../../../../dist/aplicativo/api/catalogoDeContratos.js');
 const { repositorioCaso } = await import('../../../../dist/testes/api/repositorioCaso.js');
 const { repositorioSuite } = await import('../../../../dist/testes/api/repositorioSuite.js');
 const { repositorioListar } = await import('../../../../dist/testes/api/repositorioListar.js');
+const { diretorioDados } = await import('../../../../dist/compartilhado/banco/diretorioDados.js');
 const handlers = { 'repositorio:caso': repositorioCaso, 'repositorio:suite': repositorioSuite, 'repositorio:listar': repositorioListar };
 async function canal(nome, bruto) {
   const parsed = esquemasIpc[nome].safeParse(bruto);
@@ -63,7 +64,7 @@ class No {
 const h = (tag, attrs, ...filhos) => new No(tag, attrs, filhos);
 const campo = (_, attrs) => { const input = h('input', attrs); return { input, no: h('div', {}, input) }; };
 const source = p => fs.readFileSync(path.join(root, p), 'utf8');
-const suitesJS = source('frontend/testes/fluxos-casos-qase.parte.js');
+const suitesJS = source('frontend/testes/fluxos-repositorio-local.parte.js');
 const i = suitesJS.indexOf('  function formularioSuiteLocal(e, suites, atual = null) {');
 const j = suitesJS.indexOf('  async function telaCasosLocais(e, _mem, corpo) {', i);
 assert.ok(i >= 0 && j > i, 'formulário original de suíte localizado');
@@ -107,8 +108,10 @@ test('UI cria suíte e caso via contratos/handlers reais e relê persistência a
   assert.equal(res.data.casos.length, 1); assert.equal(res.data.casos[0].id, caso.id);
   assert.equal(res.data.casos[0].dados.passos[0].dados, 'usuario=qa');
   assert.equal(res.data.casos[0].dados.titulo, 'Autenticação revisada');
-  assert.equal(fs.existsSync(path.join(base, 'plataforma', 'repositorio-testes-local.json')), true);
-  assert.equal(fs.existsSync(path.join(base, 'plataforma', 'propostas.json')), false);
+  const pastaDados = path.join(diretorioDados(), 'plataforma');
+  assert.equal(fs.existsSync(path.join(pastaDados, 'repositorio-testes-local.json')), true);
+  assert.equal(fs.existsSync(path.join(pastaDados, 'propostas.json')), false);
+  assert.equal(fs.existsSync(path.join(base, 'plataforma', 'repositorio-testes-local.json')), false, 'não grava fora do escopo da conta');
 });
 test('schema estrito bloqueia payload adicional e impede gravação', async () => {
   const antes = (await api.repositorioLocal(A)).data.casos.length;

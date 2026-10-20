@@ -6,7 +6,7 @@ import { pareceArquivoDePipeline } from './pareceArquivoDePipeline.js';
 import { pareceArquivoDeTeste } from './pareceArquivoDeTeste.js';
 import { IGNORAR, limites } from '../tipos/catalogoDeTestes.js';
 
-export type ResultadoDaEscrita = { arquivo: string; linhas: number; hash: string; criado: boolean };
+type ResultadoDaEscrita = { arquivo: string; linhas: number; hash: string; criado: boolean };
 
 function caminhoRelativo(relativo: string): string {
   const rel = String(relativo).replaceAll('\\', '/');

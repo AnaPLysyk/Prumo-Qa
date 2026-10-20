@@ -35,5 +35,5 @@ test('a janela carrega somente os bundles e nunca seus fragmentos internos',()=>
     }
     for (const parte of bundle.origens) assert.ok(!html.includes('src="'+parte.replace('dist/renderer/','')+'"'), 'fragmento não pode ser carregado: '+parte);
   }
-  assert.ok(html.indexOf('src="fluxos-v40.js"') < html.indexOf('src="testes-v40.js"'), 'testes avançados dependem de Fluxos');
+  assert.ok(html.indexOf('src="fluxos.js"') < html.indexOf('src="tela-testes.js"'), 'testes avançados dependem de Fluxos');
 });

@@ -1,8 +1,8 @@
 /** Uma chamada HTTPS dos logins por provedor: host numa lista fechada, tempo limite e resposta limitada a 1 MB. */
 import https from 'node:https';
 
-export type HostDoLogin = 'github.com' | 'api.github.com' | 'oauth2.googleapis.com' | 'openidconnect.googleapis.com';
-export type RespostaHttps = { status: number; json: unknown };
+type HostDoLogin = 'github.com' | 'api.github.com' | 'oauth2.googleapis.com' | 'openidconnect.googleapis.com';
+type RespostaHttps = { status: number; json: unknown };
 
 /** O host é sempre um dos da lista, escolhido pelo código do Prumo, nunca pela janela; `codigo` prefixa o erro (ex.: GITHUB_LOGIN_FAILED). */
 export function chamarHttps(codigo: string, host: HostDoLogin, caminho: string, metodo: 'GET' | 'POST', cabecalhos: Record<string, string>, corpo?: string): Promise<RespostaHttps> {

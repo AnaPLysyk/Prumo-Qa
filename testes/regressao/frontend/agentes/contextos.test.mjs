@@ -9,7 +9,9 @@ const dialogos = (app, resposta) => app.evaluate(({ dialog }, r) => { dialog.sho
 const chamar = (page, fn, ...args) => page.evaluate(([f, a]) => window.prumo[f](...a), [fn, args]);
 async function preparar(t, extra = {}) {
   const f = await fixture(t, extra); const dados = novoDados(t); const s = await abrir(t, dados);
-  await escolherPasta(s.app, f.root); await s.page.click('text=Vincular pasta…'); await s.page.waitForSelector('table');
+  await escolherPasta(s.app, f.root); await s.page.click('text=Vincular pasta…');
+  await s.page.waitForFunction((raiz) => window.prumo.projetos().then((r) => r.ok && r.data.some((p) => p.root === raiz)), f.root);
+  await s.page.waitForFunction(() => document.querySelector('#projeto-atual')?.textContent !== 'nenhum selecionado', null, { timeout: 8000 });
   return { f, dados, ...s };
 }
 async function novoContexto(page, { titulo, texto, chave, ref = 'README.md', tipo = 'requisito' }) {
@@ -71,7 +73,9 @@ test('disponibilizar ao agente exige confirmação; o MCP real do app lê o apro
   await dialogos(app, 1); await abrirDetalhe(page, 'Somente Editor grava'); await page.click('#painel-contexto button:has-text("Aprovar")'); await page.waitForTimeout(500);
   const plano = { requirement: 'R1: Apenas Editor grava registros.', source: 'RQ-1', existingTests: [], candidates: [{ id: 'A', behavior: 'Editor grava', source: 'RQ-1', risk: 'r', expected: 'ok', oracle: 'o', technique: 'equivalence', partition: 'Editor' }], contextoId: id };
   // padrão: desabilitado
-  let [ctx0, rev0] = (await mcp(f.root, dados, [['contexto_projeto', {}], ['revisar_cobertura', plano]])).map((r) => JSON.parse(r.content[0].text));
+  const primeiraLeituraMcp = await mcp(f.root, dados, [['contexto_projeto', {}], ['revisar_cobertura', plano]]);
+  assert.ok(primeiraLeituraMcp.every(r => !r.isError), 'MCP sem erros: ' + primeiraLeituraMcp.map(r => r.content[0]?.text).join(' | '));
+  let [ctx0, rev0] = primeiraLeituraMcp.map((r) => JSON.parse(r.content[0].text));
   assert.equal(ctx0.contextos.disponivel, false); assert.ok(rev0.findings.some((x) => x.type === 'CONTEXT_UNAVAILABLE'));
   // recusar a confirmação mantém desabilitado
   await dialogos(app, 0); await page.click('#ctx-mcp'); await page.waitForTimeout(400);

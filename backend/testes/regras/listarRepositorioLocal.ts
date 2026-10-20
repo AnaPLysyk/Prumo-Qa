@@ -1,7 +1,7 @@
 /** Combina casos locais próprios e casos pessoais antigos, sem duplicar IDs nem modificar propostas.json. */
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { listarPropostas } from '../../tickets/banco/listarPropostas.js';
-import { dadosCasoLocal, type CasoLocal } from '../tipos/repositorioLocal.js';
+import { dadosCasoLocal } from '../tipos/repositorioLocal.js';
 import { lerRepositorioLocal } from '../banco/lerRepositorioLocal.js';
 
 export function listarRepositorioLocal(espacoId: string, base?: string) {
@@ -15,7 +15,7 @@ export function listarRepositorioLocal(espacoId: string, base?: string) {
       id: p.id, espacoId, tipo: 'caso' as const, origem: 'PESSOA' as const,
       titulo: p.titulo, dados: dadosCasoLocal.parse((({ suiteId: _suite, ticket: _ticket, ...dados }) => dados)(p.dados as Record<string, unknown>)), requisito: p.requisito, risco: p.risco,
       suiteLocalId: null,
-      // Referências textuais da proposta original são históricas; NÃO declaram um vínculo verificado no Jira/Qase.
+      // Referências textuais da proposta original são históricas; não declaram um vínculo verificado no Jira/Qase.
       referenciasLegadas: {
         ...(typeof p.dados.ticket === 'string' ? { ticket: p.dados.ticket } : {}),
         ...(typeof p.dados.suiteId === 'number' && Number.isSafeInteger(p.dados.suiteId) && p.dados.suiteId > 0 ? { suiteId: p.dados.suiteId } : {})

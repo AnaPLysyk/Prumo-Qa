@@ -1,5 +1,5 @@
 /** Canal agenda:revogarpolitica: Revogar uma política de publicação. */
-import { revogarPublicacao } from '../autorizacoes/revogarPublicacao.js';
+import { revogarAutorizacao } from '../autorizacoes/revogarAutorizacao.js';
 import { TratadorDoCanal } from '../../aplicativo/api/TratadorDoCanal.js';
 
-export const agendaRevogarPolitica: TratadorDoCanal<'agenda:revogarpolitica'> = a => ({ politica: revogarPublicacao(a.id) });
+export const agendaRevogarPolitica: TratadorDoCanal<'agenda:revogarpolitica'> = a => ({ politica: revogarAutorizacao('publicacoes', a.id) });

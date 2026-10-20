@@ -1,4 +1,4 @@
-/** Canal atualizacao:instalar: Atualizar com um clique para a versão encontrada pela consulta (2.10.2). */
+/** Canal atualizacao:instalar: Atualizar com um clique para a versão encontrada pela consulta. */
 import { dialog, app, shell } from 'electron';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -11,8 +11,8 @@ import { entregarInstalador, instrucaoDeInstalacao } from '../regras/entregarIns
 import { plataformaDoInstalador } from '../regras/plataformaDoInstalador.js';
 import { argumentosInstalador } from '../tipos/instalador.js';
 
-// 2.10.2: atualizar com um clique (Windows). No macOS e no Linux o instalador é baixado, conferido e entregue na pasta Downloads para a pessoa abrir.
-// Original 2.10.2: Versão só a que a consulta validou; confirmação nativa; download e SHA-256 conferidos
+// Atualizar com um clique (Windows). No macOS e no Linux o instalador é baixado, conferido e entregue na pasta Downloads para a pessoa abrir.
+// Só a versão que a consulta validou; confirmação nativa; download e SHA-256 conferidos
 // no processo principal; o instalador roda em modo silencioso e reabre o Prumo. Fora do pacote (desenvolvimento e testes)
 // baixa e confere de um servidor 127.0.0.1, mas nunca executa instalador.
 export const atualizacaoInstalar: TratadorDoCanal<'atualizacao:instalar'> = async (_a, janela) => {

@@ -11,7 +11,7 @@ import { MetodoEscrita } from '../tipos/rotasDeEscrita.js';
 import { PedidoServico } from '../tipos/transporte.js';
 
 /**
- * lookup que devolve sempre o IP já conferido. O Node atual (autoSelectFamily) chama com {all:true} e espera uma LISTA;
+ * lookup que devolve sempre o IP já conferido. O Node atual (autoSelectFamily) chama com {all:true} e espera uma lista;
  * devolver um endereço só nesse caso dava "Invalid IP address: undefined" e derrubava toda conexão real com Qase, Jira e GitHub.
  */
 export const fixarIp=(ip:string):LookupFunction=>(_h,o,cb)=>(o as {all?:boolean})?.all?(cb as unknown as (e:null,l:{address:string;family:number}[])=>void)(null,[{address:ip,family:4}]):cb(null,ip,4);
@@ -32,7 +32,7 @@ export async function requisitarServico(p:PedidoServico,metodo:'GET'|MetodoEscri
   const u=new URL(p.caminho,origem);if(u.origin!==origem)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   const base=p.servico==='jira'?'/rest/api/3/':p.servico==='qase'?'/v1/':'/';if(!u.pathname.startsWith(base))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   if(metodo!=='GET'&&(u.search||!rotaEscritaPermitida(p.servico,metodo,u.pathname)))throw new ErroServico('SERVICE_WRITE_BLOCKED');
-  // Resolve UMA vez e fixa o IP no socket TLS. Não segue redirects. Corpo só existe no POST de comentário (2.8).
+  // Resolve uma vez e fixa o IP no socket TLS. Não segue redirects. Só as escritas (POST, PUT, PATCH) levam corpo.
   let ip:string;let dnsTimer:ReturnType<typeof setTimeout>|undefined;try{const r=await Promise.race([lookup(u.hostname,{family:4}),new Promise<never>((_,reject)=>{dnsTimer=setTimeout(()=>reject(new ErroServico('SERVICE_TIMEOUT')),3000);dnsTimer.unref();})]);ip=r.address;}catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_UNAVAILABLE');}finally{clearTimeout(dnsTimer);}
   if(!enderecoPublico(ip))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   return new Promise((resolve,reject)=>{

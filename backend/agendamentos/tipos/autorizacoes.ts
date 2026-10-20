@@ -3,13 +3,13 @@ import { z } from 'zod';
 import { solicitarAprovacao } from '../../testes/aprovacao/solicitarAprovacao.js';
 
 /**
- * Autorizações para trabalho agendado (2.8).
+ * Autorizações para trabalho agendado.
  *
- * Execução de testes: a pessoa aprova UMA vez, pelo mesmo broker nativo do Windows usado nas execuções manuais,
+ * Execução de testes: a pessoa aprova uma vez, pelo mesmo broker nativo do Windows usado nas execuções manuais,
  * um escopo exato (projeto + capability + hash do comando, ambiente e fontes). A autorização guarda esse hash, uma
  * validade, um limite de execuções e pode ser revogada. Se o projeto, o comando ou o ambiente mudarem, o hash muda e a
  * autorização deixa de valer: o trabalho fica BLOCKED. Não existe autorização global nem para "qualquer comando".
- * O broker NÃO é alterado nem contornado: o consentimento acontece aqui, na criação, e é comprovado pelo retorno dele.
+ * O broker não é alterado nem contornado: o consentimento acontece aqui, na criação, e é comprovado pelo retorno dele.
  *
  * Publicação no Jira: política separada, restrita a tickets explícitos e tipos de rotina, com validade e limite.
  */
@@ -30,7 +30,7 @@ export const pubSchema = z.object({
   aprovadoPor: z.string().max(200), revogadaEm: z.string().datetime().nullable()
 }).strict();
 
-// 2.9: política de escrita agendada para operações externas explicitamente permitidas (hoje: publicar resultados no Qase).
+// Política de escrita agendada para operações externas explicitamente permitidas (hoje: publicar resultados no Qase).
 export const OPERACOES_AGENDAVEIS = ['qase.publicar_resultados'] as const;
 
 export const escritaSchema = z.object({

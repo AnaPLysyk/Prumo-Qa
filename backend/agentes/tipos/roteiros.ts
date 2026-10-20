@@ -2,13 +2,13 @@
 import { valorOuPadrao } from '../mcp/valorOuPadrao.js';
 
 /**
- * Prompts do Prumo (2.10): roteiros reutilizáveis que o cliente MCP mostra como comandos (por exemplo /prumo:investigar-falha)
+ * Prompts do Prumo: roteiros reutilizáveis que o cliente MCP mostra como comandos (por exemplo /prumo:investigar-falha)
  * e que o CLI imprime com `prumo prompts <nome>`. Prompt não executa nada: só organiza o pedido e aponta as ferramentas.
  * As permissões continuam no servidor (políticas por capacidade); a pessoa continua decidindo o que publicar e aprovar.
  */
-export type Argumento = { nome: string; descricao: string; obrigatorio: boolean };
+type Argumento = { nome: string; descricao: string; obrigatorio: boolean };
 
-export type DefPrompt = { nome: string; titulo: string; descricao: string; agente: string; argumentos: Argumento[]; passos: (a: Record<string, string | undefined>) => string[] };
+type DefPrompt = { nome: string; titulo: string; descricao: string; agente: string; argumentos: Argumento[]; passos: (a: Record<string, string | undefined>) => string[] };
 
 export const sempre = [
   'Comece por `listar_politicas` e `contexto_projeto` (que traz contextos e aprendizados aprovados, se a pessoa permitiu).',

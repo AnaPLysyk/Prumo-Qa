@@ -2,18 +2,18 @@
 import { Servico } from '../../projetos/tipos/espacos.js';
 
 /**
- * Lista fechada das ÚNICAS escritas remotas que o Prumo sabe fazer (2.9). Cada rota é método + caminho exatos, sem query string.
+ * Lista fechada das únicas escritas remotas que o Prumo sabe fazer. Cada rota é método + caminho exatos, sem query string.
  * Conferida contra a documentação oficial: Jira Cloud REST v3 (developer.atlassian.com), Qase TestOps API v1 (qase-tms/specs) e GitHub REST
  * (docs.github.com, versão 2022-11-28). O transporte recusa qualquer outra combinação com SERVICE_WRITE_BLOCKED, mesmo que um adaptador peça.
  * Nenhuma rota apaga recurso, altera permissões ou mexe em configuração: só cria ou complementa o que a pessoa autorizou.
  */
 export type MetodoEscrita = 'POST' | 'PUT' | 'PATCH';
 
-export const chave = '[A-Z][A-Z0-9_]*-\\d+';
+const chave = '[A-Z][A-Z0-9_]*-\\d+';
 
-export const codigoQase = '[A-Z][A-Z0-9]{1,9}';
+const codigoQase = '[A-Z][A-Z0-9]{1,9}';
 
-export const dono = '[A-Za-z0-9_.-]{1,100}';
+const dono = '[A-Za-z0-9_.-]{1,100}';
 
 export const rotas: Record<Servico, { metodo: MetodoEscrita; caminho: RegExp }[]> = {
   jira: [

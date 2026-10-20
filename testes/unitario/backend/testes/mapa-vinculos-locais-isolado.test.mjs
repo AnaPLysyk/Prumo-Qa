@@ -13,19 +13,19 @@ const espaco = { id: espacoId, nome: 'Projeto sintético', vinculos: [], relacoe
 const caso = { id: casoId, titulo: 'Validar autenticação local', dados: { titulo: 'Validar autenticação local' } };
 const ticket = { id: ticketId, titulo: 'Corrigir autenticação', espacoId, tipo: 'bug', origem: 'PESSOA', estado: 'RASCUNHO', remoto: null };
 
-mock.module('../../../../dist/projetos/banco/obterEspaco.js', { namedExports: { obterEspaco: id => {
+mock.module('../../../../dist/projetos/banco/obterEspaco.js', { exports: { obterEspaco: id => {
   assert.equal(id, espacoId); return espaco;
 } } });
-mock.module('../../../../dist/testes/regras/listarRepositorioLocal.js', { namedExports: { listarRepositorioLocal: id => {
+mock.module('../../../../dist/testes/regras/listarRepositorioLocal.js', { exports: { listarRepositorioLocal: id => {
   assert.equal(id, espacoId); return { casos: [caso], suites: [] };
 } } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { namedExports: { listarPropostas: id => {
+mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: { listarPropostas: id => {
   assert.equal(id, espacoId); return [ticket];
 } } });
-mock.module('../../../../dist/conexoes/banco/listarOperacoes.js', { namedExports: { listarOperacoes: () => [] } });
-mock.module('../../../../dist/testes/banco/listarRunsLocais.js', { namedExports: { listarRunsLocais: () => [] } });
-mock.module('../../../../dist/agendamentos/banco/listarTrabalhos.js', { namedExports: { listarTrabalhos: () => [] } });
-mock.module('../../../../dist/testes/regras/catalogoDeTestes.js', { namedExports: { catalogoDeTestes: () => { throw new Error('Não pode consultar projeto real'); } } });
+mock.module('../../../../dist/conexoes/banco/listarOperacoes.js', { exports: { listarOperacoes: () => [] } });
+mock.module('../../../../dist/testes/banco/listarRunsLocais.js', { exports: { listarRunsLocais: () => [] } });
+mock.module('../../../../dist/agendamentos/banco/listarTrabalhos.js', { exports: { listarTrabalhos: () => [] } });
+mock.module('../../../../dist/testes/regras/catalogoDeTestes.js', { exports: { catalogoDeTestes: () => { throw new Error('Não pode consultar projeto real'); } } });
 
 const { mapaDeVinculos } = await import('../../../../dist/testes/regras/mapaDeVinculos.js');
 

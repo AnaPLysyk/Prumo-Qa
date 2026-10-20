@@ -1,18 +1,14 @@
-/** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
-  function portrait(index, large = false, tamanho) {
-    const classe = tamanho || (large ? 'large' : '');
-    const el = h('div', { class: 'v36-portrait' + (classe ? ' ' + classe : ''), 'data-motion': index % 6 },
+/** Desenha os retratos dos agentes e seus estados visuais. */
+  // Retrato vivo: respiração e microviradas próprias, halo na cor do agente e varredura holográfica.
+  // large: perfil e Cérebro; sem ele, o tamanho da lista. Movimento visual, sem articulação facial.
+  function portrait(index, large = false) {
+    const el = h('div', { class: 'v36-portrait' + (large ? ' large' : ''), 'data-motion': index % 6 },
       h('span', { class: 'v36-retrato-halo', 'aria-hidden': 'true' }),
       h('span', { class: 'v36-retrato-3d' }, h('img', { src: asset('avatar-' + variants[index % 8] + '.webp'), alt: '', draggable: false }), h('span', { class: 'v36-retrato-scan', 'aria-hidden': 'true' })));
     el.style.setProperty('--face-color', palette[index % 8]);
     el.style.setProperty('--face-duration', (5 + index * .47) + 's');
     el.style.setProperty('--face-delay', (-index * .67) + 's');
     return el;
-  }
-  // Paralaxe sutil seguindo o ponteiro (desligada com movimento reduzido).
-  function paralaxe(area, alvo) {
-    area.addEventListener('pointermove', (e) => { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; const r = area.getBoundingClientRect(); alvo.style.setProperty('--rx', (((e.clientY - r.top) / r.height - .5) * -7).toFixed(2) + 'deg'); alvo.style.setProperty('--ry', (((e.clientX - r.left) / r.width - .5) * 9).toFixed(2) + 'deg'); });
-    area.addEventListener('pointerleave', () => { alvo.style.setProperty('--rx', '0deg'); alvo.style.setProperty('--ry', '0deg'); });
   }
   // Campo neural decorativo: pontos, sinapses e, no Cérebro, conexões do rosto aos neurônios com impulsos.
   function neural(el, opcoes = {}) {

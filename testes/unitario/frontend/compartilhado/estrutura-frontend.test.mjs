@@ -15,7 +15,9 @@ const lista = (base) => {
   return visitar(base).sort();
 };
 test('frontend: os mesmos arquivos e conteúdos do Electron, sem duplicatas editáveis', () => {
-  const arquivos = lista(origem).filter(arq => /\.(js|css|html)$/.test(arq) && !mapeadas.has(arq));
+  // As partes (*.parte.js|css) só chegam à janela dentro dos bundles (arquitetura-telas.test.mjs confere byte a byte e que o
+  // index nunca as carrega): a cópia avulsa delas seria peso morto no instalador, então a cópia de execução não as tem.
+  const arquivos = lista(origem).filter(arq => /\.(js|css|html)$/.test(arq) && !/(^|\/)web\//.test(arq) && !/\.parte\.(js|css)$/.test(arq) && !mapeadas.has(arq));
   assert.deepEqual(lista(copia).filter(arq => /\.(js|css|html)$/.test(arq)), arquivos, 'Cópia de execução deve ter os mesmos arquivos distribuíveis da fonte oficial');
   assert.ok(lista(copia).every(arq => !arq.endsWith('.md')), 'Documentação de desenvolvimento não deve ser distribuída como tela');
   for (const arq of arquivos) assert.deepEqual(
@@ -33,7 +35,7 @@ test('frontend: recursos têm fonte única e preservam todos os caminhos distrib
     assert.ok(!fs.existsSync(path.join(copia, recurso.fonte.slice('frontend/'.length))), 'Recurso não deve ser copiado como tela: '+recurso.fonte);
   }
   const bundles = JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json', 'utf8')).bundles.map(b => path.basename(b.destino));
-  const excluidos = new Set([...bundles, 'agenda.js', 'apoio-v40.js', 'integracoes.js', 'plataforma.js', 'status.css']);
+  const excluidos = new Set([...bundles, 'status.css']);
   const runtime = fs.readdirSync('dist/renderer').filter(arq => /\.(js|css|html)$/.test(arq) && !excluidos.has(arq)).sort();
   assert.deepEqual(recursos.filter(r => path.dirname(r.destino) === 'dist/renderer').map(r => path.basename(r.destino)).sort(), runtime, 'Todo recurso não gerado da raiz deve ter fonte oficial');
 });

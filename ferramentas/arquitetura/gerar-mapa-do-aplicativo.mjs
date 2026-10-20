@@ -8,11 +8,11 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { lerCopiaDeTrabalho, montarInstantaneo } from './gerar-arquitetura.mjs';
-import { telas as frasesDasTelas, papeis } from '../documentacao/gerar-leia-me-backend.mjs';
+import { telas as frasesDasTelas, papeis } from '../documentacao/catalogo-documentacao-viva.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const destino = path.join(raiz, 'dist', 'documentacao', 'mapa.json');
-const PAPEIS = ['api', 'regras', 'banco', 'integracoes', 'tipos'];
+const PAPEIS = ['api', 'regras', 'banco', 'integracoes', 'tipos', 'servidor'];
 
 export function gerarMapaDoAplicativo() {
   const arquivos = lerCopiaDeTrabalho();
@@ -22,7 +22,7 @@ export function gerarMapaDoAplicativo() {
   const ids = [...new Set([...pastasDe('frontend'), ...pastasDe('backend')])].sort();
   const testes = lista.filter((a) => /^testes\/.+\.test\.mjs$/.test(a.caminho));
   const telas = ids.map((id) => {
-    const doBackend = lista.filter((a) => a.caminho.startsWith(`backend/${id}/`) && a.caminho.endsWith('.ts'));
+    const doBackend = lista.filter((a) => a.caminho.startsWith(`backend/${id}/`) && /\.(?:ts|mjs|js)$/.test(a.caminho));
     const backend = Object.fromEntries([...PAPEIS, 'outros'].map((p) => [p, []]));
     for (const a of doBackend) { const papel = a.caminho.split('/')[2]; (PAPEIS.includes(papel) ? backend[papel] : backend.outros).push(resumo(a)); }
     const usaTela = (texto) => texto.includes(`dist/${id}/`) || texto.includes(`frontend/${id}/`) || texto.includes(`backend/${id}/`);

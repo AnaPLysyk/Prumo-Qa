@@ -1,8 +1,0 @@
-{
-  "name": "prumo-qa-servico-de-email",
-  "private": true,
-  "type": "module",
-  "description": "Envia os códigos de confirmação de e-mail do Prumo QA. Sem dependências.",
-  "engines": { "node": ">=20" },
-  "scripts": { "start": "node servidor.mjs" }
-}

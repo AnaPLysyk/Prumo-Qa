@@ -6,14 +6,14 @@
 // existe por anotação no código (qase(31), qase.id(31), @qase(31), "Qase: SFQ-31") ou por vínculo declarado.
 (() => {
   const F = window.PrumoFluxos; if (!F) return;
-  const { vinc, memoria, relacoesDe, outroLado, tipoCaso, chipTipoCaso, rotuloTipoCaso, resultadosLocais, ticketsExternos } = F;
+  const { vinc, relacoesDe, outroLado, tipoCaso, rotuloTipoCaso, resultadosLocais, ticketsExternos } = F;
   const nomesNivel = { unitario: 'Unitário', integracao: 'Integração/API', funcional: 'Funcional (E2E)', regressao: 'Regressão', smoke: 'Smoke', desempenho: 'Desempenho', acessibilidade: 'Acessibilidade', indefinido: 'Não classificado' };
   const chipNivel = (t) => h('span', { class: 'tipo t-' + t }, tr(nomesNivel[t] || t));
   const chipTag = (t) => h('span', { class: 'ds-chip ds-tag' }, '@' + t);
 
   /** Carrega e memoriza o catálogo do código e os casos do Qase do projeto (uma vez por sessão, com "Atualizar"). */
   async function fontes(e, { forcar = false } = {}) {
-    const mem = memoria('testes', e.id); if (forcar) { delete mem.catalogo; delete mem.casos; delete mem.runsLocais; }
+    const mem = memoriaDaTela('testes', e.id); if (forcar) { delete mem.catalogo; delete mem.casos; delete mem.runsLocais; }
     const vq = vinc(e, 'qase');
     const [cat, casos, runs] = await Promise.all([
       mem.catalogo || api.testesCatalogo(e.id).then((r) => (r.ok ? r.data : { erro: r.error })),
@@ -60,10 +60,10 @@
     const aba = sub === 'pipelines' ? 'ide' : sub; // 'pipelines' é o modo CI/CD dentro da aba IDE
     if (!e) {
       el.append(DS.cabecalho({ titulo: 'Testes' }), barraSub('testes', itens, aba), aba === 'ide' ? modosIde(sub) : null, h('div', { id: 'sub-conteudo' }, sub === 'runs' ? null : DS.estadoTela('vazio', 'Nenhum projeto selecionado', 'Selecione ou crie um projeto para continuar.', [DS.acao('Ir para Projetos', () => mostrar('projetos'))])));
-      if (sub === 'runs') await F.telaRuns(null, memoria('testes', 'todos'), el.querySelector('#sub-conteudo'), false);
+      if (sub === 'runs') await F.telaRuns(null, memoriaDaTela('testes', 'todos'), el.querySelector('#sub-conteudo'), false);
       return;
     }
-    const vq = vinc(e, 'qase'), vg = vinc(e, 'github'); const mem = memoria('testes', e.id);
+    const vq = vinc(e, 'qase'), vg = vinc(e, 'github'); const mem = memoriaDaTela('testes', e.id);
     const perm = vq ? await escritaDoProjeto(e) : {}; const esc = !!perm.qase;
     const acoes = { repositorio: [DS.acao('Atualizar', async () => { await fontes(e, { forcar: true }); delete mem.casos; void mostrar('testes'); }, { id: 'testes-atualizar', icone: 'atualizar' }),
         ...(vq ? [DS.acao('Consulta avançada', () => F.avancadaQase(e), { id: 'testes-avancada', icone: 'filtro' }), DS.acao('Nova suite', () => F.novaSuite(e, esc), { id: 'su-nova', icone: 'mais' })] : []),
@@ -173,192 +173,3 @@
   }
 
   // ======================= Código (visão de IDE) =======================
-  function abrirNoCodigo(e, arquivo, linha) { DS.fecharModal(); const mem = memoria('testes', e.id); mem.ide = { arquivo, linha }; (estado.sub ||= {}).testes = 'codigo'; void mostrar('testes'); }
-  function arvore(arquivos) { const raiz = { pastas: new Map(), arquivos: [] }; for (const a of arquivos) { const partes = a.arquivo.split('/'); let n = raiz; for (const p of partes.slice(0, -1)) { if (!n.pastas.has(p)) n.pastas.set(p, { pastas: new Map(), arquivos: [] }); n = n.pastas.get(p); } n.arquivos.push(a); } return raiz; }
-  // Trazer (clonar) ou atualizar o repositório do GitHub vinculado: usa o git deste computador e a confirmação nativa; ao terminar, a IDE passa a editar a pasta.
-  async function trazerDoGithub(e, atualizar) {
-    const r = await chamar(() => api.espacoTrazer(e.id)); if (!r || r.canceled) return;
-    avisar(atualizar ? tr('Repositório atualizado do GitHub.') : r.vinculada === false ? tr('Repositório trazido, mas a pasta ainda não foi vinculada ao projeto.') : tr('Repositório trazido do GitHub e vinculado ao projeto.'));
-    void mostrar('testes');
-  }
-  const pastaDoPrumo = (e) => !!e.pastaLocal && /[\\/]repositorios[\\/]/.test(e.pastaLocal);
-
-  // Editor de arquivo (CodeMirror embutido, sem rede) usado pela IDE e pelos pipelines. Salvar pede a confirmação nativa do Windows e
-  // só grava se o arquivo não mudou fora do Prumo; o fim de linha original é preservado pelo backend.
-  function abrirEditor({ e, editor, arquivo, dados, aoDescartar, aoSalvar }) {
-    const modo = /\.tsx?$/i.test(arquivo) ? { name: 'javascript', typescript: true } : /\.[cm]?jsx?$/i.test(arquivo) ? 'javascript' : /\.py$/i.test(arquivo) ? 'python' : /\.feature$/i.test(arquivo) ? 'gherkin' : /\.ya?ml$/i.test(arquivo) ? 'yaml' : null;
-    const host = h('div', { class: 'ds-ide-cm' }); const estadoEl = h('span', { class: 'ds-sub', id: 'ide-estado', role: 'status' }, tr('Editando'));
-    let hashAtual = dados.hash; let sujo = false; let armado = false;
-    const salvarBtn = DS.acao('Salvar', () => salvar(), { id: 'ide-salvar', primaria: true, compacto: true, titulo: 'Ctrl+S' });
-    const descartarBtn = DS.acao('Descartar', () => { if (sujo && !armado) { armado = true; descartarBtn.lastChild.textContent = tr('Descartar alterações?'); return; } aoDescartar(); }, { id: 'ide-descartar', compacto: true });
-    editor.replaceChildren(h('div', { class: 'ds-ide-aba' }, DS.icone('codigo'), h('strong', {}, arquivo), estadoEl, salvarBtn, descartarBtn), host);
-    const cm = window.CodeMirror(host, { value: String(dados.conteudo).replace(/\r\n/g, '\n'), mode: modo, lineNumbers: true, indentUnit: 2, tabSize: 2, indentWithTabs: false, theme: 'prumo', viewportMargin: 40,
-      extraKeys: { 'Ctrl-S': () => salvar(), 'Cmd-S': () => salvar(), Tab: (c) => c.execCommand(c.somethingSelected() ? 'indentMore' : 'insertSoftTab'), 'Shift-Tab': (c) => c.execCommand('indentLess') } });
-    cm.setSize('100%', '100%'); cm.on('change', () => { sujo = true; armado = false; descartarBtn.lastChild.textContent = tr('Descartar'); estadoEl.textContent = tr('Alterações não salvas'); });
-    requestAnimationFrame(() => { cm.refresh(); cm.focus(); });
-    async function salvar() {
-      if (!sujo) { estadoEl.textContent = tr('Nada a salvar'); return; }
-      const r = await chamar(() => api.testesGravar(e.id, arquivo, cm.getValue(), hashAtual)); if (!r || r.canceled) return;
-      hashAtual = r.hash; sujo = false; estadoEl.textContent = tr('Salvo · {n} linhas', { n: r.linhas }); avisar(tr('Arquivo salvo.')); if (aoSalvar) await aoSalvar(r);
-    }
-  }
-
-  // Pipelines CI/CD: os workflows do GitHub Actions do MESMO repositório vinculado ao projeto (pasta local), para ler e editar.
-  // Salvar altera só o arquivo local; o pipeline passa a valer no GitHub depois que a pessoa enviar o repositório.
-  const MODELO_PIPELINE = (nome) => `name: ${nome}\non:\n  push:\n    branches: [main]\n  pull_request:\njobs:\n  testes:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: npm ci\n      - run: npm test\n`;
-  async function telaPipelines(e, mem, corpo) {
-    const vg = vinc(e, 'github');
-    if (!e.pastaLocal) {
-      corpo.append(DS.estadoTela('vazio', 'Vincule a pasta do repositório', 'Os pipelines (.github/workflows) são lidos e editados na pasta do repositório vinculada ao projeto. Vincule a pasta em Projetos.', [...(vg ? [DS.acao('Trazer o repositório do GitHub', () => trazerDoGithub(e, false), { id: 'ide-trazer', primaria: true })] : []), DS.acao('Abrir Projetos', () => mostrar('projetos'))], { id: 'pipe-sem-pasta', compacto: true }));
-      if (vg || e.vinculos.length) { const legado = h('div', { id: 'pipe-github' }); corpo.append(legado); await abaAutomacao(legado); semTitulo(legado); }
-      return;
-    }
-    const dados = await chamar(() => api.testesPipelines(e.id)); if (!dados) return;
-    const caixa = h('div', { class: 'ds-ide', id: 'ide-pipelines' }); const arvoreEl = h('nav', { class: 'ds-ide-arvore', 'aria-label': tr('Pipelines do repositório') }); const editor = h('section', { class: 'ds-ide-editor', 'aria-live': 'polite' }); const painel = h('aside', { class: 'ds-ide-painel' });
-    caixa.append(arvoreEl, editor, painel); corpo.append(caixa);
-    arvoreEl.append(h('div', { class: 'ds-ide-barra' }, DS.acao('Novo pipeline', () => novoPipeline(), { id: 'pipe-novo', compacto: true, icone: 'mais' }), vg ? DS.acao('Execuções no GitHub', () => { const alvo = h('div', { id: 'pipe-github' }); DS.modal('Execuções no GitHub Actions', alvo, { tamanho: 'lg' }); abaAutomacao(alvo).then(() => semTitulo(alvo)); }, { id: 'pipe-github-abrir', compacto: true }) : null),
-      h('p', { class: 'ds-doc-grupo' }, tr('{n} pipeline(s)', { n: dados.pipelines.length })));
-    for (const p of dados.pipelines) arvoreEl.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': p.arquivo, onclick: () => abrir(p.arquivo) }, DS.icone('codigo'), h('span', {}, p.nome), h('span', { class: 'ds-sub' }, p.arquivo.replace('.github/workflows/', ''))));
-    if (!dados.pipelines.length) { editor.append(DS.estadoTela('vazio', 'Nenhum pipeline neste repositório', 'Não há arquivos em .github/workflows. Use "Novo pipeline" para criar o primeiro.', [], { id: 'pipe-vazio' })); painel.append(h('p', { class: 'suave' }, tr('Um pipeline só roda no GitHub depois que você enviar o repositório.'))); return; }
-    async function abrir(arquivo) {
-      const abrirEditando = mem.pipe?.arquivo === arquivo && mem.pipe.editar === true; mem.pipe = { arquivo }; for (const b of arvoreEl.querySelectorAll('.ds-ide-arquivo')) b.setAttribute('aria-current', String(b.dataset.arquivo === arquivo));
-      editor.replaceChildren(DS.carregando('Lendo arquivo…'));
-      const r = await api.testesArquivo(e.id, arquivo); if (!r.ok) { editor.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o arquivo', r.error)); return; }
-      const p = dados.pipelines.find((x) => x.arquivo === arquivo); const linhasEl = h('ol', { class: 'ds-ide-linhas', 'data-arquivo': arquivo });
-      r.data.conteudo.split(/\r?\n/).forEach((txt, i) => linhasEl.append(h('li', { 'data-linha': i + 1 }, h('code', {}, txt || ' '))));
-      const editavel = r.data.editavel === true;
-      editor.replaceChildren(h('div', { class: 'ds-ide-aba' }, DS.icone('codigo'), h('strong', {}, arquivo), h('span', { class: 'ds-sub' }, tr('{n} linhas · somente leitura', { n: r.data.linhas })),
-        editavel ? DS.acao('Editar', () => abrirEditor({ e, editor, arquivo, dados: r.data, aoDescartar: () => abrir(arquivo), aoSalvar: async () => { const d = await chamar(() => api.testesPipelines(e.id)); if (d) { dados.pipelines = d.pipelines; resumo(arquivo); } } }), { id: 'ide-editar', compacto: true })
-          : h('span', { class: 'ds-chip', 'data-tom': 'aviso', id: 'ide-bloqueado', title: tr('O arquivo contém o que parece um segredo; o Prumo não o exibe para edição. Edite em outro editor.') }, tr('Edição bloqueada'))), linhasEl);
-      resumo(arquivo); if (abrirEditando && editavel) editor.querySelector('#ide-editar')?.click();
-    }
-    function resumo(arquivo) {
-      const p = dados.pipelines.find((x) => x.arquivo === arquivo); if (!p) return;
-      painel.replaceChildren(h('div', { class: 'ds-bloco' }, h('h3', { class: 'ds-h' }, tr('Pipeline')), h('p', { class: 'ds-texto' }, h('strong', {}, p.nome)), h('p', { class: 'ds-sub' }, p.arquivo)),
-        DS.bloco('Quando roda', p.eventos.length ? h('div', { class: 'ds-chips' }, p.eventos.map((x) => DS.chip(x))) : h('p', { class: 'suave' }, tr('Eventos não identificados no arquivo.'))),
-        DS.bloco('Jobs', p.jobs.length ? h('ol', { class: 'ds-lista' }, p.jobs.map((j) => h('li', {}, j))) : h('p', { class: 'suave' }, tr('Nenhum job identificado.'))),
-        DS.info('Salvar altera só o arquivo deste computador. O pipeline passa a valer no GitHub depois que você enviar o repositório.'));
-    }
-    function novoPipeline() {
-      const nome = h('input', { id: 'pipe-novo-nome', maxlength: 60, placeholder: 'ci.yml' }); const titulo = h('input', { id: 'pipe-novo-titulo', maxlength: 80, value: 'CI' });
-      DS.modal('Novo pipeline', [h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Nome do arquivo em .github/workflows', nome, { inteiro: true, ajuda: 'Termina em .yml ou .yaml, sem subpastas.' }), DS.campo('Nome do pipeline', titulo, { inteiro: true })),
-        DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar…', async () => {
-          const n = nome.value.trim(); if (!n) { avisar(tr('Informe o nome do arquivo.'), true); return; }
-          const arquivo = '.github/workflows/' + n; const r = await chamar(() => api.testesGravar(e.id, arquivo, MODELO_PIPELINE(titulo.value.trim() || 'CI'), null)); if (!r || r.canceled) return;
-          DS.fecharModal(); mem.pipe = { arquivo: r.arquivo, editar: true }; void mostrar('testes');
-        }, { id: 'pipe-novo-criar', primaria: true }))], { tamanho: 'md' });
-      nome.focus();
-    }
-    const alvo = mem.pipe?.arquivo && dados.pipelines.some((x) => x.arquivo === mem.pipe.arquivo) ? mem.pipe.arquivo : dados.pipelines[0].arquivo; await abrir(alvo);
-  }
-
-  async function telaCodigo(e, mem, corpo) {
-    const vg = vinc(e, 'github');
-    if (!e.pastaLocal && !vg) { corpo.append(DS.estadoTela('vazio', 'Nenhum repositório vinculado', 'Vincule a pasta local do repositório ou um repositório do GitHub em Projetos para ver o código de teste.', [DS.acao('Abrir Projetos', () => mostrar('projetos'))])); return; }
-    if (!e.pastaLocal) return codigoGithub(e, vg, corpo);
-    const src = await fontes(e); const cat = src.cat?.catalogo; if (!cat) { corpo.append(DS.estadoTela('erro', 'Não foi possível ler o repositório', src.cat?.erro || '')); return; }
-    const porArquivo = cat.features.map((f) => ({ arquivo: f.arquivo, feature: f.nome, testes: f.testes, tipos: f.tipos }));
-    const casosPorId = new Map((src.casos?.itens || []).map((c) => [String(c.id), c]));
-    const caixa = h('div', { class: 'ds-ide', id: 'ide' }); const arvoreEl = h('nav', { class: 'ds-ide-arvore', 'aria-label': tr('Arquivos de teste') }); const editor = h('section', { class: 'ds-ide-editor', 'aria-live': 'polite' }); const painel = h('aside', { class: 'ds-ide-painel' });
-    caixa.append(arvoreEl, editor, painel); corpo.append(caixa, agentesNoCodigo(e));
-    const pasta = (nome, n, nivel) => { const det = h('details', { class: 'ds-ide-pasta', open: nivel < 3 }, h('summary', {}, DS.icone('pasta'), h('span', {}, nome))); for (const [k, sub] of [...n.pastas.entries()].sort((a, b) => a[0].localeCompare(b[0]))) det.append(pasta(k, sub, nivel + 1)); for (const a of n.arquivos.sort((x, y) => x.arquivo.localeCompare(y.arquivo))) det.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, title: a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo.split('/').at(-1)), h('span', { class: 'ds-n' }, String(a.testes.length)))); return det; };
-    const raiz = arvore(porArquivo); arvoreEl.append(h('p', { class: 'ds-doc-grupo' }, tr('{n} arquivo(s) · {t} teste(s)', { n: porArquivo.length, t: cat.testes })));
-    for (const [k, sub] of [...raiz.pastas.entries()].sort((a, b) => a[0].localeCompare(b[0]))) arvoreEl.append(pasta(k, sub, 0)); for (const a of raiz.arquivos) arvoreEl.append(h('button', { type: 'button', class: 'ds-ide-arquivo', 'data-arquivo': a.arquivo, onclick: () => abrir(a.arquivo) }, DS.icone('codigo'), h('span', {}, a.arquivo)));
-    arvoreEl.prepend(h('div', { class: 'ds-ide-barra' }, DS.acao('Novo arquivo', () => novoArquivo(), { id: 'ide-novo', compacto: true, icone: 'mais' }), vinc(e, 'github') && pastaDoPrumo(e) ? DS.acao('Atualizar do GitHub', () => trazerDoGithub(e, true), { id: 'ide-atualizar-github', compacto: true, titulo: 'Atualiza a cópia deste computador só por avanço; suas mudanças não são sobrescritas' }) : null));
-    if (!porArquivo.length) { editor.append(DS.estadoTela('vazio', 'Nenhum arquivo de teste encontrado na pasta vinculada.', 'O Prumo reconhece *.spec/*.test (JS/TS), *.feature e test_*.py. Use "Novo arquivo" para criar a primeira automação.')); if (mem.ide?.novo) novoArquivo(mem.ide.novo); return; }
-    painel.append(DS.estadoTela('vazio', 'Selecione um teste', 'As conexões do teste com casos, tickets, execuções e agentes aparecem aqui.', [], { compacto: true }));
-    async function abrir(arquivo, linha) {
-      const quererEditar = !!mem.ide?.editar && mem.ide.arquivo === arquivo; mem.ide = { arquivo, linha }; for (const b of arvoreEl.querySelectorAll('.ds-ide-arquivo')) b.setAttribute('aria-current', String(b.dataset.arquivo === arquivo));
-      editor.replaceChildren(DS.carregando('Lendo arquivo…'));
-      const r = await api.testesArquivo(e.id, arquivo); if (!r.ok) { editor.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o arquivo', r.error)); return; }
-      const info = porArquivo.find((x) => x.arquivo === arquivo); const porLinha = new Map((info?.testes || []).map((t) => [t.linha, t]));
-      const linhasEl = h('ol', { class: 'ds-ide-linhas', 'data-arquivo': arquivo });
-      r.data.conteudo.split(/\r?\n/).forEach((txt, i) => { const t = porLinha.get(i + 1); const li = h('li', { 'data-linha': i + 1, class: t ? 'ds-ide-teste' : null }, h('code', {}, txt || ' '));
-        if (t) li.prepend(h('button', { type: 'button', class: 'ds-ide-marca', 'aria-label': tr('Ver conexões do teste {t}', { t: t.titulo }), onclick: () => selecionar(t, li) }, chipNivel(t.tipo), ...(t.qase || []).map((q) => h('span', { class: 'ds-chip', 'data-tom': 'info' }, 'Qase ' + q)), ...t.tags.slice(0, 3).map(chipTag)));
-        linhasEl.append(li); });
-      const editavel = r.data.editavel === true; const bloqueado = r.data.editavel === false;
-      editor.replaceChildren(h('div', { class: 'ds-ide-aba' }, DS.icone('codigo'), h('strong', {}, arquivo), h('span', { class: 'ds-sub' }, tr('{n} linhas · {t} teste(s) · somente leitura', { n: r.data.linhas, t: info?.testes.length || 0 })),
-        editavel ? DS.acao('Editar', () => editarArquivo(arquivo, r.data), { id: 'ide-editar', compacto: true }) : null,
-        bloqueado ? h('span', { class: 'ds-chip', 'data-tom': 'aviso', id: 'ide-bloqueado', title: tr('O arquivo contém o que parece um segredo; o Prumo não o exibe para edição. Edite em outro editor.') }, tr('Edição bloqueada')) : null), linhasEl);
-      if (editavel && quererEditar) { editarArquivo(arquivo, r.data); return; }
-      const alvo = linha && linhasEl.querySelector(`[data-linha="${linha}"]`); if (alvo) { alvo.scrollIntoView({ block: 'center' }); const t = porLinha.get(linha); if (t) selecionar(t, alvo); }
-    }
-    const editarArquivo = (arquivo, dados) => abrirEditor({ e, mem, editor, arquivo, dados, aoDescartar: () => abrir(arquivo, mem.ide?.linha), aoSalvar: async () => { await fontes(e, { forcar: true }); } });
-    const modeloDeTeste = (caminho, casoId, titulo) => {
-      const chave = vinc(e, 'qase')?.recurso?.chave; const ref = casoId && chave ? `${chave}-${casoId}` : null; const nome = titulo || 'descreva o cenário';
-      if (/\.feature$/i.test(caminho)) return `${ref ? `# Qase: ${ref}\n` : ''}Feature: ${nome}\n\n  Scenario: ${nome}\n    Given o sistema está pronto\n    When a pessoa executa o passo\n    Then o resultado esperado aparece\n`;
-      if (/\.py$/i.test(caminho)) return `${ref ? `# Qase: ${ref}\n` : ''}def test_${(nome.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '').toLowerCase() || 'cenario')}():\n    # passos do cenário\n    assert True\n`;
-      return `${ref ? `// Qase: ${ref}\n` : ''}test(${JSON.stringify(nome)}, async () => {\n  // passos do cenário\n});\n`;
-    };
-    function novoArquivo(inicio) {
-      const caminho = h('input', { id: 'ide-novo-caminho', maxlength: 300, placeholder: 'tests/e2e/login.spec.ts', value: inicio ? `tests/${String(inicio.titulo || 'caso-' + inicio.casoId).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'novo'}.spec.ts` : '' });
-      const caso = h('input', { id: 'ide-novo-caso', type: 'number', min: 1, placeholder: vinc(e, 'qase') ? '31' : '', value: inicio?.casoId || '', disabled: !vinc(e, 'qase') });
-      const titulo = h('input', { id: 'ide-novo-titulo', maxlength: 200, value: inicio?.titulo || '' });
-      if (mem.ide) delete mem.ide.novo;
-      DS.modal('Novo arquivo de teste', [h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() },
-        DS.campo('Caminho dentro da pasta do projeto', caminho, { inteiro: true, ajuda: 'Nome de teste: *.spec.ts, *.test.js, *.feature ou test_*.py.' }), DS.campo('Título do cenário', titulo, { inteiro: true }),
-        DS.campo('Caso do Qase (opcional)', caso, { inteiro: true, ajuda: 'Grava a anotação "Qase: CHAVE-ID" no arquivo, que liga a automação ao caso.' })),
-      DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar…', async () => {
-        const c = caminho.value.trim(); if (!c) { avisar(tr('Informe o caminho do arquivo.'), true); return; }
-        const r = await chamar(() => api.testesGravar(e.id, c, modeloDeTeste(c, caso.value ? Number(caso.value) : null, titulo.value.trim()), null)); if (!r || r.canceled) return;
-        DS.fecharModal(); await fontes(e, { forcar: true }); mem.ide = { arquivo: r.arquivo, editar: true }; void mostrar('testes');
-      }, { id: 'ide-novo-criar', primaria: true }))], { tamanho: 'md' });
-      caminho.focus();
-    }
-    function selecionar(t, li) {
-      for (const x of editor.querySelectorAll('.ds-ide-teste[aria-current]')) x.removeAttribute('aria-current'); li.setAttribute('aria-current', 'true');
-      const casos = (t.qase || []).map((q) => ({ q, c: casaQase(vinc(e, 'qase'), [q], q.replace(/^.*-/, '')) ? casosPorId.get(q.replace(/^.*-/, '')) : null }));
-      const tickets = casos.flatMap(({ c }) => (c ? [...ticketsExternos(c), ...relacoesDe(e, ['qase'], c.id).map((x) => outroLado(x, ['qase'], c.id)).filter((x) => x.tipo === 'jira').map((x) => x.id)] : []));
-      const res = casos.flatMap(({ c }) => (c ? resultadosLocais(src.runs, c.id) : [])).sort((a, b) => Date.parse(b.em) - Date.parse(a.em));
-      painel.replaceChildren(...[h('div', { class: 'ds-bloco' }, h('h3', { class: 'ds-h' }, tr('Teste')), h('p', { class: 'ds-texto' }, h('strong', {}, t.titulo)), h('p', { class: 'ds-sub' }, tr('linha {l}', { l: t.linha }) + (t.fim ? '–' + t.fim : '')), h('div', { class: 'ds-chips' }, chipNivel(t.tipo), DS.chip(tr('confiança {c}', { c: t.confianca })), ...t.tags.map(chipTag)), h('p', { class: 'ds-sub' }, tr('Classificação: {m}', { m: t.motivo }))),
-        t.passos.length ? DS.bloco('Passos no código', h('ol', { class: 'ds-lista' }, t.passos.map((p) => h('li', {}, p)))) : null,
-        DS.bloco('Caso no Qase', casos.length ? h('div', { class: 'ds-celula-nos' }, casos.map(({ q, c }) => (c ? F.noRef(e, { tipo: 'qase', id: String(c.id), vinculoId: vinc(e, 'qase')?.id }, tr('Caso {id}', { id: c.id }) + ' · ' + rotuloTipoCaso[tipoCaso(c)]) : h('span', { class: 'ds-chip', 'data-tom': 'aviso', title: tr('O código anota este ID, mas o caso não veio na consulta ao Qase vinculado.') }, 'Qase ' + q + ' · ' + tr('não encontrado'))))) : h('p', { class: 'suave' }, tr('Nenhuma anotação Qase neste teste.'))),
-        tickets.length ? DS.bloco('Tickets', h('div', { class: 'ds-celula-nos' }, [...new Set(tickets)].map((k) => F.noRef(e, { tipo: 'jira', id: k, vinculoId: vinc(e, 'jira')?.id }, k)))) : null,
-        DS.bloco('Resultados no Prumo', res.length ? DS.tempo(res.slice(0, 5).map((x) => ({ tom: DS.tom(x.status), titulo: h('span', {}, selo(x.status), ' ', x.run.titulo), sub: hora(x.em) + ' · ' + (x.origem === 'MANUAL' ? tr('declarado manualmente') : tr('execução de automação')) }))) : h('p', { class: 'suave' }, tr('Nenhum resultado registrado no Prumo para este teste.')))].filter(Boolean));
-    }
-    // Sem arquivo escolhido: abre o que mais liga código a casos do Qase (depois, o que tem mais testes).
-    const peso = (x) => x.testes.filter((t) => (t.qase || []).length).length * 1000 + x.testes.length; const inicial = [...porArquivo].sort((x, y) => peso(y) - peso(x))[0];
-    const alvo = mem.ide?.arquivo && porArquivo.some((x) => x.arquivo === mem.ide.arquivo) ? mem.ide : { arquivo: inicial.arquivo, linha: inicial.testes.find((t) => (t.qase || []).length)?.linha };
-    await abrir(alvo.arquivo, alvo.linha);
-    if (mem.ide?.novo) novoArquivo(mem.ide.novo);
-  }
-  async function codigoGithub(e, vg, corpo) {
-    const caixa = h('div', { class: 'ds-ide' }); const arvoreEl = h('nav', { class: 'ds-ide-arvore', 'aria-label': tr('Arquivos do repositório') }); const editor = h('section', { class: 'ds-ide-editor' });
-    corpo.append(DS.barra(DS.acao('Trazer o repositório do GitHub', () => trazerDoGithub(e, false), { id: 'ide-trazer', primaria: true, titulo: 'Baixa uma cópia para este computador e a vincula ao projeto, para editar na IDE' })), DS.info(tr('Repositório {r} lido pelo GitHub vinculado, somente leitura. Traga uma cópia para este computador para editar, criar automações e classificar testes.', { r: vg.recurso.chave })), caixa, agentesNoCodigo(e)); caixa.append(arvoreEl, editor);
-    async function listar(caminho, destino) {
-      destino.replaceChildren(DS.carregando()); const r = await api.servicoConsultar(e.id, 'github', 'arquivos', {}, caminho || '');
-      if (!r.ok) { destino.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o repositório', r.error, [], { compacto: true })); return; }
-      const itens = Array.isArray(r.data.dados) ? r.data.dados : []; destino.replaceChildren(...itens.sort((a, b) => (a.tipo === b.tipo ? a.nome.localeCompare(b.nome) : a.tipo === 'dir' ? -1 : 1)).map((x) => {
-        if (x.tipo === 'dir') { const det = h('details', { class: 'ds-ide-pasta' }, h('summary', {}, DS.icone('pasta'), h('span', {}, x.nome))); const filhos = h('div'); det.append(filhos); det.addEventListener('toggle', () => { if (det.open && !filhos.childNodes.length) void listar(x.caminho, filhos); }); return det; }
-        return h('button', { type: 'button', class: 'ds-ide-arquivo', onclick: () => abrir(x.caminho) }, DS.icone('codigo'), h('span', {}, x.nome));
-      }));
-    }
-    async function abrir(caminho) {
-      editor.replaceChildren(DS.carregando('Lendo arquivo…')); const r = await api.servicoConsultar(e.id, 'github', 'arquivos', {}, caminho);
-      if (!r.ok) { editor.replaceChildren(DS.estadoTela('erro', 'Não foi possível ler o arquivo', r.error)); return; }
-      const d = r.data.dados; editor.replaceChildren(h('div', { class: 'ds-ide-aba' }, DS.icone('codigo'), h('strong', {}, d.caminho), h('span', { class: 'ds-sub' }, tr('GitHub · somente leitura'))), d.conteudo === null ? DS.estadoTela('vazio', d.conteudoOmitido || 'Conteúdo indisponível') : h('ol', { class: 'ds-ide-linhas' }, d.conteudo.split(/\r?\n/).map((txt, i) => h('li', { 'data-linha': i + 1 }, h('code', {}, txt || ' ')))));
-    }
-    editor.append(DS.estadoTela('vazio', 'Selecione um arquivo', null, [], { compacto: true })); await listar('', arvoreEl);
-  }
-  /** Quem pode agir neste código: políticas reais do projeto (o agente lê pelo MCP; escrever no repositório é só da pessoa). */
-  function agentesNoCodigo(e) {
-    const linha = h('div', { class: 'ds-fontes', id: 'ide-agentes', 'aria-live': 'polite' }, h('span', {}, DS.carregando('Consultando permissões dos agentes…')));
-    api.agentesEstado(e.id).then((r) => {
-      if (!r.ok) { linha.replaceChildren(h('span', { class: 'suave' }, tr('Permissões dos agentes indisponíveis.'))); return; }
-      const m = new Map(r.data.matriz.map((c) => [c.id, c])); const rot = { PERMITIDO: 'permitido', EXIGE_AUTORIZACAO: 'exige autorização', BLOQUEADO: 'bloqueado', SOMENTE_PESSOA: 'somente pessoa' };
-      const item = (id, texto) => { const c = m.get(id); if (!c) return null; return h('span', { title: c.motivo || '' }, DS.icone(c.estado === 'BLOQUEADO' ? 'cadeado' : 'escudo'), tr(texto), ': ', h('strong', {}, tr(rot[c.estado] || c.estado))); };
-      linha.replaceChildren(h('span', {}, h('strong', {}, tr('Agentes neste código'))), item('consultar_contexto', 'ler contexto'), item('propor_casos', 'propor casos'), item('executar_testes', 'executar testes'), item('github_escrita', 'branch, commit e PR'), DS.link('Ajustar em Agentes', () => mostrar('agentes'), { seta: true }));
-    });
-    return linha;
-  }
-  /** Bloco "Código que implementa" no modal do caso (usa o catálogo já carregado ou carrega). */
-  function blocoCodigoDoCaso(e, id) {
-    const alvo = h('div', {}, h('p', { class: 'suave' }, tr('Procurando anotações no código…')));
-    void (async () => { if (!e.pastaLocal) { alvo.replaceChildren(h('p', { class: 'suave' }, tr('Vincule a pasta do repositório para localizar o código deste caso.'))); return; }
-      const src = await fontes(e); const vq = vinc(e, 'qase'); const declarados = relacoesDe(e, ['qase'], id).map((x) => outroLado(x, ['qase'], id)).filter((x) => x.tipo === 'automacao').map((x) => x.id); const impl = []; for (const f of src.cat?.catalogo?.features || []) for (const t of f.testes) if (casaQase(vq, t.qase || [], id) || declarados.includes(f.arquivo + ':' + t.linha)) impl.push({ ...t, arquivo: f.arquivo });
-      alvo.replaceChildren(impl.length ? h('ul', { class: 'ds-lista' }, impl.map((t) => h('li', {}, h('button', { type: 'button', class: 'ds-link seta', onclick: () => abrirNoCodigo(e, t.arquivo, t.linha) }, t.arquivo + ':' + t.linha), h('span', { class: 'ds-sub' }, t.titulo), h('span', { class: 'ds-chips' }, chipNivel(t.tipo), ...t.tags.map(chipTag)))))
-        : h('p', { class: 'suave' }, tr('Nenhum teste do código anota este caso (qase({id}) ou "Qase: {id}").', { id }))); })();
-    return DS.bloco('Código que implementa', alvo);
-  }
-  window.PrumoTestes = Object.freeze({ blocoCodigoDoCaso, abrirNoCodigo });
-})();

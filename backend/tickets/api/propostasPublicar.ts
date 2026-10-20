@@ -13,7 +13,7 @@ import { parametrosDaIssueGithub, parametrosDoDefeitoQase, publicarProposta } fr
 
 export const propostasPublicar: TratadorDoCanal<'propostas:publicar'> = async (a, j) => {
   const i = idiomaAtual(); const p = obterProposta(a.id); podePublicar(p); const e = obterEspaco(p.espacoId); const op = p.tipo === 'caso' ? 'qase.criar_caso' : a.destino === 'qase' ? 'qase.criar_defeito' : a.destino === 'github' ? 'github.criar_issue' : 'jira.criar_ticket';
-  // 2.10.2: a prévia confirmada usa o mesmo tipo do envio real; sem tipo, recusa antes de pedir confirmação (antes mostrava '1').
+  // A prévia confirmada usa o mesmo tipo do envio real; sem tipo, recusa antes de pedir confirmação.
   const tipoId = a.tipoId ?? (typeof p.dados.tipoId === 'string' ? p.dados.tipoId : undefined);
   if (p.tipo !== 'caso' && (a.destino ?? 'jira') === 'jira' && !tipoId) throw new Error('ISSUE_TYPE_REQUIRED: escolha o tipo do ticket (ex.: Bug) antes de publicar.');
   const parametros = p.tipo === 'caso' ? p.dados : a.destino === 'github' ? parametrosDaIssueGithub(p) : a.destino === 'qase'

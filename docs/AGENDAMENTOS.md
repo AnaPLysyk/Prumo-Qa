@@ -13,7 +13,7 @@ Janela / bandeja  ->  agendamentos/api  ->  agendamentos/regras (quando)  ->  ag
                                                                                                                        ->  execucoes/integracoes (comentário Jira, opcional)
 ```
 
-Tudo é Node puro (sem Electron) e testado fora da janela. Só `backend/aplicativo.ts`, `backend/aplicativo/` e os arquivos `api/` que abrem diálogos conhecem Electron: janela, bandeja, diálogos e ciclo de vida. Todas as pastas abaixo ficam em `backend/` e têm `LEIA-ME.md`.
+Tudo é Node puro (sem Electron) e testado fora da janela. Só `backend/aplicativo.ts`, `backend/aplicativo/` e os arquivos `api/` que abrem diálogos conhecem Electron: janela, bandeja, diálogos e ciclo de vida. Todas as pastas abaixo ficam em `backend/` e podem ser consultadas pela Documentação Viva.
 
 | Módulo | Responsabilidade |
 |---|---|
@@ -101,7 +101,7 @@ Avisos nativos e som opcional para: rotina iniciada (só aviso interno), conclu�
 
 ## Limitações
 
-Veja [VALIDACAO.md](VALIDACAO.md) e a entrega 2.8: autenticação humana real do Windows em execução agendada, Jira/Qase/GitHub reais, k6 real, Playwright real, leitor de tela e assinatura digital não foram verificados.
+Na entrega 2.8 não foram verificados: autenticação humana real do Windows em execução agendada, Jira/Qase/GitHub reais, k6 real, Playwright real, leitor de tela e assinatura digital.
 
 ## Run do Qase (2.9)
 

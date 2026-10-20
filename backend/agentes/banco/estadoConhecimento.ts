@@ -9,7 +9,6 @@ import { vistaDoAgente } from './vistaDoAgente.js';
 import { Linha, VERSAO_ESQUEMA } from '../tipos/conhecimento.js';
 import { agentesChat } from '../tipos/persona.js';
 
-// ---------------- Visão geral (Cérebro, Ajuda e Beekeeper) ----------------
 export function estadoConhecimento(espacoId: string | null, base?: string) {
   validarProjetoDoConhecimento(espacoId); const arquivo = caminhoConhecimento(base);
   return comBancoDeConhecimento(base, (db) => {

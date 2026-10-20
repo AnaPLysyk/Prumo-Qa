@@ -10,6 +10,7 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const ler = rel => fs.readFileSync(path.join(raiz,rel), 'utf8');
 const qase = ler('frontend/conexoes/mostrarConexoes.js');
 const login = ler('frontend/login/entrarNaConta.js');
+const mensagensLogin = ler('frontend/login/mensagensDeEntrada.js');
 
 // Avalia as funções efetivamente utilizadas pelas telas, sem simular aprovação de autenticação.
 const corteQase = qase.indexOf('abas.conexoes=async el=>');
@@ -18,13 +19,10 @@ const ctxQase = vm.createContext({});
 vm.runInContext(qase.slice(0, corteQase) + '\nthis.mensagem = mensagemFalhaQase;', ctxQase);
 const mensagemQase = ctxQase.mensagem;
 
-const inicio = login.indexOf('  function mensagemDaEntrada(erro) {');
-const fim = login.indexOf('\n  function mostrarErro(form, erro)', inicio);
-assert.ok(inicio > 0 && fim > inicio, 'a função de mensagens deve existir na entrada');
-const ctxLogin = vm.createContext({});
-vm.runInContext("const codigoDo = erro => /^([A-Z][A-Z0-9_]{2,63}):/.exec(String(erro||''))?.[1]||null;\n" +
-  login.slice(inicio, fim) + '\nthis.mensagem = mensagemDaEntrada;', ctxLogin);
-const mensagemLogin = ctxLogin.mensagem;
+const ctxLogin = vm.createContext({ window: {} });
+vm.runInContext(mensagensLogin, ctxLogin);
+const mensagemLogin = ctxLogin.window.PrumoMensagensEntrada.mensagemDaEntrada;
+assert.match(login, /PrumoMensagensEntrada/, 'a tela deve usar o módulo de mensagens, não duplicá-lo');
 
 test('Qase diferencia rede, tempo, limite, credencial e permissão', () => {
   assert.match(mensagemQase('SERVICE_UNAVAILABLE'), /rede, DNS, proxy/);

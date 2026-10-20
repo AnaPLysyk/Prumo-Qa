@@ -7,10 +7,12 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { entrarNaConta } from '../../../../dist/login/regras/contas.js';
 import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
-import { estadoDaEntradaGithub, iniciarEntradaGithub } from '../../../../dist/login/regras/entradaPeloGithub.js';
+import { estadoDaEntrada as estadoDaEntradaGithub, iniciarEntrada } from '../../../../dist/login/regras/entradaPorProvedor.js';
 import { encerrarSessao, situacaoDaSessao } from '../../../../dist/login/regras/sessao.js';
 import { gravarContas } from '../../../../dist/login/banco/gravarContas.js';
 import { lerContas } from '../../../../dist/login/banco/lerContas.js';
+
+const iniciarEntradaGithub = (d, modo) => iniciarEntrada('github', d, modo);
 
 // GitHub simulado e navegador falso: o teste faz o papel do navegador chamando o endereço local de volta (127.0.0.1) com ou sem o state certo.
 // Nenhuma rede externa, nenhum cofre, nenhuma conta real.
@@ -124,7 +126,6 @@ test('primeiro login pelo GitHub cria administradora, entra sem conexao de repos
 });
 
 // ---- Google: a mesma lógica (entradaPorProvedor) com endereços, escopos e identidade próprios; o Google serve só para entrar.
-import { iniciarEntrada } from '../../../../dist/login/regras/entradaPorProvedor.js';
 
 test('Google: autorização com PKCE e escopo mínimo; cadastro novo fica PENDENTE e nenhuma conexão é criada', async (t) => {
   const b = await base(t), { d, chamadas } = montar(b, { perfil: { id: '104857600000000000001', login: 'maria.silva', nome: 'Maria Silva' } }); delete d.guardarConexao;
@@ -141,12 +142,11 @@ test('Google: depois de aprovada entra já; o mesmo número em outro provedor n�
   const g = montar(b, { perfil }); delete g.d.guardarConexao; await iniciarEntrada('google', g.d); await volta(g.chamadas.urls[0], { code: 'c', state: new URL(g.chamadas.urls[0]).searchParams.get('state') }); await esperar((x) => x.estado !== 'AGUARDANDO');
   const reg = lerContas(b); reg.usuarios.find((x) => x.origem === 'GOOGLE').estado = 'ATIVO'; gravarContas(reg, b);
   // O mesmo id 4242, agora vindo do GitHub, cria OUTRA conta pendente (a identidade é provedor + id).
-  const h = montar(b, { perfil }); await iniciarEntradaGithubComo(h.d); await volta(h.chamadas.urls[0], { code: 'c', state: new URL(h.chamadas.urls[0]).searchParams.get('state') });
+  const h = montar(b, { perfil }); await iniciarEntradaGithub(h.d); await volta(h.chamadas.urls[0], { code: 'c', state: new URL(h.chamadas.urls[0]).searchParams.get('state') });
   const outra = await esperar((x) => x.estado !== 'AGUARDANDO'); assert.equal(outra.estado, 'PENDENTE'); assert.equal(h.chamadas.conexoes.length, 0);
   const g2 = montar(b, { perfil }); delete g2.d.guardarConexao; await iniciarEntrada('google', g2.d); await volta(g2.chamadas.urls[0], { code: 'c', state: new URL(g2.chamadas.urls[0]).searchParams.get('state') });
   const f = await esperar((x) => x.estado !== 'AGUARDANDO'); assert.equal(f.estado, 'CONCLUIDO'); assert.equal(situacaoDaSessao(b).tipo, 'ATIVA'); assert.equal(f.sessao.usuario.origem, 'GOOGLE');
 });
-const iniciarEntradaGithubComo = (d) => iniciarEntrada('github', d);
 
 test('Google: ativar o login sem nenhuma conta cria a administradora; a falta de configuração é recusada com o código do Google', async (t) => {
   const vazio = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo g ativar ')); t.after(() => { encerrarSessao(); estadoDaEntradaGithub(true); fs.rmSync(vazio, { recursive: true, force: true }); });

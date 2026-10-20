@@ -26,10 +26,11 @@ import { entradaCasoLocal, entradaSuiteLocal } from '../../testes/tipos/reposito
 
 /**
  * Fonte única dos contratos técnicos: o que a janela (IPC) e os agentes de IA (MCP) podem pedir ao Prumo.
- * - Os esquemas IPC abaixo são os MESMOS usados por backend/aplicativo/api/registrarCanal.ts para validar cada chamada.
+ * - Os esquemas IPC abaixo são os mesmos usados por backend/aplicativo/api/registrarCanal.ts para validar cada chamada.
  * - O catálogo descreve cada operação para a Ajuda › Integrações técnicas; testes comparam o catálogo com
- *   main.ts, preload.cjs e o servidor MCP real, então documentação e código não divergem em silêncio.
- * É puro Node (sem Electron). Não existe API HTTP: só IPC local e MCP por stdio.
+ *   registrarCanaisIpc.ts, preload.cjs e o servidor MCP real, então documentação e código não divergem em silêncio.
+ * Este catálogo é Node puro (sem Electron) e cobre apenas IPC local e MCP por stdio.
+ * As APIs HTTP possuem contratos próprios em backend/login, backend/suporte e backend/aplicativo.
  */
 const textoCurto = z.string().min(1).max(60);
 const textoNome = z.string().min(1).max(80);
@@ -38,16 +39,22 @@ const textoEmail = z.string().min(1).max(254);
 const codigoDoEmail = z.string().min(1).max(12);
 const raiz = z.string().min(1).max(1000);
 const soRaiz = z.object({ root: raiz }).strict();
+/** Um ?nico formato para pedidos que carregam apenas o identificador. */
+const somenteId = z.object({ id: z.string().uuid() }).strict();
+const somenteEspaco = z.object({ espacoId: z.string().uuid() }).strict();
+const espacoOuNulo = z.object({ espacoId: z.string().uuid().nullable() }).strict();
+const espacoOpcional = z.object({ espacoId: z.string().uuid().optional() }).strict();
+const raizEId = z.object({ root: raiz, id: z.string().uuid() }).strict();
 const vazio = z.object({}).strict();
 export const esquemasIpc = {
   'interface:exportar': z.object({ tipo: z.enum(['agente', 'metricas-json', 'metricas-csv', 'evidencia-json']), texto: z.string().min(1).max(2 * 1024 * 1024) }).strict(),
   'espacos:listar': vazio,
   'espacos:criar': dadosEspaco,
-  'espacos:obter': z.object({id:z.string().uuid()}).strict(),
+  'espacos:obter': somenteId,
   'espacos:editar': z.object({id:z.string().uuid(),dados:dadosEspaco}).strict(),
-  'espacos:pasta': z.object({id:z.string().uuid()}).strict(),
-  'espacos:trazer': z.object({id:z.string().uuid()}).strict(),
-  'espacos:automacoes': z.object({id:z.string().uuid()}).strict(),
+  'espacos:pasta': somenteId,
+  'espacos:trazer': somenteId,
+  'espacos:automacoes': somenteId,
   'espacos:associar': z.object({id:z.string().uuid(),dados:associacaoSchema}).strict(),
   'servicos:listar': vazio,
   'servicos:adicionar': conexaoEntrada,
@@ -55,8 +62,8 @@ export const esquemasIpc = {
   'servicos:qasepreviaconta': z.object({conexaoId:z.string().uuid()}).strict(),
   'servicos:qaseimportar': z.object({previaId:z.string().uuid(),codigos:z.array(z.string().regex(/^[A-Z][A-Z0-9]{1,9}$/)).min(1).max(1000)}).strict(),
   'servicos:qasecancelar': z.object({previaId:z.string().uuid()}).strict(),
-  'servicos:validar': z.object({id:z.string().uuid()}).strict(),
-  'servicos:remover': z.object({id:z.string().uuid()}).strict(),
+  'servicos:validar': somenteId,
+  'servicos:remover': somenteId,
   'servicos:recursos': z.object({id:z.string().uuid(),pagina:paginaSchema.optional()}).strict(),
   'servicos:vincular': z.object({espacoId:z.string().uuid(),conexaoId:z.string().uuid(),recurso:identidadeRecurso}).strict(),
   'servicos:desvincular': z.object({espacoId:z.string().uuid(),servico:servicoSchema}).strict(),
@@ -64,44 +71,40 @@ export const esquemasIpc = {
   'servicos:consultar': z.object({espacoId:z.string().uuid(),servico:servicoSchema,operacao:z.enum(operacoesServico),pagina:paginaSchema.optional(),id:z.string().max(200).optional(),filtros:filtrosSchema.optional()}).strict(),
   'servicos:aceite': z.object({espacoId:z.string().uuid(),campo:z.string().regex(/^customfield_\d+$/)}).strict(),
   'servicos:importar': z.object({espacoId:z.string().uuid(),ticket:z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/)}).strict(),
-  'operacoes:previa': z.object({espacoId:z.string().uuid(),operacao:z.enum(idsDeOperacao),parametros:z.record(z.unknown())}).strict(),
   'operacoes:executar': z.object({espacoId:z.string().uuid(),operacao:z.enum(idsDeOperacao),parametros:z.record(z.unknown()),anexo:z.discriminatedUnion('tipo',[z.object({tipo:z.literal('evidencia'),jobId:z.string().uuid()}).strict(),z.object({tipo:z.literal('arquivo')}).strict()]).optional()}).strict(),
   'operacoes:listar': z.object({espacoId:z.string().uuid().optional(),limite:z.number().int().min(1).max(500).optional()}).strict(),
-  'escrita:estado': z.object({espacoId:z.string().uuid()}).strict(),
+  'escrita:estado': somenteEspaco,
   'escrita:habilitar': z.object({espacoId:z.string().uuid(),servico:servicoSchema,habilitada:z.boolean()}).strict(),
-  'repositorio:listar': z.object({espacoId:z.string().uuid()}).strict(),
+  'repositorio:listar': somenteEspaco,
   'repositorio:caso': entradaCasoLocal,
   'repositorio:suite': entradaSuiteLocal,
-  'propostas:listar': z.object({espacoId:z.string().uuid()}).strict(),
+  'propostas:listar': somenteEspaco,
   'propostas:criar': z.object({espacoId:z.string().uuid(),tipo:z.enum(['caso','bug']),dados:z.record(z.unknown()),requisito:z.string().max(500).optional(),risco:z.string().max(300).optional(),falhaDeOrigem:z.object({runLocalId:z.string().uuid(),casoId:z.number().int().positive()}).strict().optional()}).strict(),
   'propostas:editar': z.object({id:z.string().uuid(),dados:z.record(z.unknown()),requisito:z.string().max(500).optional(),risco:z.string().max(300).optional()}).strict(),
   'propostas:revisar': z.object({id:z.string().uuid(),duplicidade:z.boolean(),requisito:z.boolean(),risco:z.boolean(),cobertura:z.boolean()}).strict(),
-  'propostas:descartar': z.object({id:z.string().uuid()}).strict(),
+  'propostas:descartar': somenteId,
   'propostas:vincular': z.object({id:z.string().uuid(),chave:z.string().trim().min(3).max(40)}).strict(),
   'propostas:publicar': z.object({id:z.string().uuid(),tipoId:z.string().regex(/^\d{1,12}$/).optional(),destino:z.enum(['jira','qase','github']).optional(),severidadeQase:z.number().int().min(1).max(20).optional(),marcoQase:z.number().int().positive().optional(),camposQase:z.record(z.string().regex(/^\d{1,12}$/),z.string().trim().min(1).max(2000)).optional()}).strict(),
-  'runs:listar': z.object({espacoId:z.string().uuid()}).strict(),
+  'runs:listar': somenteEspaco,
   'runs:preparar': z.object({espacoId:z.string().uuid(),titulo:z.string().trim().min(3).max(255),ambiente:z.enum(ambientes),casos:z.array(z.object({casoId:z.number().int().positive(),titulo:z.string().max(255)}).strict()).min(1).max(500),planoId:z.number().int().positive().optional(),marcoId:z.number().int().positive().optional(),ambienteQaseId:z.number().int().positive().optional()}).strict(),
-  'runs:criar': z.object({id:z.string().uuid()}).strict(),
-  'runs:executar': z.object({id:z.string().uuid()}).strict(),
+  'runs:criar': somenteId,
+  'runs:executar': somenteId,
   'runs:resultado': z.object({id:z.string().uuid(),casoId:z.number().int().positive(),status:z.enum(['PASS','FAIL','BLOCKED']),comentario:z.string().trim().min(3).max(2000)}).strict(),
   'runs:publicar': z.object({id:z.string().uuid(),anexarEvidencia:z.boolean().optional()}).strict(),
   'runs:bugs': z.object({id:z.string().uuid(),classificacao:z.enum(['PRODUTO','OUTRO_BUG','MELHORIA']).optional()}).strict(),
   'runs:politica': z.object({espacoId:z.string().uuid(),runId:z.number().int().positive(),dias:z.number().int().min(1).max(30),maxUsos:z.number().int().min(1).max(1000)}).strict(),
-  'runs:revogar': z.object({id:z.string().uuid()}).strict(),
-  'vinculos:mapa': z.object({espacoId:z.string().uuid()}).strict(),
-  'testes:catalogo': z.object({espacoId:z.string().uuid()}).strict(),
+  'runs:revogar': somenteId,
+  'vinculos:mapa': somenteEspaco,
+  'testes:catalogo': somenteEspaco,
   'testes:arquivo': z.object({espacoId:z.string().uuid(),arquivo:z.string().min(1).max(400)}).strict(),
-  'testes:pipelines': z.object({espacoId:z.string().uuid()}).strict(),
+  'testes:pipelines': somenteEspaco,
   'testes:gravar': z.object({espacoId:z.string().uuid(),arquivo:z.string().min(1).max(400),conteudo:z.string().max(300000),hashBase:z.string().regex(/^[a-f0-9]{64}$/).nullable()}).strict(),
-  'assistente:perguntar': z.object({espacoId:z.string().uuid().nullable(),pergunta:z.string().trim().min(2).max(300)}).strict(),
-  'assistente:situacao': z.object({espacoId:z.string().uuid().nullable()}).strict(),
   'assistente:conversar': z.object({espacoId:z.string().uuid().nullable(),pergunta:z.string().trim().min(2).max(300),agente:z.string().regex(/^[a-z0-9-]{1,40}$/).nullable().optional(),provedor:z.enum(['local','claude','codex']).optional(),primeira:z.boolean().optional(),historico:z.array(z.object({pergunta:z.string().max(300),agente:z.string().regex(/^[a-z0-9-]{1,40}$/),pendente:z.enum(['nome','papel']).nullable().optional()}).strict()).max(6).optional(),contexto:z.object({tipo:z.literal('teste'),arquivo:z.string().min(1).max(400).refine(v=>!/(^|[\\/])\.\.([\\/]|$)/.test(v)&&!/^([a-zA-Z]:|[\\/])/.test(v),'Caminho relativo à pasta do projeto, sem ..'),linha:z.number().int().min(1).max(1_000_000).nullable().optional()}).strict().nullable().optional()}).strict(),
-  'assistente:agentes': z.object({espacoId:z.string().uuid().nullable()}).strict(),
+  'assistente:agentes': espacoOuNulo,
   'conversas:listar': z.object({espacoId:z.string().uuid().nullable(),agente:z.string().regex(/^[a-z0-9-]{1,40}$/)}).strict(),
-  'conversas:apagar': z.object({espacoId:z.string().uuid().nullable()}).strict(),
-  'assistente:abertura': z.object({espacoId:z.string().uuid().nullable()}).strict(),
+  'assistente:abertura': espacoOuNulo,
   'assistente:avaliar': z.object({id:z.number().int().positive(),avaliacao:z.enum(['UTIL','NAO_UTIL']),agenteCorreto:z.string().regex(/^[a-z0-9-]{1,40}$/).optional(),pergunta:z.string().max(300).optional()}).strict(),
-  'conhecimento:estado': z.object({espacoId:z.string().uuid().nullable()}).strict(),
+  'conhecimento:estado': espacoOuNulo,
   'conhecimento:listar': z.object({espacoId:z.string().uuid().nullable(),agente:z.string().regex(/^[a-z0-9-]{1,40}$/).nullable().optional(),estados:z.array(z.enum(['RASCUNHO','APROVADO','DESCARTADO'])).max(3).optional(),busca:z.string().max(100).optional(),somenteDoAgente:z.boolean().optional()}).strict(),
   'conhecimento:criar': z.object({espacoId:z.string().uuid().nullable(),agente:z.string().regex(/^[a-z0-9-]{1,40}$/).nullable(),tipo:z.enum(tiposConhecimento),titulo:z.string().trim().min(2).max(120),texto:z.string().trim().min(2).max(2000)}).strict(),
   'conhecimento:decidir': z.object({id:z.string().regex(/^(prumo:[a-z0-9-]{1,40}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/),estado:z.enum(['APROVADO','DESCARTADO'])}).strict(),
@@ -111,7 +114,7 @@ export const esquemasIpc = {
   'conhecimento:mostrar': z.object({}).strict(),
   'administracao:mapa': z.object({}).strict(),
   'administracao:codigo': z.object({caminho:caminhoDeCodigoSchema}).strict(),
-  'agentes:orquestracoes': z.object({espacoId:z.string().uuid().nullable()}).strict(),
+  'agentes:orquestracoes': espacoOuNulo,
   'agentes:rastrear': z.object({espacoId:z.string().uuid().nullable(),pergunta:z.string().trim().min(1).max(500),agente:z.string().regex(/^[a-z0-9-]{1,40}$/).nullable()}).strict(),
   'skills:listar': z.object({especializacao:z.enum(especializacoes.map(e=>e.id) as [string,...string[]]).nullable().optional(),estados:z.array(z.enum(estadosTrecho)).max(3).optional(),busca:z.string().max(100).optional()}).strict(),
   'skills:criar': z.object({especializacao:z.enum(especializacoes.map(e=>e.id) as [string,...string[]]),titulo:z.string().trim().min(2).max(120),texto:z.string().trim().min(2).max(4000)}).strict(),
@@ -120,24 +123,24 @@ export const esquemasIpc = {
   'perfil:obter': z.object({}).strict(),
   'perfil:salvar': z.object({comoChamar:z.string().max(30).nullable().optional(),papel:z.enum(papeis as unknown as ['qa','dev','po','analista','outro']).nullable().optional(),experiencia:z.enum(['iniciante','intermediario','avancado']).nullable().optional(),foco:z.string().max(160).nullable().optional(),compartilharComIa:z.boolean().optional()}).strict(),
   'ia:delegacao': z.object({provedor:z.enum(['claude','codex']),valor:z.boolean()}).strict(),
-  'agentes:estado': z.object({espacoId:z.string().uuid()}).strict(),
+  'agentes:estado': somenteEspaco,
   'agentes:pessoais': z.object({ espacoId: z.string().uuid() }).strict(),
   'agentes:pessoalsalvar': z.object({ espacoId: z.string().uuid(), agente: dadosDoAgentePessoal }).strict(),
   'agentes:pessoalexcluir': z.object({ id: z.string().regex(/^[a-z0-9-]{1,80}$/) }).strict(),
   'agentes:pessoaisimportar': z.object({ espacoId: z.string().uuid(), previas: z.array(dadosDoAgentePessoal.omit({ publico: true })).max(50) }).strict(),
   'agentes:salvar': z.object({espacoId:z.string().uuid(),especializacoes:z.array(z.string().max(40)).max(16),politicas:z.record(z.string().max(30))}).strict(),
-  'agenda:listar': z.object({espacoId:z.string().uuid().optional()}).strict(),
+  'agenda:listar': espacoOpcional,
   'agenda:salvar': z.object({id:z.string().uuid().optional(),dados:dadosRotinaSchema}).strict(),
   'agenda:estado': z.object({id:z.string().uuid(),acao:z.enum(['pausar','retomar','desativar'])}).strict(),
-  'agenda:excluir': z.object({id:z.string().uuid()}).strict(),
-  'agenda:executar': z.object({id:z.string().uuid()}).strict(),
+  'agenda:excluir': somenteId,
+  'agenda:executar': somenteId,
   'agenda:autorizar': z.object({id:z.string().uuid(),dias:z.number().int().min(1).max(30),maxUsos:z.number().int().min(1).max(1000)}).strict(),
-  'agenda:revogar': z.object({id:z.string().uuid()}).strict(),
-  'agenda:permissoes': z.object({espacoId:z.string().uuid().optional()}).strict(),
+  'agenda:revogar': somenteId,
+  'agenda:permissoes': espacoOpcional,
   'agenda:politica': z.object({espacoId:z.string().uuid(),tickets:z.array(z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/)).min(1).max(20),tipos:z.array(z.enum(['smoke','regressao','validacao-ticket','k6'])).min(1).max(4),dias:z.number().int().min(1).max(30),maxPublicacoes:z.number().int().min(1).max(1000)}).strict(),
-  'agenda:revogarpolitica': z.object({id:z.string().uuid()}).strict(),
+  'agenda:revogarpolitica': somenteId,
   'execucoes:listar': z.object({filtro:filtroExecucoes.optional()}).strict(),
-  'execucoes:metricas': z.object({espacoId:z.string().uuid().optional()}).strict(),
+  'execucoes:metricas': espacoOpcional,
   'jira:previa': z.object({trabalhoId:z.string().uuid()}).strict(),
   'jira:publicar': z.object({trabalhoId:z.string().uuid()}).strict(),
   'worker:estado': vazio,
@@ -171,12 +174,12 @@ export const esquemasIpc = {
     z.object({ escopo: z.literal('diagnostico') }).strict()]),
   'diagnostico:listar': vazio,
   'contextos:listar': z.object({ root: raiz, filter: z.object({ tipo: z.enum(tipos).optional(), estado: z.enum(estados).optional(), busca: z.string().max(200).optional(), chave: z.string().max(60).optional() }).strict().optional() }).strict(),
-  'contextos:obter': z.object({ root: raiz, id: z.string().uuid() }).strict(),
+  'contextos:obter': raizEId,
   'contextos:salvar': z.object({ root: raiz, id: z.string().uuid().optional(), substituir: z.boolean().optional(), dados: conteudoSchema.partial() }).strict(),
-  'contextos:aprovar': z.object({ root: raiz, id: z.string().uuid() }).strict(),
-  'contextos:desatualizar': z.object({ root: raiz, id: z.string().uuid() }).strict(),
+  'contextos:aprovar': raizEId,
+  'contextos:desatualizar': raizEId,
   'contextos:conflito': z.object({ root: raiz, id: z.string().uuid(), outroId: z.string().uuid().optional() }).strict(),
-  'contextos:excluir': z.object({ root: raiz, id: z.string().uuid() }).strict(),
+  'contextos:excluir': raizEId,
   'contextos:mcp': z.object({ root: raiz, habilitar: z.boolean() }).strict(),
   'preferencias:obter': vazio,
   'preferencias:salvar': alteracaoSchema,
@@ -197,14 +200,14 @@ export const esquemasIpc = {
   'chamados:anexo': z.object({ numero: numeroChamado, indice: z.number().int().min(0).max(3) }).strict(),
   'chamados:responder': z.object({ numero: numeroChamado, texto: z.string().trim().min(1).max(4000) }).strict(),
   'chamados:estado': z.object({ numero: numeroChamado, estado: z.enum(estadosDoChamado) }).strict(),
-  // 2.11: login, contas, papéis com permissão por tela e agentes da plataforma (Administração).
+  // Login, contas, papéis com permissão por tela e agentes da plataforma (Administração).
   'conta:sessao': vazio,
   'conta:entrar': z.object({ login: textoEmail, senha: textoSenha, idioma: z.enum(['pt-BR', 'en']).optional() }).strict(),
   'conta:confirmarentrada': z.object({ desafio: z.string().uuid(), codigo: codigoDoEmail }).strict(),
   'conta:reenviarentrada': z.object({ desafio: z.string().uuid(), idioma: z.enum(['pt-BR', 'en']).optional() }).strict(),
   'conta:duasetapas': z.object({ ligar: z.boolean(), senha: textoSenha }).strict(),
   'conta:sair': vazio,
-  'conta:cadastrar': z.object({ email: textoEmail, nome: textoNome, senha: textoSenha, codigo: codigoDoEmail }).strict(),
+  'conta:cadastrar': z.object({ email: textoEmail, nome: textoNome, senha: textoSenha, codigo: codigoDoEmail.optional() }).strict(),
   'conta:codigo': z.object({ email: textoEmail, finalidade: z.enum(['CADASTRO', 'SENHA']), idioma: z.enum(['pt-BR', 'en']).optional() }).strict(),
   'conta:recuperar': z.object({ email: textoEmail, codigo: codigoDoEmail, novaSenha: textoSenha }).strict(),
   'conta:githubiniciar': z.object({ ativar: z.boolean().optional() }).strict(),
@@ -231,7 +234,7 @@ export const esquemasIpc = {
   'plataforma:salvar': z.object({ desligados: z.array(z.string().min(1).max(40)).max(16), iaExterna: z.boolean(), orquestracao: z.boolean() }).strict()
 } as const;
 export type CanalIpc = keyof typeof esquemasIpc;
-export type Operacao = {
+type Operacao = {
   tipo: 'IPC' | 'MCP'; nome: string; campos: string[]; finalidade: string; origem: string; destino: string; entrada: string; saida: string;
   permissoes: string; efeito: string; arquivos: string; erros: string[]; protecoes: string[]; registro: string;
 };
@@ -264,7 +267,7 @@ const ipc: Partial<Record<CanalIpc, Descricao>> = {
   'ajuda:integracoes': { finalidade: 'Catálogo técnico das operações IPC e das ferramentas MCP.', origem: 'Interface > Ajuda > Integrações técnicas', destino: 'main.ts > contratos.catalogo', entrada: 'Nenhuma', saida: 'Lista de operações', permissoes: 'Nenhuma', efeito: consulta, arquivos: 'Nenhum', erros: ipcErros, protecoes: ipcProtecoes, registro: 'Diagnóstico IPC (somente erros)' },
   'atualizacao:verificar': { finalidade: 'Consultar a release oficial mais recente (somente quando a pessoa clica).', origem: 'Interface > Ajuda > Atualizações', destino: 'main.ts > atualizacao.verificarAtualizacao', entrada: 'Nenhuma: nada do usuário é enviado', saida: 'status, versão instalada, versão mais recente, notas, página oficial e notificacao (indicador, som)', permissoes: 'Ação explícita da pessoa ou preferência "verificar ao iniciar" (desligada por padrão)', efeito: 'Uma requisição HTTPS GET ao GitHub; não baixa nem instala nada. Grava só a versão disponível e as decisões de aviso em preferencias.json.', arquivos: 'Nenhum', erros: [...ipcErros, 'INDISPONIVEL', 'RESPOSTA_INVALIDA'], protecoes: [...ipcProtecoes, 'Destino fixo (api.github.com)', 'Timeout', 'Sem corpo, sem cookies, sem redirecionamento', 'Resposta validada'], registro: 'Diagnóstico IPC' },
   'atualizacao:abrir': { finalidade: 'Abrir no navegador a página oficial da release encontrada.', origem: 'Interface > Ajuda > Atualizações > Abrir página oficial', destino: 'main.ts > shell.openExternal', entrada: 'Nenhuma: a URL é a validada pelo processo principal', saida: 'opened', permissoes: 'Confirmação nativa', efeito: 'Abre o navegador padrão na página da release; não baixa nem executa instalador.', arquivos: 'Nenhum', erros: [...ipcErros, 'NO_VERIFIED_RELEASE'], protecoes: [...ipcProtecoes, 'URL reconstruída a partir de tag validada', 'Somente github.com/AnaPLysyk/Prumo-Qa'], registro: 'Diagnóstico IPC' },
-  'atualizacao:instalar': { finalidade: 'Atualizar com um clique para a versão encontrada pela consulta (2.10.2).', origem: 'Interface > Ajuda > Atualizações > Atualizar agora', destino: 'main.ts > atualizacaoInstalar.baixarAtualizacao + instalador NSIS silencioso', entrada: 'Nenhuma: versão e URLs vêm da consulta validada no processo principal', saida: 'canceled, verificado, instalando, versao, sha256', permissoes: 'Confirmação nativa; recusa com execução em andamento', efeito: 'Baixa o instalador oficial e o .sha256 da release no GitHub, confere o resumo, executa o instalador (/S --updated --force-run) e fecha o Prumo, que reabre na versão nova. Fora do pacote nunca executa instalador.', arquivos: 'Instalador temporário na pasta TEMP do usuário (prumo-atualizacao-*)', erros: [...ipcErros, 'NO_VERIFIED_RELEASE', 'UPDATE_BUSY', 'UPDATE_DOWNLOAD_FAILED', 'UPDATE_HASH_MISSING', 'UPDATE_HASH_MISMATCH', 'UPDATE_DESTINATION_FORBIDDEN', 'UPDATE_DEV_MODE'], protecoes: [...ipcProtecoes, 'URL montada da versão validada', 'Redirecionamentos só para hosts de download do GitHub, HTTPS', 'SHA-256 publicado na release conferido antes de executar', 'Gravação exclusiva e limite de tamanho'], registro: 'Diagnóstico IPC' },
+  'atualizacao:instalar': { finalidade: 'Atualizar com um clique para a versão encontrada pela consulta.', origem: 'Interface > Ajuda > Atualizações > Atualizar agora', destino: 'main.ts > atualizacaoInstalar.baixarAtualizacao + instalador NSIS silencioso', entrada: 'Nenhuma: versão e URLs vêm da consulta validada no processo principal', saida: 'canceled, verificado, instalando, versao, sha256', permissoes: 'Confirmação nativa; recusa com execução em andamento', efeito: 'Baixa o instalador oficial e o .sha256 da release no GitHub, confere o resumo, executa o instalador (/S --updated --force-run) e fecha o Prumo, que reabre na versão nova. Fora do pacote nunca executa instalador.', arquivos: 'Instalador temporário na pasta TEMP do usuário (prumo-atualizacao-*)', erros: [...ipcErros, 'NO_VERIFIED_RELEASE', 'UPDATE_BUSY', 'UPDATE_DOWNLOAD_FAILED', 'UPDATE_HASH_MISSING', 'UPDATE_HASH_MISMATCH', 'UPDATE_DESTINATION_FORBIDDEN', 'UPDATE_DEV_MODE'], protecoes: [...ipcProtecoes, 'URL montada da versão validada', 'Redirecionamentos só para hosts de download do GitHub, HTTPS', 'SHA-256 publicado na release conferido antes de executar', 'Gravação exclusiva e limite de tamanho'], registro: 'Diagnóstico IPC' },
   'dados:resumo': { finalidade: 'Mostrar onde ficam os dados locais e quanto espaço ocupam.', origem: 'Interface > Ajuda > Privacidade e dados', destino: 'main.ts > dados.resumirDados', entrada: 'Nenhuma', saida: 'Pasta, projetos vinculados, bytes por categoria, política de retenção', permissoes: 'Nenhuma', efeito: consulta, arquivos: '%LOCALAPPDATA%\\PrumoQA (somente tamanhos)', erros: ipcErros, protecoes: [...ipcProtecoes, 'Não segue links simbólicos'], registro: 'Diagnóstico IPC' },
   'dados:excluir': { finalidade: 'Excluir histórico operacional, evidências de um projeto ou diagnósticos do aplicativo.', origem: 'Interface > Ajuda > Privacidade e dados', destino: 'main.ts (confirmação nativa) > atividades/evidencias/diagnostico', entrada: 'escopo (historico, evidencias, contextos ou diagnostico) + projeto quando aplicável', saida: 'deleted, failed', permissoes: vinculado + ' Confirmação nativa destrutiva.', efeito: 'Apaga somente arquivos do escopo, validados por nome, tipo e caminho canônico. Nunca apaga código-fonte; não é exposto ao MCP.', arquivos: 'Histórico do projeto; <projeto>/.prumo/evidencias; diagnóstico do app', erros: [...ipcErros, 'PROJECT_NOT_LINKED', 'HISTORY_SYMLINK'], protecoes: [...ipcProtecoes, 'Confirmação nativa', 'Recusa links e arquivos fora do padrão', 'Falhas parciais informadas, nunca ocultadas'], registro: 'Diagnóstico IPC' },
   'diagnostico:listar': { finalidade: 'Listar o diagnóstico técnico das chamadas da interface.', origem: 'Interface > Logs > Diagnóstico da interface', destino: 'main.ts > diagnostico.lerDiagnostico', entrada: 'Nenhuma', saida: 'Eventos (canal, estado, duração, código)', permissoes: 'Nenhuma', efeito: consulta, arquivos: '%LOCALAPPDATA%\\PrumoQA\\diagnostico', erros: ipcErros, protecoes: [...ipcProtecoes, 'Somente metadados, sem argumentos'], registro: 'Não se registra (evita recursão)' }
@@ -337,16 +340,15 @@ for(const nome of Object.keys(esquemasIpc).filter(n=>n.startsWith('espacos:')||n
   const leitura=/:listar$|:obter$|:automacoes$|:recursos$|:consultar$|:conferir$|:validar$/.test(nome);
   ipc[nome]={finalidade:`${nome}: gestão explícita do projeto Prumo e integrações de leitura.`,origem:'Interface > Projetos, Tickets, Testes ou Conexões',destino:nome.startsWith('espacos:')?'main.ts > espacos.ts':'main.ts > servicos.ts > adaptadoresServicos.ts',entrada:'Argumentos definidos pelo esquema estrito; nunca método ou endereço de consulta arbitrário',saida:leitura?'Metadados ou dados da consulta com origem, data e cache:false':'Registro local ou confirmação de cancelamento',permissoes:'Ação explícita da pessoa; conta e projeto selecionados. Escrita externa e execução não autorizadas.',efeito:leitura?'Consulta local ou leitura externa pelo adaptador; não altera sistemas externos.':'Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa.',arquivos:'Dados locais plataforma; credenciais exclusivamente protegidas pelo sistema operacional',erros:[...ipcErros,...codigosServico,'WORKSPACE_NOT_FOUND','CREDENTIAL_PROTECTION_UNAVAILABLE'],protecoes:[...ipcProtecoes,'Isolamento por identificador de projeto, conexão e instância','Sem conteúdo remoto ou token nos logs','Não exposto ao MCP'],registro:'Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido'};
 }
-// 2.10.2: vincular qualquer pasta de código propõe o contrato e só o cria com confirmação nativa.
+// Vincular qualquer pasta de código propõe o contrato e só o cria com confirmação nativa.
 const pastaBase = ipc['espacos:pasta']!;
 ipc['espacos:pasta'] = { ...pastaBase, finalidade: 'Vincular a pasta de um repositório de código ao projeto Prumo, de qualquer stack.', entrada: 'Id do projeto; a pasta vem do diálogo nativo, nunca da página', efeito: 'Grava a pasta no projeto Prumo. Sem qa.project.json, detecta a stack pela raiz e propõe o contrato; só cria o arquivo após confirmação nativa (gravação exclusiva, nunca sobrescreve). Contrato inválido não é vinculado.', arquivos: 'qa.project.json da pasta escolhida (criado só com aprovação); dados locais plataforma', erros: [...pastaBase.erros, 'WORKSPACE_LOCAL_CONTRACT_INVALID', 'WORKSPACE_LOCAL_FOLDER_MISSING', 'WORKSPACE_LOCAL_DUPLICATE', 'CONTRACT_EXISTS'] };
 ipc['espacos:trazer'] = { ...pastaBase, finalidade: 'Trazer o repositório do GitHub vinculado ao projeto para uma pasta deste computador (ou atualizá-lo), para a IDE de Testes poder editá-lo.', origem: 'Interface > Testes > IDE', entrada: 'Id do projeto', saida: 'Ação (clonado ou atualizado), pasta, ramo e se a pasta foi vinculada ao projeto', efeito: 'Pede confirmação nativa do Windows e usa o git instalado, só com o endereço do GitHub do repositório vinculado (por https), hooks e links simbólicos desligados e as credenciais do próprio git (o Prumo não entrega a dele). Clona na pasta de dados do Prumo (repositorios); atualizar é só avanço, sem sobrescrever o trabalho local.', permissoes: 'Projetos: USAR', arquivos: 'Pasta de dados do Prumo, repositorios/<projeto>/<repositório>', erros: [...pastaBase.erros, 'GIT_UNAVAILABLE', 'GIT_AUTH', 'GIT_FAILED', 'GIT_TIMEOUT', 'GIT_URL_INVALID', 'GITHUB_NOT_LINKED', 'CLONE_DESTINATION_BUSY', 'CLONE_REMOTE_MISMATCH', 'CLONE_CANNOT_FAST_FORWARD', 'CLONE_NOT_FROM_PRUMO'] };
-// ---- 2.9: escritas externas, propostas, runs Qase, vínculos e agentes ----
+// Escritas externas, propostas, runs Qase, vínculos e agentes.
 const extProt = [...ipcProtecoes, 'Isolamento por projeto Prumo, conexão e instância', 'Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts)', 'Escrita desligada por padrão por projeto e serviço', 'Confirmação nativa que a página não consegue simular', 'Idempotência e reconciliação; sem token nos logs'];
 const extErros = [...ipcErros, ...codigosServico, 'WRITE_NOT_ENABLED', 'HUMAN_CONFIRMATION_REQUIRED', 'WRITE_POLICY_MISSING', 'OPERATION_UNKNOWN', 'OPERATION_RETRY_LIMIT', 'WORKSPACE_NOT_FOUND'];
 const extDesc = (finalidade: string, entrada: string, saida: string, efeito: string, permissoes: string, extra: Partial<Descricao> = {}): Descricao => ({ finalidade, origem: 'Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões', destino: 'main.ts > operacoesExternas.ts / fluxoQase.ts / propostas.ts', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json', erros: extErros, protecoes: extProt, registro: 'Livro-razão local de operações externas e histórico do projeto', ...extra });
 Object.assign(ipc, {
-  'operacoes:previa': extDesc('Mostrar o resumo, o efeito e a chave de idempotência de uma operação externa antes de executá-la.', 'Projeto, operação do catálogo e parâmetros', 'Resumo mascarado, efeito, chave e se a escrita está habilitada', 'Sem rede e sem gravação.', 'Nenhuma'),
   'operacoes:executar': extDesc('Executar uma operação externa do catálogo (criar ticket/caso/plano/run, anexar, editar, mudar status, vincular, branch, commit de teste, PR).', 'Projeto, operação, parâmetros e, para anexos, evidência do projeto ou arquivo escolhido no diálogo nativo', 'Registro da operação com estado (CONFIRMADA, ENVIADA, FALHA, BLOQUEADA) e identificador/link remoto', 'Escreve no Jira, Qase ou GitHub vinculados somente depois de confirmação nativa; relê o serviço para confirmar; repetir não duplica.', 'Escrita habilitada no projeto + confirmação nativa com o resumo exato', { protecoes: [...extProt, 'Caminho de arquivo nunca vem da página'] }),
   'operacoes:listar': extDesc('Livro-razão das operações externas por projeto.', 'Projeto opcional e limite', 'Operações com estado, resumo, identificador remoto e tentativas', 'Consulta local.', 'Nenhuma'),
   'escrita:estado': extDesc('Ver em quais serviços a escrita está habilitada no projeto.', 'Projeto', 'Habilitação por serviço', 'Consulta local.', 'Nenhuma'),
@@ -366,10 +368,9 @@ Object.assign(ipc, {
   'testes:pipelines': extDesc('Listar os pipelines do GitHub Actions (.github/workflows) da pasta vinculada ao projeto, para a IDE de Testes.', 'Projeto', 'Se há pasta vinculada e, para cada pipeline, caminho, nome, eventos, jobs e número de linhas', 'Somente leitura dentro da pasta vinculada; ignora link simbólico, arquivo maior que 300 KB e mais de 50 pipelines. Nada é executado.', 'Testes: VER'),
   'testes:gravar': extDesc('Gravar ou criar um arquivo de teste na pasta vinculada, pela IDE de Testes.', 'Projeto, caminho relativo, conteúdo e SHA-256 do conteúdo lido (nulo para arquivo novo)', 'Caminho, número de linhas, novo SHA-256 e se o arquivo foi criado', 'Pede confirmação nativa do Windows; grava só dentro da pasta vinculada, só arquivo de teste (.spec/.test, .feature, test_*.py) ou pipeline (.github/workflows/*.yml), até 300 KB, sem link simbólico, por troca atômica; recusa se o arquivo mudou fora do Prumo ou já existe ao criar. Nada é executado nem enviado.', 'Testes: USAR'),
   'testes:catalogo': extDesc('Ler os arquivos de teste da pasta do projeto, agrupar por feature e classificar cada teste (unitário, integração, funcional, regressão, smoke, desempenho, acessibilidade).', 'Projeto', 'Features, cenários, passos, tipo, confiança e motivo', 'Leitura estática da pasta vinculada; nada é executado nem alterado.', 'Nenhuma'),
-  'assistente:perguntar': extDesc('Responder uma pergunta com os dados locais do projeto (contextos aprovados, propostas, execuções, agenda). Não usa modelo de IA nem rede.', 'Projeto e pergunta', 'Linhas de resposta e telas de origem', 'Consulta local; nada é gravado nem enviado.', 'Nenhuma'),
   'assistente:conversar': extDesc('Rotear a pergunta do chat para um agente local e responder com dados deste computador; opcionalmente delegar ao Claude Code/Codex já autorizado.', 'Projeto, pergunta, agente opcional e provedor', 'Agente, linhas, fontes, modo (LOCAL/CLAUDE/CODEX), estilo, rota, próximos passos, ações (aprovar/descartar aprendizado), pendência de perfil e atendimentoId', 'Não grava a conversa: registra só o atendimento (agente, modo e fontes) em conhecimento.db. A memória da sessão (até 6 turnos) e o contexto do teste aberto vêm da janela. Pedidos como "me chama de…" e "lembra que…" gravam o perfil ou um rascunho de conhecimento. Com provedor externo autorizado, executa o CLI local sem shell, com tempo limite; linhas APRENDIZADO da IA viram rascunho.', 'Delegação externa exige autorização prévia com confirmação nativa', { arquivos: 'conhecimento.db; backend/agentes/skills/<especialização>/SKILL.md', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED'] }),
   'assistente:agentes': extDesc('Listar os agentes do chat, suas especializações, capacidades e a disponibilidade de Claude Code/Codex.', 'Projeto', 'Agentes e provedores (encontrado, autorizado)', 'Consulta local.', 'Nenhuma'),
-  'conversas:listar': extDesc('Listar os atendimentos de um agente (sem texto, desde a 2.10) e as conversas gravadas até a 2.9, para o Cérebro e o Painel de atividades.', 'Projeto e agente', 'Até 40 itens (data, modo, fontes; pergunta e resposta só nos registros antigos)', 'Consulta local.', 'Nenhuma'),
+  'conversas:listar': extDesc('Listar os atendimentos da pessoa com um agente (sem o texto das perguntas), para o Cérebro e o Painel de atividades.', 'Projeto e agente', 'Até 40 itens (data, modo, fontes e avaliação)', 'Consulta local.', 'Nenhuma'),
   'assistente:abertura': extDesc("Abrir a conversa: cumprimentar pelo nome, resumir a situação do projeto e, se ainda não souber, perguntar como chamar a pessoa e o papel dela.", "Projeto", "Linhas, pendência (nome/papel), próximos passos e nome da pessoa", "Consulta local.", "Nenhuma", { origem: 'Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes', destino: 'main.ts > orquestrador.ts / conhecimento.ts', arquivos: "%LOCALAPPDATA%\\PrumoQA\\conhecimento.db", registro: 'Banco de conhecimento local (SQLite)', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'KNOWLEDGE_*', 'PROFILE_*'] }),
   'assistente:avaliar': extDesc("Avaliar um atendimento (útil ou não). Ao indicar o agente certo, ensina a ele só os termos da pergunta.", "Id do atendimento, avaliação, agente certo e pergunta (opcionais)", "avaliado e termos aprendidos", "Grava a avaliação e o vocabulário em conhecimento.db; a pergunta não é gravada.", "Ação explícita da pessoa", { origem: 'Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes', destino: 'main.ts > orquestrador.ts / conhecimento.ts', arquivos: "%LOCALAPPDATA%\\PrumoQA\\conhecimento.db", registro: 'Banco de conhecimento local (SQLite)', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'KNOWLEDGE_*', 'PROFILE_*'] }),
   'conhecimento:estado': extDesc("Resumo do banco de conhecimento: arquivo, tabelas, vistas por agente, contagens e perfil.", "Projeto", "Arquivo, tamanho, tabelas, vistas, contagens por agente e perfil", "Consulta local (cria o banco e o conhecimento inicial se ainda não existirem).", "Nenhuma", { origem: 'Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes', destino: 'main.ts > orquestrador.ts / conhecimento.ts', arquivos: "%LOCALAPPDATA%\\PrumoQA\\conhecimento.db", registro: 'Banco de conhecimento local (SQLite)', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'KNOWLEDGE_*', 'PROFILE_*'] }),
@@ -390,9 +391,7 @@ Object.assign(ipc, {
   'skills:importar': extDesc("Importar uma pasta de Skill aberta (SKILL.md e references/) já presente no computador, como rascunhos de uma especialização.", "Especialização e fonte (endereço do repositório, opcional)", "Licença reconhecida, quantidade importada e duplicada (estado RASCUNHO)", "Abre o seletor de pastas do sistema; recusa pasta sem licença aberta reconhecida (MIT, Apache-2.0, BSD, ISC, CC). Nada é baixado nem executado; scripts da pasta são ignorados.", "Ação explícita da pessoa; aprovação de cada trecho antes de ir para o prompt", { origem: 'Interface > Agentes (Skills)', arquivos: "%LOCALAPPDATA%\\PrumoQA\\skills.db; pasta escolhida pela pessoa (somente leitura)", registro: 'Banco de Skills local (SQLite), separado do conhecimento', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'SKILL_*', 'SKILLS_*'] }),
   'perfil:obter': extDesc("Ler como a pessoa quer ser chamada e o papel dela.", "Nenhuma", "comoChamar, papel e data", "Consulta local.", "Nenhuma", { origem: 'Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes', destino: 'main.ts > orquestrador.ts / conhecimento.ts', arquivos: "%LOCALAPPDATA%\\PrumoQA\\conhecimento.db", registro: 'Banco de conhecimento local (SQLite)', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'KNOWLEDGE_*', 'PROFILE_*'] }),
   'perfil:salvar': extDesc("Salvar como a pessoa quer ser chamada e o papel dela (QA, dev, PO, analista ou outro).", "comoChamar e/ou papel (null limpa)", "Perfil", "Grava a única linha da tabela perfil.", "Ação explícita da pessoa", { origem: 'Interface > Início, chat flutuante, Agentes (Cérebro) ou Ajustes', destino: 'main.ts > orquestrador.ts / conhecimento.ts', arquivos: "%LOCALAPPDATA%\\PrumoQA\\conhecimento.db", registro: 'Banco de conhecimento local (SQLite)', erros: ['INVALID_ARGUMENTS', 'IPC_SENDER_REJECTED', 'KNOWLEDGE_*', 'PROFILE_*'] }),
-  'conversas:apagar': extDesc('Apagar as conversas gravadas deste projeto neste computador.', 'Projeto', 'apagado', 'Remove conversas/<projeto>.jsonl após confirmação nativa.', 'Confirmação nativa da pessoa'),
   'ia:delegacao': extDesc('Autorizar ou revogar a delegação do chat ao Claude Code ou Codex.', 'Provedor e valor', 'Preferências atualizadas', 'Grava preferencias.json. Autorizar exige confirmação nativa; revogar não.', 'Confirmação nativa para autorizar'),
-  'assistente:situacao': extDesc('Resumir o que está acontecendo agora no projeto para o painel inicial.', 'Projeto', 'Até cinco linhas de situação', 'Consulta local.', 'Nenhuma'),
   'runs:listar': extDesc('Listar as runs locais do projeto (preparadas, criadas, executadas e publicadas).', 'Projeto', 'Runs com casos, resultados e publicações', 'Consulta local.', 'Nenhuma'),
   'runs:preparar': extDesc('Preparar uma run local com casos do Qase e identificar quais têm automação associada.', 'Projeto, título, ambiente e casos', 'Run local PREPARADA', 'Grava runs-qase.json. Não cria nada no Qase.', 'Ação explícita da pessoa'),
   'runs:criar': extDesc('Criar a run no Qase com os casos escolhidos.', 'Id da run local', 'Operação externa e id remoto da run', 'Cria a run no Qase após confirmação nativa. Criar a run não executa nada.', 'Escrita habilitada + confirmação nativa'),
@@ -406,7 +405,7 @@ Object.assign(ipc, {
   'agentes:estado': extDesc('Especializações, políticas e propostas de IA do projeto.', 'Projeto', 'Configuração, matriz de capacidades com motivo, contagem de propostas de IA', 'Consulta local.', 'Nenhuma'),
   'agentes:salvar': extDesc('Habilitar especializações e bloquear capacidades da IA conectada neste projeto.', 'Projeto, especializações e políticas', 'Configuração salva', 'Grava agentes.json. O bloqueio vale no servidor MCP a cada chamada.', 'Confirmação nativa')
 });
-// ---- 2.8: agenda, execuções, comentário Jira e worker ----
+// Agenda, execuções, comentário Jira e worker.
 const agendaProt = [...ipcProtecoes, 'Isolamento por projeto Prumo', 'Sem comando livre: só capabilities declaradas', 'Não exposto ao MCP'];
 const agendaErros = [...ipcErros, 'SCHEDULE_NOT_FOUND', 'SCHEDULE_LIMIT', 'SCHEDULE_IN_THE_PAST', 'SCHEDULE_PROJECT_IMMUTABLE', 'WORKSPACE_NOT_FOUND'];
 const agendaDesc = (finalidade: string, entrada: string, saida: string, efeito: string, permissoes: string, extra: Partial<Descricao> = {}): Descricao => ({ finalidade, origem: 'Interface > Agendamentos / Execuções, ou menu da bandeja', destino: 'main.ts > agenda.ts / fila.ts / worker.ts', entrada, saida, permissoes, efeito, arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agenda.json, fila.json, autorizacoes.json', erros: agendaErros, protecoes: agendaProt, registro: 'Diagnóstico IPC e histórico de execuções por projeto', ...extra });
@@ -490,7 +489,7 @@ Object.assign(ipc, {
   'plataforma:agentes': contaDesc('Ler a configuração geral dos agentes da plataforma.', 'Nenhuma', 'Agentes com estado ligado, IA externa e orquestração', 'Consulta local.', 'Administração: VER', { arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agentes-plataforma.json' }),
   'plataforma:salvar': contaDesc('Ligar ou desligar agentes, o uso de Claude Code/Codex e a orquestração em todos os projetos.', 'Agentes desligados, iaExterna e orquestracao', 'Configuração salva', 'Grava agentes-plataforma.json; vale para o chat e para o servidor MCP.', 'Administração: USAR', { arquivos: '%LOCALAPPDATA%\\PrumoQA\\plataforma\\agentes-plataforma.json', erros: [...contaErros, 'AGENT_UNKNOWN'] })
 });
-export const canaisFrequentes: ReadonlySet<string> = new Set(['repositorio:listar','testes:catalogo','testes:arquivo','assistente:situacao','assistente:agentes','conversas:listar','operacoes:previa','operacoes:listar','escrita:estado','propostas:listar','runs:listar','vinculos:mapa','agentes:estado','worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter', 'conhecimento:estado', 'conhecimento:listar', 'perfil:obter', 'assistente:abertura', 'conhecimento:vocabulario']);
+export const canaisFrequentes: ReadonlySet<string> = new Set(['repositorio:listar','testes:catalogo','testes:arquivo','assistente:agentes','conversas:listar','operacoes:listar','escrita:estado','propostas:listar','runs:listar','vinculos:mapa','agentes:estado','worker:eventos','agenda:listar','agenda:permissoes','execucoes:listar','execucoes:metricas','worker:estado','jira:previa','espacos:listar','espacos:obter','servicos:listar','preferencias:obter', 'app:info', 'projetos:listar', 'projeto:visao', 'projeto:logs', 'projeto:historico', 'diagnostico:listar', 'ajuda:documentos', 'ajuda:versoes', 'ajuda:integracoes', 'dados:resumo', 'contextos:listar', 'contextos:obter', 'conhecimento:estado', 'conhecimento:listar', 'perfil:obter', 'assistente:abertura', 'conhecimento:vocabulario']);
 const mcpProtecoes = ['Projeto fixado na configuração do servidor, nunca pela ferramenta', 'Leitura limitada à raiz autorizada', 'Registro de início e término'];
 const mcp: { nome: string; campos: string[]; d: Descricao }[] = [
   { nome: 'contexto_projeto', campos: [], d: { finalidade: 'Identificar tipo, tecnologias, testes, comandos e o que falta no contexto autorizado.', origem: 'Agente de IA por MCP (stdio)', destino: 'backend/agentes/mcp/criarServidor.ts > contextoCompleto', entrada: 'Nenhuma', saida: 'Contexto NOT_VERIFIED com fontes, hashes e informações ausentes', permissoes: 'Servidor iniciado pelo cliente para um projeto', efeito: 'Somente leitura.', arquivos: 'Arquivos listados no contexto do qa.project.json', erros: ['ROOT_REQUIRED', 'INVALID_MANIFEST', 'PATH_FORBIDDEN', 'SECRET_FORBIDDEN', 'CONTEXT_LIMIT'], protecoes: [...mcpProtecoes, 'Arquivos tratados como dados, não instruções', 'Segredos mascarados'], registro: 'Histórico de atividades (origem MCP)' } },

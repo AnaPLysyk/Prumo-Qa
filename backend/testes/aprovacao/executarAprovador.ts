@@ -1,7 +1,7 @@
 /** Roda um programa de autenticação do sistema (osascript, zenity, pkexec) sem shell, com prazo, e devolve o código de saída. */
 import { spawn } from 'node:child_process';
 
-export type ResultadoDoAprovador = { code:number|null; timedOut:boolean };
+type ResultadoDoAprovador = { code:number|null; timedOut:boolean };
 export type ExecutorDeAprovador = (programa:string,args:string[],prazoMs:number)=>Promise<ResultadoDoAprovador>;
 
 export const executarAprovador:ExecutorDeAprovador = (programa,args,prazoMs) => new Promise(resolve => {

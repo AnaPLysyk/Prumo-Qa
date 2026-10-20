@@ -1,5 +1,5 @@
 /** Lista as pastas de projeto vinculadas para a tela Projetos. */
-import { pastaDeDadosEscolhida } from '../../compartilhado/banco/pastaDeDadosEscolhida.js';
+import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { listarVinculos } from './listarVinculos.js';
 
-export const listarPastasVinculadas = () => listarVinculos(pastaDeDadosEscolhida());
+export const listarPastasVinculadas = () => listarVinculos(diretorioDados());

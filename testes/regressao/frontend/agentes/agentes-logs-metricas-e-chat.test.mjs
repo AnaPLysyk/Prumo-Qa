@@ -75,7 +75,7 @@ test('agentes reais, prévia validada/persistida, descarte, confirmação nativa
   assert.match(await b.page.textContent('[data-agent^="pessoal-"]'), /Prévia de QA/); assert.deepEqual([...a.erros, ...b.erros], []);
 });
 
-test('MCP/IPC reais alimentam terminal, filtros, gráficos, exportação e painel', async t => {
+test('MCP isolado e diario da conta alimentam terminal, filtros, graficos e painel', async t => {
   const a = await prepare(t);
   const out = await mcp(a.e.raizContextos, a.dados, [['contexto_projeto', {}], ['consultar_evidencias', {}]]);
   assert.ok(out.every(r => !r.isError));
@@ -83,7 +83,8 @@ test('MCP/IPC reais alimentam terminal, filtros, gráficos, exportação e paine
   await a.page.fill('#v36-logs-busca', 'NOT_VERIFIED'); assert.equal(await a.page.locator('.v36-log-line').count(), 1);
   await a.page.locator('.v36-log-line').first().click(); assert.match(await a.page.textContent('.v36l-detalhe'), /contexto_projeto/);
   await a.page.click('#v36-logs-limpar'); await a.page.check('#acompanhar');
-  await mcp(a.e.raizContextos, a.dados, [['consultar_evidencias', {}]]); await a.page.waitForFunction(() => document.querySelectorAll('.v36-log-line').length === 6, null, { timeout: 8000 });
+  await mcp(a.e.raizContextos, a.dados, [['consultar_evidencias', {}]]);
+  await a.page.waitForFunction(() => document.querySelectorAll('.v36-log-line').length === 6, null, { timeout: 8000 });
   await ir(a.page, 'metricas'); await a.page.waitForSelector('#v36-met-graficos [data-grafico]'); await capture(a, 'metricas');
   assert.equal(await a.page.locator('#v36-met-graficos [data-grafico]').count(), 3, 'três gráficos padrão do protótipo');
   await a.page.getByRole('button', { name: 'Filtros', exact: true }).click();

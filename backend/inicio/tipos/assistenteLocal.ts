@@ -1,7 +1,7 @@
 /** Formato da resposta do assistente local do Início (linhas e fontes) e as palavras ignoradas nas perguntas. */
 
 /**
- * Assistente local do Prumo: responde SOMENTE com o que existe neste computador (contextos aprovados, propostas, runs,
+ * Assistente local do Prumo: responde só com o que existe neste computador (contextos aprovados, propostas, runs,
  * execuções, agenda). Não é um modelo de IA, não consulta a rede e não inventa: sem dado, diz que não encontrou.
  */
 export type Fonte = { rotulo: string; aba: string };

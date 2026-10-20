@@ -1,14 +1,14 @@
 /** Formato das preferências da pessoa (tema, idioma, avisos, IA) e seus valores padrão. */
 import { z } from 'zod';
 
-export const versaoTxt = z.string().regex(/^\d+\.\d+\.\d+$/);
+const versaoTxt = z.string().regex(/^\d+\.\d+\.\d+$/);
 
-// 2.9: configuração do assistente. A delegação a IA externa só muda por autorizarDelegacao (confirmação nativa).
-export const nomeIa = z.string().trim().min(1).max(40).regex(/^[\p{L}\p{N} ._-]+$/u);
+// Configuração do assistente. A delegação a IA externa só muda por autorizarDelegacaoDeIa (confirmação nativa).
+const nomeIa = z.string().trim().min(1).max(40).regex(/^[\p{L}\p{N} ._-]+$/u);
 
-export const iaSchema = z.object({ nome: nomeIa, estilo: z.enum(['amigavel', 'direto', 'tecnico']), voz: z.string().max(120).nullable(), lerRespostas: z.boolean(), delegacao: z.object({ claude: z.boolean(), codex: z.boolean() }).strict() }).strict();
+const iaSchema = z.object({ nome: nomeIa, estilo: z.enum(['amigavel', 'direto', 'tecnico']), voz: z.string().max(120).nullable(), lerRespostas: z.boolean(), delegacao: z.object({ claude: z.boolean(), codex: z.boolean() }).strict() }).strict();
 
-export const iaPadrao = { nome: 'Prumo', estilo: 'amigavel' as const, voz: null, lerRespostas: false, delegacao: { claude: false, codex: false } };
+const iaPadrao = { nome: 'Prumo', estilo: 'amigavel' as const, voz: null, lerRespostas: false, delegacao: { claude: false, codex: false } };
 
 export const preferenciasSchema = z.object({
   version: z.literal(1),

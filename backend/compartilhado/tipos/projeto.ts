@@ -1,9 +1,9 @@
 /** Formato do contrato qa.project.json (schema v2), dos comandos permitidos e do projeto carregado. */
 import { z } from 'zod';
 
-export const nome = z.string().regex(/^[a-zA-Z][a-zA-Z0-9_-]{0,79}$/);
+const nome = z.string().regex(/^[a-zA-Z][a-zA-Z0-9_-]{0,79}$/);
 
-export const relativo = z.string().min(1).max(500);
+const relativo = z.string().min(1).max(500);
 
 export const comandoObjeto = z.object({
   executable: z.enum(['node', 'npm']), args: z.array(z.string().max(500)).min(1).max(40),

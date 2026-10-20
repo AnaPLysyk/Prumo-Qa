@@ -4,8 +4,8 @@ import { mudarTrabalho } from './mudarTrabalho.js';
 import { ESPERA_BASE_MS, resultadoSchema } from '../tipos/fila.js';
 
 /**
- * Falha de INFRAESTRUTURA (rede, serviço indisponível, runner ausente): retenta com espera crescente até o limite.
- * Falha de teste NÃO passa por aqui: é um resultado (FAIL), registrado em `concluir`, e não se repete.
+ * Falha de infraestrutura (rede, serviço indisponível, runner ausente): retenta com espera crescente até o limite.
+ * Falha de teste não passa por aqui: é um resultado (FAIL), registrado em `concluir`, e não se repete.
  */
 export const falharPorInfraestrutura = (id: string, codigo: string, motivo: string, retentavel: boolean, base?: string, agora = new Date()) => mudarTrabalho(id, t => {
   const iso = agora.toISOString(); fecharTentativa(t, 'ERRO', iso, codigo); t.heartbeat = null;

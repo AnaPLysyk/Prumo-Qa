@@ -1,7 +1,7 @@
 /** Formato de uma evidência de execução: estados PASS/FAIL/BLOCKED/NOT_RUN, casos, logs e integridade. */
 import { z } from 'zod';
 
-export const statusSchema = z.enum(['PASS','FAIL','BLOCKED','NOT_RUN']);
+const statusSchema = z.enum(['PASS','FAIL','BLOCKED','NOT_RUN']);
 
 export type Status = z.infer<typeof statusSchema>;
 

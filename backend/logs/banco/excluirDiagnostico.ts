@@ -1,7 +1,7 @@
 /** Apaga o diagnóstico da janela, informando falhas. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { eAtalho } from '../../compartilhado/seguranca/eAtalho.js';
+import { eAtalho } from './eAtalho.js';
 import { pastaDoDiagnostico } from './pastaDoDiagnostico.js';
 import { nomeValido } from '../tipos/diagnostico.js';
 

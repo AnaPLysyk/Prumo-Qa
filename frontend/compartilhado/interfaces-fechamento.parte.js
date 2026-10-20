@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função compartilhado para o bundle interfaces-v36. */
+/** Finaliza o escopo compartilhado das interfaces. */
   for (const id of ['inicio', 'metricas', 'logs', 'agentes']) {
     const render = abas[id]; abas[id] = async el => { await render(el); const wrapper = h('section', { class: el.className }, ...el.childNodes); el.replaceChildren(wrapper); };
   }

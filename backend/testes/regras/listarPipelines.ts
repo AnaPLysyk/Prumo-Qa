@@ -4,12 +4,12 @@ import path from 'node:path';
 import { limites } from '../tipos/catalogoDeTestes.js';
 import { pareceArquivoDePipeline } from './pareceArquivoDePipeline.js';
 
-export type ResumoDePipeline = { arquivo: string; nome: string; eventos: string[]; jobs: string[]; linhas: number };
+type ResumoDePipeline = { arquivo: string; nome: string; eventos: string[]; jobs: string[]; linhas: number };
 
 const MAX_PIPELINES = 50;
 
 /** Leitura simples e conservadora do YAML: só `name:`, as chaves de `on:` e as chaves de `jobs:`. Não interpreta expressões. */
-export function resumirPipeline(arquivo: string, texto: string): ResumoDePipeline {
+function resumirPipeline(arquivo: string, texto: string): ResumoDePipeline {
   const linhas = texto.split(/\r?\n/);
   const nome = /^name:\s*['"]?(.+?)['"]?\s*(#.*)?$/m.exec(texto)?.[1]?.slice(0, 120) ?? path.posix.basename(arquivo).replace(/\.ya?ml$/i, '');
   const bloco = (chave: string): string[] => {

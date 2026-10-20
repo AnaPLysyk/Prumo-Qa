@@ -5,9 +5,9 @@ export const repositorio = 'AnaPLysyk/Prumo-Qa';
 
 export const semver = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
-export const lista = z.array(z.string().min(1).max(600)).max(30);
+const lista = z.array(z.string().min(1).max(600)).max(30);
 
-export const versaoSchema = z.object({
+const versaoSchema = z.object({
   version: z.string().regex(semver),
   // publicada: release oficial; repositorio: código no GitHub sem release; planejada: ainda não publicada.
   status: z.enum(['publicada', 'repositorio', 'planejada']),

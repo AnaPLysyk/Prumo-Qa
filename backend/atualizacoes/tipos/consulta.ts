@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { repositorio } from '../../ajuda/tipos/versoes.js';
 
 /**
- * Verificação MANUAL de atualização. Só consulta a release oficial; nunca baixa nem executa instalador.
+ * Verificação manual de atualização. Só consulta a release oficial; nunca baixa nem executa instalador.
  * Enviado ao GitHub: uma requisição HTTPS GET sem corpo, sem cookies e com User-Agent "PrumoQA/<versão>".
  * Não enviado: logs, projetos, caminhos, identificadores, evidências, tokens. O servidor remoto vê, como em qualquer
  * conexão HTTPS, o endereço IP de origem e dados normais de rede; isto não é anonimato.
@@ -17,7 +17,7 @@ export const limiteResposta = 1_000_000;
 export type Resultado = {
   status: 'ATUALIZACAO_DISPONIVEL' | 'ATUALIZADO' | 'INSTALADA_MAIS_NOVA' | 'SEM_RELEASE' | 'INDISPONIVEL' | 'LIMITE_DE_TAXA' | 'RESPOSTA_INVALIDA';
   installed: string; latest?: string; notes?: string; url?: string; message: string;
-  /** Só as respostas conclusivas dizem se existe ou não atualização. Falhas (rede, tempo, recusa, limite, resposta inválida) NÃO dizem nada sobre isso. */
+  /** Só as respostas conclusivas dizem se existe ou não atualização. Falhas (rede, tempo, recusa, limite, resposta inválida) não dizem nada sobre isso. */
   conclusivo: boolean;
   /** Por que a consulta não concluiu (somente quando conclusivo é falso). */
   motivo?: 'REDE' | 'TEMPO_ESGOTADO' | 'RECUSADO' | 'SERVIDOR' | 'LIMITE_DE_TAXA' | 'RESPOSTA_INVALIDA';

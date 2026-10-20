@@ -9,8 +9,8 @@ export type PedidoServico={servico:Servico;instancia:string;caminho:string;heade
 
 export type TransporteServico=(pedido:PedidoServico)=>Promise<unknown>;
 
-/** Única escrita remota do produto (2.8): um comentário em um ticket Jira. Qualquer outro caminho é recusado. */
-export type PedidoEscrita=PedidoServico&{corpo:string|Buffer;metodo?:MetodoEscrita;tipoConteudo?:string};
+/** Pedido de escrita remota: só sai se o método e o caminho estiverem na lista fechada (rotasDeEscrita.ts); qualquer outro é recusado. */
+type PedidoEscrita=PedidoServico&{corpo:string|Buffer;metodo?:MetodoEscrita;tipoConteudo?:string};
 
 export type TransporteEscrita=(pedido:PedidoEscrita)=>Promise<unknown>;
 

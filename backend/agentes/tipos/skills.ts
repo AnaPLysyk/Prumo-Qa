@@ -1,7 +1,7 @@
 /** Formato do banco de Skills: trechos de instrução por especialização, com origem, licença, estado e limites. */
 
 /**
- * Banco de Skills (skills.db), separado do conhecimento.db. Cada Skill é guardada em TRECHOS (um parágrafo ou seção),
+ * Banco de Skills (skills.db), separado do conhecimento.db. Cada Skill é guardada em trechos (um parágrafo ou seção),
  * para que o prompt leve só o que combina com a pergunta, em vez do arquivo inteiro.
  * - PRUMO: trechos das Skills que acompanham o aplicativo (pasta backend/agentes/skills/), sincronizados a cada versão.
  * - PESSOA: escritos pela equipe na tela; nascem APROVADO (é a decisão dela).
@@ -13,9 +13,9 @@ export const estadosTrecho = ['RASCUNHO', 'APROVADO', 'DESCARTADO'] as const;
 
 export type EstadoTrecho = (typeof estadosTrecho)[number];
 
-export const origensTrecho = ['PRUMO', 'PESSOA', 'IMPORTADO', 'IA'] as const;
+const origensTrecho = ['PRUMO', 'PESSOA', 'IMPORTADO', 'IA'] as const;
 
-export type OrigemTrecho = (typeof origensTrecho)[number];
+type OrigemTrecho = (typeof origensTrecho)[number];
 
 export type TrechoDeSkill = {
   id: string; especializacao: string; titulo: string; texto: string; ordem: number;

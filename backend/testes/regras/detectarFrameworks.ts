@@ -1,6 +1,6 @@
 /** Descobre, por evidência (dependência, configuração, imports), quais frameworks de teste o projeto usa. */
 import { declaraPlaywright } from './declaraPlaywright.js';
-import { importaPlaywright } from './importaPlaywright.js';
+import { ehTestePlaywright } from './ehTestePlaywright.js';
 import { Fonte, Framework, config, conhecimento } from '../tipos/frameworks.js';
 
 /** Estado só é CONFIRMADO com dependência + (configuração ou teste que importa o pacote). Nome de pasta nunca confirma. */
@@ -8,7 +8,7 @@ export function detectarFrameworks(fontes: Fonte[], omitidos: string[] = []): Fr
   const r: Framework[] = []; const norm = (s: string) => s.replaceAll('\\', '/');
   const dep = fontes.filter(declaraPlaywright).map(f => `${norm(f.path)}: dependência @playwright/test`);
   const cfg = fontes.filter(f => config.test(f.path)).map(f => `${norm(f.path)}: arquivo de configuração`);
-  const specs = fontes.filter(importaPlaywright).map(f => `${norm(f.path)}: importa @playwright/test`);
+  const specs = fontes.filter(f => ehTestePlaywright(f.path, f.content)).map(f => `${norm(f.path)}: importa @playwright/test`);
   const nomes = [...fontes.map(f => f.path), ...omitidos].filter(p => /playwright/i.test(norm(p)) && !config.test(p)).map(norm);
   if (dep.length && (cfg.length || specs.length)) r.push({ id: 'playwright', nome: conhecimento.playwright.nome, estado: 'CONFIRMADO', evidencias: [...dep, ...cfg, ...specs.slice(0, 5)], skill: conhecimento.playwright.skill });
   else if (dep.length || cfg.length || specs.length) r.push({ id: 'playwright', nome: conhecimento.playwright.nome, estado: 'PROVAVEL', evidencias: [...dep, ...cfg, ...specs.slice(0, 5)], skill: conhecimento.playwright.skill, observacao: 'Evidência parcial: falta dependência ou configuração/teste que importe @playwright/test dentro do contexto autorizado.' });

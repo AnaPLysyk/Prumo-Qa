@@ -10,16 +10,11 @@ test('instalação nova: abre no primeiro acesso, nada responde e nenhuma tela a
   assert.equal(await p.locator('dialog#entrada[open]').count(), 1); await p.waitForSelector('#entrada-login');
   assert.equal(await p.locator('#primeiro-nome').count(), 0, 'abre em Entrar, não direto no cadastro'); assert.equal(await p.locator('#entrada-ir-recuperar').count(), 1, 'Esqueci a senha sempre aparece na entrada (2.17)');
   await p.fill('#entrada-login', 'alguem'); await p.fill('#entrada-senha', 'qualquer-senha-123'); await p.click('#entrada-enviar'); await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /não existe conta/i);
-  // Mais de um caminho para a primeira conta: login e senha, GitHub ou Google (sem OAuth configurado, a própria entrada pede o Client ID), além de idioma e site.
-  assert.equal(await p.textContent('#entrada-github'), 'Criar conta com o GitHub'); assert.equal(await p.textContent('#entrada-google'), 'Criar conta com o Google');
+  // OAuth não configurado não pede segredos técnicos no cadastro: pertence à Administração.
+  assert.equal(await p.locator('#entrada-github, #entrada-google, #provedor-id, #provedor-segredo').count(), 0);
   assert.equal(await p.locator('#entrada-idioma').count(), 1); assert.equal(await p.locator('#entrada-site').count(), 1);
-  await p.click('#entrada-github'); await p.waitForSelector('#provedor-id'); assert.match(await p.textContent('#entrada-titulo'), /Configurar o acesso com o GitHub/);
-  await p.fill('#provedor-id', 'id com espaço'); await p.fill('#provedor-segredo', 'qualquer-segredo'); await p.click('#entrada-enviar');
-  await p.waitForSelector('#entrada-erro:not([hidden])'); assert.match(await p.textContent('#entrada-erro'), /Client ID do GitHub não tem o formato esperado/);
-  assert.equal(await p.inputValue('#provedor-segredo'), '', 'o segredo não fica na tela depois de enviado');
-  assert.equal((await p.evaluate(() => window.prumo.contaSessao())).data.entradaGithub, false, 'formato inválido não grava nada');
-  await p.click('#entrada-voltar'); await p.waitForSelector('#entrada-login');
-  await p.selectOption('#entrada-idioma', 'en'); await p.waitForFunction(() => document.querySelector('#entrada-titulo')?.textContent === 'Sign in'); assert.equal(await p.textContent('#entrada-github'), 'Create account with GitHub');
+  assert.equal((await p.evaluate(() => window.prumo.contaSessao())).data.entradaGithub, false);
+  await p.selectOption('#entrada-idioma', 'en'); await p.waitForFunction(() => document.querySelector('#entrada-titulo')?.textContent === 'Sign in'); assert.equal(await p.locator('#entrada-github').count(), 0);
   await p.selectOption('#entrada-idioma', 'pt-BR'); await p.waitForFunction(() => document.querySelector('#entrada-titulo')?.textContent === 'Entrar');
   await p.click('#entrada-ir-cadastro'); await p.waitForSelector('#primeiro-nome'); await p.click('#entrada-voltar'); await p.waitForSelector('#entrada-login'); await p.click('#entrada-ir-cadastro'); await p.waitForSelector('#primeiro-nome');
   assert.equal(await p.isVisible('#nav'), false, 'o menu fica escondido atrás da entrada'); assert.equal(await p.locator('#entrada-fechar').count(), 0);

@@ -1,4 +1,4 @@
-/** Endereço do serviço do Prumo (servico-do-prumo/ no Render), que manda os códigos por e-mail e recebe os chamados de suporte, e a chamada HTTP até ele. */
+/** Endereço do serviço do Prumo (backend/aplicativo/servidor/ no Render), que manda os códigos por e-mail e recebe os chamados de suporte, e a chamada HTTP até ele. */
 
 export const ENDERECO_DO_SERVICO = 'https://prumo-qa-servico.onrender.com';
 

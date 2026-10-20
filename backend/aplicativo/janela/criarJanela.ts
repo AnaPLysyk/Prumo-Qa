@@ -15,10 +15,10 @@ export function criarJanela(): BrowserWindow {
   });
   janela.once('ready-to-show', () => janela.show());
   janela.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  // 2.11: a única navegação permitida é recarregar a própria página (ao entrar ou sair da conta, para não sobrar dado da sessão anterior).
+  // A única navegação permitida é recarregar a própria página (ao entrar ou sair da conta, para não sobrar dado da sessão anterior).
   janela.webContents.on('will-navigate', (e, url) => { if (url !== origemPermitida) e.preventDefault(); });
   janela.webContents.on('will-attach-webview', e => e.preventDefault());
-  // Fechar a janela NÃO encerra o Prumo: ele continua na bandeja para que as rotinas sigam funcionando.
+  // Fechar a janela não encerra o Prumo: ele continua na bandeja para que as rotinas sigam funcionando.
   janela.on('close', e => {
     if (estadoDoAplicativo.saindo) return;
     e.preventDefault(); janela.hide();

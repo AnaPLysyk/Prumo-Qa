@@ -5,7 +5,7 @@ import { aplicarConexao } from '../ia/aplicarConexao.js';
 import { prepararConexao } from '../ia/prepararConexao.js';
 import { projetoVinculado } from '../../projetos/regras/projetoVinculado.js';
 
-// Alterar configuração de outro programa exige uma caixa de confirmação NATIVA, que a página não consegue simular.
+// Alterar configuração de outro programa exige uma caixa de confirmação nativa, que a página não consegue simular.
 export const conexaoAplicar: TratadorDoCanal<'conexao:aplicar'> = async (a, janela) => {
   const p = await projetoVinculado(a.root);
   const plano = prepararConexao(p, a.client);

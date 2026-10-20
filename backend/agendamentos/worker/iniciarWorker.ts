@@ -15,7 +15,7 @@ export function iniciarWorker(e: EstadoDoWorker) {
   e.abort = new AbortController(); e.ativo = true; gravarTravaDoWorker(e, true);
   // Com a trava assumida, nenhum outro worker está vivo: todo EXECUTANDO que não é desta instância foi interrompido,
   // mesmo com batimento recente (queda e reabertura em menos de 2 min travariam a fila inteira). Só um trabalho ainda
-  // em curso NESTE processo (parar() que esgotou a espera) mantém a tolerância por batimento.
+  // em curso neste processo (parar() que esgotou a espera) mantém a tolerância por batimento.
   const recuperados = recuperarInterrompidos(e.base, agora, e.processando ? 120000 : 0);
   if (recuperados) emitirEventoDoWorker(e, 'WORKER_INTERROMPIDO', '', '', 'Execuções interrompidas recuperadas', `${recuperados} trabalho(s) estavam em andamento quando o Prumo foi encerrado; o histórico foi preservado.`);
   agendarProximaPassada(e, 0);

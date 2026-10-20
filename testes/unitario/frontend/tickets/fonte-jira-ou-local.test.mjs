@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const fonte = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../frontend/tickets/fluxos-tickets.parte.js'), 'utf8');
+const pasta = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../frontend/tickets');
+const arquivos = ['fluxos-tickets.parte.js', 'tickets-locais.parte.js', 'tickets-jira.parte.js', 'tickets-defeitos-qase.parte.js', 'tickets-issues-github.parte.js'];
+const fonte = arquivos.map(nome => fs.readFileSync(path.join(pasta, nome), 'utf8')).join('\n');
 
 test('com Jira vinculado, o modo manual continua disponível sem publicar', () => {
   assert.match(fonte, /DS\.acao\('Novo rascunho local'/);

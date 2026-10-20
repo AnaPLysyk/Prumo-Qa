@@ -17,9 +17,8 @@ export const estadoDoChamadoSchema = z.enum(estadosDoChamado);
 export type AnexoEscolhido = { id: string; nome: string; tipo: TipoDeAnexo; tamanho: number };
 
 /** O que fica neste computador sobre cada chamado aberto: a chave de acompanhamento vai protegida pelo cofre do sistema. */
-export const meuChamadoSchema = z.object({
+const meuChamadoSchema = z.object({
   usuarioId: z.string().uuid(), numero: z.number().int().min(1).max(999999999), titulo: z.string().max(200), categoria: z.enum(['bug', 'melhoria', 'sugestao']),
   criadoEm: z.string().datetime(), chave: z.string().max(2000).nullable()
 }).strict();
-export type MeuChamado = z.infer<typeof meuChamadoSchema>;
 export const meusChamadosSchema = z.object({ version: z.literal(1), chamados: z.array(meuChamadoSchema).max(2000) }).strict();

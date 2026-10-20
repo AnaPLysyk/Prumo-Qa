@@ -21,7 +21,7 @@ export function tipoPelaAssinatura(b: Buffer): TipoDeAnexo | null {
 }
 
 /** Lê o arquivo inteiro e confere: arquivo comum (sem atalho), tamanho, assinatura e extensão coerente com o conteúdo. */
-export function lerAnexoDoChamado(caminho: string): { nome: string; tipo: TipoDeAnexo; bytes: Buffer } {
+function lerAnexoDoChamado(caminho: string): { nome: string; tipo: TipoDeAnexo; bytes: Buffer } {
   const nome = path.basename(caminho);
   let st: fs.Stats; try { st = fs.lstatSync(caminho); } catch { throw new Error('ATTACHMENT_INVALID: ' + nome + ' não foi encontrado.'); }
   if (!st.isFile()) throw new Error('ATTACHMENT_INVALID: ' + nome + ' não é um arquivo comum.');

@@ -1,7 +1,7 @@
 /** Responde sobre um teste escolhido na tela Testes (tipo, arquivo, agente certo). */
 import { Coleta, ContextoChat, agentePorTipo } from '../tipos/chat.js';
 import { agentesChat } from '../tipos/persona.js';
-import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
+import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { Fonte } from '../../inicio/tipos/assistenteLocal.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { catalogoDeTestes } from '../../testes/regras/catalogoDeTestes.js';

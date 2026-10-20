@@ -1,6 +1,6 @@
 name: Windows — unitários, instalador e release
 
-# Executa somente testes unitários, gera instalador, verifica SHA-256 e cria release nas tags v*.
+# Push e PR: unitários. Tag v*: unitários, smoke, regressão e smoke do executável empacotado antes de publicar.
 # Preserva publicação verificada do instalador, catálogo de versões e site.
 on:
   push:
@@ -19,7 +19,7 @@ concurrency:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: write
       actions: write   # dispara o fluxo do site depois de marcar a versão como publicada
@@ -46,8 +46,23 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:unitarios
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Homologar smoke e regressao antes da release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          npm run test:smoke
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:regressao
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Gerar instalador
         run: npm run dist
+      - name: Verificar o executavel empacotado antes da release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $env:PRUMO_APP_EXE = (Resolve-Path 'release/win-unpacked/Prumo QA.exe').Path
+          node --require ./testes/apoio/conhecimento-hook.cjs --experimental-test-module-mocks --test --test-concurrency=1 testes/smoke/frontend/aplicativo/todas-as-telas.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: SHA-256 do instalador
         shell: pwsh
         run: |

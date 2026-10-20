@@ -1,10 +1,10 @@
 /** Os agentes do chat, os papéis da pessoa e a personalidade de cada agente. */
 
 /**
- * Personalidade do Prumo e dos agentes do chat (2.10). Fonte ÚNICA usada pelo chat local, pela delegação ao Claude
+ * Personalidade do Prumo e dos agentes do chat. Fonte única usada pelo chat local, pela delegação ao Claude
  * Code/Codex, pelos prompts MCP e espelhada (somente leitura) na tabela `agentes` do banco de conhecimento.
  *
- * A personalidade muda a FORMA de dizer, nunca os fatos: nenhuma frase daqui afirma execução, resultado ou aprovação.
+ * A personalidade muda a forma de dizer, nunca os fatos: nenhuma frase daqui afirma execução, resultado ou aprovação.
  * As variações são escolhidas por uma semente determinística (mesma pergunta, mesma frase), o que mantém os testes estáveis.
  */
 import { especializacoes } from './politicas.js';
@@ -24,7 +24,7 @@ export const rotuloPapel: Record<Papel, string> = { qa: 'QA', dev: 'Desenvolvime
 
 export type AgenteChat = { id: string; nome: string; especializacao: string | null; dominio: string; palavras: string[]; aba: string; rotulo: string; profissao: string; especialidade: string };
 
-export type Personalidade = { tom: string; foco: string; aberturas: string[]; assinatura: string };
+type Personalidade = { tom: string; foco: string; aberturas: string[]; assinatura: string };
 
 /**
  * Palavras de roteamento, comparadas palavra a palavra e sem acento: termo simples casa a palavra inteira, inclusive no

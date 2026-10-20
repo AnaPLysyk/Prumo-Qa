@@ -8,9 +8,9 @@ import { Status } from './evidencia.js';
  * Contrato do projeto: o runner (ou o reporter incluído em backend/testes/reporters/prumo-playwright-reporter.cjs) grava o resultado
  * em PRUMO_RESULT_FILE; esta função serve para quem preferir apontar para o JSON nativo do Playwright.
  */
-export type Res = { status: string; error?: { message?: string }; errors?: { message?: string }[] };
+type Res = { status: string; error?: { message?: string }; errors?: { message?: string }[] };
 
-export type Teste = { status?: string; expectedStatus?: string; results?: Res[]; projectName?: string };
+type Teste = { status?: string; expectedStatus?: string; results?: Res[]; projectName?: string };
 
 export type Suite = { title?: string; file?: string; specs?: { title: string; file?: string; tests?: Teste[] }[]; suites?: Suite[] };
 

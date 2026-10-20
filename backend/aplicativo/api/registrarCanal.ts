@@ -3,11 +3,17 @@ import { BrowserWindow, ipcMain, type IpcMainInvokeEvent } from 'electron';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { CanalIpc, canaisFrequentes, esquemasIpc } from './catalogoDeContratos.js';
-import { mensagemComCodigo } from './mensagemComCodigo.js';
+import { mensagemComCodigo } from '../../compartilhado/erros/mensagemComCodigo.js';
 import { Resposta, origemPermitida } from '../tipos/aplicativo.js';
 import { registrarDiagnostico } from '../../logs/banco/registrarDiagnostico.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
 import { conferirAcessoAoCanal } from '../../login/regras/conferirAcessoAoCanal.js';
+import { contaDaSessao } from '../../login/regras/sessao.js';
+import { executarNoEscopoDoUsuario } from '../../compartilhado/banco/escopoDeUsuario.js';
+import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo.js';
+import {validarSessaoRemota} from '../../login/integracoes/autenticacaoRemota.js';
+import {usarAutenticacaoRemota} from '../../login/integracoes/configuracaoDaAutenticacao.js';
+import {acessoDosCanais} from '../../login/tipos/acessoDosCanais.js';
 
 /**
  * Registra um canal do catálogo: recusa remetente que não seja a nossa página, valida com o esquema do contrato,
@@ -30,10 +36,23 @@ export function registrarCanal<C extends CanalIpc>(nome: C, fn: (a: z.output<(ty
       const entrada = esquemasIpc[nome].safeParse(bruto ?? {});
       if (!entrada.success) throw new Error('INVALID_ARGUMENTS: argumentos recusados.');
       const args = entrada.data as z.output<(typeof esquemasIpc)[C]>;
-      // 2.11: com o login ligado, cada canal exige sessão e o nível da tela no papel da pessoa (login/tipos/acessoDosCanais.ts).
+      // Com o login ligado, cada canal exige sessão e o nível da tela no papel da pessoa (login/tipos/acessoDosCanais.ts).
+      // Revalida a sessão remota periodicamente antes de processar dados locais protegidos.
+      if(usarAutenticacaoRemota() && acessoDosCanais[nome]!=='publico' && nome!=='conta:sair' && contaDaSessao())
+        await validarSessaoRemota();
       conferirAcessoAoCanal(nome, undefined, Date.now(), !canaisFrequentes.has(nome));
       apagaDiagnostico = nome === 'dados:excluir' && (args as { escopo?: string }).escopo === 'diagnostico';
-      const data = await fn(args, janela);
+      // A identidade do pedido fica fixa durante awaits; A jamais grava nos dados de B após um logout.
+      const data = await executarNoEscopoDoUsuario(contaDaSessao()?.id ?? null, () => fn(args, janela));
+      // Reinicia os agendamentos no escopo de quem acabou de entrar (não no do usuário anterior).
+      if (['conta:entrar','conta:confirmarentrada','conta:githubestado','conta:googleestado','usuarios:ativar'].includes(nome)) {
+        const usuario=contaDaSessao();
+        if(usuario){
+          await workerDoAplicativo.parar();
+          try { executarNoEscopoDoUsuario(usuario.id, () => workerDoAplicativo.iniciar()); }
+          catch { /* erro do worker não dá acesso e não bloqueia login */ }
+        }
+      }
       diag('OK'); return { ok: true, data };
     } catch (err) {
       // Entrada inválida já virou INVALID_ARGUMENTS acima; um ZodError aqui é dado local recusado pelo núcleo, não erro de quem chamou.

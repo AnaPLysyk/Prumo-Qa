@@ -9,7 +9,7 @@ import { separarAprendizados } from './separarAprendizados.js';
 import { ContextoDelegacao } from '../tipos/ContextoDelegacao.js';
 import { Resposta } from '../tipos/chat.js';
 import { Conhecimento } from '../tipos/conhecimento.js';
-import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
+import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 

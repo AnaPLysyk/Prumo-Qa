@@ -1,4 +1,4 @@
-/** Seleciona testes pelo caminho testes/<natureza>/<camada>/<modulo>/; não compila, não autoriza migração e preserva o hook em memória. */
+/** Seleciona testes pelo caminho testes/<natureza>/<camada>/<modulo>/; não compila, recusa o perfil instalado e preserva o hook em memória. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,11 +14,11 @@ export function arquivosDeTeste(base = raiz, pasta = 'testes') {
     return e.isDirectory() ? arquivosDeTeste(base, arquivo) : e.name.endsWith('.test.mjs') ? [arquivo] : [];
   }).sort();
 }
-/** Natureza, camada e módulo vêm só do caminho; migração roda no perfil instalado do CI e fica fora da suíte local. */
+/** Natureza, camada e módulo vêm só do caminho. */
 export function descrever(arquivo) {
   const [pasta, natureza, camada, modulo, ...resto] = arquivo.split('/');
   if (pasta !== 'testes' || resto.length !== 1 || !naturezas.includes(natureza) || !camadas.includes(camada) || !/^[a-z-]+$/.test(modulo)) throw new Error('TEST_PATH_INVALID: use testes/<natureza>/<camada>/<modulo>/arquivo.test.mjs — ' + arquivo);
-  return { arquivo, natureza, camada, modulo, perfilReal: path.basename(arquivo).startsWith('migracao') };
+  return { arquivo, natureza, camada, modulo };
 }
 export function catalogar(existentes) { return existentes.map(descrever); }
 export function argumentos(args) {
@@ -40,7 +40,6 @@ export function selecionar(catalogo, filtros) {
 export function dividirPorIsolamento(catalogo, base = raiz) {
   const elegiveis = [], pendentes = [];
   for (const t of catalogo) {
-    if (t.perfilReal) { pendentes.push({ arquivo: t.arquivo, motivo: 'MIGRACAO_PERFIL_REAL' }); continue; }
     const fonte = fs.readFileSync(path.join(base, t.arquivo), 'utf8');
     if (/janela\.mjs|playwright-core|electron\.launch|desktop-entry\.cjs/.test(fonte)) {
       pendentes.push({ arquivo: t.arquivo, motivo: 'ELECTRON_NAO_AUTORIZADO' }); continue;
@@ -53,7 +52,6 @@ export function planoDeExecucao(selecao, env = process.env, isolado = false) {
   if (Object.entries(env).some(([k, v]) => (k === 'PRUMO_APP_EXE' || k.startsWith('PRUMO_MIGRACAO')) && v)) throw new Error('TEST_REAL_PROFILE_BLOCKED: remova PRUMO_APP_EXE e flags PRUMO_MIGRACAO');
   if (isolado && env.PRUMO_DATA_DIR) throw new Error('TEST_DATA_PROFILE_BLOCKED: remova PRUMO_DATA_DIR externo');
   if (!selecao.length) throw new Error('TEST_SELECTION_EMPTY');
-  if (selecao.some(t => t.perfilReal)) throw new Error('TEST_REAL_PROFILE_BLOCKED: migração pertence ao workflow isolado de instalação');
   return [...(isolado ? ['--require', './ferramentas/testes/bloquear-efeitos.cjs'] : []),
     '--require', './testes/apoio/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
 }
@@ -61,13 +59,10 @@ export function executar(args = process.argv.slice(2)) {
   const { filtros, listar, isolado } = argumentos(args);
   const catalogo = catalogar(arquivosDeTeste());
   const encontrados = selecionar(catalogo, filtros);
-  const { elegiveis, pendentes } = isolado ? dividirPorIsolamento(encontrados) : { elegiveis: encontrados, pendentes: [] };
-  const selecao = isolado ? elegiveis : !listar && !Object.keys(filtros).length ? encontrados.filter(t => !t.perfilReal) : encontrados;
-  if (listar) { console.log(JSON.stringify(isolado ? { elegiveis, pendentes } : selecao, null, 2)); return 0; }
-  if (isolado) {
-    console.log('CHECK_ISOLADO: ' + elegiveis.length + ' arquivos elegíveis; ' + pendentes.length + ' arquivos NOT_RUN (requerem Electron ou migração).');
-    for (const p of pendentes) console.log('NOT_RUN|' + p.motivo + '|' + p.arquivo);
-  }
+  const { elegiveis: selecao, pendentes } = isolado ? dividirPorIsolamento(encontrados) : { elegiveis: encontrados, pendentes: [] };
+  if (listar) { console.log(JSON.stringify(isolado ? { elegiveis: selecao, pendentes } : selecao, null, 2)); return 0; }
+  if (isolado) console.log('CHECK_ISOLADO: ' + selecao.length + ' arquivos elegíveis; ' + pendentes.length + ' arquivos NOT_RUN (requerem Electron).');
+  for (const p of pendentes) console.log('NOT_RUN|' + p.motivo + '|' + p.arquivo);
   const argv = planoDeExecucao(selecao, process.env, isolado);
   const resultado = spawnSync(process.execPath, argv, { cwd: raiz, env: process.env, stdio: 'inherit', windowsHide: true });
   if (resultado.error) throw resultado.error;

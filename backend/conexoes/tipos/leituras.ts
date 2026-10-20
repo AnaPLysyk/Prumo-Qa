@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 /**
- * Leituras adicionais (2.9) dos três serviços. Todas são GET com parâmetros montados aqui (nada vem de URL livre) e conferem
+ * Leituras adicionais dos três serviços. Todas são GET com parâmetros montados aqui (nada vem de URL livre) e conferem
  * que o recurso pertence ao projeto/repositório vinculado. Limites: logs de workflow e download de artefatos exigem redirecionamento,
  * que o Prumo bloqueia por segurança; por isso só metadados e links oficiais são apresentados.
  */

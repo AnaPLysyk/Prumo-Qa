@@ -7,7 +7,7 @@ import { ferramentas } from '../../logs/tipos/atividade.js';
  * valida o argumento, exige projeto vinculado e delega a atividades/evidencias/conexoes.
  * É puro Node (sem Electron) para ser testado sem janela.
  */
-export const estados = ['STARTED', 'OK', 'NOT_VERIFIED', 'PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'ERROR'] as const;
+const estados = ['STARTED', 'OK', 'NOT_VERIFIED', 'PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'ERROR'] as const;
 
 export const filtroSchema = z.object({
   tool: z.enum(ferramentas).optional(), state: z.enum(estados).optional(),

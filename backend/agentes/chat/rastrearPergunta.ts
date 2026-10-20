@@ -11,10 +11,10 @@ import { escolherTrechosDaSkill } from '../regras/escolherTrechosDaSkill.js';
 import { raizDaPalavra } from '../regras/raizDaPalavra.js';
 import { termosDaFrase } from '../regras/termosDaFrase.js';
 import { agentesChat } from '../tipos/persona.js';
-import { tentarOuPadrao } from '../../compartilhado/erros/tentarOuPadrao.js';
+import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 
-export type Rastro = {
+type Rastro = {
   pergunta: string; palavras: string[]; termos: string[];
   escolhido: { id: string; nome: string; porPadrao: boolean };
   rota: { agente: string; nome: string; pontos: number; casou: { termo: string; pontos: number }[]; mencao: boolean; aprendidos: number }[];

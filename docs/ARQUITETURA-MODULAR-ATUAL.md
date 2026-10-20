@@ -1,6 +1,6 @@
 # Arquitetura modular do Prumo QA — branch em revisão
 
-**Situação:** descreve a estrutura atual do repositório (2.14): uma pasta por tela em `backend/` e em `frontend/`, a interface do Electron gerada em `dist/renderer/` no build e os testes em `testes/`, por tipo e depois por camada. Registros de decisões e de versões anteriores ficam em `docs/historico/`.
+**Situação:** descreve a estrutura atual do repositório (2.14): uma pasta por tela em `backend/` e em `frontend/`, a interface do Electron gerada em `dist/renderer/` no build e os testes em `testes/`, por tipo e depois por camada. Registros de decisões e de versões anteriores ficam no histórico do git.
 
 ## Primeiro, escolha o nome da tela
 

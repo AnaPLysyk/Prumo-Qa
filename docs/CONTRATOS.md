@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (184 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (180 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (8 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -35,7 +35,6 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:servicos:consultar` | `espacoId`, `filtros`, `id`, `operacao`, `pagina`, `servico` | Consulta local ou leitura externa pelo adaptador; não altera sistemas externos. |
 | `prumo:servicos:aceite` | `campo`, `espacoId` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
 | `prumo:servicos:importar` | `espacoId`, `ticket` | Altera somente dados próprios do aplicativo; ações sensíveis exigem confirmação nativa. |
-| `prumo:operacoes:previa` | `espacoId`, `operacao`, `parametros` | Sem rede e sem gravação. |
 | `prumo:operacoes:executar` | `anexo`, `espacoId`, `operacao`, `parametros` | Escreve no Jira, Qase ou GitHub vinculados somente depois de confirmação nativa; relê o serviço para confirmar; repetir não duplica. |
 | `prumo:operacoes:listar` | `espacoId`, `limite` | Consulta local. |
 | `prumo:escrita:estado` | `espacoId` | Consulta local. |
@@ -64,12 +63,9 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:testes:arquivo` | `arquivo`, `espacoId` | Somente leitura dentro da pasta vinculada; recusa caminho fora dela, link simbólico, arquivo que não é de teste ou maior que 300 KB. |
 | `prumo:testes:pipelines` | `espacoId` | Somente leitura dentro da pasta vinculada; ignora link simbólico, arquivo maior que 300 KB e mais de 50 pipelines. Nada é executado. |
 | `prumo:testes:gravar` | `arquivo`, `conteudo`, `espacoId`, `hashBase` | Pede confirmação nativa do Windows; grava só dentro da pasta vinculada, só arquivo de teste (.spec/.test, .feature, test_*.py) ou pipeline (.github/workflows/*.yml), até 300 KB, sem link simbólico, por troca atômica; recusa se o arquivo mudou fora do Prumo ou já existe ao criar. Nada é executado nem enviado. |
-| `prumo:assistente:perguntar` | `espacoId`, `pergunta` | Consulta local; nada é gravado nem enviado. |
-| `prumo:assistente:situacao` | `espacoId` | Consulta local. |
 | `prumo:assistente:conversar` | `agente`, `contexto`, `espacoId`, `historico`, `pergunta`, `primeira`, `provedor` | Não grava a conversa: registra só o atendimento (agente, modo e fontes) em conhecimento.db. A memória da sessão (até 6 turnos) e o contexto do teste aberto vêm da janela. Pedidos como "me chama de…" e "lembra que…" gravam o perfil ou um rascunho de conhecimento. Com provedor externo autorizado, executa o CLI local sem shell, com tempo limite; linhas APRENDIZADO da IA viram rascunho. |
 | `prumo:assistente:agentes` | `espacoId` | Consulta local. |
 | `prumo:conversas:listar` | `agente`, `espacoId` | Consulta local. |
-| `prumo:conversas:apagar` | `espacoId` | Remove conversas/<projeto>.jsonl após confirmação nativa. |
 | `prumo:assistente:abertura` | `espacoId` | Consulta local. |
 | `prumo:assistente:avaliar` | `agenteCorreto`, `avaliacao`, `id`, `pergunta` | Grava a avaliação e o vocabulário em conhecimento.db; a pergunta não é gravada. |
 | `prumo:conhecimento:estado` | `espacoId` | Consulta local (cria o banco e o conhecimento inicial se ainda não existirem). |
@@ -571,21 +567,6 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por identificador de projeto, conexão e instância; Sem conteúdo remoto ou token nos logs; Não exposto ao MCP
 - **Registro:** Diagnóstico IPC e metadados por projeto; conteúdo remoto não persistido
 
-### `prumo:operacoes:previa`
-
-- **Tipo:** IPC
-- **Finalidade:** Mostrar o resumo, o efeito e a chave de idempotência de uma operação externa antes de executá-la.
-- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/conexoes/api/operacoesPrevia.ts > prepararOperacao
-- **Entrada:** Projeto, operação do catálogo e parâmetros
-- **Saída:** Resumo mascarado, efeito, chave e se a escrita está habilitada
-- **Permissões:** Nenhuma
-- **Efeito:** Sem rede e sem gravação.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
-- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
-- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
-- **Registro:** Livro-razão local de operações externas e histórico do projeto
-
 ### `prumo:operacoes:executar`
 
 - **Tipo:** IPC
@@ -921,7 +902,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Revogar uma política de escrita agendada.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/testes/api/runsRevogar.ts > revogarPoliticaEscrita
+- **Destino:** backend/testes/api/runsRevogar.ts > revogarAutorizacao
 - **Entrada:** Id da política
 - **Saída:** Política revogada
 - **Permissões:** Ação explícita da pessoa
@@ -1006,36 +987,6 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
 - **Registro:** Livro-razão local de operações externas e histórico do projeto
 
-### `prumo:assistente:perguntar`
-
-- **Tipo:** IPC
-- **Finalidade:** Responder uma pergunta com os dados locais do projeto (contextos aprovados, propostas, execuções, agenda). Não usa modelo de IA nem rede.
-- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/inicio/api/assistentePerguntar.ts > perguntarAoAssistenteLocal
-- **Entrada:** Projeto e pergunta
-- **Saída:** Linhas de resposta e telas de origem
-- **Permissões:** Nenhuma
-- **Efeito:** Consulta local; nada é gravado nem enviado.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
-- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
-- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
-- **Registro:** Livro-razão local de operações externas e histórico do projeto
-
-### `prumo:assistente:situacao`
-
-- **Tipo:** IPC
-- **Finalidade:** Resumir o que está acontecendo agora no projeto para o painel inicial.
-- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/inicio/api/assistenteSituacao.ts > situacaoDoProjeto
-- **Entrada:** Projeto
-- **Saída:** Até cinco linhas de situação
-- **Permissões:** Nenhuma
-- **Efeito:** Consulta local.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
-- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
-- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
-- **Registro:** Livro-razão local de operações externas e histórico do projeto
-
 ### `prumo:assistente:conversar`
 
 - **Tipo:** IPC
@@ -1069,28 +1020,13 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 ### `prumo:conversas:listar`
 
 - **Tipo:** IPC
-- **Finalidade:** Listar os atendimentos de um agente (sem texto, desde a 2.10) e as conversas gravadas até a 2.9, para o Cérebro e o Painel de atividades.
+- **Finalidade:** Listar os atendimentos da pessoa com um agente (sem o texto das perguntas), para o Cérebro e o Painel de atividades.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
 - **Destino:** backend/agentes/api/conversasListar.ts > listarAtendimentos
 - **Entrada:** Projeto e agente
-- **Saída:** Até 40 itens (data, modo, fontes; pergunta e resposta só nos registros antigos)
+- **Saída:** Até 40 itens (data, modo, fontes e avaliação)
 - **Permissões:** Nenhuma
 - **Efeito:** Consulta local.
-- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
-- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
-- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
-- **Registro:** Livro-razão local de operações externas e histórico do projeto
-
-### `prumo:conversas:apagar`
-
-- **Tipo:** IPC
-- **Finalidade:** Apagar as conversas gravadas deste projeto neste computador.
-- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
-- **Destino:** backend/agentes/api/conversasApagar.ts > apagarConversas
-- **Entrada:** Projeto
-- **Saída:** apagado
-- **Permissões:** Confirmação nativa da pessoa
-- **Efeito:** Remove conversas/<projeto>.jsonl após confirmação nativa.
 - **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
@@ -1596,7 +1532,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Revogar uma autorização de execução.
 - **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
-- **Destino:** backend/agendamentos/api/agendaRevogar.ts > revogarExecucao
+- **Destino:** backend/agendamentos/api/agendaRevogar.ts > revogarAutorizacao
 - **Entrada:** Id da autorização
 - **Saída:** Autorização revogada
 - **Permissões:** Ação explícita da pessoa
@@ -1641,7 +1577,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Revogar uma política de publicação.
 - **Origem:** Interface > Agendamentos / Execuções, ou menu da bandeja
-- **Destino:** backend/agendamentos/api/agendaRevogarPolitica.ts > revogarPublicacao
+- **Destino:** backend/agendamentos/api/agendaRevogarPolitica.ts > revogarAutorizacao
 - **Entrada:** Id da política
 - **Saída:** Política revogada
 - **Permissões:** Ação explícita da pessoa
@@ -2029,7 +1965,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 ### `prumo:atualizacao:instalar`
 
 - **Tipo:** IPC
-- **Finalidade:** Atualizar com um clique para a versão encontrada pela consulta (2.10.2).
+- **Finalidade:** Atualizar com um clique para a versão encontrada pela consulta.
 - **Origem:** Interface > Ajuda > Atualizações > Atualizar agora
 - **Destino:** backend/atualizacoes/api/atualizacaoInstalar.ts > workerDoAplicativo, estadoDoAplicativo, baixarAtualizacao, entregarInstalador, instrucaoDeInstalacao, plataformaDoInstalador, argumentosInstalador
 - **Entrada:** Nenhuma: versão e URLs vêm da consulta validada no processo principal
@@ -2511,7 +2447,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Saber se o login está ligado, quem está na sessão e o nível de cada tela para o papel dessa pessoa.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
-- **Destino:** backend/login/api/contaSessao.ts > sessaoParaJanela
+- **Destino:** backend/login/api/contaSessao.ts > sessaoParaJanela, usarAutenticacaoRemota
 - **Entrada:** Nenhuma
 - **Saída:** loginAtivo, conta visível (sem resumos), telas e regras de cadastro
 - **Permissões:** Nenhuma (atende antes do login)
@@ -2541,7 +2477,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Terminar a entrada em duas etapas com o código mandado ao e-mail.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
-- **Destino:** backend/login/api/contaConfirmarentrada.ts > confirmarEntrada
+- **Destino:** backend/login/api/contaConfirmarentrada.ts
 - **Entrada:** Desafio da entrada e código de 6 dígitos
 - **Saída:** Sessão (conta e telas)
 - **Permissões:** Nenhuma (atende antes do login); só com um desafio aberto pela senha certa
@@ -2586,7 +2522,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Encerrar a sessão.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
-- **Destino:** backend/login/api/contaSair.ts > sairDaConta
+- **Destino:** backend/login/api/contaSair.ts > sairDaConta, workerDoAplicativo, servicosDoAplicativo, revogarCredencialMcp
 - **Entrada:** Nenhuma
 - **Saída:** Sessão vazia
 - **Permissões:** Sessão aberta
@@ -2616,7 +2552,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Mandar um código de 6 dígitos ao e-mail, para confirmar o cadastro ou definir senha nova.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
-- **Destino:** backend/login/api/contaCodigo.ts > pedirCodigo
+- **Destino:** backend/login/api/contaCodigo.ts
 - **Entrada:** E-mail, finalidade (CADASTRO ou SENHA) e idioma
 - **Saída:** E-mail, minutos de validade e segundos para pedir outro
 - **Permissões:** Nenhuma (atende antes do login); ação explícita da pessoa
@@ -2646,7 +2582,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Entrar ou se cadastrar pelo GitHub: abre o navegador na autorização e a pessoa volta já com o acesso. Com ativar, e sem nenhuma conta, a primeira conta (administradora) nasce da autorização.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
-- **Destino:** backend/login/api/contaGithubiniciar.ts > dependenciasDoGithub, iniciarEntradaGithub
+- **Destino:** backend/login/api/contaGithubiniciar.ts > dependenciasDoGithub, iniciarEntrada
 - **Entrada:** Opcional: ativar
 - **Saída:** iniciado
 - **Permissões:** Nenhuma (atende antes do login); exige login ligado e o OAuth App configurado
@@ -2661,7 +2597,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Tipo:** IPC
 - **Finalidade:** Ver como está a entrada pelo GitHub (aguardando, concluída, pendente de aprovação ou com erro) ou desistir dela.
 - **Origem:** Interface > Entrada do Prumo, Minha conta ou Administração
-- **Destino:** backend/login/api/contaGithubestado.ts > estadoDaEntradaGithub
+- **Destino:** backend/login/api/contaGithubestado.ts > estadoDaEntrada
 - **Entrada:** Opcional: cancelar
 - **Saída:** estado, mensagem e, quando concluída, a sessão
 - **Permissões:** Nenhuma (atende antes do login)

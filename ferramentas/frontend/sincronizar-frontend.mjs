@@ -33,8 +33,10 @@ for (const recurso of recursos) {
   if (fontesMapeadas.has(recurso.fonte) || destinosMapeados.has(recurso.destino)) throw new Error('Recurso duplicado: ' + recurso.fonte);
   fontesMapeadas.add(recurso.fonte); destinosMapeados.add(recurso.destino);
 }
-const distribuivel = arquivo => /\.(js|css|html)$/.test(arquivo);
-const fontes = arquivosDentro(origem).filter(arquivo => distribuivel(arquivo) && !fontesMapeadas.has('frontend/' + arquivo.split(path.sep).join('/')));
+const distribuivel = arquivo => /\.(js|css|html)$/.test(arquivo) && !/(^|[\\/])web[\\/]/.test(arquivo);
+// As partes (*.parte.js|css) entram na janela só pelos bundles de telas-modulares.json; a cópia avulsa nunca seria carregada.
+const parte = arquivo => /\.parte\.(js|css)$/.test(arquivo);
+const fontes = arquivosDentro(origem).filter(arquivo => distribuivel(arquivo) && !parte(arquivo) && !fontesMapeadas.has('frontend/' + arquivo.split(path.sep).join('/')));
 const copias = arquivosDentro(destino).filter(distribuivel);
 const diferencas = [];
 const fontesSet = new Set(fontes);
@@ -68,6 +70,17 @@ for (const recurso of recursos) {
     fs.copyFileSync(a, b);
     console.log('SINCRONIZADO: ' + recurso.fonte);
   }
+}
+// Na raiz de dist/renderer só ficam os recursos declarados, os bundles e o status.css (gerar-status.mjs).
+// Arquivo de um nome antigo (renomeado ou removido): ao gerar, some; ao conferir, é erro.
+const raizDaJanela = path.join(raiz, 'dist/renderer');
+const bundles = JSON.parse(fs.readFileSync(path.join(raiz, 'ferramentas/frontend/telas-modulares.json'), 'utf8')).bundles.map(b => b.destino);
+const permitidos = new Set([...recursos.map(r => r.destino), ...bundles, 'dist/renderer/status.css']);
+for (const item of fs.existsSync(raizDaJanela) ? fs.readdirSync(raizDaJanela, { withFileTypes: true }) : []) {
+  const relativo = 'dist/renderer/' + item.name;
+  if (!item.isFile() || !distribuivel(item.name) || permitidos.has(relativo)) continue;
+  if (somenteConferir) diferencas.push('Arquivo antigo na raiz da janela: ' + relativo);
+  else { fs.rmSync(path.join(raizDaJanela, item.name)); console.log('REMOVIDO: ' + relativo); }
 }
 if (diferencas.length) {
   diferencas.forEach(d => console.error('ERRO: ' + d));

@@ -33,6 +33,7 @@ const validar = (canal, entrada, fn) => {
 };
 const api = {
   espacos: () => Promise.resolve({ ok: true, data: listarEspacos(dados) }),
+  projetos: () => Promise.resolve({ ok: true, data: [] }),
   espacoCriar: entrada => validar('espacos:criar', entrada, d => criarEspaco(d, dados)),
   espacoEditar: (_id, _entrada) => Promise.resolve({ ok: false, error: 'Não testado' }),
   suiteLocalSalvar: entrada => validar('repositorio:suite', entrada, d => salvarSuiteLocal(d, dados)),
@@ -71,7 +72,7 @@ class No {
 const h = (tag, attrs, ...filhos) => new No(tag, attrs, filhos);
 const source = p => fs.readFileSync(path.join(raiz, p), 'utf8');
 const campo = (_, attrs) => { const input = h('input', attrs); return { input, no: h('label', {}, input) }; };
-const suitesJS = source('frontend/testes/fluxos-casos-qase.parte.js');
+const suitesJS = source('frontend/testes/fluxos-repositorio-local.parte.js');
 const i = suitesJS.indexOf('  function formularioSuiteLocal(e, suites, atual = null) {');
 const j = suitesJS.indexOf('  async function telaCasosLocais(e, _mem, corpo) {', i);
 assert.ok(i > 0 && j > i);
@@ -111,6 +112,10 @@ function montarUI() {
     source('frontend/compartilhado/criarBotaoAcao.js') + '\n' +
     source('frontend/projetos/selecionarProjeto.js') + '\n' +
     source('frontend/projetos/modais/criarEditarProjeto/abrirFormularioProjeto.js') + '\n' +
+    source('frontend/projetos/componentes/montarVinculosProjeto.js') + '\n' +
+    source('frontend/projetos/componentes/montarSecaoProjeto.js') + '\n' +
+    source('frontend/projetos/componentes/montarDiagnosticoPasta.js') + '\n' +
+    source('frontend/projetos/mostrarPastasLocais.js') + '\n' +
     source('frontend/projetos/mostrarProjetos.js') + '\n' +
     source('frontend/testes/formularios/montarFormularioProposta.js') + '\n' +
     suitesJS.slice(i, j) +

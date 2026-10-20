@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { abrir, novoDados, ir } from '../../../apoio/janela.mjs';
+import { abrir, novoDados, ir, dadosDaConta } from '../../../apoio/janela.mjs';
 import { servidorFixture } from '../../../apoio/servicos-fixtures.mjs';
 import { concluirTrabalho as concluir } from '../../../../dist/agendamentos/banco/concluirTrabalho.js';
 import { enfileirar } from '../../../../dist/agendamentos/banco/enfileirar.js';
@@ -24,9 +24,10 @@ async function prepararJira(t) {
   const conta = (await a.page.evaluate(() => window.prumo.servicoAdicionar({ servico: 'jira', nome: 'Jira simulado', instancia: 'https://lab.atlassian.net', usuario: 'fixture@example.test', token: 'fixture-secret-28' }))).data;
   const recursos = (await a.page.evaluate((id) => window.prumo.servicoRecursos(id), conta.id)).data.recursos;
   assert.ok((await a.page.evaluate(([x, y, z]) => window.prumo.servicoVincular(x, y, z), [e.id, conta.id, recursos[0]])).ok);
-  const rotina = criarRotina({ nome: 'Regressão SMART-1', espacoId: e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, dados);
-  const execucao = (chave, resultado) => { const { trabalho } = enfileirar({ chave, rotinaId: rotina.id, espacoId: e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', origem: 'MANUAL', slot: null }, dados); reivindicar(dados); concluir(trabalho.id, resultado, dados); return trabalho.id; };
-  return { dados, s, a, e, rotina, execucao };
+  const pastaDaConta = await dadosDaConta(a.page, dados);
+  const rotina = criarRotina({ nome: 'Regressão SMART-1', espacoId: e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', frequencia: { tipo: 'intervalo', minutos: 600 }, fuso: 'UTC' }, pastaDaConta);
+  const execucao = (chave, resultado) => { const { trabalho } = enfileirar({ chave, rotinaId: rotina.id, espacoId: e.id, tipo: 'regressao', capability: 'unit', ambiente: 'teste', ticket: 'SMART-1', origem: 'MANUAL', slot: null }, pastaDaConta); reivindicar(pastaDaConta); concluir(trabalho.id, resultado, pastaDaConta); return trabalho.id; };
+  return { dados: pastaDaConta, s, a, e, rotina, execucao };
 }
 
 test('comentário Jira pela interface: prévia, confirmação nativa, publicação única e somente o POST de comentário', async (t) => {

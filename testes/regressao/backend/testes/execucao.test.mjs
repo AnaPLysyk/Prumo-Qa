@@ -9,7 +9,7 @@ import { consultarEvidencias } from '../../../../dist/testes/banco/consultarEvid
 
 // Double APENAS neste processo de testes. Nenhum adaptador aceita isso do usuário/IA.
 let autorizar=async scope=>({subject:'FIXTURE-NON-HUMAN',method:'test-double',scopeHash:scope.scopeHash,at:new Date().toISOString()});
-mock.module('../../../../dist/testes/aprovacao/solicitarAprovacao.js',{namedExports:{solicitarAprovacao:scope=>autorizar(scope)}});
+mock.module('../../../../dist/testes/aprovacao/solicitarAprovacao.js',{exports:{solicitarAprovacao:scope=>autorizar(scope)}});
 const { executarValidacao } = await import('../../../../dist/testes/regras/executarValidacao.js'); const { ambienteMinimo } = await import('../../../../dist/testes/regras/ambienteMinimo.js');
 
 test('sem consentimento, capability ausente e bloqueio de política não executam',async t=>{

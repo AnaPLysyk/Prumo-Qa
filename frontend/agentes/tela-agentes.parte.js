@@ -1,4 +1,4 @@
-/** Reúne trecho visual da função agentes para o bundle interfaces-v36. */
+/** Lista agentes, abre detalhes e edita permissoes. */
   /** Número entre 0 e 1 para os efeitos visuais (meteoros); vem do gerador do navegador, não de Math.random. */
   const acaso = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
   const activityDetails = detalhesAtividade;
@@ -68,7 +68,7 @@
     const e = estado.espaco; if (!e) {
       disponivel(tr('Selecione um projeto para consultar as especializações e configurar permissões. Claude Code, Codex, Qase e Jira se conectam em Conexões.'));
       // Pasta vinculada sem projeto selecionado: o diagnóstico e a configuração do MCP continuam aqui.
-      if (estado.root) { const legacy = h('div'); await agentesLegado(legacy); legacy.querySelector('h1')?.remove(); el.append(legacy); }
+      if (estado.root) { const legacy = h('div'); await mostrarConfiguracaoMcp(legacy); legacy.querySelector('h1')?.remove(); el.append(legacy); }
       return;
     }
     const s = await chamar(() => api.agentesEstado(e.id)); if (!s) { disponivel(tr('Não foi possível ler os agentes deste projeto agora. O Orchestrator local segue disponível; tente de novo em instantes.')); return; }
@@ -110,14 +110,14 @@
           const astro = h('button', { type: 'button', class: 'v36a-astro', role: 'listitem', 'data-agent': x.id, title: tr('Configurar agente'), onclick: () => detail(x) });
           astro.style.setProperty('--face-color', palette[x.index % 8]); astro.style.setProperty('--atraso', (-k * 1.3) + 's');
           astro.append(figuraRobo(h('span', { class: 'v36a-astro-figura' }), x, 'lista', astro),
-            h('span', { class: 'v36a-astro-nome', 'data-i18n-ignore': '' }, x.nome), h('span', { class: 'v36a-astro-sub' }, x.preview ? visibilidade(x) : x.skill),
+            h('span', { class: 'v36a-astro-nome', 'data-i18n-ignore': '' }, x.nome), h('span', { class: 'v36a-astro-sub' }, x.preview ? visibilidade(x) : ([x.profissao, x.especialidade].filter(Boolean).map(parte => tr(parte)).join(' — ') || x.skill)),
             h('span', { class: 'v36a-astro-estado' }, h('i', { class: x.preview ? '' : ligado ? 'ok' : 'off' }), h('span', {}, x.preview ? tr('Prévia · sem execução') : ligado ? tr('Habilitada no projeto') : tr('Desabilitada no projeto')),
               x.preview ? null : h('span', { class: 'v36a-astro-caps' }, ' · ', tr('{n} capacidades', { n: caps.length }))));
           return astro; }));
         if (!lista.children.length) lista.append(h('div', { class: 'v36a-vazio' }, tr('Nenhum agente para esta busca.')));
       }
       const clientContent = h('div', { id: 'v36-client-panel' }); let loaded = false;
-      const clients = h('details', { class: 'v36a-secao-extra', id: 'v36-clients', ontoggle: async ev => { if (!ev.currentTarget.open || loaded) return; loaded = true; await agentesLegado(clientContent); clientContent.querySelector('h1')?.remove(); } }, h('summary', {}, tr('Clientes MCP · diagnóstico e configuração')), clientContent);
+      const clients = h('details', { class: 'v36a-secao-extra', id: 'v36-clients', ontoggle: async ev => { if (!ev.currentTarget.open || loaded) return; loaded = true; await mostrarConfiguracaoMcp(clientContent); clientContent.querySelector('h1')?.remove(); } }, h('summary', {}, tr('Clientes MCP · diagnóstico e configuração')), clientContent);
       body.replaceChildren(
         h('div', { class: 'v36a-topo' }, h('div', {}, h('h2', { class: 'v36a-titulo' }, tr('Agentes'), ' ', conta, DS.info(['Especializações do núcleo e prévias locais deste projeto.', 'Especializações reais do núcleo. Habilitação não comprova sessão nem execução ativa. Retratos com movimento visual, sem articulação facial 3D.'], { id: 'v36a-sobre' }))),
           h('div', { class: 'v36a-acoes' }, h('label', { class: 'v36a-busca' }, iconeBusca(), search), h('button', { type: 'button', class: 'v36a-quieto', id: 'v36-agentes-integracoes', title: tr('Claude Code, Codex, Qase e Jira'), onclick: () => void mostrar('conexoes') }, tr('Integrações')), novo)),
@@ -241,129 +241,3 @@
     const linhasInstrucao = (texto) => String(texto || '').split(/\n+|(?<=[.;!?])\s+/).map(l => l.trim()).filter(Boolean).slice(0, 24);
     function figuraRobo(host, x, modo, area) { if (!PrumoRobos.criar(host, x.index, modo, area)) host.append(portrait(x.index, modo !== 'lista')); return host; }
     const bolinha = (cor) => { const i = h('i'); i.style.background = cor; return i; };
-    async function brain(x) {
-      const caps = capsDe(x); const mudou = lerMudancas()[x.id];
-      const tema = document.documentElement.dataset.tema, claroTema = tema === 'claro' || (tema !== 'escuro' && matchMedia('(prefers-color-scheme: light)').matches);
-      // Tons claros no escuro e tons fortes no claro, para ponto, linha e legenda terem contraste nos dois temas.
-      const C = claroTema ? { base: '#2f6fd6', cap: '#0f8a72', ctx: '#7a4fd6', inst: '#1d86b8', conv: '#c25a17', saber: '#0f8a72', skill: '#9a6a00', voc: '#b8336f' }
-        : { base: '#7cb6ff', cap: '#52e0c4', ctx: '#b38cff', inst: '#7ad7ff', conv: '#ff9f6b', saber: '#52e0c4', skill: '#f2c977', voc: '#ff9fc8' };
-      const corMudou = claroTema ? '#b07800' : '#ffc65a';
-      const GRUPOS = { base: ['Identidade', C.base], voc: ['Vocabulário', C.voc], cap: ['Capacidade', C.cap], ctx: ['Contexto do projeto', C.ctx], inst: ['Instrução', C.inst], saber: ['Conhecimento', C.saber], skill: ['Trecho de Skill', C.skill], conv: ['Atendimento', C.conv] };
-      const neuronios = x.preview
-        ? [{ id: 'identidade', t: 'Identidade', r: x.nome, v: { nome: x.nome, descricao: x.descricao }, g: 'base' }, { id: 'objetivo', t: 'Objetivo', r: x.objetivo, v: x.objetivo, g: 'base' }, ...linhasInstrucao(x.instrucoes).map((l, i) => ({ id: 'inst:' + i, t: tr('Instrução {n}', { n: i + 1 }), r: l, v: l, g: 'inst' })), { id: 'estado', t: 'Estado', r: tr('Prévia local · sem execução'), v: previewNotice, g: 'base' }]
-        : [{ id: 'identidade', t: 'Identidade', r: x.rotulo, v: { id: x.id, rotulo: x.rotulo }, g: 'base' }, { id: 'skill', t: 'Skill', r: x.skill, v: x.skill, g: 'base' }, { id: 'disponibilidade', t: 'Disponibilidade', r: habilitada(x.id) ? tr('Habilitada no projeto') : tr('Desabilitada no projeto'), v: { habilitada: habilitada(x.id) }, g: 'base' }, ...caps.map(c => ({ id: 'cap:' + c.id, t: c.rotulo, r: c.estado, v: c, g: 'cap' }))];
-      // Contextos aprovados que a especialização pode ler (capacidade de contexto permitida no projeto).
-      const ctxCap = caps.find(c => c.id === 'consultar_contexto');
-      if (!x.preview && ctxCap && ctxCap.estado === 'PERMITIDO' && estado.root) {
-        const r = await chamar(() => api.contextosListar(estado.root, {})); if (estado.aba !== 'agentes') return;
-        for (const c of (r?.contextos || []).filter(c => c.estado === 'APROVADO').slice(0, 40)) neuronios.push({ id: 'ctx:' + c.id, t: c.titulo, r: c.tipo, v: { id: c.id, titulo: c.titulo, tipo: c.tipo, estado: c.estado }, g: 'ctx' });
-      }
-      if (!x.preview) {
-        // Tudo o que o agente sabe: vocabulário de roteamento, termos aprendidos, conhecimentos, todos os trechos de Skill e atendimentos.
-        const [roster, vocab, conhecimentos, trechos, conv] = await Promise.all([chamar(() => api.assistenteAgentes(e.id)), chamar(() => api.conhecimentoVocabulario(x.id)), chamar(() => api.conhecimentoListar(e.id, { agente: x.id })), chamar(() => api.skillsListar({ especializacao: x.id, estados: ['RASCUNHO', 'APROVADO'] })), chamar(() => api.conversasListar(e.id, x.id))]);
-        if (estado.aba !== 'agentes') return;
-        const palavras = roster?.agentes?.find((a) => a.id === x.id)?.palavras || [];
-        if (palavras.length) neuronios.push({ id: 'palavras', t: tr('Palavras de roteamento'), r: tr('{n} palavras', { n: palavras.length }), v: palavras.join(', '), g: 'voc' });
-        if (vocab?.length) neuronios.push({ id: 'aprendidos', t: tr('Termos aprendidos'), r: tr('{n} termos', { n: vocab.length }), v: vocab, g: 'voc' });
-        for (const c of conhecimentos || []) neuronios.push({ id: c.id, t: c.titulo, r: c.estado + ' · ' + c.origem, v: c, g: 'saber' });
-        for (const t of (trechos || []).slice(0, 40)) neuronios.push({ id: t.id, t: t.titulo, r: (t.origem === 'PRUMO' ? 'Prumo' : t.origem) + ' · ' + t.estado, v: t, g: 'skill' });
-        // Atendimentos recentes têm metadados; conversas antigas podem conter texto.
-        for (const c of (conv || []).slice(0, 12)) neuronios.push({ id: 'conv:' + c.id, t: c.semTexto ? 'Atendimento · ' + (c.avaliacao || 'Sem avaliação') : '“' + c.pergunta.slice(0, 38) + (c.pergunta.length > 38 ? '…”' : '”'), r: (c.modo === 'LOCAL' ? tr('local') : c.modo) + ' · ' + hora(c.em), v: { pergunta: c.pergunta, resposta: c.linhas, fontes: c.fontes.map((f) => f.rotulo), modo: c.modo, estilo: c.estilo, em: c.em }, g: 'conv' });
-      }
-      const inspect = h('section', { class: 'v36-brain-inspect', 'aria-live': 'polite' });
-      const campo = h('div', { class: 'v36a-campo-neural' }); const anel = h('div', { class: 'v36a-anel' });
-      const face = h('div', { class: 'v36-brain-face' }); const stage = h('div', { class: 'v36-stage v36-brain v36a-cerebro' });
-      // Os grupos ficam juntos no anel (setores), na ordem da legenda, para a ramificação ser legível.
-      const ordem = Object.keys(GRUPOS); neuronios.sort((a, b) => ordem.indexOf(a.g) - ordem.indexOf(b.g));
-      const n = neuronios.length, anel2 = n > 16;
-      neuronios.forEach((nr, i) => {
-        const externo = !anel2 || i % 2 === 0, k = anel2 ? Math.floor(i / 2) : i, total = anel2 ? Math.ceil(n / 2) : n;
-        const a = -Math.PI / 2 + (k + (externo ? 0 : .5)) / Math.max(1, total) * Math.PI * 2, rx = externo ? 48 : 36, ry = externo ? 47 : 36;
-        const lado = Math.cos(a) < 0 ? 'esq' : 'dir', cor = GRUPOS[nr.g][1], alterado = mudou?.chaves?.includes(nr.t);
-        const b = h('button', { type: 'button', class: 'v36-neuron ' + lado + (alterado ? ' mudou' : ''), 'data-neuron': nr.t, 'data-id': nr.id, 'data-cor': alterado ? corMudou : cor, 'aria-pressed': 'false', 'aria-label': nr.t + ': ' + String(nr.r || '') },
-          h('span', { class: 'v36-neuron-ponto', 'aria-hidden': 'true' }), h('span', { class: 'v36-neuron-rotulo' }, h('strong', {}, nr.t), h('small', { 'data-i18n-ignore': '' }, String(nr.r || '—'))));
-        b.style.left = (50 + Math.cos(a) * rx) + '%'; b.style.top = (50 + Math.sin(a) * ry) + '%'; b.style.setProperty('--cor', alterado ? corMudou : cor); b.style.setProperty('--atraso', (-i * .37) + 's');
-        b.addEventListener('click', () => { anel.querySelectorAll('.v36-neuron').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
-          inspect.replaceChildren(h('div', { class: 'v36a-insp-grupo' }, bolinha(cor), tr(GRUPOS[nr.g][0]), alterado ? h('span', { class: 'v36a-insp-mudou' }, tr('Alterado em {quando}', { quando: hora(mudou.em) })) : null), h('h3', {}, nr.t), h('pre', {}, typeof nr.v === 'string' ? nr.v : JSON.stringify(nr.v, null, 2)));
-          if (nr.g === 'saber') for (const [estado, rotulo] of [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']]) if (nr.v.estado !== estado) inspect.append(h('button', { type: 'button', class: 'v36c-fonte', onclick: async () => { const resultado = await chamar(() => api.conhecimentoDecidir(nr.v.id, estado)); if (resultado) void brain(x); } }, rotulo));
-          if (nr.g === 'skill') for (const [estado, rotulo] of [['APROVADO', 'Aprovar'], ['DESCARTADO', 'Descartar']]) if (nr.v.estado !== estado) inspect.append(h('button', { type: 'button', class: 'v36c-fonte', onclick: async () => { const resultado = await chamar(() => api.skillsDecidir(nr.v.id, estado)); if (resultado) void brain(x); } }, rotulo));
-        });
-        anel.append(b);
-      });
-      campo.append(face, anel);
-      const legenda = h('div', { class: 'v36a-legenda-neural' }, ...Object.entries(GRUPOS).filter(([g]) => neuronios.some(nr => nr.g === g)).map(([, [t, cor]]) => h('span', {}, bolinha(cor), tr(t))), mudou ? h('span', {}, bolinha(corMudou), tr('Alterado no último salvamento')) : null);
-      // Simulador: mostra o caminho que o chat faria com a pergunta e acende os neurônios que ela usaria. Só leitura.
-      const pergunta = h('input', { id: 'v36-brain-pergunta', type: 'text', maxlength: 500, autocomplete: 'off', placeholder: tr('Ex.: oi, quais testes de API falharam?') });
-      const rastro = h('div', { class: 'v36a-sim-resultado', id: 'v36-brain-rastro', 'aria-live': 'polite' });
-      function limpar() { campo.classList.remove('v36a-simulando'); anel.querySelectorAll('.v36-neuron').forEach((o) => o.classList.remove('aceso')); rastro.replaceChildren(); }
-      async function simular(ev) {
-        ev.preventDefault(); const q = pergunta.value.trim(); if (!q) { limpar(); return; }
-        const r = await chamar(() => api.agentesRastrear(e.id, q, x.preview ? null : x.id)); if (!r || !stage.isConnected) return;
-        const minha = r.rota.find((z) => z.agente === x.id), participa = !!r.foco && (r.foco.responderia || !!r.orquestracao?.includes(x.id));
-        const acesos = new Set([...(r.foco?.skill.usados || []), ...(r.foco?.conhecimentos || []).map((c) => c.id), ...(participa ? ['identidade'] : []), ...(minha?.casou.length ? ['palavras'] : []), ...(minha?.aprendidos ? ['aprendidos'] : [])]);
-        campo.classList.add('v36a-simulando'); anel.querySelectorAll('.v36-neuron').forEach((o) => o.classList.toggle('aceso', acesos.has(o.dataset.id)));
-        const nomeAg = (id) => r.rota.find((z) => z.agente === id)?.nome || id;
-        rastro.replaceChildren(
-          h('p', { class: 'v36a-sim-quem' }, r.orquestracao ? tr('Orquestraria: ') : tr('Responderia: '), h('strong', { 'data-i18n-ignore': '' }, r.orquestracao ? r.orquestracao.map(nomeAg).join(' → ') : r.escolhido.nome),
-            r.foco ? h('span', { class: participa ? 'ok' : '' }, participa ? tr(' · este agente participa') : tr(' · outro agente atende')) : null),
-          r.rota.length ? h('ol', { class: 'v36a-sim-rota' }, r.rota.slice(0, 5).map((z) => h('li', { 'data-agente': z.agente, class: z.agente === x.id ? 'este' : '' }, h('span', { 'data-i18n-ignore': '' }, z.nome), h('b', {}, tr('{n} pts', { n: z.pontos })),
-            h('small', { 'data-i18n-ignore': '' }, [...z.casou.map((c) => c.termo), ...(z.mencao ? [tr('menção')] : []), ...(z.aprendidos ? [tr('aprendido +{n}', { n: z.aprendidos })] : [])].join(', ')))))
-            : note(tr('Nenhuma palavra conhecida: o Prumo Orchestrator atende por padrão.')),
-          r.foco ? h('p', { class: 'v36a-sim-uso' }, tr('Se este agente responder: {s} trechos de Skill ({o} ficam de fora) e {c} conhecimentos aprovados. Os usados acendem no anel.', { s: r.foco.skill.usados.length, o: r.foco.skill.omitidos, c: r.foco.conhecimentos.length })) : null,
-          acesos.size ? h('ul', { class: 'v36a-sim-acesos', 'aria-label': tr('Neurônios acesos') }, [...anel.querySelectorAll('.v36-neuron.aceso')].map((o) => h('li', {}, h('button', { type: 'button', onclick: () => o.click() }, bolinha(o.dataset.cor), h('span', { 'data-i18n-ignore': '' }, o.dataset.neuron))))) : null,
-          h('p', { class: 'v36a-sim-termos' }, tr('Termos considerados: {t}', { t: r.termos.join(', ') || '—' })));
-      }
-      const simulador = h('form', { class: 'v36a-simulador', id: 'v36-brain-simulador', onsubmit: simular },
-        h('label', { for: 'v36-brain-pergunta' }, tr('Testar uma pergunta'), DS.info('Mostra o caminho que o chat faria agora com esta pergunta. Não chama IA e não grava nada.')),
-        h('div', { class: 'v36a-sim-linha' }, pergunta, h('button', { type: 'submit', class: 'v36a-primario' }, tr('Simular')), h('button', { type: 'button', class: 'v36a-quieto', onclick: () => { pergunta.value = ''; limpar(); pergunta.focus(); } }, tr('Limpar'))),
-        rastro);
-      stage.append(h('div', { class: 'v36a-cerebro-topo' }, h('button', { type: 'button', class: 'v36a-voltar', onclick: () => detail(x) }, '← ', tr('Configuração')), h('strong', { 'data-i18n-ignore': '' }, x.nome), DS.info('Cada ponto é um conhecimento configurado deste agente. Selecione um para consultar. Isso não representa memória aprendida automaticamente.'), h('span', {}, tr('{n} conhecimentos', { n: neuronios.length }))),
-        h('div', { class: 'v36a-cerebro-corpo' }, campo, h('aside', { class: 'v36a-cerebro-lado', 'aria-label': tr('Testar e consultar o cérebro') }, simulador, inspect, legenda)));
-      stage.style.setProperty('--face-color', palette[x.index % 8]); neural(stage, { pontos: 110 });
-      body.replaceChildren(stage); figuraRobo(face, x, 'cerebro', campo);
-    }
-    // Painel de atividades (v41): canvas com janelas de terminal ligadas pelos registros locais, atualizado ao vivo.
-    // Orquestrações do chat: quem participou, em que ordem, quanto cada etapa levou, o que consultou e o que falhou (registro local, sem pergunta nem resposta).
-    async function mostrarOrquestracoes(alvo, quieto) {
-      const nomeDe = (id) => s.especializacoes?.find?.((x) => x.id === id)?.rotulo || id;
-      const ROTULO = { CONCLUIDA: 'Concluída', PARCIAL: 'Parcial', FALHOU: 'Falhou', SEM_DADOS: 'Sem dados' }; const rotulo = (x) => tr(ROTULO[x] || x);
-      const r = await quieto(() => api.agentesOrquestracoes(e.id)); if (estado.aba !== 'agentes') return;
-      if (!r) { alvo.replaceChildren(note(tr('Orquestrações indisponíveis.'))); return 0; }
-      const itens = r.orquestracoes.slice(0, 8);
-      const titulo = h('h3', { class: 'v36a-orq-titulo' }, tr('Orquestrações recentes'), h('small', {}, tr('{n} registradas', { n: r.orquestracoes.length })));
-      if (!itens.length) { alvo.replaceChildren(titulo, note(tr('Nenhuma ainda. Quando uma pergunta envolve duas ou mais especialidades, o orquestrador consulta cada uma e registra as etapas aqui.'))); return 0; }
-      alvo.replaceChildren(titulo, h('ol', { class: 'v36a-orq-lista' }, itens.map((o) => h('li', { class: 'v36a-orq-item', 'data-estado': o.estado, 'data-orquestracao': o.id },
-        h('button', { type: 'button', class: 'v36a-orq-abrir', onclick: () => caixa(tr('Orquestração · {quando}', { quando: hora(o.em) }), [note(tr('Registro local de metadados: agentes, ordem, tempos, fontes e falhas. A pergunta e as respostas não foram gravadas. As etapas são independentes.')), h('pre', {}, JSON.stringify(o, null, 2))]) },
-          h('span', { class: 'v36a-orq-quando' }, hora(o.em)), h('strong', {}, rotulo(o.estado)), h('span', { class: 'v36a-orq-tempo' }, o.duracaoMs + ' ms')),
-        h('ol', { class: 'v36a-orq-etapas' }, o.etapas.map((et) => h('li', { 'data-estado': et.estado }, h('span', { 'data-i18n-ignore': '' }, et.ordem + '. ' + nomeDe(et.agente)), ' · ', rotulo(et.estado), ' · ' + et.duracaoMs + ' ms', et.fontes.length ? h('small', {}, ' · ' + et.fontes.join(', ')) : null)))))));
-      return itens.length;
-    }
-    async function activity() {
-      painelVivo?.parar();
-      const quieto = async (fn) => { try { const r = await fn(); return r && r.ok ? r.data : null; } catch { return null; } };
-      const host = h('div', { class: 'v36a-painel' });
-      const orq = h('section', { class: 'v36a-orq', id: 'v36-orquestracoes', 'aria-label': tr('Orquestrações recentes') }, note(tr('Carregando orquestrações…')));
-      body.replaceChildren(h('div', { class: 'v36a-topo v36a-topo-painel' }, h('div', {}, h('h2', { class: 'v36a-titulo', title: tr('Clientes, agentes e o worker trabalhando, em tempo real. Só aparecem ligações que os registros deste computador comprovam.') }, tr('Painel de atividades')), h('p', { class: 'v36-sr' }, tr('Clientes, agentes e o worker trabalhando, em tempo real. Só aparecem ligações que os registros deste computador comprovam.')))), host);
-      painelVivo = PrumoPainelAtividades.montar(host, {
-        lateral: { rotulo: tr('Orquestrações'), conteudo: orq },
-        reduzido, ativo: () => activeTab === 'activity' && estado.aba === 'agentes' && estado.espaco?.id === e.id,
-        carregar: async () => {
-          const root = estado.root;
-          const [hist, roster, execs] = await Promise.all([root ? quieto(() => api.historico(root, { limit: 1000 })) : null, quieto(() => api.assistenteAgentes(e.id)), quieto(() => api.execucoes({ espacoId: e.id, limite: 200 }))]);
-          const agentes = roster?.agentes || [];
-          const conversas = (await Promise.all(agentes.map((a) => quieto(() => api.conversasListar(e.id, a.id)).then((l) => (l || []).map((c) => ({ ...c, fontes: c.fontes.map(f => typeof f === 'string' ? f : f.rotulo), agenteNome: a.nome })))))).flat();
-          if (!hist && !execs && !conversas.length) return null;
-          const avisos = [!hist ? tr('Histórico do núcleo indisponível.') : null, hist && !hist.complete ? tr('Histórico parcial: registros inválidos excluídos.') : null, !execs ? tr('Execuções indisponíveis.') : null].filter(Boolean);
-          return { atividades: hist?.activities || [], conversas, agentes, execucoes: execs?.execucoes || [], totalExecucoes: execs?.total, avisos };
-        },
-        abrirAtividade: activityDetails,
-        abrirConversa: (c) => caixa((c.semTexto ? 'Atendimento · ' : 'Conversa · ') + (c.agenteNome || c.agente), [note(c.semTexto ? 'Registro local de metadados. A pergunta e a resposta não foram gravadas.' : tr('Gravada somente neste computador. Resposta {m}.', { m: c.modo === 'LOCAL' ? tr('local, sem modelo de IA') : c.modo })), h('pre', {}, JSON.stringify({ em: c.em, agente: c.agente, ...(c.semTexto ? { avaliacao: c.avaliacao } : { pergunta: c.pergunta, resposta: c.linhas }), fontes: c.fontes, modo: c.modo }, null, 2))]),
-        abrirExecucao: (x) => caixa(tr('Execução {r}', { r: x.rotina }), [note(tr('Registro da fila do worker. Evidência e logs completos ficam em Testes › Runs.')), h('pre', {}, JSON.stringify(x, null, 2)), button(tr('Abrir Runs'), () => { document.querySelector('.v36-dialog[open]')?.close(); void mostrar('runs'); })]),
-        abrirTela: (aba) => mostrar(aba)
-      });
-      const vivo = painelVivo; mostrarOrquestracoes(orq, quieto).then((n) => { if (n && painelVivo === vivo) vivo.abrirLateral(true); }).catch(() => avisar(tr('Não foi possível mostrar as orquestrações.')));
-    }
-    void list();
-  };
-
-  // ---------------- Ajustes: Sistema (tema, idioma, cor) e Assistente (nome, estilo, voz, IA externa) ----------------

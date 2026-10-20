@@ -66,7 +66,6 @@
     }
   }
 
-  const menu = document.querySelector('#nav [data-aba="contextos"]'); if (menu) menu.hidden = true;
   let corpoCtx = null;
   async function abrirContextos() {
     const caixa = corpoCtx?.isConnected ? corpoCtx : null; const alvo = h('div', { class: 'ds-contextos' }, DS.carregando());

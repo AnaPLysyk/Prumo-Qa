@@ -8,7 +8,7 @@ import { arquivosDoDiario } from './arquivosDoDiario.js';
 import { pastaAtividades } from './pastaAtividades.js';
 
 /**
- * Exclusão controlada do histórico OPERACIONAL de um projeto (nunca código nem evidências).
+ * Exclusão controlada do histórico operacional de um projeto (nunca código nem evidências).
  * Só apaga arquivos <uuid>.jsonl regulares, um a um, sem links; falhas parciais (arquivo em uso, permissão) são devolvidas.
  */
 export function excluirAtividades(p:Projeto,base?:string) {

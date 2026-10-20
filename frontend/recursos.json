@@ -18,22 +18,6 @@
       "destino": "dist/renderer/i18n-en.js"
     },
     {
-      "fonte": "frontend/compartilhado/runtime/i18n-en-29.js",
-      "destino": "dist/renderer/i18n-en-29.js"
-    },
-    {
-      "fonte": "frontend/compartilhado/runtime/i18n-en-v36.js",
-      "destino": "dist/renderer/i18n-en-v36.js"
-    },
-    {
-      "fonte": "frontend/compartilhado/runtime/i18n-en-v40.js",
-      "destino": "dist/renderer/i18n-en-v40.js"
-    },
-    {
-      "fonte": "frontend/compartilhado/runtime/i18n-en-v41.js",
-      "destino": "dist/renderer/i18n-en-v41.js"
-    },
-    {
       "fonte": "frontend/design-system/ds.js",
       "destino": "dist/renderer/ds.js"
     },
@@ -50,36 +34,44 @@
       "destino": "dist/renderer/estilo.css"
     },
     {
-      "fonte": "frontend/design-system/qualidade-v39.css",
-      "destino": "dist/renderer/qualidade-v39.css"
+      "fonte": "frontend/design-system/modal-de-detalhes.css",
+      "destino": "dist/renderer/modal-de-detalhes.css"
     },
     {
-      "fonte": "frontend/design-system/qualidade-v39.js",
-      "destino": "dist/renderer/qualidade-v39.js"
+      "fonte": "frontend/design-system/modal-de-detalhes.js",
+      "destino": "dist/renderer/modal-de-detalhes.js"
     },
     {
       "fonte": "frontend/inicio/identidade/qc.js",
       "destino": "dist/renderer/qc.js"
     },
     {
-      "fonte": "frontend/inicio/identidade/orbitas-v36.js",
-      "destino": "dist/renderer/orbitas-v36.js"
+      "fonte": "frontend/inicio/identidade/orbitas.js",
+      "destino": "dist/renderer/orbitas.js"
     },
     {
-      "fonte": "frontend/inicio/identidade/robos-v36.js",
-      "destino": "dist/renderer/robos-v36.js"
+      "fonte": "frontend/inicio/identidade/robos.js",
+      "destino": "dist/renderer/robos.js"
     },
     {
-      "fonte": "frontend/agentes/atividades/painel-atividades-v41.js",
-      "destino": "dist/renderer/painel-atividades-v41.js"
+      "fonte": "frontend/agentes/atividades/modelo-e-layout.js",
+      "destino": "dist/renderer/modelo-e-layout.js"
     },
     {
-      "fonte": "frontend/agentes/atividades/painel-atividades-v41.css",
-      "destino": "dist/renderer/painel-atividades-v41.css"
+      "fonte": "frontend/agentes/atividades/painel-atividades.js",
+      "destino": "dist/renderer/painel-atividades.js"
     },
     {
-      "fonte": "frontend/agendamentos/operacao-v40.js",
-      "destino": "dist/renderer/operacao-v40.js"
+      "fonte": "frontend/agentes/atividades/painel-atividades.css",
+      "destino": "dist/renderer/painel-atividades.css"
+    },
+    {
+      "fonte": "frontend/testes/execucoes-e-evidencias.js",
+      "destino": "dist/renderer/execucoes-e-evidencias.js"
+    },
+    {
+      "fonte": "frontend/agendamentos/tela-agendamentos.js",
+      "destino": "dist/renderer/tela-agendamentos.js"
     },
     {
       "fonte": "frontend/compartilhado/vendor/three-0.159.0.min.js",

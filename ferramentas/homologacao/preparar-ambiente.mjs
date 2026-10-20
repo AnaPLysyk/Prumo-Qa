@@ -35,9 +35,13 @@ function preflight() {
   return ausentes.length === 0;
 }
 function ambienteSemSegredos(perfil) {
+  // A homologação usa somente a URL pública da API Better Auth; nenhum token ou senha é herdado.
+  // Mantém o isolamento do perfil e nunca herda tokens, senhas ou segredos locais.
+  const publicas = new Set(['PRUMO_AUTH_API_URL']);
   const variaveis = Object.fromEntries(Object.entries(process.env).filter(([nome]) =>
-    !/TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|API_KEY|PRIVATE_KEY|AUTHORIZATION|(^|_)KEY$|^NODE_OPTIONS$|^ELECTRON_RUN_AS_NODE$|^PRUMO_/i.test(nome)));
+    publicas.has(nome) || !/TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|API_KEY|PRIVATE_KEY|AUTHORIZATION|(^|_)KEY$|^NODE_OPTIONS$|^ELECTRON_RUN_AS_NODE$|^PRUMO_/i.test(nome)));
   variaveis.PRUMO_DATA_DIR = perfil;
+  variaveis.PRUMO_LOGIN_MVP = '1';
   variaveis.PRUMO_SEM_AVISO_AUTOMATICO = '1';
   return variaveis;
 }

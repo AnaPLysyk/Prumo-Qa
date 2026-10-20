@@ -30,7 +30,7 @@ O MCP compartilha o núcleo da CLI e oferece prompts de especialização e `prop
 
 ## Limites da entrega
 
-Qase/Jira/GitHub são verificados com serviços simulados nos testes, sem credenciais reais. Autenticação e publicação reais dependem de uma conta configurada. O reaproveitamento de Quality Control (portfólio) e QA-Orchestrator já foi documentado em [REAPROVEITAMENTO-2.8.md](historico/REAPROVEITAMENTO-2.8.md): identidade visual, agenda, fila e worker foram adaptados ao núcleo único. Esta entrega completa os vínculos de teste e o ciclo do assistente sobre esses módulos; não inicia um segundo daemon nem transfere dados de outros repositórios.
+Qase/Jira/GitHub são verificados com serviços simulados nos testes, sem credenciais reais. Autenticação e publicação reais dependem de uma conta configurada. Na 2.8, a identidade visual do Quality Control (portfólio da autora) e a agenda, a fila e o worker do QA-Orchestrator foram adaptados ao núcleo único; os repositórios de origem não foram alterados. Esta entrega completa os vínculos de teste e o ciclo do assistente sobre esses módulos; não inicia um segundo daemon nem transfere dados de outros repositórios.
 
 A pasta de automação é necessária para ler arquivos locais; conectar o GitHub não equivale a baixar código privado. A cobertura de sistemas web, mobile e outros depende de capabilities e runners declarados pelo projeto, não de detecção universal.
 

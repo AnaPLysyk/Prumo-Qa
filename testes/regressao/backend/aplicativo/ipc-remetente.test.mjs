@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 
 test('IPC rejeita subframe, janela clonada, URL diferente e janela destruída antes do handler', async (t) => {
   let tratar; let chamadas = 0; const diagnosticos = [];
-  t.mock.module('electron', { namedExports: { app: { getVersion: () => 'fixture' }, BrowserWindow: class {}, Tray: class {}, ipcMain: { handle: (_nome, fn) => { tratar = fn; } } } });
-  t.mock.module('../../../../dist/logs/banco/registrarDiagnostico.js', { namedExports: { registrarDiagnostico: (registro) => diagnosticos.push(registro) } });
+  t.mock.module('electron', { exports: { app: { getVersion: () => 'fixture' }, BrowserWindow: class {}, Tray: class {}, dialog: {}, shell: {}, Menu: class {}, session: {}, nativeImage: {}, safeStorage: {}, Notification: class { static isSupported() { return false; } }, ipcMain: { handle: (_nome, fn) => { tratar = fn; } } } });
+  t.mock.module('../../../../dist/logs/banco/registrarDiagnostico.js', { exports: { registrarDiagnostico: (registro) => diagnosticos.push(registro) } });
   const { registrarCanal } = await import('../../../../dist/aplicativo/api/registrarCanal.js');
   const { estadoDoAplicativo } = await import('../../../../dist/aplicativo/estadoDoAplicativo.js');
   const { origemPermitida } = await import('../../../../dist/aplicativo/tipos/aplicativo.js');

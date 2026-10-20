@@ -17,9 +17,9 @@ async function conferir<T>(r: Response, esperados: number[]): Promise<T> {
   throw new Error('SUPPORT_SEND_FAILED: o serviço de suporte não conseguiu concluir agora; tente de novo em instantes.');
 }
 
-export type ChamadoParaServico = { categoria: string; titulo: string; descricao: string; passos?: string; esperado?: string; versao?: string; sistema?: string; diagnostico?: string; contato?: { nome: string; email?: string }; anexos: { nome: string; tipo: string; tamanho: number }[] };
-export type RespostaDoChamado = { em: string; texto: string };
-export type ResumoDoChamado = { numero: number; titulo: string; categoria: string; estado: string; contato: string | null; criadoEm: string; atualizadoEm: string; anexos: number };
+type ChamadoParaServico = { categoria: string; titulo: string; descricao: string; passos?: string; esperado?: string; versao?: string; sistema?: string; diagnostico?: string; contato?: { nome: string; email?: string }; anexos: { nome: string; tipo: string; tamanho: number }[] };
+type RespostaDoChamado = { em: string; texto: string };
+type ResumoDoChamado = { numero: number; titulo: string; categoria: string; estado: string; contato: string | null; criadoEm: string; atualizadoEm: string; anexos: number };
 
 const json = (corpo: unknown) => ({ cabecalhos: { 'Content-Type': 'application/json' }, corpo: JSON.stringify(corpo) });
 

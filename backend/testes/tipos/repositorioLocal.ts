@@ -12,14 +12,14 @@ export const entradaSuiteLocal = z.object({
   espacoId: z.string().uuid(), id: z.string().uuid().optional(), titulo: z.string().trim().min(2).max(255),
   descricao: z.string().max(4000).default(''), paiId: z.string().uuid().nullable().optional()
 }).strict();
-export const casoLocalSchema = z.object({
+const casoLocalSchema = z.object({
   id: z.string().uuid(), espacoId: z.string().uuid(), tipo: z.literal('caso'), origem: z.literal('PESSOA'),
   titulo: z.string().min(3).max(255), dados: dadosCasoLocal, requisito: z.string().max(500),
   risco: z.string().max(300), suiteLocalId: z.string().uuid().nullable(),
   referenciasLegadas: z.object({ ticket: z.string().max(40).optional(), suiteId: z.number().int().positive().optional() }).strict().optional(),
   criadaEm: z.string().datetime(), atualizadaEm: z.string().datetime()
 }).strict();
-export const suiteLocalSchema = z.object({
+const suiteLocalSchema = z.object({
   id: z.string().uuid(), espacoId: z.string().uuid(), titulo: z.string().max(255), descricao: z.string().max(4000),
   paiId: z.string().uuid().nullable(), criadaEm: z.string().datetime(), atualizadaEm: z.string().datetime()
 }).strict();

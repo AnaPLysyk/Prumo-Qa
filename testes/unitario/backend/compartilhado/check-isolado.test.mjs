@@ -15,7 +15,7 @@ test('filtro --isolado combina com --listar e impede argumentos repetidos', () =
   assert.throws(() => argumentos(['--isolado', '--isolado']), /TEST_ARGUMENT_INVALID/);
 });
 
-test('E2E e migração ficam NOT_RUN; apenas arquivos sem dependência conhecida entram', t => {
+test('E2E fica NOT_RUN; entram só arquivos sem janela, inclusive migração sintética', t => {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-selecao-isolada-'));
   t.after(() => fs.rmSync(base, { recursive: true, force: true }));
   const nomes = [
@@ -29,11 +29,8 @@ test('E2E e migração ficam NOT_RUN; apenas arquivos sem dependência conhecida
   fs.writeFileSync(path.join(base, nomes[1]), "import { abrir } from '../../../apoio/" + helper + "';\n");
   fs.writeFileSync(path.join(base, nomes[2]), "import test from 'node:test';\n");
   const grupo = dividirPorIsolamento(catalogar(nomes), base);
-  assert.deepEqual(grupo.elegiveis.map(x => x.arquivo), [nomes[0]]);
-  assert.deepEqual(grupo.pendentes, [
-    { arquivo: nomes[1], motivo: 'ELECTRON_NAO_AUTORIZADO' },
-    { arquivo: nomes[2], motivo: 'MIGRACAO_PERFIL_REAL' }
-  ]);
+  assert.deepEqual(grupo.elegiveis.map(x => x.arquivo), [nomes[0], nomes[2]]);
+  assert.deepEqual(grupo.pendentes, [{ arquivo: nomes[1], motivo: 'ELECTRON_NAO_AUTORIZADO' }]);
 });
 
 test('plano isolado instala bloqueador antes dos testes e recusa perfil externo de dados', () => {

@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import { randomUUID } from 'node:crypto';
+import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
+import { iniciarAtividade } from '../../../../dist/logs/regras/iniciarAtividade.js';
+import { criarEvidenciaInicial } from '../../../../dist/testes/regras/criarEvidenciaInicial.js';
+import { salvarEvidencia } from '../../../../dist/testes/banco/salvarEvidencia.js';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { versao, exe, novoDados, abrir, ir, escolherPasta, mcp } from '../../../apoio/janela.mjs';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
@@ -15,6 +20,18 @@ const dialogos = (app, resposta, salvar) => app.evaluate(({ dialog }, [r, destin
 }, [resposta, salvar]);
 async function vincular(app, page, root) { await escolherPasta(app, root); await page.click('text=Vincular pasta…'); await page.waitForSelector('table'); }
 const chamar = (page, fn, ...args) => page.evaluate(([f, a]) => window.prumo[f](...a), [fn, args]);
+// Uma conta autenticada tem diario proprio; MCP iniciado sem sessao nao recebe esse escopo.
+const dadosDaConta = async (page, dados) => {
+  const s = await chamar(page, 'contaSessao');
+  assert.ok(s.ok && s.data.usuario?.id, 'conta autenticada');
+  return path.join(dados, 'usuarios', s.data.usuario.id);
+};
+async function registrarAtividadeDaConta(page, dados, raiz, ferramenta, status = 'OK') {
+  const base = await dadosDaConta(page, dados);
+  const projeto = await carregarProjeto(raiz);
+  iniciarAtividade(projeto, ferramenta, { origin: 'MCP', client: 'sdk' }, {}, { base }).finalizar({ status });
+}
+
 
 test('central de ajuda: guia completo, perguntas frequentes expansíveis e tudo offline', async (t) => {
   const dados = novoDados(t);
@@ -129,7 +146,11 @@ test('Privacidade e dados: resumo real, exportação, exclusão separada por esc
   const f = await fixture(t); const dados = novoDados(t);
   const { app, page } = await abrir(t, dados);
   await vincular(app, page, f.root);
-  await mcp(f.root, dados, [['contexto_projeto', {}], ['executar_validacao', { capability: 'unit' }]]);
+  await mcp(f.root, dados, [['contexto_projeto', {}]]);
+  await registrarAtividadeDaConta(page, dados, f.root, 'executar_validacao', 'BLOCKED');
+  const projeto = await carregarProjeto(f.root);
+  const job = randomUUID(); const agora = new Date().toISOString();
+  await salvarEvidencia(projeto, criarEvidenciaInicial(projeto, 'unit', job, agora));
   await abrirAjuda(page, 'Privacidade e dados');
   const painel = await page.textContent('article');
   assert.ok(painel.includes(dados)); assert.match(painel, /Projetos vinculados: 1/); assert.match(painel, /Sem retenção automática/); assert.match(painel, /não recebe as conversas/); assert.match(painel, /processo principal consulta atualizações.*chamados públicos no GitHub oficial/i); assert.match(painel,/nenhum dado de projeto é enviado/);
@@ -152,7 +173,7 @@ test('Privacidade e dados: resumo real, exportação, exclusão separada por esc
   assert.equal((await chamar(page, 'visao', f.root)).data.metrics.totalOperations, 0);
   assert.equal((await chamar(page, 'projetos')).data.length, 1, 'vínculo mantido');
   for (const arq of ['qa.project.json', 'README.md', 'src/app.mjs', 'tests/test.mjs']) assert.ok(fs.existsSync(path.join(f.root, arq)), arq);
-  // MCP independente continua funcionando e registrando depois da exclusão
+  // MCP conectado à conta atual registra uma operação após a limpeza, no escopo autenticado.
   await mcp(f.root, dados, [['consultar_evidencias', {}]]);
   assert.equal((await chamar(page, 'visao', f.root)).data.metrics.totalOperations, 1);
 });
@@ -183,7 +204,8 @@ test('diagnóstico IPC: erros ficam registrados sem argumentos; polling não ger
   await page.click('#ver-diagnostico'); await page.waitForSelector('text=Diagnóstico da interface >> nth=1').catch(() => {});
   const tabela = await page.textContent('#conteudo');
   assert.match(tabela, /projeto:visao/); assert.match(tabela, /PROJECT_NOT_LINKED/); assert.doesNotMatch(tabela, /segredo|projeto-privado/);
-  const bruto = fs.readdirSync(path.join(dados, 'diagnostico')).map((n) => fs.readFileSync(path.join(dados, 'diagnostico', n), 'utf8')).join('');
+  const pastaDiagnostico = path.join(await dadosDaConta(page, dados), 'diagnostico');
+  const bruto = fs.readdirSync(pastaDiagnostico).map((n) => fs.readFileSync(path.join(pastaDiagnostico, n), 'utf8')).join('');
   assert.doesNotMatch(bruto, /segredo|projeto-privado|Users/); assert.match(bruto, /"correlationId":"[0-9a-f-]{36}"/);
   assert.equal((await chamar(page, 'visao', f.root)).data.metrics.totalOperations, base, 'diagnóstico fica fora das métricas de QA');
   await dialogos(app, 1); await abrirAjuda(page, 'Privacidade e dados');

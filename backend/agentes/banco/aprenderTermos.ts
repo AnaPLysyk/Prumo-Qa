@@ -4,7 +4,6 @@ import { validarAgenteDoConhecimento } from './validarAgenteDoConhecimento.js';
 import { termosDaFrase } from '../regras/termosDaFrase.js';
 import { limitesConhecimento } from '../tipos/conhecimento.js';
 
-// ---------------- Vocabulário aprendido com as correções da pessoa ----------------
 export function aprenderTermos(agente: string, frase: string, base?: string, agora = new Date()) {
   validarAgenteDoConhecimento(agente); const ts = termosDaFrase(frase); if (!ts.length) return { termos: [] as string[] };
   return comBancoDeConhecimento(base, (db) => {

@@ -5,7 +5,7 @@ import { resumirContratoProposto } from './resumirContratoProposto.js';
 import { situacaoProjeto } from './situacaoProjeto.js';
 import { vincularPastaAoEspaco } from './vincularPastaAoEspaco.js';
 
-export type Confirmar = (titulo: string, mensagem: string, detalhe: string, botao: string) => Promise<boolean>;
+type Confirmar = (titulo: string, mensagem: string, detalhe: string, botao: string) => Promise<boolean>;
 
 export async function vincularPastaDoDisco(id: string, pasta: string, confirmar: Confirmar) {
   const s = await situacaoProjeto(pasta);

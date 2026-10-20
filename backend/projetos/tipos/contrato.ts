@@ -2,7 +2,7 @@
 import { Manifesto } from '../../compartilhado/tipos/projeto.js';
 
 /**
- * 2.10.2: pasta sem qa.project.json. Detecta a stack só pelos arquivos da raiz (sem recursão, sem executar nada, sem
+ * Pasta sem qa.project.json: detecta a stack só pelos arquivos da raiz (sem recursão, sem executar nada, sem
  * seguir links) e monta um contrato v2 conservador para a pessoa aprovar. Comandos só para npm, com scripts que existem
  * no package.json; as demais stacks ficam somente leitura até o executor aceitá-las. Nada é gravado aqui sem aprovação:
  * gravarContratoProposto é chamado pelo aplicativo depois da confirmação nativa.

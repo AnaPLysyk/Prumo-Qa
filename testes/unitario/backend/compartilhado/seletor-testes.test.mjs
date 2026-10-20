@@ -15,9 +15,9 @@ test('todo teste fica em testes/<unitario|smoke|regressao>/<backend|frontend>/<m
   assert.deepEqual(problemas, []);
 });
 
-test('nada solto em testes/ além do LEIA-ME; auxiliares ficam em testes/apoio/ e sem casos de teste', () => {
+test('nada solto em testes/; auxiliares ficam em testes/apoio/ e sem casos de teste', () => {
   const raizDosTestes = fs.readdirSync(path.join(raiz, 'testes'), { withFileTypes: true });
-  assert.deepEqual(raizDosTestes.filter((e) => e.isFile()).map((e) => e.name).filter((n) => n !== 'LEIA-ME.md'), []);
+  assert.deepEqual(raizDosTestes.filter((e) => e.isFile()).map((e) => e.name), []);
   assert.deepEqual(raizDosTestes.filter((e) => e.isDirectory()).map((e) => e.name).sort(), ['apoio', 'regressao', 'smoke', 'unitario']);
   assert.ok(fs.readdirSync(path.join(raiz, 'testes', 'apoio')).every((n) => !n.endsWith('.test.mjs')));
 });
@@ -30,10 +30,15 @@ test('filtros combinam natureza, camada e módulo com AND e recusam o desconheci
   assert.throws(() => descrever('testes/e2e/ui/x.test.mjs'), /TEST_PATH_INVALID/);
 });
 
-test('runner mantém o hook, não adiciona build e bloqueia perfil real e migração', () => {
+test('seleção ampla vai inteira para a execução, inclusive teste sintético de migração', () => {
+  const regressao = selecionar(fixture, { natureza: 'regressao' });
+  assert.deepEqual(regressao.map((t) => t.arquivo), [fixture[1].arquivo, fixture[2].arquivo]);
+  assert.deepEqual(planoDeExecucao(regressao, {}).slice(-2), regressao.map((t) => t.arquivo));
+});
+
+test('runner mantém o hook, não adiciona build e recusa o perfil instalado no ambiente', () => {
   const argv = planoDeExecucao([fixture[0]], {});
   assert.ok(argv.includes('./testes/apoio/conhecimento-hook.cjs')); assert.ok(argv.includes('--test')); assert.ok(!argv.includes('build'));
   for (const env of [{ PRUMO_APP_EXE: 'app.exe' }, { PRUMO_MIGRACAO_26: '1' }, { PRUMO_MIGRACAO: '0' }]) assert.throws(() => planoDeExecucao([fixture[0]], env), /TEST_REAL_PROFILE_BLOCKED/);
-  assert.throws(() => planoDeExecucao([fixture[2]], {}), /TEST_REAL_PROFILE_BLOCKED/);
   assert.throws(() => planoDeExecucao([], {}), /TEST_SELECTION_EMPTY/);
 });

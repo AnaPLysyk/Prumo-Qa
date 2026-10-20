@@ -7,7 +7,8 @@ import { randomUUID } from 'node:crypto';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { criarMundo } from '../../../apoio/mundo-servicos.mjs';
 import { autorizacaoDelegada as delegadaPara } from '../../../../dist/agendamentos/autorizacoes/autorizacaoDelegada.js';
-import { autorizarExecucao } from '../../../../dist/agendamentos/autorizacoes/autorizarExecucao.js';
+import { autorizarEscopo } from '../../../../dist/agendamentos/autorizacoes/autorizarEscopo.js';
+import { escopoDeCapability } from '../../../../dist/testes/regras/escopoDeCapability.js';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { executarOperacao } from '../../../../dist/conexoes/escrita/executarOperacao.js';
 import { habilitarEscrita } from '../../../../dist/conexoes/escrita/habilitarEscrita.js';
@@ -39,6 +40,8 @@ import { MAX_IA_POR_HORA } from '../../../../dist/tickets/tipos/proposta.js';
 
 const base = (t) => { const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo fluxo ')); t.after(() => fs.rmSync(b, { recursive: true, force: true })); return b; };
 const solicitador = async (esc) => ({ subject: 'pessoa-simulada', method: 'Windows-CredUI-LogonUser', scopeHash: esc.scopeHash, at: new Date().toISOString() });
+const autorizarExecucao = async (projeto, espacoId, capability, ambiente, opcoes, base, solicitar, agora = new Date()) =>
+  autorizarEscopo(projeto, espacoId, capability, ambiente, await escopoDeCapability(projeto, capability), opcoes, base, solicitar, agora);
 const runner = (cases, saida = 1) => `import fs from 'node:fs';fs.appendFileSync(new URL('../ran.txt',import.meta.url),'x');fs.writeFileSync(process.env.PRUMO_RESULT_FILE,JSON.stringify({jobId:process.env.PRUMO_JOB_ID,cases:${JSON.stringify(cases)}}));process.exit(${saida});`;
 
 async function cenario(t, { teste, capabilities = { unit: 'node tests/test.mjs' }, autorizar = true } = {}) {

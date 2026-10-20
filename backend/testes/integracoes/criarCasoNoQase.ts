@@ -22,7 +22,7 @@ export const criarCasoNoQase: DefOperacao<z.infer<typeof esquemaCaso>> = {
   },
   async reconciliar(ctx, rec, p, _chave, anterior) {
     if (anterior?.id) {
-      // O ID vem do registro anterior da MESMA chave de operação e do MESMO vínculo/conexão.
+      // O ID vem do registro anterior da mesma chave de operação e do mesmo vínculo/conexão.
       if (!/^\d+$/.test(anterior.id)) throw new ErroServico('SERVICE_RESPONSE_INVALID');
       const conferir = criarCasoNoQase.confirmar;
       if (!conferir) throw new ErroServico('SERVICE_RESPONSE_INVALID');
@@ -76,7 +76,7 @@ export const criarCasoNoQase: DefOperacao<z.infer<typeof esquemaCaso>> = {
     if (p.tipo !== undefined && c.type !== p.tipo) return false;
     if (p.tags.length && (c.tags === undefined ||
       p.tags.some(t => !c.tags!.some(tag => (typeof tag === 'string' ? tag : tag.title) === t)))) return false;
-    // A operação promete criar o caso E associá-lo ao Jira: um deles sem o outro não é CONFIRMADA.
+    // A operação promete criar o caso e associá-lo ao Jira: um deles sem o outro não é CONFIRMADA.
     if (p.ticket && !c.external_issues?.some(grupo =>
       grupo.type === 'jira-cloud' && grupo.issues?.some(issue => issue.id === p.ticket))) return false;
     return true;

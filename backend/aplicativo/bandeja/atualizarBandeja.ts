@@ -5,4 +5,9 @@ import { menuDaBandeja } from './menuDaBandeja.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
 import { idiomaAtual } from '../../configuracoes/regras/idiomaAtual.js';
 
-export function atualizarBandeja() { if (estadoDoAplicativo.bandeja) { estadoDoAplicativo.bandeja.setContextMenu(menuDaBandeja()); estadoDoAplicativo.bandeja.setToolTip(dicaDaBandeja(workerDoAplicativo.estado(), idiomaAtual())); } }
+export function atualizarBandeja() {
+  const bandeja = estadoDoAplicativo.bandeja;
+  if (!bandeja) return;
+  bandeja.setContextMenu(menuDaBandeja(atualizarBandeja));
+  bandeja.setToolTip(dicaDaBandeja(workerDoAplicativo.estado(), idiomaAtual()));
+}

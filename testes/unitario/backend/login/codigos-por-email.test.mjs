@@ -9,7 +9,7 @@ import path from 'node:path';
 import { conferirCodigo, esquecerCodigos, pedirCodigo } from '../../../../dist/login/regras/codigosPorEmail.js';
 import { enviarCodigoPorEmail } from '../../../../dist/login/integracoes/enviarCodigoPorEmail.js';
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';
-import { criarServico } from '../../../../servico-do-prumo/servidor.mjs';
+import { criarServico } from '../../../../backend/aplicativo/servidor/servidor.mjs';
 
 const pasta = (t) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-codigos-')); t.after(() => { encerrarSessao(); esquecerCodigos(); fs.rmSync(d, { recursive: true, force: true }); }); return d; };
 const caixa = () => { const enviados = []; return { enviados, enviar: async (p) => { enviados.push(p); } }; };

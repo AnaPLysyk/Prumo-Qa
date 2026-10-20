@@ -1,11 +1,11 @@
 import { esquecerCodigos, pedirCodigo } from '../../dist/login/regras/codigosPorEmail.js';
 import { ativarLogin, cadastrarConta } from '../../dist/login/regras/contas.js';
+import { emailDa } from './caixa-de-email.mjs';
 
 /**
  * Apoio dos testes unitários de contas: pede o código por e-mail com um envio em memória (nada sai do processo) e devolve o código.
  * Não é um teste. Esquece os códigos pendentes antes, para a espera entre envios não atrapalhar testes que reusam o mesmo e-mail.
  */
-export const emailDa = (conta) => conta.email || conta.login + '@prumo.test';
 export async function codigoPara(email, finalidade, b) {
   esquecerCodigos(); let codigo = null;
   await pedirCodigo({ email, finalidade }, b, async (p) => { codigo = p.codigo; });

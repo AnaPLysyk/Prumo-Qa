@@ -157,7 +157,7 @@ test('o botão de salvar impede submissões simultâneas e reativa após respost
 
 function montarSuite() {
   const a = montarContexto(); const estado = { chamadas: [], fechado: false, navegou: false, modal: null };
-  const completo = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-casos-qase.parte.js'), 'utf8');
+  const completo = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-repositorio-local.parte.js'), 'utf8');
   const inicio = completo.indexOf('  function formularioSuiteLocal(e, suites, atual = null) {');
   const fim = completo.indexOf('  async function telaCasosLocais(e, _mem, corpo) {', inicio);
   assert.ok(inicio > 0 && fim > inicio, 'função de suíte isolada da interface do repositório');
@@ -221,14 +221,14 @@ test('UI de suíte mantém modal aberto e mostra falha IPC; não declara sucesso
 function montarLista(temQase, resposta) {
   const a = montarContexto();
   const estado = { chamadas: 0, tabelas: {}, estados: [], seções: [], total: 0 };
-  const source = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-casos-qase.parte.js'), 'utf8');
+  const source = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-repositorio-local.parte.js'), 'utf8');
   const inicio = source.indexOf('  async function telaCasosLocais(e, _mem, corpo) {');
-  const fim = source.indexOf('  async function novaProposta(e)', inicio);
+  const fim = source.length;
   assert.ok(inicio > 0 && fim > inicio);
   a.ctx.api.repositorioLocal = async () => { estado.chamadas++; return resposta; };
   a.ctx.vinc = (_e, servico) => temQase && servico === 'qase' ? { servico: 'qase' } : null;
-  a.ctx.memoria = () => estado;
-  a.ctx.quando = valor => valor;
+  a.ctx.memoriaDaTela = () => estado;
+  a.ctx.hora = valor => valor;
   a.ctx.abrirCasoLocal = () => undefined;
   a.ctx.formularioSuiteLocal = () => undefined;
   a.ctx.tr = valor => valor;
@@ -278,7 +278,7 @@ function montarVinculoJira(resposta) {
   const a = montarContexto(); const estado = { consultas: [], associacoes: [], modal: null };
   const src = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-casos-qase.parte.js'), 'utf8');
   const ini = src.indexOf('  async function abrirCasoLocal(e, caso) {');
-  const fim = src.indexOf('  function formularioSuiteLocal(e, suites, atual = null) {', ini);
+  const fim = src.indexOf('  async function novaProposta(e) {', ini);
   assert.ok(ini > 0 && fim > ini, 'fluxo de vínculo presente');
   a.ctx.api.repositorioLocal = async () => ({ ok: true, data: { casos: [], suites: [] } });
   a.ctx.api.propostas = async () => ({ ok: true, data: [] });
@@ -289,7 +289,7 @@ function montarVinculoJira(resposta) {
   a.ctx.relacoesDe = () => []; a.ctx.outroLado = () => null;
   a.ctx.atualizarEspaco = async e => e; a.ctx.mostrar = async () => {};
   a.ctx.formularioProposta = () => a.ctx.h('div', {});
-  a.ctx.tr = s => s; a.ctx.quando = v => v;
+  a.ctx.tr = s => s; a.ctx.hora = v => v;
   a.ctx.DS = {
     acao: (_rotulo, callback, opcoes = {}) => a.ctx.h('button', { id: opcoes.id, onclick: callback }),
     bloco: (titulo, filho) => a.ctx.h('section', {}, titulo, filho),
@@ -365,7 +365,7 @@ function montarCriacaoQase({ ticketValido = true, confirmado = true, vinculoJira
   };
   a.ctx.api.espacoAssociar = async (...args) => { estado.vinculos.push(args); return { ok: true }; };
   a.ctx.atualizarEspaco = async e => e;
-  a.ctx.memoria = () => estado.memoria;
+  a.ctx.memoriaDaTela = () => estado.memoria;
   a.ctx.mostrar = async () => {};
   a.ctx.painelResultado = r => a.ctx.h('span', {}, r.estado);
   a.ctx.DS = {

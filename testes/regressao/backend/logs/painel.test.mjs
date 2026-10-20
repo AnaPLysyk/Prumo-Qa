@@ -17,7 +17,7 @@ import { copiarDemonstracao } from '../../../../dist/projetos/regras/copiarDemon
 import { desvincularPasta } from '../../../../dist/projetos/regras/desvincularPasta.js';
 import { listarPastasVinculadas } from '../../../../dist/projetos/regras/listarPastasVinculadas.js';
 import { situacaoProjeto } from '../../../../dist/projetos/regras/situacaoProjeto.js';
-import { vincularPasta } from '../../../../dist/projetos/regras/vincularPasta.js';
+import { adicionarVinculo as vincularPasta } from '../../../../dist/projetos/regras/adicionarVinculo.js';
 import { visaoGeralDoProjeto } from '../../../../dist/projetos/regras/visaoGeralDoProjeto.js';
 import { documentosAjuda } from '../../../../dist/projetos/tipos/painel.js';
 

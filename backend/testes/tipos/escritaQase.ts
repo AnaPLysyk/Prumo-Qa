@@ -1,18 +1,25 @@
 /** Formatos aceitos nas operações de escrita no Qase (suite, caso, plano, run, resultados, anexo). */
 import { z } from 'zod';
 
+/**
+ * Escritas controladas no Qase TestOps (API v1, qase-tms/specs). O projeto é o código vinculado (rec.chave).
+ * Rotas: POST /case|suite|plan|run/{code}, PATCH /case/{code}/{id}, POST /run/{code}/{id}/complete, POST /result/{code}/{run}/bulk,
+ * POST /attachment/{code} (multipart, campo file[]), POST /case/{code}/external-issue/attach. Criação de caso, run e plano é
+ * idempotente (busca por título e marcador); resultados levam o marcador no comentário e são conferidos relendo a run.
+ * Não existe PASS sem execução: resultados só entram com status vindo de uma execução ou de declaração humana explícita.
+ */
 export const id = z.number().int().positive().max(999999999999);
 
 export const ticket = z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/);
 
-export const campoInt = z.number().int().min(0).max(100);
+const campoInt = z.number().int().min(0).max(100);
 
 /** Valores de campos personalizados do Qase: chave = ID do campo, valor sempre texto escalar (exigência da API). */
-export const camposPersonalizados = z.record(z.string().regex(/^\d{1,12}$/), z.string().trim().min(1).max(2000)).refine(c => Object.keys(c).length <= 30, 'campos demais');
+const camposPersonalizados = z.record(z.string().regex(/^\d{1,12}$/), z.string().trim().min(1).max(2000)).refine(c => Object.keys(c).length <= 30, 'campos demais');
 
 export type Pagina ={ entities: Record<string, unknown>[]; total?: number; filtered?: number };
 
-export const passo = z.object({ acao: z.string().trim().min(1).max(2000), esperado: z.string().max(2000).default(''), dados: z.string().max(2000).default('') }).strict();
+const passo = z.object({ acao: z.string().trim().min(1).max(2000), esperado: z.string().max(2000).default(''), dados: z.string().max(2000).default('') }).strict();
 
 export const criarSuite = z.object({ titulo: z.string().trim().min(2).max(255), descricao: z.string().max(4000).default(''), paiId: id.optional() }).strict();
 
@@ -37,7 +44,7 @@ export const criarRun = z.object({ titulo: z.string().trim().min(3).max(255), de
 
 export const completarRun = z.object({ runId: id }).strict();
 
-export const statusQase = z.enum(['passed', 'failed', 'blocked', 'skipped']);
+const statusQase = z.enum(['passed', 'failed', 'blocked', 'skipped']);
 
 export const resultado = z.object({ casoId: id, status: statusQase, tempoMs: z.number().int().min(0).max(31536000000).optional(), comentario: z.string().max(2000).default(''), stacktrace: z.string().max(4000).optional(), anexos: z.array(z.string().regex(/^[a-f0-9]{16,64}$/)).max(10).optional() }).strict();
 

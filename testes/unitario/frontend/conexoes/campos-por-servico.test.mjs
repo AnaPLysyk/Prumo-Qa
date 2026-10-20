@@ -7,7 +7,12 @@ import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 const raiz=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../../../');
-const fonte=readFileSync(path.join(raiz,'frontend/conexoes/mostrarConexoes.js'),'utf8');
+const fonte=readFileSync(path.join(raiz,'frontend/conexoes/componentes/apresentarProjetosQase.js'),'utf8')+'\n'+
+  readFileSync(path.join(raiz,'frontend/conexoes/componentes/mostrarPermissoesConexao.js'),'utf8')+'\n'+
+  readFileSync(path.join(raiz,'frontend/conexoes/formularios/abrirFormularioConexao.js'),'utf8')+'\n'+
+  readFileSync(path.join(raiz,'frontend/conexoes/mostrarConexoes.js'),'utf8')+'\n'+
+  readFileSync(path.join(raiz,'frontend/conexoes/mostrarOperacoesExternas.js'),'utf8')+'\n'+
+  readFileSync(path.join(raiz,'frontend/conexoes/mostrarIntegracoesDosAgentes.js'),'utf8');
 class Elemento {
   constructor(tag,attrs={},filhos=[]) {
     this.tag=tag;this.attrs=attrs;this.children=[];this.parent=null;this.listeners={};
@@ -18,6 +23,9 @@ class Elemento {
   }
   append(...itens) {for(const c of itens.flat(Infinity)){if(c==null)continue;if(c instanceof Elemento){if(c.parent)c.parent.children=c.parent.children.filter(x=>x!==c);c.parent=this;}this.children.push(c);}}
   replaceChildren(...items){for(const c of this.children)if(c instanceof Elemento)c.parent=null;this.children=[];this.append(...items);}
+  replaceWith(novo){const pai=this.parent;if(!pai)return;const i=pai.children.indexOf(this);if(i<0)return;
+    if(novo.parent)novo.parent.children=novo.parent.children.filter(c=>c!==novo);
+    pai.children.splice(i,1,novo);novo.parent=pai;this.parent=null;}
   addEventListener(e,cb){this.listeners[e]=cb;}
   dispatchEvent(ev){return this.listeners[ev.type]?.(ev);}
   querySelectorAll(selector){const out=[];const matches=n=>selector.startsWith('#')?n.attrs.id===selector.slice(1):selector.startsWith('[data-codigo')?n.attrs['data-codigo']!==undefined:n.tag===selector;
@@ -37,7 +45,9 @@ function montar() {
     qaseImportar:async(id,codigos)=>{chamadas.push(['importar',id,codigos]);return{ok:true,data:{adicionados:codigos,existentes:[],falhas:[]}};},
     servicoAdicionar:async dados=>{chamadas.push(['adicionar',{...dados}]);return{ok:true,data:{id:'fake'}};}
   };
-  const ctx={h,botao,campoPlataforma,abas:{},api,estado:{espaco:null},avisar:(...xs)=>notificacoes.push(xs),
+  const DS={info:texto=>h('span',{},texto),chip:texto=>h('span',{},texto),
+    secao:(titulo,conteudo)=>h('section',{},titulo,conteudo)};
+  const ctx={h,botao,campoPlataforma,DS,tr:texto=>texto,abas:{},api,estado:{espaco:null},avisar:(...xs)=>notificacoes.push(xs),
     chamar:async fn=>{const r=await fn();return r.ok?r.data:null;},mostrar:name=>telas.push(name),hora:String};
   vm.createContext(ctx);vm.runInContext(fonte,ctx);
   const tela=h('main',{});

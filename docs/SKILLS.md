@@ -4,7 +4,7 @@
 
 A versão de cada Skill é seu SHA-256 integral, sem inventar uma versão editorial. `INSTRUCOES_DISPONIVEIS` significa arquivo presente, não agente executado ou Skill instalada no cliente. A instalação em Claude/Codex é opcional e não comprovada por este registro. Os roteiros MCP usam `backend/agentes/tipos/roteiros.ts`, e não carregam automaticamente esses arquivos.
 
-Valide com `node ferramentas/skills/verificar.mjs` e `node --test testes/unitario/backend/compartilhado/skills.test.mjs`. Ambos apenas leem fontes do repositório: não acessam SQLite, projetos externos nem rede. A suíte principal já inclui `testes/estrutura/*.test.mjs`.
+Valide com `node ferramentas/skills/verificar.mjs` e `node --test testes/unitario/backend/compartilhado/skills.test.mjs`. Ambos apenas leem fontes do repositório: não acessam SQLite, projetos externos nem rede. O teste também roda em `npm run test:unitarios`.
 
 Após alterar uma Skill, atualize seu campo `versao` com `sha256:` seguido do hash dos bytes do arquivo. Após alterar o catálogo de especializações ou permissões, atualize o manifesto e revise o parser estático do validador. Uma divergência falha explicitamente; não há execução de TypeScript nem importação de módulos de persistência.
 

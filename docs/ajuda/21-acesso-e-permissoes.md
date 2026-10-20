@@ -1,5 +1,31 @@
 # Acesso, usuários e permissões
 
+## Autenticação central com PostgreSQL (em desenvolvimento)
+
+O modelo escolhido para a próxima entrega usa **e-mail e senha** com Better Auth no serviço Node.js do Render e PostgreSQL persistente. O Electron envia as credenciais por HTTPS a partir do processo principal; o login valida o e-mail confirmado e mantém sessão com cookie protegido no Main. O botão **Sair e trocar usuário** revoga a sessão remota, encerra a local e limpa o estado da interface. Em Configurações, **Recuperar acesso** envia um link ao e-mail. GitHub/Google ficam exclusivamente em Conexões nesta fase. Este modo só aparece após configurar `PRUMO_AUTH_API_URL`; o serviço DEV existe no Render, mas o banco e o envio de e-mail ainda não estão configurados; não há homologação E2E real.
+
+## Contas antigas (compatibilidade)
+
+O login local de versões anteriores permanece isolado para **não perder o acesso às contas existentes**. Ele não é o caminho de cadastro do MVP remoto. O fluxo experimental de Supabase por código de seis dígitos foi retirado e não deve ser configurado novamente.
+
+Com o login central configurado, a tela usa apenas **Entrar**, **Criar conta** e **Esqueci a senha** por e-mail e senha. Sem a API central, o perfil isolado de homologação mostra que o serviço ainda não está pronto; não transforma silenciosamente a conta local em conta online.
+
+## Manutenção da tela de Login
+
+As fontes da interface estão todas em `frontend/login/`:
+
+- `entrarNaConta.js` — inicializa a sessão, controla a entrada local legada, permissões e navegação.
+- `entradaRemota.js` — mostra os formulários de **login remoto, cadastro e recuperação**; solicita ações ao backend pelo preload.
+- `mensagensDeEntrada.js` — converte códigos de erro em mensagens claras, sem mostrar detalhes internos.
+- `vitrineDaEntrada.js` e `entrada.css` — apresentação e estilos do cartão de login.
+- `web/recuperar-senha.html` e `web/recuperar-senha.js` — página aberta no navegador, sem copiar esses arquivos para o instalador Electron.
+
+A lógica está em `backend/login/`. Os canais IPC ficam em `api/`, as decisões em `regras/`, os modelos em `tipos/`, os dados locais em `banco/` e a conexão externa em `integracoes/`. A autenticação Better Auth, executada no Render, fica em `servidor/`. Para ver como os arquivos se conectam, abra **Administração → Documentação Viva → Login**.
+
+Nunca edite os arquivos compilados em `dist/renderer/`: faça alterações em `frontend/login/` e execute os testes unitários e o build. O teste `testes/unitario/frontend/login/tela-login-modular.test.mjs` confere o fluxo visual básico sem usar contas reais.
+
+## Fluxo legado (versões anteriores)
+
 O Prumo sempre abre na tela de entrada. O **papel** define quais telas de trabalho cada pessoa pode ver ou alterar. A **marca admin** define quem pode abrir a Administração. Ela é para quem cuida do sistema, não para o uso do dia a dia.
 
 ## Primeiro acesso
@@ -7,7 +33,7 @@ O Prumo sempre abre na tela de entrada. O **papel** define quais telas de trabal
 Num computador sem contas, a tela de entrada oferece três caminhos para criar a primeira conta:
 
 - **Criar conta**: informe seu nome, e-mail e senha (pelo menos 10 caracteres, incluindo letras e números). O Prumo envia um código de 6 dígitos para seu e-mail. Digite o código para criar a conta e entrar. Ele vale por 10 minutos. Se não chegar, confira o spam e use **Reenviar código** depois de um minuto.
-- **Continuar com GitHub / Google**: autorize sua identidade no navegador. O provedor deve ter sido configurado uma vez pela Administração; o login nunca pede Client ID, segredo nem token ao usuário. Repositórios são independentes.
+- **Continuar com GitHub / Google**: autorize sua identidade no navegador. A identidade pública do aplicativo deve ser registrada uma vez pelo mantenedor antes de distribuir; o login nunca pede Client ID, segredo nem token ao usuário. No GitHub, a autorização inclui um código curto digitado no navegador. Repositórios são independentes.
 
 Abaixo do cartão ficam o **idioma** (português ou inglês, já vale na entrada) e **Site e documentação**, que abre o site oficial no navegador.
 

@@ -1,7 +1,7 @@
 /** Monta a consulta no GitHub (repositório, branches, commits, PRs, um PR e verificações de um commit) só no repositório vinculado. */
 import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
-import { parametrosDaUrl } from '../../compartilhado/texto/parametrosDaUrl.js';
+import { parametrosDaUrl } from './parametrosDaUrl.js';
 import { Recurso } from '../../projetos/tipos/espacos.js';
 import { OperacaoServico, PlanoDaConsulta } from '../tipos/adaptador.js';
 import { paginaSchema } from '../tipos/transporte.js';

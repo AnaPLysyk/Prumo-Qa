@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import electronPath from 'electron';
-import { repo, exe, abrir, novoDados, ir, ajustes } from '../../../apoio/janela.mjs';
+import { repo, exe, abrir, novoDados, ir, ajustes, dadosDaConta } from '../../../apoio/janela.mjs';
 import { dicaDaBandeja as dicaBandeja } from '../../../../dist/aplicativo/bandeja/dicaDaBandeja.js';
 import { itensDoMenuDaBandeja as modeloMenuBandeja } from '../../../../dist/aplicativo/bandeja/itensDoMenuDaBandeja.js';
 import { resumoDoWorker as resumoEstado } from '../../../../dist/aplicativo/bandeja/resumoDoWorker.js';
@@ -68,7 +68,7 @@ test('Início com esfera Quality Control: parada quando nada roda; tema e idioma
   // Persistência por usuário (preferencias.json), inclusive após reiniciar
   await ajustes(a.page); await a.page.selectOption('#tema', 'claro'); await ajustes(a.page); await a.page.selectOption('#idioma', 'en');
   await a.page.waitForFunction(() => document.querySelector('[data-aba=inicio]').textContent.trim() === 'Home');
-  const salvo = JSON.parse(fs.readFileSync(path.join(dados, 'preferencias.json'), 'utf8')); assert.equal(salvo.tema, 'claro'); assert.equal(salvo.idioma, 'en'); assert.equal(salvo.iniciarComWindows, false, 'iniciar com o Windows nunca é ligado por padrão');
+  const salvo = JSON.parse(fs.readFileSync(path.join(await dadosDaConta(a.page, dados), 'preferencias.json'), 'utf8')); assert.equal(salvo.tema, 'claro'); assert.equal(salvo.idioma, 'en'); assert.equal(salvo.iniciarComWindows, false, 'iniciar com o Windows nunca é ligado por padrão');
   assert.deepEqual(a.erros, []); await a.fechar();
   a = await abrir(t, dados, [], {}, { inicio: true });
   await a.page.waitForFunction(() => document.documentElement.dataset.tema === 'claro' && document.querySelector('[data-aba=agenda]').textContent.trim() === 'Schedules');
@@ -140,7 +140,9 @@ test('fechar a janela mantém o Prumo e o worker vivos; segunda instância é re
   // Pausar/retomar pela mesma ação da bandeja e da janela
   assert.equal((await a.page.evaluate(() => window.prumo.workerPausa(true))).data.pausado, true); assert.equal((await a.page.evaluate(() => window.prumo.workerEstado())).data.pausado, true);
   assert.equal((await a.page.evaluate(() => window.prumo.workerPausa(false))).data.pausado, false);
+  // Captura o diretório antes de fechar a janela; depois do encerramento a página não responde.
+  const pastaDaConta = await dadosDaConta(a.page, dados);
   // Sair: encerra o processo e libera a trava, com registro do encerramento controlado
   const saiu = new Promise((ok) => a.app.process().once('exit', ok)); await a.app.evaluate(({ app }) => app.quit()); await Promise.race([saiu, new Promise((_, no) => setTimeout(() => no(new Error('não encerrou')), 20000))]);
-  const trava = JSON.parse(fs.readFileSync(path.join(dados, 'plataforma', 'worker-trava.json'), 'utf8')); assert.equal(trava.ativo, false, 'trava liberada ao sair');
+  const trava = JSON.parse(fs.readFileSync(path.join(pastaDaConta, 'plataforma', 'worker-trava.json'), 'utf8')); assert.equal(trava.ativo, false, 'trava liberada ao sair');
 });

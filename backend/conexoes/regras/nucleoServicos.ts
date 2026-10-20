@@ -33,6 +33,7 @@ export function nucleoServicos(protetor: Protetor, transporte: TransporteServico
     qasePreverConta: (conexaoId: string) => importacaoQase.preverConta(conexaoId),
     qaseImportar: (previaId: string, codigos: string[]) => importacaoQase.importar(previaId, codigos),
     qaseCancelar: (previaId: string) => importacaoQase.cancelar(previaId),
+    limparPrevias: () => importacaoQase.limparTodas(),
     adicionar: (entrada: z.input<typeof conexaoEntrada>) => adicionarConta(c, entrada),
     validarConta: (id: string) => validarConta(c, id),
     removerConta: (id: string) => removerConta(c, id),
