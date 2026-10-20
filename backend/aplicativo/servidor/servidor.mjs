@@ -9,6 +9,7 @@ import { criarLimitador, responder } from '../../compartilhado/servidor/comum.mj
 import { LIMITES, enviarPeloResend, rotaDeCodigos } from '../../login/servidor/codigos.mjs';
 import { LIMITES_DE_CHAMADOS, rotaDeChamados } from '../../suporte/servidor/chamados.mjs';
 import { clienteDoGitHub } from '../../suporte/servidor/github.mjs';
+import { oauthDesktopAtivo } from '../../login/regras/oauthDesktop.mjs';
 
 export { mensagem, enviarPeloResend } from '../../login/servidor/codigos.mjs';
 
@@ -16,7 +17,7 @@ export { mensagem, enviarPeloResend } from '../../login/servidor/codigos.mjs';
  * Cria o atendimento HTTP. `enviar` (Resend) e `suporte.github` são injetados: os testes usam uma caixa e um repositório em memória.
  * Sem configuração, cada parte recusa com 503 e o resto continua funcionando.
  */
-export function criarServico({ enviar, configurado = true, limites = LIMITES, suporte = null, autenticacao = null, agora = () => Date.now(), registrar = (linha) => console.log(linha) }) {
+export function criarServico({ enviar, configurado = true, limites = LIMITES, suporte = null, autenticacao = null, oauthDesktop = false, agora = () => Date.now(), registrar = (linha) => console.log(linha) }) {
   const limitador = criarLimitador(agora);
   const codigos = rotaDeCodigos({ enviar, configurado, limites, limitador, registrar });
   const chamados = rotaDeChamados({ github: suporte?.github, configurado: !!suporte?.github, chaveAdmin: suporte?.chaveAdmin, limites: suporte?.limites ?? LIMITES_DE_CHAMADOS, limitador, registrar, agora });
@@ -33,6 +34,20 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
       if (caminho.startsWith('/api/auth/')) {
         if (!autenticacao) return responder(res, 503, { erro: 'AUTH_NOT_CONFIGURED' });
         return await autenticacao.atender(req,res);
+      }
+      if (req.method === 'GET' && (caminho === '/entrar-social' || caminho === '/entrar-social.js')) {
+        // A página só funciona quando Better Auth + plugin desktop estiverem habilitados.
+        // Não aceita tokens, client secrets ou URLs de redirecionamento arbitrárias.
+        if (!autenticacao || !oauthDesktop) return responder(res, 503, { erro: 'AUTH_NOT_CONFIGURED' });
+        const script = caminho.endsWith('.js');
+        const nome = script ? 'entrar-social.js' : 'entrar-social.html';
+        res.writeHead(200, {
+          'Content-Type': script ? 'text/javascript; charset=utf-8' : 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
+          'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
+          'Content-Security-Policy': "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'"
+        });
+        return res.end(fs.readFileSync(new URL('../../../frontend/login/web/' + nome, import.meta.url)));
       }
       if (req.method === 'GET' && caminho === '/conta-confirmada') {
         res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'",'X-Content-Type-Options':'nosniff'});
@@ -87,5 +102,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.warn('Autenticação central incompleta: login permanece desabilitado.');
   }
   const porta = Number(env.PORT) || 10000;
-  http.createServer(criarServico({ enviar, configurado: comEmail, suporte, autenticacao })).listen(porta, () => console.log(`serviço do Prumo QA na porta ${porta} (e-mail: ${comEmail ? 'sim' : 'NÃO'}; suporte: ${comSuporte ? 'sim' : 'NÃO'}; administração: ${(env.PRUMO_SUPORTE_CHAVE_ADMIN || '').length >= 32 ? 'sim' : 'NÃO'})`));
+  http.createServer(criarServico({ enviar, configurado: comEmail, suporte, autenticacao, oauthDesktop: oauthDesktopAtivo(env) })).listen(porta, () => console.log(`serviço do Prumo QA na porta ${porta} (e-mail: ${comEmail ? 'sim' : 'NÃO'}; suporte: ${comSuporte ? 'sim' : 'NÃO'}; administração: ${(env.PRUMO_SUPORTE_CHAVE_ADMIN || '').length >= 32 ? 'sim' : 'NÃO'})`));
 }
