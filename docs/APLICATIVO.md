@@ -2,7 +2,7 @@
 
 Conexões concentra os adaptadores de Jira, Qase e GitHub em `backend/conexoes/integracoes/` e as integrações de IA em `backend/conexoes/ia/`. O controlador da tela fica em `backend/conexoes/controlador.ts`.
 
-Suporte concentra seus fluxos em `backend/suporte/controlador.ts`, `servicoRelato.ts`, `integracoes.ts` e `regras/`. O texto remoto deve ser tratado como dado, não como HTML ou comando.
+Suporte concentra seus fluxos em `backend/suporte/controlador.ts`, `servicoRelato.ts` e `regras/chamadosDaPessoa.ts`. O texto remoto deve ser tratado como dado, não como HTML ou comando.
 
 O site usa `site/gerar.mjs` e o catálogo de versões do projeto; não duplica o núcleo do aplicativo. Detalhes de utilização estão na [Ajuda](ajuda/17-plataforma.md).
 
@@ -10,23 +10,39 @@ A janela é uma camada de **apresentação**. Seus canais chegam ao registrador 
 
 ## Manutenção manual: por onde começar
 
-Para corrigir uma operação, comece pela pasta da tela. A lógica central fica em `controlador.ts` e `servico*.ts`; `banco/` concentra leitura e gravação, `integracoes/` conversa com serviços externos, e `tipos/` guarda contratos compartilhados. Evite um arquivo por função curta ou uma pasta por verbo.
+**Abra primeiro a pasta da funcionalidade.** Nela, `controlador.ts` recebe as chamadas da janela, o serviço executa a operação, `banco/` cuida da persistência, `integracoes/` conversa com serviços externos e `tipos/` reúne contratos. Não crie arquivos separados para funções minúsculas; também não misture fluxos sem relação para reduzir números.
 
-| Funcionalidade | Arquivo inicial | Implementação relacionada |
+| Quero modificar… | Comece por… | Operações relacionadas |
 |---|---|---|
-| Login e permissões | `backend/login/controlador.ts` | `regras/contas.ts`, `regras/sessao.ts`, `banco/contas.ts` |
-| OAuth GitHub e Google | `backend/login/regras/entradaPorProvedor.ts` | `integracoes/oauthDosProvedores.ts` |
-| Agentes e Skills | `backend/agentes/controlador.ts` | `chat/conversar.ts`, `banco/skills.ts`, `banco/contextos.ts` |
-| Projetos | `backend/projetos/controlador.ts` | `servicoProjetos.ts`, `banco/projetos.ts` |
-| Conexões Jira/Qase/GitHub | `backend/conexoes/controlador.ts` | `regras/nucleoServicos.ts`, `integracoes/`, `github/fluxoRepositorio.ts` |
-| Casos e execuções | `backend/testes/controlador.ts` | `servicoCasos.ts`, `servicoExecucoes.ts`, `regras/executarValidacao.ts` |
-| Agenda e worker | `backend/agendamentos/controlador.ts` | `regras/cicloDaRotina.ts`, `banco/agenda.ts`, `worker/Worker.ts` |
-| Logs e métricas | `backend/logs/controlador.ts` | `banco/atividades.ts`, `regras/consultasDoDiario.ts` |
+| Login, cadastro e sessão | `backend/login/controlador.ts` | `regras/contas.ts`, `regras/sessao.ts`, `controladorSessao.ts` |
+| Login pelo GitHub ou Google | `backend/login/regras/entradaPorProvedor.ts` | `integracoes/oauthDosProvedores.ts` e servidor de autenticação |
+| Administração e permissões | `backend/administracao/controlador.ts` | `servico.ts` |
+| Tela Início | `backend/inicio/controlador.ts` | `servico.ts` |
+| Projetos e repositórios | `backend/projetos/controlador.ts` | `servicoProjetos.ts`, `banco/projetos.ts`, `servicoRepositorioGit.ts` |
+| Conexões com Jira, Qase e GitHub | `backend/conexoes/controlador.ts` | `servicoContas.ts`, `regras/nucleoServicos.ts`, `integracoes/` |
+| Chat e seleção de agentes | `backend/agentes/controlador.ts` | `chat/conversar.ts`, `chat/roteamento.ts` |
+| Conhecimento e Skills | `backend/agentes/controlador.ts` | `banco/conhecimento.ts`, `banco/skills.ts`, `regras/regrasDasSkills.ts` |
+| Contextos e aprovações | `backend/agentes/regras/cicloDosContextos.ts` | `banco/contextos.ts`, `regras/consultasDeContextos.ts` |
+| Casos de teste | `backend/testes/controlador.ts` | `servicoCasos.ts`, `servicoClassificacao.ts`, `banco/local.ts` |
+| Execuções e evidências | `backend/testes/controlador.ts` | `servicoExecucoes.ts`, `regras/executarValidacao.ts`, `banco/runs.ts` |
+| Resultados no Qase | `backend/testes/integracoes/publicarRunLocal.ts` | `casosQase.ts`, `execucoesQase.ts` |
+| Agenda e automações | `backend/agendamentos/controlador.ts` | `regras/cicloDaRotina.ts`, `worker/Worker.ts`, `banco/agenda.ts` |
+| Autorizar rotinas | `backend/agendamentos/autorizacoes/autorizarRotina.ts` | `banco/autorizacoes.ts` |
+| Propostas e tickets | `backend/tickets/controlador.ts` | `servicoPropostas.ts`, `integracoesJira.ts` |
+| Logs e histórico | `backend/logs/controlador.ts` | `regras/iniciarAtividade.ts`, `regras/consultasDoDiario.ts` |
+| Métricas | `backend/metricas/controlador.ts` | `servico.ts` |
 | Suporte | `backend/suporte/controlador.ts` | `servicoRelato.ts`, `regras/chamadosDaPessoa.ts` |
+| Configurações | `backend/configuracoes/controlador.ts` | `servico.ts` |
+| Ajuda e versões | `backend/ajuda/controlador.ts` | `servicoAjuda.ts`, `docs/catalogo/versoes.json` |
 | Atualizações | `backend/atualizacoes/controlador.ts` | `servicoVerificacao.ts`, `servicoInstalacao.ts` |
-| Janela Electron | `backend/aplicativo.ts` | `aplicativo/janela/`, `aplicativo/bandeja/`, `aplicativo/api/` |
+| Janela e bandeja | `backend/aplicativo.ts` | `aplicativo/janela/`, `aplicativo/avisos/`, `aplicativo/bandeja/` |
+| Terminal e MCP | `backend/cli.ts`, `backend/mcp.ts` | `terminal/`, `agentes/mcp/` |
 
-Separações técnicas são mantidas quando necessárias: funções puras não carregam Electron, o worker não importa a interface e o SQLite é independente das funções de leitura de Skills usadas nos testes. A Documentação Viva, acessível pela Ajuda do aplicativo, fornece o mapa navegável atualizado de arquivos e canais.
+**Não edite arquivos gerados:** `dist/`, `backend/aplicativo/api/arquivosDosCanais.ts` e o mapa da Documentação Viva. Para os canais, use `npm.cmd run documentacao:viva`; para o mapa, `node docs/geradores/gerar-mapa-do-aplicativo.mjs`.
+
+**Separe os ambientes:** `backend/login/servidor/` e `backend/suporte/servidor/` são serviços remotos (não são telas do Electron). `site/` é o site público. `backend/compartilhado/` é apenas para funções reutilizadas em várias áreas.
+
+**Após mudar código:** rode `npm.cmd run typecheck` e `npm.cmd run test:backend`. Alterações de regras de negócio e segurança exigem compreender o comportamento esperado; preferências, textos e dados configuráveis devem ser modificáveis pela interface, sem exigir que a pessoa edite TypeScript.
 
 ## Arquitetura
 
@@ -60,7 +76,7 @@ Cada `tools/call` MCP (e cada comando do CLI) grava um registro de início e out
 
 ### Contratos técnicos (IPC e MCP)
 
-`backend/aplicativo/api/catalogoDeContratos.ts` é a fonte única: os mesmos esquemas Zod que validam cada chamada IPC em `backend/aplicativo/api/registrarCanal.ts` alimentam o catálogo mostrado em **Ajuda › Integrações técnicas** e o arquivo gerado [docs/CONTRATOS.md](CONTRATOS.md) (`npm run contratos`). Testes comparam o catálogo com `main.ts`, `preload.cjs` e o servidor MCP real; uma operação nova sem documentação, ou um catálogo desatualizado, quebra a suíte. Não existe API HTTP.
+`backend/aplicativo/api/catalogoDeContratos.ts` é a fonte única: os mesmos esquemas Zod que validam cada chamada IPC em `backend/aplicativo/api/registrarCanal.ts` alimentam o catálogo mostrado em **Ajuda › Integrações técnicas** e o arquivo gerado [docs/CONTRATOS.md](CONTRATOS.md) (`npm run contratos`). Testes comparam o catálogo com `main.ts`, `preload.cjs` e o servidor MCP real; uma operação nova sem documentação, ou um catálogo desatualizado, quebra a suíte. O processo Electron não expõe uma API HTTP local; autenticação e suporte usam serviços HTTPS remotos separados, localizados em `backend/login/servidor/` e `backend/suporte/servidor/`.
 
 ### Suporte e avisos de versão (2.5)
 
@@ -76,7 +92,7 @@ A aba **Suporte** prepara bug, melhoria ou sugestão (`backend/suporte/regras/`)
 
 ### Versões e atualização
 
-`docs/catalogo/versoes.json` (validado por `backend/ajuda/versoes/validarVersoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`site/release/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
+`docs/catalogo/versoes.json` (validado por `backend/ajuda/servicoAjuda.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`site/release/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
 
 ### Dados locais: exportar e excluir
 
