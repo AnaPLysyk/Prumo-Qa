@@ -101,7 +101,7 @@ test('cada arquivo citado como destino existe no backend', () => {
 });
 
 test('docs/CONTRATOS.md está sincronizado com o catálogo real (rode npm run contratos)', async () => {
-  const { documento } = await import('../../../../ferramentas/documentacao/gerar-contratos.mjs');
+  const { documento } = await import('../../../../docs/geradores/gerar-contratos.mjs');
   const normal = (s) => s.split('\r').join('');
   assert.equal(normal(ler('docs/CONTRATOS.md')), normal(documento()));
 });

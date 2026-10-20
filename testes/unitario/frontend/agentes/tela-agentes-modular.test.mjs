@@ -16,7 +16,7 @@ test('a tela separa cadastro, cérebro visual e atividades por responsabilidade'
  assert.ok(s.every(x=>x.startsWith('/** ')));
 });
 test('o bundle interfaces preserva a ordem e o JavaScript executado',()=>{
- const data=JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json','utf8'));
+ const data=JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8'));
  const b=data.bundles.find(x=>x.destino==='dist/renderer/interfaces.js');
  assert.ok(b);
  assert.deepEqual(b.origens.filter(x=>x.startsWith('frontend/agentes/')).slice(-3),[

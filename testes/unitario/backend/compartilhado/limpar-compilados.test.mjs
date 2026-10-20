@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { limparCompilados } from '../../../../ferramentas/empacotamento/limpar-compilados.mjs';
+import { limparCompilados } from '../../../../site/release/limpar-compilados.mjs';
 
 function criar(raiz, arquivos) {
   for (const arquivo of arquivos) {

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 test('Administração carrega um único bundle com árvore, fluxo, código e navegação', () => {
- const manifest=JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json','utf8'));
+ const manifest=JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8'));
  const bundle=manifest.bundles.find(b=>b.destino==='dist/renderer/administracao.js');
  assert.ok(bundle);
  assert.deepEqual(bundle.origens,[

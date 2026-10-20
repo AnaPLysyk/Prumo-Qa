@@ -43,7 +43,7 @@ win:
   # Gancho de assinatura: assina só se PRUMO_ASSINATURA_THUMBPRINT existir (certificado legítimo no ambiente de build);
   # sem credencial o arquivo permanece não assinado, e com credencial qualquer falha interrompe o build. Ver docs/ASSINATURA.md.
   signtoolOptions:
-    sign: ferramentas/empacotamento/assinar-windows.cjs
+    sign: site/release/assinar-windows.cjs
 nsis:
   oneClick: false
   perMachine: false

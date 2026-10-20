@@ -62,15 +62,15 @@ Para validar no Windows:
 
 ```powershell
 npm.cmd run frontend:check
-node ferramentas/frontend/gerar-telas-modulares.mjs --check
-node ferramentas/frontend/verificar-modulos.mjs
+node frontend/construcao/gerar-telas-modulares.mjs --check
+node frontend/construcao/verificar-modulos.mjs
 npm.cmd run dependencias
 npm.cmd run check
 ```
 
-Para reconstruir cópias **depois de editar o frontend**: `npm.cmd run frontend:sync` e `node ferramentas/frontend/gerar-telas-modulares.mjs`. O comando `npm.cmd run build` também faz essas etapas automaticamente.
+Para reconstruir cópias **depois de editar o frontend**: `npm.cmd run frontend:sync` e `node frontend/construcao/gerar-telas-modulares.mjs`. O comando `npm.cmd run build` também faz essas etapas automaticamente.
 
-`ferramentas/arquitetura/dependencias.mjs` resolve os imports TypeScript e informa origem, linha e destino. `--json` fornece o grafo para investigação. Um import local ausente interrompe o build; o verificador não executa módulos nem consulta projetos externos. O mapa de documentação viva também inclui `ferramentas/`, `site/` e `backend/agentes/skills/`, sem incluir `site/public/`.
+`testes/apoio/dependencias.mjs` resolve os imports TypeScript e informa origem, linha e destino. `--json` fornece o grafo para investigação. Um import local ausente interrompe o build; o verificador não executa módulos nem consulta projetos externos. O mapa de documentação viva também inclui `site/`, `docs/geradores/` e `backend/agentes/skills/`, sem incluir `site/public/`.
 
 O site possui fonte em `site/gerar.mjs`, estilos em `site/estilos/base.css` e template em `site/componentes/pagina.mjs`. `site/gerar.mjs` permanece uma entrada compatível para npm, Render e CI. [Testes](TESTES.md) e [Skills](SKILLS.md) têm catálogos verificáveis; não são listas de funcionalidades aprovadas.
 
@@ -129,4 +129,4 @@ Os testes de regressão usam pastas temporárias e dados fictícios. `testes/uni
 
 ## Documentação viva dentro do aplicativo
 
-O build gera `dist/documentacao/mapa.json` (`ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs`, não versionado) a partir do código desta versão: para cada pasta de `frontend/` e `backend/`, os arquivos com a descrição da primeira linha e as funções, os canais IPC (ponte, arquivo `api/`, funções chamadas) e os testes que importam arquivos daquela tela. A tela **Administração › Documentação viva** (`frontend/administracao/`) mostra esse mapa pelo canal `administracao:mapa` (`backend/administracao/`). O mapa não leva código-fonte nem dados da pessoa. A visão Atual (main) × Proposta (cópia de trabalho) continua disponível para desenvolvimento com `npm run arquitetura`.
+O build gera `dist/documentacao/mapa.json` (`docs/geradores/gerar-mapa-do-aplicativo.mjs`, não versionado) a partir do código desta versão: para cada pasta de `frontend/` e `backend/`, os arquivos com a descrição da primeira linha e as funções, os canais IPC (ponte, arquivo `api/`, funções chamadas) e os testes que importam arquivos daquela tela. A tela **Administração › Documentação viva** (`frontend/administracao/`) mostra esse mapa pelo canal `administracao:mapa` (`backend/administracao/`). O mapa não leva código-fonte nem dados da pessoa. A visão Atual (main) × Proposta (cópia de trabalho) continua disponível para desenvolvimento com `npm run arquitetura`.

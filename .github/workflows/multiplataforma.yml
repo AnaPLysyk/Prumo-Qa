@@ -13,7 +13,7 @@ on:
       - 'backend/testes/aprovacao/**'
       - 'backend/conexoes/regras/servicosDoAplicativo.ts'
       - 'backend/atualizacoes/**'
-      - 'ferramentas/empacotamento/**'
+      - 'backend/empacotamento/**'
   workflow_dispatch:
 
 permissions:

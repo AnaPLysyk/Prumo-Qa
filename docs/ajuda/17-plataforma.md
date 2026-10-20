@@ -48,7 +48,7 @@ A documentação de uso fica em **Ajuda**, dentro do aplicativo, e no **site ofi
 
 A organização do código segue o nome da tela: `frontend/login/` contém sua interface e `backend/login/` contém as regras, dados e integrações. O mesmo padrão vale para Projetos, Testes, Tickets e as outras telas. As rotas HTTP remotas ficam em `backend/<tela>/servidor/`; a entrada comum fica em `backend/aplicativo/servidor/`. A página web de recuperação fica em `frontend/login/web/`, separada das telas Electron.
 
-Para atualizar o catálogo de canais usado pela Documentação Viva execute `npm run documentacao:viva`. O build também o atualiza automaticamente. Não são gerados arquivos `LEIA-ME` por pasta. O login do MVP usa somente o módulo remoto Better Auth/PostgreSQL; o fluxo local anterior continua disponível apenas para compatibilidade. Os arquivos históricos `v36`/`v40` no `dist/` são derivados do manifesto `ferramentas/frontend/telas-modulares.json` e não devem ser editados.
+Para atualizar o catálogo de canais usado pela Documentação Viva execute `npm run documentacao:viva`. O build também o atualiza automaticamente. Não são gerados arquivos `LEIA-ME` por pasta. O login do MVP usa somente o módulo remoto Better Auth/PostgreSQL; o fluxo local anterior continua disponível apenas para compatibilidade. Os arquivos históricos `v36`/`v40` no `dist/` são derivados do manifesto `frontend/construcao/telas-modulares.json` e não devem ser editados.
 
 ## Manutenção da tela Projetos
 
@@ -79,7 +79,7 @@ A implementação visual de Tickets fica exclusivamente em `frontend/tickets/`. 
 - `tickets-defeitos-qase.parte.js`: detalhe de defeitos Qase, relações com Jira e alteração de status quando autorizada.
 - `tickets-issues-github.parte.js`: leitura dos detalhes de Issues do repositório GitHub vinculado.
 
-O manifesto `ferramentas/frontend/telas-modulares.json` estabelece a ordem desses fragmentos, reunidos automaticamente em `dist/renderer/fluxos-v40.js`. **Edite as fontes de `frontend/tickets/`, nunca o bundle gerado.**
+O manifesto `frontend/construcao/telas-modulares.json` estabelece a ordem desses fragmentos, reunidos automaticamente em `dist/renderer/fluxos-v40.js`. **Edite as fontes de `frontend/tickets/`, nunca o bundle gerado.**
 
 As regras de Tickets ficam em `backend/tickets/`: `api/` são canais IPC, `banco/` é persistência local, `regras/` organiza a criação, revisão e publicação, `integracoes/` executa chamadas autorizadas ao Jira e `tipos/` define os contratos. O login nas plataformas externas pertence à tela Conexões e não deve ser implementado novamente em Tickets.
 
@@ -114,7 +114,7 @@ A tela de agentes está em `frontend/agentes/`, não no runtime compartilhado. A
 - `atividades/painel-atividades-v41.js`: controles do canvas, navegação, atualização dos registros e apresentação visual. Carregado depois do modelo, conforme `frontend/recursos.json` e `frontend/compartilhado/runtime/index.html`.
 - `mostrarConfiguracaoMcp.js`: orientação e teste das conexões MCP de Claude Code e Codex, exibido também por Conexões.
 
-Os fragmentos do bundle são concatenados exatamente na ordem indicada em `ferramentas/frontend/telas-modulares.json`; não edite diretamente `dist/renderer/interfaces-v36.js`. As permissões e a execução ficam no backend em `backend/agentes/`.
+Os fragmentos do bundle são concatenados exatamente na ordem indicada em `frontend/construcao/telas-modulares.json`; não edite diretamente `dist/renderer/interfaces-v36.js`. As permissões e a execução ficam no backend em `backend/agentes/`.
 
 A separação em arquivos não constitui homologação manual do painel, nem prova de conexão com IA externa. Primeiro confira a tela em um perfil de homologação, depois avalie as APIs de IA/MCP conforme as permissões de cada agente.
 
@@ -130,7 +130,7 @@ A versão ativa está em `frontend/metricas/tela-metricas.parte.js`, montada no 
 
 ## Manutenção da tela Logs
 
-O terminal visual mantém a responsabilidade na pasta `frontend/logs/`: `tela-logs.parte.js` monta a interface e os botões; `eventos-e-detalhes.parte.js` prepara as linhas e a inspeção de eventos; `filtros-e-atualizacao.parte.js` filtra, consulta o backend e controla a atualização automática. As três partes são montadas nesta ordem no `interfaces-v36.js` pelo manifesto `ferramentas/frontend/telas-modulares.json`.
+O terminal visual mantém a responsabilidade na pasta `frontend/logs/`: `tela-logs.parte.js` monta a interface e os botões; `eventos-e-detalhes.parte.js` prepara as linhas e a inspeção de eventos; `filtros-e-atualizacao.parte.js` filtra, consulta o backend e controla a atualização automática. As três partes são montadas nesta ordem no `interfaces-v36.js` pelo manifesto `frontend/construcao/telas-modulares.json`.
 
 As consultas e a exportação continuam em `backend/logs/api`, com regras de processamento em `backend/logs/regras` e persistência em `backend/logs/banco`. A modularização não altera os eventos, o intervalo de atualização nem a comunicação IPC. Ainda é necessária homologação visual real, incluindo navegação, seguir saída, filtros e exportação.
 

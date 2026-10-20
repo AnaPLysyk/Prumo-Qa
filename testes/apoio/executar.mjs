@@ -52,7 +52,7 @@ export function planoDeExecucao(selecao, env = process.env, isolado = false) {
   if (Object.entries(env).some(([k, v]) => (k === 'PRUMO_APP_EXE' || k.startsWith('PRUMO_MIGRACAO')) && v)) throw new Error('TEST_REAL_PROFILE_BLOCKED: remova PRUMO_APP_EXE e flags PRUMO_MIGRACAO');
   if (isolado && env.PRUMO_DATA_DIR) throw new Error('TEST_DATA_PROFILE_BLOCKED: remova PRUMO_DATA_DIR externo');
   if (!selecao.length) throw new Error('TEST_SELECTION_EMPTY');
-  return [...(isolado ? ['--require', './ferramentas/testes/bloquear-efeitos.cjs'] : []),
+  return [...(isolado ? ['--require', './testes/apoio/bloquear-efeitos.cjs'] : []),
     '--require', './testes/apoio/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
 }
 export function executar(args = process.argv.slice(2)) {

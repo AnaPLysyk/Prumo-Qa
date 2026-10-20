@@ -3,9 +3,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { gerarMapaDoAplicativo } from '../../../../ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs';
+import { gerarMapaDoAplicativo } from '../../../../docs/geradores/gerar-mapa-do-aplicativo.mjs';
 
-const modulos=JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json','utf8')).bundles;
+const modulos=JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8')).bundles;
 function arquivosEm(dir){
   return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?arquivosEm(path.join(dir,e.name)):
     e.isFile()?[path.join(dir,e.name).split(path.sep).join('/')]:[]);

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { gerarMapaDoAplicativo } from '../../../../ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs';
+import { gerarMapaDoAplicativo } from '../../../../docs/geradores/gerar-mapa-do-aplicativo.mjs';
 import { lerMapaDoAplicativo } from '../../../../dist/administracao/banco/lerMapaDoAplicativo.js';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 

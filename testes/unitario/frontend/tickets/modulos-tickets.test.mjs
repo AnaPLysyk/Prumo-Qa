@@ -31,7 +31,7 @@ test('cada funcionalidade de Tickets tem um arquivo na própria tela', () => {
 });
 
 test('manifesto monta Tickets uma vez, mantendo o JS publicado byte a byte', () => {
-  const m=JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json', 'utf8'));
+  const m=JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json', 'utf8'));
   const bundle=m.bundles.find(b=>b.destino==='dist/renderer/fluxos.js');
   assert.ok(bundle);
   const origens=partes.map(n=>raiz+n);

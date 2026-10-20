@@ -6,7 +6,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const raiz = process.cwd();
-const manifest = JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json','utf8'));
+const manifest = JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8'));
 test('bundles da interface são reproduzidos exatamente pelas partes de cada tela', () => {
   assert.equal(manifest.schemaVersion, 1);
   for (const bundle of manifest.bundles) {

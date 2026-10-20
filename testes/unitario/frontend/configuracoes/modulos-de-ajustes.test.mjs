@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 test('Configurações mantém perfil, assistente e abas no bundle da interface', () => {
- const b=JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json','utf8')).bundles.find(x=>x.destino==='dist/renderer/interfaces.js');
+ const b=JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8')).bundles.find(x=>x.destino==='dist/renderer/interfaces.js');
  const parts=[
   'frontend/configuracoes/ajustes-do-assistente.parte.js',
   'frontend/configuracoes/perfil-e-conta.parte.js',

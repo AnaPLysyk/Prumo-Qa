@@ -93,7 +93,7 @@ jobs:
         run: |
           $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
           if ($env:GITHUB_REF_NAME -ne "v$v") { throw "A tag $($env:GITHUB_REF_NAME) não corresponde à versão $v do package.json" }
-          node ferramentas/release/notas-versao.mjs $v | Out-File -Encoding utf8 release-notes.md
+          node site/release/notas-versao.mjs $v | Out-File -Encoding utf8 release-notes.md
       - name: Criar release (instalador não assinado)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -128,7 +128,7 @@ jobs:
           $data = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'E. South America Standard Time').ToString('yyyy-MM-dd')
           git fetch --no-tags origin main
           git checkout -B main origin/main
-          node ferramentas/release/publicar-versao.mjs $v $env:SHA256_PUBLICADO $data
+          node site/release/publicar-versao.mjs $v $env:SHA256_PUBLICADO $data
           if ($LASTEXITCODE -ne 0) { throw "Não foi possível marcar $v como publicada no catálogo" }
           git diff --quiet -- docs/catalogo/versoes.json
           if ($LASTEXITCODE -ne 0) {

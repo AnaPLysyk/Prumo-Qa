@@ -54,7 +54,7 @@ A aba **Suporte** prepara bug, melhoria ou sugestão (`backend/suporte/regras/`)
 
 ### Versões e atualização
 
-`docs/catalogo/versoes.json` (validado por `backend/ajuda/versoes/validarVersoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`ferramentas/release/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
+`docs/catalogo/versoes.json` (validado por `backend/ajuda/versoes/validarVersoes.ts`) é a única fonte do histórico de versões: alimenta Ajuda › Versões, as notas de release (`site/release/notas-versao.mjs`) e a conferência com `package.json`, tag e nome do instalador. **Verificar atualizações** é sempre uma ação sua: o processo principal faz uma requisição HTTPS GET a `api.github.com` (destino fixo, sem redirecionamento, com timeout, resposta validada) e a janela continua sem acesso à rede. Não são enviados logs, projetos, caminhos, identificadores, evidências nem tokens; como em qualquer conexão HTTPS, o servidor vê o seu endereço IP, o que não é anonimato. Nada é baixado nem executado: o botão apenas abre, após confirmação nativa, a página oficial da release. Sem internet, o app mostra “Não foi possível verificar atualizações. O aplicativo continua disponível para uso local.”
 
 ### Dados locais: exportar e excluir
 
@@ -126,7 +126,7 @@ Desinstalar: Configurações › Aplicativos › Prumo QA. Para apagar também o
 
 ## Substituir o ícone
 
-Troque `assets/prumo-icon.png` (256×256), `assets/prumo-icon.ico` (de 16 a 256 px) e `assets/prumo-icon-1024.png` (macOS e Linux) e rode `npm run dist`. O `.ico` alimenta o executável, o instalador, o desinstalador e os atalhos do Windows. O ícone atual é **provisório**: `npm run icone` (`ferramentas/empacotamento/gerar-icones.cjs`) gera os três a partir da esfera `assets/qc-orb.png` (não rode esse comando depois de colocar o seu).
+Troque `assets/prumo-icon.png` (256×256), `assets/prumo-icon.ico` (de 16 a 256 px) e `assets/prumo-icon-1024.png` (macOS e Linux) e rode `npm run dist`. O `.ico` alimenta o executável, o instalador, o desinstalador e os atalhos do Windows. O ícone atual é **provisório**: `npm run icone` (`site/release/gerar-icones.cjs`) gera os três a partir da esfera `assets/qc-orb.png` (não rode esse comando depois de colocar o seu).
 
 ## Diagnóstico de erros comuns
 

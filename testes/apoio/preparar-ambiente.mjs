@@ -47,7 +47,7 @@ function ambienteSemSegredos(perfil) {
 }
 
 if (args.includes('--ajuda')) {
-  console.log('Uso: node ferramentas/homologacao/preparar-ambiente.mjs [--verificar|--iniciar]');
+  console.log('Uso: node testes/apoio/preparar-ambiente.mjs [--verificar|--iniciar]');
   console.log('Padrão: pré-verificação sem efeitos. --iniciar: abre Electron manual em perfil TEMP isolado.');
 } else if (args.some(x => !flagsValidas.has(x)) ||
   (args.includes('--verificar') && args.includes('--iniciar')) ||

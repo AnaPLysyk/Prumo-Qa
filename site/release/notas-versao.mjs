@@ -1,5 +1,5 @@
 // Gera as notas de release de uma versão a partir da fonte única docs/catalogo/versoes.json.
-// Uso: node ferramentas/release/notas-versao.mjs 2.3.1 > notas.md   (falha se a versão não existir no histórico)
+// Uso: node site/release/notas-versao.mjs 2.3.1 > notas.md   (falha se a versão não existir no histórico)
 // PRUMO_ASSINADO=true só deve ser definido pelo CI DEPOIS de confirmar Authenticode "Valid"; sem isso, as notas dizem NÃO ASSINADO.
 import { carregarVersoes } from '../../dist/ajuda/versoes/carregarVersoes.js';
 import { notasDaVersao } from '../../dist/ajuda/versoes/notasDaVersao.js';
@@ -14,7 +14,7 @@ const paragrafoAssinatura = assinado
   : `**Instalador NÃO ASSINADO.** Esta versão não tem assinatura digital. O Windows pode mostrar o alerta do SmartScreen e, com Smart App Control ou Controle de Aplicativo ativos, pode bloquear o instalador ou o \`aprovar.exe\`. O Prumo não contorna essas proteções. Veja docs/ASSINATURA.md.`;
 const cabecalho = `${paragrafoAssinatura}
 
-**Integridade:** o SHA-256 do instalador está no arquivo \`Prumo-QA-Setup-${alvo}.exe.sha256\` desta release. O checksum confirma que o arquivo baixado é o publicado; ele **não** substitui uma assinatura digital nem prova quem o publicou. Baixe somente desta página; \`ferramentas/release/verificar-download.ps1\` confere o hash sem executar nada.
+**Integridade:** o SHA-256 do instalador está no arquivo \`Prumo-QA-Setup-${alvo}.exe.sha256\` desta release. O checksum confirma que o arquivo baixado é o publicado; ele **não** substitui uma assinatura digital nem prova quem o publicou. Baixe somente desta página; \`site/release/verificar-download.ps1\` confere o hash sem executar nada.
 
 **Instalar:** execute o instalador (por usuário, sem administrador, pasta alterável). Não é necessário Node.js. Seus dados em \`%LOCALAPPDATA%\\PrumoQA\` são preservados ao atualizar e ao desinstalar.
 `;

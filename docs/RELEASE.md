@@ -15,7 +15,7 @@ Entrada nova no topo com `status: "repositorio"`, `date: null`, `releaseUrl: nul
 
 - Páginas de ajuda em `docs/ajuda/` (PT e, quando houver, `.en.md`). Página nova: registrar em `backend/projetos/tipos/painel.ts` (`documentosAjuda`) e no índice da fonte `frontend/ajuda/busca-e-indice.parte.js`; sincronizar a cópia Electron.
 - Textos novos da interface com tradução em `frontend/compartilhado/runtime/i18n-en-*.js`; sincronizar as cópias distribuídas com `npm run frontend:sync`.
-- Capturas do site: `node ferramentas/site/capturar-site.mjs` (aplicativo real, dados sintéticos). Textos do site: `site/gerar.mjs`.
+- Capturas do site: `node site/scripts/capturar-site.mjs` (aplicativo real, dados sintéticos). Textos do site: `site/gerar.mjs`.
 - `npm run site` e conferir `site/public` (escuro, claro e celular). O site e a ajuda do aplicativo leem os mesmos arquivos de `docs/ajuda`.
 
 ## 4. Verificação e main
@@ -36,7 +36,7 @@ git push origin vX.Y.Z
 1. Testes unitários, smoke e regressão, instalador NSIS e smoke de todas as telas no executável empacotado (`release/win-unpacked`). A atualização sobre versões publicadas e a desinstalação não rodam mais no CI.
 2. SHA-256 do instalador e estado real da assinatura.
 3. Release `vX.Y.Z` com o `.exe`, o `.sha256` e as notas geradas do catálogo; confere que o arquivo publicado é idêntico ao gerado.
-4. `node ferramentas/release/publicar-versao.mjs X.Y.Z <sha256> <data>`: o catálogo passa a `publicada` (data, link da release e SHA-256), num commit na `main`.
+4. `node site/release/publicar-versao.mjs X.Y.Z <sha256> <data>`: o catálogo passa a `publicada` (data, link da release e SHA-256), num commit na `main`.
 5. Dispara `.github/workflows/site.yml`, que publica o site (Render) e espera o commit certo no ar (`build.txt`). O site passa a oferecer o download da versão com o SHA-256.
 
 ### macOS e Linux (em paralelo ao Windows)
@@ -59,12 +59,12 @@ As publicações do site rodam em fila, uma por vez (`concurrency` sem cancelame
 
 ## Conferência final
 
-- `https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/vX.Y.Z`: instalador e `.sha256`. Para conferir o download sem executar: `.\ferramentas\release\verificar-download.ps1 -Versao X.Y.Z` (baixa o `.exe` e o `.sha256`, confere o SHA-256 e mostra o estado da assinatura).
+- `https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/vX.Y.Z`: instalador e `.sha256`. Para conferir o download sem executar: `.\site\release\verificar-download.ps1 -Versao X.Y.Z` (baixa o `.exe` e o `.sha256`, confere o SHA-256 e mostra o estado da assinatura).
 - Site: Início ("Baixar a versão X.Y.Z") e Download (SHA-256 igual ao da release).
 - Aplicativo: Ajuda › Versões mostra a versão como publicada; um aplicativo de versão anterior mostra o aviso.
 
 ## Se algo falhar
 
 - Etapa antes da release: nada é publicado. Corrija, faça novo commit na `main` e mova a tag só se a release ainda não existir.
-- Release criada mas catálogo ou site falharam: rode à mão `node ferramentas/release/publicar-versao.mjs X.Y.Z <sha256>` (o SHA-256 está no `.sha256` da release), faça o commit na `main` e o push; o site publica sozinho.
+- Release criada mas catálogo ou site falharam: rode à mão `node site/release/publicar-versao.mjs X.Y.Z <sha256>` (o SHA-256 está no `.sha256` da release), faça o commit na `main` e o push; o site publica sozinho.
 - Nunca apague uma release publicada nem reutilize o número de uma versão já baixada.

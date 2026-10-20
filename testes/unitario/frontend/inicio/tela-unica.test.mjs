@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 test('Início possui uma única tela e mantém a identidade visual compartilhada', () => {
- const manifest=JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json','utf8'));
+ const manifest=JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8'));
  const b=manifest.bundles.find(x=>x.destino==='dist/renderer/interfaces.js');
  assert.ok(b.origens.includes('frontend/inicio/tela-inicio.parte.js'));
  const src=fs.readFileSync('frontend/inicio/tela-inicio.parte.js','utf8');

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-const { assinar, montarArgumentos, procurarSigntool } = createRequire(import.meta.url)('../../../../ferramentas/empacotamento/assinar-windows.cjs');
+const { assinar, montarArgumentos, procurarSigntool } = createRequire(import.meta.url)('../../../../site/release/assinar-windows.cjs');
 const arquivo = path.resolve('release/win-unpacked/Prumo QA.exe');
 const digital = 'a'.repeat(40);
 
@@ -46,7 +46,7 @@ test('localização do signtool: variável explícita ou Windows SDK, sem invent
 
 test('nenhum segredo, certificado ou chave privada no repositório; o gancho está ligado ao electron-builder', () => {
   const yml = fs.readFileSync('electron-builder.yml', 'utf8');
-  assert.match(yml, /sign: ferramentas\/empacotamento\/assinar-windows\.cjs/);
+  assert.match(yml, /sign: site\/release\/assinar-windows\.cjs/);
   assert.doesNotMatch(yml, /certificateFile|certificatePassword|CSC_KEY_PASSWORD|WIN_CSC_LINK/i);
   const rastreados = fs.readdirSync('.', { recursive: true }).filter((f) => !/node_modules|\.git[\\/]|release|dist|\.prumo/.test(String(f)) && /\.(pfx|p12|pem|key|snk)$/i.test(String(f)));
   assert.deepEqual(rastreados, []);

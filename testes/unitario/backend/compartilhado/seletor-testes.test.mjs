@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { raiz, argumentos, selecionar, planoDeExecucao, descrever, catalogar, arquivosDeTeste } from '../../../../ferramentas/testes/executar.mjs';
+import { raiz, argumentos, selecionar, planoDeExecucao, descrever, catalogar, arquivosDeTeste } from '../../../../testes/apoio/executar.mjs';
 const fixture = catalogar(['testes/unitario/backend/projetos/a.test.mjs', 'testes/regressao/frontend/projetos/b.test.mjs', 'testes/regressao/frontend/aplicativo/migracao-x.test.mjs']);
 
 test('todo teste fica em testes/<unitario|smoke|regressao>/<backend|frontend>/<modulo>/ e o módulo é uma pasta de tela', () => {

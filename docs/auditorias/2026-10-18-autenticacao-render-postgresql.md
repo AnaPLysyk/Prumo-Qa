@@ -33,7 +33,7 @@ Antes de ativar login real, aplicar em ambiente controlado o esquema gerado pelo
 
 ## Desktop — homologação isolada
 Após implantar o servidor **de desenvolvimento**, configurar **somente no ambiente de homologação** `PRUMO_AUTH_API_URL=https://<servico>.onrender.com`, e executar:
-`node ferramentas/homologacao/preparar-ambiente.mjs --iniciar`
+`node testes/apoio/preparar-ambiente.mjs --iniciar`
 
 O script cria um perfil TEMP, não copia contas ou tokens anteriores e ativa o login remoto. O app instalado continua intacto. Não colocar o endereço fixo no app distribuído nem publicar release antes de validar no mínimo: cadastro, confirmação de e-mail, login, senha errada, recuperação, logout, sessão revogada e isolamento A/B.
 

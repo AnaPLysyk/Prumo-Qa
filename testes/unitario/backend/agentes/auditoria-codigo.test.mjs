@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { auditarPorAgentes, conferirScripts, localizarArquivosLongos } from '../../../../ferramentas/arquitetura/auditoria-por-agentes.mjs';
+import { auditarPorAgentes, conferirScripts, localizarArquivosLongos } from '../../../../testes/apoio/auditoria-por-agentes.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..');
 const temporario = t => {

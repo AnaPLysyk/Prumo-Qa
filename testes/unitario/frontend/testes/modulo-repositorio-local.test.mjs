@@ -8,7 +8,7 @@ test('Testes deixa Qase e repositório local em arquivos distintos com uma únic
   const local = 'frontend/testes/fluxos-repositorio-local.parte.js';
   const origemQase = fs.readFileSync(qase, 'utf8');
   const origemLocal = fs.readFileSync(local, 'utf8');
-  const manifesto = JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json', 'utf8'));
+  const manifesto = JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json', 'utf8'));
   const bundle = manifesto.bundles.find(b => b.destino === 'dist/renderer/fluxos.js');
   assert.ok(bundle, 'o bundle de Testes precisa estar declarado');
   const posQase = bundle.origens.indexOf(qase);

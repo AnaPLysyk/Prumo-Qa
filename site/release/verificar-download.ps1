@@ -1,6 +1,6 @@
-﻿# Baixa uma release do Prumo QA e verifica integridade e assinatura SEM executar o instalador.
-# Uso (PowerShell):  .\ferramentas\release\verificar-download.ps1 -Versao 2.18.0
-#                    .\ferramentas\release\verificar-download.ps1 -Versao 2.18.0 -Pasta "C:\Prumo QA download"
+# Baixa uma release do Prumo QA e verifica integridade e assinatura SEM executar o instalador.
+# Uso (PowerShell):  .\site\release\verificar-download.ps1 -Versao 2.18.0
+#                    .\site\release\verificar-download.ps1 -Versao 2.18.0 -Pasta "C:\Prumo QA download"
 # Etapas: baixa o .exe e o .sha256 da release oficial, confere o SHA-256 e mostra o estado da assinatura Authenticode.
 # Não instala, não executa e não altera proteções do Windows.
 param(

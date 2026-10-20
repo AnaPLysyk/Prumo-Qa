@@ -10,7 +10,7 @@ test('a tela Testes tem repositório, editor/pipelines e IDE separados, mantendo
     'editor-e-pipelines.parte.js',
     'ide-codigo.parte.js'
   ].map(arquivo => origem + arquivo);
-  const manifesto = JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json', 'utf8'));
+  const manifesto = JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json', 'utf8'));
   const bundle = manifesto.bundles.find(item => item.destino === 'dist/renderer/tela-testes.js');
   assert.ok(bundle, 'manifesto deve declarar o bundle de Testes');
   assert.deepEqual(bundle.origens, partes, 'a ordem das funções no bundle não pode mudar');

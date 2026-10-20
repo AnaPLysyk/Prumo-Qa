@@ -2,13 +2,13 @@
 // o backend (api, regras, banco, integrações, tipos) e os testes que a exercitam. Lido do código desta versão no build,
 // sem o código-fonte (só caminhos, descrições, funções e ligações). Saída: dist/documentacao/mapa.json (não versionado);
 // o código de cada arquivo listado vai para dist/documentacao/codigo.json, lido um arquivo por pedido (canal administracao:codigo).
-// Uso: node ferramentas/arquitetura/gerar-mapa-do-aplicativo.mjs [--check]
+// Uso: node docs/geradores/gerar-mapa-do-aplicativo.mjs [--check]
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { lerCopiaDeTrabalho, montarInstantaneo } from './gerar-arquitetura.mjs';
-import { telas as frasesDasTelas, papeis } from '../documentacao/catalogo-documentacao-viva.mjs';
+import { telas as frasesDasTelas, papeis } from './catalogo-documentacao-viva.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const destino = path.join(raiz, 'dist', 'documentacao', 'mapa.json');

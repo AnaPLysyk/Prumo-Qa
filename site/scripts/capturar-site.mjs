@@ -1,6 +1,6 @@
 // Captura as imagens do site a partir do aplicativo REAL, com dados 100% sintéticos e isolados.
 // Nada aqui toca Jira, Qase, GitHub ou projetos reais: os serviços são um servidor HTTP local de laboratório
-// (testes/apoio/servicos-fixtures.mjs) e o diretório de dados é temporário. Uso: node ferramentas/site/capturar-site.mjs
+// (testes/apoio/servicos-fixtures.mjs) e o diretório de dados é temporário. Uso: node site/scripts/capturar-site.mjs
 // O bootstrap de testes substitui SQLite por armazenamento em memória. As capturas não comprovam
 // avaliação humana, uso de leitor de tela ou autenticação em serviços externos.
 import fs from 'node:fs';

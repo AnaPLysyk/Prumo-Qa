@@ -31,7 +31,7 @@ Com **Smart App Control** (ou Controle de Aplicativo) ativo, o Windows bloqueia 
 
 ## O que já está preparado no build
 
-- `ferramentas/empacotamento/assinar-windows.cjs`, ligado em `electron-builder.yml` (`win.signtoolOptions.sign`), assina **cada** executável (`Prumo QA.exe`, `aprovar.exe`, desinstalador e o instalador) quando existir a variável de ambiente `PRUMO_ASSINATURA_THUMBPRINT` (SHA-1 do certificado já disponível ao Windows da máquina de build). Opcionais: `PRUMO_SIGNTOOL` e `PRUMO_TIMESTAMP_URL`.
+- `site/release/assinar-windows.cjs`, ligado em `electron-builder.yml` (`win.signtoolOptions.sign`), assina **cada** executável (`Prumo QA.exe`, `aprovar.exe`, desinstalador e o instalador) quando existir a variável de ambiente `PRUMO_ASSINATURA_THUMBPRINT` (SHA-1 do certificado já disponível ao Windows da máquina de build). Opcionais: `PRUMO_SIGNTOOL` e `PRUMO_TIMESTAMP_URL`.
 - **Sem credencial**, nada é assinado e o log diz isso (`permanece NÃO ASSINADO`). **Com credencial**, qualquer falha **interrompe o build**: nunca se publica um arquivo supostamente assinado.
 - O workflow verifica a assinatura do instalador com `Get-AuthenticodeSignature` e as **notas da release** afirmam "assinado" somente se a verificação confirmar uma assinatura válida; caso contrário continuam dizendo "NÃO ASSINADO".
 - Credenciais, certificados e chaves **nunca** entram no Git (`.gitignore` bloqueia `*.pfx`, `*.pem`, `*.key`; um teste verifica). Em CI, usar segredos do GitHub; certificados em token USB físico não funcionam em runners hospedados, então o caminho do CI exige HSM em nuvem do fornecedor ou um runner próprio.

@@ -48,7 +48,7 @@ O código da tela fica em `frontend/testes/` e as regras, contratos IPC e grava�
 - `fluxos-vinculos.parte.js`: relações entre tickets, casos e automações.
 - `formularios/`, `cartoes/` e `componentes/`: campos, cartões e controles de apresentação.
 
-Esses fragmentos são reunidos pelo manifesto `ferramentas/frontend/telas-modulares.json`; **o manifesto define a ordem**, e o build gera os bundles `dist/renderer/fluxos-v40.js` e `dist/renderer/testes-v40.js`. O nome histórico do bundle não é a origem a editar. A Documentação Viva permite localizar cada arquivo pela tela Testes.
+Esses fragmentos são reunidos pelo manifesto `frontend/construcao/telas-modulares.json`; **o manifesto define a ordem**, e o build gera os bundles `dist/renderer/fluxos-v40.js` e `dist/renderer/testes-v40.js`. O nome histórico do bundle não é a origem a editar. A Documentação Viva permite localizar cada arquivo pela tela Testes.
 
 A verificação unitária e as jornadas de regressão usam perfis temporários e mocks, sem escrever em serviços reais. As suítes locais continuam no armazenamento isolado do projeto/usuário. Para confirmar o fluxo de ponta a ponta com Qase e Jira, ainda é preciso fazer homologação manual com integrações autorizadas.
 

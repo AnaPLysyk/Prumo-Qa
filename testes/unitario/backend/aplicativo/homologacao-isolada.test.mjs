@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../');
-const programa = path.join(raiz, 'ferramentas', 'homologacao', 'preparar-ambiente.mjs');
+const programa = path.join(raiz, 'testes', 'apoio', 'preparar-ambiente.mjs');
 function executar(arg) {
   return spawnSync(process.execPath, [programa, ...arg], {
     cwd: raiz,

@@ -1,4 +1,4 @@
-/** Regressão do seletor de check isolado; fixtures em TEMP, sem banco ou projetos externos. */
+/** RegressÃ£o do seletor de check isolado; fixtures em TEMP, sem banco ou projetos externos. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { argumentos, catalogar, dividirPorIsolamento, planoDeExecucao, raiz } from '../../../../ferramentas/testes/executar.mjs';
+import { argumentos, catalogar, dividirPorIsolamento, planoDeExecucao, raiz } from '../../../../testes/apoio/executar.mjs';
 
 test('filtro --isolado combina com --listar e impede argumentos repetidos', () => {
   const args = argumentos(['--camada', 'frontend', '--isolado', '--listar']);
@@ -15,7 +15,7 @@ test('filtro --isolado combina com --listar e impede argumentos repetidos', () =
   assert.throws(() => argumentos(['--isolado', '--isolado']), /TEST_ARGUMENT_INVALID/);
 });
 
-test('E2E fica NOT_RUN; entram só arquivos sem janela, inclusive migração sintética', t => {
+test('E2E fica NOT_RUN; entram sÃ³ arquivos sem janela, inclusive migraÃ§Ã£o sintÃ©tica', t => {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-selecao-isolada-'));
   t.after(() => fs.rmSync(base, { recursive: true, force: true }));
   const nomes = [
@@ -37,14 +37,14 @@ test('plano isolado instala bloqueador antes dos testes e recusa perfil externo 
   const primeiro = catalogar(['testes/unitario/backend/compartilhado/x.test.mjs'])[0];
   const argv = planoDeExecucao([primeiro], {}, true);
   assert.deepEqual(argv.slice(0, 4), [
-    '--require', './ferramentas/testes/bloquear-efeitos.cjs',
+    '--require', './testes/apoio/bloquear-efeitos.cjs',
     '--require', './testes/apoio/conhecimento-hook.cjs'
   ]);
   assert.throws(() => planoDeExecucao([primeiro], { PRUMO_DATA_DIR: 'C:\\PrumoQA' }, true), /TEST_DATA_PROFILE_BLOCKED/);
 });
 
 test('bloqueador impede subprocesso de navegador, SQLite require e TCP remoto sem abrir esses recursos', () => {
-  const guard = path.join(raiz, 'ferramentas', 'testes', 'bloquear-efeitos.cjs');
+  const guard = path.join(raiz, 'testes', 'apoio', 'bloquear-efeitos.cjs');
   const amostras = [
     ["require('node:sqlite')", /TEST_ISOLATION_BLOCKED/],
     ["require('node:child_process').spawnSync('electron', [])", /TEST_ISOLATION_BLOCKED/],

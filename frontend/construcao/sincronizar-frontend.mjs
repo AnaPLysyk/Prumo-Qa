@@ -74,7 +74,7 @@ for (const recurso of recursos) {
 // Na raiz de dist/renderer só ficam os recursos declarados, os bundles e o status.css (gerar-status.mjs).
 // Arquivo de um nome antigo (renomeado ou removido): ao gerar, some; ao conferir, é erro.
 const raizDaJanela = path.join(raiz, 'dist/renderer');
-const bundles = JSON.parse(fs.readFileSync(path.join(raiz, 'ferramentas/frontend/telas-modulares.json'), 'utf8')).bundles.map(b => b.destino);
+const bundles = JSON.parse(fs.readFileSync(path.join(raiz, 'frontend/construcao/telas-modulares.json'), 'utf8')).bundles.map(b => b.destino);
 const permitidos = new Set([...recursos.map(r => r.destino), ...bundles, 'dist/renderer/status.css']);
 for (const item of fs.existsSync(raizDaJanela) ? fs.readdirSync(raizDaJanela, { withFileTypes: true }) : []) {
   const relativo = 'dist/renderer/' + item.name;

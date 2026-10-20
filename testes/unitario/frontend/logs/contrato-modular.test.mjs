@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 test('Logs mantém interface, detalhes e atualização em módulos da própria tela', () => {
-  const manifest = JSON.parse(fs.readFileSync('ferramentas/frontend/telas-modulares.json','utf8'));
+  const manifest = JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8'));
   const b = manifest.bundles.find(x => x.destino === 'dist/renderer/interfaces.js');
   const parts = ['tela-logs.parte.js', 'eventos-e-detalhes.parte.js', 'filtros-e-atualizacao.parte.js'];
   const sources = parts.map(name => 'frontend/logs/' + name);

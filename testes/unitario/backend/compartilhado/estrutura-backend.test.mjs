@@ -107,7 +107,7 @@ test('backend: cada canal da janela (IPC) é atendido por um arquivo api/ com o 
 });
 
 test('backend: Documentação Viva corresponde ao catálogo de telas e canais IPC', async () => {
-  const { telas, papeis, gerarArquivosDosCanais } = await import('../../../../ferramentas/documentacao/catalogo-documentacao-viva.mjs');
+  const { telas, papeis, gerarArquivosDosCanais } = await import('../../../../docs/geradores/catalogo-documentacao-viva.mjs');
   const problemas = [];
   for (const nome of fs.readdirSync('backend', { withFileTypes: true }).filter(f=>f.isDirectory()).map(f=>f.name)) {
     if (!telas[nome]) problemas.push('sem descrição na Documentação Viva: backend/'+nome);

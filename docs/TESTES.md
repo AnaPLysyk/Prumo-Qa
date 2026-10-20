@@ -5,10 +5,10 @@ Os arquivos ficam em `testes/<natureza>/<camada>/<módulo>/`: natureza `unitario
 Exemplos:
 
 ```powershell
-node ferramentas/testes/executar.mjs --listar
-node ferramentas/testes/executar.mjs --natureza smoke
-node ferramentas/testes/executar.mjs --natureza unitario --camada backend --listar
-node ferramentas/testes/executar.mjs --camada frontend --modulo agentes --listar
+node testes/apoio/executar.mjs --listar
+node testes/apoio/executar.mjs --natureza smoke
+node testes/apoio/executar.mjs --natureza unitario --camada backend --listar
+node testes/apoio/executar.mjs --camada frontend --modulo agentes --listar
 ```
 
 Os filtros combinam com AND e valores desconhecidos falham. `--listar` apenas lê as pastas; não importa módulos da aplicação e não abre banco, janela ou rede.
@@ -21,7 +21,7 @@ Os testes reais de UI continuam dependendo da janela e das fixtures existentes; 
 
 Verificação do seletor: `node --test testes/unitario/backend/compartilhado/seletor-testes.test.mjs`. Esses testes conferem a organização real, filtros com fixtures em memória, argumentos do runner e recusa de perfil real sem executar a seleção. O seletor não inventa aprovação humana e preserva códigos de saída e falhas do Node.
 
-`npm run check:isolado` (ou `test:selecionar -- --isolado`) roda só o que não precisa de janela: arquivos que usam o Electron ou de migração ficam `NOT_RUN|motivo|arquivo`, e `ferramentas/testes/bloquear-efeitos.cjs` recusa abrir navegador, carregar driver SQLite e conectar fora de localhost. Não é sandbox do sistema, e a falha de um teste selecionado continua falha; `--isolado --listar` mostra a divisão sem executar.
+`npm run check:isolado` (ou `test:selecionar -- --isolado`) roda só o que não precisa de janela: arquivos que usam o Electron ou de migração ficam `NOT_RUN|motivo|arquivo`, e `testes/apoio/bloquear-efeitos.cjs` recusa abrir navegador, carregar driver SQLite e conectar fora de localhost. Não é sandbox do sistema, e a falha de um teste selecionado continua falha; `--isolado --listar` mostra a divisão sem executar.
 
 O `npm test` também usa esse seletor após o build, sem ignorar os bloqueios de migração. Os scripts npm `test:unitarios`, `test:smoke`, `test:regressao`, `test:backend` e `test:frontend` usam esse mesmo seletor; `test:selecionar -- --modulo agentes` permite combinações. Faça o build antes de executar os testes que usam `dist/`.
 

@@ -24,7 +24,7 @@ cd C:\Users\DELL\projetos-github\Prumo-Qa
 $env:PRUMO_AUTH_URL = 'https://SEU-PROJETO.supabase.co'
 $env:PRUMO_AUTH_PUBLISHABLE_KEY = 'sb_publishable_SUA_CHAVE_PUBLICA'
 npm.cmd run build
-node ferramentas/homologacao/preparar-ambiente.mjs --iniciar
+node testes/apoio/preparar-ambiente.mjs --iniciar
 ```
 
 **CMD:**
@@ -33,7 +33,7 @@ cd C:\Users\DELL\projetos-github\Prumo-Qa
 set "PRUMO_AUTH_URL=https://SEU-PROJETO.supabase.co"
 set "PRUMO_AUTH_PUBLISHABLE_KEY=sb_publishable_SUA_CHAVE_PUBLICA"
 npm.cmd run build
-node ferramentas\homologacao\preparar-ambiente.mjs --iniciar
+node testes\homologacao\preparar-ambiente.mjs --iniciar
 ```
 
 O script preserva as duas variáveis **públicas** e limpa segredos/credenciais do processo. Cria sempre perfil TEMP novo. Não utiliza `C:\Users\DELL\AppData\Local\PrumoQA` nem altera o aplicativo instalado.
