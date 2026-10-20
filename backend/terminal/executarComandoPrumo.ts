@@ -21,7 +21,7 @@ import { menuDoTerminal } from './menuDoTerminal.js';
 import { perguntarNoTerminal } from './perguntarNoTerminal.js';
 import { textoSeguroNoTerminal } from './saidaDoTerminal.js';
 import { ajuda } from './contratos.js';
-import { revisarCobertura } from '../testes/regras/revisarCobertura.js';
+import { revisarCobertura } from '../testes/regras/revisaoDeCobertura.js';
 
 export async function executarComandoPrumo() {
   const args=process.argv.slice(2);

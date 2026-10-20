@@ -1,13 +1,12 @@
-/** Revisa um plano de testes contra o requisito: rastreabilidade, riscos, oráculos, lacunas e cenários repetidos. Nunca diz que está aprovado. */
-import { Projeto } from '../../compartilhado/projeto/contratos.js';
-import { revisaoSchema, AnaliseDeCobertura, Revisao } from '../tipos/revisaoDeCobertura.js';
-import { hash } from '../../compartilhado/seguranca/hash.js';
-import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';
-import { contextoParaRevisao } from '../../agentes/regras/consultasDeContextos.js';
-import { caminhoSeguro } from '../../compartilhado/seguranca/caminhoSeguro.js';
-import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { analisarPlaywright } from './analisarPlaywright.js';
-import { ehTestePlaywright } from './ehTestePlaywright.js';
+/** Revisa a cobertura de testes e identifica arquivos Playwright para análise. */
+import { Projeto } from "../../compartilhado/projeto/contratos.js";
+import { revisaoSchema, AnaliseDeCobertura, Revisao } from "../tipos/revisaoDeCobertura.js";
+import { hash } from "../../compartilhado/seguranca/hash.js";
+import { lerSeguro } from "../../compartilhado/seguranca/lerSeguro.js";
+import { contextoParaRevisao } from "../../agentes/regras/consultasDeContextos.js";
+import { caminhoSeguro } from "../../compartilhado/seguranca/caminhoSeguro.js";
+import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
+import { analisarPlaywright } from "./analisarPlaywright.js";
 
 export async function revisarCobertura(p: Projeto, entrada: unknown) {
   const r = revisaoSchema.parse(entrada);
@@ -113,3 +112,7 @@ function conferirCenariosCandidatos(r: Revisao, a: AnaliseDeCobertura, existente
 function textoParaComparar(s: string | undefined) {
   return (s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
+
+/** Diz se o arquivo é um teste Playwright. */
+
+export const ehTestePlaywright = (arquivo: string, conteudo: string) => /\.(spec|test)\.[cm]?[jt]s$/.test(arquivo) && /from\s+['"]@playwright\/test['"]|require\(\s*['"]@playwright\/test['"]\s*\)/.test(conteudo);

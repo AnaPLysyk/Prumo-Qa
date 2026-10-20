@@ -4,7 +4,7 @@ import { consultarEvidencias } from "../../testes/repositorioEvidencias.js";
 import { MeiosDoServidorMcp, somenteLeitura } from "../tipos/mcp.js";
 import { contextoCompleto } from "./consultasDoProjeto.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";
-import { revisarCobertura } from "../../testes/regras/revisarCobertura.js";
+import { revisarCobertura } from "../../testes/regras/revisaoDeCobertura.js";
 import { revisaoSchema } from "../../testes/tipos/revisaoDeCobertura.js";
 import { configuracaoDoEspaco } from "../servicoPoliticas.js";
 import { matrizDePoliticas } from "../servicoCapacidades.js";

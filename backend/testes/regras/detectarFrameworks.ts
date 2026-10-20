@@ -1,6 +1,6 @@
 /** Descobre, por evidência (dependência, configuração, imports), quais frameworks de teste o projeto usa. */
 
-import { ehTestePlaywright } from './ehTestePlaywright.js';
+import { ehTestePlaywright } from './revisaoDeCobertura.js';
 import { Fonte, Framework, config, conhecimento } from '../tipos/frameworks.js';
 
 const declaraPlaywright = (f: Fonte) => { if (!/(^|[\\/])package\.json$/.test(f.path)) return false; try { const p = JSON.parse(f.content); return !!({ ...p.dependencies, ...p.devDependencies })['@playwright/test']; } catch { return false; } };

@@ -2,7 +2,7 @@
 import { estadoDaAutorizacao } from './estadoERevogacao.js';
 import { gravarAutorizacoes } from '../repositorioAutorizacoes.js';
 import { lerAutorizacoes } from '../repositorioAutorizacoes.js';
-import { Delegada } from '../../testes/tipos/execucao.js';
+import { Delegada } from '../../testes/tipos/autorizacoes.js';
 
 /** Delegada para o executor. Consome um uso de forma atômica ao reconhecer o escopo; qualquer divergência devolve null (BLOCKED). */
 export function autorizacaoDelegada(espacoId: string, ambiente: string, base?: string, agora = () => new Date()): Delegada {

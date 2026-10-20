@@ -7,7 +7,7 @@ import { fixture } from '../../../apoio/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
 import { executarValidacao } from '../../../../dist/testes/regras/executarValidacao.js';
-import { revisarCobertura } from '../../../../dist/testes/regras/revisarCobertura.js';
+import { revisarCobertura } from '../../../../dist/testes/regras/revisaoDeCobertura.js';
 
 test('readonly bloqueia execução sem gravar no projeto',async t=>{
   const f=await fixture(t);f.manifest.execution.readOnly=true;await f.save();const antes=(await fs.readdir(f.root)).sort();

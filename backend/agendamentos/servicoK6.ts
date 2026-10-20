@@ -16,7 +16,7 @@ import { classificarResultado } from "../testes/regras/classificarResultado.js";
 import { Evidencia } from "../testes/tipos/evidencia.js";
 import { solicitarAprovacao } from "../testes/servicoAprovacao.js";
 import { criarEvidenciaInicial } from "../testes/regras/criarEvidenciaInicial.js";
-import { Delegada } from "../testes/tipos/execucao.js";
+import { Delegada } from "../testes/tipos/autorizacoes.js";
 
 export const capacidadeDoK6 = (c: ConfigK6) => ('k6:' + c.script.replaceAll('\\', '/')).slice(0, 80);
 

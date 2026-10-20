@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
-import { revisarCobertura } from '../../../../dist/testes/regras/revisarCobertura.js';
+import { revisarCobertura } from '../../../../dist/testes/regras/revisaoDeCobertura.js';
 
 const candidato={id:'A',behavior:'Editor grava',source:'R1',risk:'Alteração indevida',expected:'200 e persistência',oracle:'nova leitura',technique:'equivalence',partition:'Editor'};
 const plano={requirement:'R1: Apenas Editor grava.',source:'README R1',sourcePath:'README.md',existingTests:[],candidates:[candidato]};

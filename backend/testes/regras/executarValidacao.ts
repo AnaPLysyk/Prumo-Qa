@@ -21,7 +21,7 @@ import { ambienteMinimo } from './ambienteMinimo.js';
 
 import { escopoDaExecucao } from './escopoDaExecucao.js';
 
-import { Delegada } from '../tipos/execucao.js';
+import { Delegada } from '../tipos/autorizacoes.js';
 import path from 'node:path';
 
 async function encerrarArvoreDeProcessos(pid:number|undefined) {

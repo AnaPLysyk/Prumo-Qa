@@ -1,7 +1,7 @@
 /** Exige aprovação nativa do Windows, macOS ou Linux antes de executar ações. */
 import fs from "node:fs";
 import os from "node:os";
-import { Aprovacao, EscopoAprovacao } from "./tipos/aprovacao.js";
+import { Aprovacao, EscopoAprovacao } from "./tipos/autorizacoes.js";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

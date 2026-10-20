@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { Executor } from '../../conexoes/tipos/operacoesExternas.js';
 import { executarValidacao } from '../regras/executarValidacao.js';
-import { Delegada } from './execucao.js';
+import { Delegada } from './autorizacoes.js';
 
 /**
  * Fluxo real de QA com o Qase: casos -> plano/run -> execução autorizada das automações associadas -> resultados verificáveis ->
