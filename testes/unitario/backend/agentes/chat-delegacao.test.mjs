@@ -5,9 +5,9 @@ import fs from 'node:fs';
 import { skillDoAgente } from '../../../../dist/agentes/chat/skillDoAgente.js';
 import { listarTrechosDeSkill } from '../../../../dist/agentes/banco/listarTrechosDeSkill.js';
 import { decidirTrechoDeSkill } from '../../../../dist/agentes/banco/decidirTrechoDeSkill.js';
-import { montarPrompt } from '../../../../dist/agentes/chat/montarPrompt.js';
+import { montarPrompt } from '../../../../dist/agentes/chat/consultarIaExterna.js';
 import { consultarIaExterna } from '../../../../dist/agentes/chat/consultarIaExterna.js';
-import { registrarSugestoesDaIa } from '../../../../dist/agentes/chat/registrarSugestoesDaIa.js';
+import { registrarSugestoesDaIa } from '../../../../dist/agentes/chat/consultarIaExterna.js';
 
 const agente = { id: 'orquestrador', nome: 'Prumo', especializacao: null, dominio: 'Chat', palavras: [], aba: 'inicio', rotulo: 'Início' };
 function contexto(o) {

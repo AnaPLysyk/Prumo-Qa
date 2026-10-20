@@ -35,7 +35,7 @@ async function encerrarArvoreDeProcessos(pid:number|undefined) {
 }
 
 
-async function gravarRelatorioRedigido(p:Projeto,e:Evidencia,jobId:string,resultadoRel:string):Promise<void> {
+export async function gravarRelatorioRedigido(p:Projeto,e:Evidencia,jobId:string,resultadoRel:string):Promise<void> {
   // Artefato bruto pode conter segredos: só persistir versão redigida.
   if(e.resultArtifact) {
     const sanitized=JSON.stringify({jobId,cases:e.cases},null,2);
@@ -47,7 +47,7 @@ async function gravarRelatorioRedigido(p:Projeto,e:Evidencia,jobId:string,result
 }
 
 
-function mascararLogsDaExecucao(p: Projeto, env: NodeJS.ProcessEnv, stdout: Buffer[], stderr: Buffer[]) {
+export function mascararLogsDaExecucao(p: Projeto, env: NodeJS.ProcessEnv, stdout: Buffer[], stderr: Buffer[]) {
   const segredos=[...Object.entries(process.env).filter(([n])=>/token|secret|password|api.?key/i.test(n)).map(([,v])=>v!),...p.manifesto.execution.envAllowlist.map(n=>env[n]!)].filter(Boolean);
   return {
     segredos,

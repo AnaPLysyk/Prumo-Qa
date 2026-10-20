@@ -18,7 +18,7 @@ import { personalidadeParaIa } from './personalidadeParaIa.js';
 import { Coleta, Estilo, ExtrasPrompt } from '../tipos/chat.js';
 import { situacaoDaSessao } from '../../login/regras/sessao.js';
 
-function argumentosDoProvedorDeIa(provedor: Exclude<Provedor, 'local'>, prompt: string) {
+export function argumentosDoProvedorDeIa(provedor: Exclude<Provedor, 'local'>, prompt: string) {
   // A delegação do chat autoriza uma resposta, nunca edição, execução ou publicação.
   // Flags incompatíveis falham fechadas e conversar volta para a resposta local.
   return provedor === 'claude'
@@ -32,7 +32,7 @@ function contaParaIa(base?: string): { nome: string; acesso: string } | null {
 }
 
 
-function montarPrompt(agente: AgenteChat, pergunta: string, local: Coleta, estilo: Estilo, nomeAssistente: string, extras: ExtrasPrompt = {}) {
+export function montarPrompt(agente: AgenteChat, pergunta: string, local: Coleta, estilo: Estilo, nomeAssistente: string, extras: ExtrasPrompt = {}) {
   const skill = extras.skill ?? skillDoAgente(agente.especializacao, pergunta, extras.base).texto;
   return [personalidadeParaIa(agente.id, extras.perfil ?? null, nomeAssistente, extras.conta ?? null), `Agente do Prumo QA: ${agente.nome} (${agente.dominio}). Responda em português do Brasil, em até 8 frases, no estilo ${estilo}.`,
     'Use apenas os fatos abaixo e o que puder verificar pelo servidor MCP do Prumo, se estiver disponível. Não invente execuções, resultados, requisitos ou aprovações. Diga quando não souber.',
@@ -46,7 +46,7 @@ function montarPrompt(agente: AgenteChat, pergunta: string, local: Coleta, estil
 }
 
 
-function registrarSugestoesDaIa(o: Opcoes, agente: AgenteChat, provedor: Exclude<Provedor, 'local'>, aprendizados: string[]): { acoes: Acao[]; sugeridos: number; naoRegistrados: number } {
+export function registrarSugestoesDaIa(o: Opcoes, agente: AgenteChat, provedor: Exclude<Provedor, 'local'>, aprendizados: string[]): { acoes: Acao[]; sugeridos: number; naoRegistrados: number } {
     const acoes: Acao[] = []; let sugeridos = 0; let naoRegistrados = 0;
     for (const a of aprendizados) { try { const { item, duplicado } = registrarConhecimento({ espacoId: o.espacoId, agente: agente.id === 'orquestrador' ? null : agente.id, tipo: 'fato', titulo: a.slice(0, 80), texto: a, origem: 'IA', cliente: provedor }, o.base);
       if (!duplicado && item.estado === 'RASCUNHO') { sugeridos++; acoes.push({ tipo: 'aprovar_conhecimento', id: item.id, rotulo: 'Aprovar: ' + item.titulo.slice(0, 40) }, { tipo: 'descartar_conhecimento', id: item.id, rotulo: 'Descartar' }); } } catch { naoRegistrados++; } }
@@ -55,7 +55,7 @@ function registrarSugestoesDaIa(o: Opcoes, agente: AgenteChat, provedor: Exclude
 
 
 /** Separa as linhas "APRENDIZADO:" do texto da IA externa (no máximo duas). */
-function separarAprendizados(texto: string) {
+export function separarAprendizados(texto: string) {
   const aprendizados: string[] = [];
   const linhasDaResposta = texto.split('\n').filter(linha => {
     const sugestao = linha.match(/^\s*[-*]?\s*APRENDIZADO:\s*(.{4,})$/i);

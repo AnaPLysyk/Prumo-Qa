@@ -12,7 +12,7 @@ import { telas as frasesDasTelas, papeis } from './catalogo-documentacao-viva.mj
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const destino = path.join(raiz, 'dist', 'documentacao', 'mapa.json');
-const PAPEIS = ['api', 'regras', 'banco', 'integracoes', 'tipos', 'servidor'];
+const PAPEIS = ['controlador', 'servico', 'repositorio', 'contratos', 'api', 'regras', 'banco', 'integracoes', 'tipos', 'servidor'];
 
 export function gerarMapaDoAplicativo() {
   const arquivos = lerCopiaDeTrabalho();
@@ -24,12 +24,12 @@ export function gerarMapaDoAplicativo() {
   const telas = ids.map((id) => {
     const doBackend = lista.filter((a) => a.caminho.startsWith(`backend/${id}/`) && /\.(?:ts|mjs|js)$/.test(a.caminho));
     const backend = Object.fromEntries([...PAPEIS, 'outros'].map((p) => [p, []]));
-    for (const a of doBackend) { const papel = a.caminho.split('/')[2]; (PAPEIS.includes(papel) ? backend[papel] : backend.outros).push(resumo(a)); }
+    for (const a of doBackend) { const trecho = a.caminho.split('/')[2]; const papel = trecho.startsWith('controlador') && trecho.endsWith('.ts') ? 'controlador' : trecho; (PAPEIS.includes(papel) ? backend[papel] : backend.outros).push(resumo(a)); }
     const usaTela = (texto) => texto.includes(`dist/${id}/`) || texto.includes(`frontend/${id}/`) || texto.includes(`backend/${id}/`);
     return {
       id, descricao: frasesDasTelas[id] ?? null,
       frontend: lista.filter((a) => a.caminho.startsWith(`frontend/${id}/`) && /\.(js|css|html)$/.test(a.caminho)).map(resumo),
-      canais: fluxos.filter((f) => f.api.startsWith(`backend/${id}/api/`)).map((f) => ({ canal: f.canal, ponte: f.ponte, api: f.api, chama: f.chama, telas: f.telas.filter((t) => t.startsWith('frontend/')) })),
+      canais: fluxos.filter((f) => f.api.startsWith(`backend/${id}/`)).map((f) => ({ canal: f.canal, ponte: f.ponte, api: f.api, chama: f.chama, telas: f.telas.filter((t) => t.startsWith('frontend/')) })),
       backend,
       testes: testes.filter((t) => usaTela(arquivos.get(t.caminho) ?? '')).map((t) => ({ caminho: t.caminho, descricao: t.descricao }))
     };

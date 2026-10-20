@@ -3,7 +3,7 @@
 import { CasoTeste } from '../tipos/catalogoDeTestes.js';
 import { QASE_PADROES } from '../tipos/catalogoDeTestes.js';
 
-function idsQase(trecho: string): string[] {
+export function idsQase(trecho: string): string[] {
   const ids = new Set<string>();
   for (const re of QASE_PADROES) for (const m of trecho.matchAll(re)) {
     const projeto = m.groups?.projeto; const lista = m.groups?.ids ?? '';

@@ -25,11 +25,15 @@ export const telas = {
   compartilhado: 'Compartilhado: só o que várias telas usam de verdade — segurança, erros, textos, contrato do projeto e pasta de dados.',
 };
 export const papeis = {
-  api: 'Portas da tela: cada arquivo atende um pedido da janela (um canal IPC, com o mesmo nome). Recebe os dados já validados, pede confirmação no Windows quando precisa e chama as regras.',
-  regras: 'O que a tela decide: validações, cálculos e os passos de cada ação.',
-  banco: 'Onde os dados são lidos e gravados neste computador (arquivos JSON e SQLite na pasta de dados do Prumo).',
+  controlador: 'Controller: recebe os pedidos IPC, validações e confirmações e encaminha à lógica do serviço; permissões continuam por canal.',
+  servico: 'Service: reúne o ciclo de vida e as regras de negócio de uma funcionalidade.',
+  repositorio: 'Repository: lê, grava, atualiza e remove dados no banco ou armazenamento local.',
+  contratos: 'Schemas e tipos para entradas, saídas e validação de dados.',
+  api: 'Infraestrutura central de registro e validação dos canais IPC.',
+  regras: 'Serviços e regras de negócio existentes, a consolidar por ciclo funcional.',
+  banco: 'Repositórios existentes em JSON e SQLite, a consolidar por domínio.',
   integracoes: 'Conversa com serviços de fora (Jira, Qase, GitHub ou IA), sempre pelos endereços oficiais.',
-  tipos: 'Formato dos dados, listas fixas e limites. Não tem funções.',
+  tipos: 'Contratos existentes, listas e limites de cada domínio.',
   worker: 'O trabalhador que roda as rotinas sozinho, um trabalho por vez.',
   autorizacoes: 'Autorizações prévias e políticas aprovadas pela pessoa, com validade e limite de usos.',
   k6: 'Teste de desempenho com o executável oficial do k6, com limites e produção bloqueada.',
@@ -59,19 +63,32 @@ export const papeis = {
   servidor: 'Rotas HTTP desta área que rodam no Render; login e suporte continuam nas suas próprias pastas. Diferente dos canais IPC do Electron.',
 };
 
-/** Para cada canal da janela: o arquivo api/ que o atende e as funções do backend que ele chama (lidas dos imports). */
+/** Obtém o controlador real de cada canal IPC e documenta sua localização automaticamente. */
 export function gerarArquivosDosCanais() {
-  const linhas = [];
-  for (const rel of fs.readdirSync(raiz, { recursive: true }).map(String).filter((n) => /[\\/]api[\\/][^\\/]+\.ts$/.test(n) && !n.split(/[\\/]/).includes('node_modules'))) {
-    const arq = path.join(raiz, rel).split(path.sep).join('/'); const texto = fs.readFileSync(arq, 'utf8');
-    const canal = /TratadorDoCanal<'([a-z]+:[a-z]+)'>/.exec(texto)?.[1]; if (!canal) continue;
-    const chamadas = [...texto.matchAll(/^import \{ ([^}]+) \} from '\.[^']*';$/gm)].flatMap((m) => m[1].split(',').map((s) => s.trim())).filter((n) => n && n !== 'TratadorDoCanal' && !/^[A-Z]/.test(n));
-    linhas.push([canal, `  '${canal}': '${arq}${chamadas.length ? ' > ' + chamadas.join(', ') : ''}',`]);
+  const arquivos = fs.readdirSync(raiz, { recursive: true }).map(String)
+    .filter(n => path.basename(n).startsWith('controlador') && n.endsWith('.ts'));
+  const porFuncao = new Map();
+  for (const rel of arquivos) {
+    const caminho = path.join(raiz, rel).split(path.sep).join('/');
+    const texto = fs.readFileSync(caminho, 'utf8');
+    for (const m of texto.matchAll(/export (?:const|async function|function) ([A-Za-z][A-Za-z0-9_]*)/g)) {
+      if (porFuncao.has(m[1])) throw new Error('Controlador repetido: ' + m[1]);
+      porFuncao.set(m[1], caminho);
+    }
   }
-  linhas.sort((a, b) => a[0].localeCompare(b[0]));
-  return '/** Onde cada canal da janela é atendido: o arquivo da tela e as funções que ele chama. Gerado pelo catálogo da Documentação Viva; não edite à mão. */\nexport const arquivosDosCanais: Record<string, string> = {\n' + linhas.map((l) => l[1]).join('\n') + '\n};\n';
+  const registro = fs.readFileSync(path.join(raiz, 'aplicativo', 'api', 'registrarCanaisIpc.ts'), 'utf8');
+  const linhas = []; const vistos = new Set();
+  for (const m of registro.matchAll(/registrarCanal\('([a-z]+:[a-z]+)',\s*([A-Za-z][A-Za-z0-9_]*)\)/g)) {
+    const [, canal, nome] = m;
+    if (vistos.has(canal)) throw new Error('Canal repetido: ' + canal);
+    vistos.add(canal);
+    const arquivo = porFuncao.get(nome);
+    if (!arquivo) throw new Error('Canal sem controlador: ' + canal + ' -> ' + nome);
+    linhas.push([canal, "  '" + canal + "': '" + arquivo + " > " + nome + "',"]);
+  }
+  linhas.sort((a,b) => a[0].localeCompare(b[0]));
+  return '/** Local de atendimento de cada canal. Gerado automaticamente dos controladores. */\nexport const arquivosDosCanais: Record<string, string> = {\n' + linhas.map(l => l[1]).join('\n') + '\n};\n';
 }
-
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   const destino=path.join(raiz,'aplicativo','api','arquivosDosCanais.ts');

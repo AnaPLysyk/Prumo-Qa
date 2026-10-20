@@ -6,7 +6,7 @@ import path from 'node:path';
 import { arquivoDeTeste } from '../../../../dist/testes/regras/arquivoDeTeste.js';
 import { catalogoDeTestes } from '../../../../dist/testes/regras/catalogoDeTestes.js';
 import { classificarTeste as classificar } from '../../../../dist/testes/regras/classificarTeste.js';
-import { idsQase } from '../../../../dist/testes/regras/idsQase.js';
+import { idsQase } from '../../../../dist/testes/regras/anotarQase.js';
 
 // Repositório 100% sintético em diretório temporário: nada de projeto real.
 function repo(t, arquivos) {
@@ -91,7 +91,7 @@ test('anotações Qase não vazam entre cenários adjacentes', (t) => {
 
 test('rastreabilidade liga feature, cenário e Qase só no projeto anotado', async (t) => {
   const { fixture } = await import('../../infra/fixtures.mjs');
-  const { criarEspaco } = await import('../../../../dist/projetos/regras/criarEspaco.js'); const { vincularPastaAoEspaco: pastaEspaco } = await import('../../../../dist/projetos/regras/vincularPastaAoEspaco.js'); const { vincularServicoAoEspaco: gravarVinculo } = await import('../../../../dist/projetos/regras/vincularServicoAoEspaco.js');
+  const { criarEspaco } = await import('../../../../dist/projetos/regras/criarEspaco.js'); const { vincularPastaAoEspaco: pastaEspaco } = await import('../../../../dist/projetos/regras/vincularPastaDoDisco.js'); const { vincularServicoAoEspaco: gravarVinculo } = await import('../../../../dist/projetos/regras/vincularServicoAoEspaco.js');
   const { mapaDeVinculos } = await import('../../../../dist/testes/regras/mapaDeVinculos.js');
   const { randomUUID } = await import('node:crypto');
   const b = repo(t, {}), fx = await fixture(t);

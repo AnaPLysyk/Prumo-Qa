@@ -1,4 +1,4 @@
-// Garante a organização do backend: pasta por tela, canal IPC por arquivo, funções públicas sem colisões
+// Garante a organização do backend: pasta por tela, controlador por lógica, funções públicas sem colisões
 // e a primeira linha explicando em português o que o arquivo faz. Cada teste lista TODOS os arquivos com problema.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -55,7 +55,7 @@ test('backend: todo arquivo começa com uma frase em português dizendo o que fa
   assert.deepEqual(problemas, []);
 });
 
-test('backend: APIs mantêm um canal por arquivo; regras podem conter funções auxiliares coesas', () => {
+test('backend: controladores agrupam canais por lógica e mantêm funções públicas explícitas', () => {
   const problemas = [];
   for (const a of arquivos) {
     if (tabelas.includes(a) || a.includes('/tipos/')) continue;
@@ -71,7 +71,7 @@ test('backend: APIs mantêm um canal por arquivo; regras podem conter funções 
     if (!exportadas.length) problemas.push(`${a}: precisa exportar ao menos uma função, classe ou declaração nomeada`);
     const ehApi = a.includes('/api/');
     if (ehApi && exportadas.length !== 1) problemas.push(`${a}: API deve ter exatamente uma declaração exportada`);
-    if ((ehApi || exportadas.length === 1) && exportadas[0]?.nome !== base) {
+    if (!path.basename(a).startsWith('controlador') && (ehApi || exportadas.length === 1) && exportadas[0]?.nome !== base) {
       problemas.push(`${a}: a única exportação deve ter o nome do arquivo (${exportadas[0]?.nome ?? 'nenhuma'})`);
     }
     if (ehApi && d.some((x) => !x.exportado)) problemas.push(`${a}: canal IPC não pode ter declarações internas ocultas; delegue às regras`);
@@ -98,11 +98,20 @@ test('backend: cada função pública tem nome único, mesmo quando várias fica
   assert.deepEqual(problemas, []);
 });
 
-test('backend: cada canal da janela (IPC) é atendido por um arquivo api/ com o nome do canal', async () => {
+test('backend: cada canal IPC registrado possui controlador e contrato oficial', async () => {
   const { esquemasIpc } = await import('../../../../dist/aplicativo/api/catalogoDeContratos.js');
-  const nomeDoArquivo = (c) => { const [p, acao] = c.split(':'); return p + acao[0].toUpperCase() + acao.slice(1).replace('politica', 'Politica'); };
-  const apis = new Set(arquivos.filter((a) => a.includes('/api/')).map((a) => path.basename(a, '.ts')));
-  const problemas = Object.keys(esquemasIpc).filter((c) => !apis.has(nomeDoArquivo(c))).map((c) => `canal ${c} sem arquivo ${nomeDoArquivo(c)}.ts numa pasta api/`);
+  const registro = fs.readFileSync('backend/aplicativo/api/registrarCanaisIpc.ts', 'utf8');
+  const canais = [...registro.matchAll(/registrarCanal\('([a-z]+:[a-z]+)',\s*([A-Za-z][A-Za-z0-9_]*)\)/g)];
+  const controladores = arquivos.filter(a => /\/controlador[^/]*\.ts$/.test(a));
+  const funcoes = new Set(controladores.flatMap(a => declaracoes(a).filter(d => d.exportado).map(d => d.nome)));
+  const problemas = []; const usados = new Set();
+  for (const [, canal, nome] of canais) {
+    if (usados.has(canal)) problemas.push('canal repetido: ' + canal);
+    usados.add(canal);
+    if (!funcoes.has(nome)) problemas.push('sem controlador: ' + canal + ' -> ' + nome);
+    if (!(canal in esquemasIpc)) problemas.push('sem contrato IPC: ' + canal);
+  }
+  for (const canal of Object.keys(esquemasIpc)) if (!usados.has(canal)) problemas.push('sem registro: ' + canal);
   assert.deepEqual(problemas, []);
 });
 

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {contaEntrar} from '../../../../dist/login/api/contaEntrar.js';
+import {contaEntrar} from '../../../../dist/login/controladorSessao.js';
 import {entrarComIdentidadeRemota} from '../../../../dist/login/regras/entrarComIdentidadeRemota.js';
 import {encerrarSessao, contaDaSessao} from '../../../../dist/login/regras/sessao.js';
 import {sairRemotamente, validarSessaoRemota} from '../../../../dist/login/integracoes/autenticacaoRemota.js';

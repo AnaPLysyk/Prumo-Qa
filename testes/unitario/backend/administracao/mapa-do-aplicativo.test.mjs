@@ -8,11 +8,11 @@ import { gerarMapaDoAplicativo } from '../../../../docs/geradores/gerar-mapa-do-
 import { lerMapaDoAplicativo } from '../../../../dist/administracao/banco/lerMapaDoAplicativo.js';
 import { esquemasIpc } from '../../../../dist/aplicativo/api/catalogoDeContratos.js';
 
-test('mapa: cada canal IPC do catálogo aparece uma vez, na tela do seu arquivo api/, e sem código-fonte', () => {
+test('mapa: cada canal IPC do catálogo aparece uma vez, no controlador da sua tela, e sem código-fonte', () => {
   const mapa = gerarMapaDoAplicativo();
   const canais = mapa.telas.flatMap((t) => t.canais.map((c) => ({ ...c, tela: t.id })));
   assert.deepEqual(canais.map((c) => c.canal).sort(), Object.keys(esquemasIpc).sort());
-  for (const c of canais) { assert.ok(c.api.startsWith(`backend/${c.tela}/api/`), c.canal); assert.ok(fs.existsSync(c.api), c.api); }
+  for (const c of canais) { assert.ok(c.api.startsWith(`backend/${c.tela}/controlador`), c.canal); assert.ok(fs.existsSync(c.api), c.api); }
   assert.ok(!JSON.stringify(mapa).includes('"codigo"'), 'o mapa não leva o código-fonte');
   const agentes = mapa.telas.find((t) => t.id === 'agentes');
   assert.ok(agentes.frontend.some((a) => a.caminho === 'frontend/agentes/tela-agentes.parte.js'));

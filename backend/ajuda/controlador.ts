@@ -1,0 +1,41 @@
+/** Controlador da funcionalidade ajuda: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
+import path from "node:path";
+import { lerDocumentosDaAjuda } from "./regras/lerDocumentosDaAjuda.js";
+import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
+import { versao, arquivoVersoes, textoExclusao } from "../aplicativo/tipos/aplicativo.js";
+import { raizDoAplicativo } from "../compartilhado/raizDoAplicativo.js";
+import { catalogo } from "../aplicativo/api/catalogoDeContratos.js";
+import { apresentarVersoes } from "./versoes/apresentarVersoes.js";
+import { carregarVersoes } from "./versoes/carregarVersoes.js";
+import { conferirInstalada } from "./versoes/conferirInstalada.js";
+import { dialog, shell } from "electron";
+import { excluirTodosContextos } from "../agentes/banco/excluirTodosContextos.js";
+import { excluirEvidencias } from "../testes/banco/excluirEvidencias.js";
+import { excluirAtividades } from "../logs/banco/excluirAtividades.js";
+import { excluirDiagnostico } from "../logs/banco/excluirDiagnostico.js";
+import { projetoVinculado } from "../projetos/regras/projetoVinculado.js";
+import { resumirDados } from "./privacidade/resumirDados.js";
+
+export const ajudaDocumentos: TratadorDoCanal<'ajuda:documentos'> = () => lerDocumentosDaAjuda(path.join(raizDoAplicativo, 'docs', 'ajuda'), versao);
+
+export const ajudaIntegracoes: TratadorDoCanal<'ajuda:integracoes'> = () => catalogo();
+
+export const ajudaVersoes: TratadorDoCanal<'ajuda:versoes'> = () => { const v = carregarVersoes(arquivoVersoes); conferirInstalada(v, versao); return { installed: versao, versions: apresentarVersoes(v, versao) }; };
+
+export const dadosExcluir: TratadorDoCanal<'dados:excluir'> = async (a, janela) => {
+  const r = await dialog.showMessageBox(janela!, { type: 'warning', title: 'Confirmar exclusão', buttons: ['Cancelar', 'Excluir'], defaultId: 0, cancelId: 0, noLink: true,
+    message: textoExclusao[a.escopo], detail: 'Esta ação não pode ser desfeita. Código-fonte e demais arquivos do projeto não são tocados e o vínculo do projeto é mantido.' });
+  if (r.response !== 1) return { canceled: true, deleted: 0, failed: [] };
+  if (a.escopo === 'diagnostico') return { canceled: false, ...excluirDiagnostico() };
+  const p = await projetoVinculado(a.root);
+  return { canceled: false, ...(a.escopo === 'historico' ? excluirAtividades(p) : a.escopo === 'contextos' ? excluirTodosContextos(p) : await excluirEvidencias(p)) };
+};
+
+export const dadosResumo: TratadorDoCanal<'dados:resumo'> = () => resumirDados();
+
+export const siteAbrir: TratadorDoCanal<'site:abrir'> = async (_a, janela) => {
+  const url = 'https://prumo-qa-docs.onrender.com/';
+  const r = await dialog.showMessageBox(janela!, { type: 'question', title: 'Prumo QA', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true, message: 'Abrir o site oficial do Prumo QA no navegador?', detail: url });
+  if (r.response !== 1) return { opened: false };
+  await shell.openExternal(url); return { opened: true };
+};

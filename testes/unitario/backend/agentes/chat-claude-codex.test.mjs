@@ -4,9 +4,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { argumentosDoProvedorDeIa } from '../../../../dist/agentes/chat/argumentosDoProvedorDeIa.js';
+import { argumentosDoProvedorDeIa } from '../../../../dist/agentes/chat/consultarIaExterna.js';
 import { consultarIaExterna } from '../../../../dist/agentes/chat/consultarIaExterna.js';
-import { separarAprendizados } from '../../../../dist/agentes/chat/separarAprendizados.js';
+import { separarAprendizados } from '../../../../dist/agentes/chat/consultarIaExterna.js';
 
 const agente = { id: 'orquestrador', nome: 'Prumo', especializacao: null, dominio: 'Chat', palavras: [], aba: 'inicio', rotulo: 'Início' };
 const montar = (_a, coleta, modo, extra = {}) => ({ agente: { id: agente.id, nome: agente.nome, especializacao: null }, linhas: coleta.linhas, fontes: [], fatos: [], modo, estilo: 'direto', rota: [], proximos: [], acoes: extra.acoes ?? [], pendente: null, pessoa: null, continuou: false, ...(extra.aviso ? { aviso: extra.aviso } : {}) });
