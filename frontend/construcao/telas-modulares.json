@@ -37,7 +37,6 @@
         "frontend/logs/tela-logs.parte.js",
         "frontend/logs/eventos-e-detalhes.parte.js",
         "frontend/logs/filtros-e-atualizacao.parte.js",
-        "frontend/agentes/detalhes-da-atividade.parte.js",
         "frontend/metricas/tela-metricas.parte.js",
         "frontend/agentes/tela-agentes.parte.js",
         "frontend/agentes/cerebro-do-agente.parte.js",

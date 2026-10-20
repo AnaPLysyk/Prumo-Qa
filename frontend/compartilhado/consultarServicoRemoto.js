@@ -1,5 +1,6 @@
 'use strict';
 /** Consulta Jira, Qase ou GitHub e mostra o resultado paginado. */
+function classificacaoCaso(x){if(typeof x.isManual==='boolean')return x.isManual?(x.isToBeAutomated?'MANUAL · automação planejada':'MANUAL'):'AUTOMATIZADO';return ({0:'MANUAL',1:'MANUAL · automação planejada',2:'AUTOMATIZADO'})[x.automation]||'Classificação não informada pela API';}
 function tituloItem(x){return x.fields?.summary||x.title||x.name||x.key||x.id||x.hash||x.sha||'Item';}
 
 async function consultaManual(el,servico,operacoes){

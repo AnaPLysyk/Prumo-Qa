@@ -1,4 +1,5 @@
 /** Lista agentes, abre detalhes e edita permissoes. */
+  function detalhesAtividade(a) { caixa(tr('Detalhes da atividade'), [note(tr('Origem observada no núcleo; identidade do cliente é declarada.')), h('pre', {}, JSON.stringify(a, null, 2))]); }
   /** Número entre 0 e 1 para os efeitos visuais (meteoros); vem do gerador do navegador, não de Math.random. */
   const acaso = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
   const activityDetails = detalhesAtividade;

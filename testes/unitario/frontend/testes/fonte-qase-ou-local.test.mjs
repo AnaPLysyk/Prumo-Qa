@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,4 +45,15 @@ test('repositório Qase carrega páginas adicionais sem repetir casos nem escond
   assert.match(visao, /new Map\(\[\.\.\.src\.casos\.itens,\s*\.\.\.proxima\.itens\]/);
   assert.match(visao, /mem\.casos\s*=\s*\{\s*itens:/);
   assert.match(visao, /casos carregados do Qase/);
+});
+
+test('classificação Qase fica na consulta remota e respeita caso manual ou automatizado', () => {
+  const fonte = fs.readFileSync(path.join(raiz, 'frontend/compartilhado/consultarServicoRemoto.js'), 'utf8');
+  const classificar = vm.runInNewContext(fonte + '\nclassificacaoCaso;', {});
+  assert.equal(classificar({ isManual: true }), 'MANUAL');
+  assert.equal(classificar({ isManual: true, isToBeAutomated: true }), 'MANUAL · automação planejada');
+  assert.equal(classificar({ isManual: false }), 'AUTOMATIZADO');
+  assert.equal(classificar({ automation: 2 }), 'AUTOMATIZADO');
+  assert.equal(classificar({ automation: 0 }), 'MANUAL');
+  assert.equal(classificar({}), 'Classificação não informada pela API');
 });
