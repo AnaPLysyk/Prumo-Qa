@@ -6,8 +6,8 @@ import vm from 'node:vm';
 
 const scripts = [
   'frontend/projetos/selecionarProjeto.js',
-  'frontend/projetos/modais/criarEditarProjeto/abrirFormularioProjeto.js',
-  'frontend/projetos/modais/escolherRepositorioGithub/abrirRepositoriosGithub.js',
+  'frontend/projetos/modais/abrirFormularioProjeto.js',
+  'frontend/projetos/modais/abrirRepositoriosGithub.js',
   'frontend/projetos/componentes/montarVinculosProjeto.js',
   'frontend/projetos/componentes/montarSecaoProjeto.js',
   'frontend/projetos/componentes/montarDiagnosticoPasta.js',
@@ -89,8 +89,8 @@ test('componentes de Projetos carregam na ordem correta, antes da tela', () => {
   let anterior = -1;
   for (const caminho of [
     'telas/projetos/selecionarProjeto.js',
-    'telas/projetos/modais/criarEditarProjeto/abrirFormularioProjeto.js',
-    'telas/projetos/modais/escolherRepositorioGithub/abrirRepositoriosGithub.js',
+    'telas/projetos/modais/abrirFormularioProjeto.js',
+    'telas/projetos/modais/abrirRepositoriosGithub.js',
     'telas/projetos/componentes/montarVinculosProjeto.js',
     'telas/projetos/componentes/montarSecaoProjeto.js',
     'telas/projetos/componentes/montarDiagnosticoPasta.js',

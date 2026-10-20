@@ -32,7 +32,6 @@
         "frontend/agentes/retratos-dos-agentes.parte.js",
         "frontend/compartilhado/exportar-e-icones.parte.js",
         "frontend/agentes/conversa-do-orchestrator.parte.js",
-        "frontend/compartilhado/abrir-tela-pelo-orchestrator.parte.js",
         "frontend/agentes/orchestrator-flutuante.parte.js",
         "frontend/inicio/tela-inicio.parte.js",
         "frontend/logs/tela-logs.parte.js",

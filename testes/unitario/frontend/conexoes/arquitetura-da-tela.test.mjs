@@ -7,7 +7,7 @@ const base = 'frontend/conexoes/';
 const arquivos = [
   'componentes/apresentarProjetosQase.js',
   'componentes/mostrarPermissoesConexao.js',
-  'formularios/abrirFormularioConexao.js',
+  'abrirFormularioConexao.js',
   'mostrarConexoes.js',
   'mostrarOperacoesExternas.js',
   'mostrarIntegracoesDosAgentes.js'
@@ -41,7 +41,7 @@ test('scripts de Conexões carregam dependências antes da tela principal e dos 
 
 test('identidade do Prumo permanece separada das contas conectadas', () => {
   const principal = ler('mostrarConexoes.js');
-  const formulario = ler('formularios/abrirFormularioConexao.js');
+  const formulario = ler('abrirFormularioConexao.js');
   assert.doesNotMatch(principal + formulario, /contaEntrar\(|contaCadastrar\(|contaSair\(/);
   assert.match(formulario, /api\.servicoAdicionar\(/);
   assert.match(fs.readFileSync('backend/conexoes/banco/credenciais.ts','utf8'), /salvarCredencial/);

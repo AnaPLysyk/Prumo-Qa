@@ -1,5 +1,7 @@
 'use strict';
 /** Consulta Jira, Qase ou GitHub e mostra o resultado paginado. */
+function tituloItem(x){return x.fields?.summary||x.title||x.name||x.key||x.id||x.hash||x.sha||'Item';}
+
 async function consultaManual(el,servico,operacoes){
   const e=estado.espaco;if(!e)return el.append(faltaEspaco());const v=e.vinculos.find(v=>v.servico===servico);
   if(!v)return el.append(h('div',{class:'vazio'},'Serviço '+servico+' não vinculado a '+e.nome+'. Configure e selecione o recurso em Conexões.'));

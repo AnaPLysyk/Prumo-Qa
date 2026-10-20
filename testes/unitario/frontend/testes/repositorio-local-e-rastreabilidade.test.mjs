@@ -30,7 +30,7 @@ test('o catálogo não apaga as seções locais de casos e suítes', () => {
 });
 
 test('casos locais persistem no novo núcleo, não em propostas nem Qase', () => {
-  const c = read('frontend/testes/formularios/montarFormularioProposta.js');
+  const c = read('frontend/testes/montarFormularioProposta.js');
   assert.match(c, /const local = !e\.vinculos\.some\(v => v\.servico === 'qase'\)/);
   assert.match(c, /local \? api\.casoLocalSalvar\(/);
   assert.match(c, /suiteLocalId: suiteLocal\.value \|\| null/);

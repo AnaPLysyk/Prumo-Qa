@@ -7,8 +7,8 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../');
-const codigo = fs.readFileSync(path.join(raiz, 'frontend/testes/formularios/montarFormularioProposta.js'), 'utf8');
-const botaoReal = fs.readFileSync(path.join(raiz, 'frontend/compartilhado/criarBotaoAcao.js'), 'utf8');
+const codigo = fs.readFileSync(path.join(raiz, 'frontend/testes/montarFormularioProposta.js'), 'utf8');
+const botaoReal = fs.readFileSync(path.join(raiz, 'frontend/compartilhado/componentesDeFormulario.js'), 'utf8');
 
 function montarContexto() {
   const chamadas = []; const avisos = []; let concluidos = 0;

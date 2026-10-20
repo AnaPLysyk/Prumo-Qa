@@ -1,4 +1,7 @@
-/** Abre, fecha e posiciona a conversa flutuante. */
+/** Conversa flutuante dos agentes: navegação, abertura e posicionamento. */
+  function abrirTela(aba) { if (!document.body.classList.contains('v36-encaixado')) flutuante?.fechar(true); void mostrar(aba); }
+
+  // ---------------- Orchestrator flutuante (robô original, balão contextual, painel e lateral) ----------------
   const DICAS = {
     metricas: ['Quer explorar um gráfico ou comparar períodos?', 'Posso te ajudar a interpretar estas métricas.'],
     logs: ['Precisa investigar uma falha nos logs?', 'Posso te ajudar a localizar a etapa com problema.'],

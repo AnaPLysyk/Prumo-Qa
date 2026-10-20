@@ -9,7 +9,7 @@ import vm from 'node:vm';
 const raiz=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../../../');
 const fonte=readFileSync(path.join(raiz,'frontend/conexoes/componentes/apresentarProjetosQase.js'),'utf8')+'\n'+
   readFileSync(path.join(raiz,'frontend/conexoes/componentes/mostrarPermissoesConexao.js'),'utf8')+'\n'+
-  readFileSync(path.join(raiz,'frontend/conexoes/formularios/abrirFormularioConexao.js'),'utf8')+'\n'+
+  readFileSync(path.join(raiz,'frontend/conexoes/abrirFormularioConexao.js'),'utf8')+'\n'+
   readFileSync(path.join(raiz,'frontend/conexoes/mostrarConexoes.js'),'utf8')+'\n'+
   readFileSync(path.join(raiz,'frontend/conexoes/mostrarOperacoesExternas.js'),'utf8')+'\n'+
   readFileSync(path.join(raiz,'frontend/conexoes/mostrarIntegracoesDosAgentes.js'),'utf8');
