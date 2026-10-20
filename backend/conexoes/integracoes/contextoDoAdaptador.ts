@@ -3,7 +3,7 @@ import { ContextoServico, PartesDoAdaptador } from '../tipos/adaptador.js';
 import { cabecalhosDoServico } from './cabecalhosDoServico.js';
 import { ErroServico } from './ErroServico.js';
 import { lerComCredencial } from './lerComCredencial.js';
-import { limparRespostaDoServico } from './limparRespostaDoServico.js';
+import { limparRespostaDoServico } from '../integracoesFormatos.js';
 
 export function contextoDoAdaptador(a: PartesDoAdaptador): ContextoServico {
   const c = a.c;

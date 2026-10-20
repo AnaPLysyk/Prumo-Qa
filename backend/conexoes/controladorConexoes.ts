@@ -4,7 +4,7 @@ import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { aplicarConexao } from "./ia/aplicarConexao.js";
 import { prepararConexao } from "./ia/prepararConexao.js";
 import { projetoVinculado } from "../projetos/servicoProjetos.js";
-import { testarIntegracao } from "./ia/testarIntegracao.js";
+import { testarIntegracao } from "./servicoIaDiagnostico.js";
 import { catalogoOperacoes } from "./escrita/catalogoOperacoes.js";
 import { permissoesDoEspaco } from "./escrita/permissoesDoEspaco.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
@@ -18,7 +18,7 @@ import { prepararOperacao } from "./escrita/prepararOperacao.js";
 import { servicosDoAplicativo } from "./regras/servicosDoAplicativo.js";
 import { obterEspaco } from "../projetos/repositorio.js";
 import { resolverAnexo } from "../tickets/servicoPropostas.js";
-import { listarOperacoes } from "./banco/listarOperacoes.js";
+import { listarOperacoes } from "./repositorioOperacoes.js";
 import { situacaoDasConexoesDeIa } from "./ia/situacaoDasConexoesDeIa.js";
 
 // Alterar configuração de outro programa exige uma caixa de confirmação nativa, que a página não consegue simular.

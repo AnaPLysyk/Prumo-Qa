@@ -2,8 +2,8 @@
 import { consumirPoliticaEscrita } from '../../agendamentos/autorizacoes/politicasDaAutorizacao.js';
 import { OPERACOES_AGENDAVEIS } from '../../agendamentos/tipos/autorizacoes.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { gravarRegistroDaOperacao } from '../banco/gravarRegistroDaOperacao.js';
-import { lerRegistroDeOperacoes } from '../banco/armazenamentoDeOperacoes.js';
+import { gravarRegistroDaOperacao } from '../repositorioOperacoes.js';
+import { lerRegistroDeOperacoes } from '../repositorioOperacoes.js';
 import { chaveDaOperacao } from './chaveDaOperacao.js';
 
 import { escritaHabilitada } from './escritaHabilitada.js';

@@ -1,11 +1,11 @@
 /** Lista, página por página, os projetos (Jira, Qase) ou repositórios (GitHub) que a conta enxerga. */
 import { z } from 'zod';
-import { parametrosDaUrl } from './parametrosDaUrl.js';
+import { parametrosDaUrl } from '../integracoesFormatos.js';
 import { PartesDoAdaptador, objetos, paginaQase } from '../tipos/adaptador.js';
 import { paginaSchema } from '../tipos/transporte.js';
 import { ErroServico } from './ErroServico.js';
 import { lerComCredencial } from './lerComCredencial.js';
-import { recursoDaResposta } from './recursoDaResposta.js';
+import { recursoDaResposta } from '../integracoesFormatos.js';
 
 export async function listarRecursosDoServico(a: PartesDoAdaptador, pagina: z.input<typeof paginaSchema> = {}) {
   const p = paginaSchema.parse(pagina);

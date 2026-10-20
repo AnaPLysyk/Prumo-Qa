@@ -10,7 +10,7 @@ import { Protetor } from '../tipos/credenciais.js';
 import { Filtros } from '../tipos/leituras.js';
 import { TransporteEscrita, TransporteServico, paginaSchema } from '../tipos/transporte.js';
 import { Recurso, Servico } from '../../projetos/contratos.js';
-import { adicionarConta } from './adicionarConta.js';
+import { adicionarConta } from '../servicoContas.js';
 import { importarProjetosQase } from './importarProjetosQase.js';
 
 
@@ -24,16 +24,16 @@ import { importarProjetosQase } from './importarProjetosQase.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
 import { vincularServicoAoEspaco } from '../../projetos/servicoProjetos.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
-import { adaptadorDaConta } from './adaptadorDaConta.js';
-import { contaAtiva } from './contaAtiva.js';
-import { verificarVinculoDoServico } from './verificarVinculoDoServico.js';
+import { adaptadorDaConta } from '../servicoContas.js';
+import { contaAtiva } from '../servicoContas.js';
+import { verificarVinculoDoServico } from '../servicoContas.js';
 import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
 import { lerContasDeServico } from '../banco/contasDeServico.js';
 import { listarEspacos } from '../../projetos/repositorio.js';
 import { atualizarEstadoDoVinculo } from '../../projetos/servicoProjetos.js';
 import { registrarConsultaExterna } from '../../projetos/servicoProjetos.js';
-import { codigoDoErroDeServico } from './codigoDoErroDeServico.js';
-import { vinculoDoServico } from './vinculoDoServico.js';
+import { codigoDoErroDeServico } from '../servicoContas.js';
+import { vinculoDoServico } from '../servicoContas.js';
 import { configurarAceite } from '../../projetos/servicoProjetos.js';
 
 async function comentarNoJira(c: ContextoDosServicos, espacoId: string, ticket: string, adf: unknown) {

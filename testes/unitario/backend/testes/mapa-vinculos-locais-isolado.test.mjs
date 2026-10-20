@@ -22,7 +22,7 @@ mock.module('../../../../dist/testes/regras/listarRepositorioLocal.js', { export
 mock.module('../../../../dist/tickets/repositorio.js', { exports: { listarPropostas: id => {
   assert.equal(id, espacoId); return [ticket];
 } } });
-mock.module('../../../../dist/conexoes/banco/listarOperacoes.js', { exports: { listarOperacoes: () => [] } });
+mock.module('../../../../dist/conexoes/repositorioOperacoes.js', { exports: { listarOperacoes: () => [] } });
 mock.module('../../../../dist/testes/banco/listarRunsLocais.js', { exports: { listarRunsLocais: () => [] } });
 mock.module('../../../../dist/agendamentos/repositorioFila.js', { exports: { listarTrabalhos: () => [] } });
 mock.module('../../../../dist/testes/regras/catalogoDeTestes.js', { exports: { catalogoDeTestes: () => { throw new Error('Não pode consultar projeto real'); } } });

@@ -10,16 +10,16 @@ import { consultarCamposTipoJira } from './detalhesJira.js';
 import { consultarTransicoesJira } from './detalhesJira.js';
 import { consultarAnexosJira } from './detalhesJira.js';
 import { consultarHistoricoJira } from './detalhesJira.js';
-import { consultarPlanoQase } from './detalhesQase.js';
-import { consultarCamposSistemaQase } from './detalhesQase.js';
-import { consultarArquivosGithub } from './consultarArquivosGithub.js';
-import { consultarWorkflowsGithub } from './detalhesGithub.js';
-import { consultarJobsGithub } from './detalhesGithub.js';
-import { consultarArtefatosGithub } from './detalhesGithub.js';
-import { consultarRevisoesGithub } from './detalhesGithub.js';
-import { consultarCommitGithub } from './detalhesGithub.js';
-import { consultarIssuesGithub } from './consultarIssuesGithub.js';
-import { consultarAmbientesQase, consultarCamposPersonalizadosQase, consultarMarcosQase } from './consultarCadastrosQase.js';
+import { consultarPlanoQase } from '../integracoesQase.js';
+import { consultarCamposSistemaQase } from '../integracoesQase.js';
+import { consultarArquivosGithub } from '../integracoesGithub.js';
+import { consultarWorkflowsGithub } from '../integracoesGithub.js';
+import { consultarJobsGithub } from '../integracoesGithub.js';
+import { consultarArtefatosGithub } from '../integracoesGithub.js';
+import { consultarRevisoesGithub } from '../integracoesGithub.js';
+import { consultarCommitGithub } from '../integracoesGithub.js';
+import { consultarIssuesGithub } from '../integracoesGithub.js';
+import { consultarAmbientesQase, consultarCamposPersonalizadosQase, consultarMarcosQase } from '../integracoesQase.js';
 import { Recurso } from '../../projetos/contratos.js';
 
 export async function lerDetalheDoServico(ctx: ContextoServico, rec: Recurso, op: OperacaoExtra, p: Pg, id?: string, f: Filtros = {}): Promise<ResultadoConsulta> {

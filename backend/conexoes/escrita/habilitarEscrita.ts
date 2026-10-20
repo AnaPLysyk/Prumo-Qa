@@ -1,6 +1,6 @@
 /** Liga ou desliga a escrita de um serviço no projeto, registrando quem fez. */
 import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
-import { lerPermissoesDeEscrita } from '../banco/lerPermissoesDeEscrita.js';
+import { lerPermissoesDeEscrita } from '../repositorioOperacoes.js';
 import { permSchema } from '../tipos/operacoesExternas.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
 import { Servico } from '../../projetos/contratos.js';

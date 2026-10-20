@@ -10,7 +10,7 @@ import { anexar, comentar, criar, editar, tipos, transicionar, vincular } from "
 import { marcadorDaOperacao } from "../conexoes/escrita/marcadorDaOperacao.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { ErroServico } from "../conexoes/integracoes/ErroServico.js";
-import { textoEntreAspasJql } from "../conexoes/integracoes/textoEntreAspasJql.js";
+import { textoEntreAspasJql } from "../conexoes/integracoesFormatos.js";
 import { Filtros } from "../conexoes/tipos/leituras.js";
 import fs from "node:fs";
 

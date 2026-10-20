@@ -1,11 +1,13 @@
-/** Lê os registros dos testes de integração já feitos. */
-import fs from 'node:fs';
-import path from 'node:path';
-import { hash } from '../../compartilhado/seguranca/hash.js';
-import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { pastaDosTestesDeIntegracao } from './pastaDosTestesDeIntegracao.js';
-import { Registro, registroSchema } from '../tipos/integracaoIa.js';
+/** Persistência de conexoes: operações relacionadas no mesmo módulo. */
+import path from "node:path";
+import { hash } from "../compartilhado/seguranca/hash.js";
+import { Projeto } from "../compartilhado/tipos/projeto.js";
+import { pastaAtividades } from "../logs/banco/pastaAtividades.js";
+import fs from "node:fs";
+import { semLinks } from "../compartilhado/seguranca/semLinks.js";
+import { Registro, registroSchema } from "./tipos/integracaoIa.js";
+
+export function pastaDosTestesDeIntegracao(p: Projeto) { return path.resolve(pastaAtividades(p), '..', '..', 'integracoes', hash(p.raiz + '\0' + p.manifesto.id)); }
 
 export function registrosIntegracao(p: Projeto) {
   const dir = pastaDosTestesDeIntegracao(p); semLinks(dir);

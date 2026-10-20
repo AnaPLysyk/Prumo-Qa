@@ -1,10 +1,18 @@
-/** Consulta milestones, ambientes e campos personalizados do projeto Qase vinculado, para preencher run e defeito. */
-import { z } from 'zod';
-import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
-import { ParametrosConsulta } from '../tipos/ParametrosConsulta.js';
-import { ResultadoConsulta } from '../tipos/ResultadoConsulta.js';
+/** Lógica e contratos de conexoes: operações relacionadas no mesmo módulo. */
+import { z } from "zod";
+import { codificarParaUrl } from "../compartilhado/texto/codificarParaUrl.js";
+import { ParametrosConsulta } from "./tipos/ParametrosConsulta.js";
+import { ResultadoConsulta } from "./tipos/ResultadoConsulta.js";
+import { camposDeSistema } from "../testes/integracoes/camposDeSistema.js";
+import { parametrosDaUrl, idNumericoDaConsulta } from "./integracoesFormatos.js";
+import { Recurso } from "../projetos/contratos.js";
+import { OperacaoServico, PlanoDaConsulta } from "./tipos/adaptador.js";
+import { Filtros } from "./tipos/leituras.js";
+import { paginaSchema } from "./tipos/transporte.js";
+import { ErroServico } from "./integracoes/ErroServico.js";
 
 const pagina = <T extends z.ZodTypeAny>(item: T) => z.object({ result: z.object({ entities: z.array(item).default([]), total: z.number().optional(), filtered: z.number().optional() }).passthrough() }).passthrough();
+
 const pg = (p: ParametrosConsulta['p']) => `limit=${Math.min(100, p.limite)}&offset=${p.offset}`;
 
 export async function consultarMarcosQase({ ctx, rec, p, prox }: ParametrosConsulta): Promise<ResultadoConsulta | null> {
@@ -32,4 +40,25 @@ export async function consultarCamposPersonalizadosQase({ ctx, rec, p, f, prox }
   const doProjeto = r.result.entities.filter(c => c.is_enabled_for_all_projects || (c.projects_codes ?? []).includes(rec.chave));
   const opcoes = (v: string | null | undefined) => { try { const l = JSON.parse(v ?? ''); return Array.isArray(l) ? l.filter(o => o && (typeof o.id === 'number' || typeof o.id === 'string')).map(o => ({ id: String(o.id), titulo: String(o.title ?? o.id) })) : null; } catch { return null; } };
   return { dados: doProjeto.map(c => ({ id: c.id, titulo: c.title, tipo: c.type ?? null, obrigatorio: c.is_required === true, padrao: c.default_value ?? null, dica: c.placeholder ?? null, opcoes: opcoes(c.value), entidade })), proxima: prox(r.result.entities.length), endpoint: '/v1/custom_field' };
+}
+
+export async function consultarCamposSistemaQase(parametros: ParametrosConsulta): Promise<ResultadoConsulta | null> {
+  const { ctx } = parametros;
+  if (ctx.servico !== 'qase') return null; return { dados: await camposDeSistema(ctx), proxima: null, endpoint: '/v1/system_field' };
+}
+
+export async function consultarPlanoQase(parametros: ParametrosConsulta): Promise<ResultadoConsulta | null> {
+  const { ctx, rec, numero } = parametros;
+  if (ctx.servico !== 'qase') return null; const r = z.object({ result: z.record(z.unknown()) }).passthrough().parse(await ctx.ler(`/v1/plan/${codificarParaUrl(rec.chave)}/${numero()}`)); return { dados: ctx.limpar(r.result), proxima: null, endpoint: '/v1/plan/{code}/{id}' };
+}
+
+export function planoDaConsultaQase(r: Recurso, operacao: OperacaoServico, p: z.output<typeof paginaSchema>, id?: string, filtros?: Filtros): PlanoDaConsulta {
+  if (!/^[A-Z][A-Z0-9]{1,9}$/.test(r.chave) || r.id !== r.chave) throw new ErroServico('SERVICE_SCOPE_CHANGED');
+  const mapa: Partial<Record<OperacaoServico, string>> = { defeitos: 'defect', defeito: 'defect', suites: 'suite', casos: 'case', caso: 'case', planos: 'plan', runs: 'run', run: 'run', resultados: 'result' };
+  const tipo = mapa[operacao]; if (!tipo) throw new ErroServico('SERVICE_WRITE_BLOCKED');
+  const detalhe = operacao === 'caso' || operacao === 'run' || operacao === 'defeito';
+  const statusDefeito = operacao === 'defeitos' && filtros?.status ? z.enum(['open', 'resolved', 'in_progress', 'invalid']).safeParse(filtros.status) : null;
+  if (statusDefeito && !statusDefeito.success) throw new ErroServico('SERVICE_RESPONSE_INVALID');
+  const endpoint = '/v1/' + tipo + '/' + codificarParaUrl(r.chave) + (detalhe ? '/' + idNumericoDaConsulta(id) : '') + '?' + parametrosDaUrl({ offset: detalhe ? undefined : p.offset, limit: detalhe ? undefined : p.limite, status: statusDefeito?.success ? statusDefeito.data : undefined, include: operacao === 'casos' || operacao === 'caso' ? 'external_issues' : undefined, run: operacao === 'resultados' && id ? idNumericoDaConsulta(id) : undefined });
+  return { endpoint, envelope: detalhe ? 'qase-item' : 'qase-page' };
 }

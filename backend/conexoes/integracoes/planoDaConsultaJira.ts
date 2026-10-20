@@ -1,7 +1,7 @@
 /** Monta a consulta no Jira (tickets com filtros, campos, um ticket ou seus comentários); ticket de outro projeto é recusado. */
 import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
-import { parametrosDaUrl } from './parametrosDaUrl.js';
+import { parametrosDaUrl } from '../integracoesFormatos.js';
 import { Recurso } from '../../projetos/contratos.js';
 import { jqlDeTickets } from '../../tickets/integracoesJira.js';
 import { OperacaoServico, PartesDoAdaptador, PlanoDaConsulta, obj } from '../tipos/adaptador.js';
@@ -9,7 +9,7 @@ import { Filtros } from '../tipos/leituras.js';
 import { paginaSchema } from '../tipos/transporte.js';
 import { ErroServico } from './ErroServico.js';
 import { lerComCredencial } from './lerComCredencial.js';
-import { saidaDaConsulta } from './saidaDaConsulta.js';
+import { saidaDaConsulta } from '../integracoesFormatos.js';
 
 export async function planoDaConsultaJira(a: PartesDoAdaptador, r: Recurso, operacao: OperacaoServico, p: z.output<typeof paginaSchema>, id?: string, campoAceite?: string, filtros?: Filtros): Promise<PlanoDaConsulta | { pronto: ReturnType<typeof saidaDaConsulta> }> {
   const fields = 'id,key,summary,description,issuetype,status,priority,assignee,reporter,labels,created,parent,subtasks,updated,issuelinks,project' + (campoAceite ? ',' + campoAceite : '');

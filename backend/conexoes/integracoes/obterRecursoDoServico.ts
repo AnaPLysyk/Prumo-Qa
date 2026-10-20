@@ -3,7 +3,7 @@ import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js'
 import { PartesDoAdaptador, itemQase } from '../tipos/adaptador.js';
 import { ErroServico } from './ErroServico.js';
 import { lerComCredencial } from './lerComCredencial.js';
-import { recursoDaResposta } from './recursoDaResposta.js';
+import { recursoDaResposta } from '../integracoesFormatos.js';
 
 export async function obterRecursoDoServico(a: PartesDoAdaptador, id: string) {
   try {
