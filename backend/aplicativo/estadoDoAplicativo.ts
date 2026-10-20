@@ -1,6 +1,8 @@
-/** O que muda enquanto o aplicativo está aberto: janela, ícone da bandeja, encerramento, último aviso e a última versão verificada. */
-import { BrowserWindow, Tray } from 'electron';
+/** estadoDoAplicativo: mantém reunidas as operações do mesmo fluxo. */
+import { BrowserWindow, Tray } from "electron";
+import { Aviso } from "./tipos/aplicativo.js";
 
+// estadoDoAplicativo — responsabilidade integrada
 export const estadoDoAplicativo = {
   ultimaRelease: (undefined) as string | undefined,
   ultimaVersao: (undefined) as string | undefined,
@@ -10,3 +12,8 @@ export const estadoDoAplicativo = {
   saindo: false,
   avisouBandeja: false,
 };
+
+// avisos — responsabilidade integrada
+export const avisosDaJanela: Aviso[] = [];
+
+export function empilharAviso(a: Omit<Aviso, 'n' | 'at'>) { avisosDaJanela.push({ ...a, n: ++estadoDoAplicativo.contadorAviso, at: new Date().toISOString() }); if (avisosDaJanela.length > 100) avisosDaJanela.shift(); }

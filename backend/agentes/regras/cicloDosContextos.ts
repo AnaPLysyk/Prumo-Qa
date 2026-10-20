@@ -6,7 +6,7 @@ import { abrirProjetoVinculado } from "../../projetos/servicoProjetos.js";
 import { obterContexto } from "./consultasDeContextos.js";
 import { ErroQa } from "../../compartilhado/erros.js";
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
-import { novaVersaoDoContexto, ultimaVersaoDoContexto, hashDoConteudoDoContexto } from "./validacoesDeContexto.js";
+import { novaVersaoDoContexto, ultimaVersaoDoContexto, hashDoConteudoDoContexto } from "../banco/contextos.js";
 import { Arquivo, conteudoSchema, limites, Entrada } from "../tipos/contexto.js";
 import { hash } from "../../compartilhado/seguranca/hash.js";
 

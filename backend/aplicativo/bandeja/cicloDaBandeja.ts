@@ -1,6 +1,6 @@
 /** cicloDaBandeja: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { workerDoAplicativo } from "../../agendamentos/worker/workerDoAplicativo.js";
-import { empilharAviso } from "../avisos/avisos.js";
+import { empilharAviso } from "../estadoDoAplicativo.js";
 import { estadoDoAplicativo } from "../estadoDoAplicativo.js";
 import { idiomaAtual } from "../../configuracoes/servico.js";
 import { nativeImage, Tray, Menu, app, dialog } from "electron";

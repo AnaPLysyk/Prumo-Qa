@@ -10,7 +10,7 @@ import { exigirCapacidade } from "../servicoPoliticas.js";
 import { MeiosDoServidorMcp } from "../tipos/mcp.js";
 import { projetoAindaVinculado, contaAutorizadaMcp, conferirAcessoMcp } from "./segurancaDaSessao.js";
 import { registrarConsultarEvidencias, registrarContextoProjeto, registrarExecutarValidacao, registrarListarPoliticas, registrarRevisarCobertura, respostaDaFerramentaMcp } from "./consultasDoProjeto.js";
-import { registrarProporAprendizado, registrarProporBug, registrarProporCaso, registrarRoteirosMcp } from "../servicoPropostasMcp.js";
+import { registrarProporAprendizado, registrarProporBug, registrarProporCaso, registrarRoteirosMcp } from "./consultasDoProjeto.js";
 import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from "../../compartilhado/banco/diretorioDados.js";
 
 // --- transporteObservado ---

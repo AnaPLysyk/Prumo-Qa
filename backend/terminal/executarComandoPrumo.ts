@@ -2,7 +2,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { contextoCompleto } from '../agentes/mcp/consultasDoProjeto.js';
-import { textoDoPrompt } from '../agentes/servicoPropostasMcp.js';
+import { textoDoPrompt } from '../agentes/mcp/consultasDoProjeto.js';
 import { promptsPrumo } from '../agentes/tipos/roteiros.js';
 import { carregarProjeto } from '../compartilhado/projeto/carregarProjeto.js';
 import { Projeto } from '../compartilhado/projeto/contratos.js';

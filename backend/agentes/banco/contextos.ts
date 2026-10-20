@@ -1,4 +1,4 @@
-/** Cria, lê, valida, remove e grava versões dos contextos e suas permissões de compartilhamento. */
+/** contextos: mantém reunidas as operações do mesmo fluxo. */
 import path from "node:path";
 import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";
 import { ErroQa } from "../../compartilhado/erros.js";
@@ -6,10 +6,11 @@ import { hash } from "../../compartilhado/seguranca/hash.js";
 import { semLinks } from "../../compartilhado/seguranca/semLinks.js";
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
 import fs from "node:fs";
-import { hashDoConteudoDoContexto, seloDaVersaoDoContexto, idDeContextoValido, ultimaVersaoDoContexto } from "../regras/validacoesDeContexto.js";
-import { Arquivo, arquivoSchema, limites, configSchema } from "../tipos/contexto.js";
+import { Arquivo, arquivoSchema, limites, configSchema, Conteudo, Entrada, Estado } from "../tipos/contexto.js";
 import { randomUUID } from "node:crypto";
+import { z } from "zod";
 
+// contextos — responsabilidade integrada
 export function pastaContextos(p: Projeto, base?: string): string {
   const dados = diretorioDados(base); const alvo = path.resolve(dados, 'contextos', hash(p.raiz + '\0' + p.manifesto.id));
   const r = path.relative(p.raiz, alvo); if (!r || (!r.startsWith('..') && !path.isAbsolute(r))) throw new ErroQa('CONTEXT_INSIDE_PROJECT', 'Contextos não podem ficar dentro do projeto.');
@@ -162,4 +163,41 @@ export function gravarPermissaoDeContextosNoMcp(
   const arquivo = path.join(pastaContextos(projeto, base), 'config.json');
   gravarArquivoDeContexto(arquivo, { version: 1, disponibilizarAoMcp });
   return { disponibilizarAoMcp };
+}
+
+// validacoesDeContexto — responsabilidade integrada
+export const idDeContextoValido = (id: string) => z.string().uuid().safeParse(id).success;
+
+export const hashDoConteudoDoContexto = (conteudo: Conteudo) =>
+  hash(JSON.stringify([
+    conteudo.tipo, conteudo.titulo, conteudo.texto, conteudo.chave ?? null,
+    conteudo.origem.tipo, conteudo.origem.referencia
+  ]));
+
+export const seloDaVersaoDoContexto = (entrada: Omit<Entrada, 'selo'>) =>
+  hash(JSON.stringify([
+    entrada.anterior, entrada.conteudoHash, entrada.acao, entrada.estado,
+    entrada.em, entrada.por, entrada.versao, entrada.detalhe ?? null
+  ]));
+
+export const ultimaVersaoDoContexto = (arquivo: Arquivo) =>
+  arquivo.historico.at(-1)!;
+
+export function novaVersaoDoContexto(
+  acao: Entrada['acao'],
+  estado: Estado,
+  conteudo: Conteudo,
+  por: string,
+  anterior: Entrada | null,
+  detalhe?: Entrada['detalhe']
+): Entrada {
+  const entrada = {
+    versao: (anterior?.versao ?? 0) + 1,
+    em: new Date().toISOString(),
+    acao, estado, por: por.slice(0, 100), conteudo,
+    conteudoHash: hashDoConteudoDoContexto(conteudo),
+    ...(detalhe ? { detalhe } : {}),
+    anterior: anterior?.selo ?? null
+  };
+  return { ...entrada, selo: seloDaVersaoDoContexto(entrada) };
 }

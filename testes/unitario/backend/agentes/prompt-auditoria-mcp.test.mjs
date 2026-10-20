@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { registrarRoteirosMcp } from '../../../../dist/agentes/servicoPropostasMcp.js';
-import { textoDoPrompt } from '../../../../dist/agentes/servicoPropostasMcp.js';
+import { registrarRoteirosMcp } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
+import { textoDoPrompt } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
 
 test('auditar-codigo orienta revisão independente sem escrita', () => {
   const texto = textoDoPrompt('auditar-codigo', {area:'backend/login'});

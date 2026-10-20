@@ -6,7 +6,7 @@ import { estadoDoAplicativo } from "../estadoDoAplicativo.js";
 import { origemPermitida, rendererDir } from "../tipos/aplicativo.js";
 import { raizDoAplicativo } from "../../compartilhado/raizDoAplicativo.js";
 import { idiomaAtual } from "../../configuracoes/servico.js";
-import { empilharAviso } from "../avisos/avisos.js";
+import { empilharAviso } from "../estadoDoAplicativo.js";
 
 // --- controleDaJanela ---
 // ── criarJanela ──

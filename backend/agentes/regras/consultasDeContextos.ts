@@ -1,7 +1,7 @@
 /** consultasDeContextos: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
 import { carregarTodosOsContextos, lerPermissaoDeContextosNoMcp } from "../banco/contextos.js";
-import { ultimaVersaoDoContexto } from "./validacoesDeContexto.js";
+import { ultimaVersaoDoContexto } from "../banco/contextos.js";
 import { Filtro, Arquivo, Estado, Resumo, ehInstrucao, limites } from "../tipos/contexto.js";
 import { abrirProjetoVinculado } from "../../projetos/servicoProjetos.js";
 import { ErroQa } from "../../compartilhado/erros.js";

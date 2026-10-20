@@ -1,5 +1,5 @@
 /** Os roteiros (prompts MCP) do Prumo e suas regras comuns. */
-import { valorOuPadrao } from '../mcp/consultasDoProjeto.js';
+import { valorOuPadrao } from '../../compartilhado/texto.js';
 
 /**
  * Prompts do Prumo: roteiros reutilizáveis que o cliente MCP mostra como comandos (por exemplo /prumo:investigar-falha)

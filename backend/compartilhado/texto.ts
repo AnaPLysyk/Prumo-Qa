@@ -12,3 +12,7 @@ export const dataEmPortugues = (iso: string | null | undefined) => (iso ? new Da
 /** Deixa o texto em minúsculas e sem acentos para comparar palavras. */
 
 export const semAcentos = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+/** Texto curto da pessoa ou padrão explícito, com limite de 300 caracteres. */
+export const valorOuPadrao = (valor: string | undefined, padrao: string) =>
+  valor && valor.trim() ? valor.trim().slice(0, 300) : padrao;

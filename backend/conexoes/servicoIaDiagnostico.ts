@@ -1,15 +1,12 @@
-/** Diagnóstico das conexões de IA: status, inspeção e teste do protocolo. */
+/** servicoIaDiagnostico: mantém reunidas as operações do mesmo fluxo. */
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
-import { prepararConexao } from "./ia/conectarIa.js";
+import { prepararConexao, Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools } from "./ia/conectarIa.js";
 import { projetoVinculado } from "../projetos/servicoProjetos.js";
-
-import { Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools } from "./ia/conectarIa.js";
 import fs from "node:fs";
 import path from "node:path";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import { Projeto } from "../compartilhado/projeto/contratos.js";
-import { registrosIntegracao, pastaDosTestesDeIntegracao } from "./banco/integracoes.js";
-import { consultarAtividades } from "../logs/regras/iniciarAtividade.js";
+import { consultarAtividades, pastaAtividades } from "../logs/regras/iniciarAtividade.js";
 import { spawnSync } from "node:child_process";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -17,6 +14,7 @@ import { randomUUID } from "node:crypto";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
 
+// servicoIaDiagnostico — responsabilidade integrada
 // situacaoDasConexoesDeIa — responsabilidade deste trecho
 /** Propõe a configuração; nada é alterado aqui. */
 export async function situacaoDasConexoesDeIa(raiz: string) {
@@ -162,4 +160,27 @@ export function mesmoCaminho(valor: unknown, esperado: string): boolean {
   return typeof valor === 'string' &&
     path.isAbsolute(valor) &&
     caminhoNormalizado(valor) === caminhoNormalizado(esperado);
+}
+
+// integracoes — responsabilidade integrada
+export function pastaDosTestesDeIntegracao(p: Projeto) { return path.resolve(pastaAtividades(p), '..', '..', 'integracoes', hash(p.raiz + '\0' + p.manifesto.id)); }
+
+export function registrosIntegracao(p: Projeto) {
+  const dir = pastaDosTestesDeIntegracao(p); semLinks(dir);
+  if (!fs.existsSync(dir)) return { records: [] as Registro[], problems: 0 };
+  const nomes = fs.readdirSync(dir).filter(n => /^[a-f0-9-]{36}\.json$/.test(n));
+  if (nomes.length > 1000) throw new Error('INTEGRATION_LIMIT');
+  const records: Registro[] = []; let problems = 0;
+  for (const nome of nomes) {
+    try {
+      const arq = path.join(dir, nome); semLinks(arq); const st = fs.lstatSync(arq);
+      if (!st.isFile() || st.nlink !== 1 || st.size > 8192) throw new Error('invalid');
+      const raw = JSON.parse(fs.readFileSync(arq, 'utf8'));
+      if (typeof raw.payload !== 'string' || hash(raw.payload) !== raw.sha256) throw new Error('invalid');
+      const r = registroSchema.parse(JSON.parse(raw.payload));
+      if (r.id + '.json' !== nome || r.rootHash !== hash(p.raiz) || r.projectHash !== hash(p.manifesto.id)) throw new Error('binding');
+      records.push(r);
+    } catch { problems++; }
+  }
+  return { records: records.sort((a, b) => a.at.localeCompare(b.at)), problems };
 }

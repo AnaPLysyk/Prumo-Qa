@@ -16,7 +16,7 @@ import { revogarAutorizacao } from "./banco/autorizacoes.js";
 import { criarRotina, editarRotina } from "./regras/cicloDaRotina.js";
 import { validarRotina } from "./regras/cicloDaRotina.js";
 import { estadoDoAplicativo } from "../aplicativo/estadoDoAplicativo.js";
-import { avisosDaJanela } from "../aplicativo/avisos/avisos.js";
+import { avisosDaJanela } from "../aplicativo/estadoDoAplicativo.js";
 import { atualizarBandeja } from "../aplicativo/bandeja/cicloDaBandeja.js";
 
 // controladorAgenda — operações relacionadas
