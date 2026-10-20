@@ -1,7 +1,7 @@
 /** Executa uma capacidade do projeto depois da aprovação humana, com tempo e saída limitados, e grava a evidência (PASS, FAIL, BLOCKED ou NOT_RUN). */
 import { spawn } from 'node:child_process';
-import { mascararLogsDaExecucao } from './mascararLogsDaExecucao.js';
-import { gravarRelatorioRedigido } from './gravarRelatorioRedigido.js';
+
+
 import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
@@ -18,10 +18,52 @@ import { criarEvidenciaInicial } from './criarEvidenciaInicial.js';
 import { Evidencia, resultadoRunnerSchema } from '../tipos/evidencia.js';
 import { solicitarAprovacao } from '../aprovacao/solicitarAprovacao.js';
 import { ambienteMinimo } from './ambienteMinimo.js';
-import { encerrarArvoreDeProcessos } from './encerrarArvoreDeProcessos.js';
+
 import { escopoDaExecucao } from './escopoDaExecucao.js';
-import { resolverExecutavel } from './resolverExecutavel.js';
+
 import { Delegada } from '../tipos/execucao.js';
+import path from 'node:path';
+
+async function encerrarArvoreDeProcessos(pid:number|undefined) {
+  if (!pid) return;
+  if (process.platform==='win32' && process.env.SystemRoot) {
+    await new Promise<void>(resolve=>{
+      const k=spawn(path.join(process.env.SystemRoot!,'System32','taskkill.exe'),['/PID',String(pid),'/T','/F'],{windowsHide:true,shell:false,stdio:'ignore'});
+      const t=setTimeout(()=>{ k.kill();resolve(); },3000); k.on('error',()=>{clearTimeout(t);resolve();});k.on('close',()=>{clearTimeout(t);resolve();});
+    });
+  } else { try { process.kill(-pid,'SIGKILL'); } catch { try { process.kill(pid,'SIGKILL'); } catch {} } }
+}
+
+
+async function gravarRelatorioRedigido(p:Projeto,e:Evidencia,jobId:string,resultadoRel:string):Promise<void> {
+  // Artefato bruto pode conter segredos: só persistir versão redigida.
+  if(e.resultArtifact) {
+    const sanitized=JSON.stringify({jobId,cases:e.cases},null,2);
+    const resultadoPath=await caminhoSeguro(p.raiz,resultadoRel,true);
+    await fs.writeFile(resultadoPath,sanitized,{mode:0o600});
+    e.resultArtifact={path:resultadoRel,sha256:hash(sanitized),trust:'Relatório do runner autorizado, redigido; sem julgamento independente.'};
+  }
+  else { try { const resultadoPath=await caminhoSeguro(p.raiz,resultadoRel,true);await fs.unlink(resultadoPath); } catch {} }
+}
+
+
+function mascararLogsDaExecucao(p: Projeto, env: NodeJS.ProcessEnv, stdout: Buffer[], stderr: Buffer[]) {
+  const segredos=[...Object.entries(process.env).filter(([n])=>/token|secret|password|api.?key/i.test(n)).map(([,v])=>v!),...p.manifesto.execution.envAllowlist.map(n=>env[n]!)].filter(Boolean);
+  return {
+    segredos,
+    stdout:mascarar(Buffer.concat(stdout).toString(),segredos),
+    stderr:mascarar(Buffer.concat(stderr).toString(),segredos)
+  };
+}
+
+
+async function resolverExecutavel(c:Comando) {
+  if(c.executable==='node') return { executable:process.execPath,args:c.args };
+  const candidatos=[path.join(path.dirname(process.execPath),'node_modules/npm/bin/npm-cli.js'),path.join(path.dirname(process.execPath),'../lib/node_modules/npm/bin/npm-cli.js')];
+  for(const f of candidatos) { try { await fs.access(f); return { executable:process.execPath,args:[await fs.realpath(f),...c.args] }; } catch {} }
+  throw new ErroQa('RUNTIME_MISSING','npm-cli.js não encontrado junto ao Node. Use comando node ou instale Node com npm.');
+}
+
 
 export async function executarValidacao(p:Projeto,capability:string,solicitar=false,delegada?:Delegada,signal?:AbortSignal) {
   const jobId=randomUUID(); const inicio=new Date().toISOString();

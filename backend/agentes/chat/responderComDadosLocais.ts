@@ -2,7 +2,7 @@
 import { listarRotinas } from '../../agendamentos/banco/listarRotinas.js';
 import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
 import { Trabalho } from '../../agendamentos/tipos/fila.js';
-import { classificarFalha } from './classificarFalha.js';
+
 import { Coleta, GUIA_MANUAL, guia } from '../tipos/chat.js';
 import { AgenteChat } from '../tipos/persona.js';
 import { dataEmPortugues } from '../../compartilhado/texto/dataEmPortugues.js';
@@ -18,6 +18,16 @@ import { Espaco } from '../../projetos/tipos/espacos.js';
 import { listarRunsLocais } from '../../testes/banco/listarRunsLocais.js';
 import { catalogoDeTestes } from '../../testes/regras/catalogoDeTestes.js';
 import { listarPropostas } from '../../tickets/banco/listarPropostas.js';
+
+/** Classificação inicial de uma falha pelo texto do resultado. É hipótese: confirmar reproduzindo. */
+function classificarFalha(texto: string): { classe: 'automacao' | 'ambiente' | 'produto' | 'inconclusiva'; rotulo: string; motivo: string } {
+  const t = semAcentos(texto);
+  if (/locator|selector|seletor|strict mode|element.*not found|elemento.*nao encontrado|fixture|waitfor|getby/.test(t)) return { classe: 'automacao', rotulo: 'provável erro de automação', motivo: 'o texto cita seletor, fixture ou espera' };
+  if (/econnrefused|enotfound|etimedout|socket hang|network|rede|dns|certificad|credencia|\b401\b|\b403\b|\b502\b|\b503\b|indisponivel|unavailable|permission denied|eacces|blocked/.test(t)) return { classe: 'ambiente', rotulo: 'provável bloqueio de ambiente', motivo: 'o texto cita rede, credencial ou serviço indisponível' };
+  if (/expected|esperado|received|recebido|assert|toequal|tobe|diverg/.test(t)) return { classe: 'produto', rotulo: 'possível defeito do produto', motivo: 'o resultado diverge do esperado; compare com a regra antes de concluir' };
+  return { classe: 'inconclusiva', rotulo: 'inconclusiva', motivo: 'o registro não traz detalhe suficiente' };
+}
+
 
 /** A resposta sendo montada: linhas, fontes (sem repetir aba) e fatos; generico = não achou nada específico. */
 type Montagem = { linhas: string[]; fontes: Fonte[]; fatos: string[]; generico: boolean; fonte: (f: Fonte) => void; semProjeto: () => void };

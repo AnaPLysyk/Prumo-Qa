@@ -11,8 +11,12 @@ import { arquivosDoDiario } from '../banco/arquivosDoDiario.js';
 import { gravarNoDiario } from '../banco/gravarNoDiario.js';
 import { pastaAtividades } from '../banco/pastaAtividades.js';
 import { achadoELacuna } from './achadoELacuna.js';
-import { resumoVazio } from './resumoVazio.js';
+
 import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema } from '../tipos/atividade.js';
+import { resumoSchema } from '../tipos/atividade.js';
+
+const resumoVazio = ():z.infer<typeof resumoSchema> => ({findings:0,recommendations:0,gaps:0,candidateRedundancies:0,types:[]});
+
 
 const comoLista = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
 

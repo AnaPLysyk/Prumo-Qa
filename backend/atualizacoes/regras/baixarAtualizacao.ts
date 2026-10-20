@@ -7,9 +7,13 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { analisarVersao } from '../../ajuda/versoes/analisarVersao.js';
 import { baixarComRedirecionamentoSeguro } from './baixarComRedirecionamentoSeguro.js';
-import { enderecoDoInstalador } from './enderecoDoInstalador.js';
+
 import { nomeDoInstalador } from './nomeDoInstalador.js';
 import { LIMITE_INSTALADOR, Opcoes } from '../tipos/instalador.js';
+import { repositorio } from '../../ajuda/tipos/versoes.js';
+
+const enderecoDoInstalador = (v: string) => `https://github.com/${repositorio}/releases/download/v${v}/${nomeDoInstalador(v)}`;
+
 
 /** Baixa e confere. Devolve o caminho do instalador verificado; em qualquer falha apaga o que baixou. */
 export async function baixarAtualizacao(versao: string, o: Opcoes = {}): Promise<{ arquivo: string; sha256: string; bytes: number }> {

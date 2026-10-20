@@ -1,6 +1,17 @@
 /** Marca em cada teste encontrado onde ele termina e quais casos do Qase cita. */
-import { idsQase } from './idsQase.js';
+
 import { CasoTeste } from '../tipos/catalogoDeTestes.js';
+import { QASE_PADROES } from '../tipos/catalogoDeTestes.js';
+
+function idsQase(trecho: string): string[] {
+  const ids = new Set<string>();
+  for (const re of QASE_PADROES) for (const m of trecho.matchAll(re)) {
+    const projeto = m.groups?.projeto; const lista = m.groups?.ids ?? '';
+    for (const bruto of lista.split(/[\s,]+/)) { const n = bruto.replace(/['"[\]]/g, ''); if (/^\d{1,9}$/.test(n)) ids.add(projeto ? projeto + '-' + n : n); }
+  }
+  return [...ids].slice(0, 20);
+}
+
 
 export function anotarQase(texto: string, casos: CasoTeste[]) {
   const linhas = texto.split(/\r?\n/); const ordem = [...casos].sort((a, b) => a.linha - b.linha);

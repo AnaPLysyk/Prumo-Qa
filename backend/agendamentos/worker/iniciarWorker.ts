@@ -2,10 +2,20 @@
 import { lerTravaDoWorker } from '../banco/lerTravaDoWorker.js';
 import { recuperarInterrompidos } from '../banco/recuperarInterrompidos.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
-import { agendarProximaPassada } from './agendarProximaPassada.js';
+
 import { emitirEventoDoWorker } from './emitirEventoDoWorker.js';
 import { gravarTravaDoWorker } from './gravarTravaDoWorker.js';
 import { processoVivo } from './processoVivo.js';
+import { passadaDoWorker } from './passadaDoWorker.js';
+
+function agendarProximaPassada(e: EstadoDoWorker, ms: number) {
+  if (!e.ativo || e.d.semTemporizador) return;
+  e.temporizador = setTimeout(() => {
+    e.atual = passadaDoWorker(e).catch(erro => { e.ultimoErro = (erro as Error).message.slice(0, 120); }).finally(() => agendarProximaPassada(e, e.intervalo));
+  }, ms);
+  e.temporizador.unref?.();
+}
+
 
 /** Assume a trava ou recusa. Dois workers sobre a mesma agenda nunca coexistem. */
 export function iniciarWorker(e: EstadoDoWorker) {

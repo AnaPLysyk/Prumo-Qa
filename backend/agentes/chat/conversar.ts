@@ -6,7 +6,7 @@ import { aplicarEstilo } from './aplicarEstilo.js';
 import { escolherAgente } from './escolherAgente.js';
 import { intencaoDeAprender } from './intencaoDeAprender.js';
 import { intencaoDePerfil } from './intencaoDePerfil.js';
-import { intencaoDeSaber } from './intencaoDeSaber.js';
+
 import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { responderComDadosLocais } from './responderComDadosLocais.js';
 import { responderSobreTeste } from './responderSobreTeste.js';
@@ -17,10 +17,40 @@ import { Orquestracao } from '../tipos/orquestracao.js';
 import { Coleta, Opcoes, Resposta } from '../tipos/chat.js';
 import { consultarIaExterna } from './consultarIaExterna.js';
 import { montarResposta } from './montarResposta.js';
-import { juntarConhecimentos } from './juntarConhecimentos.js';
+
 import { AgenteChat, agentesChat } from '../tipos/persona.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { regrasDosAgentes } from '../../administracao/regras/agentesDaPlataforma.js';
+import { Conhecimento } from '../tipos/conhecimento.js';
+import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
+import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+import { listarConhecimentos } from '../banco/listarConhecimentos.js';
+import { Meta } from '../tipos/chat.js';
+
+function intencaoDeSaber(pergunta: string, espacoId: string | null, forcado: string | null | undefined, base?: string): Meta | null {
+  const t = semAcentos(pergunta); if (!/o que (voce|vc) (sabe|aprendeu|conhece|lembra)|seus conhecimentos|o que (eu )?te ensinei|o que voce anotou/.test(t)) return null;
+  const alvo = forcado ?? escolherAgente(t.replace(/o que (voce|vc) (sabe|aprendeu|conhece|lembra)( sobre)?/, '')).agente.id; const agente = alvo === 'orquestrador' ? null : alvo;
+  const itens = tentarOuPadrao(() => listarConhecimentos({ espacoId, agente, estados: ['APROVADO', 'RASCUNHO'] }, base), [] as Conhecimento[]);
+  const aprov = itens.filter((c) => c.estado === 'APROVADO'), rasc = itens.filter((c) => c.estado === 'RASCUNHO'); const meus = aprov.filter((c) => c.origem !== 'PRUMO');
+  return { agente: alvo, fontes: [{ rotulo: 'Agentes', aba: 'agentes' }], linhas: [
+    `Sei ${aprov.length} coisa(s) aprovada(s)${agente ? ' nesta especialidade' : ''}: ${aprov.length - meus.length} do conhecimento inicial do Prumo e ${meus.length} que você me ensinou${rasc.length ? `; ${rasc.length} rascunho(s) esperando sua decisão` : ''}.`,
+    ...(meus.length ? [`Do que você me ensinou: ${meus.slice(0, 4).map((c) => c.titulo).join('; ')}.`] : []),
+    'Tudo isso está no Cérebro de cada agente e no arquivo conhecimento.db.'] };
+}
+
+
+function juntarConhecimentos(o: Opcoes, agente: AgenteChat, pergunta: string, historico: NonNullable<Opcoes['historico']>, continuou: boolean, local: Coleta): void {
+  // Seguimento ("e mais?"): busca pela pergunta anterior e mostra o que ainda não foi dito (do 2º item em diante).
+  const anterior = continuou ? historico.at(-1)?.pergunta ?? '' : '';
+  const rel = tentarOuPadrao(() => anterior ? conhecimentosRelevantes(o.espacoId, agente.id === 'orquestrador' ? null : agente.id, anterior, 4, o.base).slice(1, 3) : conhecimentosRelevantes(o.espacoId, agente.id === 'orquestrador' ? null : agente.id, pergunta, 2, o.base), [] as Conhecimento[]);
+  if (rel.length) {
+    const sabidas = rel.map((c) => `${c.origem === 'PRUMO' ? 'Do que eu sei' : 'Do que você me ensinou'} — ${semAcentos(c.texto).startsWith(semAcentos(c.titulo)) ? '' : c.titulo + ': '}${c.texto.length > 420 ? c.texto.slice(0, 420) + '…' : c.texto}`);
+    if (local.generico || local.vazio) local.linhas = sabidas; else local.linhas.push(...sabidas);
+    if (!local.fontes.some((f) => f.aba === 'agentes')) local.fontes.push({ rotulo: 'Cérebro', aba: 'agentes' }); local.fatos.push(`conhecimentos=${rel.length}`);
+  }
+  if (continuou && !rel.length) local.linhas.push('Sobre isso não tenho mais nada registrado. Posso chamar outro agente, ou você me ensina com "lembra que…".');
+}
+
 
 export async function conversar(o: Opcoes): Promise<Resposta> {
   const pergunta = o.pergunta.trim(); const estilo = o.estilo ?? 'amigavel'; const nome = (o.nome || 'Prumo').slice(0, 40); const historico = (o.historico ?? []).slice(-6);

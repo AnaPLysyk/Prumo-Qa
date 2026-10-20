@@ -2,8 +2,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Manifesto, manifestoSchema } from '../../compartilhado/tipos/projeto.js';
-import { listarRaizDoProjeto } from './listarRaizDoProjeto.js';
+
 import { CODIGO, DOCUMENTACAO, EXIGE_REVISAO, PropostaContrato, SCRIPT, STACKS, Stack, TESTES } from '../tipos/contrato.js';
+import { sensivel } from '../../compartilhado/seguranca/sensivel.js';
+
+/** Lê só a raiz da pasta escolhida. Links, itens sensíveis e pastas geradas (node_modules, dist…) ficam de fora. */
+function listarRaizDoProjeto(raiz: string) {
+  return fs.readdirSync(raiz, { withFileTypes: true }).filter((d) => !d.isSymbolicLink() && !sensivel(d.name)).map((d) => ({ nome: d.name, pasta: d.isDirectory() }));
+}
+
 
 /** Gera um identificador simples (letras, números e hífen) a partir do nome da pasta. */
 

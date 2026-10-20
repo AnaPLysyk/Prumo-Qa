@@ -5,15 +5,21 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { gravarRegistroDaOperacao } from '../banco/gravarRegistroDaOperacao.js';
 import { lerRegistroDeOperacoes } from '../banco/lerRegistroDeOperacoes.js';
 import { chaveDaOperacao } from './chaveDaOperacao.js';
-import { codigoDaFalhaDeOperacao } from './codigoDaFalhaDeOperacao.js';
+
 import { escritaHabilitada } from './escritaHabilitada.js';
-import { limparRespostaRemota } from './limparRespostaRemota.js';
+
 import { operacaoPorId } from './operacaoPorId.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { Remoto } from '../tipos/operacao.js';
 import { Executor, OpcoesOperacao, RegistroOperacao, semAux } from '../tipos/operacoesExternas.js';
 import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
 import { registrarEscritaExterna } from '../../projetos/regras/registrarEscritaExterna.js';
+
+const codigoDaFalhaDeOperacao = (e: unknown) => e instanceof ErroServico ? (e.detalhe ? `${e.codigo}: ${e.detalhe}` : e.codigo) : (/^([A-Z][A-Z_]{2,60})\b/.exec((e as Error)?.message ?? '')?.[1] ?? 'OPERATION_FAILED');
+
+
+const limparRespostaRemota = (r: Remoto): Remoto => ({ ...(r.id ? { id: r.id } : {}), ...(r.chave ? { chave: r.chave } : {}), ...(r.url ? { url: r.url } : {}), ...(r.detalhes ? { detalhes: Object.fromEntries(Object.entries(r.detalhes).filter(([, v]) => v !== undefined)) as Record<string, string | number | boolean | null> } : {}) });
+
 
 /** Diz se vale tentar a operação de novo (tempo, indisponível, limite, resposta inválida). */
 

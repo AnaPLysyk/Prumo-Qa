@@ -4,7 +4,16 @@ import { listarRotinas } from '../banco/listarRotinas.js';
 import { listarTrabalhos } from '../banco/listarTrabalhos.js';
 import { proximoHorario } from '../regras/proximoHorario.js';
 import { EstadoDoWorker } from '../tipos/worker.js';
-import { estadoDaTravaDoWorker } from './estadoDaTravaDoWorker.js';
+import { lerTravaDoWorker } from '../banco/lerTravaDoWorker.js';
+import { processoVivo } from './processoVivo.js';
+
+function estadoDaTravaDoWorker(b?: string, agora = new Date()) {
+  const t = lerTravaDoWorker(b); if (!t || !t.ativo) return { vivo: false, pid: null as number | null, ultimoBatimento: t?.batimento ?? null };
+  const fresco = agora.getTime() - Date.parse(t.batimento) < 60000 && processoVivo(t.pid);
+  return { vivo: fresco, pid: t.pid, ultimoBatimento: t.batimento };
+}
+
+
 
 export function estadoDoWorker(e: EstadoDoWorker) {
   const rot = listarRotinas(e.base); const trab = listarTrabalhos(e.base); const t = e.agora().getTime();

@@ -5,7 +5,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { capacidadeDoK6 } from './capacidadeDoK6.js';
 import { escopoDoK6 } from './escopoDoK6.js';
-import { metricasDoK6 } from './metricasDoK6.js';
+
 import { ConfigK6, ExecutavelK6 } from '../tipos/k6.js';
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
@@ -20,6 +20,17 @@ import { Evidencia } from '../../testes/tipos/evidencia.js';
 import { solicitarAprovacao } from '../../testes/aprovacao/solicitarAprovacao.js';
 import { criarEvidenciaInicial } from '../../testes/regras/criarEvidenciaInicial.js';
 import { Delegada } from '../../testes/tipos/execucao.js';
+
+/** Extrai do resumo do k6 as métricas principais (requisições, falhas, tempos). */
+
+function metricasDoK6(resumo: unknown) {
+  const m = (resumo as { metrics?: Record<string, Record<string, unknown>> } | null)?.metrics; if (!m) return null;
+  const pega = (nome: string, campos: string[]) => Object.fromEntries(campos.filter(c => typeof m[nome]?.[c] === 'number').map(c => [c, m[nome]![c]]));
+  const limiares: { metrica: string; expressao: string; ok: boolean }[] = [];
+  for (const [nome, v] of Object.entries(m)) { const t = v?.thresholds as Record<string, unknown> | undefined; if (t) for (const [expr, val] of Object.entries(t)) if (val && typeof val === 'object' && typeof (val as { ok?: unknown }).ok === 'boolean') limiares.push({ metrica: nome, expressao: expr, ok: (val as { ok: boolean }).ok }); }
+  return { http_reqs: pega('http_reqs', ['count', 'rate']), http_req_failed: pega('http_req_failed', ['value', 'passes', 'fails']), http_req_duration: pega('http_req_duration', ['avg', 'med', 'p(90)', 'p(95)', 'max']), iterations: pega('iterations', ['count']), limiares };
+}
+
 
 /** O que fica pronto depois das conferências e da aprovação: os argumentos, o arquivo de resumo e o tempo máximo. */
 type K6Preparado = { args: string[]; resumoRel: string; timeoutMs: number };
