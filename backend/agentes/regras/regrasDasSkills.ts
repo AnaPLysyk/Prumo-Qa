@@ -2,7 +2,7 @@
 import { ParteDaSkill, limitesSkills, TrechoDeSkill } from "../tipos/conhecimento.js";
 import { raizDaPalavra, termosDaFrase } from "./normalizacaoDoConhecimento.js";
 import { semAcentos } from "../../compartilhado/texto.js";
-import { especializacoes } from "../tipos/politicas.js";
+import { especializacoes } from "../tipos/persona.js";
 import { falharCom } from "../../compartilhado/erros.js";
 
 // ── regrasDasSkills ──

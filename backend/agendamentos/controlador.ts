@@ -9,7 +9,7 @@ import { idiomaAtual } from "../configuracoes/servico.js";
 import { solicitarAprovacao } from "../testes/servicoAprovacao.js";
 import { desativarRotina, pausarRotina, retomarRotina, excluirRotina, definirPausaGlobal } from "./regras/cicloDaRotina.js";
 import { workerDoAplicativo } from "./worker/workerDoAplicativo.js";
-import { criarPoliticaPublicacao } from "./autorizacoes/politicas.js";
+import { criarPoliticaPublicacao } from "./autorizacoes/autorizarRotina.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";
 import { revogarAutorizacao } from "./banco/autorizacoes.js";

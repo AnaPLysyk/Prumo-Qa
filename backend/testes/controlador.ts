@@ -18,7 +18,7 @@ import { idiomaAtual } from "../configuracoes/servico.js";
 import { obterRunLocal, listarRunsLocais } from "./banco/runs.js";
 import { criarRunNoQase, parametrosDaRunQase } from "./integracoes/publicarRunLocal.js";
 import { executarValidacao } from "./regras/executarValidacao.js";
-import { criarPoliticaEscrita } from "../agendamentos/autorizacoes/politicas.js";
+import { criarPoliticaEscrita } from "../agendamentos/autorizacoes/autorizarRotina.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { publicarRunLocal } from "./integracoes/publicarRunLocal.js";
 import { declararResultadoManual } from "./servicoExecucoes.js";

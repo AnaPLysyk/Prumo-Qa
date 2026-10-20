@@ -1,7 +1,7 @@
 /** Roteamento e próximos passos da conversa — arquivos relacionados agrupados para manutenção. */
 import { matrizDePoliticas } from "../servicoPoliticas.js";
 import { agentesChat, Papel } from "../tipos/persona.js";
-import { especializacoes } from "../tipos/politicas.js";
+import { especializacoes } from "../tipos/persona.js";
 import { regrasDosAgentes } from "../../administracao/servico.js";
 import { SEGUIMENTO, Turno, Proximo } from "../tipos/chat.js";
 import { semAcentos } from "../../compartilhado/texto.js";

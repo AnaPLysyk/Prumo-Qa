@@ -16,7 +16,7 @@ test('capacidades externas permanecem somente da pessoa; execução exige autori
 });
 
 test('oito especializações têm profissão e área; interface distingue permissão efetiva', () => {
-  const fonte = fs.readFileSync(path.join(raiz, 'backend/agentes/tipos/politicas.ts'), 'utf8');
+  const fonte = fs.readFileSync(path.join(raiz, 'backend/agentes/tipos/persona.ts'), 'utf8');
   const perfis = [...fonte.matchAll(/skill: '([^']+)', capacidades: \[[^\]]*\], profissao: '([^']+)', especialidade: '([^']+)'/g)];
   assert.equal(perfis.length, 8);
   assert.equal(new Set(perfis.map(p => p[1])).size, 8);

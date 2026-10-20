@@ -1,5 +1,5 @@
 /** servicoPoliticas: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
-import { Registro, registro, Configuracao, idsEsp, EstadoCapacidade, capacidades, especializacoes } from "./tipos/politicas.js";
+import { Registro, registro, Configuracao, idsEsp, EstadoCapacidade, capacidades, especializacoes } from "./tipos/persona.js";
 import { lerLocal, gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { especializacaoLigada } from "../administracao/servico.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";

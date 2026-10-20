@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 export const raiz = fileURLToPath(new URL('../../', import.meta.url));
 export function fontesSkills(base = raiz) {
-  const fonte = fs.readFileSync(path.join(base, 'backend/agentes/tipos/politicas.ts'), 'utf8');
+  const fonte = fs.readFileSync(path.join(base, 'backend/agentes/tipos/persona.ts'), 'utf8');
   const capacidades = new Map([...fonte.matchAll(/\{ id: '([^']+)', rotulo: '[^']+', ferramenta: (?:'[^']+'|null), editavel: \[[^\]]*\], padrao: '([^']+)'/g)].map(m => [m[1], m[2]]));
   const especializacoes = [...fonte.matchAll(/\{ id: '([^']+)', rotulo: '[^']+', skill: '([^']+)', capacidades: \[([^\]]*)\]/g)].map(m => ({ id: m[1], caminho: m[2] + '/SKILL.md', capacidades: [...m[3].matchAll(/'([^']+)'/g)].map(x => x[1]) }));
   if (especializacoes.length !== 8 || capacidades.size !== 13) throw new Error('SKILLS_POLICY_FORMAT: formato ou catálogo mudou; revise o validador.');
@@ -31,7 +31,7 @@ export function verificarSkills(base = raiz) {
     exigir(JSON.stringify(item.permissoes) === JSON.stringify(Object.fromEntries(esperado.capacidades.map(id => [id, capacidades.get(id)]))), esperado.id + ': permissões divergentes');
     exigir(JSON.stringify(item.consumidores) === JSON.stringify(['backend/agentes/chat/roteamento.ts']), esperado.id + ': consumidor divergente');
     for (const consumidor of item.consumidores) exigir(fs.existsSync(path.join(base, consumidor)), esperado.id + ': consumidor ausente');
-    exigir(item.fontePoliticas === 'backend/agentes/tipos/politicas.ts', esperado.id + ': fonte divergente');
+    exigir(item.fontePoliticas === 'backend/agentes/tipos/persona.ts', esperado.id + ': fonte divergente');
   }
   return { skills: manifesto.skills.length, estado: 'VALIDADO_ESTATICAMENTE' };
 }

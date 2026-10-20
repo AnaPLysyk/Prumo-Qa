@@ -17,7 +17,7 @@ import { decidirTrechoDeSkill } from '../../../../dist/agentes/banco/skills.js';
 import { skillDoAgente } from '../../../../dist/agentes/chat/roteamento.js';
 import { montarPrompt } from '../../../../dist/agentes/chat/consultarIaExterna.js';
 import { agentesChat } from '../../../../dist/agentes/tipos/persona.js';
-import { especializacoes } from '../../../../dist/agentes/tipos/politicas.js';
+import { especializacoes } from '../../../../dist/agentes/tipos/persona.js';
 
 const pastaTemporaria = (t) => { const p = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-skill-')); t.after(() => fs.rmSync(p, { recursive: true, force: true })); return p; };
 const trecho = (x) => ({ id: x.id, especializacao: 'api-rest', titulo: x.titulo ?? 'Seção', texto: x.texto, ordem: x.ordem ?? 5, origem: x.origem ?? 'PRUMO', estado: x.estado ?? 'APROVADO', fonte: x.fonte ?? 'backend/agentes/skills/api-rest/SKILL.md', licenca: null, criadoEm: '', decididoEm: null });

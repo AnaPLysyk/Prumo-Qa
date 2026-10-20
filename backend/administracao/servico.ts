@@ -7,7 +7,7 @@ import { falharCom } from "../compartilhado/erros.js";
 import { raizDoAplicativo } from "../compartilhado/raizDoAplicativo.js";
 import { contaDaSessao, contaParaJanela, ehAdmin, situacaoDaSessao } from "../login/regras/sessao.js";
 import { agentesChat } from "../agentes/tipos/persona.js";
-import { especializacoes } from "../agentes/tipos/politicas.js";
+import { especializacoes } from "../agentes/tipos/persona.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { randomUUID } from "node:crypto";
 import { gerarSenhaTemporaria, resumirSegredo } from "../login/regras/contas.js";

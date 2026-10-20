@@ -1,20 +1,19 @@
-/** Autorização de rotinas e acesso delegado — arquivos relacionados agrupados para manutenção. */
-import { estadoDaAutorizacao, abrirEspacoDeAutorizacoes } from "../banco/autorizacoes.js";
-import { gravarAutorizacoes, lerAutorizacoes } from "../banco/autorizacoes.js";
-import { MAX_VALIDADE_DIAS, AutorizacaoExecucao, EscopoAutorizado, MAX_USOS, Solicitador, execSchema } from "../tipos/autorizacoes.js";
+/** autorizarRotina: operações reunidas por responsabilidade. */
+import { estadoDaAutorizacao, abrirEspacoDeAutorizacoes, gravarAutorizacoes, lerAutorizacoes } from "../banco/autorizacoes.js";
+import { MAX_VALIDADE_DIAS, AutorizacaoExecucao, EscopoAutorizado, MAX_USOS, Solicitador, execSchema, PoliticaEscrita, escritaSchema, PoliticaPublicacao, pubSchema } from "../tipos/autorizacoes.js";
 import { randomUUID } from "node:crypto";
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
 import { solicitarAprovacao } from "../../testes/servicoAprovacao.js";
 import { obterRotina } from "../banco/agenda.js";
-import { capacidadeDoK6, escopoDoK6, localizarK6 } from "../servicoK6.js";
+import { capacidadeDoK6, escopoDoK6, localizarK6, ExecutavelK6 } from "../servicoK6.js";
 import { capacidadesDaRotina } from "../regras/cicloDaRotina.js";
-import { ExecutavelK6 } from "../servicoK6.js";
 import { ErroQa } from "../../compartilhado/erros.js";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
 import { escopoDeCapability } from "../../testes/regras/executarValidacao.js";
 import { obterEspaco } from "../../projetos/banco/projetos.js";
 import { Delegada } from "../../testes/tipos/catalogoDeTestes.js";
 
+// Operações de autorizarRotina
 // ── politicasDaAutorizacao ──
 /** Consome um uso se existir política vigente que cubra a operação e a run. Sem política: null (a operação agendada fica BLOQUEADA). */
 export function consumirPoliticaEscrita(espacoId: string, operacao: string, run: number, base?: string, agora = new Date()) {
@@ -74,4 +73,19 @@ export function autorizacaoDelegada(espacoId: string, ambiente: string, base?: s
     if (!a) return null; a.usos += 1; gravarAutorizacoes(r, base);
     return { subject: a.aprovadoPor, method: 'delegada:' + a.metodo, scopeHash, at: t.toISOString() };
   };
+}
+
+// Operações de politicas
+export function criarPoliticaEscrita(espacoId: string, d: { operacao: PoliticaEscrita['operacao']; runs: number[]; dias: number; maxUsos: number }, aprovadoPor: string, base?: string, agora = new Date()): PoliticaEscrita {
+  const p = escritaSchema.parse({ id: randomUUID(), espacoId, operacao: d.operacao, runs: [...new Set(d.runs)], criadaEm: agora.toISOString(), validaAte: validadeDaAutorizacao(d.dias, agora), maxUsos: d.maxUsos, usos: 0, aprovadoPor, revogadaEm: null });
+  const r = lerAutorizacoes(base); r.escritas = abrirEspacoDeAutorizacoes(r.escritas, x => estadoDaAutorizacao(x, agora) === 'VIGENTE'); if (r.escritas.length >= 300) throw new Error('AUTH_LIMIT');
+  for (const x of r.escritas) if (x.espacoId === espacoId && x.operacao === p.operacao && !x.revogadaEm) x.revogadaEm = agora.toISOString();
+  r.escritas.push(p); gravarAutorizacoes(r, base); return p;
+}
+
+export function criarPoliticaPublicacao(espacoId: string, d: { tickets: string[]; tipos: PoliticaPublicacao['tipos']; dias: number; maxPublicacoes: number }, aprovadoPor: string, base?: string, agora = new Date()): PoliticaPublicacao {
+  const p = pubSchema.parse({ id: randomUUID(), espacoId, tickets: [...new Set(d.tickets.map(t => t.toUpperCase()))], tipos: d.tipos, criadaEm: agora.toISOString(), validaAte: validadeDaAutorizacao(d.dias, agora), maxPublicacoes: d.maxPublicacoes, usadas: 0, aprovadoPor, revogadaEm: null });
+  const r = lerAutorizacoes(base); r.publicacoes = abrirEspacoDeAutorizacoes(r.publicacoes, x => estadoDaAutorizacao(x, agora) === 'VIGENTE'); if (r.publicacoes.length >= 300) throw new Error('AUTH_LIMIT');
+  for (const x of r.publicacoes) if (x.espacoId === espacoId && !x.revogadaEm) x.revogadaEm = agora.toISOString();
+  r.publicacoes.push(p); gravarAutorizacoes(r, base); return p;
 }

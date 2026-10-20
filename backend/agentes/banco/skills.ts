@@ -5,7 +5,7 @@ import { limitesSkills, TrechoDeSkill, VERSAO_ESQUEMA_SKILLS, EstadoTrecho, esta
 import { validarEspecializacao } from "../regras/regrasDasSkills.js";
 import { hash } from "../../compartilhado/seguranca/hash.js";
 import { DatabaseSync } from "node:sqlite";
-import { abrirBancoProtegido } from "./abrirBancoProtegido.js";
+import { abrirBancoProtegido } from "./comBancoDeConhecimento.js";
 import { sementeDasSkills } from "./sementeDasSkills.js";
 import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";
 import { semAcentos } from "../../compartilhado/texto.js";

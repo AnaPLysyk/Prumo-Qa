@@ -1,7 +1,7 @@
 /** Controlador da tela agentes: concentra canais de entrada, organizados por área funcional. */
 import { configuracaoDoEspaco, salvarConfiguracao } from "./servicoPoliticas.js";
 import { matrizDePoliticas } from "./servicoPoliticas.js";
-import { especializacoes } from "./tipos/politicas.js";
+import { especializacoes } from "./tipos/persona.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { listarPropostas } from "../tickets/banco/tickets.js";
 import { listarOrquestracoes } from "./banco/orquestracao.js";
@@ -26,7 +26,7 @@ import { avaliarAtendimento, registrarAtendimento, listarAtendimentos } from "./
 import { conversar } from "./chat/conversar.js";
 import { dialog, shell } from "electron";
 import { apagarConhecimento, registrarConhecimento, listarConhecimentos } from "./banco/conhecimento.js";
-import { estadoConhecimento } from "./banco/estadoConhecimento.js";
+import { estadoConhecimento } from "./banco/conhecimento.js";
 import { caminhoConhecimento } from "./banco/comBancoDeConhecimento.js";
 import { lerPerfil, salvarPerfil } from "./banco/perfil.js";
 import { listarContextosDaPasta } from "./regras/consultasDeContextos.js";

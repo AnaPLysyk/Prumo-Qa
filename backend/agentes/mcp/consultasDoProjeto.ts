@@ -13,7 +13,7 @@ import { consultarEvidencias } from "../../testes/banco/publicacoes.js";
 import { MeiosDoServidorMcp, somenteLeitura, RespostaMcp } from "../tipos/mcp.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";
 import { configuracaoDoEspaco, matrizDePoliticas } from "../servicoPoliticas.js";
-import { especializacoes } from "../tipos/politicas.js";
+import { especializacoes } from "../tipos/persona.js";
 import { mensagemComCodigo } from "../../compartilhado/erros.js";
 
 // --- consultasDoProjeto ---

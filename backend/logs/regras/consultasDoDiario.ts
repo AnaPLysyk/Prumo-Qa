@@ -1,7 +1,7 @@
 /** Consultas do diário: logs, histórico consolidado e exportação. */
 import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";
 import { consultarAtividades } from "./iniciarAtividade.js";
-import { apresentarRegistroDoDiario, filtrarRegistrosDoDiario } from "./resumoDoDiario.js";
+import { apresentarRegistroDoDiario, filtrarRegistrosDoDiario } from "./iniciarAtividade.js";
 import { projetoVinculado } from "../../projetos/servicoProjetos.js";
 import { Filtro, filtroSchema } from "../../projetos/contratos.js";
 

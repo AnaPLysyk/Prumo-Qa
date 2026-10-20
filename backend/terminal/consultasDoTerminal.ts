@@ -1,7 +1,7 @@
 /** consultasDoTerminal: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { createInterface } from "node:readline/promises";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { descreverAchados } from "../logs/regras/resumoDoDiario.js";
+import { descreverAchados } from "../logs/regras/iniciarAtividade.js";
 import { Evento } from "../logs/contratos.js";
 import { Projeto } from "../compartilhado/projeto/contratos.js";
 import { observar, consultarAtividades } from "../logs/regras/iniciarAtividade.js";

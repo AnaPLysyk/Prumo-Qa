@@ -1,13 +1,15 @@
-/** Persistência do conhecimento dos agentes: registrar, listar, recuperar trechos relevantes e apagar. */
-import { comBancoDeConhecimento } from "./comBancoDeConhecimento.js";
-import { falharConhecimento, validarAgenteDoConhecimento, validarProjetoDoConhecimento } from "./comBancoDeConhecimento.js";
-import { Linha, Conhecimento, Filtro, estadosConhecimento, limitesConhecimento, EstadoConhecimento, NovoConhecimento, tiposConhecimento } from "../tipos/conhecimento.js";
+/** conhecimento: operações reunidas por responsabilidade. */
+import { comBancoDeConhecimento, falharConhecimento, validarAgenteDoConhecimento, validarProjetoDoConhecimento, linhaParaConhecimento, impressaoDoConhecimento, caminhoConhecimento, pessoaDoConhecimento, vistaDoAgente } from "./comBancoDeConhecimento.js";
+import { Linha, Conhecimento, Filtro, estadosConhecimento, limitesConhecimento, EstadoConhecimento, NovoConhecimento, tiposConhecimento, VERSAO_ESQUEMA } from "../tipos/conhecimento.js";
 import { raizDaPalavra, termosDaFrase } from "../regras/normalizacaoDoConhecimento.js";
 import { semAcentos } from "../../compartilhado/texto.js";
-import { linhaParaConhecimento, impressaoDoConhecimento } from "./formatosDoConhecimento.js";
 import { randomUUID } from "node:crypto";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
+import fs from "node:fs";
+import { lerPerfil } from "./perfil.js";
+import { agentesChat } from "../tipos/persona.js";
 
+// Operações de conhecimento
 /** Apagar remove de vez; o conhecimento de origem PRUMO só pode ser descartado (volta se a pessoa reaprovar). */
 export function apagarConhecimento(id: string, base?: string) {
   return comBancoDeConhecimento(base, (db) => { const r = db.prepare('SELECT origem FROM conhecimentos WHERE id = ?').get(id) as Linha | undefined; if (!r) falharConhecimento('KNOWLEDGE_NOT_FOUND'); if (r.origem === 'PRUMO') falharConhecimento('KNOWLEDGE_BUILTIN');
@@ -49,5 +51,21 @@ export function registrarConhecimento(n: NovoConhecimento, base?: string, agora 
     db.prepare('INSERT INTO conhecimentos (id, agente_id, espaco_id, tipo, titulo, texto, origem, estado, criado_em, decidido_em, cliente, hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
       .run(id, agente, espacoId, n.tipo, titulo, texto, n.origem, estado, em, estado === 'APROVADO' ? em : null, n.cliente ? String(n.cliente).slice(0, 80) : null, hash);
     return { item: linhaParaConhecimento(db.prepare('SELECT * FROM conhecimentos WHERE id = ?').get(id) as Linha), duplicado: false };
+  });
+}
+
+// Operações de estadoConhecimento
+export function estadoConhecimento(espacoId: string | null, base?: string) {
+  validarProjetoDoConhecimento(espacoId); const arquivo = caminhoConhecimento(base);
+  return comBancoDeConhecimento(base, (db) => {
+    const conta = (sql: string, ...p: string[]) => Number((db.prepare(sql).get(...p) as Linha).n);
+    const escopo = espacoId ? '(espaco_id IS NULL OR espaco_id = ?)' : 'espaco_id IS NULL'; const p = espacoId ? [espacoId] : [];
+    // Atendimentos contam só os da pessoa da sessão; conhecimento aprovado é do projeto e vale para todos.
+    const pessoa = pessoaDoConhecimento(base) ?? ''; const deQuem = `usuario_id = ? AND ${espacoId ? 'espaco_id = ?' : 'espaco_id IS NULL'} AND agente_id = ?`;
+    const porAgente = Object.fromEntries(agentesChat.map((a) => [a.id, { aprovados: conta(`SELECT COUNT(*) AS n FROM conhecimentos WHERE ${escopo} AND agente_id = ? AND estado = 'APROVADO'`, ...p, a.id), rascunhos: conta(`SELECT COUNT(*) AS n FROM conhecimentos WHERE ${escopo} AND agente_id = ? AND estado = 'RASCUNHO'`, ...p, a.id),
+      atendimentos: conta(`SELECT COUNT(*) AS n FROM atendimentos WHERE ${deQuem}`, pessoa, ...p, a.id), uteis: conta(`SELECT COUNT(*) AS n FROM atendimentos WHERE ${deQuem} AND avaliacao = 'UTIL'`, pessoa, ...p, a.id),
+      naoUteis: conta(`SELECT COUNT(*) AS n FROM atendimentos WHERE ${deQuem} AND avaliacao = 'NAO_UTIL'`, pessoa, ...p, a.id) }]));
+    return { arquivo, bytes: (() => { try { return fs.statSync(arquivo).size; } catch { return 0; } })(), esquema: VERSAO_ESQUEMA, tabelas: ['perfil', 'agentes', 'conhecimentos', 'vocabulario', 'atendimentos'], vistas: agentesChat.map((a) => vistaDoAgente(a.id)),
+      gerais: conta(`SELECT COUNT(*) AS n FROM conhecimentos WHERE ${escopo} AND agente_id IS NULL AND estado = 'APROVADO'`, ...p), porAgente, perfil: lerPerfil(base) };
   });
 }

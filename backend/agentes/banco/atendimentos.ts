@@ -3,7 +3,7 @@ import { comBancoDeConhecimento } from "./comBancoDeConhecimento.js";
 import { falharConhecimento, validarAgenteDoConhecimento, validarProjetoDoConhecimento, pessoaDoConhecimento } from "./comBancoDeConhecimento.js";
 import { Atendimento, Linha, limitesConhecimento, Conhecimento, EstadoConhecimento } from "../tipos/conhecimento.js";
 import { termosDaFrase } from "../regras/normalizacaoDoConhecimento.js";
-import { linhaParaConhecimento } from "./formatosDoConhecimento.js";
+import { linhaParaConhecimento } from "./comBancoDeConhecimento.js";
 import { semAcentos } from "../../compartilhado/texto.js";
 
 // ── atendimentos ──

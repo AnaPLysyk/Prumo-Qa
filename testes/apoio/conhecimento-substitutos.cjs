@@ -8,7 +8,8 @@ module.exports = {
     "listarConhecimentos": "listarConhecimentos",
     "registrarConhecimento": "registrarConhecimento",
     "apagarConhecimento": "apagarConhecimento",
-    "conhecimentosRelevantes": "relevantes"
+    "conhecimentosRelevantes": "relevantes",
+    "estadoConhecimento": "estadoConhecimento"
   },
   "agentes/banco/atendimentos.js": {
     "registrarAtendimento": "registrarAtendimento",
@@ -19,9 +20,6 @@ module.exports = {
     "pesosAprendidos": "pesosAprendidos",
     "vocabularioDoAgente": "vocabularioDoAgente",
     "esquecerTermo": "esquecerTermo"
-  },
-  "agentes/banco/estadoConhecimento.js": {
-    "estadoConhecimento": "estadoConhecimento"
   },
   "agentes/banco/skills.js": {
     "listarTrechosDeSkill": "listarTrechosDeSkill",

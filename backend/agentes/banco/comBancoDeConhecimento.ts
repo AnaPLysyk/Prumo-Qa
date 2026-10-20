@@ -1,13 +1,26 @@
-/** Conhecimento: abertura e esquema de dados — arquivos relacionados agrupados para manutenção. */
+/** comBancoDeConhecimento: operações reunidas por responsabilidade. */
+import { createHash } from "node:crypto";
+import { Conhecimento, EstadoConhecimento, Linha, OrigemConhecimento, TipoConhecimento, idsAgentes, uuid, SEMENTE, VERSAO_ESQUEMA } from "../tipos/conhecimento.js";
 import path from "node:path";
 import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";
 import { contaDaSessao } from "../../login/regras/sessao.js";
-import { idsAgentes, uuid, SEMENTE, VERSAO_ESQUEMA } from "../tipos/conhecimento.js";
 import { DatabaseSync } from "node:sqlite";
-import { impressaoDoConhecimento, vistaDoAgente } from "./formatosDoConhecimento.js";
 import { agentesChat, personalidades } from "../tipos/persona.js";
-import { abrirBancoProtegido } from "./abrirBancoProtegido.js";
+import fs from "node:fs";
+import { semLinks } from "../../compartilhado/seguranca/semLinks.js";
 
+// Operações de formatosDoConhecimento
+export function impressaoDoConhecimento(agente: string | null, espacoId: string | null, tipo: string, titulo: string, texto: string) { return createHash('sha256').update([agente ?? '*', espacoId ?? '*', tipo, titulo.trim().toLowerCase(), texto.trim().toLowerCase()].join('\0')).digest('hex'); }
+
+export const linhaParaConhecimento = (r: Linha): Conhecimento => ({ id: String(r.id), agente: (r.agente_id as string | null) ?? null, espacoId: (r.espaco_id as string | null) ?? null, tipo: r.tipo as TipoConhecimento, titulo: String(r.titulo), texto: String(r.texto),
+  origem: r.origem as OrigemConhecimento, estado: r.estado as EstadoConhecimento, criadoEm: String(r.criado_em), decididoEm: (r.decidido_em as string | null) ?? null, cliente: (r.cliente as string | null) ?? null });
+
+/** Nome da vista do banco que mostra os conhecimentos de um agente (agente_<id>). */
+
+export const vistaDoAgente = (id: string) => 'agente_' + id.replace(/-/g, '_');
+
+// Operações de comBancoDeConhecimento
+// Operações de comBancoDeConhecimento
 // ── baseDoConhecimento ──
 /** Banco de conhecimento compartilhado, fora das pastas dos projetos. */
 export const caminhoConhecimento = (base?: string) =>
@@ -86,4 +99,14 @@ export function criarEsquemaDoConhecimento(db: DatabaseSync) {
 export function comBancoDeConhecimento<T>(base: string | undefined, fn: (db: DatabaseSync) => T): T {
   const db = abrirBancoProtegido(caminhoConhecimento(base), () => falharConhecimento('KNOWLEDGE_FILE_INVALID'), criarEsquemaDoConhecimento);
   try { return fn(db); } finally { db.close(); }
+}
+
+// Operações de abrirBancoProtegido
+/** `preparar` cria as tabelas; se falhar, o banco é fechado antes do erro subir. */
+export function abrirBancoProtegido(alvo: string, falhar: () => never, preparar: (db: DatabaseSync) => void): DatabaseSync {
+  fs.mkdirSync(path.dirname(alvo), { recursive: true, mode: 0o700 }); semLinks(alvo);
+  if (fs.existsSync(alvo)) { const st = fs.lstatSync(alvo); if (!st.isFile() || st.nlink !== 1) falhar(); }
+  const db = new DatabaseSync(alvo); try { preparar(db); } catch (e) { db.close(); throw e; }
+  try { fs.chmodSync(alvo, 0o600); } catch { /* ACL herdada no Windows */ }
+  return db;
 }

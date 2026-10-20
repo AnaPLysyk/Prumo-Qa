@@ -4,7 +4,7 @@ import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { marcadorDaOperacao } from "../../conexoes/escrita/chaveDaOperacao.js";
 import { DefOperacao } from "../../conexoes/tipos/operacao.js";
-import { conferirCasosNoQase, listarNoQase, resultadosDaRun } from "./pesquisasQase.js";
+import { conferirCasosNoQase, listarNoQase, resultadosDaRun } from "./casosQase.js";
 import { conferirIdsDoObjetoQase, idCriadoNoQase } from "./casosQase.js";
 import { criarRun, completarRun, publicar, criarPlano } from "../tipos/escritaQase.js";
 

@@ -3,7 +3,7 @@ import path from 'node:path';
 import { lerPastaDeSkill } from './lerPastaDeSkill.js';
 import { dividirSkillEmTrechos } from '../regras/regrasDasSkills.js';
 import { TrechoDeSkill } from '../tipos/conhecimento.js';
-import { especializacoes } from '../tipos/politicas.js';
+import { especializacoes } from '../tipos/persona.js';
 import { raizDoAplicativo } from '../../compartilhado/raizDoAplicativo.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 

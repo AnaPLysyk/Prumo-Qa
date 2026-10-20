@@ -4,7 +4,7 @@ import { caminhoDeCodigoSchema } from '../../administracao/contratos.js';
 import { ambientes, dadosRotinaSchema } from '../../agendamentos/tipos/rotina.js';
 import { tiposConhecimento } from '../../agentes/tipos/conhecimento.js';
 import { papeis } from '../../agentes/tipos/persona.js';
-import { especializacoes } from '../../agentes/tipos/politicas.js';
+import { especializacoes } from '../../agentes/tipos/persona.js';
 import { estadosTrecho, idTrecho } from '../../agentes/tipos/conhecimento.js';
 import { configuracaoDeAcessoSchema, idPapelSchema, niveisDeAcesso } from '../../login/tipos/contas.js';
 import { arquivosDosCanais } from './arquivosDosCanais.js';

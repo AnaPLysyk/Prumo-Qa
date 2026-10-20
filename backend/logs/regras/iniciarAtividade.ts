@@ -1,4 +1,4 @@
-/** iniciarAtividade: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
+/** iniciarAtividade: operações reunidas por responsabilidade. */
 import fs from "node:fs";
 import { falharCom } from "../../compartilhado/erros.js";
 import { semLinks } from "../../compartilhado/seguranca/semLinks.js";
@@ -6,12 +6,13 @@ import { limitesHistorico, Evento, eventoSchema, Origem, codigos, estados, ferra
 import path from "node:path";
 import { hash } from "../../compartilhado/seguranca/hash.js";
 import { Projeto } from "../../compartilhado/projeto/contratos.js";
-import { achadoELacuna } from "./resumoDoDiario.js";
 import { pino } from "pino";
 import { diretorioDados } from "../../compartilhado/banco/diretorioDados.js";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
+import { filtroSchema } from "../../projetos/contratos.js";
 
+// Operações de iniciarAtividade
 // --- atividades ---
 export function arquivosDoDiario(pasta:string):string[] {
   semLinks(pasta);
@@ -167,4 +168,21 @@ export async function observar<T>(p:Projeto,tool:string,origem:Origem,entrada:un
   const atividade=iniciarAtividade(p,tool,origem,entrada,opcoes);
   try { const r=await fn();atividade.finalizar(r);return r; }
   catch(e) { atividade.finalizar(e,true);throw e; }
+}
+
+// Operações de resumoDoDiario
+/** Diz se um tipo de achado é uma lacuna (requisito faltando, cobertura, rastreabilidade...). */
+
+export const achadoELacuna=(tipo:string)=>/^(MISSING_|UNVERIFIED_|TRACEABILITY_GAP|COVERAGE_GAP|CONTRADICTORY_REQUIREMENT|CONTEXT_(UNAVAILABLE|NOT_APPROVED|OUTDATED|CONFLICT|SOURCE_MISSING|MISMATCH))/.test(tipo);
+
+/** `consolidado`: o último evento da operação; se ainda for o início, nenhum término foi observado. */
+export function apresentarRegistroDoDiario(e: Evento, consolidado = false) {
+  return { operationId: e.operationId, at: e.at, phase: e.phase, tool: e.tool, origin: e.origin, client: e.client, clientIdentity: e.clientIdentity,
+    state: consolidado && e.phase === 'start' ? 'SEM_TERMINO_OBSERVADO' : e.state, durationMs: e.durationMs, input: e.input, summary: e.summary, findingsText: descreverAchados(e) };
+}
+
+export function descreverAchados(e:Evento) {return e.summary.types.map(t=>`${t.count} × ${orientacoes[t.type]}`).join(' ');}
+
+export function filtrarRegistrosDoDiario(eventos: Evento[], f: z.output<typeof filtroSchema>) {
+  return eventos.filter(e => (!f.tool || e.tool === f.tool) && (!f.state || e.state === f.state) && (!f.since || e.at >= f.since) && (!f.until || e.at <= f.until));
 }
