@@ -1,6 +1,9 @@
-/** Versões de contexto com hashes e selos que protegem a cadeia de alterações. */
-import { hash } from '../../compartilhado/seguranca/hash.js';
-import { Arquivo, Conteudo, Entrada, Estado } from '../tipos/contexto.js';
+/** Valida IDs, versões e integridade dos contextos persistidos. */
+import { z } from "zod";
+import { hash } from "../../compartilhado/seguranca/hash.js";
+import { Arquivo, Conteudo, Entrada, Estado } from "../tipos/contexto.js";
+
+export const idDeContextoValido = (id: string) => z.string().uuid().safeParse(id).success;
 
 export const hashDoConteudoDoContexto = (conteudo: Conteudo) =>
   hash(JSON.stringify([

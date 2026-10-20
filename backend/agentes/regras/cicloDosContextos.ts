@@ -8,7 +8,7 @@ import { gravarPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.j
 import { ErroQa } from '../../compartilhado/erros.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
-import { novaVersaoDoContexto, ultimaVersaoDoContexto, hashDoConteudoDoContexto } from './versoesDoContexto.js';
+import { novaVersaoDoContexto, ultimaVersaoDoContexto, hashDoConteudoDoContexto } from './validacoesDeContexto.js';
 import { Arquivo, conteudoSchema, limites } from '../tipos/contexto.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { carregarTodosOsContextos } from '../banco/consultarContextos.js';

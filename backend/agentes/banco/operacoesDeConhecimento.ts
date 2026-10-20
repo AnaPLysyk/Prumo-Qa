@@ -2,7 +2,7 @@
 import { comBancoDeConhecimento } from "./comBancoDeConhecimento.js";
 import { falharConhecimento, validarAgenteDoConhecimento, validarProjetoDoConhecimento } from "./baseDoConhecimento.js";
 import { Linha, Conhecimento, Filtro, estadosConhecimento, limitesConhecimento, EstadoConhecimento, NovoConhecimento, tiposConhecimento } from "../tipos/conhecimento.js";
-import { raizDaPalavra, termosDaFrase } from "../regras/textosDoConhecimento.js";
+import { raizDaPalavra, termosDaFrase } from "../regras/normalizacaoDoConhecimento.js";
 import { semAcentos } from "../../compartilhado/texto.js";
 import { linhaParaConhecimento, impressaoDoConhecimento } from "./formatosDoConhecimento.js";
 import { randomUUID } from "node:crypto";

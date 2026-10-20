@@ -2,7 +2,7 @@
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/consultarContextos.js';
 import { lerPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
-import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
+import { ultimaVersaoDoContexto } from './validacoesDeContexto.js';
 import { Filtro, Arquivo, Estado, Resumo, ehInstrucao } from '../tipos/contexto.js';
 import { abrirProjetoVinculado } from '../../projetos/servicoProjetos.js';
 import { ErroQa } from '../../compartilhado/erros.js';

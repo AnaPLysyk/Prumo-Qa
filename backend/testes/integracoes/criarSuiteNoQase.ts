@@ -5,8 +5,8 @@ import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { idCriadoNoQase } from '../integracaoFormatosQase.js';
-import { listarNoQase } from './listarNoQase.js';
-import { tituloComparavel } from './consultasDeCasosQase.js';
+import { listarNoQase } from './pesquisasQase.js';
+import { tituloComparavel } from './pesquisasQase.js';
 import { criarSuite } from '../tipos/escritaQase.js';
 
 const mesmaSuite = (s: Record<string, unknown>, p: z.infer<typeof criarSuite>) =>

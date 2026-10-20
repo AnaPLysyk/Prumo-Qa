@@ -1,7 +1,7 @@
 /** Gerencia termos aprendidos, pesos de roteamento e decisões de conhecimento. */
 import { comBancoDeConhecimento } from "./banco/comBancoDeConhecimento.js";
 import { validarAgenteDoConhecimento, falharConhecimento } from "./banco/baseDoConhecimento.js";
-import { termosDaFrase } from "./regras/textosDoConhecimento.js";
+import { termosDaFrase } from "./regras/normalizacaoDoConhecimento.js";
 import { limitesConhecimento, Conhecimento, EstadoConhecimento, Linha } from "./tipos/conhecimento.js";
 import { linhaParaConhecimento } from "./banco/formatosDoConhecimento.js";
 import { semAcentos } from "../compartilhado/texto.js";

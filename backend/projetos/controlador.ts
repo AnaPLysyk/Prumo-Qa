@@ -2,7 +2,7 @@
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { associarEspaco } from "./servicoProjetos.js";
 import { localizarK6 } from "../agendamentos/servicoK6.js";
-import { contextoCompleto } from "../agentes/mcp/contextosDoMcp.js";
+import { contextoCompleto } from "../agentes/mcp/consultasDoProjeto.js";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { obterEspaco } from "./repositorio.js";
 import { criarEspaco } from "./servicoProjetos.js";

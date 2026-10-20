@@ -1,9 +1,18 @@
-/** Confere uma rotina antes de salvar: projeto, capacidade declarada, run do mesmo projeto, k6 e produção bloqueada. */
-import { DadosRotina, dadosRotinaSchema } from '../tipos/rotina.js';
-import { ErroQa } from '../../compartilhado/erros.js';
-import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
-import { obterEspaco } from '../../projetos/repositorio.js';
-import { obterRunLocal } from '../../testes/repositorioRuns.js';
+/** Verifica os limites e capacidades disponíveis para rotinas agendadas. */
+import { capacidadeDoK6 } from "../servicoK6.js";
+import { Rotina, DadosRotina, dadosRotinaSchema } from "../tipos/rotina.js";
+import { obterEspaco } from "../../projetos/repositorio.js";
+import { obterRunLocal } from "../../testes/repositorioRuns.js";
+import { ErroQa } from "../../compartilhado/erros.js";
+import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
+
+export function capacidadesDaRotina(r: Rotina, base?: string): string[] {
+  if (r.tipo === 'smoke' || r.tipo === 'regressao') return r.capability ? [r.capability] : [];
+  if (r.tipo === 'k6') return r.k6 ? [capacidadeDoK6(r.k6)] : [];
+  if (r.tipo === 'run-qase') { try { return [...new Set(obterRunLocal(r.runLocalId!, base).casos.map(c => c.capability).filter((c): c is string => !!c))]; } catch { return []; } }
+  if (r.tipo === 'validacao-ticket') { const e = obterEspaco(r.espacoId, base); return [...new Set(e.relacoes.filter(x => x.de.tipo === 'jira' && x.de.id === r.ticket && x.para.tipo === 'automacao').map(x => x.para.id))].slice(0, 5); }
+  return [];
+}
 
 /** Valida o que o esquema sozinho não vê: projeto existe, pasta de automação, capability declarada e vínculos exigidos. */
 export async function validarRotina(dados: DadosRotina, base?: string) {

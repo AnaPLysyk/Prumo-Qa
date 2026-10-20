@@ -14,7 +14,7 @@ import { entrarNaConta, sairDaConta } from '../../../../dist/login/regras/contas
 import { criarContaPelaAdministracao } from '../../../../dist/administracao/servico.js';
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';
 import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
-import { LIMITE_FOCO, normalizarFoco } from '../../../../dist/agentes/regras/normalizarFoco.js';
+import { LIMITE_FOCO, normalizarFoco } from '../../../../dist/agentes/regras/normalizacaoDoConhecimento.js';
 import { criarEsquemaDoConhecimento } from '../../../../dist/agentes/banco/criarEsquemaDoConhecimento.js';
 import { personalidadeParaIa } from '../../../../dist/agentes/servicoEstiloDoChat.js';
 import { conhecimentoParaIA } from '../../../../dist/agentes/regras/conhecimentoParaIA.js';

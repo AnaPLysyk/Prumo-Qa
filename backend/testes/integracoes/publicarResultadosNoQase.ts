@@ -4,7 +4,7 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { marcadorDaOperacao } from '../../conexoes/escrita/marcadorDaOperacao.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { resultadosDaRun } from './resultadosDaRun.js';
+import { resultadosDaRun } from './pesquisasQase.js';
 import { publicar } from '../tipos/escritaQase.js';
 
 /** Espera base entre releituras (ms); exportada para os testes simularem o atraso sem esperar de verdade. */

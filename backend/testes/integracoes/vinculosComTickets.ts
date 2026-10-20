@@ -1,9 +1,13 @@
-/** Operação "Associar caso do Qase a ticket do Jira". */
-import { z } from 'zod';
-import { codificarParaUrl } from '../../compartilhado/texto.js';
-import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { associarCasoAoTicket } from './associarCasoAoTicket.js';
-import { associarTicket } from '../tipos/escritaQase.js';
+/** Associa casos de teste e tickets, mantendo as confirmações dos serviços. */
+import { codificarParaUrl } from "../../compartilhado/texto.js";
+import { ContextoServico } from "../../conexoes/tipos/adaptador.js";
+import { Recurso } from "../../projetos/contratos.js";
+import { z } from "zod";
+import { DefOperacao } from "../../conexoes/tipos/operacao.js";
+import { associarTicket } from "../tipos/escritaQase.js";
+
+export const associarCasoAoTicket = (ctx: ContextoServico, rec: Recurso, casoId: string, t: string) =>
+  ctx.enviar('POST', `/v1/case/${codificarParaUrl(rec.chave)}/external-issue/attach`, JSON.stringify({ type: 'jira-cloud', links: [{ case_id: Number(casoId), external_issues: [t] }] }));
 
 export const associarTicketAoCasoNoQase: DefOperacao<z.infer<typeof associarTicket>> = {
   id: 'qase.associar_ticket', servico: 'qase', rotulo: 'Associar caso do Qase a ticket do Jira', efeito: 'Registra no Qase o ticket Jira (jira-cloud) de origem do caso.', exigeConfirmacao: true, schema: associarTicket,

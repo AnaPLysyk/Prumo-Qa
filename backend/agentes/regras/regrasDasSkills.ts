@@ -1,6 +1,6 @@
 /** Regras das Skills: validar especialização, dividir conteúdo e selecionar trechos pertinentes. */
 import { ParteDaSkill, limitesSkills, TrechoDeSkill } from "../tipos/skills.js";
-import { raizDaPalavra, termosDaFrase } from "./textosDoConhecimento.js";
+import { raizDaPalavra, termosDaFrase } from "./normalizacaoDoConhecimento.js";
 import { semAcentos } from "../../compartilhado/texto.js";
 import { especializacoes } from "../tipos/politicas.js";
 import { falharCom } from "../../compartilhado/erros.js";

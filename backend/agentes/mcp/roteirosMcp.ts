@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { MeiosDoServidorMcp } from '../tipos/mcp.js';
 import { promptsPrumo, sempre } from '../tipos/roteiros.js';
-import { contaAutorizadaMcp, conferirAcessoMcp } from './contaAutorizadaMcp.js';
+import { contaAutorizadaMcp, conferirAcessoMcp } from './segurancaDaSessao.js';
 import { exigirCapacidade } from '../politicas/avaliarCapacidades.js';
 import { personalidadeParaIa } from '../servicoEstiloDoChat.js';
 

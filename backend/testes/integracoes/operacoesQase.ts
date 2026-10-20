@@ -1,6 +1,6 @@
 /** Lista das operações de escrita no Qase que o Prumo conhece. */
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { associarTicketAoCasoNoQase } from './associarTicketAoCasoNoQase.js';
+import { associarTicketAoCasoNoQase } from './vinculosComTickets.js';
 import { criarDefeitoNoQase } from './criarDefeitoNoQase.js';
 import { mudarStatusDefeitoNoQase } from './mudarStatusDefeitoNoQase.js';
 import { criarCasoNoQase } from './criarCasoNoQase.js';

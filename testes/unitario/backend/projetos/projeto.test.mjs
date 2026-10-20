@@ -4,7 +4,7 @@ import { symlink,readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fixture } from '../../../apoio/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
-import { contextoProjeto } from '../../../../dist/agentes/mcp/contextosDoMcp.js';
+import { contextoProjeto } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
 import { normalizarComando } from '../../../../dist/compartilhado/projeto/normalizarComando.js';
 import { caminhoSeguro } from '../../../../dist/compartilhado/seguranca/caminhoSeguro.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';

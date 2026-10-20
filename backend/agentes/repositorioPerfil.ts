@@ -4,8 +4,8 @@ import { pessoaDoConhecimento } from "./banco/baseDoConhecimento.js";
 import { Linha, Perfil } from "./tipos/conhecimento.js";
 import { Experiencia, Papel, experiencias, papeis } from "./tipos/persona.js";
 import { falharConhecimento } from "./banco/baseDoConhecimento.js";
-import { normalizarFoco } from "./regras/normalizarFoco.js";
-import { normalizarNome } from "./regras/textosDoConhecimento.js";
+import { normalizarFoco } from "./regras/normalizacaoDoConhecimento.js";
+import { normalizarNome } from "./regras/normalizacaoDoConhecimento.js";
 
 const vazio: Perfil = { comoChamar: null, papel: null, experiencia: null, foco: null, compartilharComIa: false, atualizadoEm: null };
 

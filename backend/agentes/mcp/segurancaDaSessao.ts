@@ -1,16 +1,20 @@
-/** Obtém a conta ativa do processo principal; cliente MCP não pode escolher o ID de usuário. */
-import net from 'node:net';
-import { z } from 'zod';
-import { diretorioBase } from '../../compartilhado/banco/diretorioDados.js';
-import { lerLocal } from '../../compartilhado/banco/persistenciaLocal.js';
-import { lerContas } from '../../login/repositorioContas.js';
-import { loginLigado, nivelDaConta, papelDaConta } from '../../login/regras/sessao.js';
+/** Confere a conta ativa, a autorização e o vínculo do projeto antes das chamadas MCP. */
+import net from "node:net";
+import { z } from "zod";
+import { diretorioBase } from "../../compartilhado/banco/diretorioDados.js";
+import { lerLocal } from "../../compartilhado/banco/persistenciaLocal.js";
+import { lerContas } from "../../login/repositorioContas.js";
+import { loginLigado, nivelDaConta, papelDaConta } from "../../login/regras/sessao.js";
+import { ErroQa } from "../../compartilhado/erros.js";
+import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
+import { Projeto } from "../../compartilhado/tipos/projeto.js";
 
 const autorizacao = z.object({
   versao: z.literal(1),
   endereco: z.string().min(10).max(230),
   chave: z.string().regex(/^[a-f0-9]{64}$/),
 }).strict().nullable();
+
 const usuarioValido = /^[a-f0-9-]{36}$/i;
 
 /** O nível de acesso da conta também vale fora da janela. */
@@ -64,4 +68,10 @@ export async function contaAutorizadaMcp(): Promise<string | null> {
     socket.on('error', recusar);
     socket.on('end', () => { if (!recebido.includes('\n')) recusar(); });
   });
+}
+
+export async function projetoAindaVinculado(raiz: string, vinculo: Projeto, contratoLeitura?: string) {
+  const atual = await carregarProjeto(raiz, contratoLeitura);
+  if (atual.manifesto.id !== vinculo.manifesto.id) throw new ErroQa('PROJECT_BINDING_CHANGED', 'Identidade do projeto mudou; reinicie o servidor para vincular o novo histórico.');
+  return atual;
 }

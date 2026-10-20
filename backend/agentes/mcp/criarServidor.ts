@@ -6,7 +6,7 @@ import { espacoDaRaiz } from '../../projetos/servicoProjetos.js';
 import { projetoVinculado } from '../../projetos/servicoProjetos.js';
 import { exigirCapacidade } from '../politicas/avaliarCapacidades.js';
 import { MeiosDoServidorMcp } from '../tipos/mcp.js';
-import { projetoAindaVinculado } from './projetoAindaVinculado.js';
+import { projetoAindaVinculado } from './segurancaDaSessao.js';
 import { registrarConsultarEvidencias } from './registroDeFerramentas.js';
 import { registrarContextoProjeto } from './registroDeFerramentas.js';
 import { registrarExecutarValidacao } from './registroDeFerramentas.js';
@@ -18,7 +18,7 @@ import { registrarRevisarCobertura } from './registroDeFerramentas.js';
 import { registrarRoteirosMcp } from './roteirosMcp.js';
 import { respostaDaFerramentaMcp } from './formatoDasFerramentas.js';
 import { transporteObservado } from './transporteObservado.js';
-import { contaAutorizadaMcp, conferirAcessoMcp } from './contaAutorizadaMcp.js';
+import { contaAutorizadaMcp, conferirAcessoMcp } from './segurancaDaSessao.js';
 import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from '../../compartilhado/banco/escopoDeUsuario.js';
 
 export async function criarServidor(raiz: string, contratoLeitura?: string) {

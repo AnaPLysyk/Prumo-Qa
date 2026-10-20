@@ -7,7 +7,7 @@ import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { camposDeSistema } from '../integracaoFormatosQase.js';
 import { idCriadoNoQase } from '../integracaoFormatosQase.js';
-import { listarNoQase } from './listarNoQase.js';
+import { listarNoQase } from './pesquisasQase.js';
 import { criarDefeito } from '../tipos/escritaQase.js';
 const corpo = (p: z.infer<typeof criarDefeito>, chave: string) => ({
   title: mascarar(p.titulo),

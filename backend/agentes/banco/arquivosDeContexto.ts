@@ -6,8 +6,8 @@ import { hash } from "../../compartilhado/seguranca/hash.js";
 import { semLinks } from "../../compartilhado/seguranca/semLinks.js";
 import { Projeto } from "../../compartilhado/tipos/projeto.js";
 import fs from "node:fs";
-import { hashDoConteudoDoContexto, seloDaVersaoDoContexto } from "../regras/versoesDoContexto.js";
-import { idDeContextoValido } from "../regras/idDeContextoValido.js";
+import { hashDoConteudoDoContexto, seloDaVersaoDoContexto } from "../regras/validacoesDeContexto.js";
+import { idDeContextoValido } from "../regras/validacoesDeContexto.js";
 import { Arquivo, arquivoSchema } from "../tipos/contexto.js";
 import { randomUUID } from "node:crypto";
 

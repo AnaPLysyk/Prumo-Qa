@@ -1,7 +1,7 @@
 /** Controlador da funcionalidade agendamentos: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { autorizarRotina } from "./autorizacoes/autorizarRotina.js";
 import { obterRotina } from "./repositorioAgenda.js";
-import { permissoesDaRotina } from "./regras/permissoes.js";
+import { permissoesDaRotina } from "./regras/consultaDaAgenda.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
@@ -9,15 +9,15 @@ import { idiomaAtual } from "../configuracoes/servico.js";
 import { solicitarAprovacao } from "../testes/servicoAprovacao.js";
 import { desativarRotina, pausarRotina, retomarRotina, excluirRotina } from "./regras/operacoesDaRotina.js";
 import { workerDoAplicativo } from "./worker/workerDoAplicativo.js";
-import { listarAgenda } from "./regras/listarAgenda.js";
-import { listarPermissoes } from "./regras/permissoes.js";
+import { listarAgenda } from "./regras/consultaDaAgenda.js";
+import { listarPermissoes } from "./regras/consultaDaAgenda.js";
 import { criarPoliticaPublicacao } from "./autorizacoes/politicas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { obterEspaco } from "../projetos/repositorio.js";
 import { revogarAutorizacao } from "./autorizacoes/estadoERevogacao.js";
 import { criarRotina } from "./regras/cicloDaRotina.js";
 import { editarRotina } from "./regras/cicloDaRotina.js";
-import { validarRotina } from "./regras/validarRotina.js";
+import { validarRotina } from "./regras/validacaoDaRotina.js";
 
 export const agendaAutorizar: TratadorDoCanal<'agenda:autorizar'> = async (a, j) => {
   const i = idiomaAtual(); const r = obterRotina(a.id);

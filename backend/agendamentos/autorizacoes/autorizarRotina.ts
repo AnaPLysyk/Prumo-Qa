@@ -4,7 +4,7 @@ import { obterRotina } from '../repositorioAgenda.js';
 import { capacidadeDoK6 } from '../servicoK6.js';
 import { escopoDoK6 } from '../servicoK6.js';
 import { localizarK6 } from '../servicoK6.js';
-import { capacidadesDaRotina } from '../regras/capacidadesDaRotina.js';
+import { capacidadesDaRotina } from '../regras/validacaoDaRotina.js';
 import { Solicitador } from '../tipos/autorizacoes.js';
 import { ExecutavelK6 } from '../tipos/k6.js';
 import { ErroQa } from '../../compartilhado/erros.js';

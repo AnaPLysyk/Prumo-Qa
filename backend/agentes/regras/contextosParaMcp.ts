@@ -4,7 +4,7 @@ import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/consultarContextos.js';
 import { lerPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
 import { resumirContextos } from './consultasDeContextos.js';
-import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
+import { ultimaVersaoDoContexto } from './validacoesDeContexto.js';
 import { limites } from '../tipos/contexto.js';
 
 /** O que o MCP enxerga: só se a pessoa habilitou; sem adulterados; texto mascarado e limitado; conteúdo é dado, não instrução. */

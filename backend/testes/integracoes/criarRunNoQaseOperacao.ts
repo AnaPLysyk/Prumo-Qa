@@ -4,10 +4,10 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { marcadorDaOperacao } from '../../conexoes/escrita/marcadorDaOperacao.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { conferirCasosNoQase } from './consultasDeCasosQase.js';
+import { conferirCasosNoQase } from './pesquisasQase.js';
 import { conferirIdsDoObjetoQase } from '../integracaoFormatosQase.js';
 import { idCriadoNoQase } from '../integracaoFormatosQase.js';
-import { listarNoQase } from './listarNoQase.js';
+import { listarNoQase } from './pesquisasQase.js';
 import { criarRun } from '../tipos/escritaQase.js';
 
 export const criarRunNoQaseOperacao: DefOperacao<z.infer<typeof criarRun>> = {

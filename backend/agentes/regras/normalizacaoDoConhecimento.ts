@@ -1,6 +1,14 @@
-/** Reúne textos do conhecimento da funcionalidade, mantendo cada operação identificável pelo nome. */
+/** Normaliza termos, nomes e foco usados no conhecimento dos agentes. */
+import { falharConhecimento } from "../banco/baseDoConhecimento.js";
 import { nomeValido, pare } from "../tipos/conhecimento.js";
 import { semAcentos } from "../../compartilhado/texto.js";
+
+export const LIMITE_FOCO = 160;
+
+export function normalizarFoco(texto: string): string | null {
+  const t = texto.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!t) return null; if (t.length > LIMITE_FOCO) falharConhecimento('PROFILE_FOCUS_INVALID'); return t;
+}
 
 export function normalizarNome(bruto: string): string | null {
   const n = bruto.replace(/[.!?,;:]+$/g, '').replace(/\s+/g, ' ').trim(); if (!nomeValido.test(n)) return null;

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarContexto } from './consultarContextos.js';
-import { ultimaVersaoDoContexto } from '../regras/versoesDoContexto.js';
+import { ultimaVersaoDoContexto } from '../regras/validacoesDeContexto.js';
 import { pastaContextos } from './arquivosDeContexto.js';
 
 /** Elimina o conteúdo e mantém somente identificador, data, hash e versão no registro. */
