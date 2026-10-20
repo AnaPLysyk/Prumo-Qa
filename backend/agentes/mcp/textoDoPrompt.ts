@@ -1,5 +1,5 @@
 /** Monta o texto de um roteiro MCP do Prumo com os valores informados. */
-import { personalidadeParaIa } from '../chat/personalidadeParaIa.js';
+import { personalidadeParaIa } from '../servicoEstiloDoChat.js';
 import { promptsPrumo, sempre } from '../tipos/roteiros.js';
 
 /** Texto completo de um prompt: personalidade + regras + passos. Mesmo resultado no MCP e no CLI. */

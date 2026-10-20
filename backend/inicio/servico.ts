@@ -6,7 +6,7 @@ import { listarContextosDaPasta } from "../agentes/regras/listarContextosDaPasta
 import { Fonte, Resposta, pare } from "./contratos.js";
 import { metricasDasExecucoes } from "../metricas/servico.js";
 import { obterEspaco } from "../projetos/repositorio.js";
-import { listarRunsLocais } from "../testes/banco/listarRunsLocais.js";
+import { listarRunsLocais } from "../testes/repositorioRuns.js";
 import { listarPropostas } from "../tickets/repositorio.js";
 
 /** Identifica palavras-chave no texto normalizado da pergunta sem consultar serviços externos. */

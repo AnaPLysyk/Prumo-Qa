@@ -22,7 +22,7 @@ mock.module('../../../../dist/projetos/repositorio.js', { exports: {
 mock.module('../../../../dist/tickets/repositorio.js', { exports: {
   listarPropostas: id => propostas.filter(p => p.espacoId === id)
 } });
-mock.module('../../../../dist/testes/banco/lerRepositorioLocal.js', { exports: {
+mock.module('../../../../dist/testes/repositorioLocal.js', { exports: {
   lerRepositorioLocal: () => ({ version: 1, casos: [], suites: [] })
 } });
 const { associarEspaco } = await import('../../../../dist/projetos/servicoProjetos.js');

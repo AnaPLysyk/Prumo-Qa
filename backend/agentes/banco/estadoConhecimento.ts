@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import { caminhoConhecimento } from './caminhoConhecimento.js';
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
-import { lerPerfil } from './lerPerfil.js';
+import { lerPerfil } from '../repositorioPerfil.js';
 import { pessoaDoConhecimento } from './pessoaDoConhecimento.js';
 import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
 import { vistaDoAgente } from './formatosDoConhecimento.js';

@@ -1,8 +1,8 @@
 /** Atende uma pergunta do chat: entende intenções, escolhe o agente, responde localmente e, se autorizado, consulta Claude ou Codex. */
-import { lerPerfil } from '../banco/lerPerfil.js';
-import { nomeParaChamar } from './nomeParaChamar.js';
-import { pesosAprendidos } from '../banco/pesosAprendidos.js';
-import { aplicarEstilo } from './aplicarEstilo.js';
+import { lerPerfil } from '../repositorioPerfil.js';
+import { nomeParaChamar } from '../servicoEstiloDoChat.js';
+import { pesosAprendidos } from '../repositorioAprendizados.js';
+import { aplicarEstilo } from '../servicoEstiloDoChat.js';
 import { escolherAgente } from './escolherAgente.js';
 
 import { intencaoDePerfil } from './intencaoDePerfil.js';
@@ -12,7 +12,7 @@ import { responderComDadosLocais } from './responderComDadosLocais.js';
 
 import { orquestrar } from './orquestrar.js';
 import { planejarOrquestracao } from './planejarOrquestracao.js';
-import { registrarOrquestracao } from '../banco/registrarOrquestracao.js';
+import { registrarOrquestracao } from '../repositorioOrquestracao.js';
 import { Orquestracao } from '../tipos/orquestracao.js';
 import { Coleta, ContextoChat, Estilo, Meta, Opcoes, Resposta, agentePorTipo } from '../tipos/chat.js';
 import { consultarIaExterna } from './consultarIaExterna.js';
@@ -26,7 +26,7 @@ import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 import { listarConhecimentos } from '../banco/listarConhecimentos.js';
 import { Fonte } from '../../inicio/contratos.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
-import { catalogoDeTestes } from '../../testes/regras/catalogoDeTestes.js';
+import { catalogoDeTestes } from '../../testes/servicoClassificacao.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { registrarConhecimento } from '../banco/registrarConhecimento.js';
 

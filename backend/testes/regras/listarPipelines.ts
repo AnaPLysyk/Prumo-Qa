@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { limites } from '../tipos/catalogoDeTestes.js';
-import { pareceArquivoDePipeline } from './identificarArquivosDeTeste.js';
+import { pareceArquivoDePipeline } from '../servicoClassificacao.js';
 
 type ResumoDePipeline = { arquivo: string; nome: string; eventos: string[]; jobs: string[]; linhas: number };
 

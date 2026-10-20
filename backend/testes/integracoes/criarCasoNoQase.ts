@@ -6,8 +6,8 @@ import { DefOperacao, Remoto } from '../../conexoes/tipos/operacao.js';
 import { acharCasoNoQase } from './consultasDeCasosQase.js';
 import { associarCasoAoTicket } from './associarCasoAoTicket.js';
 import { automacaoLida } from './automacaoNoQase.js';
-import { corpoDoCasoQase } from './corpoDoCasoQase.js';
-import { idCriadoNoQase } from './idCriadoNoQase.js';
+import { corpoDoCasoQase } from '../integracaoFormatosQase.js';
+import { idCriadoNoQase } from '../integracaoFormatosQase.js';
 import { esquemaCaso } from '../tipos/escritaQase.js';
 
 export const criarCasoNoQase: DefOperacao<z.infer<typeof esquemaCaso>> = {

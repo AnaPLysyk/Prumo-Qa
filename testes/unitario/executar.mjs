@@ -1,21 +1,13 @@
 /** Seleciona testes pelo caminho testes/<natureza>/<camada>/<modulo>/; não compila, recusa o perfil instalado e preserva o hook em memória. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 export const raiz = fileURLToPath(new URL('../../', import.meta.url));
 export const naturezas = ['unitario'];
 export const camadas = ['backend', 'frontend'];
-/** Recursos fictícios permanecem no Prumo QA Lab; nunca são versionados no aplicativo. */
-export function localizarMontador(base = raiz, env = process.env) {
-  const opcoes = [env.PRUMO_LAB_DIR, path.join(base, '.lab'), path.resolve(base, '..', 'Prumo-QA-Lab')].filter(Boolean);
-  for (const opcao of opcoes) {
-    const arquivo = path.join(path.resolve(opcao), 'automacao', 'prumo-qa', 'montar-recursos.mjs');
-    if (fs.existsSync(arquivo)) return arquivo;
-  }
-  throw new Error('PRUMO_LAB_NECESSARIO: clone o Prumo-QA-Lab ao lado deste projeto ou defina PRUMO_LAB_DIR');
-}
+/** Simuladores necessários são versionados em testes/apoio; não exigem outro repositório. */
 export function arquivosDeTeste(base = raiz, pasta = 'testes') {
   return fs.readdirSync(path.join(base, pasta), { withFileTypes: true }).flatMap(e => {
     const arquivo = pasta + '/' + e.name;
@@ -61,8 +53,8 @@ export function planoDeExecucao(selecao, env = process.env, isolado = false) {
   if (Object.entries(env).some(([k, v]) => (k === 'PRUMO_APP_EXE' || k.startsWith('PRUMO_MIGRACAO')) && v)) throw new Error('TEST_REAL_PROFILE_BLOCKED: remova PRUMO_APP_EXE e flags PRUMO_MIGRACAO');
   if (isolado && env.PRUMO_DATA_DIR) throw new Error('TEST_DATA_PROFILE_BLOCKED: remova PRUMO_DATA_DIR externo');
   if (!selecao.length) throw new Error('TEST_SELECTION_EMPTY');
-  return [...(isolado ? ['--require', './testes/unitario/infra/bloquear-efeitos.cjs'] : []),
-    '--require', './testes/unitario/infra/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
+  return [...(isolado ? ['--require', './testes/apoio/bloquear-efeitos.cjs'] : []),
+    '--require', './testes/apoio/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
 }
 export async function executar(args = process.argv.slice(2)) {
   const { filtros, listar, isolado } = argumentos(args);
@@ -72,15 +64,19 @@ export async function executar(args = process.argv.slice(2)) {
   if (listar) { console.log(JSON.stringify(isolado ? { elegiveis: selecao, pendentes } : selecao, null, 2)); return 0; }
   if (isolado) console.log('CHECK_ISOLADO: ' + selecao.length + ' arquivos elegíveis; ' + pendentes.length + ' arquivos NOT_RUN (requerem Electron).');
   for (const p of pendentes) console.log('NOT_RUN|' + p.motivo + '|' + p.arquivo);
-  const { montarRecursosUnitarios } = await import(pathToFileURL(localizarMontador()).href);
-  const limpar = montarRecursosUnitarios(raiz);
-  try {
-    const argv = planoDeExecucao(selecao, process.env, isolado);
-    const resultado = spawnSync(process.execPath, argv, { cwd: raiz, env: process.env, stdio: 'inherit', windowsHide: true });
-    if (resultado.error) throw resultado.error;
-    if (isolado) console.log('CHECK_ISOLADO_RESULTADO=' + (resultado.status === 0 ? 'PASS' : 'FAIL') + '; E2E_ELECTRON=NOT_RUN; ARQUIVOS_PENDENTES=' + pendentes.length);
-    return resultado.status ?? 1;
-  } finally { limpar(); }
+  const arquivosApoio = ['bloquear-efeitos.cjs', 'conhecimento-hook.cjs', 'conhecimento-substitutos.cjs', 'conhecimento-falso.mjs'];
+  for (const nome of arquivosApoio) {
+    if (!fs.existsSync(path.join(raiz, 'testes', 'apoio', nome))) {
+      throw new Error('TEST_APOIO_AUSENTE: ' + nome);
+    }
+  }
+  const argv = planoDeExecucao(selecao, process.env, isolado);
+  const resultado = spawnSync(process.execPath, argv, {
+    cwd: raiz, env: process.env, stdio: 'inherit', windowsHide: true
+  });
+  if (resultado.error) throw resultado.error;
+  if (isolado) console.log('CHECK_ISOLADO_RESULTADO=' + (resultado.status === 0 ? 'PASS' : 'FAIL') + '; E2E_ELECTRON=NOT_RUN; ARQUIVOS_PENDENTES=' + pendentes.length);
+  return resultado.status ?? 1;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { process.exitCode = await executar(); } catch (erro) { console.error(erro.message); process.exitCode = 1; }

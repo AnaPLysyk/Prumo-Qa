@@ -1,4 +1,4 @@
-/** Persistência de conexoes: operações relacionadas no mesmo módulo. */
+/** Gerencia caminhos e registros dos testes de integração com serviços. */
 import path from "node:path";
 import { hash } from "../compartilhado/seguranca/hash.js";
 import { Projeto } from "../compartilhado/tipos/projeto.js";

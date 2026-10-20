@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { aprovarNoMac } from '../../../../dist/testes/aprovacao/aprovarNoMac.js';
-import { aprovarNoLinux } from '../../../../dist/testes/aprovacao/aprovarNoLinux.js';
-import { textoDaAprovacao } from '../../../../dist/testes/aprovacao/textoDaAprovacao.js';
+import { aprovarNoMac } from '../../../../dist/testes/servicoAprovacao.js';
+import { aprovarNoLinux } from '../../../../dist/testes/servicoAprovacao.js';
+import { textoDaAprovacao } from '../../../../dist/testes/servicoAprovacao.js';
 
 const escopo = (extra = {}) => ({ projectId: 'proj', root: '/home/ana/projeto', capability: 'unit', scopeHash: 'a'.repeat(64), command: '["npm","test"]', expiresAt: new Date(Date.now() + 60000).toISOString(), ...extra });
 const executor = (respostas) => { const chamadas = []; const f = async (programa, args, prazo) => { chamadas.push({ programa, args, prazo }); return respostas.shift() ?? { code: 1, timedOut: false }; }; f.chamadas = chamadas; return f; };

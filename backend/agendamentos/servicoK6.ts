@@ -11,10 +11,10 @@ import path from "node:path";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { caminhoSeguro } from "../compartilhado/seguranca/caminhoSeguro.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { salvarEvidencia } from "../testes/banco/salvarEvidencia.js";
+import { salvarEvidencia } from "../testes/repositorioEvidencias.js";
 import { classificarResultado } from "../testes/regras/classificarResultado.js";
 import { Evidencia } from "../testes/tipos/evidencia.js";
-import { solicitarAprovacao } from "../testes/aprovacao/solicitarAprovacao.js";
+import { solicitarAprovacao } from "../testes/servicoAprovacao.js";
 import { criarEvidenciaInicial } from "../testes/regras/criarEvidenciaInicial.js";
 import { Delegada } from "../testes/tipos/execucao.js";
 

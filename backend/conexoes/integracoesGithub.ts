@@ -1,4 +1,4 @@
-/** Lógica e contratos de conexoes: operações relacionadas no mesmo módulo. */
+/** Consulta arquivos, issues, commits, workflows e revisões do GitHub. */
 import { ParametrosConsulta } from "./tipos/ParametrosConsulta.js";
 import { ResultadoConsulta } from "./tipos/ResultadoConsulta.js";
 import { z } from "zod";

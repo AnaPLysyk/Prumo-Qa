@@ -19,9 +19,9 @@ mock.module('../../../../dist/projetos/repositorio.js', { exports: { obterEspaco
   return { ...projeto, id };
 } } });
 mock.module('../../../../dist/tickets/repositorio.js', { exports: { listarPropostas: id => legados.filter(p => p.espacoId === id) } });
-const { listarRepositorioLocal } = await import('../../../../dist/testes/regras/listarRepositorioLocal.js');
-const { salvarCasoLocal } = await import('../../../../dist/testes/regras/salvarCasoLocal.js');
-const { salvarSuiteLocal } = await import('../../../../dist/testes/regras/salvarSuiteLocal.js');
+const { listarRepositorioLocal } = await import('../../../../dist/testes/servicoCasos.js');
+const { salvarCasoLocal } = await import('../../../../dist/testes/servicoCasos.js');
+const { salvarSuiteLocal } = await import('../../../../dist/testes/servicoCasos.js');
 
 const diretorio = t => {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-local-fixture-'));

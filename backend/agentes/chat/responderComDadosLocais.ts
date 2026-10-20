@@ -15,8 +15,8 @@ import { Fonte } from '../../inicio/contratos.js';
 import { metricasDasExecucoes } from '../../metricas/servico.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
 import { Espaco } from '../../projetos/contratos.js';
-import { listarRunsLocais } from '../../testes/banco/listarRunsLocais.js';
-import { catalogoDeTestes } from '../../testes/regras/catalogoDeTestes.js';
+import { listarRunsLocais } from '../../testes/repositorioRuns.js';
+import { catalogoDeTestes } from '../../testes/servicoClassificacao.js';
 import { listarPropostas } from '../../tickets/repositorio.js';
 
 /** Classificação inicial de uma falha pelo texto do resultado. É hipótese: confirmar reproduzindo. */

@@ -5,9 +5,9 @@ import { definirEstadoJiraDoTrabalho } from '../../agendamentos/repositorioFila.
 import { obterTrabalho } from '../../agendamentos/repositorioFila.js';
 import { gravarPublicacoesJira } from '../banco/publicacoesJira.js';
 import { lerPublicacoesJira } from '../banco/publicacoesJira.js';
-import { codigoDoErroDePublicacao } from '../regras/codigoDoErroDePublicacao.js';
+import { codigoDoErroDePublicacao } from '../servicoPublicacao.js';
 import { montarComentario } from '../regras/montarComentario.js';
-import { publicacaoPodeRepetir } from '../regras/publicacaoPodeRepetir.js';
+import { publicacaoPodeRepetir } from '../servicoPublicacao.js';
 import { Pub, PublicadorJira, registroPub } from '../tipos/comentarioJira.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
 

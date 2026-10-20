@@ -1,14 +1,14 @@
 /** Controlador da funcionalidade agentes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
-import { configuracaoDoEspaco } from "./politicas/configuracaoDoEspaco.js";
+import { configuracaoDoEspaco } from "./servicoPoliticas.js";
 import { matrizDePoliticas } from "./politicas/avaliarCapacidades.js";
 import { especializacoes } from "./tipos/politicas.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { listarPropostas } from "../tickets/repositorio.js";
-import { listarOrquestracoes } from "./banco/listarOrquestracoes.js";
+import { listarOrquestracoes } from "./repositorioOrquestracao.js";
 import { listarAgentesPessoais, importarPreviasAntigas, excluirAgentePessoal, salvarAgentePessoal } from "./regras/agentesPessoais.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { rastrearPergunta } from "./chat/rastrearPergunta.js";
-import { salvarConfiguracao } from "./politicas/salvarConfiguracao.js";
+import { salvarConfiguracao } from "./servicoPoliticas.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";

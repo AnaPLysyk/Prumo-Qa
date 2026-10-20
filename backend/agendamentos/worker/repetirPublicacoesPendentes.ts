@@ -1,6 +1,6 @@
 /** Tenta de novo os comentários no Jira que falharam por rede ou serviço (sem duplicar); depois de 3 tentativas, marca como falha. */
 import { publicarComentarioDeResultado } from '../../testes/integracoes/publicarComentarioDeResultado.js';
-import { publicacaoPodeRepetir } from '../../testes/regras/publicacaoPodeRepetir.js';
+import { publicacaoPodeRepetir } from '../../testes/servicoPublicacao.js';
 import { definirEstadoJiraDoTrabalho } from '../repositorioFila.js';
 import { listarTrabalhos } from '../repositorioFila.js';
 import { obterTrabalho } from '../repositorioFila.js';

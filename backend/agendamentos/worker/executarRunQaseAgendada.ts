@@ -2,9 +2,9 @@
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { Executor } from '../../conexoes/tipos/operacoesExternas.js';
 import { executarValidacao } from '../../testes/regras/executarValidacao.js';
-import { obterRunLocal } from '../../testes/banco/armazenamentoDeRuns.js';
+import { obterRunLocal } from '../../testes/repositorioRuns.js';
 import { publicarRunLocal } from '../../testes/integracoes/publicarRunLocal.js';
-import { executarRunLocal } from '../../testes/regras/executarRunLocal.js';
+import { executarRunLocal } from '../../testes/servicoExecucoes.js';
 import { autorizacaoDelegada } from '../autorizacoes/autorizacaoDelegada.js';
 import { ResultadoTrabalho, Trabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';

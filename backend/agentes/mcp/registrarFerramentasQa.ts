@@ -1,6 +1,6 @@
 /** Reúne registrar ferramentas qa da funcionalidade, mantendo cada operação identificável pelo nome. */
 import { z } from "zod";
-import { consultarEvidencias } from "../../testes/banco/consultarEvidencias.js";
+import { consultarEvidencias } from "../../testes/repositorioEvidencias.js";
 import { MeiosDoServidorMcp, somenteLeitura } from "../tipos/mcp.js";
 import { contextoCompleto } from "./contextoCompleto.js";
 import { executarValidacao } from "../../testes/regras/executarValidacao.js";

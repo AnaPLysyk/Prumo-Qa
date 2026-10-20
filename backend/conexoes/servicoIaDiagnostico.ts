@@ -1,4 +1,4 @@
-/** Lógica e contratos de conexoes: operações relacionadas no mesmo módulo. */
+/** Inspeciona configurações, testa protocolos e diagnostica conexões de IA. */
 import { mesmoCaminho } from "./ia/mesmoCaminho.js";
 import { Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools } from "./tipos/integracaoIa.js";
 import fs from "node:fs";

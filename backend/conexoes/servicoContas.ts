@@ -1,4 +1,4 @@
-/** Lógica e contratos de conexoes: operações relacionadas no mesmo módulo. */
+/** Adiciona, valida e seleciona contas vinculadas a serviços externos. */
 import { AdaptadorServico } from "./integracoes/AdaptadorServico.js";
 import { Conta, ContextoDosServicos, conexaoEntrada, contaSchema } from "./tipos/contaDeServico.js";
 import { randomUUID } from "node:crypto";

@@ -1,6 +1,6 @@
 /** Cria rascunhos de bug para os casos que falharam na run. */
 import { obterEspaco } from '../../projetos/repositorio.js';
-import { obterRunLocal } from '../banco/armazenamentoDeRuns.js';
+import { obterRunLocal } from '../repositorioRuns.js';
 import { criarProposta } from '../../tickets/servicoPropostas.js';
 import { classificacoesDeFalha } from '../../tickets/contratos.js';
 

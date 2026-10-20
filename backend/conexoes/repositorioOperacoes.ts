@@ -1,4 +1,4 @@
-/** Persistência de conexoes: operações relacionadas no mesmo módulo. */
+/** Lê, grava e consulta o registro local de operações e permissões de escrita. */
 import { lerLocal } from "../compartilhado/banco/lerLocal.js";
 import { Razao, razaoSchema, Entrada, RegistroOperacao, itemSchema, Perm, permSchema } from "./tipos/operacoesExternas.js";
 import { gravarLocal } from "../compartilhado/banco/gravarLocal.js";

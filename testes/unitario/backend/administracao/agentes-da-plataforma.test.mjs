@@ -8,7 +8,7 @@ import path from 'node:path';
 import { agentesDaPlataformaParaJanela, especializacaoLigada, regrasDosAgentes, salvarAgentesDaPlataforma } from '../../../../dist/administracao/servico.js';
 import { escolherAgente } from '../../../../dist/agentes/chat/escolherAgente.js';
 import { agentesDoChat } from '../../../../dist/agentes/chat/agentesDoChat.js';
-import { configuracaoDoEspaco } from '../../../../dist/agentes/politicas/configuracaoDoEspaco.js';
+import { configuracaoDoEspaco } from '../../../../dist/agentes/servicoPoliticas.js';
 
 const pasta = (t) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-agentes-plataforma-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };
 const espaco = '11111111-1111-4111-8111-111111111111';

@@ -12,11 +12,11 @@ import { hash } from '../../compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../compartilhado/seguranca/lerSeguro.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { Comando, Projeto } from '../../compartilhado/tipos/projeto.js';
-import { salvarEvidencia } from '../banco/salvarEvidencia.js';
+import { salvarEvidencia } from '../repositorioEvidencias.js';
 import { classificarResultado } from './classificarResultado.js';
 import { criarEvidenciaInicial } from './criarEvidenciaInicial.js';
 import { Evidencia, resultadoRunnerSchema } from '../tipos/evidencia.js';
-import { solicitarAprovacao } from '../aprovacao/solicitarAprovacao.js';
+import { solicitarAprovacao } from '../servicoAprovacao.js';
 import { ambienteMinimo } from './ambienteMinimo.js';
 
 import { escopoDaExecucao } from './escopoDaExecucao.js';

@@ -5,8 +5,8 @@ import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js'
 import { marcadorDaOperacao } from '../../conexoes/escrita/marcadorDaOperacao.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { camposDeSistema } from './camposDeSistema.js';
-import { idCriadoNoQase } from './idCriadoNoQase.js';
+import { camposDeSistema } from '../integracaoFormatosQase.js';
+import { idCriadoNoQase } from '../integracaoFormatosQase.js';
 import { listarNoQase } from './listarNoQase.js';
 import { criarDefeito } from '../tipos/escritaQase.js';
 const corpo = (p: z.infer<typeof criarDefeito>, chave: string) => ({

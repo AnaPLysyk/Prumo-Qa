@@ -10,7 +10,7 @@ import { carregarVersoes } from "./servicoVersoes.js";
 import { conferirInstalada } from "./servicoVersoes.js";
 import { dialog, shell } from "electron";
 import { excluirTodosContextos } from "../agentes/banco/excluirTodosContextos.js";
-import { excluirEvidencias } from "../testes/banco/excluirEvidencias.js";
+import { excluirEvidencias } from "../testes/repositorioEvidencias.js";
 import { excluirAtividades } from "../logs/banco/excluirAtividades.js";
 import { excluirDiagnostico } from "../logs/repositorioDiagnostico.js";
 import { projetoVinculado } from "../projetos/servicoProjetos.js";

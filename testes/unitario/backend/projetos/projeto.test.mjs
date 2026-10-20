@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { symlink,readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fixture } from '../../infra/fixtures.mjs';
+import { fixture } from '../../../apoio/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { contextoProjeto } from '../../../../dist/agentes/mcp/contextoProjeto.js';
 import { normalizarComando } from '../../../../dist/compartilhado/projeto/normalizarComando.js';
@@ -10,7 +10,7 @@ import { caminhoSeguro } from '../../../../dist/compartilhado/seguranca/caminhoS
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
 import { lerSeguro } from '../../../../dist/compartilhado/seguranca/lerSeguro.js';
 import { mascarar } from '../../../../dist/compartilhado/seguranca/mascarar.js';
-import { consultarEvidencias } from '../../../../dist/testes/banco/consultarEvidencias.js';
+import { consultarEvidencias } from '../../../../dist/testes/repositorioEvidencias.js';
 import { classificarResultado as classificar } from '../../../../dist/testes/regras/classificarResultado.js';
 
 test('fixtures API, web e automação reconhecidas com fontes reais',async t=>{

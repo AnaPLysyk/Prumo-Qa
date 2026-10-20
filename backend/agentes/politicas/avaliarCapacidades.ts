@@ -1,5 +1,5 @@
 /** Política de capacidades: consulta efetiva, exigência de autorização e matriz da interface. */
-import { configuracaoDoEspaco } from './configuracaoDoEspaco.js';
+import { configuracaoDoEspaco } from '../servicoPoliticas.js';
 import {
   Configuracao, EstadoCapacidade, capacidades, especializacoes, idsEsp
 } from '../tipos/politicas.js';

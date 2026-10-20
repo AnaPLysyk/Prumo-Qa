@@ -1,8 +1,8 @@
 /** Controlador da funcionalidade testes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import type { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { salvarCasoLocal } from "./regras/salvarCasoLocal.js";
-import { listarRepositorioLocal } from "./regras/listarRepositorioLocal.js";
-import { salvarSuiteLocal } from "./regras/salvarSuiteLocal.js";
+import { salvarCasoLocal } from "./servicoCasos.js";
+import { listarRepositorioLocal } from "./servicoCasos.js";
+import { salvarSuiteLocal } from "./servicoCasos.js";
 
 export const repositorioCaso: TratadorDoCanal<'repositorio:caso'> =
   dados => salvarCasoLocal(dados);

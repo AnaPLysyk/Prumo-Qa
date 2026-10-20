@@ -4,8 +4,8 @@ import { autorizarDelegacaoDeIa } from "./regras/autorizarDelegacaoDeIa.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { lerPreferencias } from "../configuracoes/repositorio.js";
 import { regrasDosAgentes } from "../administracao/servico.js";
-import { lerPerfil } from "./banco/lerPerfil.js";
-import { salvarPerfil } from "./banco/salvarPerfil.js";
+import { lerPerfil } from "./repositorioPerfil.js";
+import { salvarPerfil } from "./repositorioPerfil.js";
 
 export const iaDelegacao: TratadorDoCanal<'ia:delegacao'> = async (a, janela) => {
   if (a.valor && !regrasDosAgentes().iaExterna) throw new Error('EXTERNAL_AI_DISABLED: a Administração desligou o uso de Claude Code e Codex nesta instalação.');

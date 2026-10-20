@@ -14,7 +14,7 @@ import { obterEspaco } from '../../projetos/repositorio.js';
 import { registrarConhecimento } from '../banco/registrarConhecimento.js';
 import { Acao, Opcoes, Provedor } from '../tipos/chat.js';
 import { AgenteChat } from '../tipos/persona.js';
-import { personalidadeParaIa } from './personalidadeParaIa.js';
+import { personalidadeParaIa } from '../servicoEstiloDoChat.js';
 import { Coleta, Estilo, ExtrasPrompt } from '../tipos/chat.js';
 import { situacaoDaSessao } from '../../login/regras/sessao.js';
 

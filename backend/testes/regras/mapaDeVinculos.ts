@@ -3,11 +3,11 @@ import { listarOperacoes } from '../../conexoes/repositorioOperacoes.js';
 import { obterEspaco } from '../../projetos/repositorio.js';
 import { GrafoDeVinculos, LacunaDoMapa } from '../tipos/mapaDeVinculos.js';
 import { Espaco } from '../../projetos/contratos.js';
-import { catalogoDeTestes } from './catalogoDeTestes.js';
-import { listarRunsLocais } from '../banco/listarRunsLocais.js';
+import { catalogoDeTestes } from '../servicoClassificacao.js';
+import { listarRunsLocais } from '../repositorioRuns.js';
 import { listarTrabalhos } from '../../agendamentos/repositorioFila.js';
 import { listarPropostas } from '../../tickets/repositorio.js';
-import { listarRepositorioLocal } from './listarRepositorioLocal.js';
+import { listarRepositorioLocal } from '../servicoCasos.js';
 
 export function mapaDeVinculos(espacoId: string, b?: string) {
   const e = obterEspaco(espacoId, b); const g = novoGrafoDeVinculos(); const avisos: string[] = [];

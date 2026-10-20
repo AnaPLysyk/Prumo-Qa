@@ -1,6 +1,6 @@
 /** Comando "prumo evidencias": lista as evidências ou uma pelo id. */
 import { Projeto } from '../compartilhado/tipos/projeto.js';
-import { consultarEvidencias } from '../testes/banco/consultarEvidencias.js';
+import { consultarEvidencias } from '../testes/repositorioEvidencias.js';
 import { chamadaRegistrada } from './chamadaRegistrada.js';
 import { imprimirJson } from './saidaDoTerminal.js';
 import { textoSeguroNoTerminal } from './saidaDoTerminal.js';

@@ -1,5 +1,5 @@
 /** Controlador da funcionalidade inicio: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
-import { saudacao } from "../agentes/chat/saudacao.js";
+import { saudacao } from "../agentes/servicoEstiloDoChat.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { lerPreferencias } from "../configuracoes/repositorio.js";
 

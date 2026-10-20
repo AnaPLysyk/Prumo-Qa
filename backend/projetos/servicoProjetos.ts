@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { atualizarEspaco, gravarEspacos, lerEspacos, listarEspacos, gravarPastasVinculadas, lerPastasVinculadas, obterEspaco } from "./repositorio.js";
 import { listarPropostas } from "../tickets/repositorio.js";
-import { lerRepositorioLocal } from "../testes/banco/lerRepositorioLocal.js";
+import { lerRepositorioLocal } from "../testes/repositorioLocal.js";
 import { associacaoSchema, servicoDaReferencia, Espaco, dadosEspaco, evento, Situacao, instrucoesManifesto, Servico, Recurso, vinculoSchema } from "./contratos.js";
 import fs from "node:fs";
 import path from "node:path";

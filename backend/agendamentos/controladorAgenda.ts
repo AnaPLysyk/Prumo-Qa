@@ -6,7 +6,7 @@ import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
-import { solicitarAprovacao } from "../testes/aprovacao/solicitarAprovacao.js";
+import { solicitarAprovacao } from "../testes/servicoAprovacao.js";
 import { desativarRotina, pausarRotina, retomarRotina, excluirRotina } from "./regras/operacoesDaRotina.js";
 import { workerDoAplicativo } from "./worker/workerDoAplicativo.js";
 import { listarAgenda } from "./regras/listarAgenda.js";

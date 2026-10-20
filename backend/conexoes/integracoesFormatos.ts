@@ -1,4 +1,4 @@
-/** Lógica e contratos de conexoes: operações relacionadas no mesmo módulo. */
+/** Normaliza parâmetros, IDs, textos e respostas de serviços externos. */
 import { codificarParaUrl } from "../compartilhado/texto/codificarParaUrl.js";
 import { ErroServico } from "./integracoes/ErroServico.js";
 import { Recurso, identidadeRecurso } from "../projetos/contratos.js";

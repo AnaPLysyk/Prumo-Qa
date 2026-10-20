@@ -50,7 +50,7 @@ test('suítes locais têm formulário próprio, edição e escopo do projeto', (
 
 test('associação de casos locais valida IDs e o escopo no back-end', () => {
   const ui = read('frontend/testes/fluxos-casos-qase.parte.js');
-  const regra = read('backend/projetos/regras/associarEspaco.ts');
+  const regra = read('backend/projetos/servicoProjetos.ts');
   assert.match(ui, /api\.espacoAssociar\(e\.id, d\)/);
   assert.match(ui, /tipo: 'caso-local', id: caso\.id, origem: 'prumo'/);
   assert.match(ui, /tipo: 'ticket-local', id: seletor\.value, origem: 'prumo'/);

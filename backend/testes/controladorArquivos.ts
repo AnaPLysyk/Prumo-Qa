@@ -3,11 +3,11 @@ import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { obterEspaco } from "../projetos/repositorio.js";
-import { arquivoDeTeste } from "./regras/arquivoDeTeste.js";
-import { catalogoDeTestes } from "./regras/catalogoDeTestes.js";
+import { arquivoDeTeste } from "./servicoClassificacao.js";
+import { catalogoDeTestes } from "./servicoClassificacao.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { escreverArquivoDeTeste } from "./regras/escreverArquivoDeTeste.js";
-import { pareceArquivoDePipeline } from "./regras/identificarArquivosDeTeste.js";
+import { pareceArquivoDePipeline } from "./servicoClassificacao.js";
 import { listarPipelines } from "./regras/listarPipelines.js";
 
 export const testesArquivo: TratadorDoCanal<'testes:arquivo'> = a => { const e = obterEspaco(a.espacoId); if (!e.pastaLocal) throw new Error('PASTA_AUSENTE'); const r = arquivoDeTeste(e.pastaLocal, a.arquivo); const conteudo = mascarar(r.conteudo); return { ...r, conteudo, hash: hash(r.conteudo), editavel: conteudo === r.conteudo }; };

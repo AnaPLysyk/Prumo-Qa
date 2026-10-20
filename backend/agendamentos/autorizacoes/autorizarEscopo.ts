@@ -7,7 +7,7 @@ import { gravarAutorizacoes } from '../banco/autorizacoes.js';
 import { lerAutorizacoes } from '../banco/autorizacoes.js';
 import { AutorizacaoExecucao, EscopoAutorizado, MAX_USOS, Solicitador, execSchema } from '../tipos/autorizacoes.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { solicitarAprovacao } from '../../testes/aprovacao/solicitarAprovacao.js';
+import { solicitarAprovacao } from '../../testes/servicoAprovacao.js';
 
 /** Pede o consentimento humano nativo para este escopo exato e só então grava a autorização. */
 export async function autorizarEscopo(p: Projeto, espacoId: string, capability: string, ambiente: string, escopo: EscopoAutorizado, opcoes: { dias: number; maxUsos: number }, base?: string, solicitar: Solicitador = solicitarAprovacao, agora = new Date()): Promise<AutorizacaoExecucao> {

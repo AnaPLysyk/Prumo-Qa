@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { fixture } from '../../infra/fixtures.mjs';
+import { fixture } from '../../../apoio/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
 import { executarValidacao } from '../../../../dist/testes/regras/executarValidacao.js';

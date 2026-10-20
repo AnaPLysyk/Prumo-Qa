@@ -1,9 +1,9 @@
-/** Lógica e contratos de conexoes: operações relacionadas no mesmo módulo. */
+/** Consulta cadastros, campos e planos de teste remotos do Qase. */
 import { z } from "zod";
 import { codificarParaUrl } from "../compartilhado/texto/codificarParaUrl.js";
 import { ParametrosConsulta } from "./tipos/ParametrosConsulta.js";
 import { ResultadoConsulta } from "./tipos/ResultadoConsulta.js";
-import { camposDeSistema } from "../testes/integracoes/camposDeSistema.js";
+import { camposDeSistema } from "../testes/integracaoFormatosQase.js";
 import { parametrosDaUrl, idNumericoDaConsulta } from "./integracoesFormatos.js";
 import { Recurso } from "../projetos/contratos.js";
 import { OperacaoServico, PlanoDaConsulta } from "./tipos/adaptador.js";

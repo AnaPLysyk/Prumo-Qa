@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { mkdir, writeFile, readFile, stat } from 'node:fs/promises';
-import { fixture } from '../../infra/fixtures.mjs';
+import { fixture } from '../../../apoio/fixtures.mjs';
 import { mascararLogsDaExecucao } from '../../../../dist/testes/regras/executarValidacao.js';
 import { gravarRelatorioRedigido } from '../../../../dist/testes/regras/executarValidacao.js';
 import { hash } from '../../../../dist/compartilhado/seguranca/hash.js';
