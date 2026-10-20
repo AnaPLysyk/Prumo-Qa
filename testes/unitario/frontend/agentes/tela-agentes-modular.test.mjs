@@ -74,3 +74,37 @@ test('CSS de Agentes mantém o visual definitivo sem animações contraditórias
  const gerado = bundle.origens.map((f) => { const s = fs.readFileSync(f, 'utf8'); return s.slice(s.indexOf('\n') + 1); }).join('');
  assert.equal(gerado, fs.readFileSync(bundle.destino, 'utf8'));
 });
+
+test('Agentes mantém Orchestrator e nova tentativa quando a consulta pessoal falha', async () => {
+  const fonte = fs.readFileSync('frontend/agentes/tela-agentes.parte.js', 'utf8');
+  const ini = fonte.indexOf('async function carregarPessoais(id) {');
+  const fim = fonte.indexOf('\n  const visibilidade', ini);
+  assert.ok(ini > 0 && fim > ini);
+  const simular = resposta => vm.runInNewContext('(' + fonte.slice(ini, fim) + ')', {
+    api: { agentesPessoais: async () => resposta },
+    localStorage: { getItem: () => null }
+  });
+  await assert.rejects(simular({ ok: false, error: 'SERVICE_UNAVAILABLE' })('p-1'), /Não foi possível consultar/);
+  const vazio = await simular({ ok: true, data: [] })('p-1');
+  assert.equal(vazio.length, 0);
+  const ids = [];
+  const ctx = {
+    el: { append(...nos) { this.nos = nos; } },
+    h: (tag, props, ...nos) => ({ tag, props, nos }),
+    tr: s => s, asset: () => '', note: s => s,
+    PrumoOrbitas: { anexar() {} },
+    button: (texto, onClick, props) => ({ texto, onClick, props }),
+    mostrar: id => ids.push(id)
+  };
+  const a = fonte.indexOf('function disponivel(motivo, tentar = false)');
+  const b = fonte.indexOf('\n    const e = estado.espaco', a);
+  assert.ok(a > 0 && b > a);
+  const disponivel = vm.runInNewContext('(' + fonte.slice(a, b) + ')', ctx);
+  disponivel('erro', true);
+  assert.equal(ctx.el.nos[0].props.role, 'list');
+  const tentar = ctx.el.nos[2].nos.find(n => n?.props?.id === 'v36-agentes-recarregar');
+  assert.ok(tentar, 'há um comando real para repetir a consulta');
+  tentar.onClick();
+  assert.deepEqual(ids, ['agentes']);
+  assert.match(fonte, /catch \{ disponivel\(/);
+});

@@ -65,7 +65,7 @@ A fronteira local Electron usa **IPC**, não endpoints HTTP. Existem serviços H
 - **Partes de telas:** `*.parte.js` e `*.parte.css` são concatenados, na ordem de `frontend/construcao/telas-modulares.json`, nos bundles do renderer. Essas partes não devem ser carregadas individualmente pelo HTML.
 - **Recursos comuns:** `frontend/recursos.json` mapeia estilos, login, traduções, identidade visual e recursos de terceiros para os caminhos distribuídos; não crie cópias editáveis adicionais.
 - **Formulários e componentes:** mantenha-os na pasta da tela. Use `componentes/` ou `modais/` somente quando houver mais de uma responsabilidade que justifique a subpasta.
-- **Falhas de consulta:** não transforme `null` (erro ou consulta não concluída) em `[]` (lista realmente vazia). Projetos e Conexões exibem um estado de erro quando a consulta falha. Em Projetos, a lista gerenciada já consultada é repassada para `mostrarPastasLocais`, evitando a segunda chamada e cadastros repetidos na apresentação.
+- **Falhas de consulta:** não transforme `null` (erro ou consulta não concluída) em `[]` (lista realmente vazia). Projetos e Conexões exibem um estado de erro quando a consulta falha. Em Projetos, a lista gerenciada já consultada é repassada para `mostrarPastasLocais`, evitando a segunda chamada. Em Agentes, a falha de leitura não esconde o Orchestrator e oferece nova tentativa. Em Testes, resultados locais indisponíveis geram um aviso explícito, em vez de serem apresentados como uma consulta vazia.
 
 Exemplos atuais: `frontend/agendamentos/montarFormularioRotina.js`, `frontend/conexoes/abrirFormularioConexao.js`, `frontend/projetos/modais/abrirRepositoriosGithub.js`, `frontend/agentes/abrirContextos.js` e `frontend/testes/montarFormularioProposta.js`.
 

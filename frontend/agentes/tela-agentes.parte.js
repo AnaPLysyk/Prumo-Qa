@@ -19,7 +19,9 @@
   async function carregarPessoais(id) {
     let antigas = []; try { antigas = localStorage.getItem('prumo-v36-drafts-' + id) ? readDrafts(id) : []; } catch { antigas = []; }
     if (antigas.length) { const r = await api.agentesPessoaisImportar(id, antigas.map(({ id: i, nome, descricao, objetivo, instrucoes }) => ({ id: i, nome, descricao, objetivo, instrucoes }))); if (r.ok) { try { localStorage.removeItem('prumo-v36-drafts-' + id); } catch { /* sem armazenamento */ } } }
-    const r = await api.agentesPessoais(id); return r.ok ? r.data.map((a) => ({ version: 1, ...a })) : [];
+    const r = await api.agentesPessoais(id);
+    if (!r.ok || !Array.isArray(r.data)) throw Error('Não foi possível consultar os agentes pessoais.');
+    return r.data.map((a) => ({ version: 1, ...a }));
   }
   const visibilidade = (x) => (x.meu === false ? tr('Público de {dono} · só leitura', { dono: x.dono || tr('outra conta') }) : x.publico ? tr('Seu · público') : tr('Seu · só você vê'));
   const iconeCerebro = () => sv('svg', { class: 'v36-icone', viewBox: '0 0 24 24', width: 26, height: 26, 'aria-hidden': 'true' }, sv('path', { d: 'M12 18V5a3 3 0 0 0-5.7-1.3A4.5 4.5 0 0 0 4 10.5 4.4 4.4 0 0 0 5 17.5 3.5 3.5 0 0 0 12 18Z' }), sv('path', { d: 'M12 18V5a3 3 0 0 1 5.7-1.3A4.5 4.5 0 0 1 20 10.5a4.4 4.4 0 0 1-1 7A3.5 3.5 0 0 1 12 18Z' }), sv('path', { d: 'M8 9a3 3 0 0 1-3 3m3 2a3 3 0 0 0 3 3m5-8a3 3 0 0 0 3 3m-3 2a3 3 0 0 1-3 3' }));
@@ -58,13 +60,14 @@
   abas.agentes = async el => {
     el.classList.add('v36a'); espaco(el); el.append(h('h1', { class: 'v36-sr' }, 'Agentes'));
     // A tela nunca fica vazia: sem projeto, ou se o estado do projeto falhar, o Orchestrator local e o caminho para Projetos e Conexões continuam à mão.
-    function disponivel(motivo) {
+    function disponivel(motivo, tentar = false) {
       const orbe = h('span', { class: 'v36a-orbe' }, h('img', { src: asset('robo-original.png'), alt: '' })); PrumoOrbitas.anexar(orbe);
       const orq = h('button', { type: 'button', class: 'v36a-astro v36a-astro-orq', role: 'listitem', id: 'v36-orquestrador-sempre', 'aria-label': tr('Conversar com o Prumo Orchestrator'), onclick: () => flutuante?.abrir() },
         h('span', { class: 'v36a-astro-figura' }, orbe), h('span', { class: 'v36a-astro-nome' }, 'Prumo Orchestrator'), h('span', { class: 'v36a-astro-sub' }, tr('Assistente local no Prumo')),
         h('span', { class: 'v36a-astro-estado' }, h('i', { class: 'ok' }), h('span', {}, tr('Sem modelo de IA'))));
       el.append(h('div', { class: 'v36a-constelacao', role: 'list' }, orq), h('div', { class: 'v36a-sem' }, note(motivo)),
-        h('div', { class: 'v36a-acoes' }, button(tr('Escolher projeto'), () => void mostrar('projetos'), { id: 'v36-agentes-projetos' }), button(tr('Abrir Conexões'), () => void mostrar('conexoes'), { id: 'v36-agentes-conexoes' })));
+        h('div', { class: 'v36a-acoes' }, button(tr('Escolher projeto'), () => void mostrar('projetos'), { id: 'v36-agentes-projetos' }), button(tr('Abrir Conexões'), () => void mostrar('conexoes'), { id: 'v36-agentes-conexoes' }),
+          tentar ? button(tr('Tentar novamente'), () => void mostrar('agentes'), { id: 'v36-agentes-recarregar' }) : null));
     }
     const e = estado.espaco; if (!e) {
       disponivel(tr('Selecione um projeto para consultar as especializações e configurar permissões. Claude Code, Codex, Qase e Jira se conectam em Conexões.'));
@@ -72,8 +75,11 @@
       if (estado.root) { const legacy = h('div'); await mostrarConfiguracaoMcp(legacy); legacy.querySelector('h1')?.remove(); el.append(legacy); }
       return;
     }
-    const s = await chamar(() => api.agentesEstado(e.id)); if (!s) { disponivel(tr('Não foi possível ler os agentes deste projeto agora. O Orchestrator local segue disponível; tente de novo em instantes.')); return; }
-    let drafts = await carregarPessoais(e.id); let activeTab = 'agents', painelVivo = null;
+    const s = await chamar(() => api.agentesEstado(e.id)); if (!s) { disponivel(tr('Não foi possível ler os agentes deste projeto agora. O Orchestrator local segue disponível; tente de novo em instantes.'), true); return; }
+    let drafts;
+    try { drafts = await carregarPessoais(e.id); }
+    catch { disponivel(tr('Não foi possível consultar os agentes pessoais deste projeto. Nenhum agente foi alterado.'), true); return; }
+    let activeTab = 'agents', painelVivo = null;
     const body = h('div', { id: 'v36-agents-body', class: 'v36a-corpo' });
     const tabs = h('div', { class: 'v36a-abas', role: 'group', 'aria-label': tr('Áreas de agentes') },
       h('button', { type: 'button', class: 'v36a-aba', 'data-agent-tab': 'agents', 'aria-pressed': 'true', onclick: () => showTab('agents') }, tr('Agentes')),

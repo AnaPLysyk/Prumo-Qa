@@ -57,3 +57,32 @@ test('classificação Qase fica na consulta remota e respeita caso manual ou aut
   assert.equal(classificar({ automation: 0 }), 'MANUAL');
   assert.equal(classificar({}), 'Classificação não informada pela API');
 });
+
+test('falha de resultados locais em Testes não é interpretada como consulta vazia', async () => {
+  const inicio = visao.indexOf('async function fontes(e,');
+  const fim = visao.indexOf('\n  const casaQase', inicio);
+  assert.ok(inicio > 0 && fim > inicio);
+  const mem = {}; let chamadas = 0, falhar = true;
+  const contexto = {
+    memoriaDaTela: () => mem,
+    vinc: () => null,
+    api: {
+      testesCatalogo: async () => ({ ok: true, data: { semPasta: true } }),
+      runs: async () => { chamadas++; return falhar ? { ok: false, error: 'SERVICE_UNAVAILABLE' } : { ok: true, data: [{ id: 'run-1' }] }; }
+    }
+  };
+  const carregar = vm.runInNewContext('(' + visao.slice(inicio, fim) + ')', contexto);
+  const primeira = await carregar({ id: 'pr-1' });
+  assert.deepEqual(Array.from(primeira.runs), []);
+  assert.match(primeira.erroRuns, /não puderam ser consultados/);
+  assert.equal(chamadas, 1);
+  falhar = false;
+  const semAtualizar = await carregar({ id: 'pr-1' });
+  assert.ok(semAtualizar.erroRuns, 'não apresenta dados antigos como sucesso');
+  assert.equal(chamadas, 1);
+  const atualizada = await carregar({ id: 'pr-1' }, { forcar: true });
+  assert.equal(atualizada.erroRuns, undefined);
+  assert.equal(atualizada.runs[0].id, 'run-1');
+  assert.equal(chamadas, 2);
+  assert.match(visao, /src\.erroRuns\s*\?\s*DS\.alerta/);
+});

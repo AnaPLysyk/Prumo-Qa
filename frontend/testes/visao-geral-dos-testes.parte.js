@@ -18,10 +18,10 @@
     const [cat, casos, runs] = await Promise.all([
       mem.catalogo || api.testesCatalogo(e.id).then((r) => (r.ok ? r.data : { erro: r.error })),
       vq ? (mem.casos || F.carregarQase(e, mem, 'casos')) : null,
-      mem.runsLocais || api.runs(e.id).then((r) => (r.ok ? r.data : []))
+      mem.runsLocais || api.runs(e.id).then((r) => (r.ok ? { itens: r.data } : { erro: 'Os resultados locais não puderam ser consultados.' }))
     ]);
     mem.catalogo = cat; if (vq) mem.casos = casos; mem.runsLocais = runs;
-    return { cat, casos, runs, vq };
+    return { cat, casos, runs: runs.itens || [], erroRuns: runs.erro, vq };
   }
   const casaQase = (vq, ids, casoId) => ids.some((x) => x === String(casoId) || (vq && x === vq.recurso.chave + '-' + casoId));
   /** Modelo unificado: cada linha é um caso do Qase, um teste do código, ou os dois quando ligados explicitamente. */
@@ -137,6 +137,7 @@
       }, { id: 'cat-carregar-mais', icone: 'mais' })) : null,
       DS.info('A ligação caso ↔ código vem de anotação no código (qase(31), qase.id(31), @qase(31) ou "Qase: SFQ-31") ou de vínculo declarado; nomes parecidos não ligam nada. Nível e tags vêm da leitura estática; nada foi executado.', { id: 'cat-aviso' }),
       c?.truncado ? DS.alerta('Leitura limitada: o repositório tem mais arquivos de teste do que o Prumo lê de uma vez.', 'aviso') : null,
+      src.erroRuns ? DS.alerta(tr('Resultados locais indisponíveis. Atualize a consulta para tentar novamente.'), 'falha') : null,
       src.casos?.erro ? DS.alerta(tr('Casos do Qase indisponíveis: {e}', { e: src.casos.erro }), 'falha') : null, src.casos?.limitacao ? DS.info(src.casos.limitacao) : null].filter(Boolean));
     function passa(l) {
       const q = f.q.toLowerCase();
