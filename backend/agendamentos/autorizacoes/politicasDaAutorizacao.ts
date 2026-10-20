@@ -1,5 +1,5 @@
 /** Reúne politicas da autorizacao da funcionalidade, mantendo cada operação identificável pelo nome. */
-import { estadoDaAutorizacao } from "./estadoDaAutorizacao.js";
+import { estadoDaAutorizacao } from "./estadoERevogacao.js";
 import { gravarAutorizacoes, lerAutorizacoes } from "../banco/autorizacoes.js";
 import { MAX_VALIDADE_DIAS } from "../tipos/autorizacoes.js";
 

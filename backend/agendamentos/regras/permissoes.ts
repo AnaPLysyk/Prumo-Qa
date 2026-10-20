@@ -1,5 +1,5 @@
 /** Calcula e apresenta as permissões aplicáveis às rotinas agendadas. */
-import { estadoDaAutorizacao } from "../autorizacoes/estadoDaAutorizacao.js";
+import { estadoDaAutorizacao } from "../autorizacoes/estadoERevogacao.js";
 import { lerAutorizacoes } from "../banco/autorizacoes.js";
 import { capacidadesDaRotina } from "./capacidadesDaRotina.js";
 import { Rotina } from "../tipos/rotina.js";

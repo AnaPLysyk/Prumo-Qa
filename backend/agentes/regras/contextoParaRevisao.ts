@@ -1,7 +1,7 @@
 /** Busca um contexto para a revisão de cobertura da IA, respeitando a permissão da pessoa. */
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
-import { lerPermissaoDeContextosNoMcp } from '../banco/lerPermissaoDeContextosNoMcp.js';
+import { lerPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
 import { resumirContextos } from './resumirContextos.js';
 import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 

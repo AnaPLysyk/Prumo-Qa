@@ -7,7 +7,7 @@ import { decidirConhecimento } from "./repositorioAprendizados.js";
 import { esquecerTermo } from "./repositorioAprendizados.js";
 import { estadoConhecimento } from "./banco/estadoConhecimento.js";
 import { listarConhecimentos } from "./banco/listarConhecimentos.js";
-import { caminhoConhecimento } from "./banco/caminhoConhecimento.js";
+import { caminhoConhecimento } from "./banco/baseDoConhecimento.js";
 import { lerPerfil } from "./repositorioPerfil.js";
 import { vocabularioDoAgente } from "./repositorioAprendizados.js";
 

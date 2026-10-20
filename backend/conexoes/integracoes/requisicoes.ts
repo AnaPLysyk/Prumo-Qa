@@ -3,7 +3,7 @@ import { ErroServico } from './ErroServico.js';
 import { requisitarServico } from './requisitarServico.js';
 import { TransporteEscrita, TransporteServico } from '../tipos/transporte.js';
 import { PartesDoAdaptador, itemQase } from '../tipos/adaptador.js';
-import { cabecalhosDoServico } from './cabecalhosDoServico.js';
+import { cabecalhosDoServico } from './configuracaoDosServicos.js';
 import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { recursoDaResposta } from '../integracoesFormatos.js';
 

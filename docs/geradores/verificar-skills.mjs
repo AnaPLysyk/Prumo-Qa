@@ -29,7 +29,7 @@ export function verificarSkills(base = raiz) {
     exigir(item.versao === 'sha256:' + createHash('sha256').update(conteudo).digest('hex'), esperado.id + ': conteúdo mudou; atualize versão');
     exigir(JSON.stringify(item.capacidades) === JSON.stringify(esperado.capacidades), esperado.id + ': capacidades divergentes');
     exigir(JSON.stringify(item.permissoes) === JSON.stringify(Object.fromEntries(esperado.capacidades.map(id => [id, capacidades.get(id)]))), esperado.id + ': permissões divergentes');
-    exigir(JSON.stringify(item.consumidores) === JSON.stringify(['backend/agentes/chat/skillDoAgente.ts']), esperado.id + ': consumidor divergente');
+    exigir(JSON.stringify(item.consumidores) === JSON.stringify(['backend/agentes/chat/selecaoDoAgente.ts']), esperado.id + ': consumidor divergente');
     for (const consumidor of item.consumidores) exigir(fs.existsSync(path.join(base, consumidor)), esperado.id + ': consumidor ausente');
     exigir(item.fontePoliticas === 'backend/agentes/tipos/politicas.ts', esperado.id + ': fonte divergente');
   }

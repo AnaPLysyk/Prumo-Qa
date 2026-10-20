@@ -1,12 +1,12 @@
 /** Inspeciona configurações, testa protocolos e diagnostica conexões de IA. */
-import { mesmoCaminho } from "./ia/mesmoCaminho.js";
+import { mesmoCaminho } from "./ia/validacaoDeConfiguracao.js";
 import { Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools } from "./tipos/integracaoIa.js";
 import fs from "node:fs";
 import path from "node:path";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import { Projeto } from "../compartilhado/tipos/projeto.js";
 import { registrosIntegracao, pastaDosTestesDeIntegracao } from "./repositorioIntegracoes.js";
-import { assinaturaDaConfiguracao } from "./ia/assinaturaDaConfiguracao.js";
+import { assinaturaDaConfiguracao } from "./ia/validacaoDeConfiguracao.js";
 import { prepararConexao } from "./ia/prepararConexao.js";
 import { consultarAtividades } from "../logs/banco/consultarAtividades.js";
 import { spawnSync } from "node:child_process";

@@ -2,7 +2,7 @@
 import { randomUUID } from 'node:crypto';
 import { AdaptadorServico } from '../integracoes/AdaptadorServico.js';
 import { ContextoDosServicos } from '../tipos/contaDeServico.js';
-import { instanciaServico } from '../integracoes/instanciaServico.js';
+import { instanciaServico } from '../integracoes/configuracaoDosServicos.js';
 import { Recurso } from '../../projetos/contratos.js';
 import { lerContasDeServico } from '../banco/contasDeServico.js';
 import { lerEspacos } from '../../projetos/repositorio.js';

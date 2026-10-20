@@ -1,8 +1,8 @@
 /** Pede a autenticação humana do Windows e grava a autorização para um escopo exato (projeto, comando por hash, ambiente). */
 import { randomUUID } from 'node:crypto';
 import { validadeDaAutorizacao } from './politicasDaAutorizacao.js';
-import { abrirEspacoDeAutorizacoes } from './abrirEspacoDeAutorizacoes.js';
-import { estadoDaAutorizacao } from './estadoDaAutorizacao.js';
+import { abrirEspacoDeAutorizacoes } from './estadoERevogacao.js';
+import { estadoDaAutorizacao } from './estadoERevogacao.js';
 import { gravarAutorizacoes } from '../banco/autorizacoes.js';
 import { lerAutorizacoes } from '../banco/autorizacoes.js';
 import { AutorizacaoExecucao, EscopoAutorizado, MAX_USOS, Solicitador, execSchema } from '../tipos/autorizacoes.js';

@@ -9,7 +9,7 @@ import { salvarPerfil as salvarPerfilDaBase } from '../../../../dist/agentes/rep
 import { registrarAtendimento } from '../../../../dist/agentes/repositorioAtendimentos.js';
 import { listarAtendimentos } from '../../../../dist/agentes/repositorioAtendimentos.js';
 import { avaliarAtendimento } from '../../../../dist/agentes/repositorioAtendimentos.js';
-import { pessoaDoConhecimento } from '../../../../dist/agentes/banco/pessoaDoConhecimento.js';
+import { pessoaDoConhecimento } from '../../../../dist/agentes/banco/baseDoConhecimento.js';
 import { entrarNaConta, sairDaConta } from '../../../../dist/login/regras/contas.js';
 import { criarContaPelaAdministracao } from '../../../../dist/administracao/servico.js';
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';

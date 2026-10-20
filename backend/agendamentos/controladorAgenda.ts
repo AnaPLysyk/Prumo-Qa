@@ -14,7 +14,7 @@ import { listarPermissoes } from "./regras/permissoes.js";
 import { criarPoliticaPublicacao } from "./autorizacoes/politicas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { obterEspaco } from "../projetos/repositorio.js";
-import { revogarAutorizacao } from "./autorizacoes/revogarAutorizacao.js";
+import { revogarAutorizacao } from "./autorizacoes/estadoERevogacao.js";
 import { criarRotina } from "./regras/criarRotina.js";
 import { editarRotina } from "./regras/editarRotina.js";
 import { validarRotina } from "./regras/validarRotina.js";

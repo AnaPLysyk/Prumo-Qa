@@ -1,6 +1,6 @@
 /** Dá às operações de escrita só o necessário (ler, enviar e limpar), sem nunca entregar a credencial; erros viram ErroServico. */
 import { ContextoServico, PartesDoAdaptador } from '../tipos/adaptador.js';
-import { cabecalhosDoServico } from './cabecalhosDoServico.js';
+import { cabecalhosDoServico } from './configuracaoDosServicos.js';
 import { ErroServico } from './ErroServico.js';
 import { lerComCredencial } from './requisicoes.js';
 import { limparRespostaDoServico } from '../integracoesFormatos.js';

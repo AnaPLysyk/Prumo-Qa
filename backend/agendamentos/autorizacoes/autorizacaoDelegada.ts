@@ -1,5 +1,5 @@
 /** Cria a verificação que o worker usa: só executa se houver autorização vigente para exatamente o mesmo escopo, e gasta um uso. */
-import { estadoDaAutorizacao } from './estadoDaAutorizacao.js';
+import { estadoDaAutorizacao } from './estadoERevogacao.js';
 import { gravarAutorizacoes } from '../banco/autorizacoes.js';
 import { lerAutorizacoes } from '../banco/autorizacoes.js';
 import { Delegada } from '../../testes/tipos/execucao.js';

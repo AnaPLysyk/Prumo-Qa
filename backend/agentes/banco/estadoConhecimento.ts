@@ -1,10 +1,10 @@
 /** Resume o banco de conhecimento: arquivo, tamanho, tabelas, vistas e contagens por agente. */
 import fs from 'node:fs';
-import { caminhoConhecimento } from './caminhoConhecimento.js';
+import { caminhoConhecimento } from './baseDoConhecimento.js';
 import { comBancoDeConhecimento } from './comBancoDeConhecimento.js';
 import { lerPerfil } from '../repositorioPerfil.js';
-import { pessoaDoConhecimento } from './pessoaDoConhecimento.js';
-import { validarProjetoDoConhecimento } from './validacoesDoConhecimento.js';
+import { pessoaDoConhecimento } from './baseDoConhecimento.js';
+import { validarProjetoDoConhecimento } from './baseDoConhecimento.js';
 import { vistaDoAgente } from './formatosDoConhecimento.js';
 import { Linha, VERSAO_ESQUEMA } from '../tipos/conhecimento.js';
 import { agentesChat } from '../tipos/persona.js';

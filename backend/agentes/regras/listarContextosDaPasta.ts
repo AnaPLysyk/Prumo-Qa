@@ -4,7 +4,7 @@ import { Filtro } from '../tipos/contexto.js';
 import { abrirProjetoVinculado } from '../../projetos/servicoProjetos.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
-import { lerPermissaoDeContextosNoMcp } from '../banco/lerPermissaoDeContextosNoMcp.js';
+import { lerPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
 import { resumirContextos } from './resumirContextos.js';
 import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 

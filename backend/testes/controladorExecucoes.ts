@@ -17,7 +17,7 @@ import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { prepararRunLocal } from "./servicoExecucoes.js";
 import { publicarRunLocal } from "./integracoes/publicarRunLocal.js";
 import { declararResultadoManual } from "./regras/declararResultadoManual.js";
-import { revogarAutorizacao } from "../agendamentos/autorizacoes/revogarAutorizacao.js";
+import { revogarAutorizacao } from "../agendamentos/autorizacoes/estadoERevogacao.js";
 
 export const runsBugs: TratadorDoCanal<'runs:bugs'> = a => propostasDeBugs(a.id, undefined, a.classificacao);
 

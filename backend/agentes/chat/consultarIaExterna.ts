@@ -1,7 +1,7 @@
 /** Usa Claude ou Codex somente após autorização; retorna ao chat local quando faltar permissão ou a IA falhar. */
 import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
 
-import { skillDoAgente } from './skillDoAgente.js';
+import { skillDoAgente } from './selecaoDoAgente.js';
 
 
 

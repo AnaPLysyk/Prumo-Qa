@@ -1,7 +1,7 @@
 /** Registra, lista e avalia atendimentos, com isolamento por conta e projeto. */
 import { comBancoDeConhecimento } from "./banco/comBancoDeConhecimento.js";
-import { falharConhecimento, validarAgenteDoConhecimento, validarProjetoDoConhecimento } from "./banco/validacoesDoConhecimento.js";
-import { pessoaDoConhecimento } from "./banco/pessoaDoConhecimento.js";
+import { falharConhecimento, validarAgenteDoConhecimento, validarProjetoDoConhecimento } from "./banco/baseDoConhecimento.js";
+import { pessoaDoConhecimento } from "./banco/baseDoConhecimento.js";
 import { Atendimento, Linha, limitesConhecimento } from "./tipos/conhecimento.js";
 
 export function avaliarAtendimento(id: number, avaliacao: 'UTIL' | 'NAO_UTIL', base?: string) {

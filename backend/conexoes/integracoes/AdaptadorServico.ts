@@ -9,7 +9,7 @@ import { consultarNoServico } from './consultarNoServico.js';
 import { contextoDoAdaptador } from './contextoDoAdaptador.js';
 import { enviarAoServico } from './requisicoes.js';
 import { ErroServico } from './ErroServico.js';
-import { instanciaServico } from './instanciaServico.js';
+import { instanciaServico } from './configuracaoDosServicos.js';
 import { lerDoServico } from './requisicoes.js';
 import { listarRecursosDoServico } from './listarRecursosDoServico.js';
 import { obterRecursoDoServico } from './requisicoes.js';

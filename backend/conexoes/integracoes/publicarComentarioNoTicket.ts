@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto.js';
 import { Recurso } from '../../projetos/contratos.js';
 import { PartesDoAdaptador, obj } from '../tipos/adaptador.js';
-import { cabecalhosDoServico } from './cabecalhosDoServico.js';
+import { cabecalhosDoServico } from './configuracaoDosServicos.js';
 import { consultarNoServico } from './consultarNoServico.js';
 import { ErroServico } from './ErroServico.js';
 

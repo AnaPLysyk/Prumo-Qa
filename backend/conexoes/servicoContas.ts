@@ -6,7 +6,7 @@ import { z } from "zod";
 import { gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { lerContasDeServico } from "./banco/contasDeServico.js";
-import { instanciaServico } from "./integracoes/instanciaServico.js";
+import { instanciaServico } from "./integracoes/configuracaoDosServicos.js";
 import { ErroServico } from "./integracoes/ErroServico.js";
 import { atualizarEstadoDoVinculo } from "../projetos/servicoProjetos.js";
 import { Servico } from "../projetos/contratos.js";

@@ -1,9 +1,9 @@
 /** Lê e salva o perfil da conta autenticada no armazenamento protegido. */
 import { comBancoDeConhecimento } from "./banco/comBancoDeConhecimento.js";
-import { pessoaDoConhecimento } from "./banco/pessoaDoConhecimento.js";
+import { pessoaDoConhecimento } from "./banco/baseDoConhecimento.js";
 import { Linha, Perfil } from "./tipos/conhecimento.js";
 import { Experiencia, Papel, experiencias, papeis } from "./tipos/persona.js";
-import { falharConhecimento } from "./banco/validacoesDoConhecimento.js";
+import { falharConhecimento } from "./banco/baseDoConhecimento.js";
 import { normalizarFoco } from "./regras/normalizarFoco.js";
 import { normalizarNome } from "./regras/textosDoConhecimento.js";
 

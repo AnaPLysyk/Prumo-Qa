@@ -3,7 +3,7 @@ import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
 import { listarTrechosDeSkill } from '../banco/listarTrechosDeSkill.js';
 import { pesosAprendidos } from '../repositorioAprendizados.js';
 import { sementeDasSkills } from '../banco/sementeDasSkills.js';
-import { escolherAgente } from './escolherAgente.js';
+import { escolherAgente } from './selecaoDoAgente.js';
 import { palavrasDaPergunta } from './roteamentoDePerguntas.js';
 import { planejarOrquestracao } from './roteamentoDePerguntas.js';
 import { termoCasaComPergunta } from './roteamentoDePerguntas.js';

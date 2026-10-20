@@ -1,5 +1,5 @@
 /** Controlador da funcionalidade agentes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
-import { agentesDoChat } from "./chat/agentesDoChat.js";
+import { agentesDoChat } from "./chat/selecaoDoAgente.js";
 import { executavelDaIa } from "./chat/executavelDaIa.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { localizarClienteDeIa } from "../conexoes/ia/localizarClienteDeIa.js";

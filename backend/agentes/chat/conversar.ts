@@ -3,7 +3,7 @@ import { lerPerfil } from '../repositorioPerfil.js';
 import { nomeParaChamar } from '../servicoEstiloDoChat.js';
 import { pesosAprendidos } from '../repositorioAprendizados.js';
 import { aplicarEstilo } from '../servicoEstiloDoChat.js';
-import { escolherAgente } from './escolherAgente.js';
+import { escolherAgente } from './selecaoDoAgente.js';
 
 import { intencaoDePerfil } from './intencaoDePerfil.js';
 

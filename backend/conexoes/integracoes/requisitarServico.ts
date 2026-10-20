@@ -6,7 +6,7 @@ import { rotaEscritaPermitida } from '../escrita/permissoes.js';
 import { enderecoPublico } from './enderecoPublico.js';
 import { ErroServico } from './ErroServico.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { instanciaServico } from './instanciaServico.js';
+import { instanciaServico } from './configuracaoDosServicos.js';
 import { MetodoEscrita } from '../tipos/rotasDeEscrita.js';
 import { PedidoServico } from '../tipos/transporte.js';
 

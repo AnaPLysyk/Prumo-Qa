@@ -1,5 +1,5 @@
 /** Texto livre curto do foco de trabalho: sem caracteres de controle, espaços normalizados e no máximo LIMITE_FOCO caracteres. */
-import { falharConhecimento } from '../banco/validacoesDoConhecimento.js';
+import { falharConhecimento } from '../banco/baseDoConhecimento.js';
 
 export const LIMITE_FOCO = 160;
 

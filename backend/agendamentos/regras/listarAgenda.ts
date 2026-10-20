@@ -1,5 +1,5 @@
 /** Lista as rotinas para a tela Agendamentos, com próxima e última execução, permissões e autorizações. */
-import { estadoDaAutorizacao } from '../autorizacoes/estadoDaAutorizacao.js';
+import { estadoDaAutorizacao } from '../autorizacoes/estadoERevogacao.js';
 import { lerAutorizacoes } from '../banco/autorizacoes.js';
 import { listarRotinas } from '../repositorioAgenda.js';
 import { listarTrabalhos } from '../repositorioFila.js';
