@@ -11,8 +11,7 @@ import { conferirAcessoAoCanal } from '../../login/regras/conferirAcessoAoCanal.
 import { contaDaSessao } from '../../login/regras/sessao.js';
 import { executarNoEscopoDoUsuario } from '../../compartilhado/banco/escopoDeUsuario.js';
 import { workerDoAplicativo } from '../../agendamentos/worker/workerDoAplicativo.js';
-import {validarSessaoRemota} from '../../login/integracoes/autenticacaoRemota.js';
-import {usarAutenticacaoRemota} from '../../login/integracoes/configuracaoDaAutenticacao.js';
+import {usarAutenticacaoRemota,validarSessaoRemota} from '../../login/integracoes/autenticacaoRemota.js';
 import {acessoDosCanais} from '../../login/tipos/acessoDosCanais.js';
 
 /**
@@ -36,7 +35,7 @@ export function registrarCanal<C extends CanalIpc>(nome: C, fn: (a: z.output<(ty
       const entrada = esquemasIpc[nome].safeParse(bruto ?? {});
       if (!entrada.success) throw new Error('INVALID_ARGUMENTS: argumentos recusados.');
       const args = entrada.data as z.output<(typeof esquemasIpc)[C]>;
-      // Com o login ligado, cada canal exige sessão e o nível da tela no papel da pessoa (login/tipos/acessoDosCanais.ts).
+      // 2.11: com o login ligado, cada canal exige sessão e o nível da tela no papel da pessoa (login/tipos/acessoDosCanais.ts).
       // Revalida a sessão remota periodicamente antes de processar dados locais protegidos.
       if(usarAutenticacaoRemota() && acessoDosCanais[nome]!=='publico' && nome!=='conta:sair' && contaDaSessao())
         await validarSessaoRemota();

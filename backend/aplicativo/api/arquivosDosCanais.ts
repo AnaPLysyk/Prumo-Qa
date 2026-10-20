@@ -66,7 +66,7 @@ export const arquivosDosCanais: Record<string, string> = {
   'conta:reenviarentrada': 'backend/login/api/contaReenviarentrada.ts > reenviarCodigoDeEntrada',
   'conta:sair': 'backend/login/api/contaSair.ts > sairDaConta, workerDoAplicativo, servicosDoAplicativo, revogarCredencialMcp',
   'conta:senha': 'backend/login/api/contaSenha.ts > trocarMinhaSenha',
-  'conta:sessao': 'backend/login/api/contaSessao.ts > sessaoParaJanela, usarAutenticacaoRemota',
+  'conta:sessao': 'backend/login/api/contaSessao.ts > contaDaSessao, encerrarSessao, sessaoParaJanela, validarSessaoRemota, usarAutenticacaoRemota',
   'contextos:aprovar': 'backend/agentes/api/contextosAprovar.ts > confirmarNoWindows, usuarioDoWindows, aprovarContextoDaPasta, obterContextoDaPasta',
   'contextos:conflito': 'backend/agentes/api/contextosConflito.ts > usuarioDoWindows, conflitoDeContextoDaPasta',
   'contextos:desatualizar': 'backend/agentes/api/contextosDesatualizar.ts > confirmarNoWindows, usuarioDoWindows, desatualizarContextoDaPasta, obterContextoDaPasta',

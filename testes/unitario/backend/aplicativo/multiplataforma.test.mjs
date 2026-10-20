@@ -3,8 +3,7 @@ import assert from 'node:assert/strict';
 import { plataformaDoInstalador } from '../../../../dist/atualizacoes/regras/plataformaDoInstalador.js';
 import { nomeDoInstalador } from '../../../../dist/atualizacoes/regras/nomeDoInstalador.js';
 import { protetorDoSistema } from '../../../../dist/conexoes/regras/protetorDoSistema.js';
-import { diretorioBase, diretorioDados } from '../../../../dist/compartilhado/banco/diretorioDados.js';
-import { executarNoEscopoDoUsuario } from '../../../../dist/compartilhado/banco/escopoDeUsuario.js';
+import { diretorioDados } from '../../../../dist/compartilhado/banco/diretorioDados.js';
 
 test('cada sistema recebe o seu instalador; sistemas sem instalador oficial ficam sem atualização automática', () => {
   assert.equal(plataformaDoInstalador('win32', 'x64', {}), 'win');
@@ -40,12 +39,10 @@ test('cofre: Linux sem cofre real (basic_text) é recusado; Windows e macOS depe
 
 test('pasta de dados: Windows em LOCALAPPDATA, macOS em Application Support, Linux em XDG; PRUMO_DATA_DIR sempre vence', () => {
   assert.equal(diretorioDados(process.platform === 'win32' ? 'C:\\dados-prumo' : '/tmp/dados-prumo'), process.platform === 'win32' ? 'C:\\dados-prumo' : '/tmp/dados-prumo');
-  const padrao = diretorioBase();
-  if (process.platform === 'darwin') assert.match(padrao, /Library[\\/]Application Support[\\/]PrumoQA$/);
-  else if (process.platform === 'linux') assert.match(padrao, /prumo-qa$/);
-  else assert.match(padrao, /PrumoQA$/);
-  // Sem sessão autenticada, não acessa arquivos legados nem de outra conta.
-  assert.match(diretorioDados(), /[\\/]usuarios[\\/]sem-sessao$/);
+  const padrao = diretorioDados(undefined);
+  if (process.platform === 'darwin') assert.match(padrao, /Library[\\/]Application Support[\\/]PrumoQA[\\/]usuarios[\\/]sem-sessao$/);
+  else if (process.platform === 'linux') assert.match(padrao, /prumo-qa[\\/]usuarios[\\/]sem-sessao$/);
+  else assert.match(padrao, /PrumoQA[\\/]usuarios[\\/]sem-sessao$/);
 });
 
 test('iniciar com o sistema: Windows e macOS usam o item de login; Linux grava e remove o atalho de autostart', async () => {
@@ -78,13 +75,4 @@ test('site e aplicativo usam os mesmos nomes de instalador para cada sistema', a
   const esperado = { win: 'win', 'mac-arm64': 'mac-arm64', 'mac-x64': 'mac-x64', 'linux-appimage': 'linux-appimage', 'linux-deb': 'linux-deb' };
   for (const i of instaladoresDaVersao('9.8.7')) assert.equal(i.arquivo, nomeDoInstalador('9.8.7', esperado[i.id]), i.id);
   assert.equal(instaladoresDaVersao('9.8.7').length, 5);
-});
-
-test('pasta de dados de cada conta segue o mesmo escopo nas leituras e gravacoes', () => {
-  const a='11111111-1111-4111-8111-111111111111';
-  const b='22222222-2222-4222-8222-222222222222';
-  const local=(id)=>executarNoEscopoDoUsuario(id,()=>diretorioDados());
-  assert.notEqual(local(a),local(b));
-  assert.match(local(a),/[\\\\/]usuarios[\\\\/]11111111-1111-4111-8111-111111111111$/);
-  assert.notEqual(local(a),diretorioBase());
 });

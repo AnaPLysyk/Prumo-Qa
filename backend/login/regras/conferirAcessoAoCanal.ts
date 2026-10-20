@@ -3,7 +3,7 @@ import { nivelDaConta, situacaoDaSessao } from './sessao.js';
 import { acessoDosCanais } from '../tipos/acessoDosCanais.js';
 import { modulosDoMenu } from '../tipos/contas.js';
 import type { CanalIpc } from '../../aplicativo/api/catalogoDeContratos.js';
-import {usarAutenticacaoRemota} from '../integracoes/configuracaoDaAutenticacao.js';
+import {usarAutenticacaoRemota} from '../integracoes/autenticacaoRemota.js';
 
 /**
  * Enquanto não existe nenhuma conta, além dos públicos só atendem os canais do primeiro acesso: criar a conta de Administrador ou

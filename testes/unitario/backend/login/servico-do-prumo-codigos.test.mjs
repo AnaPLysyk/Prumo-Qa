@@ -89,3 +89,12 @@ test('recuperaÃ§Ã£o de senha usa a interface oficial de frontend/login/web, 
   assert.equal(codigo.status, 200);
   assert.match(await codigo.text(), /reset-password/);
 });
+test('falha de e-mail jamais imprime segredo de provedor no Render', async t => {
+  const segredo='re_TOKEN_FICTICIO_123';
+  const s=await subir(t,{enviar:async()=>{throw new Error('Authorization Bearer '+segredo);}});
+  const resposta=await s.pedir(PEDIDO);
+  assert.equal(resposta.status,502);
+  assert.deepEqual(await resposta.json(),{erro:'EMAIL_SEND_FAILED'});
+  assert.doesNotMatch(JSON.stringify(s.registros),/re_TOKEN_FICTICIO_123|Authorization Bearer/);
+  assert.ok(s.registros.some(l=>l.startsWith('EMAIL_SEND_FAILED: ')));
+});

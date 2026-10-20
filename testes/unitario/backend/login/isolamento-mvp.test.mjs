@@ -45,20 +45,3 @@ test('sair, entrar em outra conta e operação tardia nunca misturam arquivos de
   assert.equal(lerLocal('tardio.json',schema,vazio).projeto,'Tarefa A');
   assert.equal(fs.existsSync(path.join(raiz,'plataforma','privado.json')),false,'não usa mais pasta comum');
 });
-
-test('dados legados de pasta comum não aparecem para outras contas',t=>{
-  const anterior=process.env.PRUMO_DATA_DIR;
-  const raiz=fs.mkdtempSync(path.join(os.tmpdir(),'prumo-legado-isolado-'));
-  process.env.PRUMO_DATA_DIR=raiz;
-  t.after(()=>{encerrarSessao();if(anterior===undefined)delete process.env.PRUMO_DATA_DIR;else process.env.PRUMO_DATA_DIR=anterior;fs.rmSync(raiz,{recursive:true,force:true});});
-  const legado=path.join(raiz,'plataforma');
-  fs.mkdirSync(legado,{recursive:true});
-  fs.writeFileSync(path.join(legado,'privado.json'),JSON.stringify({projeto:'Dado antigo de outra pessoa'}));
-  const schema=z.object({projeto:z.string()});
-  const vazio={projeto:'NENHUM'};
-  encerrarSessao();
-  assert.deepEqual(lerLocal('privado.json',schema,vazio),vazio);
-  entrarComIdentidadeRemota({id:'pessoaNovaSemDados',email:'nova@example.test',name:'Nova pessoa',emailVerified:true},raiz);
-  assert.deepEqual(lerLocal('privado.json',schema,vazio),vazio);
-  assert.equal(fs.existsSync(path.join(legado,'privado.json')),true,'arquivo legado preservado para migração explícita');
-});

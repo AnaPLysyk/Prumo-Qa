@@ -4,13 +4,20 @@
   "type": "module",
   "description": "Backend remoto do Prumo QA por tela: autenticação, suporte e entrada HTTP do aplicativo.",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
-    "start": "node ../../aplicativo/servidor/servidor.mjs", "auth:migrar": "node migrar-autenticacao.mjs"
+    "start": "node ../../aplicativo/servidor/servidor.mjs",
+    "auth:migrar": "node migrar-autenticacao.mjs",
+    "auth:migrar:prod": "node migrar-autenticacao-producao.mjs",
+    "auth:web:gerar": "node gerar-entrada-social.mjs"
   },
   "dependencies": {
+    "@better-auth/electron": "1.7.10",
     "better-auth": "1.7.10",
     "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
   }
 }

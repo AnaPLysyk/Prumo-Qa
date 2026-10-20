@@ -3,6 +3,10 @@ import {betterAuth} from 'better-auth';
 import {toNodeHandler} from 'better-auth/node';
 import pg from 'pg';
 import {enviarPeloResend} from './codigos.mjs';
+import {verificarEsquemaDaAutenticacao} from '../regras/verificarEsquema.mjs';
+import {provedoresSociais} from '../regras/provedoresSociais.mjs';
+import {electron} from '@better-auth/electron';
+import {oauthDesktopAtivo, origensOAuthDesktop} from '../regras/oauthDesktop.mjs';
 
 /** Falha fechada: sem servidor HTTPS, banco, segredo forte ou e-mail, não habilita cadastro. */
 export function conferirAmbienteDeAutenticacao(env=process.env) {
@@ -31,6 +35,10 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
     appName:'Prumo QA',
     baseURL,secret:env.BETTER_AUTH_SECRET,
     database:pool,
+    socialProviders:provedoresSociais(env),
+    // Plugin oficial desativado por padrão até o retorno PKCE ser homologado no Electron.
+    plugins:oauthDesktopAtivo(env) ? [electron()] : [],
+    trustedOrigins:origensOAuthDesktop(env),
     emailAndPassword:{
       enabled:true,minPasswordLength:10,maxPasswordLength:128,requireEmailVerification:true,revokeSessionsOnPasswordReset:true,
       sendResetPassword:async ({user,token})=>{
@@ -52,5 +60,5 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
         '/request-password-reset':{window:60,max:3}}},
     advanced:{useSecureCookies:true}
   });
-  return {auth,atender:toNodeHandler(auth),checar:async()=>{await pool.query('SELECT 1');},fechar:()=>pool.end()};
+  return {auth,atender:toNodeHandler(auth),checar:()=>verificarEsquemaDaAutenticacao(pool),fechar:()=>pool.end()};
 }

@@ -6,6 +6,32 @@ A nova arquitetura mantém o login visual em `frontend/login/`, a autorização 
 
 O servidor de autenticação ainda não está pronto para contas reais: sem URL HTTPS, segredo forte, banco persistente, migração e envio de e-mail configurados, o acesso deve recusar. O PostgreSQL gratuito atual expira em 12/11/2026, portanto não deve guardar contas reais sem plano de persistência. Os trechos abaixo documentam o **login legado**, não descrevem o comportamento futuro do Better Auth.
 
+## Preparação do banco de contas central
+
+O serviço de produção é `prumo-qa-servico` e o PostgreSQL interno é `prumo-qa-contas-db`. O Blueprint conecta `DATABASE_URL` pelo nome do banco; a declaração em `render.yaml` **não configura automaticamente** serviços já criados pela API. Conferir a conexão efetiva em **Render › prumo-qa-servico › Environment**; não abrir acesso público ao PostgreSQL. A credencial publicada em uma conversa deve ser rotacionada antes do uso com contas reais.
+
+Na mesma tela, `BETTER_AUTH_URL` deve ser `https://prumo-qa-servico.onrender.com`, `BETTER_AUTH_SECRET` deve ser gerado aleatoriamente (mínimo de 32 caracteres), e `RESEND_API_KEY` e `PRUMO_EMAIL_REMETENTE` devem ser configurados para um domínio remetente verificado. Não inserir essas credenciais em Git, logs, testes ou mensagens. A ausência de qualquer parte deixa `/api/auth/*` e `/saude/autenticacao` indisponíveis (503), mantendo outras rotas operacionais.
+
+A migração de produção **não é automática**. A partir do backend remoto, depois de garantir plano de persistência para o banco, conexão interna, rotação de senha e backup verificado:
+
+1. Executar `npm run auth:migrar:prod` com as variáveis do ambiente de produção para consultar a quantidade de alterações, sem gravar nada.
+2. Revisar o preview, confirmar backup recuperável e autorizar explicitamente `PRUMO_APROVAR_MIGRACAO_PROD=SIM`, `PRUMO_BACKUP_CONFIRMADO=SIM`, `PRUMO_CREDENCIAL_ROTACIONADA=SIM` **somente no processo manual de migração**, não como variáveis permanentes do servidor.
+3. Executar `npm run auth:migrar:prod` novamente e conferir `/saude/autenticacao` (HTTP 200). O endpoint verifica conexão **e** tabelas `user`, `session`, `account`, `verification` e `rateLimit` (usada para limitar tentativas por banco). Antes disso, 503 é o estado seguro.
+4. Validar cadastro, confirmação de e-mail, login, logout e recuperação de senha em uma conta de teste, sem publicar senhas ou tokens.
+
+O PostgreSQL gratuito do Render informa exclusão em 12/11/2026, salvo atualização do plano. Não usar essa instância como armazenamento definitivo de contas reais sem uma solução de continuidade/backup.
+
+## Preparação do login social central (GitHub e Google)
+
+O servidor Better Auth aceita GitHub e Google como **provedores de identidade**, sem confundir essa autorização com as conexões de repositórios realizadas depois do login. Cada provedor só é habilitado se tiver **Client ID e Client Secret**, configurados exclusivamente no Render:
+
+- GitHub: `GITHUB_CLIENT_ID` e `GITHUB_CLIENT_SECRET`. Callback HTTPS no OAuth App: `https://prumo-qa-servico.onrender.com/api/auth/callback/github`. Escopos de perfil e e-mail, **sem** `repo`.
+- Google: `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`. URI de redirecionamento autorizada: `https://prumo-qa-servico.onrender.com/api/auth/callback/google`.
+
+Um par incompleto não habilita o provedor nem altera o acesso por e-mail. O próprio login social **não está habilitado na interface Electron remota** até existir e ser testado o retorno seguro navegador → aplicativo, com verificação de estado, PKCE, proteção contra sessão trocada e vínculo explícito de contas antigas. A implementação de OAuth local legado é separada e não deve receber credenciais do Better Auth. Não adicionar Client Secrets ao instalador ou ao Git.
+
+O instalador registra o protocolo `com.anaplysyk.prumoqa`, e o servidor carrega o plugin oficial `@better-auth/electron` somente com `PRUMO_OAUTH_DESKTOP_ATIVO=SIM`. A página HTTPS `/entrar-social` e seu JavaScript local também exigem a mesma ativação e uma instância de autenticação configurada; por padrão devolvem HTTP 503. A página encaminha somente `client_id`, `state` e `code_challenge` ao proxy oficial do Better Auth, sem copiar tokens para o HTML. O JavaScript servido é gerado pelo comando `npm run auth:web:gerar` no diretório `backend/login/servidor`, e o teste verifica o hash do código-fonte. **Não configurar `PRUMO_OAUTH_DESKTOP_ATIVO` no Render ainda**: a transferência do código PKCE, a validação do callback e o armazenamento seguro da sessão no processo principal do Electron ainda não foram homologados. O cadastro por e-mail e as conexões de repositórios não dependem desse protocolo.
+
 ## Em poucas palavras
 
 O Prumo limita o que pode ler e executar, pede confirmação do sistema para ações protegidas e guarda tokens no cofre do sistema quando há suporte. O login central foi projetado para separar contas do Prumo, mas não é uma barreira de segurança entre pessoas que compartilham a mesma conta do sistema operacional. Os testes automatizados não comprovam uma autenticação humana real, e o Prumo não é uma sandbox: comandos e dependências do próprio projeto ainda precisam ser confiáveis. O instalador não tem assinatura digital; confira o SHA-256, sabendo que ele não confirma quem criou o arquivo.
@@ -18,7 +44,7 @@ Credenciais usam o cofre do Electron (DPAPI, Keychain ou Secret Service/KWallet)
 
 ## Login local e permissões — legado (2.12)
 
-- **O Prumo não abre sem entrar (2.14).** Sem nenhuma conta, só o primeiro acesso é atendido: criar a primeira conta, de Administrador, ou, se o OAuth App já foi configurado por quem distribui/administra a instalação, autorizar a conta no navegador pelo GitHub/Google. A tela de primeiro acesso nunca pede credenciais técnicas do aplicativo; configurar o provedor continua sendo uma responsabilidade administrativa. A primeira conta criada neste computador recebe o papel Administrador. Todos os outros canais recusam com `LOGIN_SETUP_REQUIRED` e a janela mostra só a entrada. Antes de entrar também atendem o idioma da janela (só na janela, salvo nas preferências depois do login) e `site:abrir` (endereço fixo do site oficial, com confirmação nativa). Criar a conta cria `acessos.json` na pasta `plataforma` dos dados, separado de `contas.json` (contas de serviço Jira/Qase/GitHub).
+- **O Prumo não abre sem entrar (2.14).** Sem nenhuma conta, só o primeiro acesso é atendido: criar a primeira conta, de Administrador, ou guardar o Client ID e o segredo do GitHub/Google para criá-la pelo provedor (`acesso:github`, `acesso:google`). Quem está num computador sem contas vira Administrador de qualquer jeito, então isso não amplia o acesso; assim que existe uma conta, configurar o provedor volta a exigir a Administração. Todos os outros canais recusam com `LOGIN_SETUP_REQUIRED` e a janela mostra só a entrada. Antes de entrar também atendem o idioma da janela (só na janela, salvo nas preferências depois do login) e `site:abrir` (endereço fixo do site oficial, com confirmação nativa). Criar a conta cria `acessos.json` na pasta `plataforma` dos dados, separado de `contas.json` (contas de serviço Jira/Qase/GitHub).
 - **Senhas** nunca ficam em texto: só resumo scrypt com sal próprio. A senha temporária aparece uma única vez. Não existe mais código de recuperação: a senha nova sai de um código mandado ao e-mail (veja abaixo). Respostas, logs e diagnóstico nunca os contêm; erro de login não diz se o usuário existe.
 - **Sessão** só na memória do processo principal, com expiração por inatividade e bloqueio da conta após tentativas erradas (ambos configuráveis). Nada de token no renderer.
 - **Autorização no backend:** `registrarCanal` confere, a cada pedido, a sessão e o nível (Sem acesso, Ver, Usar) do papel na tela do canal (`backend/login/tipos/acessoDosCanais.ts`). Esconder item de menu não é a autorização. Todo canal novo precisa de uma regra ali (o compilador recusa o contrário).
@@ -50,29 +76,21 @@ Credenciais usam o cofre do Electron (DPAPI, Keychain ou Secret Service/KWallet)
 - O código vale 10 minutos, uma vez, com 5 tentativas; o desafio vale 10 minutos e fica só na memória. Código errado conta para o bloqueio da conta, como senha errada. A mensagem avisa para trocar a senha se a pessoa não tentou entrar.
 - Contas sem e-mail e entradas pelo GitHub ou Google não passam pela segunda etapa (o provedor já autentica).
 
-## MCP e conta autenticada (desenvolvimento)
-
-O servidor MCP continua sendo um processo separado iniciado por Claude/Codex, mas **não escolhe a identidade** pelo nome do cliente, argumento ou variável de ambiente. O Electron mantém uma ponte local que exige uma credencial aleatória efêmera para consultar a sessão atual. A credencial é gerada no login, substituída quando outra sessão começa e invalidada ao sair e encerrar o aplicativo.
-
-O MCP associa a identidade ao processo no instante da conexão e confere a sessão novamente a cada ferramenta. Um servidor de IA iniciado pela conta A não pode atuar como B após a troca de conta: deve reiniciar e obter autorização na nova sessão. Além disso, o núcleo confere permissões por tela e exige que a pasta solicitada esteja vinculada à conta. Sem sessão, não se pode acessar dados pertencentes a contas cadastradas.
-
-**Limite da proteção local:** a credencial fica num arquivo temporário sob a pasta de dados do perfil do sistema operacional, e a ponte é acessível nesse computador. Ela não protege contra programas maliciosos executados com acesso ao mesmo perfil Windows/macOS/Linux; os limites de isolamento local estão documentados neste arquivo. Não se deve entender um handshake MCP como prova de identidade humana nem como substituto de autenticação remota.
-
 ## Isolamento entre contas (2.17)
 
 - **Perfil e histórico com os agentes são de cada conta:** **Meu perfil** (como chamar, papel, experiência, foco e a autorização de compartilhar com a IA) e os atendimentos dos agentes ficam ligados à conta da sessão. Outra conta no mesmo computador não vê, não usa e não avalia nada disso.
-- **Sem sessão, nada pessoal:** worker, bandeja e linha de comando não recebem uma identidade do Prumo por conta própria. O servidor MCP só recebe identidade autenticada por meio da ponte local; sem login permanece no escopo vazio, sem acesso às pastas privadas das contas. A IA externa não recebe nome nem papel pelo handshake.
+- **Sem sessão, nada pessoal:** worker, bandeja, servidor MCP e linha de comando rodam sem conta do Prumo; nesses caminhos o perfil é vazio e nada pessoal é gravado. A IA externa conectada por MCP não recebe nome nem papel de ninguém.
 - **Dados antigos:** o perfil gravado antes da 2.17 (um por computador), os atendimentos sem dono e as conversas com texto de até a 2.9 continuam no disco, mas não aparecem para nenhuma conta.
 - **Agentes criados pela pessoa:** ficam no núcleo (`plataforma/agentes-pessoais.json`) com dono e projeto. Só o dono vê, edita e exclui; público, as outras contas veem só para leitura (sem o id do dono); a Administração não vê os privados. A janela não escolhe o dono. As prévias que ficavam no armazenamento da janela (até a 2.16, visíveis a todas as contas do computador) passam a ser privadas de quem abrir a tela Agentes primeiro e saem desse armazenamento.
 - **O que continua compartilhado, de propósito:** projetos, conhecimento aprovado dos agentes, testes, runs e evidências são da equipe, conforme o papel de cada um. O login não isola pessoas que usam o mesmo usuário do sistema operacional: quem tem acesso aos arquivos dessa pasta tem acesso aos dados.
 
 ## Entrar com GitHub ou Google
 
-- **Duas modalidades distintas:** com `PRUMO_AUTH_API_URL` o Prumo usa o Better Auth central (e-mail/senha; OAuth central ainda não implementado). Sem esse endereço, a entrada local pode oferecer GitHub e Google **somente quando o administrador pré-configurou o OAuth App** no cofre ou no ambiente da instalação. A pessoa vê só os botões de autorização, nunca campos para Client ID, Client Secret ou token. A autenticação local não equivale a uma sessão central nem conecta automaticamente repositórios.
+- O Client ID fica em `acessos.json`; o Client Secret só no cofre do sistema, nunca na janela, em log ou no arquivo. Sem configuração o botão de entrar não aparece e o canal recusa (`GITHUB_LOGIN_NOT_CONFIGURED`, `GOOGLE_LOGIN_NOT_CONFIGURED`). No primeiro acesso os botões **Criar conta com o GitHub/Google** aparecem sempre e, sem configuração, pedem o Client ID e o segredo antes da autorização.
 - O Prumo abre o navegador (PKCE S256 e `state` aleatório) e escuta um endereço local temporário em 127.0.0.1, porta aleatória, por 5 minutos. Só atende `GET /callback` com o Host exato e o `state` certo; o resto é recusado sem derrubar a tentativa. Cancelar, negar ou esgotar o tempo fecha o endereço.
 - Pessoa nova nasce PENDENTE, sem senha, com o papel de novos cadastros. Conta pendente, desativada ou bloqueada não ganha sessão nem conexão, e o token é descartado. Só a primeira conta de uma instalação sem contas nasce Administrador.
 - A identidade é o provedor mais o id numérico, nunca o login nem o e-mail.
-- GitHub: escopo `read:user`, sem acesso automático a repositórios privados e sem criar conexão de repositório no cadastro. Google: `openid email profile`, sem conexão com serviços. Os tokens da autorização servem para identificar a pessoa e não são devolvidos à tela de entrada.
+- GitHub: escopos `read:user repo` (o `repo` lista repositórios privados). A conexão criada é só leitura; escrever exige habilitar e confirmar. Google: `openid email profile`, sem conexão, e o token é descartado depois de ler o perfil.
 
 ## IDE de Testes: escrita de arquivos (2.13)
 
