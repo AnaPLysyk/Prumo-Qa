@@ -55,7 +55,14 @@ abas.conexoes=async el=>{
       resultado.proxima!==null?botao('Próxima página',()=>listar(c,{offset:resultado.proxima,limite:50},ancora)):null);
     ancora.after?.(recursos);
   }
-  const contas=(await chamar(api.servicos))||[];
+  const contas=await chamar(api.servicos);
+  if(!contas){
+    el.append(DS.estadoTela('erro','Não foi possível consultar as conexões',
+      'As contas conectadas não foram carregadas. Nenhuma conexão foi alterada.',
+      [DS.acao('Tentar novamente',()=>mostrar('conexoes'),{icone:'atualizar'})],
+      {id:'conexoes-falha-consulta'}));
+    return;
+  }
   const e=estado.espaco;
   const perm=e&&typeof escritaDoProjeto==='function'?await escritaDoProjeto(e).catch(()=>null):null;
   const linhas=servicosConexao.map(([sv,nomeSv,serve])=>{

@@ -53,7 +53,9 @@ function criarContexto(overrides = {}) {
       nomesServico: { github: 'GitHub' },
       origem: (...args) => ({ tipo: 'origem', args }),
       info: texto => ({ tipo: 'info', texto }),
-      link: (texto, onClick, props) => ({ tipo: 'link', texto, onClick, props })
+      link: (texto, onClick, props) => ({ tipo: 'link', texto, onClick, props }),
+      acao: (texto, onClick) => ({ tipo: 'acao', texto, onClick }),
+      estadoTela: (tipo, titulo, descricao, acoes, opcoes) => ({ tipo, titulo, descricao, acoes, opcoes })
     },
     tr: (texto, dados) => texto.replace(/\{(\w+)\}/g, (_, k) => dados?.[k] ?? ''),
     hora: x => x, selo: x => ({ tipo: 'selo', x }),
@@ -191,4 +193,29 @@ test('se não há conexão GitHub ativa, exibe orientação e não tenta vincula
   assert.equal(chamadas.length, 0);
   await nos.find(x => x.tipo === 'botao' && x.texto === 'Abrir Conexões').onClick();
   assert.deepEqual(navegacao, ['conexoes']);
+});
+
+
+test('Projetos diferencia consultas com falha de listas vazias sem duplicar pastas', async () => {
+  const montar = async (api) => {
+    const { contexto, percorrer } = criarContexto({ api });
+    const elemento = { elementos: [], append(...nos) { this.elementos.push(...nos); } };
+    await contexto.abas.projetos(elemento);
+    return percorrer(elemento);
+  };
+  const falhaProjetos = await montar({ espacos: async () => null });
+  assert.ok(falhaProjetos.some(x => x.opcoes?.id === 'projetos-falha-consulta'));
+  assert.ok(!falhaProjetos.some(x => x.tag === 'section' && x.props?.['data-espaco']));
+
+  const falhaPastas = await montar({ projetos: async () => null });
+  assert.ok(falhaPastas.some(x => x.opcoes?.id === 'pastas-falha-consulta'));
+  assert.ok(!falhaPastas.some(x => x.children?.includes('Nenhuma pasta vinculada ainda.')));
+
+  let consultas = 0;
+  const pastasFiltradas = await montar({
+    espacos: async () => { consultas++; return [projeto]; },
+    projetos: async () => [{ root: 'raiz-A', id: 'legado-1', name: 'Antiga' }]
+  });
+  assert.ok(pastasFiltradas.some(x => x.children?.includes('Nenhuma pasta vinculada ainda.')));
+  assert.equal(consultas, 1, 'a lista gerenciada é reutilizada, sem consulta duplicada');
 });

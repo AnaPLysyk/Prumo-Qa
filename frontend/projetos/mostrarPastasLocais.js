@@ -1,6 +1,6 @@
 'use strict';
 /** Projetos: mostra pastas com qa.project.json; não gerencia conexões remotas ou cadastros de projeto. */
-async function mostrarPastasLocais(elemento) {
+async function mostrarPastasLocais(elemento, gerenciados) {
   elemento.append(h('h2', { id: 'pastas-contrato-local' }, 'Pastas com contrato local'));
   const diagnostico = h('div', { id: 'diagnostico' });
 
@@ -40,9 +40,14 @@ async function mostrarPastasLocais(elemento) {
   );
 
   const todas = await chamar(api.projetos);
-  if (!todas) return;
-  const gerenciados = await chamar(api.espacos);
-  const lista = todas.filter(pasta => !gerenciados?.some(
+  if (!todas) {
+    elemento.append(DS.estadoTela('erro', 'Não foi possível consultar as pastas locais',
+      'As pastas vinculadas não foram carregadas. Tente novamente em Projetos.', [],
+      { id: 'pastas-falha-consulta' }));
+    return;
+  }
+  // Usa a lista já consultada pela tela Projetos; não repete a mesma chamada ao núcleo.
+  const lista = todas.filter(pasta => !gerenciados.some(
     espaco => espaco.raizContextos === pasta.root
   ));
 

@@ -40,12 +40,18 @@ abas.projetos = async elemento => {
   );
 
   const projetos = await chamar(api.espacos);
-  if (!projetos) return;
+  if (!projetos) {
+    elemento.append(DS.estadoTela('erro', 'Não foi possível consultar os projetos',
+      'A lista de projetos não foi carregada. Nenhum cadastro foi alterado.',
+      [DS.acao('Tentar novamente', () => mostrar('projetos'), { icone: 'atualizar' })],
+      { id: 'projetos-falha-consulta' }));
+    return;
+  }
 
   for (const espaco of projetos) {
     elemento.append(montarSecaoProjeto(espaco, editar));
   }
 
   // Preserva a seção inferior de pastas locais com contrato já existente.
-  await mostrarPastasLocais(elemento);
+  await mostrarPastasLocais(elemento, projetos);
 };

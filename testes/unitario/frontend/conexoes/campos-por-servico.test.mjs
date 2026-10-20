@@ -38,7 +38,7 @@ function montar() {
   const botao=(label,cb,id)=>h('button',{id,onclick:cb},label);
   const campoPlataforma=(titulo,attrs={})=>{const input=h('input',attrs);return{input,no:h('label',{class:'campo'},titulo,input)};};
   const api={
-    servicos:async()=>[],
+    servicos:async()=>({ok:true,data:[]}),
     qasePrever:async token=>{chamadas.push(['prever',token]);return{ok:true,data:{previaId:'preview',projetos:[
       {codigo:'PQ',nome:'Prumo QA',jaImportado:false},{codigo:'EX',nome:'Exemplo',jaImportado:true}]}};},
     qaseCancelar:async id=>{chamadas.push(['cancelar',id]);return{ok:true,data:{cancelada:true}};},
