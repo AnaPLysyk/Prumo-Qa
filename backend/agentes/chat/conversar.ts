@@ -4,28 +4,64 @@ import { nomeParaChamar } from './nomeParaChamar.js';
 import { pesosAprendidos } from '../banco/pesosAprendidos.js';
 import { aplicarEstilo } from './aplicarEstilo.js';
 import { escolherAgente } from './escolherAgente.js';
-import { intencaoDeAprender } from './intencaoDeAprender.js';
+
 import { intencaoDePerfil } from './intencaoDePerfil.js';
 
 import { proximosPassosSugeridos } from './proximosPassosSugeridos.js';
 import { responderComDadosLocais } from './responderComDadosLocais.js';
-import { responderSobreTeste } from './responderSobreTeste.js';
+
 import { orquestrar } from './orquestrar.js';
 import { planejarOrquestracao } from './planejarOrquestracao.js';
 import { registrarOrquestracao } from '../banco/registrarOrquestracao.js';
 import { Orquestracao } from '../tipos/orquestracao.js';
-import { Coleta, Opcoes, Resposta } from '../tipos/chat.js';
+import { Coleta, ContextoChat, Estilo, Meta, Opcoes, Resposta, agentePorTipo } from '../tipos/chat.js';
 import { consultarIaExterna } from './consultarIaExterna.js';
-import { montarResposta } from './montarResposta.js';
 
 import { AgenteChat, agentesChat } from '../tipos/persona.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { regrasDosAgentes } from '../../administracao/regras/agentesDaPlataforma.js';
-import { Conhecimento } from '../tipos/conhecimento.js';
+import { Conhecimento, TipoConhecimento } from '../tipos/conhecimento.js';
 import { conhecimentosRelevantes } from '../banco/conhecimentosRelevantes.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
 import { listarConhecimentos } from '../banco/listarConhecimentos.js';
-import { Meta } from '../tipos/chat.js';
+import { Fonte } from '../../inicio/tipos/assistenteLocal.js';
+import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { catalogoDeTestes } from '../../testes/regras/catalogoDeTestes.js';
+import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
+import { registrarConhecimento } from '../banco/registrarConhecimento.js';
+
+function intencaoDeAprender(pergunta: string, espacoId: string | null, forcado: string | null | undefined, base?: string): Meta | null {
+  const m = pergunta.match(/^\s*(?:por favor,?\s*)?(?:lembr[ae](?:-se)?|anot[ae]|guard[ae]|aprend[ae]|memoriz[ae])\s*(?:que|isso|:)?\s*:?\s+(.{4,})$/i); if (!m) return null;
+  const texto = m[1]!.trim(); const alvo = forcado ?? escolherAgente(texto).agente.id; const agente = alvo === 'orquestrador' ? null : alvo; const n = semAcentos(texto);
+  const tipo: TipoConhecimento = / significa | quer dizer | e o nome de /.test(' ' + n + ' ') ? 'glossario' : /^(eu )?(prefiro|gosto|quero que)/.test(n) ? 'preferencia' : /^(sempre|nunca|antes de|depois de|para )/.test(n) ? 'procedimento' : 'fato';
+  try {
+    const { item, duplicado } = registrarConhecimento({ espacoId, agente, tipo, titulo: texto.slice(0, 80), texto, origem: 'CONVERSA' }, base);
+    const quem = agente ? agentesChat.find((a) => a.id === agente)!.nome : 'todos os agentes';
+    if (duplicado) return { linhas: [`Eu já tinha isso anotado para ${quem} (${item.estado === 'APROVADO' ? 'aprovado' : 'em rascunho'}).`], agente: agente ?? 'orquestrador', fontes: [{ rotulo: 'Agentes', aba: 'agentes' }] };
+    return { linhas: [`Anotei como rascunho para ${quem}: "${item.texto}".`, 'Só passo a usar depois que você confirmar.'], agente: agente ?? 'orquestrador', fontes: [{ rotulo: 'Agentes', aba: 'agentes' }],
+      acoes: [{ tipo: 'aprovar_conhecimento', id: item.id, rotulo: 'Confirmar aprendizado' }, { tipo: 'descartar_conhecimento', id: item.id, rotulo: 'Descartar' }] };
+  } catch (e) { return { linhas: [`Não consegui anotar: ${(e as Error).message === 'KNOWLEDGE_LIMIT' ? 'o banco de conhecimento chegou ao limite' : 'o banco de conhecimento não está disponível'}.`] }; }
+}
+
+function montarResposta(agente: AgenteChat, c: Coleta, modo: Resposta['modo'], estilo: Estilo, pessoa: string | null, extra: Partial<Resposta> & { rota?: Resposta['rota'] } = {}): Resposta {
+  return ({ agente: { id: agente.id, nome: agente.nome, especializacao: agente.especializacao },
+    linhas: c.linhas.map((l) => mascarar(l)), fontes: c.fontes, modo, estilo, rota: extra.rota ?? [], fatos: c.fatos, proximos: extra.proximos ?? [], acoes: extra.acoes ?? [], pendente: extra.pendente ?? null, pessoa: extra.pessoa !== undefined ? extra.pessoa : pessoa, continuou: extra.continuou ?? false, ...(extra.aviso ? { aviso: extra.aviso } : {}), ...(extra.orquestracao ? { orquestracao: extra.orquestracao } : {}) });
+}
+
+/** Explica um teste aberto na visão de código: só o que a leitura do arquivo mostra (inferência declarada). */
+function responderSobreTeste(ctx: ContextoChat, espacoId: string | null, base?: string): Coleta {
+  const fontes: Fonte[] = [{ rotulo: 'Testes', aba: 'testes' }]; const agenteDe = (id: string) => agentesChat.find((a) => a.id === id)!;
+  const e = espacoId ? tentarOuPadrao(() => obterEspaco(espacoId, base), null) : null;
+  if (!e?.pastaLocal) return { linhas: ['Vincule a pasta do repositório ao projeto para eu ler este teste.'], fontes, fatos: [], agente: agenteDe('qa-geral') };
+  const cat = tentarOuPadrao(() => catalogoDeTestes(e.pastaLocal!), null); const f = cat?.features.find((x) => x.arquivo === ctx.arquivo);
+  if (!f || !f.testes.length) return { linhas: [`Não encontrei testes reconhecíveis em ${ctx.arquivo}.`], fontes, fatos: [], agente: agenteDe('qa-geral') };
+  const antes = f.testes.filter((t) => !ctx.linha || t.linha <= ctx.linha); const t = antes.length ? antes.reduce((a, b) => (b.linha > a.linha ? b : a)) : f.testes[0]!;
+  const linhas = [`"${t.titulo}" fica em ${f.arquivo}:${t.linha}, na feature ${f.nome}.`, `Tipo provável: ${t.tipo} (${t.motivo}; confiança ${t.confianca.toLowerCase()}). É inferência pela leitura do código.`,
+    t.passos.length ? `Passos que encontrei no código: ${t.passos.slice(0, 6).map((s, i) => `${i + 1}) ${s}`).join(' ')}${t.passos.length > 6 ? ' …' : ''}.` : 'Não encontrei passos nomeados neste teste; leia o corpo no editor.',
+    [t.tags.length ? `Tags: ${t.tags.join(', ')}.` : '', t.qase?.length ? `Ligado aos casos do Qase: ${t.qase.join(', ')}.` : 'Nenhum caso do Qase marcado neste teste.'].filter(Boolean).join(' '),
+    'Se ele passa hoje, só uma execução real responde: rode pela capability do projeto e confira em Execuções.'];
+  return { linhas, fontes, fatos: [`teste=${t.tipo}`, `passos=${t.passos.length}`], agente: agenteDe(agentePorTipo[t.tipo] ?? 'qa-geral') };
+}
 
 function intencaoDeSaber(pergunta: string, espacoId: string | null, forcado: string | null | undefined, base?: string): Meta | null {
   const t = semAcentos(pergunta); if (!/o que (voce|vc) (sabe|aprendeu|conhece|lembra)|seus conhecimentos|o que (eu )?te ensinei|o que voce anotou/.test(t)) return null;
@@ -38,7 +74,6 @@ function intencaoDeSaber(pergunta: string, espacoId: string | null, forcado: str
     'Tudo isso está no Cérebro de cada agente e no arquivo conhecimento.db.'] };
 }
 
-
 function juntarConhecimentos(o: Opcoes, agente: AgenteChat, pergunta: string, historico: NonNullable<Opcoes['historico']>, continuou: boolean, local: Coleta): void {
   // Seguimento ("e mais?"): busca pela pergunta anterior e mostra o que ainda não foi dito (do 2º item em diante).
   const anterior = continuou ? historico.at(-1)?.pergunta ?? '' : '';
@@ -50,7 +85,6 @@ function juntarConhecimentos(o: Opcoes, agente: AgenteChat, pergunta: string, hi
   }
   if (continuou && !rel.length) local.linhas.push('Sobre isso não tenho mais nada registrado. Posso chamar outro agente, ou você me ensina com "lembra que…".');
 }
-
 
 export async function conversar(o: Opcoes): Promise<Resposta> {
   const pergunta = o.pergunta.trim(); const estilo = o.estilo ?? 'amigavel'; const nome = (o.nome || 'Prumo').slice(0, 40); const historico = (o.historico ?? []).slice(-6);
