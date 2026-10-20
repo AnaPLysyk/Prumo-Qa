@@ -2,11 +2,11 @@
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
-import { aprovarContextoDaPasta } from "./regras/aprovarContextoDaPasta.js";
-import { obterContextoDaPasta, desatualizarContextoDaPasta, excluirContextoDaPasta, permitirContextosNoMcp } from "./regras/operacoesDoContextoDaPasta.js";
-import { conflitoDeContextoDaPasta } from "./regras/conflitoDeContextoDaPasta.js";
+import { aprovarContextoDaPasta } from "./regras/cicloDosContextos.js";
+import { obterContextoDaPasta, desatualizarContextoDaPasta, excluirContextoDaPasta, permitirContextosNoMcp } from "./regras/cicloDosContextos.js";
+import { conflitoDeContextoDaPasta } from "./regras/cicloDosContextos.js";
 import { listarContextosDaPasta } from "./regras/consultasDeContextos.js";
-import { salvarContextoDaPasta } from "./regras/salvarContextoDaPasta.js";
+import { salvarContextoDaPasta } from "./regras/cicloDosContextos.js";
 
 export const contextosAprovar: TratadorDoCanal<'contextos:aprovar'> = async (a, janela) => {
   const c = await obterContextoDaPasta(a.root, a.id);

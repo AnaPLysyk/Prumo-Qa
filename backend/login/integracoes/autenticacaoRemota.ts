@@ -4,8 +4,8 @@ import {encerrarSessao} from '../regras/sessao.js';
 let cookieSessao:string|null=null;
 let proximaConferencia=0;
 let loginEmAndamento=false;
-import { enderecoDeAutenticacao, usarAutenticacaoRemota } from './configuracaoDaAutenticacao.js';
-export { enderecoDeAutenticacao, usarAutenticacaoRemota } from './configuracaoDaAutenticacao.js';
+import { enderecoDeAutenticacao, usarAutenticacaoRemota } from './envioEmail.js';
+export { enderecoDeAutenticacao, usarAutenticacaoRemota } from './envioEmail.js';
 function obrigatorio(){const u=enderecoDeAutenticacao();if(!u)throw new Error('IDENTITY_NOT_CONFIGURED');return u;}
 function exporErro(status:number){
   if(status===429)throw new Error('LOGIN_RATE_LIMIT');

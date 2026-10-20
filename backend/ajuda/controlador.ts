@@ -9,7 +9,7 @@ import { apresentarVersoes } from "./servicoVersoes.js";
 import { carregarVersoes } from "./servicoVersoes.js";
 import { conferirInstalada } from "./servicoVersoes.js";
 import { dialog, shell } from "electron";
-import { excluirTodosContextos } from "../agentes/banco/excluirTodosContextos.js";
+import { excluirTodosContextos } from "../agentes/banco/excluirContextos.js";
 import { excluirEvidencias } from "../testes/repositorioEvidencias.js";
 import { excluirAtividades } from "../logs/banco/excluirAtividades.js";
 import { excluirDiagnostico } from "../logs/repositorioDiagnostico.js";

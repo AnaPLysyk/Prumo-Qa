@@ -1,6 +1,6 @@
 /** Consultas, histórico e resumos de contextos da pasta vinculada de um projeto. */
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
-import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
+import { carregarTodosOsContextos } from '../banco/consultarContextos.js';
 import { lerPermissaoDeContextosNoMcp } from '../banco/permissoesDeContexto.js';
 import { ultimaVersaoDoContexto } from './versoesDoContexto.js';
 import { Filtro, Arquivo, Estado, Resumo, ehInstrucao } from '../tipos/contexto.js';

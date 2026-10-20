@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mascarar } from '../../../../dist/compartilhado/seguranca/mascarar.js';
-import { respostaDaFerramentaMcp } from '../../../../dist/agentes/mcp/respostaDaFerramentaMcp.js';
+import { respostaDaFerramentaMcp } from '../../../../dist/agentes/mcp/formatoDasFerramentas.js';
 import { abrirEspacoDeAutorizacoes } from '../../../../dist/agendamentos/autorizacoes/estadoERevogacao.js';
 
 test('tokens GitHub fine-grained e Atlassian são mascarados mesmo sem rótulo', () => {

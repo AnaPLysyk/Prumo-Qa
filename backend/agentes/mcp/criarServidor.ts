@@ -16,7 +16,7 @@ import { registrarProporBug } from '../servicoPropostasMcp.js';
 import { registrarProporCaso } from '../servicoPropostasMcp.js';
 import { registrarRevisarCobertura } from './registrarFerramentasQa.js';
 import { registrarRoteirosMcp } from './roteirosMcp.js';
-import { respostaDaFerramentaMcp } from './respostaDaFerramentaMcp.js';
+import { respostaDaFerramentaMcp } from './formatoDasFerramentas.js';
 import { transporteObservado } from './transporteObservado.js';
 import { contaAutorizadaMcp, conferirAcessoMcp } from './contaAutorizadaMcp.js';
 import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from '../../compartilhado/banco/escopoDeUsuario.js';

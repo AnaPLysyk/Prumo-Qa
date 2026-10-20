@@ -15,7 +15,7 @@ import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
 import { textoRemoto } from "../conexoes/integracoesFormatos.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
-import { salvarContextoDaPasta } from "./regras/salvarContextoDaPasta.js";
+import { salvarContextoDaPasta } from "./regras/cicloDosContextos.js";
 import { obterEspaco } from "../projetos/repositorio.js";
 
 export const agentesEstado: TratadorDoCanal<'agentes:estado'> = a => ({ configuracao: configuracaoDoEspaco(a.espacoId), matriz: matrizDePoliticas(a.espacoId), especializacoes: especializacoes, propostasIA: listarPropostas(a.espacoId).filter(p => p.origem === 'IA').length });

@@ -1,7 +1,7 @@
 /** O que a própria pessoa faz com a conta: criar a primeira conta, entrar, sair, se cadastrar por e-mail, definir senha nova pelo e-mail, trocar a senha e o nome. */
 import { randomUUID } from 'node:crypto';
 import { conferirCodigo, emailValido, emitirCodigo } from './codigosPorEmail.js';
-import { enviarCodigoPorEmail } from '../integracoes/enviarCodigoPorEmail.js';
+import { enviarCodigoPorEmail } from '../integracoes/envioEmail.js';
 import { conferirForcaDaSenha, conferirSegredo, resumirSegredo } from './senhas.js';
 import { contaParaJanela, encerrarSessao, iniciarSessao, loginLigado, sessaoParaJanela, situacaoDaSessao } from './sessao.js';
 import { gravarContas } from '../repositorioContas.js';

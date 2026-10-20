@@ -2,7 +2,7 @@
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { loginLigado } from './sessao.js';
 import { lerContas } from '../repositorioContas.js';
-import { enviarCodigoPorEmail, PedidoDeCodigo } from '../integracoes/enviarCodigoPorEmail.js';
+import { enviarCodigoPorEmail, PedidoDeCodigo } from '../integracoes/envioEmail.js';
 import { codigoPorEmailSchema, emailSchema } from '../tipos/contas.js';
 
 type FinalidadeDoCodigo = PedidoDeCodigo['finalidade'];

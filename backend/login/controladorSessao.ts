@@ -1,7 +1,7 @@
 /** Controlador da funcionalidade login: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { contaDaSessao, encerrarSessao, sessaoParaJanela } from "./regras/sessao.js";
 import { validarSessaoRemota } from "./integracoes/autenticacaoRemota.js";
-import { usarAutenticacaoRemota } from "./integracoes/configuracaoDaAutenticacao.js";
+import { usarAutenticacaoRemota } from "./integracoes/envioEmail.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 
 import { entrarNaConta } from './regras/contas.js';

@@ -2,7 +2,7 @@
 import { lerContas } from '../repositorioContas.js';
 import { definirUsuarioDoEscopo } from '../../compartilhado/banco/escopoDeUsuario.js';
 import { renovarCredencialMcp, revogarCredencialMcp } from '../../aplicativo/ponteDaSessaoMcp.js';
-import { usarAutenticacaoRemota } from '../integracoes/configuracaoDaAutenticacao.js';
+import { usarAutenticacaoRemota } from '../integracoes/envioEmail.js';
 import { ContaVisivel, IdModulo, NivelDeAcesso, Papel, RegistroDeContas, Usuario, modulosDoMenu } from '../tipos/contas.js';
 
 let atual: { usuarioId: string; ultimoUso: number } | null = null;
