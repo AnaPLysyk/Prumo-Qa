@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { raiz, fontesSkills, verificarSkills } from '../../../../testes/apoio/verificar-skills.mjs';
+import { raiz, fontesSkills, verificarSkills } from '../../../../docs/geradores/verificar-skills.mjs';
 
 test('manifesto corresponde às Skills e às políticas reais', () => {
   assert.deepEqual(verificarSkills(), { skills: 8, estado: 'VALIDADO_ESTATICAMENTE' });

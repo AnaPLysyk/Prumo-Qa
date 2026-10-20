@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../infra/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { revisarCobertura } from '../../../../dist/testes/regras/revisarCobertura.js';
 

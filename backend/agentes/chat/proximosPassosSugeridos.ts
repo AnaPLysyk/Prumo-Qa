@@ -1,9 +1,12 @@
 /** Sugere as próximas perguntas úteis conforme o agente, os fatos e o papel da pessoa. */
-import { numeroDoFato } from './numeroDoFato.js';
 import { termosDaFrase } from '../regras/termosDaFrase.js';
 import { Proximo } from '../tipos/chat.js';
 import { Papel } from '../tipos/persona.js';
 import { semAcentos } from '../../compartilhado/texto/semAcentos.js';
+
+/** Extrai o número de um fato como "falhas=3". Uso exclusivo desta sugestão. */
+const numeroDoFato = (fatos: string[], chave: string): number =>
+  Number(fatos.find(fato => fato.startsWith(chave + '='))?.split('=')[1] ?? NaN);
 
 /** Próximos passos calculados dos dados e do papel da pessoa (no lugar de uma frase fixa no fim de toda resposta). */
 export function proximosPassosSugeridos(agente: string, fatos: string[], papel: Papel | null, pergunta: string): Proximo[] {

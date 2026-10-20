@@ -1,5 +1,5 @@
 // Login, cadastro por e-mail, senha nova pelo e-mail, bloqueio, gestão de contas e permissão por canal, nas regras do núcleo (sem janela).
-// O código por e-mail vem de um envio em memória (testes/apoio/contas-por-email.mjs): nada sai do processo.
+// O código por e-mail vem de um envio em memória (testes/unitario/infra/contas-por-email.mjs): nada sai do processo.
 // Cada teste usa uma pasta de dados temporária própria; nada toca a pasta da pessoa nem SQLite.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,7 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { alterarMinhasDuasEtapas, ativarLogin, cadastrarConta, confirmarEntrada, entrarNaConta, reenviarCodigoDeEntrada, recuperarConta, sairDaConta, trocarMinhaSenha } from '../../../../dist/login/regras/contas.js';
 import { pedirCodigo } from '../../../../dist/login/regras/codigosPorEmail.js';
-import { cadastrarComEmail, codigoPara, criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
+import { cadastrarComEmail, codigoPara, criarPrimeiraConta } from '../../infra/contas-por-email.mjs';
 import { alterarContaPelaAdministracao, criarContaPelaAdministracao, desbloquearConta, excluirConta, listarContasDeAcesso, redefinirSenhaPelaAdministracao } from '../../../../dist/administracao/regras/gestaoDeContas.js';
 import { excluirPapel, salvarConfiguracaoDeAcesso, salvarPapel } from '../../../../dist/administracao/regras/papeis.js';
 import { conferirAcessoAoCanal } from '../../../../dist/login/regras/conferirAcessoAoCanal.js';

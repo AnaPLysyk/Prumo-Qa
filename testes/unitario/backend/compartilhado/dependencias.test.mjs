@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { verificarDependencias } from '../../../../testes/apoio/dependencias.mjs';
+import { verificarDependencias } from '../../../../docs/geradores/dependencias.mjs';
 
 test('arquitetura: todos os imports locais do backend resolvem para fontes existentes', () => {
   const resultado = verificarDependencias(process.cwd());

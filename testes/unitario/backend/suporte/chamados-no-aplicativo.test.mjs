@@ -11,7 +11,7 @@ import { chamadosDaAdministracao, lerChaveDeAdministracao, salvarChaveDeAdminist
 import { servicoDeChamados } from '../../../../dist/suporte/integracoes/servicoDeChamados.js';
 import { urlDoServico } from '../../../../dist/compartilhado/integracoes/servicoDoPrumo.js';
 import { acessoDosCanais } from '../../../../dist/login/tipos/acessoDosCanais.js';
-import { caixaDeEmail, CHAVE_DE_ADMIN_DOS_TESTES } from '../../../apoio/caixa-de-email.mjs';
+import { caixaDeEmail, CHAVE_DE_ADMIN_DOS_TESTES } from '../../infra/caixa-de-email.mjs';
 
 const PNG = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(120, 3)]);
 const MP4 = Buffer.concat([Buffer.from([0, 0, 0, 0x18]), Buffer.from('ftypisom'), Buffer.alloc(120, 1)]);

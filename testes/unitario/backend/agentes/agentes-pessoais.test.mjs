@@ -11,7 +11,7 @@ import { acessoDosCanais } from '../../../../dist/login/tipos/acessoDosCanais.js
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';
 import { lerContas } from '../../../../dist/login/banco/lerContas.js';
 import { criarContaPelaAdministracao } from '../../../../dist/administracao/regras/gestaoDeContas.js';
-import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
+import { criarPrimeiraConta } from '../../infra/contas-por-email.mjs';
 
 const PROJETO = '11111111-1111-4111-8111-111111111111'; const OUTRO = '22222222-2222-4222-8222-222222222222';
 const AGENTE = { nome: 'Regressão da Ana', descricao: 'Revisa regressão', objetivo: 'Achar regressões', instrucoes: 'Ler os testes que falharam', publico: false };

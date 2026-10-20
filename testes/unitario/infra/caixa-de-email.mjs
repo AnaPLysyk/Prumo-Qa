@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { criarServico } from '../../backend/aplicativo/servidor/servidor.mjs';
+import { criarServico } from '../../../backend/aplicativo/servidor/servidor.mjs';
 import { repositorioDeSuporteFalso } from './repositorio-de-suporte-falso.mjs';
 
 /**

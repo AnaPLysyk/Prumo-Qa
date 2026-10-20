@@ -9,7 +9,7 @@ import { orquestrar } from '../../dist/agentes/chat/orquestrar.js';
 import { verificarDependencias } from './dependencias.mjs';
 
 const raizPadrao = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const pastasDeCodigo = /^(backend|frontend|ferramentas|testes|site|docs)\//;
+const pastasDeCodigo = /^(backend|frontend|testes|site|docs)\//;
 const extensoes = /\.(?:ts|tsx|js|mjs|cjs|css|json|html|md)$/i;
 
 function fontesExistentes(raiz, nomes) {

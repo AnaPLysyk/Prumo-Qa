@@ -2,7 +2,7 @@
 
 ## Onde ficam os testes
 
-No aplicativo Prumo QA, `testes/unitario/<camada>/<tela>/*.test.mjs` guarda apenas testes unitários de frontend e backend. `testes/apoio/` contém as fixtures e os scripts essenciais para unidade, compilação, documentação, segurança do CI e construção do site; esses auxiliares não são uma suíte adicional.
+No aplicativo Prumo QA, `testes/unitario/<camada>/<tela>/*.test.mjs` guarda apenas testes unitários de frontend e backend. `testes/` contém exclusivamente `unitario/`. As fixtures e o runner unitário ficam em `testes/unitario/infra/` e `testes/unitario/executar.mjs`; scripts de geração em `docs/geradores/`, recursos do site em `site/scripts/`, e homologação externa no Prumo QA Lab. Não há uma pasta genérica `testes/apoio/`.
 
 Os testes de fumaça, regressão, interfaces reais, integração, migração simulada e automação de ponta a ponta pertencem ao repositório **Prumo-QA-Lab**: `automacao/prumo-qa/testes/smoke/` e `automacao/prumo-qa/testes/regressao/`. A aplicação fictícia `aplicacao/` e os cenários de avaliação do Lab continuam independentes.
 

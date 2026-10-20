@@ -70,7 +70,7 @@ npm.cmd run check
 
 Para reconstruir cópias **depois de editar o frontend**: `npm.cmd run frontend:sync` e `node frontend/construcao/gerar-telas-modulares.mjs`. O comando `npm.cmd run build` também faz essas etapas automaticamente.
 
-`testes/apoio/dependencias.mjs` resolve os imports TypeScript e informa origem, linha e destino. `--json` fornece o grafo para investigação. Um import local ausente interrompe o build; o verificador não executa módulos nem consulta projetos externos. O mapa de documentação viva também inclui `site/`, `docs/geradores/` e `backend/agentes/skills/`, sem incluir `site/public/`.
+`docs/geradores/dependencias.mjs` resolve os imports TypeScript e informa origem, linha e destino. `--json` fornece o grafo para investigação. Um import local ausente interrompe o build; o verificador não executa módulos nem consulta projetos externos. O mapa de documentação viva também inclui `site/`, `docs/geradores/` e `backend/agentes/skills/`, sem incluir `site/public/`.
 
 O site possui fonte em `site/gerar.mjs`, estilos em `site/estilos/base.css` e template em `site/componentes/pagina.mjs`. `site/gerar.mjs` permanece uma entrada compatível para npm, Render e CI. [Testes](TESTES.md) e [Skills](SKILLS.md) têm catálogos verificáveis; não são listas de funcionalidades aprovadas.
 

@@ -1,5 +1,10 @@
-/** Diz se dois caminhos absolutos apontam para o mesmo lugar. */
+/** Compara caminhos absolutos, respeitando a diferença entre Windows e sistemas POSIX. */
 import path from 'node:path';
-import { caminhoNormalizado } from './caminhoNormalizado.js';
 
-export const mesmoCaminho = (a: unknown, b: string) => typeof a === 'string' && path.isAbsolute(a) && caminhoNormalizado(a) === caminhoNormalizado(b);
+const caminhoNormalizado = (caminho: string): string => {
+  const absoluto = path.resolve(caminho);
+  return process.platform === 'win32' ? absoluto.toLowerCase() : absoluto;
+};
+
+export const mesmoCaminho = (a: unknown, b: string): boolean =>
+  typeof a === 'string' && path.isAbsolute(a) && caminhoNormalizado(a) === caminhoNormalizado(b);

@@ -2,13 +2,12 @@
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { blocosDeTeste } from './blocosDeTeste.js';
 import { codigoSemComentarios } from './codigoSemComentarios.js';
-import { recorteDaLinha } from './recorteDaLinha.js';
 import { seletorFragil } from './seletorFragil.js';
 import { AchadoTeste, doc } from '../tipos/frameworks.js';
 
 /** Análise estática de um arquivo de teste Playwright. Cada regra cita a fonte oficial; falsos positivos possíveis estão descritos na orientação. */
 export function analisarPlaywright(arquivo: string, conteudo: string): AchadoTeste[] {
-  const out: AchadoTeste[] = []; const linhas = codigoSemComentarios(conteudo); const add = (regra: string, severidade: AchadoTeste['severidade'], i: number, orientacao: string, fonte: string) => out.push({ regra, severidade, arquivo: arquivo.replaceAll('\\', '/'), linha: i + 1, trecho: recorteDaLinha(linhas[i]!), orientacao, fonte });
+  const out: AchadoTeste[] = []; const linhas = codigoSemComentarios(conteudo); const add = (regra: string, severidade: AchadoTeste['severidade'], i: number, orientacao: string, fonte: string) => out.push({ regra, severidade, arquivo: arquivo.replaceAll('\\', '/'), linha: i + 1, trecho: linhas[i]!.trim().slice(0, 140), orientacao, fonte });
   linhas.forEach((l, i) => {
     if (/\bwaitForTimeout\s*\(/.test(l) || /new Promise\([^)]*setTimeout/.test(l)) add('PW_ESPERA_FIXA', 'medium', i, 'Espera por tempo fixo. Ações e assertions do Playwright já aguardam a condição; troque por uma assertion que repete (await expect(...)) ou por um evento observável.', `${doc}/writing-tests`);
     for (const m of l.matchAll(/\.locator\(\s*(['"`])((?:\\.|(?!\1).)*)\1/g)) if (seletorFragil(m[2]!)) add('PW_SELETOR_FRAGIL', 'medium', i, `Seletor preso à estrutura do DOM ("${m[2]!.slice(0, 50)}"). Prefira locators por papel, rótulo, texto ou data-testid.`, `${doc}/locators#locate-by-css-or-xpath`);

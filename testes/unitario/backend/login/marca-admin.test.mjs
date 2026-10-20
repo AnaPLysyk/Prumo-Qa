@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { entrarNaConta, sairDaConta, trocarMinhaSenha } from '../../../../dist/login/regras/contas.js';
-import { cadastrarComEmail, criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
+import { cadastrarComEmail, criarPrimeiraConta } from '../../infra/contas-por-email.mjs';
 import { alterarContaPelaAdministracao, criarContaPelaAdministracao, listarContasDeAcesso } from '../../../../dist/administracao/regras/gestaoDeContas.js';
 import { salvarConfiguracaoDeAcesso } from '../../../../dist/administracao/regras/papeis.js';
 import { conferirAcessoAoCanal } from '../../../../dist/login/regras/conferirAcessoAoCanal.js';

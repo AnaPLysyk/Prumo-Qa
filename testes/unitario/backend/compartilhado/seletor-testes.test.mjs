@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { raiz, argumentos, selecionar, planoDeExecucao, descrever, catalogar, arquivosDeTeste } from '../../../../testes/apoio/executar.mjs';
+import { raiz, argumentos, selecionar, planoDeExecucao, descrever, catalogar, arquivosDeTeste } from '../../../../testes/unitario/executar.mjs';
 
 const exemplos = catalogar([
   'testes/unitario/backend/projetos/a.test.mjs',
@@ -27,8 +27,8 @@ test('os arquivos unitarios seguem pasta, camada e modulo existente', () => {
 test('apenas unitarios e auxiliares ficam no repositorio do aplicativo', () => {
   const itens = fs.readdirSync(path.join(raiz, 'testes'), { withFileTypes: true });
   assert.deepEqual(itens.filter(e => e.isFile()).map(e => e.name), []);
-  assert.deepEqual(itens.filter(e => e.isDirectory()).map(e => e.name).sort(), ['apoio', 'unitario']);
-  assert.ok(fs.readdirSync(path.join(raiz, 'testes', 'apoio')).every(n => !n.endsWith('.test.mjs')));
+  assert.deepEqual(itens.filter(e => e.isDirectory()).map(e => e.name).sort(), ['unitario']);
+  assert.ok(fs.readdirSync(path.join(raiz, 'testes', 'unitario', 'infra')).every(n => !n.endsWith('.test.mjs')));
 });
 
 test('filtros de unidade combinam natureza, camada e modulo e recusam natureza externa', () => {
@@ -48,7 +48,7 @@ test('selecao ampla executa somente unidades, sem ignorar casos sintéticos', ()
 
 test('runner preserva hook, nao compila de novo e recusa perfil instalado', () => {
   const argv = planoDeExecucao([exemplos[0]], {});
-  assert.ok(argv.includes('./testes/apoio/conhecimento-hook.cjs'));
+  assert.ok(argv.includes('./testes/unitario/infra/conhecimento-hook.cjs'));
   assert.ok(argv.includes('--test'));
   assert.ok(!argv.includes('build'));
   for (const env of [{ PRUMO_APP_EXE: 'app.exe' }, { PRUMO_MIGRACAO_26: '1' }, { PRUMO_MIGRACAO: '0' }])

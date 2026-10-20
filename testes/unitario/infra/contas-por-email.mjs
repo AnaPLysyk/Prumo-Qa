@@ -1,5 +1,5 @@
-import { esquecerCodigos, pedirCodigo } from '../../dist/login/regras/codigosPorEmail.js';
-import { ativarLogin, cadastrarConta } from '../../dist/login/regras/contas.js';
+import { esquecerCodigos, pedirCodigo } from '../../../dist/login/regras/codigosPorEmail.js';
+import { ativarLogin, cadastrarConta } from '../../../dist/login/regras/contas.js';
 import { emailDa } from './caixa-de-email.mjs';
 
 /**
