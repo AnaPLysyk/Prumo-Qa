@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { CanalIpc, canaisFrequentes, esquemasIpc } from './catalogoDeContratos.js';
 import { mensagemComCodigo } from '../../compartilhado/erros/mensagemComCodigo.js';
 import { Resposta, origemPermitida } from '../tipos/aplicativo.js';
-import { registrarDiagnostico } from '../../logs/banco/registrarDiagnostico.js';
+import { registrarDiagnostico } from '../../logs/repositorioDiagnostico.js';
 import { estadoDoAplicativo } from '../estadoDoAplicativo.js';
 import { conferirAcessoAoCanal } from '../../login/regras/conferirAcessoAoCanal.js';
 import { contaDaSessao } from '../../login/regras/sessao.js';

@@ -16,10 +16,10 @@ import { codigosServico, paginaSchema } from '../../conexoes/tipos/transporte.js
 import { alteracaoSchema } from '../../configuracoes/contratos.js';
 import { conteudoSchema, estados, tipos } from '../../agentes/tipos/contexto.js';
 import { filtroExecucoes } from '../../testes/tipos/historicoDeExecucoes.js';
-import { associacaoSchema, dadosEspaco, identidadeRecurso, servicoSchema } from '../../projetos/tipos/espacos.js';
-import { filtroSchema } from '../../projetos/tipos/painel.js';
-import { numeroChamado, solicitacaoSchema } from '../../suporte/tipos/suporte.js';
-import { estadosDoChamado } from '../../suporte/tipos/chamados.js';
+import { associacaoSchema, dadosEspaco, identidadeRecurso, servicoSchema } from '../../projetos/contratos.js';
+import { filtroSchema } from '../../projetos/contratos.js';
+import { numeroChamado, solicitacaoSchema } from '../../suporte/contratos.js';
+import { estadosDoChamado } from '../../suporte/contratos.js';
 import { dadosDoAgentePessoal } from '../../agentes/regras/agentesPessoais.js';
 import { esquemaCaso } from '../../testes/tipos/escritaQase.js';
 import { entradaCasoLocal, entradaSuiteLocal } from '../../testes/tipos/repositorioLocal.js';

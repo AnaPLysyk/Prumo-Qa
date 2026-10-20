@@ -8,7 +8,7 @@ import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { arquivosDoDiario } from './arquivosDoDiario.js';
 import { pastaAtividades } from './pastaAtividades.js';
 import { achadoELacuna } from '../regras/resumoDoDiario.js';
-import { Evento, eventoSchema, limitesHistorico } from '../tipos/atividade.js';
+import { Evento, eventoSchema, limitesHistorico } from '../contratos.js';
 
 export function consultarAtividades(p:Projeto,base?:string) {
   const pasta=pastaAtividades(p,base);const eventos:Evento[]=[];const problemas:{file:string;code:string}[]=[];let bytes=0;

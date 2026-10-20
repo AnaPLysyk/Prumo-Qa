@@ -1,7 +1,7 @@
 /** Ferramenta MCP propor_bug: a IA propõe um bug que fica como RASCUNHO local; não cria ticket no Jira. */
 import { z } from 'zod';
-import { criarProposta } from '../../tickets/regras/criarProposta.js';
-import { dadosBug } from '../../tickets/tipos/proposta.js';
+import { criarProposta } from '../../tickets/servicoPropostas.js';
+import { dadosBug } from '../../tickets/contratos.js';
 import { MeiosDoServidorMcp, avisoDeRascunho, rascunhoLocal } from '../tipos/mcp.js';
 
 export function registrarProporBug(m: MeiosDoServidorMcp) {

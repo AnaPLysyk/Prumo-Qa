@@ -2,8 +2,8 @@
 import { listarRotinas } from '../../agendamentos/banco/agenda.js';
 import { listarTrabalhos } from '../../agendamentos/banco/listarTrabalhos.js';
 import { Trabalho } from '../../agendamentos/tipos/fila.js';
-import { listarEspacos } from '../../projetos/banco/armazenamentoDeEspacos.js';
-import { Espaco } from '../../projetos/tipos/espacos.js';
+import { listarEspacos } from '../../projetos/repositorio.js';
+import { Espaco } from '../../projetos/contratos.js';
 import { FiltroExecucoes, filtroExecucoes } from '../tipos/historicoDeExecucoes.js';
 
 const repositorioDoEspaco = (espaco: Espaco | undefined): string | null =>

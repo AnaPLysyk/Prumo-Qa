@@ -3,12 +3,12 @@ import { randomUUID } from 'node:crypto';
 import { AdaptadorServico } from '../integracoes/AdaptadorServico.js';
 import { ContextoDosServicos } from '../tipos/contaDeServico.js';
 import { instanciaServico } from '../integracoes/instanciaServico.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { lerContasDeServico } from '../banco/contasDeServico.js';
-import { lerEspacos } from '../../projetos/banco/armazenamentoDeEspacos.js';
+import { lerEspacos } from '../../projetos/repositorio.js';
 import { adicionarConta } from './adicionarConta.js';
-import { criarEspaco } from '../../projetos/regras/criarEspaco.js';
-import { vincularServicoAoEspaco } from '../../projetos/regras/vincularServicoAoEspaco.js';
+import { criarEspaco } from '../../projetos/servicoProjetos.js';
+import { vincularServicoAoEspaco } from '../../projetos/servicoProjetos.js';
 
 type Previa = { token: string; projetos: Recurso[]; expiraEm: number; timer: ReturnType<typeof setTimeout> };
 const LIMITE_PROJETOS = 1000, PRAZO_MS = 5 * 60_000;

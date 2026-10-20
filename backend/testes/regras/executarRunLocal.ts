@@ -1,6 +1,6 @@
 /** Executa as automações dos casos da run (só capacidades declaradas) e anota os resultados. */
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 import { alterarRunLocal } from '../banco/armazenamentoDeRuns.js';
 import { obterRunLocal } from '../banco/armazenamentoDeRuns.js';
 

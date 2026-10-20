@@ -5,7 +5,7 @@ import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js'
 import { montarEnvioDeArquivo } from '../../conexoes/integracoes/montarEnvioDeArquivo.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
 import { anexar } from '../tipos/escritaQase.js';
-import { lerAnexo } from '../../tickets/integracoes/lerAnexo.js';
+import { lerAnexo } from '../../tickets/integracoesJira.js';
 
 export const enviarAnexoAoQase: DefOperacao<z.infer<typeof anexar>> = {
   id: 'qase.anexar', servico: 'qase', rotulo: 'Enviar anexo ao Qase', efeito: 'Envia um arquivo (log, imagem, vídeo ou evidência) e devolve o hash para usar em casos e resultados.', exigeConfirmacao: true, schema: anexar,

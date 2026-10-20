@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ConfigServico, ContextoServico, OperacaoServico } from '../tipos/adaptador.js';
 import { Filtros } from '../tipos/leituras.js';
 import { TransporteEscrita, TransporteServico, paginaSchema } from '../tipos/transporte.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { autenticarNoServico } from './autenticarNoServico.js';
 import { consultarNoServico } from './consultarNoServico.js';
 import { contextoDoAdaptador } from './contextoDoAdaptador.js';

@@ -2,7 +2,7 @@
 import { obterTrabalho } from '../../agendamentos/banco/armazenamentoDaFila.js';
 import { publicacaoDoTrabalho } from '../banco/publicacaoDoTrabalho.js';
 import { montarComentario } from './montarComentario.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 
 /** Prévia: nada é gravado nem enviado. */
 export function prepararPublicacao(trabalhoId: string, b?: string) {

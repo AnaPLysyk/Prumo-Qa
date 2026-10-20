@@ -1,6 +1,6 @@
 /** Confere que o que voltou pertence ao recurso vinculado (tickets, caso, defeito, repositório) e valida o formato dos defeitos do Qase. */
 import { z } from 'zod';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { OperacaoServico, nome, obj } from '../tipos/adaptador.js';
 import { ErroServico } from './ErroServico.js';
 

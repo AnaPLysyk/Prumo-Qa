@@ -1,7 +1,7 @@
 /** Lista os contextos de uma pasta vinculada para a tela Contextos. */
 
 import { Filtro } from '../tipos/contexto.js';
-import { abrirProjetoVinculado } from '../../projetos/regras/abrirProjetoVinculado.js';
+import { abrirProjetoVinculado } from '../../projetos/servicoProjetos.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { carregarTodosOsContextos } from '../banco/carregarTodosOsContextos.js';
 import { lerPermissaoDeContextosNoMcp } from '../banco/lerPermissaoDeContextosNoMcp.js';

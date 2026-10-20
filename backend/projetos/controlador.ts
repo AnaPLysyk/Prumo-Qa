@@ -1,29 +1,29 @@
 /** Controlador da funcionalidade projetos: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { associarEspaco } from "./regras/associarEspaco.js";
+import { associarEspaco } from "./servicoProjetos.js";
 import { localizarK6 } from "../agendamentos/k6/localizarK6.js";
 import { contextoCompleto } from "../agentes/mcp/contextoCompleto.js";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
-import { obterEspaco } from "./banco/obterEspaco.js";
-import { criarEspaco } from "./regras/criarEspaco.js";
-import { editarEspaco } from "./regras/edicaoDoEspaco.js";
-import { listarEspacos } from "./banco/armazenamentoDeEspacos.js";
+import { obterEspaco } from "./repositorio.js";
+import { criarEspaco } from "./servicoProjetos.js";
+import { editarEspaco } from "./servicoProjetos.js";
+import { listarEspacos } from "./repositorio.js";
 import { dialog, app } from "electron";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
-import { vincularPastaDoDisco } from "./regras/vincularPastaDoDisco.js";
+import { vincularPastaDoDisco } from "./servicoProjetos.js";
 import path from "node:path";
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
-import { clonarOuAtualizarRepositorio, repositorioValido } from "./regras/clonarRepositorio.js";
+import { clonarOuAtualizarRepositorio, repositorioValido } from "./servicoRepositorioGit.js";
 import { raizDoAplicativo } from "../compartilhado/raizDoAplicativo.js";
-import { adicionarVinculo } from "./regras/adicionarVinculo.js";
-import { copiarDemonstracao } from "./regras/copiarDemonstracao.js";
-import { desvincularPasta } from "./regras/desvincularPasta.js";
-import { gravarContratoProposto } from "./regras/gravarContratoProposto.js";
-import { proporContrato } from "./regras/proporContrato.js";
-import { resumirContratoProposto } from "./regras/resumirContratoProposto.js";
-import { situacaoProjeto } from "./regras/situacaoProjeto.js";
-import { listarPastasVinculadas } from "./regras/consultasDeVinculos.js";
-import { visaoGeralDoProjeto } from "./regras/visaoGeralDoProjeto.js";
+import { adicionarVinculo } from "./servicoProjetos.js";
+import { copiarDemonstracao } from "./servicoRepositorioGit.js";
+import { desvincularPasta } from "./servicoProjetos.js";
+import { gravarContratoProposto } from "./servicoContrato.js";
+import { proporContrato } from "./servicoContrato.js";
+import { resumirContratoProposto } from "./servicoContrato.js";
+import { situacaoProjeto } from "./servicoProjetos.js";
+import { listarPastasVinculadas } from "./servicoProjetos.js";
+import { visaoGeralDoProjeto } from "./servicoProjetos.js";
 
 export const espacosAssociar: TratadorDoCanal<'espacos:associar'> = a=>associarEspaco(a.id,a.dados);
 

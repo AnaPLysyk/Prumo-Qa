@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { clonarOuAtualizarRepositorio, repositorioValido } from '../../../../dist/projetos/regras/clonarRepositorio.js';
+import { clonarOuAtualizarRepositorio, repositorioValido } from '../../../../dist/projetos/servicoRepositorioGit.js';
 
 const identidade = { GIT_AUTHOR_NAME: 'T', GIT_AUTHOR_EMAIL: 't@example.test', GIT_COMMITTER_NAME: 'T', GIT_COMMITTER_EMAIL: 't@example.test' };
 const git = (cwd, ...args) => execFileSync('git', args, { cwd, env: { ...process.env, ...identidade }, encoding: 'utf8' });

@@ -1,7 +1,7 @@
 /** Diz quais comandos do projeto (capacidades) uma rotina vai executar. */
 import { capacidadeDoK6 } from '../k6/capacidadeDoK6.js';
 import { Rotina } from '../tipos/rotina.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 import { obterRunLocal } from '../../testes/banco/armazenamentoDeRuns.js';
 
 export function capacidadesDaRotina(r: Rotina, base?: string): string[] {

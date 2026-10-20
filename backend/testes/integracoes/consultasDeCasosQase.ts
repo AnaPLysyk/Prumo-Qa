@@ -1,6 +1,6 @@
 /** Reúne consultas de casos qase da funcionalidade, mantendo cada operação identificável pelo nome. */
 import { ContextoServico } from "../../conexoes/tipos/adaptador.js";
-import { Recurso } from "../../projetos/tipos/espacos.js";
+import { Recurso } from "../../projetos/contratos.js";
 import { listarNoQase } from "./listarNoQase.js";
 import { codificarParaUrl } from "../../compartilhado/texto/codificarParaUrl.js";
 

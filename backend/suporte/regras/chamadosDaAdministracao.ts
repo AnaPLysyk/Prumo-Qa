@@ -1,8 +1,8 @@
 /** Administração › Chamados: lê todos os chamados e anexos, responde e muda o estado, com a chave de administração guardada no cofre. */
 // Administração › Chamados: lê todos os chamados, os anexos, responde e muda o estado, pelo serviço do Prumo e com a chave de administração do suporte. A chave fica só no cofre do sistema deste computador e nunca volta para a janela.
 import { cofreCredenciais } from '../../conexoes/banco/cofreCredenciais.js';
-import { servicoDeChamados } from '../integracoes/servicoDeChamados.js';
-import { estadoDoChamadoSchema } from '../tipos/chamados.js';
+import { servicoDeChamados } from '../integracoes.js';
+import { estadoDoChamadoSchema } from '../contratos.js';
 import type { Protetor } from '../../conexoes/tipos/credenciais.js';
 
 /** Id fixo da chave de administração no cofre (o cofre exige um UUID). */

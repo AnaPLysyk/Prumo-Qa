@@ -13,11 +13,11 @@ import { perguntarAoAssistenteLocal } from '../../inicio/servico.js';
 import { situacaoDoProjeto } from '../../inicio/servico.js';
 import { Fonte } from '../../inicio/contratos.js';
 import { metricasDasExecucoes } from '../../metricas/servico.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { Espaco } from '../../projetos/tipos/espacos.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
+import { Espaco } from '../../projetos/contratos.js';
 import { listarRunsLocais } from '../../testes/banco/listarRunsLocais.js';
 import { catalogoDeTestes } from '../../testes/regras/catalogoDeTestes.js';
-import { listarPropostas } from '../../tickets/banco/listarPropostas.js';
+import { listarPropostas } from '../../tickets/repositorio.js';
 
 /** Classificação inicial de uma falha pelo texto do resultado. É hipótese: confirmar reproduzindo. */
 function classificarFalha(texto: string): { classe: 'automacao' | 'ambiente' | 'produto' | 'inconclusiva'; rotulo: string; motivo: string } {

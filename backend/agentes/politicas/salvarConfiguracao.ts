@@ -3,7 +3,7 @@ import { lerConfiguracaoDosAgentes } from '../banco/lerConfiguracaoDosAgentes.js
 import { configuracaoDoEspaco } from './configuracaoDoEspaco.js';
 import { EstadoCapacidade, capacidades, idsEsp, registro } from '../tipos/politicas.js';
 import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 
 export function salvarConfiguracao(espacoId: string, c: { especializacoes: string[]; politicas: Record<string, string> }, por: string, b?: string, agora = new Date()) {
   obterEspaco(espacoId, b); const esp = [...new Set(c.especializacoes)]; if (esp.some(e => !idsEsp.includes(e as never))) throw new Error('AGENT_SPECIALIZATION_UNKNOWN');

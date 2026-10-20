@@ -1,6 +1,6 @@
 /** Prepara uma run local com os casos escolhidos, marcando quais têm automação. */
 import { randomUUID } from 'node:crypto';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 import { gravarRunsLocais } from '../banco/armazenamentoDeRuns.js';
 import { lerRunsLocais } from '../banco/armazenamentoDeRuns.js';
 

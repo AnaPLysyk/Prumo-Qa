@@ -8,7 +8,7 @@ import path from 'node:path';
 import { anexosDoEnvio, guardarAnexos, tipoPelaAssinatura } from '../../../../dist/suporte/regras/anexosDoChamado.js';
 import { enviarChamado, meuChamado, meusChamados } from '../../../../dist/suporte/regras/chamadosDaPessoa.js';
 import { chamadosDaAdministracao, lerChaveDeAdministracao, salvarChaveDeAdministracao } from '../../../../dist/suporte/regras/chamadosDaAdministracao.js';
-import { servicoDeChamados } from '../../../../dist/suporte/integracoes/servicoDeChamados.js';
+import { servicoDeChamados } from '../../../../dist/suporte/integracoes.js';
 import { urlDoServico } from '../../../../dist/compartilhado/integracoes/servicoDoPrumo.js';
 import { acessoDosCanais } from '../../../../dist/login/tipos/acessoDosCanais.js';
 import { caixaDeEmail, CHAVE_DE_ADMIN_DOS_TESTES } from '../../infra/caixa-de-email.mjs';

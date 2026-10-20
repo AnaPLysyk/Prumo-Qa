@@ -9,7 +9,7 @@ import { ContextoDosServicos, conexaoEntrada } from '../tipos/contaDeServico.js'
 import { Protetor } from '../tipos/credenciais.js';
 import { Filtros } from '../tipos/leituras.js';
 import { TransporteEscrita, TransporteServico, paginaSchema } from '../tipos/transporte.js';
-import { Recurso, Servico } from '../../projetos/tipos/espacos.js';
+import { Recurso, Servico } from '../../projetos/contratos.js';
 import { adicionarConta } from './adicionarConta.js';
 import { importarProjetosQase } from './importarProjetosQase.js';
 
@@ -21,20 +21,20 @@ import { importarProjetosQase } from './importarProjetosQase.js';
 
 
 
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { vincularServicoAoEspaco } from '../../projetos/regras/vincularServicoAoEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
+import { vincularServicoAoEspaco } from '../../projetos/servicoProjetos.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { adaptadorDaConta } from './adaptadorDaConta.js';
 import { contaAtiva } from './contaAtiva.js';
 import { verificarVinculoDoServico } from './verificarVinculoDoServico.js';
 import { gravarLocal } from '../../compartilhado/banco/gravarLocal.js';
 import { lerContasDeServico } from '../banco/contasDeServico.js';
-import { listarEspacos } from '../../projetos/banco/armazenamentoDeEspacos.js';
-import { atualizarEstadoDoVinculo } from '../../projetos/regras/historicoDeVinculos.js';
-import { registrarConsultaExterna } from '../../projetos/regras/historicoDeVinculos.js';
+import { listarEspacos } from '../../projetos/repositorio.js';
+import { atualizarEstadoDoVinculo } from '../../projetos/servicoProjetos.js';
+import { registrarConsultaExterna } from '../../projetos/servicoProjetos.js';
 import { codigoDoErroDeServico } from './codigoDoErroDeServico.js';
 import { vinculoDoServico } from './vinculoDoServico.js';
-import { configurarAceite } from '../../projetos/regras/edicaoDoEspaco.js';
+import { configurarAceite } from '../../projetos/servicoProjetos.js';
 
 async function comentarNoJira(c: ContextoDosServicos, espacoId: string, ticket: string, adf: unknown) {
   try {

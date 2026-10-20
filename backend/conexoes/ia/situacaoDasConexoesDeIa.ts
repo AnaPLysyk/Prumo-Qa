@@ -2,7 +2,7 @@
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { diagnosticarIntegracao } from './diagnosticarIntegracao.js';
 import { prepararConexao } from './prepararConexao.js';
-import { projetoVinculado } from '../../projetos/regras/projetoVinculado.js';
+import { projetoVinculado } from '../../projetos/servicoProjetos.js';
 
 /** Propõe a configuração; nada é alterado aqui. */
 export async function situacaoDasConexoesDeIa(raiz: string) {

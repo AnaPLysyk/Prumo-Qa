@@ -1,7 +1,7 @@
 /** Cria/edita caso offline. Ao editar um legado, copia o mesmo ID para o arquivo novo sem apagar o original. */
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { listarRepositorioLocal } from './listarRepositorioLocal.js';
 import { lerRepositorioLocal } from '../banco/lerRepositorioLocal.js';

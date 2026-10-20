@@ -13,13 +13,13 @@ const espaco = { id: espacoId, nome: 'Projeto sintético', vinculos: [], relacoe
 const caso = { id: casoId, titulo: 'Validar autenticação local', dados: { titulo: 'Validar autenticação local' } };
 const ticket = { id: ticketId, titulo: 'Corrigir autenticação', espacoId, tipo: 'bug', origem: 'PESSOA', estado: 'RASCUNHO', remoto: null };
 
-mock.module('../../../../dist/projetos/banco/obterEspaco.js', { exports: { obterEspaco: id => {
+mock.module('../../../../dist/projetos/repositorio.js', { exports: { obterEspaco: id => {
   assert.equal(id, espacoId); return espaco;
 } } });
 mock.module('../../../../dist/testes/regras/listarRepositorioLocal.js', { exports: { listarRepositorioLocal: id => {
   assert.equal(id, espacoId); return { casos: [caso], suites: [] };
 } } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: { listarPropostas: id => {
+mock.module('../../../../dist/tickets/repositorio.js', { exports: { listarPropostas: id => {
   assert.equal(id, espacoId); return [ticket];
 } } });
 mock.module('../../../../dist/conexoes/banco/listarOperacoes.js', { exports: { listarOperacoes: () => [] } });

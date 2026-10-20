@@ -13,7 +13,7 @@ import { listarAgenda } from "./regras/listarAgenda.js";
 import { listarPermissoes } from "./regras/listarPermissoes.js";
 import { criarPoliticaPublicacao } from "./autorizacoes/criarPoliticaPublicacao.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
-import { obterEspaco } from "../projetos/banco/obterEspaco.js";
+import { obterEspaco } from "../projetos/repositorio.js";
 import { revogarAutorizacao } from "./autorizacoes/revogarAutorizacao.js";
 import { criarRotina } from "./regras/criarRotina.js";
 import { editarRotina } from "./regras/editarRotina.js";

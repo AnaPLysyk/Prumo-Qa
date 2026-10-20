@@ -2,8 +2,8 @@
 import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { parametrosDaUrl } from './parametrosDaUrl.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
-import { jqlDeTickets } from '../../tickets/integracoes/jqlDeTickets.js';
+import { Recurso } from '../../projetos/contratos.js';
+import { jqlDeTickets } from '../../tickets/integracoesJira.js';
 import { OperacaoServico, PartesDoAdaptador, PlanoDaConsulta, obj } from '../tipos/adaptador.js';
 import { Filtros } from '../tipos/leituras.js';
 import { paginaSchema } from '../tipos/transporte.js';

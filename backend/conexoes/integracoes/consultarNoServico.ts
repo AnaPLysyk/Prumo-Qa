@@ -1,6 +1,6 @@
 /** Faz uma consulta de leitura da tela no recurso vinculado: monta o endereço do serviço, lê a resposta, confere o escopo e devolve só o seguro. */
 import { z } from 'zod';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { OperacaoServico, PartesDoAdaptador } from '../tipos/adaptador.js';
 import { Filtros, OperacaoExtra, operacoesExtras } from '../tipos/leituras.js';
 import { paginaSchema } from '../tipos/transporte.js';

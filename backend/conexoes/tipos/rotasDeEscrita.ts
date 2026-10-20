@@ -1,5 +1,5 @@
 /** Lista fechada de métodos e caminhos de escrita permitidos por serviço. */
-import { Servico } from '../../projetos/tipos/espacos.js';
+import { Servico } from '../../projetos/contratos.js';
 
 /**
  * Lista fechada das únicas escritas remotas que o Prumo sabe fazer. Cada rota é método + caminho exatos, sem query string.

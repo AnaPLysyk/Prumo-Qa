@@ -2,7 +2,7 @@
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { itensDaPaginaQase } from './itensDaPaginaQase.js';
 
 /** Limite finito: se houver mais registros, a operação de escrita não pode assumir ausência de duplicata. */

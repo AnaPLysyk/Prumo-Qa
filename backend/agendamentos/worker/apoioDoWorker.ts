@@ -5,7 +5,7 @@ import { EstadoDoWorker, TipoEvento } from "../tipos/worker.js";
 import { ErroQa } from "../../compartilhado/erros/ErroQa.js";
 import { carregarProjeto } from "../../compartilhado/projeto/carregarProjeto.js";
 import { Projeto } from "../../compartilhado/tipos/projeto.js";
-import { obterEspaco } from "../../projetos/banco/obterEspaco.js";
+import { obterEspaco } from "../../projetos/repositorio.js";
 
 export function capacidadeDaRotinaAgendada(r: Rotina) {
   return r.capability ?? (r.k6 ? capacidadeDoK6(r.k6) : undefined);

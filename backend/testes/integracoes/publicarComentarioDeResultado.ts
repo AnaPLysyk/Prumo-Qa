@@ -9,7 +9,7 @@ import { codigoDoErroDePublicacao } from '../regras/codigoDoErroDePublicacao.js'
 import { montarComentario } from '../regras/montarComentario.js';
 import { publicacaoPodeRepetir } from '../regras/publicacaoPodeRepetir.js';
 import { Pub, PublicadorJira, registroPub } from '../tipos/comentarioJira.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 
 /**
  * Publica (ou confirma que já está publicado) o comentário da execução. `modo` MANUAL exige `confirmado` (a confirmação nativa

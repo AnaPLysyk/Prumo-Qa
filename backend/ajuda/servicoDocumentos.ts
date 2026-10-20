@@ -1,7 +1,7 @@
 /** Lógica e contratos de ajuda: operações relacionadas no mesmo módulo. */
 import fs from "node:fs";
 import path from "node:path";
-import { documentosAjuda } from "../projetos/tipos/painel.js";
+import { documentosAjuda } from "../projetos/contratos.js";
 
 export function lerDocumentosDaAjuda(pasta: string, versao: string) {
   return documentosAjuda.map(arq => {

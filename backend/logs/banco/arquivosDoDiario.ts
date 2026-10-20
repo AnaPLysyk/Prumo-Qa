@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import { falharCom } from '../../compartilhado/erros/falharCom.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { limitesHistorico } from '../tipos/atividade.js';
+import { limitesHistorico } from '../contratos.js';
 
 export function arquivosDoDiario(pasta:string):string[] {
   semLinks(pasta);

@@ -1,20 +1,20 @@
 /** Controlador da funcionalidade tickets: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { criarProposta } from "./regras/criarProposta.js";
-import { descartarProposta, editarProposta, revisarProposta } from "./regras/edicaoDaProposta.js";
-import { listarPropostas } from "./banco/listarPropostas.js";
+import { criarProposta } from "./servicoPropostas.js";
+import { descartarProposta, editarProposta, revisarProposta } from "./servicoPropostas.js";
+import { listarPropostas } from "./repositorio.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/textoNoIdioma.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { nomeServico } from "../aplicativo/tipos/aplicativo.js";
 import { prepararOperacao } from "../conexoes/escrita/prepararOperacao.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
-import { obterEspaco } from "../projetos/banco/obterEspaco.js";
-import { obterProposta } from "./banco/armazenamentoDePropostas.js";
-import { podePublicar } from "./regras/podePublicar.js";
-import { parametrosDaIssueGithub, parametrosDoDefeitoQase, publicarProposta } from "./regras/publicarProposta.js";
+import { obterEspaco } from "../projetos/repositorio.js";
+import { obterProposta } from "./repositorio.js";
+import { podePublicar } from "./servicoPropostas.js";
+import { parametrosDaIssueGithub, parametrosDoDefeitoQase, publicarProposta } from "./servicoPropostas.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
-import { vincularPropostaATicket } from "./regras/vincularPropostaATicket.js";
+import { vincularPropostaATicket } from "./servicoPropostas.js";
 
 export const propostasCriar: TratadorDoCanal<'propostas:criar'> = a => criarProposta({ espacoId: a.espacoId, tipo: a.tipo, origem: 'PESSOA', dados: a.dados, requisito: a.requisito, risco: a.risco, falhaDeOrigem: a.falhaDeOrigem });
 

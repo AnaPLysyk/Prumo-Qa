@@ -6,7 +6,7 @@ import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";
 import { prepararOperacao } from "../conexoes/escrita/prepararOperacao.js";
 import { servicosDoAplicativo } from "../conexoes/regras/servicosDoAplicativo.js";
 import { idiomaAtual } from "../configuracoes/servico.js";
-import { obterEspaco } from "../projetos/banco/obterEspaco.js";
+import { obterEspaco } from "../projetos/repositorio.js";
 import { obterRunLocal } from "./banco/armazenamentoDeRuns.js";
 import { criarRunNoQase, parametrosDaRunQase } from "./integracoes/criarRunNoQase.js";
 import { executarValidacao } from "./regras/executarValidacao.js";

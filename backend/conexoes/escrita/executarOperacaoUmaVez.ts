@@ -12,8 +12,8 @@ import { operacaoPorId } from './operacaoPorId.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { Remoto } from '../tipos/operacao.js';
 import { Executor, OpcoesOperacao, RegistroOperacao, semAux } from '../tipos/operacoesExternas.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { registrarEscritaExterna } from '../../projetos/regras/historicoDeVinculos.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
+import { registrarEscritaExterna } from '../../projetos/servicoProjetos.js';
 
 const codigoDaFalhaDeOperacao = (e: unknown) => e instanceof ErroServico ? (e.detalhe ? `${e.codigo}: ${e.detalhe}` : e.codigo) : (/^([A-Z][A-Z_]{2,60})\b/.exec((e as Error)?.message ?? '')?.[1] ?? 'OPERATION_FAILED');
 

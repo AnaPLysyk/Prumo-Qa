@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { categorias, limitesPrivacidade, naoTransmitido, politicaRetencao } from "./contratos.js";
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
-import { listarVinculos } from "../projetos/regras/consultasDeVinculos.js";
+import { listarVinculos } from "../projetos/servicoProjetos.js";
 
 function medirPasta(dir: string, limite = { n: 0 }): { bytes: number; arquivos: number; truncado: boolean } {
   let bytes = 0, arquivos = 0, truncado = false;

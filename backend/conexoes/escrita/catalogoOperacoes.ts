@@ -2,7 +2,7 @@
 import { operacoesGithub } from '../github/operacoesGithub.js';
 import { DefOperacao } from '../tipos/operacao.js';
 import { operacoesQase } from '../../testes/integracoes/operacoesQase.js';
-import { operacoesJira } from '../../tickets/integracoes/operacoesJira.js';
+import { operacoesJira } from '../../tickets/integracoesJira.js';
 
 /**
  * Camada única das escritas externas. Nenhuma escrita acontece fora dela:

@@ -1,6 +1,6 @@
 /** Busca a ligação do projeto com um serviço (Jira, Qase ou GitHub); se não existe, avisa WORKSPACE_LINK_NOT_FOUND. */
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { Servico } from '../../projetos/tipos/espacos.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
+import { Servico } from '../../projetos/contratos.js';
 import { ContextoDosServicos } from '../tipos/contaDeServico.js';
 
 export function vinculoDoServico(c: ContextoDosServicos, espacoId: string, servico: Servico) {

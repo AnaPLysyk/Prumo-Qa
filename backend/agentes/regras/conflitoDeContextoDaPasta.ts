@@ -1,7 +1,7 @@
 /** Marca um conflito entre dois contextos ou resolve o conflito marcado. */
 
 
-import { abrirProjetoVinculado } from '../../projetos/regras/abrirProjetoVinculado.js';
+import { abrirProjetoVinculado } from '../../projetos/servicoProjetos.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { mudarContexto } from '../banco/mudarContexto.js';
 import { novaVersaoDoContexto } from './versoesDoContexto.js';

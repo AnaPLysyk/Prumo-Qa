@@ -1,7 +1,7 @@
 /** Rotina "validação por ticket": executa as automações ligadas ao ticket nas relações do projeto (até 5) e junta os resultados, valendo o pior. */
 import { executarValidacao } from '../../testes/regras/executarValidacao.js';
 import { Evidencia } from '../../testes/tipos/evidencia.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 import { autorizacaoDelegada } from '../autorizacoes/autorizacaoDelegada.js';
 import { ResultadoTrabalho } from '../tipos/fila.js';
 import { Rotina } from '../tipos/rotina.js';

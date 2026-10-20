@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { parametrosDaUrl } from './parametrosDaUrl.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { OperacaoServico, PlanoDaConsulta } from '../tipos/adaptador.js';
 import { Filtros } from '../tipos/leituras.js';
 import { paginaSchema } from '../tipos/transporte.js';

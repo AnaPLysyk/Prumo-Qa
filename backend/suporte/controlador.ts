@@ -2,11 +2,11 @@
 import { dialog, shell, safeStorage } from "electron";
 import { repositorio } from "../ajuda/contratos.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { enderecoOficialDoRelato } from "./regras/enderecoOficialDoRelato.js";
+import { enderecoOficialDoRelato } from "./servicoRelato.js";
 import { prepararRelatoDaJanela } from "./regras/prepararRelatoDaJanela.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { guardarAnexos } from "./regras/anexosDoChamado.js";
-import { consultarChamado } from "./integracoes/consultarChamado.js";
+import { consultarChamado } from "./integracoes.js";
 import { versao } from "../aplicativo/tipos/aplicativo.js";
 import { protetorDoSistema } from "../conexoes/regras/protetorDoSistema.js";
 import { enviarChamado, meuChamado, meusChamados } from "./regras/chamadosDaPessoa.js";

@@ -1,6 +1,6 @@
 /** Reúne dados do github da funcionalidade, mantendo cada operação identificável pelo nome. */
 import { codificarParaUrl } from "../../compartilhado/texto/codificarParaUrl.js";
-import { Recurso } from "../../projetos/tipos/espacos.js";
+import { Recurso } from "../../projetos/contratos.js";
 import { z } from "zod";
 import { ContextoServico } from "../tipos/adaptador.js";
 import { ErroServico } from "../integracoes/ErroServico.js";

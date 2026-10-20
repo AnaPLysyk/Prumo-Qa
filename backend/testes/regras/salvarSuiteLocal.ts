@@ -1,7 +1,7 @@
 /** Cria/edita suítes locais com escopo por projeto e recusa árvore cíclica. */
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { lerRepositorioLocal } from '../banco/lerRepositorioLocal.js';
 import { gravarRepositorioLocal } from '../banco/gravarRepositorioLocal.js';

@@ -1,7 +1,7 @@
 /** Ferramenta MCP propor_caso: a IA propõe um caso de teste que fica como RASCUNHO local; não publica no Qase. */
 import { z } from 'zod';
 import { esquemaCaso } from '../../testes/tipos/escritaQase.js';
-import { criarProposta } from '../../tickets/regras/criarProposta.js';
+import { criarProposta } from '../../tickets/servicoPropostas.js';
 import { MeiosDoServidorMcp, avisoDeRascunho, rascunhoLocal } from '../tipos/mcp.js';
 
 export function registrarProporCaso(m: MeiosDoServidorMcp) {

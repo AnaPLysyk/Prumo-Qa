@@ -1,5 +1,5 @@
 /** Procura um marcador nos comentários do ticket (até 500), para não duplicar o comentário depois de uma falha de rede. */
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { PartesDoAdaptador } from '../tipos/adaptador.js';
 import { consultarNoServico } from './consultarNoServico.js';
 import { textoRemoto } from './textoRemoto.js';

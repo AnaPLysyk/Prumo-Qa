@@ -4,25 +4,28 @@ import { randomUUID } from 'node:crypto';
 
 const espacoId = randomUUID(), outroId = randomUUID();
 const casoId = randomUUID(), ticketId = randomUUID(), casoOutro = randomUUID();
-const espaco = { id: espacoId, vinculos: [], relacoes: [] };
+const espaco = { id: espacoId, vinculos: [], relacoes: [], historico: [] };
 const propostas = [
   { id: casoId, espacoId, tipo: 'caso', origem: 'PESSOA', remoto: null, estado: 'RASCUNHO' },
   { id: ticketId, espacoId, tipo: 'bug', origem: 'PESSOA', remoto: null, estado: 'RASCUNHO' },
   { id: casoOutro, espacoId: outroId, tipo: 'caso', origem: 'PESSOA', remoto: null, estado: 'RASCUNHO' }
 ];
-mock.module('../../../../dist/projetos/banco/atualizarEspaco.js', { exports: {
-  atualizarEspaco: (id, fn) => { assert.equal(id, espacoId); fn(espaco); return espaco; }
+mock.module('../../../../dist/projetos/repositorio.js', { exports: {
+  atualizarEspaco: (id, fn) => { assert.equal(id, espacoId); fn(espaco); return espaco; },
+  gravarEspacos: () => { throw new Error('UNEXPECTED_REPOSITORY_WRITE'); },
+  lerEspacos: () => { throw new Error('UNEXPECTED_REPOSITORY_READ'); },
+  listarEspacos: () => { throw new Error('UNEXPECTED_REPOSITORY_LIST'); },
+  gravarPastasVinculadas: () => { throw new Error('UNEXPECTED_LINK_WRITE'); },
+  lerPastasVinculadas: () => { throw new Error('UNEXPECTED_LINK_READ'); },
+  obterEspaco: () => { throw new Error('UNEXPECTED_WORKSPACE_READ'); }
 } });
-mock.module('../../../../dist/tickets/banco/listarPropostas.js', { exports: {
+mock.module('../../../../dist/tickets/repositorio.js', { exports: {
   listarPropostas: id => propostas.filter(p => p.espacoId === id)
 } });
 mock.module('../../../../dist/testes/banco/lerRepositorioLocal.js', { exports: {
   lerRepositorioLocal: () => ({ version: 1, casos: [], suites: [] })
 } });
-mock.module('../../../../dist/projetos/regras/eventoEspaco.js', { exports: {
-  eventoEspaco: () => {}
-} });
-const { associarEspaco } = await import('../../../../dist/projetos/regras/associarEspaco.js');
+const { associarEspaco } = await import('../../../../dist/projetos/servicoProjetos.js');
 const ref = (tipo, id, origem = 'prumo') => ({ tipo, id, origem });
 const vincular = (de, para) => associarEspaco(espacoId, { de, para, justificativa: 'Cobertura declarada pela pessoa' });
 

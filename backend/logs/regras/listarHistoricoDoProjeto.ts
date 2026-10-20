@@ -3,8 +3,8 @@ import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { consultarAtividades } from '../banco/consultarAtividades.js';
 import { apresentarRegistroDoDiario } from './resumoDoDiario.js';
 import { filtrarRegistrosDoDiario } from './resumoDoDiario.js';
-import { projetoVinculado } from '../../projetos/regras/projetoVinculado.js';
-import { Filtro, filtroSchema } from '../../projetos/tipos/painel.js';
+import { projetoVinculado } from '../../projetos/servicoProjetos.js';
+import { Filtro, filtroSchema } from '../../projetos/contratos.js';
 
 export async function listarHistoricoDoProjeto(raiz: string, filtro: Filtro = {}) {
   const f = filtroSchema.parse(filtro); const p = await projetoVinculado(raiz, diretorioDados());

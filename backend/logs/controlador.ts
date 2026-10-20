@@ -1,6 +1,6 @@
 /** Controlador da funcionalidade logs: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { lerDiagnostico } from "./banco/lerDiagnostico.js";
+import { lerDiagnostico } from "./repositorioDiagnostico.js";
 import { dialog } from "electron";
 import fs from "node:fs";
 import { exportarLogs } from "./regras/exportarLogs.js";

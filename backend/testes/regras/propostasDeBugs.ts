@@ -1,8 +1,8 @@
 /** Cria rascunhos de bug para os casos que falharam na run. */
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 import { obterRunLocal } from '../banco/armazenamentoDeRuns.js';
-import { criarProposta } from '../../tickets/regras/criarProposta.js';
-import { classificacoesDeFalha } from '../../tickets/tipos/proposta.js';
+import { criarProposta } from '../../tickets/servicoPropostas.js';
+import { classificacoesDeFalha } from '../../tickets/contratos.js';
 
 type ClassificacaoDeFalha = typeof classificacoesDeFalha[number];
 const prefixo = { PRODUTO: 'Bug de produto', OUTRO_BUG: 'Outro bug', MELHORIA: 'Melhoria' } as const;

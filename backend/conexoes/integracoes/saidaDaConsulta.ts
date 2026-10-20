@@ -1,5 +1,5 @@
 /** Monta o que a tela recebe de uma consulta: dados limpos, próxima página, origem, data, endpoint e o aviso de que é informação externa. */
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { ConfigServico } from '../tipos/adaptador.js';
 import { limparRespostaDoServico } from './limparRespostaDoServico.js';
 

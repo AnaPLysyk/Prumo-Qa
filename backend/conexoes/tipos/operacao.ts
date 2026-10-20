@@ -1,7 +1,7 @@
 /** Formato de uma operação de escrita (prévia, envio, reconciliação) e dos dados auxiliares de anexos. */
 import type { z } from 'zod';
 import { ContextoServico } from './adaptador.js';
-import { Recurso, Servico } from '../../projetos/tipos/espacos.js';
+import { Recurso, Servico } from '../../projetos/contratos.js';
 
 /** Resultado remoto verificável de uma escrita: identificador, chave e link oficial quando o serviço o fornece. */
 export type Remoto = { id?: string; chave?: string; url?: string; detalhes?: Record<string, string | number | boolean | null | undefined> };

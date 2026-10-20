@@ -3,7 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { AnexoEscolhido, TipoDeAnexo, quantosAnexos, tiposDeAnexo } from '../tipos/chamados.js';
+import { AnexoEscolhido, TipoDeAnexo, quantosAnexos, tiposDeAnexo } from '../contratos.js';
 
 type Guardado = AnexoEscolhido & { caminho: string; usuarioId: string; em: number };
 const escolhidos = new Map<string, Guardado>();

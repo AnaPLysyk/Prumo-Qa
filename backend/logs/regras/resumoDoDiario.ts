@@ -1,7 +1,7 @@
 /** Reúne resumo do diario da funcionalidade, mantendo cada operação identificável pelo nome. */
-import { Evento, orientacoes } from "../tipos/atividade.js";
+import { Evento, orientacoes } from "../contratos.js";
 import { z } from "zod";
-import { filtroSchema } from "../../projetos/tipos/painel.js";
+import { filtroSchema } from "../../projetos/contratos.js";
 
 /** Diz se um tipo de achado é uma lacuna (requisito faltando, cobertura, rastreabilidade...). */
 

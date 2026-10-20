@@ -4,7 +4,7 @@ import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js'
 import { ErroServico } from '../../conexoes/integracoes/ErroServico.js';
 import { ContextoServico } from '../../conexoes/tipos/adaptador.js';
 import { DefOperacao } from '../../conexoes/tipos/operacao.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { statusDefeito } from '../tipos/escritaQase.js';
 
 type P = z.infer<typeof statusDefeito>;

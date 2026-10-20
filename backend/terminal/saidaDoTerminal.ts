@@ -1,7 +1,7 @@
 /** Apresentação e avisos do terminal. Centraliza a formatação de saídas públicas. */
 import { mascarar } from '../compartilhado/seguranca/mascarar.js';
 import { descreverAchados } from '../logs/regras/resumoDoDiario.js';
-import { Evento } from '../logs/tipos/atividade.js';
+import { Evento } from '../logs/contratos.js';
 
 export const avisarHistoricoIncompleto = (registros: unknown[]) => {
   if (registros.length) {

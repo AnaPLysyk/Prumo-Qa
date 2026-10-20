@@ -1,5 +1,5 @@
 /** Lê um projeto ou repositório devolvido pelo serviço e confere id e chave no formato esperado (e sem a credencial dentro). */
-import { Recurso, identidadeRecurso } from '../../projetos/tipos/espacos.js';
+import { Recurso, identidadeRecurso } from '../../projetos/contratos.js';
 import { ConfigServico, nome, obj, sid } from '../tipos/adaptador.js';
 import { ErroServico } from './ErroServico.js';
 import { limparRespostaDoServico } from './limparRespostaDoServico.js';

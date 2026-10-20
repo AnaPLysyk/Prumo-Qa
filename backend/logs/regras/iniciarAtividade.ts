@@ -12,8 +12,8 @@ import { gravarNoDiario } from '../banco/gravarNoDiario.js';
 import { pastaAtividades } from '../banco/pastaAtividades.js';
 import { achadoELacuna } from './resumoDoDiario.js';
 
-import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema } from '../tipos/atividade.js';
-import { resumoSchema } from '../tipos/atividade.js';
+import { Evento, Origem, codigos, estados, ferramentas, limitesHistorico, orientacoes, referenciaSchema } from '../contratos.js';
+import { resumoSchema } from '../contratos.js';
 
 const resumoVazio = ():z.infer<typeof resumoSchema> => ({findings:0,recommendations:0,gaps:0,candidateRedundancies:0,types:[]});
 

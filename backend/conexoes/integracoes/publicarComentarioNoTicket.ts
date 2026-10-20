@@ -1,7 +1,7 @@
 /** Publica um comentário num ticket do projeto Jira vinculado, depois de confirmar que o ticket é desse projeto. */
 import { z } from 'zod';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 import { PartesDoAdaptador, obj } from '../tipos/adaptador.js';
 import { cabecalhosDoServico } from './cabecalhosDoServico.js';
 import { consultarNoServico } from './consultarNoServico.js';

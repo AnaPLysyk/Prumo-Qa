@@ -1,6 +1,6 @@
 /** Reúne operacoes do contexto da pasta da funcionalidade, mantendo cada operação identificável pelo nome. */
 import { excluirContexto } from "../banco/excluirContexto.js";
-import { abrirProjetoVinculado } from "../../projetos/regras/abrirProjetoVinculado.js";
+import { abrirProjetoVinculado } from "../../projetos/servicoProjetos.js";
 import { obterContexto } from "./obterContexto.js";
 import { gravarPermissaoDeContextosNoMcp } from "../banco/gravarPermissaoDeContextosNoMcp.js";
 import { ErroQa } from "../../compartilhado/erros/ErroQa.js";

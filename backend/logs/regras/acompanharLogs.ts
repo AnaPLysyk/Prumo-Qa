@@ -2,7 +2,7 @@
 import { setTimeout as esperar } from 'node:timers/promises';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { consultarAtividades } from '../banco/consultarAtividades.js';
-import { Evento } from '../tipos/atividade.js';
+import { Evento } from '../contratos.js';
 
 export async function acompanharLogs(p:Projeto,emitir:(e:Evento)=>void,opcoes:{signal:AbortSignal;base?:string;intervalMs?:number;problemas?:(p:ReturnType<typeof consultarAtividades>['problems'])=>void}) {
   const vistos=new Set<string>();let ultimosProblemas='';

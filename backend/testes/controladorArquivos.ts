@@ -2,7 +2,7 @@
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
-import { obterEspaco } from "../projetos/banco/obterEspaco.js";
+import { obterEspaco } from "../projetos/repositorio.js";
 import { arquivoDeTeste } from "./regras/arquivoDeTeste.js";
 import { catalogoDeTestes } from "./regras/catalogoDeTestes.js";
 import { confirmarNoWindows } from "../aplicativo/janela/confirmarNoWindows.js";

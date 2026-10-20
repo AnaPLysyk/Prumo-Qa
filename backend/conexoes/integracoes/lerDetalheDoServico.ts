@@ -20,7 +20,7 @@ import { consultarRevisoesGithub } from './detalhesGithub.js';
 import { consultarCommitGithub } from './detalhesGithub.js';
 import { consultarIssuesGithub } from './consultarIssuesGithub.js';
 import { consultarAmbientesQase, consultarCamposPersonalizadosQase, consultarMarcosQase } from './consultarCadastrosQase.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 
 export async function lerDetalheDoServico(ctx: ContextoServico, rec: Recurso, op: OperacaoExtra, p: Pg, id?: string, f: Filtros = {}): Promise<ResultadoConsulta> {
   const ticket = () => { if (!id || !/^[A-Z][A-Z0-9_]*-\d+$/.test(id)) throw new ErroServico('SERVICE_RESPONSE_INVALID'); return id; };

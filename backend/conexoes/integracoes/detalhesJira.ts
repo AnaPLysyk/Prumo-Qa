@@ -3,9 +3,9 @@ import { ParametrosConsulta } from "../tipos/ParametrosConsulta.js";
 import { ResultadoConsulta } from "../tipos/ResultadoConsulta.js";
 import { z } from "zod";
 import { codificarParaUrl } from "../../compartilhado/texto/codificarParaUrl.js";
-import { projetoDoTicket } from "../../tickets/integracoes/formatoDoTicket.js";
-import { camposDoTipo, tiposDeCriacao } from "../../tickets/integracoes/tiposDoTicketJira.js";
-import { transicoesDoTicket } from "../../tickets/integracoes/transicoesDoTicket.js";
+import { projetoDoTicket } from "../../tickets/integracoesJira.js";
+import { camposDoTipo, tiposDeCriacao } from "../../tickets/integracoesJira.js";
+import { transicoesDoTicket } from "../../tickets/integracoesJira.js";
 
 export async function consultarAnexosJira(parametros: ParametrosConsulta): Promise<ResultadoConsulta | null> {
   const { ctx, rec, id, ticket } = parametros;

@@ -2,11 +2,11 @@
 // Chamados da pessoa da sessão: enviar pelo serviço do Prumo (sem precisar de GitHub) e acompanhar estado e respostas. O relato passa pela mesma revisão de privacidade de sempre (algo que parece senha ou token bloqueia o envio). Vão o nome e o e-mail da conta, para a equipe responder, e só o que a pessoa marcou (versão, sistema, diagnóstico). Cada pessoa vê só os próprios chamados.
 import os from 'node:os';
 import { anexosDoEnvio, esquecerAnexos } from './anexosDoChamado.js';
-import { prepararRelato } from './prepararRelato.js';
+import { prepararRelato } from '../servicoRelato.js';
 import { resumoDoDiagnosticoParaRelato } from './resumoDoDiagnosticoParaRelato.js';
-import { lerMeusChamados, gravarMeusChamados } from '../banco/meusChamados.js';
-import { servicoDeChamados } from '../integracoes/servicoDeChamados.js';
-import { solicitacaoSchema } from '../tipos/suporte.js';
+import { lerMeusChamados, gravarMeusChamados } from '../repositorio.js';
+import { servicoDeChamados } from '../integracoes.js';
+import { solicitacaoSchema } from '../contratos.js';
 import type { Protetor } from '../../conexoes/tipos/credenciais.js';
 import type { Usuario } from '../../login/tipos/contas.js';
 

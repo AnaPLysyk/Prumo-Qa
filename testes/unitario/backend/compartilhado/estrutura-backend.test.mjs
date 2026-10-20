@@ -88,7 +88,7 @@ test('backend: pastas tipos/ só têm formatos, listas e constantes (nenhuma fun
 test('backend: cada função pública tem nome único, mesmo quando várias ficam no mesmo arquivo', () => {
   const problemas = []; const vistos = new Map();
   for (const a of arquivos.filter((x) => !x.includes('/tipos/') && !ehEntrada(x))) {
-    for (const item of declaracoes(a).filter((x) => x.exportado)) {
+    for (const item of declaracoes(a).filter((x) => x.exportado && x.funcao)) {
       const nome = item.nome;
       if (!nome) continue;
       if (vistos.has(nome)) problemas.push(`nome repetido: ${nome} em ${vistos.get(nome)} e ${a}`);

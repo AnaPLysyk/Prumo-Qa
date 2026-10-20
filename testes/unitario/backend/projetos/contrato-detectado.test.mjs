@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { gravarContratoProposto } from '../../../../dist/projetos/regras/gravarContratoProposto.js';
-import { proporContrato } from '../../../../dist/projetos/regras/proporContrato.js';
-import { resumirContratoProposto as resumoProposta } from '../../../../dist/projetos/regras/resumirContratoProposto.js';
-import { situacaoProjeto } from '../../../../dist/projetos/regras/situacaoProjeto.js';
+import { gravarContratoProposto } from '../../../../dist/projetos/servicoContrato.js';
+import { proporContrato } from '../../../../dist/projetos/servicoContrato.js';
+import { resumirContratoProposto as resumoProposta } from '../../../../dist/projetos/servicoContrato.js';
+import { situacaoProjeto } from '../../../../dist/projetos/servicoProjetos.js';
 
 /** Pastas temporárias montadas no teste: nenhum repositório real é lido. */
 const pasta = (t, arquivos) => {

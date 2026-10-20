@@ -4,7 +4,7 @@ import { pino } from 'pino';
 import { falharCom } from '../../compartilhado/erros/falharCom.js';
 import { hash } from '../../compartilhado/seguranca/hash.js';
 import { semLinks } from '../../compartilhado/seguranca/semLinks.js';
-import { Evento, limitesHistorico } from '../tipos/atividade.js';
+import { Evento, limitesHistorico } from '../contratos.js';
 
 export function gravarNoDiario(alvo:string,evento:Omit<Evento,'level'|'digest'>,inicio:boolean) {
   semLinks(alvo);

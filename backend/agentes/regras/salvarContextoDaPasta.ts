@@ -1,6 +1,6 @@
 /** Salva um contexto: cria, edita (nova versão em rascunho) ou substitui por outro. */
 
-import { abrirProjetoVinculado } from '../../projetos/regras/abrirProjetoVinculado.js';
+import { abrirProjetoVinculado } from '../../projetos/servicoProjetos.js';
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { Projeto } from '../../compartilhado/tipos/projeto.js';
 import { mudarContexto } from '../banco/mudarContexto.js';

@@ -2,7 +2,7 @@
 import { Projeto } from '../compartilhado/tipos/projeto.js';
 import { consultarAtividades } from '../logs/banco/consultarAtividades.js';
 import { acompanharLogs } from '../logs/regras/acompanharLogs.js';
-import { Evento } from '../logs/tipos/atividade.js';
+import { Evento } from '../logs/contratos.js';
 import { avisarHistoricoIncompleto } from './saidaDoTerminal.js';
 import { linhaDaOperacao } from './saidaDoTerminal.js';
 

@@ -2,7 +2,7 @@
 import { diretorioDados } from '../../compartilhado/banco/diretorioDados.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { consultarEvidencias } from '../banco/consultarEvidencias.js';
-import { projetoVinculado } from '../../projetos/regras/projetoVinculado.js';
+import { projetoVinculado } from '../../projetos/servicoProjetos.js';
 
 export async function listarEvidenciasDoProjeto(raiz: string, jobId?: string) {
   const p = await projetoVinculado(raiz, diretorioDados());

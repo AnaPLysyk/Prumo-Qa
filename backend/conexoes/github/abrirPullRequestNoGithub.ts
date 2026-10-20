@@ -10,7 +10,7 @@ import { abrirPr } from '../tipos/escritaGithub.js';
 import { DefOperacao } from '../tipos/operacao.js';
 import { codificarParaUrl } from '../../compartilhado/texto/codificarParaUrl.js';
 import { ContextoServico } from '../tipos/adaptador.js';
-import { Recurso } from '../../projetos/tipos/espacos.js';
+import { Recurso } from '../../projetos/contratos.js';
 
 const pullRequestDoBranch = async (ctx: ContextoServico, rec: Recurso, branch: string) => {
   const dono = rec.chave.split('/')[0]!; const l = z.array(z.object({ number: z.number(), html_url: z.string(), state: z.string() }).passthrough()).parse(await ctx.ler(`${caminhoDoRepositorio(rec)}/pulls?head=${codificarParaUrl(dono + ':' + branch)}&state=open&per_page=5`));

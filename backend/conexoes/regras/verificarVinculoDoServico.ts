@@ -1,6 +1,6 @@
 /** Antes de qualquer consulta ou escrita, confere de novo a conta, a identidade e o recurso vinculado; anota no projeto se o vínculo continua válido. */
-import { atualizarEstadoDoVinculo } from '../../projetos/regras/historicoDeVinculos.js';
-import { Servico } from '../../projetos/tipos/espacos.js';
+import { atualizarEstadoDoVinculo } from '../../projetos/servicoProjetos.js';
+import { Servico } from '../../projetos/contratos.js';
 import { ErroServico } from '../integracoes/ErroServico.js';
 import { ContextoDosServicos } from '../tipos/contaDeServico.js';
 import { adaptadorDaConta } from './adaptadorDaConta.js';

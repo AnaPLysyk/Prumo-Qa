@@ -12,8 +12,8 @@ import { dialog, shell } from "electron";
 import { excluirTodosContextos } from "../agentes/banco/excluirTodosContextos.js";
 import { excluirEvidencias } from "../testes/banco/excluirEvidencias.js";
 import { excluirAtividades } from "../logs/banco/excluirAtividades.js";
-import { excluirDiagnostico } from "../logs/banco/excluirDiagnostico.js";
-import { projetoVinculado } from "../projetos/regras/projetoVinculado.js";
+import { excluirDiagnostico } from "../logs/repositorioDiagnostico.js";
+import { projetoVinculado } from "../projetos/servicoProjetos.js";
 import { resumirDados } from "./servicoPrivacidade.js";
 
 export const ajudaDocumentos: TratadorDoCanal<'ajuda:documentos'> = () => lerDocumentosDaAjuda(path.join(raizDoAplicativo, 'docs', 'ajuda'), versao);

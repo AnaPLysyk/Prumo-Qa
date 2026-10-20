@@ -1,7 +1,7 @@
 /** O que cada ferramenta do servidor MCP recebe (servidor, projeto, projeto do Prumo, respostas padronizadas) e as marcas de leitura e rascunho. */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Projeto } from '../../compartilhado/tipos/projeto.js';
-import type { espacoDaRaiz } from '../../projetos/regras/espacoDaRaiz.js';
+import type { espacoDaRaiz } from '../../projetos/servicoProjetos.js';
 
 export type RespostaMcp = { content: { type: 'text'; text: string }[]; isError?: boolean };
 

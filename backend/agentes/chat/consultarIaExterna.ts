@@ -10,7 +10,7 @@ import { Resposta } from '../tipos/chat.js';
 import { Conhecimento, limitesConhecimento } from '../tipos/conhecimento.js';
 import { tentarOuPadrao } from './tentarOuPadrao.js';
 import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 import { registrarConhecimento } from '../banco/registrarConhecimento.js';
 import { Acao, Opcoes, Provedor } from '../tipos/chat.js';
 import { AgenteChat } from '../tipos/persona.js';

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { catalogoOperacoes } from '../escrita/catalogoOperacoes.js';
 import { ContextoServico } from './adaptador.js';
 import { Auxiliar } from './operacao.js';
-import { Recurso, Servico, servicoSchema } from '../../projetos/tipos/espacos.js';
+import { Recurso, Servico, servicoSchema } from '../../projetos/contratos.js';
 
 export const idsDeOperacao = catalogoOperacoes.map(o => o.id) as [string, ...string[]];
 

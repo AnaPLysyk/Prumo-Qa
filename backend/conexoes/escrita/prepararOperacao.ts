@@ -3,7 +3,7 @@ import { mascarar } from '../../compartilhado/seguranca/mascarar.js';
 import { chaveDaOperacao } from './chaveDaOperacao.js';
 import { escritaHabilitada } from './escritaHabilitada.js';
 import { operacaoPorId } from './operacaoPorId.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 
 /** Prévia: valida, calcula a chave e devolve o texto que a pessoa vai confirmar. Não grava nem envia nada. */
 export function prepararOperacao(espacoId: string, operacaoId: string, bruto: unknown, b?: string) {

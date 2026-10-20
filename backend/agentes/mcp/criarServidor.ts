@@ -2,8 +2,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { versaoDoPacote } from '../../compartilhado/versaoDoPacote.js';
-import { espacoDaRaiz } from '../../projetos/regras/espacoDaRaiz.js';
-import { projetoVinculado } from '../../projetos/regras/projetoVinculado.js';
+import { espacoDaRaiz } from '../../projetos/servicoProjetos.js';
+import { projetoVinculado } from '../../projetos/servicoProjetos.js';
 import { exigirCapacidade } from '../politicas/avaliarCapacidades.js';
 import { MeiosDoServidorMcp } from '../tipos/mcp.js';
 import { projetoAindaVinculado } from './projetoAindaVinculado.js';

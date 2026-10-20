@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { operacoesExtras } from './leituras.js';
 import { MetodoEscrita } from './rotasDeEscrita.js';
-import { Servico } from '../../projetos/tipos/espacos.js';
+import { Servico } from '../../projetos/contratos.js';
 import type { TransporteEscrita, TransporteServico } from './transporte.js';
 
 export const operacoesServico=['tickets','ticket','campos','comentarios','defeitos','defeito','suites','casos','caso','planos','runs','run','resultados','repositorio','branches','commits','prs','pr','verificacoes',...operacoesExtras] as const;

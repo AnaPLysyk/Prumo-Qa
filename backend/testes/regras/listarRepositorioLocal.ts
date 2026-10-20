@@ -1,6 +1,6 @@
 /** Combina casos locais próprios e casos pessoais antigos, sem duplicar IDs nem modificar propostas.json. */
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
-import { listarPropostas } from '../../tickets/banco/listarPropostas.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
+import { listarPropostas } from '../../tickets/repositorio.js';
 import { dadosCasoLocal } from '../tipos/repositorioLocal.js';
 import { lerRepositorioLocal } from '../banco/lerRepositorioLocal.js';
 

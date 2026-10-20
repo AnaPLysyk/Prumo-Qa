@@ -5,9 +5,9 @@ import { semAcentos } from "../compartilhado/texto/semAcentos.js";
 import { listarContextosDaPasta } from "../agentes/regras/listarContextosDaPasta.js";
 import { Fonte, Resposta, pare } from "./contratos.js";
 import { metricasDasExecucoes } from "../metricas/servico.js";
-import { obterEspaco } from "../projetos/banco/obterEspaco.js";
+import { obterEspaco } from "../projetos/repositorio.js";
 import { listarRunsLocais } from "../testes/banco/listarRunsLocais.js";
-import { listarPropostas } from "../tickets/banco/listarPropostas.js";
+import { listarPropostas } from "../tickets/repositorio.js";
 
 /** Identifica palavras-chave no texto normalizado da pergunta sem consultar serviços externos. */
 const perguntaTemPalavra = (p: string, ...palavras: string[]) => palavras.some((palavra) => p.includes(palavra));

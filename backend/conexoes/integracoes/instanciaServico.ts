@@ -1,6 +1,6 @@
 /** Devolve o endereço oficial do serviço (Qase e GitHub fixos; Jira só *.atlassian.net). */
 import { ErroServico } from './ErroServico.js';
-import { Servico } from '../../projetos/tipos/espacos.js';
+import { Servico } from '../../projetos/contratos.js';
 
 export function instanciaServico(servico:Servico,valor?:string){
   if(servico==='github')return 'https://api.github.com';if(servico==='qase')return 'https://api.qase.io';

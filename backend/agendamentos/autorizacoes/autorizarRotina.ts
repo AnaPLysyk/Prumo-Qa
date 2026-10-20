@@ -10,7 +10,7 @@ import { ExecutavelK6 } from '../tipos/k6.js';
 import { ErroQa } from '../../compartilhado/erros/ErroQa.js';
 import { carregarProjeto } from '../../compartilhado/projeto/carregarProjeto.js';
 import { escopoDeCapability } from '../../testes/regras/escopoDeCapability.js';
-import { obterEspaco } from '../../projetos/banco/obterEspaco.js';
+import { obterEspaco } from '../../projetos/repositorio.js';
 
 /** Pede ao broker nativo o consentimento para cada automação da rotina (escopo exato) e grava as autorizações. */
 export async function autorizarRotina(rotinaId: string, opcoes: { dias: number; maxUsos: number }, solicitar: Solicitador, base?: string, exe?: ExecutavelK6 | null) {
