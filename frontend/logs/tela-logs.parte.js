@@ -34,15 +34,26 @@
     // Logs de conta são consultáveis mesmo sem projeto escolhido; QA depende de projeto vinculado.
     if (!root) aviso.textContent = tr('Sem projeto selecionado: exibindo apenas o histórico de ações da conta.');
     const chave = (e) => e.operationId + ':' + e.phase;
+    // Aparelho e navegador só aparecem quando o runner do teste os declarou (reporter do Prumo); nada é inferido.
+    const dispositivosDaExecucao = (x) => [...new Set((x?.resultado?.ambientes || []).map(a => [a.dispositivo || a.projeto, a.viewport].filter(Boolean).join(' · ')).filter(Boolean))].join(' | ');
+    const navegadoresDaExecucao = (x) => [...new Set((x?.resultado?.ambientes || []).map(a => [a.navegador, a.versaoDoNavegador].filter(Boolean).join(' ')).filter(Boolean))].join(' | ');
+    /** O que aconteceu, em português: a finalidade da operação registrada pelo núcleo, ou o resumo da execução do worker. */
+    const POR_TIPO = { ALTERACAO: 'Alteração feita no Prumo: um cadastro, vínculo ou configuração mudou.', EXECUCAO: 'Execução iniciada pela interface.', CONSULTA_AGENTE: 'Consulta a um agente do Prumo.', SESSAO: 'Acesso à conta: entrada, saída ou verificação.', ORQUESTRACAO: 'Orquestração de agentes: o Orchestrator consultou especialistas.' };
+    const descricaoDe = (e) => e.descricao || (e.auditoria ? tr(POR_TIPO[e.auditoria.tipo] || '') : '') || (e.execucao ? tr('Execução {t} da rotina {r}.', { t: e.execucao.tipo, r: e.execucao.rotina || '—' }) : '');
     function mensagem(e) {
+      const d = descricaoDe(e);
+      const partes = mensagemTecnica(e);
+      return d ? [h('span', { class: 'v36l-desc' }, semTraducao(d)), ' — ', ...partes] : partes;
+    }
+    function mensagemTecnica(e) {
       if (e.auditoria) return [h('span', {}, tr('Ação auditada')), ' · ', semTraducao(e.state + ' · ' + e.auditoria.tipo + ' · ' + ms(e.durationMs))];
       if (e.execucao) return [h('span', {}, tr('Execução registrada')), ' · ', semTraducao(e.state + ' · ' + e.execucao.tipo)];
       return e.phase === 'start' ? [h('span', {}, tr('Operação iniciada')), ' · ', semTraducao(e.origin + '/' + e.client)] : [h('span', {}, tr('Operação encerrada')), ' · ', semTraducao([e.state, e.summary?.code, ms(e.durationMs)].filter(Boolean).join(' · '))];
     }
     function detalhe(e) {
-      const campos = [['Horário completo', e.at], ['Operação / correlação', e.operationId], ['Fase', e.phase], ['Ferramenta', e.tool], ['Origem', e.origin], ['Cliente (declarado)', e.client], ['Estado', e.state], ['Duração', ms(e.durationMs)], ['Código', e.summary?.code || '—'], ['Evidência', e.summary?.evidenceJobId || '—'],
+      const campos = [...(descricaoDe(e) ? [['O que é', descricaoDe(e)]] : []), ['Horário completo', e.at], ['Operação / correlação', e.operationId], ['Fase', e.phase], ['Ferramenta', e.tool], ['Origem', e.origin], ['Cliente (declarado)', e.client], ['Estado', e.state], ['Duração', ms(e.durationMs)], ['Código', e.summary?.code || '—'], ['Evidência', e.summary?.evidenceJobId || '—'],
         ...(e.auditoria ? [['Tipo de ação', e.auditoria.tipo], ['Conta responsável', e.auditoria.usuarioId || 'Não informada'], ['Projeto', e.auditoria.espacoId || 'Não informado'], ['Ambiente', e.auditoria.ambiente || 'Não informado pelo executor'], ['Dispositivo', e.auditoria.dispositivo || 'Não informado pelo executor'], ['Navegador', e.auditoria.navegador || 'Não informado pelo executor']] : []),
-        ...(e.execucao ? [['Tipo de teste', e.execucao.tipo], ['Rotina', e.execucao.rotina || '—'], ['Ambiente', e.execucao.ambiente || 'Não informado pelo executor'], ['Dispositivo', 'Não informado pelo executor'], ['Navegador', 'Não informado pelo executor'], ['Resultado', e.execucao.resultado?.status || e.execucao.estado]] : [])];
+        ...(e.execucao ? [['Tipo de teste', e.execucao.tipo], ['Rotina', e.execucao.rotina || '—'], ['Ambiente', e.execucao.ambiente || 'Não informado pelo executor'], ['Dispositivo', dispositivosDaExecucao(e.execucao) || 'Não informado pelo executor'], ['Navegador', navegadoresDaExecucao(e.execucao) || 'Não informado pelo executor'], ['Resultado', e.execucao.resultado?.status || e.execucao.estado]] : [])];
       const ev = e.summary?.evidenceJobId;
       return h('div', { class: 'v36l-detalhe', role: 'region', 'aria-label': tr('Detalhes do log') },
         h('div', { class: 'v36l-detalhe-topo' }, '↳ ', h('span', {}, tr('Inspeção de evento')), ' · ', semTraducao('op-' + e.operationId.slice(0, 8))),
@@ -62,7 +73,7 @@
     function desenhar() {
       const q = busca.value.trim().toLowerCase();
       const linhas = eventos.filter((e) => (!fFerramenta.value || e.tool === fFerramenta.value) && (!fNivel.value || nivelDe(e.state) === fNivel.value) && (!fCliente.value || e.client === fCliente.value)
-        && (!q || [e.operationId, e.tool, e.state, e.origin, e.client, e.phase, e.summary?.code].join(' ').toLowerCase().includes(q)));
+        && (!q || [e.operationId, e.tool, e.state, e.origin, e.client, e.phase, e.summary?.code, descricaoDe(e)].join(' ').toLowerCase().includes(q)));
       const diag = corpo.querySelector('.v36l-diagnostico'); corpo.replaceChildren(boot(linhas.length > 0), aviso, ...linhas.map(linha));
       if (!linhas.length) corpo.append(h('div', { class: 'v36l-vazio' }, eventos.length ? tr('Nenhum registro para estes filtros.') : tr('Nenhuma ação auditada nesta conta nem operação de QA neste projeto.')));
       if (diag) corpo.append(diag);
@@ -81,7 +92,7 @@
       const auditoria = diagnosticos?.auditoria;
       const registrosDeAcoes = (auditoria?.eventos || []).map(a => ({
         operationId: a.id, at: a.at, phase: 'end', tool: a.canal, state: a.estado, origin: 'INTERFACE',
-        client: 'prumo', durationMs: a.duracaoMs, summary: { code: a.codigo }, auditoria: a
+        client: 'prumo', durationMs: a.duracaoMs, summary: { code: a.codigo }, auditoria: a, descricao: a.descricao
       }));
       const execucoes = (jobs?.execucoes || []).map(x => ({
         operationId: x.id, at: x.termino || x.terminadoEm || x.inicio || x.iniciadoEm || x.criadoEm,

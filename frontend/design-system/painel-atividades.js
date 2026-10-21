@@ -20,18 +20,22 @@ const PrumoModeloAtividades = (() => {
   const recente = (iso) => !!iso && Date.now() - Date.parse(iso) < RECENTE_MS;
   const temaClaro = () => { const t = document.documentElement.dataset.tema; return t === 'claro' || (t !== 'escuro' && matchMedia('(prefers-color-scheme: light)').matches); };
   const corCodex = () => (temaClaro() ? '#3b4a63' : '#e8edf6');
+  /** Aparelho e navegador como o runner declarou ("Pixel 7 · Chromium 126 · 412x915"); sem registro, nada é mostrado nem inferido. */
+  const ambientesDoTeste = (x) => (x.resultado?.ambientes || []).map((a) => [a.dispositivo || a.projeto, [a.navegador, a.versaoDoNavegador].filter(Boolean).join(' '), a.viewport, a.plataforma].filter(Boolean).join(' · '));
   const nomeCliente = (c) => (c === 'claude' ? 'Claude Code' : c === 'codex' ? 'Codex' : c || 'cliente');
   const assinatura = (d) => JSON.stringify([d.atividades.map((a) => a.operationId + a.state), d.conversas.map((c) => c.id + ':' + (c.avaliacao || '')), d.execucoes.map((x) => x.id + x.estado), (d.orquestracoes || []).map((o) => o.id + ':' + o.estado + ':' + o.etapas.length + ':' + (o.emExecucao || ''))]);
 
   // ---------- Modelo: fontes (janelas), hubs e folhas, com as arestas que os registros comprovam ----------
   function modelar(d) {
-    // O canvas mostra SOMENTE processos ativos observados, nunca conversas ou diagnósticos já encerrados.
+    // Mostra o histórico real recente (conversas, operações, testes e investigações) e marca como "vivo" só o que está em andamento:
+    // processo sem batimento há mais de 2 minutos não conta como ativo.
     const agora = Date.now(), recenteAtivo = (at, janela = 120000) => !!at && agora - Date.parse(at) >= 0 && agora - Date.parse(at) < janela;
-    d = { ...d,
-      atividades: d.atividades.filter(x => x.state === 'STARTED' && recenteAtivo(x.at)),
-      conversas: [], // Mensagens antigas ficam no histórico, não são agentes em execução.
-      execucoes: d.execucoes.filter(x => x.estado === 'EXECUTANDO' && recenteAtivo(x.heartbeat || x.inicio || x.iniciadoEm)),
-      orquestracoes: (d.orquestracoes || []).filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao && recenteAtivo(o.em))
+    d = { ...d, conversas: d.conversas || [], orquestracoes: d.orquestracoes || [] };
+    d.ativos = {
+      operacoes: d.atividades.filter(x => x.state === 'STARTED' && recenteAtivo(x.at)).length,
+      testes: d.execucoes.filter(x => x.estado === 'EXECUTANDO' && recenteAtivo(x.heartbeat || x.inicio || x.iniciadoEm)).length,
+      investigacoes: d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao && recenteAtivo(o.em)).length,
+      agentes: new Set([...d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao && recenteAtivo(o.em)).map(o => o.emExecucao), ...d.conversas.filter(c => recente(c.em)).map(c => c.agente)]).size
     };
     const fontes = [], hubs = [], folhas = [], arestas = [], secoes = [];
     // 1) Clientes MCP/CLI → ferramentas do núcleo → operações.
@@ -141,12 +145,13 @@ const PrumoModeloAtividades = (() => {
         for (const x of lista.slice(0, MAX_FOLHAS)) {
           const st = x.resultado?.status || x.estado;
           const f = { id: 'ex:' + x.id, tipo: 'execucao', dado: x, cor: hub.cor, etiqueta: x.capability || x.tipo, estado: st, hora: data(x.criadoEm) + ' ' + curto(x.inicio || x.criadoEm), vivo: x.estado === 'EXECUTANDO' || recente(x.termino),
-            linhas: ['$ prumo ' + (x.capability || x.tipo) + ' --amb ' + x.ambiente, [st, duracao(x.duracaoMs), x.ticket].filter(Boolean).join(' · '), x.executor + (x.tentativas?.length > 1 ? ' · ' + tr('{n} tentativas', { n: x.tentativas.length }) : '')], rotulo: x.rotina + ' ' + st };
+            linhas: ['$ prumo ' + (x.capability || x.tipo) + ' --amb ' + x.ambiente, [st, duracao(x.duracaoMs), x.ticket].filter(Boolean).join(' · '), x.executor + (x.tentativas?.length > 1 ? ' · ' + tr('{n} tentativas', { n: x.tentativas.length }) : ''),
+              ...(ambientesDoTeste(x).length ? [ambientesDoTeste(x).join(' | ')] : [])], rotulo: x.rotina + ' ' + st };
           folhas.push(f); hub.folhas.push(f); arestas.push({ de: hub.id, para: f.id, tipo: 'folha', vivo: f.vivo, estado: st });
         }
       });
     }
-    return { fontes, hubs, folhas, arestas, secoes };
+    return { fontes, hubs, folhas, arestas, secoes, ativos: d.ativos };
   }
 
   // ---------- Disposição em camadas: janelas no alto, hubs no meio, folhas em grade abaixo de cada hub ----------
@@ -189,7 +194,7 @@ const PrumoModeloAtividades = (() => {
     return { pos, caixas, mais, largura, altura };
   }
 
-  return { sv, classe, curto, temaClaro, assinatura, modelar, dispor };
+  return { sv, classe, curto, temaClaro, assinatura, modelar, dispor, ambientesDoTeste };
 })();
 
 
@@ -412,10 +417,9 @@ const PrumoPainelAtividades = (() => {
       camada.querySelectorAll('[data-no]').forEach((el) => { el.addEventListener('pointerenter', () => destacar(el.dataset.no, true)); el.addEventListener('pointerleave', () => destacar(el.dataset.no, false)); });
       if (foco) camada.querySelector(`[data-no="${CSS.escape(foco)}"]`)?.focus({ preventScroll: true });
       const ativos = modelo;
-      const n = { op: ativos.folhas.filter(f => f.tipo === 'operacao').length,
-        ex: ativos.folhas.filter(f => f.tipo === 'execucao').length,
-        dx: ativos.fontes.filter(f => f.tipo === 'investigacao').length };
-      contagem.textContent = [tr('{n} operações ativas', { n: n.op }), tr('{n} testes ativos', { n: n.ex }), tr('{n} investigações ativas', { n: n.dx })].join(' · ');
+      const a = ativos.ativos || { agentes: 0, operacoes: 0, testes: 0, investigacoes: 0 };
+      const conv = ativos.folhas.filter(f => f.tipo === 'conversa').length;
+      contagem.textContent = [tr('{n} agentes trabalhando', { n: a.agentes }), tr('{n} operações ativas', { n: a.operacoes }), tr('{n} testes ativos', { n: a.testes }), tr('{n} investigações ativas', { n: a.investigacoes }), tr('{n} conversas', { n: conv })].join(' · ');
       if (!ajustado && vp.clientWidth) { ajustar(false); ajustado = true; } else aplicar();
     }
     function destacar(id, ligado) {

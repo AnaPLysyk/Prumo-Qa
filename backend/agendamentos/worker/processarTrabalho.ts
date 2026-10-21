@@ -112,7 +112,7 @@ export const contarCasosDaEvidencia = (e: Pick<Evidencia, 'cases'>) => ({ pass: 
 
 export function resultadoDaEvidencia(e: Evidencia & { evidencePath?: string }): ResultadoTrabalho {
   const c = contarCasosDaEvidencia(e); const f = resumoDasFalhas(e.cases);
-  return { status: e.status, motivo: e.reason.slice(0, 600), contagem: c, evidenciaId: e.jobId, ...(f ? { detalhes: f } : {}) };
+  return { status: e.status, motivo: e.reason.slice(0, 600), contagem: c, evidenciaId: e.jobId, ...(f ? { detalhes: f } : {}), ...(e.ambientes?.length ? { ambientes: e.ambientes } : {}) };
 }
 
 export const resumoDasFalhas = (cases: Evidencia['cases']) => cases.filter(c => c.status === 'FAIL').slice(0, 5).map(c => `${c.id}: ${c.evidence}`.slice(0, 300)).join('\n');

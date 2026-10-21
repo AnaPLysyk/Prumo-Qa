@@ -165,7 +165,7 @@ export async function executarValidacao(p:Projeto,capability:string,solicitar=fa
     const raw=await lerSeguro(p.raiz,resultadoRel,true,262144);
     const r=resultadoRunnerSchema.parse(JSON.parse(raw));
     if(r.jobId!==jobId || new Set(r.cases.map(c=>c.id)).size!==r.cases.length) throw new Error('IDs inválidos');
-    e.cases=r.cases.map(c=>({...c,evidence:mascarar(c.evidence,segredos)}));e.evidenceScope=e.cases.length?'individual':'round';
+    e.cases=r.cases.map(c=>({...c,evidence:mascarar(c.evidence,segredos)}));e.evidenceScope=e.cases.length?'individual':'round'; if(r.ambientes?.length) e.ambientes=r.ambientes;
     e.resultArtifact={path:resultadoRel,sha256:hash(raw),trust:'Relatório do runner autorizado; conteúdo não é julgamento independente.'};
   } catch(err) { if((err as NodeJS.ErrnoException).code!=='ENOENT') bloqueio ??= 'INVALID_RESULT'; }
   e.status=classificarResultado(e.exitCode,bloqueio,e.cases);

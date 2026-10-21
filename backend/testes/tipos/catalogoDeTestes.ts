@@ -118,7 +118,12 @@ export type Status = z.infer<typeof statusSchema>;
 
 export const casoResultadoSchema = z.object({ id:z.string().min(1).max(100), status:statusSchema, evidence:z.string().min(1).max(4000) }).strict();
 
-export const resultadoRunnerSchema = z.object({ jobId:z.string().uuid(), cases:z.array(casoResultadoSchema).max(1000) }).strict();
+/** Onde os testes rodaram, como o runner declarou: nada é inferido pelo Prumo. */
+export const ambienteDeTesteSchema = z.object({ navegador:z.string().max(40).optional(), versaoDoNavegador:z.string().max(40).optional(), dispositivo:z.string().max(60).optional(), plataforma:z.string().max(40).optional(), projeto:z.string().max(60).optional(), viewport:z.string().max(20).optional() }).strict();
+
+export type AmbienteDeTeste = z.infer<typeof ambienteDeTesteSchema>;
+
+export const resultadoRunnerSchema = z.object({ jobId:z.string().uuid(), cases:z.array(casoResultadoSchema).max(1000), ambientes:z.array(ambienteDeTesteSchema).max(12).optional() }).strict();
 
 export const evidenciaSchema = z.object({
   kind:z.literal('execution_evidence'), jobId:z.string().uuid(), projectId:z.string(), rootHash:z.string(),
@@ -126,7 +131,7 @@ export const evidenciaSchema = z.object({
   reason:z.string(), startedAt:z.string(), endedAt:z.string(), executed:z.boolean(), exitCode:z.number().int().nullable(),
   command:z.unknown(), approval:z.unknown(), cases:z.array(casoResultadoSchema),
   stdout:z.string(), stderr:z.string(), logSha256:z.string(), resultArtifact:z.unknown(),
-  evidenceScope:z.enum(['round','individual']), provenance:z.literal('local-process')
+  evidenceScope:z.enum(['round','individual']), provenance:z.literal('local-process'), ambientes:z.array(ambienteDeTesteSchema).max(12).optional()
 }).strict();
 
 export type Evidencia = z.infer<typeof evidenciaSchema>;

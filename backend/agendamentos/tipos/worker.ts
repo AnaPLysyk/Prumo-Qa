@@ -57,7 +57,8 @@ const tentativa = z.object({ n: z.number().int(), inicio: z.string().datetime(),
 export const resultadoSchema = z.object({
   status: z.enum(resultadoStatus), motivo: z.string().max(600),
   contagem: z.object({ pass: z.number().int(), fail: z.number().int(), blocked: z.number().int(), notRun: z.number().int() }).strict().optional(),
-  evidenciaId: z.string().uuid().optional(), ticket: z.string().max(40).optional(), detalhes: z.string().max(4000).optional()
+  evidenciaId: z.string().uuid().optional(), ticket: z.string().max(40).optional(), detalhes: z.string().max(4000).optional(),
+  ambientes: z.array(z.object({ navegador: z.string().max(40).optional(), versaoDoNavegador: z.string().max(40).optional(), dispositivo: z.string().max(60).optional(), plataforma: z.string().max(40).optional(), projeto: z.string().max(60).optional(), viewport: z.string().max(20).optional() }).strict()).max(12).optional()
 }).strict();
 
 export type ResultadoTrabalho = z.infer<typeof resultadoSchema>;

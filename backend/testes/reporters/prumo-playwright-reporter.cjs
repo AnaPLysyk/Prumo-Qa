@@ -8,7 +8,15 @@
 const fs = require('node:fs');
 
 class PrumoReporter {
-  constructor() { this.cases = []; this.vistos = new Map(); this.porTeste = new Map(); }
+  constructor() { this.cases = []; this.vistos = new Map(); this.porTeste = new Map(); this.ambientes = new Map(); this.versoes = new Map(); }
+  /** Projetos do Playwright (navegador, dispositivo, viewport) exatamente como o config declara. */
+  onBegin(config) {
+    for (const p of config.projects || []) {
+      const u = p.use || {}; const v = u.viewport; const a = { projeto: p.name, navegador: u.browserName || (u.defaultBrowserType) || undefined, dispositivo: u.isMobile || u.deviceScaleFactor > 1 ? p.name : undefined, viewport: v ? `${v.width}x${v.height}` : undefined, plataforma: process.platform };
+      for (const k of Object.keys(a)) if (a[k] == null) delete a[k];
+      this.ambientes.set(p.name, a);
+    }
+  }
   onTestEnd(test, result) {
     let id = this.porTeste.get(test.id);
     if (!id) {
@@ -29,7 +37,8 @@ class PrumoReporter {
   onEnd() {
     const alvo = process.env.PRUMO_RESULT_FILE; if (!alvo) return;
     const cases = this.cases;
-    fs.writeFileSync(alvo, JSON.stringify({ jobId: process.env.PRUMO_JOB_ID, cases }));
+    const ambientes = [...this.ambientes.values()].slice(0, 12).map((a) => Object.fromEntries(Object.entries(a).map(([k, v]) => [k, String(v).slice(0, 60)])));
+    fs.writeFileSync(alvo, JSON.stringify({ jobId: process.env.PRUMO_JOB_ID, cases, ...(ambientes.length ? { ambientes } : {}) }));
   }
 }
 module.exports = PrumoReporter;

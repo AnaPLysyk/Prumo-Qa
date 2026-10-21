@@ -536,6 +536,12 @@ const mcpExtra: { nome: string; campos: string[]; d: Descricao }[] = [
   { nome: 'perguntar_ao_orquestrador', campos: ['agente', 'pergunta'], d: { finalidade: 'Perguntar ao Orquestrador local sobre os dados do projeto em todas as telas (execuções, logs, métricas, agenda, testes, tickets, agentes), como se a IA fosse um agente.', origem: 'Agente de IA por MCP (stdio)', destino: 'backend/agentes/mcp/consultasDoProjeto.ts > responderSomenteLeitura', entrada: 'Pergunta de 2 a 300 caracteres e agente opcional', saida: 'Linhas mascaradas, fontes (telas), agente que respondeu e agentes consultados', permissoes: 'Capacidade perguntar_ao_orquestrador permitida pela política do projeto e agente ligado na Administração', efeito: 'Somente leitura; sem IA externa. Não grava conversa, aprendizado nem a pergunta.', arquivos: 'Dados locais do projeto Prumo vinculado à raiz do servidor MCP', erros: ['POLICY_BLOCKED', 'NO_WORKSPACE', 'AGENT_UNKNOWN', 'AGENT_DISABLED', 'PERMISSION_DENIED'], protecoes: [...mcpProtecoes, 'Isolamento por projeto', 'Segredos mascarados', 'Pergunta e resposta fora do histórico', 'Política conferida no backend a cada chamada'], registro: 'Histórico de atividades (origem MCP), só metadados' } }
 ];
 mcp.push(...mcpExtra);
+/** Em português claro, o que uma operação faz: o canal da interface ("espacos:criar") ou a ferramenta MCP ("contexto_projeto"). Usado pelos Logs. */
+export function descreverOperacao(nome: string): string | undefined {
+  const finalidade = nome.startsWith('prumo:') ? (ipc as Record<string, { finalidade: string }>)[nome.slice(6)]?.finalidade : mcp.find(m => m.nome === nome)?.d.finalidade;
+  // O texto genérico gerado para canais sem descrição própria ("canal: gestão explícita...") não explica nada: fica sem descrição.
+  return finalidade && !finalidade.startsWith(nome.replace(/^prumo:/, '') + ':') ? finalidade : undefined;
+}
 export function catalogo(): Operacao[] {
   return [
     ...(Object.keys(esquemasIpc) as CanalIpc[]).map(c => ({ tipo: 'IPC' as const, nome: 'prumo:' + c, campos: camposDe(esquemasIpc[c]), ...ipc[c]!, destino: arquivosDosCanais[c]! })),

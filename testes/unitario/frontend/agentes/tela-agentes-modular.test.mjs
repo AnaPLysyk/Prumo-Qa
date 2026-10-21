@@ -179,28 +179,34 @@ test('painel diagnostica problemas por consultas reais e exibe etapas, sem simul
   assert.match(css, /\.v36a-aba\{flex:none;white-space:nowrap/, 'abas sem quebrar em janelas estreitas');
 });
 
-test('janelas dos agentes aparecem apenas enquanto há uma execução real ativa', () => {
+test('o painel mostra o histórico real (conversas, operações, testes) e conta como ativo só o que está em andamento', () => {
+  const js = fs.readFileSync('frontend/design-system/painel-atividades.js', 'utf8');
+  const modelo = vm.runInNewContext(js + '\nPrumoModeloAtividades;', { tr: (x, v) => x.replace(/\{(\w+)\}/g, (_, k) => v?.[k] ?? '') });
+  const em = new Date().toISOString(), antigo = new Date(Date.now() - 3600000).toISOString();
+  const registro = { id: 'diag-real', em, estado: 'CONCLUIDA', agentes: ['regressao', 'investigacao-bugs'], etapas: [{ agente: 'regressao', estado: 'CONCLUIDA', fontes: ['Execuções'], inicio: em, fim: em }], emExecucao: undefined };
+  const dados = { atividades: [], conversas: [{ id: 'conversa-antiga', em: antigo, agente: 'regressao', agenteNome: 'Regressão', modo: 'LOCAL', fontes: [] }],
+    execucoes: [], agentes: [{ id: 'regressao', nome: 'Regressão' }, { id: 'investigacao-bugs', nome: 'Investigação' }], orquestracoes: [registro] };
+  let grafo = modelo.modelar(dados);
+  assert.ok(grafo.folhas.some(x => x.tipo === 'conversa'), 'a conversa registrada aparece, mesmo sendo antiga');
+  assert.ok(grafo.fontes.some(x => x.tipo === 'orquestrador') && grafo.fontes.some(x => x.tipo === 'investigacao'), 'histórico concluído continua visível');
+  assert.equal(grafo.ativos.agentes, 0, 'nada em andamento: nenhum agente trabalhando');
+  registro.estado = 'EXECUTANDO'; registro.emExecucao = 'investigacao-bugs';
+  grafo = modelo.modelar(dados);
+  assert.equal(grafo.ativos.investigacoes, 1); assert.equal(grafo.ativos.agentes, 1);
+  assert.equal(grafo.hubs.filter(x => x.tipo === 'agente').length >= 2, true);
+  assert.equal(grafo.folhas.find(x => x.id === 'diagnostico-etapa:diag-real:investigacao-bugs').estado, 'EXECUTANDO');
+  assert.ok(grafo.arestas.some(x => x.de === 'diagnostico:diag-real' && x.para === 'diagnostico-agente:regressao'));
+  assert.ok(modelo.dispor(grafo, 960, 640).pos.has('diagnostico-etapa:diag-real:regressao'));
+  const op = { ...dados, orquestracoes: [], atividades: [{ operationId: 'ab', state: 'STARTED', at: em, tool: 'executar_validacao', origin: 'MCP', client: 'claude' }] };
+  assert.equal(modelo.modelar(op).ativos.operacoes, 1, 'operação MCP em andamento conta como ativa');
+  op.atividades[0].state = 'PASS';
+  const depois = modelo.modelar(op);
+  assert.equal(depois.ativos.operacoes, 0); assert.ok(depois.folhas.some(x => x.tipo === 'operacao'), 'encerrada, ela continua no histórico');
+});
+
+test('aparelho e navegador aparecem só quando o runner os declarou', () => {
   const js = fs.readFileSync('frontend/design-system/painel-atividades.js', 'utf8');
   const modelo = vm.runInNewContext(js + '\nPrumoModeloAtividades;', { tr: x => x });
-  const em = new Date().toISOString();
-  const registro = { id:'diag-real', em, estado:'CONCLUIDA', agentes:['regressao','investigacao-bugs'],
-    etapas:[{agente:'regressao', estado:'CONCLUIDA', fontes:['Execuções'], inicio:em, fim:em}],
-    emExecucao:undefined };
-  const dados = { atividades:[],conversas:[{id:'conversa-antiga',em,agente:'regressao',fontes:[]}],
-    execucoes:[], agentes:[{id:'regressao',nome:'Regressão'},{id:'investigacao-bugs',nome:'Investigação'}], orquestracoes:[registro] };
-  assert.equal(modelo.modelar(dados).fontes.length,0,'histórico concluído não deixa agente fantasma na tela');
-  registro.estado='EXECUTANDO'; registro.emExecucao='investigacao-bugs';
-  const grafo=modelo.modelar(dados);
-  assert.equal(grafo.fontes.filter(x=>x.tipo==='investigacao').length,1);
-  assert.equal(grafo.hubs.length,2);
-  assert.equal(grafo.folhas.filter(x=>x.tipo==='diagnostico').length,2);
-  assert.ok(grafo.arestas.some(x=>x.de==='diagnostico:diag-real'&&x.para==='diagnostico-agente:regressao'));
-  assert.equal(grafo.folhas.find(x=>x.id==='diagnostico-etapa:diag-real:investigacao-bugs').estado,'EXECUTANDO');
-  assert.ok(modelo.dispor(grafo,960,640).pos.has('diagnostico-etapa:diag-real:regressao'));
-  registro.estado='CONCLUIDA'; registro.emExecucao=undefined;
-  assert.equal(modelo.modelar(dados).fontes.length,0,'ao concluir a janela some, mas os registros permanecem no backend');
-  const anterior = { ...dados, atividades:[{operationId:'ab',state:'STARTED',at:em,tool:'executar_validacao',origin:'MCP',client:'claude'}] };
-  assert.equal(modelo.modelar(anterior).fontes.length,1,'operação MCP ativa aparece');
-  anterior.atividades[0].state='PASS';
-  assert.equal(modelo.modelar(anterior).fontes.length,0,'operação MCP encerrada desaparece');
+  assert.deepEqual([...modelo.ambientesDoTeste({ resultado: { ambientes: [{ projeto: 'mobile', dispositivo: 'Pixel 7', navegador: 'chromium', versaoDoNavegador: '126', viewport: '412x915' }, { projeto: 'desktop', navegador: 'webkit' }] } })], ['Pixel 7 · chromium 126 · 412x915', 'desktop · webkit']);
+  assert.deepEqual([...modelo.ambientesDoTeste({ resultado: { status: 'PASS' } })], [], 'sem registro, nada é inferido');
 });
