@@ -3,6 +3,7 @@ import {betterAuth} from 'better-auth';
 import {toNodeHandler} from 'better-auth/node';
 import pg from 'pg';
 import {enviarPeloResend} from './codigos.mjs';
+import {montarEmail} from './modeloDeEmail.mjs';
 
 /** Falha fechada: sem servidor HTTPS, banco, segredo forte ou e-mail, não habilita cadastro. */
 export function conferirAmbienteDeAutenticacao(env=process.env) {
@@ -24,9 +25,8 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
   const pool=new pg.Pool({connectionString:env.DATABASE_URL,max:5,connectionTimeoutMillis:5000,
     idleTimeoutMillis:30000});
   const mandar=enviar??enviarPeloResend({chave:env.RESEND_API_KEY,remetente:env.PRUMO_EMAIL_REMETENTE});
-  const mandarTexto=async (para,assunto,texto)=>{
-    await mandar({para,assunto,texto,html:`<p style="font-family:sans-serif;white-space:pre-wrap">${texto.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}</p>`});
-  };
+  // Quem cadastra escolhe o nome: só um primeiro nome de letras entra no e-mail, nunca endereço ou link.
+  const saudacao=user=>{const nome=String(user.name||'').trim().split(/\s+/)[0];return /^\p{L}[\p{L}'-]{0,39}$/u.test(nome)?'Olá, '+nome+'!':'';};
   const auth=betterAuth({
     appName:'Prumo QA',
     baseURL,secret:env.BETTER_AUTH_SECRET,
@@ -36,15 +36,21 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
       sendResetPassword:async ({user,token})=>{
         // O token fica no fragmento: não chega ao servidor por GET nem é registrado em logs HTTP.
         const link=baseURL+'/recuperar-senha#token='+encodeURIComponent(token);
-        await mandarTexto(user.email,'Recuperar acesso ao Prumo QA',
-          'Para definir uma nova senha, abra este link: '+link+'\n\nSe não solicitou, ignore esta mensagem.');
+        await mandar({para:user.email,assunto:'Recuperar acesso ao Prumo QA',...montarEmail({
+          chip:'Recuperar acesso',titulo:'Defina uma senha nova',saudacao:saudacao(user),
+          texto:'Recebemos um pedido para trocar a senha da sua conta no Prumo QA.',
+          acao:{rotulo:'Definir senha nova',url:link},
+          observacao:'O link vale por 1 hora. Se você não pediu, ignore esta mensagem: sua senha continua a mesma.'})});
       }
     },
     emailVerification:{
       sendOnSignUp:true,
       sendVerificationEmail:async ({user,url})=>{
-        await mandarTexto(user.email,'Confirme seu e-mail no Prumo QA',
-          'Confirme seu e-mail para ativar a conta: '+url+'\n\nSe não solicitou, ignore esta mensagem.');
+        await mandar({para:user.email,assunto:'Confirme seu e-mail no Prumo QA',...montarEmail({
+          chip:'Confirmação de e-mail',titulo:'Confirme seu e-mail',saudacao:saudacao(user),
+          texto:'Falta só confirmar este endereço para ativar sua conta no Prumo QA.',
+          acao:{rotulo:'Confirmar e-mail',url},
+          observacao:'O link vale por 1 hora. Se você não pediu, ignore esta mensagem.'})});
       }
     },
     rateLimit:{enabled:true,storage:'database',window:60,max:100,

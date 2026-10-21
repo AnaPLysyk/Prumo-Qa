@@ -1,9 +1,17 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Recuperar acesso · Prumo QA</title>
-<style>body{font:16px system-ui;background:#101820;color:#eef4fa;display:grid;place-items:center;min-height:100vh;margin:0}main{max-width:400px;padding:30px;width:90%}input,button{box-sizing:border-box;display:block;width:100%;padding:13px;margin:14px 0;border-radius:8px;border:1px solid #596575;background:#1a2a37;color:white}button{background:#316dbd;border:0;cursor:pointer}p{line-height:1.5}</style></head>
-<body><main><h1>Prumo QA</h1><p>Defina uma nova senha para sua conta.</p>
-<form id="form"><label for="senha">Nova senha (mínimo 10 caracteres)</label>
-<input id="senha" type="password" minlength="10" maxlength="128" autocomplete="new-password" required/>
-<button type="submit">Redefinir senha</button></form><p id="estado" role="status" aria-live="polite"></p></main>
-<script src="/recuperar-senha.js" defer></script></body></html>
+<title>Recuperar acesso · Prumo QA</title><link rel="stylesheet" href="/paginas.css"/></head>
+<body><main>
+<img class="orbe" src="https://prumo-qa-docs.onrender.com/agente.png" alt="" width="150" height="150"/>
+<section class="cartao">
+<div class="marca"><img src="https://prumo-qa-docs.onrender.com/prumo.png" alt=""/>Prumo QA<span class="chip">Recuperar acesso</span></div>
+<h1>Defina uma senha nova</h1>
+<p>Use pelo menos 10 caracteres.</p>
+<form id="form" novalidate>
+<label for="senha">Senha nova<input id="senha" type="password" minlength="10" maxlength="128" autocomplete="new-password" required/></label>
+<label for="confirma">Confirmar senha nova<input id="confirma" type="password" minlength="10" maxlength="128" autocomplete="new-password" required/></label>
+<button type="submit">Definir senha nova</button></form>
+<p id="estado" class="estado" role="status" aria-live="polite"></p>
+</section>
+<p class="rodape">Do ticket à evidência. · <a href="https://prumo-qa-docs.onrender.com">Site e documentação</a></p>
+</main><script src="/recuperar-senha.js" defer></script></body></html>

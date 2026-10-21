@@ -9,6 +9,10 @@ import { criarLimitador, responder } from '../../compartilhado/servidor/comum.mj
 import { LIMITES, enviarPeloResend, rotaDeCodigos } from '../../login/servidor/codigos.mjs';
 import { LIMITES_DE_CHAMADOS, rotaDeChamados } from '../../suporte/servidor/chamados.mjs';
 import { clienteDoGitHub } from '../../suporte/servidor/github.mjs';
+import { SITE } from '../../login/servidor/modeloDeEmail.mjs';
+
+const PAGINAS_DOS_EMAILS = new Map([['/conta-confirmada', 'conta-confirmada.html'], ['/recuperar-senha', 'recuperar-senha.html'],
+  ['/recuperar-senha.js', 'recuperar-senha.js'], ['/paginas.css', 'paginas.css']]);
 
 export { mensagem, enviarPeloResend } from '../../login/servidor/codigos.mjs';
 
@@ -34,20 +38,19 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
         if (!autenticacao) return responder(res, 503, { erro: 'AUTH_NOT_CONFIGURED' });
         return await autenticacao.atender(req,res);
       }
-      if (req.method === 'GET' && caminho === '/conta-confirmada') {
-        res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'",'X-Content-Type-Options':'nosniff'});
-        return res.end('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Prumo QA — E-mail confirmado</title><body style="font-family:system-ui;background:#101820;color:#fff;text-align:center;padding:4rem"><h1>E-mail confirmado</h1><p>Volte ao aplicativo Prumo QA para entrar com sua conta.</p></body></html>');
-      }
-      if (req.method === 'GET' && (caminho === '/recuperar-senha' || caminho === '/recuperar-senha.js')) {
+      // Páginas abertas pelos links dos e-mails, com a aparência da tela de entrada. O Better Auth volta para
+      // /conta-confirmada?error=... quando o link venceu: nesse caso a página não pode dizer que confirmou.
+      const paginaWeb = req.method === 'GET' && PAGINAS_DOS_EMAILS.get(caminho);
+      if (paginaWeb) {
         if (!autenticacao) return responder(res, 503, { erro: 'AUTH_NOT_CONFIGURED' });
-        const js=caminho.endsWith('.js');const nome=js?'recuperar-senha.js':'recuperar-senha.html';
-        res.writeHead(200,{
-          'Content-Type':js?'text/javascript; charset=utf-8':'text/html; charset=utf-8',
-          'Cache-Control':'no-store','Referrer-Policy':'no-referrer',
-          'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
-          'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
+        const nome = caminho === '/conta-confirmada' && url.searchParams.has('error') ? 'confirmacao-recusada.html' : paginaWeb;
+        res.writeHead(200, {
+          'Content-Type': { html: 'text/html', js: 'text/javascript', css: 'text/css' }[nome.split('.').pop()] + '; charset=utf-8',
+          'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
+          'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
+          'Content-Security-Policy': `default-src 'none'; script-src 'self'; style-src 'self'; img-src ${SITE}; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`
         });
-        return res.end(fs.readFileSync(new URL('../../../frontend/login/web/'+nome,import.meta.url)));
+        return res.end(fs.readFileSync(new URL('../../../frontend/login/web/' + nome, import.meta.url)));
       }
       if (caminho === '/v1/codigos') return await codigos(req, res);
       if (caminho.startsWith('/v1/chamados') || caminho.startsWith('/v1/admin/')) return await chamados(req, res, caminho, url.searchParams);
