@@ -1,7 +1,7 @@
 'use strict';
 /** Mensagens seguras para o formulário de login: converte códigos de falha em texto sem expor erros internos. */
 window.PrumoMensagensEntrada = (() => {
-  const codigoDo = (erro) => /^([A-Z][A-Z0-9_]{2,63}):/.exec(String(erro || ''))?.[1] || null;
+  const codigoDo = (erro) => /^([A-Z][A-Z0-9_]{2,63})(?::|$)/.exec(String(erro || ''))?.[1] || null;
   function mensagemDaEntrada(erro) {
     const codigo = codigoDo(erro);
     const mensagens = {
@@ -24,8 +24,10 @@ window.PrumoMensagensEntrada = (() => {
       EMAIL_INVALID: 'Confira o e-mail informado.',
       EMAIL_TAKEN: 'Esse e-mail já tem conta neste computador. Entre com ele ou use Esqueci a senha.',
       EMAIL_WAIT: 'Espere um minuto para pedir outro código.',
-      EMAIL_RATE_LIMIT: 'Muitos códigos pedidos para este e-mail. Espere alguns minutos e tente de novo.',
+      EMAIL_RATE_LIMIT: 'Muitas mensagens solicitadas para este e-mail. Espere alguns minutos antes de reenviar.',
       EMAIL_SEND_FAILED: 'O e-mail não pôde ser enviado agora. Tente de novo em instantes.',
+      EMAIL_SERVICE_NOT_CONFIGURED: 'O envio de e-mails ainda não está configurado neste ambiente. A equipe precisa habilitar o remetente para concluir o cadastro.',
+      SIGNUP_INVALID: 'Não foi possível concluir o cadastro. Confira nome, e-mail e senha ou peça ajuda à equipe.',
       EMAIL_SERVICE_UNAVAILABLE: 'Não foi possível falar com o serviço de envio. Confira a internet e tente de novo.',
       CODE_INVALID: 'Código incorreto. Confira o e-mail e tente de novo.',
       CODE_EXPIRED: 'O código venceu ou foi digitado errado vezes demais. Peça um novo.',

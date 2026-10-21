@@ -6,14 +6,21 @@ import { z } from "zod";
  * aparece nas políticas do MCP; IA externa desligada impede delegar ao Claude Code ou ao Codex. O Prumo Orchestrator
  * nunca é desligado (é quem conversa); a orquestração só decide se ele combina vários agentes numa resposta.
  */
+export const perfilOficialSchema = z.object({
+  nome: z.string().trim().min(2).max(100),
+  profissao: z.string().trim().min(2).max(100),
+  especialidade: z.string().trim().min(2).max(160),
+  tom: z.string().trim().max(200), robo: z.number().int().min(0).max(8).optional()
+}).strict();
+
 export const agentesDaPlataformaSchema = z.object({
   version: z.literal(1), desligados: z.array(z.string().min(1).max(40)).max(16), iaExterna: z.boolean(), orquestracao: z.boolean(),
-  alteradoEm: z.string().datetime().nullable(), por: z.string().max(200).nullable()
+  perfis: z.record(perfilOficialSchema).default({}), alteradoEm: z.string().datetime().nullable(), por: z.string().max(200).nullable()
 }).strict();
 
 export type AgentesDaPlataforma = z.infer<typeof agentesDaPlataformaSchema>;
 
-export const agentesDaPlataformaPadrao: AgentesDaPlataforma = { version: 1, desligados: [], iaExterna: true, orquestracao: true, alteradoEm: null, por: null };
+export const agentesDaPlataformaPadrao: AgentesDaPlataforma = { version: 1, desligados: [], iaExterna: true, orquestracao: true, perfis: {}, alteradoEm: null, por: null };
 
 const arquivo = z.object({ caminho: z.string().max(300), descricao: z.string().max(2000).nullable(), funcoes: z.array(z.string().max(120)).max(400), usadoPor: z.number().int().min(0) }).strict();
 

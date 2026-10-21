@@ -23,7 +23,7 @@ function renderizarRelacoes(nos, lacunas = []) {
     renderizado
   };
   vm.runInNewContext(
-    fonte('frontend/testes/fluxos-vinculos.parte.js') +
+    fonte('frontend/testes/fluxos-vinculos.parte.js').split('\n  window.PrumoFluxos =')[0] +
       '\nrelacoes({}, mapa, { append(...itens) { renderizado.push(...itens); } }, null);',
     contexto
   );
@@ -56,7 +56,7 @@ test('lacunas existentes permanecem visíveis após a mudança de estados vazios
 });
 
 test('sem Qase, ausência de pasta não impede cadastrar casos e suítes locais', () => {
-  const origem = fonte('frontend/testes/visao-geral-dos-testes.parte.js');
+  const origem = fonte('frontend/testes/tela-testes.parte.js');
   assert.match(origem, /if \(src\.cat\?\.semPasta && !vq\)/);
   assert.match(origem, /Você já pode criar casos e suítes locais sem Qase ou GitHub/);
   assert.match(origem, /Seus casos e suítes locais continuam disponíveis acima/);

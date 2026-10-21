@@ -1,13 +1,13 @@
 /** Controlador da funcionalidade logs: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { lerDiagnostico } from "./banco/diagnostico.js";
+import { lerDiagnostico, lerAuditoria } from "./banco/diagnostico.js";
 import { dialog } from "electron";
 import fs from "node:fs";
 import { exportarLogs } from "./regras/consultasDoDiario.js";
 import { listarHistoricoDoProjeto } from "./regras/consultasDoDiario.js";
 import { listarLogsDoProjeto } from "./regras/consultasDoDiario.js";
 
-export const diagnosticoListar: TratadorDoCanal<'diagnostico:listar'> = () => lerDiagnostico();
+export const diagnosticoListar: TratadorDoCanal<'diagnostico:listar'> = () => ({ ...lerDiagnostico(), auditoria: lerAuditoria() });
 
 export const logsExportar: TratadorDoCanal<'logs:exportar'> = async (a, janela) => {
   const aviso = await dialog.showMessageBox(janela!, { type: 'info', title: 'Exportar logs', buttons: ['Cancelar', 'Continuar'], defaultId: 0, cancelId: 0, noLink: true,

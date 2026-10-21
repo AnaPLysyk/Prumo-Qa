@@ -5,7 +5,7 @@ import { OperacaoServico, nome, obj, ContextoServico, PartesDoAdaptador, objetos
 import { ErroServico } from "./configuracaoDosServicos.js";
 import { cabecalhosDoServico } from "./configuracaoDosServicos.js";
 import { lerComCredencial } from "./requisicoes.js";
-import { limparRespostaDoServico, parametrosDaUrl, recursoDaResposta, saidaDaConsulta } from "./configuracaoDosServicos.js";
+import { idNumericoDaConsulta, limparRespostaDoServico, parametrosDaUrl, recursoDaResposta, saidaDaConsulta } from "./configuracaoDosServicos.js";
 import { paginaSchema } from "../tipos/adaptador.js";
 import { ParametrosConsulta, ResultadoConsulta } from "../tipos/adaptador.js";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
@@ -33,11 +33,23 @@ export function contextoDoAdaptador(a: PartesDoAdaptador): ContextoServico {
     ler: p => lerComCredencial(a, p),
     enviar: async (metodo, caminho, corpo, tipoConteudo, extraHeaders) => {
       if (!c.token) throw new ErroServico('CREDENTIAL_UNAVAILABLE');
-      try { return await a.escrita({ servico: c.servico, instancia: c.instancia, caminho, headers: { ...cabecalhosDoServico(c), ...(extraHeaders ?? {}) }, corpo, metodo, tipoConteudo }); }
+      try { return await a.escrita({ servico: c.servico, instancia: c.instancia, ...(c.nuvem ? { nuvem: c.nuvem } : {}), caminho, headers: { ...cabecalhosDoServico(c), ...(extraHeaders ?? {}) }, corpo, metodo, tipoConteudo }); }
       catch (e) { if (e instanceof ErroServico) throw e; throw new ErroServico('SERVICE_UNAVAILABLE'); }
     },
     limpar: v => limparRespostaDoServico(c, v)
   };
+}
+
+/** Conexão pelo aplicativo do GitHub: só enxerga os repositórios onde a pessoa instalou o aplicativo (até 20 instalações e 1000 repositórios). */
+async function repositoriosDoAplicativo(a: PartesDoAdaptador) {
+  const instalacoes = z.object({ installations: objetos }).parse(await lerComCredencial(a, '/user/installations?per_page=100')).installations.slice(0, 20);
+  const todos: Record<string, unknown>[] = [];
+  for (const i of instalacoes) {
+    const r = z.object({ repositories: objetos }).parse(await lerComCredencial(a, '/user/installations/' + idNumericoDaConsulta(String(i.id)) + '/repositories?per_page=100'));
+    todos.push(...r.repositories);
+    if (todos.length >= 1000) break;
+  }
+  return todos.slice(0, 1000).sort((x, y) => String(x.full_name).localeCompare(String(y.full_name)));
 }
 
 export async function listarRecursosDoServico(a: PartesDoAdaptador, pagina: z.input<typeof paginaSchema> = {}) {
@@ -46,6 +58,7 @@ export async function listarRecursosDoServico(a: PartesDoAdaptador, pagina: z.in
     let entries: Record<string, unknown>[], total: number | undefined, next: string | number | null;
     if (a.c.servico === 'jira') { const r = z.object({ values: objetos, total: z.number().int().nonnegative(), isLast: z.boolean().optional() }).parse(await lerComCredencial(a, '/rest/api/3/project/search?' + parametrosDaUrl({ startAt: p.offset, maxResults: p.limite }))); entries = r.values; total = r.total; next = p.offset + entries.length < total ? p.offset + entries.length : null; }
     else if (a.c.servico === 'qase') { const r = paginaQase.parse(await lerComCredencial(a, '/v1/project?' + parametrosDaUrl({ offset: p.offset, limit: p.limite }))); entries = r.result.entities; total = r.result.total; next = p.offset + entries.length < total ? p.offset + entries.length : null; }
+    else if (a.c.oauth) { const todos = await repositoriosDoAplicativo(a); entries = todos.slice(p.offset, p.offset + p.limite); total = todos.length; next = p.offset + entries.length < todos.length ? p.offset + entries.length : null; }
     else { const r = objetos.parse(await lerComCredencial(a, '/user/repos?' + parametrosDaUrl({ per_page: p.limite, page: Math.floor(p.offset / p.limite) + 1, sort: 'full_name' }))); entries = r; next = r.length === p.limite ? p.offset + r.length : null; }
     return { recursos: entries.map(e => recursoDaResposta(a.c, e)), total, proxima: next, consultadoEm: new Date().toISOString(), cache: false, origem: a.c.instancia };
   } catch (e) { if (e instanceof ErroServico) throw e; throw new ErroServico('SERVICE_RESPONSE_INVALID'); }

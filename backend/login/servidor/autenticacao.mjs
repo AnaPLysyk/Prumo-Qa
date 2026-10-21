@@ -1,8 +1,10 @@
 /** Identidade global do Prumo: Better Auth e PostgreSQL, somente no processo Node do Render. */
 import {betterAuth} from 'better-auth';
+import {customSession} from 'better-auth/plugins';
 import {toNodeHandler} from 'better-auth/node';
 import pg from 'pg';
 import {enviarPeloResend} from './codigos.mjs';
+import {montarEmail} from './modeloDeEmail.mjs';
 import {verificarEsquemaDaAutenticacao} from '../regras/verificarEsquema.mjs';
 import {provedoresSociais} from '../regras/provedoresSociais.mjs';
 import {electron} from '@better-auth/electron';
@@ -28,37 +30,47 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
   const pool=new pg.Pool({connectionString:env.DATABASE_URL,max:5,connectionTimeoutMillis:5000,
     idleTimeoutMillis:30000});
   const mandar=enviar??enviarPeloResend({chave:env.RESEND_API_KEY,remetente:env.PRUMO_EMAIL_REMETENTE});
-  const mandarTexto=async (para,assunto,texto)=>{
-    await mandar({para,assunto,texto,html:`<p style="font-family:sans-serif;white-space:pre-wrap">${texto.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}</p>`});
-  };
+  // Quem cadastra escolhe o nome: só um primeiro nome de letras entra no e-mail, nunca endereço ou link.
+  const saudacao=user=>{const nome=String(user.name||'').trim().split(/\s+/)[0];return /^\p{L}[\p{L}'-]{0,39}$/u.test(nome)?'Olá, '+nome+'!':'';};
+  const emailsAdmin=new Set(String(env.PRUMO_ADMIN_EMAILS||'').split(',').map(e=>e.trim().toLowerCase()).filter(Boolean));
   const auth=betterAuth({
     appName:'Prumo QA',
     baseURL,secret:env.BETTER_AUTH_SECRET,
     database:pool,
     socialProviders:provedoresSociais(env),
     // Plugin oficial desativado por padrão até o retorno PKCE ser homologado no Electron.
-    plugins:oauthDesktopAtivo(env) ? [electron()] : [],
+    plugins:[...(oauthDesktopAtivo(env) ? [electron()] : []),
+      // Só o serviço decide quem administra: e-mails em PRUMO_ADMIN_EMAILS, com o e-mail já confirmado.
+      customSession(async ({user,session})=>({user,session,administrador:user.emailVerified===true&&emailsAdmin.has(String(user.email).toLowerCase())}))],
     trustedOrigins:origensOAuthDesktop(env),
     emailAndPassword:{
       enabled:true,minPasswordLength:10,maxPasswordLength:128,requireEmailVerification:true,revokeSessionsOnPasswordReset:true,
       sendResetPassword:async ({user,token})=>{
         // O token fica no fragmento: não chega ao servidor por GET nem é registrado em logs HTTP.
         const link=baseURL+'/recuperar-senha#token='+encodeURIComponent(token);
-        await mandarTexto(user.email,'Recuperar acesso ao Prumo QA',
-          'Para definir uma nova senha, abra este link: '+link+'\n\nSe não solicitou, ignore esta mensagem.');
+        await mandar({para:user.email,assunto:'Recuperar acesso ao Prumo QA',...montarEmail({
+          chip:'Recuperar acesso',titulo:'Defina uma senha nova',saudacao:saudacao(user),
+          texto:'Recebemos um pedido para trocar a senha da sua conta no Prumo QA.',
+          acao:{rotulo:'Definir senha nova',url:link},
+          observacao:'O link vale por 1 hora. Se você não pediu, ignore esta mensagem: sua senha continua a mesma.'})});
       }
     },
     emailVerification:{
-      sendOnSignUp:true,
+      sendOnSignUp:true,autoSignInAfterVerification:false,
       sendVerificationEmail:async ({user,url})=>{
-        await mandarTexto(user.email,'Confirme seu e-mail no Prumo QA',
-          'Confirme seu e-mail para ativar a conta: '+url+'\n\nSe não solicitou, ignore esta mensagem.');
+        await mandar({para:user.email,assunto:'Confirme seu e-mail no Prumo QA',...montarEmail({
+          chip:'Confirmação de e-mail',titulo:'Confirme seu e-mail',saudacao:saudacao(user),
+          texto:'Falta só confirmar este endereço para ativar sua conta no Prumo QA.',
+          acao:{rotulo:'Confirmar e-mail',url},
+          observacao:'O link vale por 1 hora. Se você não pediu, ignore esta mensagem.'})});
       }
     },
     rateLimit:{enabled:true,storage:'database',window:60,max:100,
       customRules:{'/sign-in/email':{window:60,max:5},'/sign-up/email':{window:60,max:3},
-        '/request-password-reset':{window:60,max:3}}},
-    advanced:{useSecureCookies:true}
+        '/request-password-reset':{window:60,max:3},'/send-verification-email':{window:60,max:3}}},
+    // No Render, a Cloudflare reescreve CF-Connecting-IP com o IP real; o X-Forwarded-For chega com vários
+    // endereços e o Better Auth juntava todo mundo num só contador de tentativas.
+    advanced:{useSecureCookies:true,ipAddress:{ipAddressHeaders:['cf-connecting-ip']}}
   });
-  return {auth,atender:toNodeHandler(auth),checar:()=>verificarEsquemaDaAutenticacao(pool),fechar:()=>pool.end()};
+  return {auth,pool,atender:toNodeHandler(auth),checar:()=>verificarEsquemaDaAutenticacao(pool),fechar:()=>pool.end()};
 }

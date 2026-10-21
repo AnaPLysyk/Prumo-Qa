@@ -52,7 +52,7 @@ export async function perguntarAoAssistenteLocal(espacoId: string | null, pergun
   if (e && termos.length) {
     try {
       const achados = new Map<string, string>();
-      for (const t of termos) for (const c of (await listarContextosDaPasta(e.raizContextos, { busca: t })).contextos.filter(x => x.estado === 'APROVADO').slice(0, 5)) achados.set(c.id, `${c.titulo} (${c.tipo})`);
+      for (const t of termos) for (const c of (await listarContextosDaPasta(e.raizContextos, { busca: t }, base)).contextos.filter(x => x.estado === 'APROVADO').slice(0, 5)) achados.set(c.id, `${c.titulo} (${c.tipo})`);
       if (achados.size) { linhas.push(`Contextos aprovados relacionados: ${[...achados.values()].slice(0, 5).join('; ')}.`); add('Contextos', 'contextos'); }
     } catch { /* projeto sem contextos acessíveis: segue sem eles */ }
   }
@@ -62,8 +62,9 @@ export async function perguntarAoAssistenteLocal(espacoId: string | null, pergun
 
 /** Resumo curto do que está acontecendo agora no projeto; alimenta a abertura do painel inicial. */
 export function situacaoDoProjeto(espacoId: string | null, base?: string): string[] {
-  const m = metricasDasExecucoes(espacoId ?? undefined, base); const linhas: string[] = [];
-  if (!espacoId) { linhas.push('Selecione um projeto para eu acompanhar o que acontece nele.'); }
+  // Sem projeto, a métrica global NÃO deve vazar resultados de outros projetos para o chat.
+  if (!espacoId) return ['Selecione um projeto para eu acompanhar o que acontece nele.'];
+  const m = metricasDasExecucoes(espacoId, base); const linhas: string[] = [];
   const props = espacoId ? listarPropostas(espacoId, base).filter(p => p.estado === 'RASCUNHO' || p.estado === 'REVISADA') : [];
   const runs = espacoId ? listarRunsLocais(espacoId, base).filter(r => r.estado !== 'PUBLICADA') : [];
   if (m.execucoes) linhas.push(`${m.execucoes} ${m.execucoes === 1 ? 'execução registrada' : 'execuções registradas'}: ${m.pass} PASS, ${m.fail} FAIL, ${m.blocked} BLOCKED.`);

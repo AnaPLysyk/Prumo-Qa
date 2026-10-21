@@ -46,6 +46,17 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
+      # Aplicativos oficiais do Prumo (GitHub App e Atlassian OAuth) para conectar pelo navegador: sem o conjunto completo de cada um, a rota responde 503 e o app mostra o caminho manual.
+      - key: PRUMO_GITHUB_APP_CLIENT_ID
+        sync: false
+      - key: PRUMO_GITHUB_APP_CLIENT_SECRET
+        sync: false
+      - key: PRUMO_GITHUB_APP_SLUG
+        sync: false
+      - key: PRUMO_JIRA_CLIENT_ID
+        sync: false
+      - key: PRUMO_JIRA_CLIENT_SECRET
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: PRUMO_EMAIL_REMETENTE

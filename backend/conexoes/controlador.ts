@@ -2,7 +2,7 @@
 import { dialog } from "electron";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { aplicarConexao, prepararConexao } from "./ia/conectarIa.js";
-import { projetoVinculado, removerVinculoServico } from "../projetos/servicoProjetos.js";
+import { projetoVinculado, removerVinculoServico, alternarVinculoServico } from "../projetos/servicoProjetos.js";
 import { testarIntegracao } from "./servicoIaDiagnostico.js";
 import { catalogoOperacoes } from "./escrita/catalogoOperacoes.js";
 import { permissoesDoEspaco, habilitarEscrita } from "./escrita/permissoes.js";
@@ -18,6 +18,11 @@ import { obterEspaco } from "../projetos/banco/projetos.js";
 import { resolverAnexo } from "../tickets/servicoPropostas.js";
 import { listarOperacoes } from "./banco/operacoes.js";
 import { situacaoDasConexoesDeIa } from "./servicoIaDiagnostico.js";
+import { iniciarConexaoGithub, estadoConexaoGithub } from './integracoes/autorizacaoGitHub.js';
+import { shell } from 'electron';
+import { autorizacaoDoAplicativo } from './integracoes/autorizacaoDoAplicativo.js';
+import { contaDaSessao } from '../login/regras/sessao.js';
+import { disponiveisNoServico } from './integracoes/servicoDeAutorizacao.js';
 
 // controladorConexoes — operações relacionadas
 // Alterar configuração de outro programa exige uma caixa de confirmação nativa, que a página não consegue simular.
@@ -66,9 +71,34 @@ export const servicosConferir: TratadorDoCanal<'servicos:conferir'> = a=>servico
 
 export const servicosConsultar: TratadorDoCanal<'servicos:consultar'> = a=>servicosDoAplicativo.consultar(a.espacoId,a.servico,a.operacao,a.pagina,a.id,a.filtros);
 
+export const servicosAlternar: TratadorDoCanal<'servicos:alternar'> = a => alternarVinculoServico(a.espacoId,a.servico,a.ativo);
+
 export const servicosDesvincular: TratadorDoCanal<'servicos:desvincular'> = async(a,j)=>{obterEspaco(a.espacoId);if(!await confirmarNoWindows(j,'Remover vínculo',`Remover o vínculo ${a.servico}?`,'Relações anteriores e histórico serão preservados. Nenhum dado externo será excluído.','Remover'))return {canceled:true};return removerVinculoServico(a.espacoId,a.servico);};
 
 export const servicosListar: TratadorDoCanal<'servicos:listar'> = ()=>servicosDoAplicativo.contas();
+
+export const servicosGithubiniciar: TratadorDoCanal<'servicos:githubiniciar'> = a => iniciarConexaoGithub(a.usuario);
+export const servicosGithubestado: TratadorDoCanal<'servicos:githubestado'> = a => estadoConexaoGithub(a.cancelar);
+
+/** Abre somente a página oficial de credenciais; não representa autorização OAuth concluída. */
+export const servicosAbrirCadastro: TratadorDoCanal<'servicos:abrircadastro'> = async a => {
+  const urls = { qase: 'https://app.qase.io/user/api/token', jira: 'https://id.atlassian.com/manage-profile/security/api-tokens', github: autorizacaoDoAplicativo.urlDeInstalacao() };
+  const url = urls[a.servico];
+  if (!url) throw new Error('INSTALL_URL_UNAVAILABLE: conecte o GitHub pelo navegador antes de escolher os repositórios.');
+  await shell.openExternal(url);
+  return { aberto: true };
+};
+
+// Autorização pelo navegador (GitHub App e Jira OAuth): igual em Windows, macOS e Linux; o app nunca vê o segredo do aplicativo oficial.
+export const servicosAutorizar: TratadorDoCanal<'servicos:autorizar'> = a => autorizacaoDoAplicativo.iniciar(a.servico);
+export const servicosAutorizacaodisponivel: TratadorDoCanal<'servicos:autorizacaodisponivel'> = () => disponiveisNoServico();
+export const servicosAutorizacaoestado: TratadorDoCanal<'servicos:autorizacaoestado'> = a => autorizacaoDoAplicativo.estado(a.cancelar);
+export const servicosAutorizacaoescolher: TratadorDoCanal<'servicos:autorizacaoescolher'> = a => autorizacaoDoAplicativo.escolherSite(a.id);
+
+/** Só com o token: o e-mail digitado (se houver) e o da conta do Prumo são os candidatos; o site é descoberto e confirmado pelo próprio Jira. */
+export const servicosJiradescobrir: TratadorDoCanal<'servicos:jiradescobrir'> = a => servicosDoAplicativo.jiraDescobrir(a.token, [a.usuario, contaDaSessao()?.email].filter((e): e is string => !!e));
+
+export const servicosQaseconectar: TratadorDoCanal<'servicos:qaseconectar'> = a => servicosDoAplicativo.qaseConectar(a.previaId);
 
 export const servicosQasecancelar: TratadorDoCanal<'servicos:qasecancelar'> = a => servicosDoAplicativo.qaseCancelar(a.previaId);
 
@@ -84,7 +114,9 @@ export const servicosQasepreviaconta: TratadorDoCanal<'servicos:qasepreviaconta'
 
 export const servicosRecursos: TratadorDoCanal<'servicos:recursos'> = a=>servicosDoAplicativo.listar(a.id,a.pagina);
 
-export const servicosRemover: TratadorDoCanal<'servicos:remover'> = async(a,j)=>{if(!await confirmarNoWindows(j,'Remover conexão','Remover esta credencial e desativar a conexão?','Vínculos e histórico permanecem identificados; nenhum recurso externo será apagado.','Remover'))return {canceled:true};return servicosDoAplicativo.removerConta(a.id);};
+export const servicosRemover: TratadorDoCanal<'servicos:remover'> = async(a,j)=>{if(!await confirmarNoWindows(j,'Remover conexão','Remover esta credencial e desativar a conexão?','Vínculos e histórico permanecem identificados; nenhum recurso externo será apagado. Em conexões feitas pelo navegador, o Prumo também pede ao GitHub que revogue a autorização.','Remover'))return {canceled:true};return servicosDoAplicativo.removerConta(a.id);};
+
+export const servicosTrocartoken: TratadorDoCanal<'servicos:trocartoken'> = a=>servicosDoAplicativo.trocarToken(a.id,a.token);
 
 export const servicosValidar: TratadorDoCanal<'servicos:validar'> = a=>servicosDoAplicativo.validarConta(a.id);
 

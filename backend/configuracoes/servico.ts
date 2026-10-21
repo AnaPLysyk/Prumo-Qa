@@ -14,9 +14,9 @@ const versaoTxt = z.string().regex(/^\d+\.\d+\.\d+$/);
 // Configuração do assistente. A delegação a IA externa só muda por autorizarDelegacaoDeIa (confirmação nativa).
 const nomeIa = z.string().trim().min(1).max(40).regex(/^[\p{L}\p{N} ._-]+$/u);
 
-const iaSchema = z.object({ nome: nomeIa, estilo: z.enum(['amigavel', 'direto', 'tecnico']), voz: z.string().max(120).nullable(), lerRespostas: z.boolean(), delegacao: z.object({ claude: z.boolean(), codex: z.boolean() }).strict() }).strict();
+const iaSchema = z.object({ nome: nomeIa, estilo: z.enum(['amigavel', 'direto', 'tecnico']), voz: z.string().max(120).nullable(), lerRespostas: z.boolean(), delegacao: z.object({ claude: z.boolean(), codex: z.boolean(), copilot: z.boolean().default(false), gemini: z.boolean().default(false) }).strict() }).strict();
 
-const iaPadrao = { nome: 'Prumo', estilo: 'amigavel' as const, voz: null, lerRespostas: false, delegacao: { claude: false, codex: false } };
+const iaPadrao = { nome: 'Prumo', estilo: 'amigavel' as const, voz: null, lerRespostas: false, delegacao: { claude: false, codex: false, copilot: false, gemini: false } };
 
 export const preferenciasSchema = z.object({
   version: z.literal(1),

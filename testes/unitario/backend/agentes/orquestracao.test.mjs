@@ -4,12 +4,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { planejarOrquestracao } from '../../../../dist/agentes/chat/roteamento.js';
-import { orquestrar } from '../../../../dist/agentes/chat/conversar.js';
+import { planejarOrquestracao, planejarDiagnosticoQa } from '../../../../dist/agentes/chat/roteamento.js';
+import { orquestrar, sinteseDiagnosticoQa } from '../../../../dist/agentes/chat/conversar.js';
 import { conversar } from '../../../../dist/agentes/chat/conversar.js';
 import { registrarOrquestracao, arquivoDeOrquestracoes } from '../../../../dist/agentes/banco/orquestracao.js';
 import { listarOrquestracoes } from '../../../../dist/agentes/banco/orquestracao.js';
 import { agentesChat } from '../../../../dist/agentes/tipos/persona.js';
+import { criarEspaco } from '../../../../dist/projetos/servicoProjetos.js';
 
 const base = (t) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-orq-')); t.after(() => fs.rmSync(d, { recursive: true, force: true })); return d; };
 const agente = (id) => agentesChat.find((a) => a.id === id);
@@ -19,6 +20,40 @@ test('planejar: dois ou mais especialistas com sinal forte; nunca o orquestrador
   assert.equal(planejarOrquestracao([{ agente: 'regressao', pontos: 5 }, { agente: 'monitoramento', pontos: 2 }]), null, 'sinal fraco não chama outro agente');
   assert.equal(planejarOrquestracao([{ agente: 'orquestrador', pontos: 9 }, { agente: 'regressao', pontos: 3 }]), null);
   assert.equal(planejarOrquestracao([{ agente: 'a', pontos: 3 }, { agente: 'b', pontos: 3 }, { agente: 'c', pontos: 3 }, { agente: 'd', pontos: 3 }]).length, 3);
+});
+
+test('diagnóstico QA: somente sob pedido explícito e com projeto; respeita especialistas desligados', () => {
+  const projeto = 'projeto-qa';
+  assert.deepEqual(planejarDiagnosticoQa('faça um diagnóstico de qualidade do projeto', projeto), ['regressao', 'investigacao-bugs', 'requisitos']);
+  assert.deepEqual(planejarDiagnosticoQa('panorama de QA', projeto, ['requisitos']), ['regressao', 'investigacao-bugs']);
+  assert.equal(planejarDiagnosticoQa('diagnóstico da qualidade do projeto', null), null);
+  assert.equal(planejarDiagnosticoQa('qual é a próxima regressão?', projeto), null);
+  assert.deepEqual(planejarDiagnosticoQa('análise da qualidade do projeto', projeto), ['regressao', 'investigacao-bugs', 'requisitos']);
+  assert.equal(planejarDiagnosticoQa('saúde do projeto', projeto, ['regressao', 'requisitos']), null);
+});
+
+test('síntese de QA: prioriza FAIL, não inventa dados e distingue ausência de evidências', () => {
+  const linhas = sinteseDiagnosticoQa({ fatos: ['regressao:execucoes=5', 'regressao:fail=2', 'requisitos:contextosAprovados=0'], fontes: [], linhas: [] });
+  assert.match(linhas.join(' '), /Prioridade alta.*2 execução/);
+  assert.match(linhas.join(' '), /nenhum contexto aprovado/);
+  assert.doesNotMatch(linhas.join(' '), /saudável|aprovado.*qualidade/);
+  assert.match(sinteseDiagnosticoQa({ fatos: [], fontes: [], linhas: [] }).join(' '), /inconclusivo/);
+  const lacunas = sinteseDiagnosticoQa({ fatos: ['requisitos:contextosAprovados=2', 'requisitos:testesCatalogados=0',
+    'requisitos:casosSemAutomacaoAssociada=1', 'requisitos:vinculosAusentes=3'], fontes: [], linhas: [] }).join(' ');
+  assert.match(lacunas, /Prioridade de cobertura.*nenhum teste/);
+  assert.match(lacunas, /1 caso.*podem ser|1 caso.*confirme se são casos manuais/);
+  assert.match(lacunas, /3 relação.*lacuna de rastreabilidade/);
+  assert.doesNotMatch(lacunas, /100%|cobertura comprovada|sem defeitos/);
+});
+
+test('diagnóstico do projeto: 3 consultas locais, prioridades na resposta, sem criar dados artificiais', async (t) => {
+  const b = base(t); const p = await criarEspaco({nome:'Projeto para diagnosticar',descricao:''},b);
+  const r = await conversar({espacoId:p.id,pergunta:'faça um diagnóstico de qualidade do projeto',base:b});
+  assert.equal(r.agente.id,'orquestrador');
+  assert.deepEqual(r.orquestracao?.agentes,['regressao','investigacao-bugs','requisitos']);
+  assert.match(r.linhas.join(' '), /Diagnóstico de QA.*Sem execuções registradas/);
+  assert.ok(r.linhas.join(' ').includes('Consultei 3 especialistas'));
+  assert.equal(r.proximos[0]?.aba, 'testes', 'sem execuções: orientar para preparar uma execução');
 });
 
 test('orquestrar: cada etapa tem ordem, tempo, fontes e estado; a falha de um agente não interrompe os outros e é mascarada', async () => {
@@ -58,4 +93,28 @@ test('registro: guarda os 500 mais recentes, separa por projeto e conta linhas i
   const r = listarOrquestracoes(projeto, b);
   assert.equal(r.invalidas, 1); assert.equal(r.orquestracoes.length, 50); assert.equal(r.orquestracoes[0].id, 'o503');
   assert.ok(r.orquestracoes.every((o) => o.espacoId === projeto));
+});
+
+test('andamento real: cria etapa em execução, registra especialistas e conclui em uma só entrada', async (t) => {
+  const b = base(t), projeto = '11111111-1111-4111-8111-111111111111';
+  const observados = [];
+  const responder = async (a) => {
+    const atual = listarOrquestracoes(projeto, b).orquestracoes[0];
+    assert.equal(atual?.estado, 'EXECUTANDO', 'andamento fica consultável antes do fim da análise');
+    assert.equal(atual.emExecucao, a.id, 'indica somente especialista realmente ativo');
+    return { linhas: ['Consulta local concluída'], fontes: [{ rotulo: 'Execuções', aba: 'execucoes' }], fatos: ['execucoes=0'], vazio: false };
+  };
+  const progresso = (registro) => {
+    observados.push({ id: registro.id, etapas: registro.etapas.length, atual: registro.emExecucao });
+    registrarOrquestracao(registro, b);
+  };
+  const r = await orquestrar([agente('regressao'), agente('investigacao-bugs')],
+    [], 'diagnóstico de qualidade do projeto', projeto, b, responder, () => new Date(), progresso);
+  registrarOrquestracao(r.registro, b);
+  const linhas = fs.readFileSync(arquivoDeOrquestracoes(b), 'utf8').trim().split('\n');
+  assert.equal(linhas.length, 1, 'atualiza o mesmo diagnóstico, não duplica execuções');
+  assert.deepEqual(observados.map(x => [x.etapas, x.atual]), [[0, 'regressao'], [1, 'investigacao-bugs'], [2, undefined]]);
+  assert.ok(observados.every(x => x.id === r.registro.id), 'ID estável durante todo o diagnóstico');
+  assert.equal(listarOrquestracoes(projeto, b).orquestracoes[0].estado, 'CONCLUIDA');
+  assert.doesNotMatch(linhas[0], /diagnóstico de qualidade do projeto|Consulta local concluída/, 'nenhuma pergunta ou resposta em texto persistida');
 });

@@ -10,7 +10,7 @@
   const outroLado = (r, tipos, id) => ([r.de, r.para].find((x) => !(tipos.includes(x.tipo) && String(x.id) === String(id))) || r.para);
   const vigente = (e, ref) => !ref.vinculoId || e.vinculos.some((v) => v.id === ref.vinculoId);
   const servicoDoTipo = { 'caso-local': 'prumo', 'ticket-local': 'prumo', jira: 'jira', 'jira-bug': 'jira', qase: 'qase', 'qase-run': 'qase', 'qase-defeito': 'qase', github: 'github', 'github-pr': 'github', 'github-commit': 'github', automacao: 'local', evidencia: 'local', execucao: 'local', run: 'prumo', contexto: 'prumo', pasta: 'local', projeto: 'prumo', servico: 'prumo' };
-  const escritaDesligada = (servico) => DS.notaPermissao(tr('Escrita no {s} desligada. Habilite em Conexões.', { s: DS.nomesServico[servico] }));
+  const escritaDesligada = (servico) => DS.notaPermissao(tr('Escrita no {s} desligada. Habilite em Projetos — Conexões.', { s: DS.nomesServico[servico] }));
   const atualizarEspaco = async (e) => { const r = await api.espacoObter(e.id); if (r.ok) { estado.espaco = r.data; return r.data; } return e; };
   const resultadoOp = (destino, r) => { if (r && destino?.isConnected) destino.append(painelResultado(r)); return r; };
   const tomStatusJira = (s) => ({ done: 'ok', indeterminate: 'info', new: null }[s?.statusCategory?.key] ?? null);

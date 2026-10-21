@@ -3,7 +3,7 @@ import { BrowserWindow, app, Notification, dialog } from "electron";
 import path from "node:path";
 import { textoNoIdioma } from "../bandeja/conteudoDaBandeja.js";
 import { estadoDoAplicativo } from "../estadoDoAplicativo.js";
-import { origemPermitida, rendererDir } from "../tipos/aplicativo.js";
+import { origemPermitida, rendererDir, versaoExibida } from "../tipos/aplicativo.js";
 import { raizDoAplicativo } from "../../compartilhado/raizDoAplicativo.js";
 import { idiomaAtual } from "../../configuracoes/servico.js";
 import { empilharAviso } from "../estadoDoAplicativo.js";
@@ -11,12 +11,15 @@ import { empilharAviso } from "../estadoDoAplicativo.js";
 // --- controleDaJanela ---
 // ── criarJanela ──
 export function criarJanela(): BrowserWindow {
+  const homologacao = process.env.PRUMO_AMBIENTE === 'homologacao';
   const janela = new BrowserWindow({
-    width: 1080, height: 720, minWidth: 820, minHeight: 560, show: false, backgroundColor: '#0b1020', title: 'Prumo QA',
+    width: 1080, height: 720, minWidth: 820, minHeight: 560, show: false, backgroundColor: '#0b1020', title: homologacao ? 'Prumo QA — Homologação v' + versaoExibida.replace(/-homologacao$/, '') : 'Prumo QA',
     icon: path.join(raizDoAplicativo, 'assets', 'prumo-icon.png'),
     webPreferences: { preload: path.join(raizDoAplicativo, 'backend', 'aplicativo', 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, spellcheck: false, devTools: !app.isPackaged }
   });
   janela.once('ready-to-show', () => janela.show());
+  // O <title> da página sobrescreveria o aviso de homologação na barra da janela.
+  if (homologacao) janela.on('page-title-updated', e => e.preventDefault());
   janela.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   // A única navegação permitida é recarregar a própria página (ao entrar ou sair da conta, para não sobrar dado da sessão anterior).
   janela.webContents.on('will-navigate', (e, url) => { if (url !== origemPermitida) e.preventDefault(); });

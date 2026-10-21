@@ -40,7 +40,7 @@ export async function publicarComentarioNoTicket(a: PartesDoAdaptador, r: Recurs
   if (!/^[A-Z][A-Z0-9_]*-\d+$/.test(ticket)) throw new ErroServico('SERVICE_RESPONSE_INVALID');
   await consultarNoServico(a, r, 'ticket', {}, ticket);
   let resposta: unknown;
-  try { resposta = await a.escrita({ servico: 'jira', instancia: a.c.instancia, caminho: '/rest/api/3/issue/' + codificarParaUrl(ticket) + '/comment', headers: cabecalhosDoServico(a.c), corpo: JSON.stringify({ body: adf }) }); }
+  try { resposta = await a.escrita({ servico: 'jira', instancia: a.c.instancia, ...(a.c.nuvem ? { nuvem: a.c.nuvem } : {}), caminho: '/rest/api/3/issue/' + codificarParaUrl(ticket) + '/comment', headers: cabecalhosDoServico(a.c), corpo: JSON.stringify({ body: adf }) }); }
   catch (e) { if (e instanceof ErroServico) throw e; throw new ErroServico('SERVICE_UNAVAILABLE'); }
   try { return { id: z.string().regex(/^\d{1,20}$/).parse(obj.parse(resposta).id) }; } catch { throw new ErroServico('SERVICE_RESPONSE_INVALID'); }
 }
@@ -50,6 +50,7 @@ export async function publicarComentarioNoTicket(a: PartesDoAdaptador, r: Recurs
 export class AdaptadorServico {
   constructor(readonly c: ConfigServico, readonly transporte: TransporteServico = lerDoServico, readonly escrita: TransporteEscrita = enviarAoServico) {
     if (instanciaServico(c.servico, c.instancia) !== c.instancia) throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
+    if (c.nuvem && c.servico !== 'jira') throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
   }
   /** Contexto mínimo dos módulos de escrita (Jira, Qase, GitHub): a credencial nunca sai daqui. */
   contexto(): ContextoServico { return contextoDoAdaptador(this); }

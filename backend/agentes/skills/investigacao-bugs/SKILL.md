@@ -14,3 +14,5 @@ Se houver um defeito confirmado, use `propor_bug` com resumo objetivo, descriç�
 Entregue: passos de reprodução, esperado, observado, evidência, hipóteses separadas de fatos e o que ficou sem verificar.
 
 Para o método completo (reproduzir antes de classificar, hipótese que pode ser derrubada, prevenção), consulte [práticas abertas](references/praticas-abertas.md).
+
+Gatilhos: aplique após FAIL, BLOCKED ou relato de comportamento inesperado. Não proponha correção antes da causa estar sustentada por evidência.

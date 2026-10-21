@@ -1,6 +1,6 @@
 /** Conversação e rastreamento do agente — arquivos relacionados agrupados para manutenção. */
 import { salvarPerfil, lerPerfil } from "../banco/perfil.js";
-import { palavrasDaPergunta, escolherAgente, planejarOrquestracao, termoCasaComPergunta } from "./roteamento.js";
+import { palavrasDaPergunta, escolherAgente, planejarOrquestracao, planejarDiagnosticoQa, termoCasaComPergunta } from "./roteamento.js";
 import { proximosPassosSugeridos } from "./roteamento.js";
 import { normalizarNome, raizDaPalavra, termosDaFrase } from "../regras/normalizacaoDoConhecimento.js";
 import { Meta, Turno, PAPEIS, Coleta, ContextoChat, Estilo, Opcoes, Resposta, agentePorTipo } from "../tipos/chat.js";
@@ -15,7 +15,8 @@ import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { nomeParaChamar, aplicarEstilo } from "../servicoEstiloDoChat.js";
 import { pesosAprendidos } from "../banco/atendimentos.js";
 import { registrarOrquestracao } from "../banco/orquestracao.js";
-import { consultarIaExterna } from "./consultarIaExterna.js";
+import { consultarIaExterna, nomesDosProvedores } from "./consultarIaExterna.js";
+import { conduzirMesaDeIas } from "./mesaDeIas.js";
 import { tentarOuPadrao } from "./responderComDadosLocais.js";
 import { regrasDosAgentes } from "../../administracao/servico.js";
 import { conhecimentosRelevantes, listarConhecimentos, registrarConhecimento } from "../banco/conhecimento.js";
@@ -55,15 +56,26 @@ type Responder = typeof responderComDadosLocais;
  * Cada etapa roda mesmo que a anterior falhe: a falha fica registrada (FALHOU, com o motivo mascarado) e entra na resposta.
  * O registro guarda só metadados; a pergunta e as respostas não são gravadas.
  */
-export async function orquestrar(agentes: AgenteChat[], motivo: { agente: string; pontos: number }[], pergunta: string, espacoId: string | null, base?: string, responder: Responder = responderComDadosLocais, agora: () => Date = () => new Date()): Promise<{ coleta: Coleta; registro: Orquestracao }> {
+export async function orquestrar(agentes: AgenteChat[], motivo: { agente: string; pontos: number }[], pergunta: string, espacoId: string | null, base?: string, responder: Responder = responderComDadosLocais, agora: () => Date = () => new Date(), progresso?: (registro: Orquestracao) => void): Promise<{ coleta: Coleta; registro: Orquestracao }> {
   const inicio = agora(); const etapas: EtapaDaOrquestracao[] = []; const partes: string[] = []; const fontes: Fonte[] = []; const fatos: string[] = [];
+  const diagnosticoCompleto = !!planejarDiagnosticoQa(pergunta, espacoId);
+  const id = randomUUID();
+  const registrarProgresso = (emExecucao: string | undefined) => {
+    if (!progresso) return;
+    const registro: Orquestracao = { id, em: inicio.toISOString(), espacoId, responsavel: 'orquestrador', modo: 'LOCAL',
+      motivo: motivo.slice(0, 6), agentes: agentes.map(a => a.id), dependencias: 'INDEPENDENTES',
+      etapas: etapas.map(et => ({ ...et })), estado: 'EXECUTANDO', duracaoMs: Math.max(0, agora().getTime() - inicio.getTime()),
+      ...(emExecucao ? { emExecucao } : {}) };
+    try { progresso(registro); } catch { /* O registro observável não pode impedir as consultas. */ }
+  };
+  registrarProgresso(agentes[0]?.id);
   for (const [i, agente] of agentes.entries()) {
     const t0 = agora();
     try {
       const r = await responder(agente, pergunta, espacoId, base);
       const fim = agora(); const vazio = !!r.vazio;
       etapas.push({ ordem: i + 1, agente: agente.id, inicio: t0.toISOString(), fim: fim.toISOString(), duracaoMs: fim.getTime() - t0.getTime(), estado: vazio ? 'SEM_DADOS' : 'CONCLUIDA', fontes: r.fontes.map((f) => f.rotulo).slice(0, 10), fatos: r.fatos.slice(0, 20), linhas: r.linhas.length });
-      partes.push(`${agente.nome}: ${vazio ? 'não encontrou dados sobre isso neste projeto.' : r.linhas.slice(0, 2).join(' ')}`);
+      partes.push(`${agente.nome}: ${vazio ? 'não encontrou dados sobre isso neste projeto.' : r.linhas.slice(0, diagnosticoCompleto ? 5 : 2).join(' ')}`);
       for (const f of r.fontes) if (!fontes.some((x) => x.aba === f.aba)) fontes.push(f);
       fatos.push(...r.fatos.map((f) => `${agente.id}:${f}`));
     } catch (e) {
@@ -71,14 +83,67 @@ export async function orquestrar(agentes: AgenteChat[], motivo: { agente: string
       etapas.push({ ordem: i + 1, agente: agente.id, inicio: t0.toISOString(), fim: fim.toISOString(), duracaoMs: fim.getTime() - t0.getTime(), estado: 'FALHOU', fontes: [], fatos: [], linhas: 0, erro });
       partes.push(`${agente.nome}: não consegui consultar agora (${erro}).`);
     }
+    registrarProgresso(agentes[i + 1]?.id);
   }
   const concluidas = etapas.filter((e) => e.estado === 'CONCLUIDA').length; const fim = agora();
   const registro: Orquestracao = {
-    id: randomUUID(), em: inicio.toISOString(), espacoId, responsavel: 'orquestrador', modo: 'LOCAL', motivo: motivo.slice(0, 6), agentes: agentes.map((a) => a.id),
+    id, em: inicio.toISOString(), espacoId, responsavel: 'orquestrador', modo: 'LOCAL', motivo: motivo.slice(0, 6), agentes: agentes.map((a) => a.id),
     dependencias: 'INDEPENDENTES', etapas, estado: concluidas === etapas.length ? 'CONCLUIDA' : concluidas ? 'PARCIAL' : 'FALHOU', duracaoMs: fim.getTime() - inicio.getTime()
   };
   const coleta: Coleta = { linhas: [`Consultei ${agentes.length} especialistas, um de cada vez:`, ...partes], fontes, fatos, generico: false, vazio: concluidas === 0 };
   return { coleta, registro };
+}
+
+/** Conclusão priorizada a partir dos números que os especialistas realmente consultaram.
+ * Sem dado, não chama o projeto de saudável nem alega uma execução não realizada.
+ */
+export function sinteseDiagnosticoQa(coleta: Coleta): string[] {
+  const contar = (agente: string, chave: string): number | null => {
+    const valor = coleta.fatos.find(f => f.startsWith(agente + ':' + chave + '='))?.split('=').at(-1);
+    if (valor === undefined) return null;
+    const numero = Number(valor);
+    return Number.isFinite(numero) && numero >= 0 ? numero : null;
+  };
+  const execucoes = contar('regressao', 'execucoes');
+  const falhas = contar('regressao', 'fail');
+  const recentes = contar('investigacao-bugs', 'falhas');
+  const contextos = contar('requisitos', 'contextosAprovados');
+  const testes = contar('requisitos', 'testesCatalogados');
+  const semAutomacao = contar('requisitos', 'casosSemAutomacaoAssociada');
+  const vinculos = contar('requisitos', 'vinculosAusentes');
+  const linhas = ['Diagnóstico de QA com evidências locais (não executei novos testes):'];
+  if (falhas !== null && falhas > 0) linhas.push(`Prioridade alta: ${falhas} execução(ões) com FAIL. Confira os resultados em Execuções e reproduza antes de atribuir a causa.`);
+  else if (execucoes === 0) linhas.push('Sem execuções registradas para este projeto: ainda não há evidência suficiente para avaliar a qualidade.');
+  else if (execucoes !== null && falhas === 0) linhas.push(`${execucoes} execução(ões) registrada(s), sem FAIL nesses registros. Isso não comprova ausência de defeitos.`);
+  if (recentes !== null && recentes > 0 && falhas === null) linhas.push(`Investigue as ${recentes} falha(s) recentes no Histórico ou em Execuções; as causas apontadas são hipóteses.`);
+  if (contextos === 0) linhas.push('Rastreabilidade: nenhum contexto aprovado encontrado. Confira critérios de aceite e vínculo entre requisitos e testes.');
+  if (contextos !== null && contextos > 0) linhas.push(`${contextos} contexto(s) aprovado(s) encontrado(s). Confira sua cobertura pelos testes antes de concluir que estão atendidos.`);
+  if (testes === 0 && contextos !== null && contextos > 0) linhas.push('Prioridade de cobertura: há requisitos aprovados, mas nenhum teste foi reconhecido no código. Proponha casos e revise o inventário antes de concluir que não existem testes.');
+  else if (testes !== null && testes > 0) linhas.push(`${testes} teste(s) localizado(s) por leitura estática. Compare cada requisito com seus casos e evidências; a quantidade não mede cobertura.`);
+  if (semAutomacao !== null && semAutomacao > 0) linhas.push(`${semAutomacao} caso(s) sem automação associada; confirme se são casos manuais antes de propor automatização.`);
+  if (vinculos !== null && vinculos > 0) linhas.push(`${vinculos} relação(ões) entre tickets e casos ainda sem cadastro no mapa de vínculos. Isso é lacuna de rastreabilidade, não defeito comprovado.`);
+  if (linhas.length === 1) linhas.push('Diagnóstico inconclusivo: não foi possível obter indicadores suficientes. Confira o projeto e as consultas dos especialistas abaixo.');
+  return linhas;
+}
+
+// ── responderSomenteLeitura ──
+/**
+ * Caminho do Orquestrador para o MCP: mesmo roteamento do chat (escolherAgente, planejarOrquestracao, orquestrar,
+ * responderComDadosLocais), sem IA externa e sem gravar nada (nem conversa, perfil, aprendizado, atendimento ou orquestração).
+ * O projeto é obrigatório: sem ele as consultas locais não teriam escopo.
+ */
+export async function responderSomenteLeitura(pergunta: string, espacoId: string, agenteId?: string | null, base?: string) {
+  const plataforma = regrasDosAgentes(base);
+  if (agenteId && !agentesChat.some((a) => a.id === agenteId)) throw new Error('AGENT_UNKNOWN: agente desconhecido: ' + agenteId + '.');
+  if (agenteId && plataforma.desligados.includes(agenteId)) throw new Error('AGENT_DISABLED: a Administração desligou este agente.');
+  const r = escolherAgente(pergunta, agenteId, { desligados: plataforma.desligados });
+  const diagnostico = !agenteId && plataforma.orquestracao ? planejarDiagnosticoQa(pergunta, espacoId, plataforma.desligados) : null;
+  const plano = !agenteId && plataforma.orquestracao ? diagnostico ?? planejarOrquestracao(r.rota) : null;
+  const orquestrador = agentesChat.find((a) => a.id === 'orquestrador')!;
+  const agente = plano ? orquestrador : r.agente;
+  const coleta = plano ? (await orquestrar(plano.map((id) => agentesChat.find((a) => a.id === id)!), r.rota, pergunta, espacoId, base)).coleta : await responderComDadosLocais(agente, pergunta, espacoId, base);
+  if (diagnostico) coleta.linhas.unshift(...sinteseDiagnosticoQa(coleta));
+  return { linhas: coleta.linhas.slice(0, 20).map((l) => mascarar(l).slice(0, 2000)), fontes: coleta.fontes, agente: { id: agente.id, nome: agente.nome }, consultados: plano ?? [agente.id] };
 }
 
 // ── conversar ──
@@ -97,7 +162,7 @@ function intencaoDeAprender(pergunta: string, espacoId: string | null, forcado: 
 
 function montarResposta(agente: AgenteChat, c: Coleta, modo: Resposta['modo'], estilo: Estilo, pessoa: string | null, extra: Partial<Resposta> & { rota?: Resposta['rota'] } = {}): Resposta {
   return ({ agente: { id: agente.id, nome: agente.nome, especializacao: agente.especializacao },
-    linhas: c.linhas.map((l) => mascarar(l)), fontes: c.fontes, modo, estilo, rota: extra.rota ?? [], fatos: c.fatos, proximos: extra.proximos ?? [], acoes: extra.acoes ?? [], pendente: extra.pendente ?? null, pessoa: extra.pessoa !== undefined ? extra.pessoa : pessoa, continuou: extra.continuou ?? false, ...(extra.aviso ? { aviso: extra.aviso } : {}), ...(extra.orquestracao ? { orquestracao: extra.orquestracao } : {}) });
+    linhas: c.linhas.map((l) => mascarar(l)), fontes: c.fontes, modo, estilo, rota: extra.rota ?? [], fatos: c.fatos, proximos: extra.proximos ?? [], acoes: extra.acoes ?? [], pendente: extra.pendente ?? null, pessoa: extra.pessoa !== undefined ? extra.pessoa : pessoa, continuou: extra.continuou ?? false, ...(extra.aviso ? { aviso: extra.aviso } : {}), ...(extra.orquestracao ? { orquestracao: extra.orquestracao } : {}), ...(extra.mesa ? { mesa: extra.mesa } : {}) });
 }
 
 /** Explica um teste aberto na visão de código: só o que a leitura do arquivo mostra (inferência declarada). */
@@ -157,23 +222,27 @@ export async function conversar(o: Opcoes): Promise<Resposta> {
   const teste = o.contexto?.tipo === 'teste' ? responderSobreTeste(o.contexto, o.espacoId, o.base) : null;
   const r = teste ? { agente: teste.agente!, rota: [], continuou: false } : escolherAgente(pergunta, o.agente, { historico, aprendidos, desligados: plataforma.desligados });
   // 3) Orquestração: sem agente escolhido pela pessoa e com dois ou mais especialistas fortes, cada um responde uma etapa.
-  const plano = !teste && !o.agente && !r.continuou && plataforma.orquestracao ? planejarOrquestracao(r.rota) : null;
+  const diagnostico = !teste && !o.agente && !r.continuou && plataforma.orquestracao ? planejarDiagnosticoQa(pergunta, o.espacoId, plataforma.desligados) : null;
+  const plano = !teste && !o.agente && !r.continuou && plataforma.orquestracao ? diagnostico ?? planejarOrquestracao(r.rota) : null;
   let orquestracao: Orquestracao | undefined; let avisoOrquestracao: string | undefined;
   let agente = r.agente; let local: Coleta;
   if (plano) {
-    const feito = await orquestrar(plano.map((id) => agentesChat.find((a) => a.id === id)!), r.rota, pergunta, o.espacoId, o.base);
+    const feito = await orquestrar(plano.map((id) => agentesChat.find((a) => a.id === id)!), r.rota, pergunta, o.espacoId, o.base,
+      responderComDadosLocais, () => new Date(), parcial => registrarOrquestracao(parcial, o.base));
     agente = agentesChat.find((a) => a.id === 'orquestrador')!; local = feito.coleta; orquestracao = feito.registro;
+    if (diagnostico) local.linhas.unshift(...sinteseDiagnosticoQa(local));
     try { registrarOrquestracao(orquestracao, o.base); } catch { avisoOrquestracao = 'Não foi possível registrar a orquestração no Painel de atividades; a resposta foi preservada.'; }
   } else local = teste ?? await responderComDadosLocais(agente, pergunta, o.espacoId, o.base);
   juntarConhecimentos(o, agente, pergunta, historico, r.continuou, local);
   const proximos = proximosPassosSugeridos(agente.id, local.fatos, perfil?.papel ?? null, pergunta);
   const externaDesligada = (o.provedor ?? 'local') !== 'local' && !plataforma.iaExterna;
-  const aviso = [avisoOrquestracao, externaDesligada ? 'A Administração desligou o uso de Claude Code e Codex nesta instalação; a resposta usou só os dados deste computador.' : null].filter(Boolean).join(' ');
+  const aviso = [avisoOrquestracao, externaDesligada ? `A Administração desligou o uso de ${Object.values(nomesDosProvedores).join(', ')} nesta instalação; a resposta usou só os dados deste computador.` : null].filter(Boolean).join(' ');
   const comum = { rota: r.rota, continuou: r.continuou, proximos, ...(orquestracao ? { orquestracao } : {}), ...(aviso ? { aviso } : {}) };
   const provedor = externaDesligada ? 'local' : o.provedor ?? 'local'; const chave = pergunta + '|' + historico.length;
   const vestido = () => aplicarEstilo(local.linhas, estilo, nome, agente, !!o.primeira, local.fatos, pessoa, chave);
   if (provedor === 'local') return montar(agente, { ...local, linhas: vestido() }, 'LOCAL', comum);
 
+  if (provedor === 'mesa') return conduzirMesaDeIas({ o, agente, pergunta, local, estilo, nome, perfil, historico, comum, montar, vestido });
   return consultarIaExterna({ o, agente, pergunta, local, estilo, nome, perfil, historico, comum, provedor, montar, vestido });
 }
 
@@ -195,13 +264,14 @@ export function rastrearPergunta(pergunta: string, espacoId: string | null, foco
   const texto = pergunta.trim(); const palavras = palavrasDaPergunta(texto); const frase = palavras.join(' '); const p = semAcentos(texto);
   const aprendidos = tentarOuPadrao(() => pesosAprendidos(texto, base), {} as Record<string, number>);
   const r = escolherAgente(texto, null, { aprendidos });
+  const ordem = (id: string) => { const i = r.rota.findIndex((x) => x.agente === id); return i < 0 ? Infinity : i; };
   const rota = agentesChat.map((a) => {
     const casou = a.palavras.map((k) => { const forte = k.startsWith('!'), w = forte ? k.slice(1) : k; return termoCasaComPergunta(w, palavras, frase) ? { termo: w.replace('~', ''), pontos: forte ? 3 : w.replace('~', '').length > 5 ? 2 : 1 } : null; })
       .filter((x): x is { termo: string; pontos: number } => !!x);
     const mencao = p.includes('@' + a.id) || p.includes('agente ' + semAcentos(a.nome)) || (a.nome.includes(' ') && p.includes(semAcentos(a.nome)));
     const extra = Math.min(6, aprendidos[a.id] ?? 0);
     return { agente: a.id, nome: a.nome, pontos: casou.reduce((n, c) => n + c.pontos, 0) + (mencao ? 10 : 0) + extra, casou, mencao, aprendidos: extra };
-  }).filter((x) => x.pontos > 0).sort((a, b) => b.pontos - a.pontos);
+  }).filter((x) => x.pontos > 0).sort((a, b) => b.pontos - a.pontos || ordem(a.agente) - ordem(b.agente));
   const agenteFoco = foco ? agentesChat.find((a) => a.id === foco) : undefined;
   let focoRastro: Rastro['foco'] = null;
   if (agenteFoco) {
@@ -212,5 +282,6 @@ export function rastrearPergunta(pergunta: string, espacoId: string | null, foco
     catch { const e = escolherTrechosDaSkill(sementeDasSkills().filter((t) => t.especializacao === esp), texto); skill = { usados: e.usados, omitidos: e.omitidos, origem: 'ARQUIVOS' }; }
     focoRastro = { agente: agenteFoco.id, responderia: r.agente.id === agenteFoco.id, conhecimentos, skill };
   }
-  return { pergunta: texto, palavras, termos: termosDaFrase(texto).map(raizDaPalavra), escolhido: { id: r.agente.id, nome: r.agente.nome, porPadrao: !r.rota.length }, rota, orquestracao: planejarOrquestracao(r.rota), foco: focoRastro };
+  const plano = planejarDiagnosticoQa(texto, espacoId, regrasDosAgentes(base).desligados) ?? planejarOrquestracao(r.rota);
+  return { pergunta: texto, palavras, termos: termosDaFrase(texto).map(raizDaPalavra), escolhido: { id: r.agente.id, nome: r.agente.nome, porPadrao: !r.rota.length }, rota, orquestracao: plano, foco: focoRastro };
 }

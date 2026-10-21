@@ -72,7 +72,7 @@ test('módulos do login são carregados na ordem correta', () => {
 });
 
 test('entrada mantém rolagem e compacta somente o visual em janelas estreitas e baixas', () => {
-  const css = fs.readFileSync('frontend/login/entrada.css', 'utf8');
+  const css = fs.readFileSync('frontend/design-system/estilos-das-telas.parte.css', 'utf8');
   assert.match(css, /\.entrada\s*\{[^{}]*overflow:\s*auto/);
   assert.match(css, /@media\s*\(max-width:\s*860px\)\s*and\s*\(max-height:\s*700px\)\s*\{/);
   assert.match(css, /\.entrada-orbita\s*\{\s*display:\s*none/);
@@ -106,7 +106,7 @@ test('início escolhe a primeira tela autorizada sem disparar navegação duplic
           data: { loginAtivo: true, usuario: { nome: 'Exemplo', login: 'qa', papelNome: 'QA' }, telas: permissoes }
         })
       },
-      DS: { iniciais: () => 'EX' },
+      DS: { iniciais: () => 'EX', avatar: () => ({ tag: 'span' }) },
       h,
       tr: (s) => s,
       localStorage: { getItem: () => null },
@@ -128,4 +128,51 @@ test('início escolhe a primeira tela autorizada sem disparar navegação duplic
   assert.equal(await primeiraAutorizada({ inicio: 'NENHUM', testes: 'VER', ajuda: 'VER' }), 'testes');
   assert.equal(await primeiraAutorizada({ inicio: 'USAR', testes: 'VER', ajuda: 'VER' }), 'inicio');
   assert.equal(await primeiraAutorizada({ inicio: 'NENHUM', testes: 'NENHUM', ajuda: 'VER' }), 'ajuda');
+});
+test('cadastro remoto aguarda verificacao por link, permite reenvio e nao libera sessao antes da confirmacao', async () => {
+  const chamadas=[];
+  const t=montar({
+    contaCadastrar:async (...a)=>{chamadas.push(['cadastro',...a]);return {ok:true,data:{estado:'VERIFICACAO_PENDENTE'}};},
+    contaCodigo:async (...a)=>{chamadas.push(['reenviar',...a]);return {ok:true,data:{enviado:true}};}
+  });
+  t.login.vistaCadastrarRemoto();
+  const cadastro=t.form();
+  for (const [i,v] of ['Pessoa Teste','pessoa@example.com','senha1234567','senha1234567'].entries()) cadastro.campos[i].input.value=v;
+  await cadastro.enviar(cadastro);
+  assert.equal(t.form().titulo,'Reenviar e-mail de confirmação');
+  assert.equal(cadastro.campos[2].input.value,'');
+  assert.equal(cadastro.campos[3].input.value,'');
+  assert.deepEqual(chamadas[0],['cadastro','pessoa@example.com','Pessoa Teste','senha1234567']);
+  assert.equal(t.sessoes.length,0);
+  const confirmacao=t.form();
+  await confirmacao.enviar(confirmacao);
+  assert.deepEqual(chamadas[1],['reenviar','pessoa@example.com','CADASTRO']);
+  assert.equal(t.sessoes.length,0);
+  t.form().links.find(x=>x.id==='entrada-confirmada').onClick();
+  assert.equal(t.form().titulo,'Entrar');
+});
+test('cadastro remoto explica falha de configuracao sem expor detalhes do servidor',()=>{
+  const mensagens=carregar('frontend/login/mensagensDeEntrada.js').PrumoMensagensEntrada;
+  assert.match(mensagens.mensagemDaEntrada('EMAIL_SERVICE_NOT_CONFIGURED: chave secreta interna'),/não está configurado/);
+  assert.doesNotMatch(mensagens.mensagemDaEntrada('EMAIL_SERVICE_NOT_CONFIGURED: chave secreta interna'),/chave secreta/);
+  assert.match(mensagens.mensagemDaEntrada('SIGNUP_INVALID'),/cadastro/);
+});
+
+test('Minha conta separa perfil e segurança usando o modal acessível do Design System', () => {
+  const js = fs.readFileSync('frontend/login/entrarNaConta.js', 'utf8');
+  const ds = fs.readFileSync('frontend/design-system/ds.js', 'utf8');
+  const css = fs.readFileSync('frontend/design-system/ds.css', 'utf8');
+  assert.match(js, /DS\.modal\('Minha conta'/);
+  assert.match(js, /\.\.\.DS\.abasModal\(/);
+  assert.match(js, /\['perfil', 'Perfil', null, perfil\]/);
+  assert.match(js, /\['seguranca', 'Segurança', null, seguranca\]/);
+  for (const id of ['minha-trocar-foto', 'minha-salvar-nome', 'minha-trocar-senha', 'minha-recuperar-senha']) {
+    assert.ok(js.includes(id), 'ação perdida: ' + id);
+  }
+  assert.match(ds, /role: 'tabpanel'/);
+  assert.match(ds, /setAttribute\('aria-controls', prefixo/);
+  assert.match(css, /\.ds-conta-cabecalho\s*\{/);
+  assert.match(css, /\.ds-conta-senhas\s*\{/);
+  assert.match(css, /\.ds-modal:has\(\.ds-conta-cabecalho\) dl\.ds-meta\.linha\s*\{\s*grid-template-columns:/);
+  assert.match(css, /\.ds-modal:has\(\.ds-conta-cabecalho\) \.ds-secao-cab \.ds-info-texto\s*\{[^}]*right:\s*0;/);
 });

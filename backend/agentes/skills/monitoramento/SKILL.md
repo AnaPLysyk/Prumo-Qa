@@ -14,3 +14,13 @@ Uma alteração detectada em ticket, caso ou commit é um sinal para a pessoa de
 Entregue: o que mudou, desde quando, fonte, o que o Prumo executou (se algo), o que falhou e por quê, e o que ainda não foi observado.
 
 Para interpretar tendência de duração e de instabilidade da suíte, use a seção "Saúde da suíte" das [práticas de regressão](../regressao/references/praticas-abertas.md).
+
+## Como ler cada sinal
+
+- Horário PERDIDO: nada rodou; não conclua "sem alterações".
+- Consulta INFO sem diferença: vale só para a fonte e o intervalo consultados.
+- Falha de rede ou serviço: infraestrutura; não é defeito do produto nem alteração.
+- BLOCKED: faltou aprovação, ambiente ou política; diga qual.
+- Alteração detectada: recomende o que a pessoa poderia rodar e por quê, sem disparar nada.
+
+Gatilho: aplique quando a pergunta for sobre o que o worker fez, o que mudou ou o que ficou sem rodar.

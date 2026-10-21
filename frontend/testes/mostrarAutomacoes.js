@@ -23,3 +23,10 @@ async function montarAutomacoes(el) {
     botao('Gravar arquivo no branch…', async () => { saida.replaceChildren(painelResultado(await executarOperacao(e, 'github.commitar_arquivo', { branch: branch.input.value, caminho: caminho.input.value, conteudo: conteudo.input.value, mensagem: msg.input.value })) || ''); }, 'gh-commit'), pr.no,
     botao('Abrir Pull Request (rascunho)…', async () => { saida.replaceChildren(painelResultado(await executarOperacao(e, 'github.abrir_pr', { branch: branch.input.value, titulo: pr.input.value, corpo: 'Proposto pelo Prumo QA para revisão.' })) || ''); }, 'gh-pr-abrir'), saida));
 }
+
+
+/** Componentes compartilhados das subabas de Testes: rótulos de tipo, barra de seções e cabeçalho sem título. */
+// ---------------- Testes: IDE, Repositório, Runs e Planos ----------------
+const nomesTipo = { unitario: 'Unitário', integracao: 'Integração', funcional: 'Funcional', regressao: 'Regressão', smoke: 'Smoke', desempenho: 'Desempenho', acessibilidade: 'Acessibilidade', indefinido: 'Indefinido' };
+const barraSub = (pai, itens, atual) => h('div', { class: 'segmentos sub', role: 'group', 'aria-label': 'Seção' }, itens.map(([k, t]) => h('button', { type: 'button', 'data-sub': k, 'aria-pressed': String(k === atual), onclick: () => { (estado.sub ||= {})[pai] = k; mostrar(pai); } }, t)));
+const semTitulo = (no) => { no.querySelector('h1')?.remove(); return no; };

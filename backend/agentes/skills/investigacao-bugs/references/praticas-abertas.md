@@ -38,3 +38,19 @@ No Prumo, cada nova rodada só acontece por uma capability declarada e autorizad
 - Omitir as alternativas descartadas.
 
 O bug, quando confirmado, vira rascunho com `propor_bug`. Abrir no Jira continua sendo decisão da pessoa.
+
+## Causa antes da correção
+
+Ideias adicionais adaptadas de `systematic-debugging` e `verification-before-completion` (obra/superpowers, MIT; ver `backend/agentes/skills/TERCEIROS.md`), reescritas para o Prumo.
+
+- Leia a mensagem de erro inteira, com caminho, linha e código, antes de formular qualquer hipótese.
+- Verifique o que mudou: commits, dependências, configuração e ambiente entre a rodada que passou e a que falhou.
+- Em fluxo com várias camadas (interface, API, serviço, banco), localize em qual fronteira o dado deixa de estar correto; só então investigue aquela camada.
+- Procure um caso parecido que funciona e liste todas as diferenças, sem descartar nenhuma por parecer irrelevante.
+- Uma hipótese por vez, escrita como "acredito que X causa Y porque Z". Mude uma variável por vez; se não confirmar, formule outra em vez de empilhar mudanças.
+- Se três hipóteses seguidas forem derrubadas, pare e questione a premissa (arquitetura, requisito ou ambiente) e peça decisão humana.
+- Diga "não sei a causa" quando for o caso. Não finja certeza.
+
+## Afirmar só com evidência nova
+
+"Corrigido" exige que o sintoma original tenha sido reexecutado e a evidência lida; "deve funcionar" não é resultado. Teste de regressão do defeito só vale depois de mostrar que falha sem a correção e passa com ela, quando a pessoa autorizar essas execuções. Sem isso, a conclusão é NOT_RUN.

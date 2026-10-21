@@ -216,7 +216,7 @@ window.PrumoConta = (() => {
       }, [link('Sair', async () => { await api.contaSair(); location.reload(); }, 'entrada-sair')]));
   }
 
-  // MVP: acesso por e-mail. Autorizações de repositórios ficam exclusivamente em Conexões.
+  // MVP: acesso por e-mail. Autorizações de repositórios ficam exclusivamente em Projetos.
 
   /** Esconde do menu o que o papel não permite (e o grupo que ficar vazio) e mostra quem está na sessão. */
   function aplicarMenu() {
@@ -227,50 +227,122 @@ window.PrumoConta = (() => {
     document.querySelector('#conta-caixa')?.remove();
     if (!sessao?.usuario) return;
     const u = sessao.usuario; const menu = h('div', { id: 'conta-menu', class: 'controles popover conta-menu', hidden: true, role: 'menu' });
-    const botao = h('button', { id: 'conta-botao', class: 'conta-botao', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'conta-menu', title: tr('Minha conta') },
-      h('span', { class: 'conta-iniciais', 'aria-hidden': 'true', 'data-i18n-ignore': '' }, DS.iniciais(u.nome)), h('span', { class: 'conta-nome', 'data-i18n-ignore': '' }, u.nome));
+    const botao = h('button', { id: 'conta-botao', class: 'conta-botao', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'conta-menu', 'aria-label': tr('Minha conta') + ': ' + u.nome },
+      DS.avatar(u));
     const fechar = () => { menu.hidden = true; botao.setAttribute('aria-expanded', 'false'); };
     botao.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; botao.setAttribute('aria-expanded', String(!menu.hidden)); });
     document.addEventListener('click', (e) => { if (!menu.hidden && !menu.contains(e.target)) fechar(); });
-    menu.append(h('div', { class: 'conta-quem' }, h('strong', { 'data-i18n-ignore': '' }, u.nome), h('span', { class: 'suave', 'data-i18n-ignore': '' }, u.login + ' · ' + u.papelNome)),
+    menu.append(h('div', { class: 'conta-quem' }, h('button', { type: 'button', class: 'conta-foto-botao', id: 'conta-foto', 'aria-label': tr('Trocar foto'), title: tr('Trocar foto'), onclick: () => { fechar(); DS.trocarFoto(u); } }, DS.avatar(u, { classe: 'ds-avatar-grande' }), h('span', { class: 'conta-foto-lapis', 'aria-hidden': 'true' }, '✎')), h('strong', { 'data-i18n-ignore': '' }, u.nome), h('span', { class: 'suave', 'data-i18n-ignore': '' }, sessao.identidadeRemota ? u.papelNome : u.login + ' · ' + u.papelNome)),
       h('button', { type: 'button', class: 'acao', id: 'conta-minha', role: 'menuitem', onclick: () => { fechar(); minhaConta(); } }, tr('Minha conta')),
       h('button', { type: 'button', class: 'acao', id: 'conta-sair', role: 'menuitem', onclick: sair }, tr('Sair e trocar usuário')));
-    document.querySelector('.topo-direita').prepend(h('div', { id: 'conta-caixa', class: 'ajustes-caixa' }, botao, menu));
+    document.querySelector('.topo-direita').prepend(h('div', { id: 'conta-caixa', class: 'ajustes-caixa', 'data-dica': u.nome + '\n' + tr('Menu da conta e trocar foto') }, botao, menu));
   }
 
-  /** Minha conta: trocar o nome de exibição e a senha. A senha atual é sempre pedida. */
+  /** Minha conta: perfil e segurança em abas, com a mesma identidade visual das outras telas. */
   function minhaConta() {
     const u = sessao.usuario;
-    const nome = h('input', { id: 'minha-nome', type: 'text', value: u.nome, maxlength: 80, autocomplete: 'name' });
-    const atual = h('input', { id: 'minha-atual', type: 'password', autocomplete: 'current-password', maxlength: 200 });
-    const nova = h('input', { id: 'minha-nova', type: 'password', autocomplete: 'new-password', maxlength: 200 });
-    const confirma = h('input', { id: 'minha-confirma', type: 'password', autocomplete: 'new-password', maxlength: 200 });
-    DS.modal('Minha conta', [
-      DS.meta([['E-mail', h('span', { 'data-i18n-ignore': '' }, u.email || '—')], ['Login', h('span', { 'data-i18n-ignore': '' }, u.login)], ['Papel', h('span', { 'data-i18n-ignore': '' }, u.papelNome)], ['Último acesso', u.ultimoAcesso ? new Date(u.ultimoAcesso).toLocaleString() : '—']]),
-      DS.secao('Nome de exibição', [DS.campo('Nome', nome), h('div', { class: 'ds-cab-acoes ds-mt' }, DS.acao('Salvar nome', async () => {
-        const r = await chamar(() => api.contaPerfil(nome.value)); if (!r) return; sessao = r; aplicarMenu(); avisar(tr('Nome atualizado.'));
-      }, { id: 'minha-salvar-nome' }))]),
-      (sessao.identidadeRemota ? null : DS.secao('Trocar senha', [h('p', { class: 'suave' }, tr('Senha com pelo menos 10 caracteres, misturando letras e números.')), DS.campo('Senha atual', atual), DS.campo('Senha nova', nova), DS.campo('Confirmar senha nova', confirma),
-        h('div', { class: 'ds-cab-acoes ds-mt' }, DS.acao('Trocar senha', async () => {
-          if (nova.value !== confirma.value) { avisar(tr('A confirmação não é igual à senha.'), true); return; }
-          const r = await chamar(() => api.contaSenha(atual.value, nova.value)); atual.value = nova.value = confirma.value = ''; if (!r) return;
-          avisar(tr('Senha trocada.'));
-        }, { id: 'minha-trocar-senha', primaria: true }))])),
-      (sessao.identidadeRemota ? null : DS.secao('Verificação em duas etapas', (() => {
-        const obrigatoria = !!sessao.exigirDuasEtapas && !!u.email; const senhaDuas = h('input', { id: 'minha-duas-senha', type: 'password', autocomplete: 'current-password', maxlength: 200 });
-        if (!u.email) return [h('p', { class: 'suave' }, tr('Precisa de um e-mail na conta. Contas criadas por e-mail já têm.'))];
-        if (obrigatoria) return [h('p', { class: 'suave', id: 'minha-duas-obrigatoria' }, tr('Ligada pela Administração para todas as contas com e-mail: ao entrar, um código vai para o seu e-mail.'))];
-        return [h('p', { class: 'suave' }, tr(u.duasEtapas ? 'Ligada: ao entrar, depois da senha, um código vai para o seu e-mail.' : 'Desligada. Ligue para pedir também um código mandado ao seu e-mail sempre que entrar.')), DS.campo('Senha atual', senhaDuas),
-          h('div', { class: 'ds-cab-acoes ds-mt' }, DS.acao(u.duasEtapas ? 'Desligar' : 'Ligar', async () => {
-            const r = await chamar(() => api.contaDuasEtapas(!u.duasEtapas, senhaDuas.value)); senhaDuas.value = ''; if (!r) return;
-            sessao = r; avisar(tr(sessao.usuario.duasEtapas ? 'Verificação em duas etapas ligada.' : 'Verificação em duas etapas desligada.')); DS.fecharModal(); minhaConta();
-          }, { id: 'minha-duas-etapas', primaria: !u.duasEtapas }))];
-      })())),
-      DS.secao('Recuperação de acesso', [
-        h('p', { class: 'suave' }, tr(sessao.identidadeRemota ? 'Você entra pelo código enviado ao seu e-mail; não existe uma senha do Prumo para recuperar.' : (u.email ? 'Esqueceu a senha atual? Receba um código no seu e-mail e defina uma nova.' : 'Esta conta não tem e-mail. Esqueceu a senha atual? Solicite uma senha temporária à Administração.'))),
-        u.email ? DS.acao(sessao.identidadeRemota ? 'Recuperar acesso' : 'Redefinir senha pelo e-mail', () => { DS.fecharModal(); vistaRecuperar(); }, { id: 'minha-recuperar-senha' }) : null
-      ])
-    ], { tamanho: 'md', subtitulo: u.nome });
+    const remota = !!sessao.identidadeRemota;
+    const nomeVisivel = h('strong', { class: 'ds-conta-nome', 'data-i18n-ignore': '' }, u.nome);
+    const foto = h('button', {
+      type: 'button', class: 'conta-foto-botao ds-conta-foto', id: 'minha-trocar-foto',
+      'aria-label': tr('Trocar foto'), title: tr('Trocar foto'), onclick: () => DS.trocarFoto(sessao.usuario)
+    }, DS.avatar(u, { classe: 'ds-avatar-grande' }),
+    h('span', { class: 'conta-foto-lapis', 'aria-hidden': 'true' }, '✎'));
+    const cabecalho = h('div', { class: 'ds-conta-cabecalho' }, foto,
+      h('div', { class: 'ds-conta-identidade' }, nomeVisivel,
+        h('span', { class: 'ds-conta-email', 'data-i18n-ignore': '' }, u.email || u.login),
+        h('span', { class: 'ds-conta-papel', 'data-i18n-ignore': '' }, u.papelNome)));
+
+    const perfil = () => {
+      const nome = h('input', { id: 'minha-nome', type: 'text', value: u.nome, maxlength: 80, autocomplete: 'name', required: true });
+      const salvar = DS.acao('Salvar nome', async () => {
+        if (!nome.value.trim()) { avisar(tr('Informe o nome.'), true); nome.focus(); return; }
+        const r = await chamar(() => api.contaPerfil(nome.value.trim()));
+        if (!r) return;
+        sessao = r;
+        nome.value = r.usuario.nome;
+        nomeVisivel.textContent = r.usuario.nome;
+        aplicarMenu();
+        avisar(tr('Nome atualizado.'));
+      }, { id: 'minha-salvar-nome', primaria: true });
+      return [
+        DS.secao('Dados da conta', [DS.meta([
+          ['E-mail', h('span', { 'data-i18n-ignore': '' }, u.email || '—')],
+          ...(!remota ? [['Login', h('span', { 'data-i18n-ignore': '' }, u.login)]] : []),
+          ['Papel', h('span', { 'data-i18n-ignore': '' }, u.papelNome)],
+          ['Último acesso', u.ultimoAcesso ? new Date(u.ultimoAcesso).toLocaleString() : '—']
+        ], { linha: true })]),
+        DS.secao('Nome de exibição', [
+          h('div', { class: 'ds-conta-edicao' }, DS.campo('Nome', nome), salvar)
+        ])
+      ];
+    };
+    const seguranca = () => {
+      const atual = h('input', { id: 'minha-atual', type: 'password', autocomplete: 'current-password', maxlength: 200 });
+      const nova = h('input', { id: 'minha-nova', type: 'password', autocomplete: 'new-password', maxlength: 200 });
+      const confirma = h('input', { id: 'minha-confirma', type: 'password', autocomplete: 'new-password', maxlength: 200 });
+      const trocar = DS.acao('Trocar senha', async () => {
+        if (!atual.value || !nova.value || !confirma.value) {
+          avisar(tr('Preencha todos os campos.'), true); (atual.value ? (nova.value ? confirma : nova) : atual).focus(); return;
+        }
+        if (nova.value !== confirma.value) { avisar(tr('A confirmação não é igual à senha.'), true); confirma.focus(); return; }
+        const r = await chamar(() => api.contaSenha(atual.value, nova.value));
+        atual.value = nova.value = confirma.value = '';
+        if (r) avisar(tr('Senha trocada.'));
+      }, { id: 'minha-trocar-senha', primaria: true });
+      const secoes = [
+        DS.secao('Trocar senha', [
+          h('div', { class: 'ds-conta-senhas' },
+            DS.campo('Senha atual', atual), DS.campo('Senha nova', nova),
+            DS.campo('Confirmar senha nova', confirma)),
+          h('div', { class: 'ds-conta-rodape' }, trocar)
+        ], { acoes: [DS.info(
+          remota ? 'Senha com pelo menos 10 caracteres. Os outros computadores saem da conta.'
+            : 'Senha com pelo menos 10 caracteres, misturando letras e números.',
+          { rotulo: 'Regras da senha' })] })
+      ];
+      if (!remota) {
+        const obrigatoria = !!sessao.exigirDuasEtapas && !!u.email;
+        const senhaDuas = h('input', { id: 'minha-duas-senha', type: 'password', autocomplete: 'current-password', maxlength: 200 });
+        let conteudo;
+        if (!u.email) conteudo = [h('p', { class: 'suave' }, tr('Precisa de um e-mail na conta. Contas criadas por e-mail já têm.'))];
+        else if (obrigatoria) conteudo = [h('p', { class: 'suave', id: 'minha-duas-obrigatoria' }, tr('Ligada pela Administração para todas as contas com e-mail: ao entrar, um código vai para o seu e-mail.'))];
+        else conteudo = [
+          h('p', { class: 'ds-conta-ajuda' }, tr(u.duasEtapas ? 'Ligada: ao entrar, depois da senha, um código vai para o seu e-mail.' : 'Desligada. Ligue para pedir também um código mandado ao seu e-mail sempre que entrar.')),
+          h('div', { class: 'ds-conta-edicao' }, DS.campo('Senha atual', senhaDuas),
+            DS.acao(u.duasEtapas ? 'Desligar' : 'Ligar', async () => {
+              const r = await chamar(() => api.contaDuasEtapas(!u.duasEtapas, senhaDuas.value));
+              senhaDuas.value = '';
+              if (!r) return;
+              sessao = r;
+              avisar(tr(sessao.usuario.duasEtapas ? 'Verificação em duas etapas ligada.' : 'Verificação em duas etapas desligada.'));
+              DS.fecharModal();
+              minhaConta();
+            }, { id: 'minha-duas-etapas', primaria: !u.duasEtapas }))
+        ];
+        secoes.push(DS.secao('Verificação em duas etapas', conteudo));
+      }
+      secoes.push(DS.secao('Recuperação de acesso', [
+        h('div', { class: 'ds-conta-recuperacao' },
+          h('span', { class: 'ds-conta-ajuda' }, tr(remota
+            ? 'Esqueceu a senha atual? Mandamos um link para o seu e-mail e você define uma nova.'
+            : (u.email ? 'Esqueceu a senha atual? Receba um código no seu e-mail e defina uma nova.'
+              : 'Esta conta não tem e-mail. Esqueceu a senha atual? Solicite uma senha temporária à Administração.'))),
+          u.email ? DS.acao(remota ? 'Enviar link para meu e-mail' : 'Redefinir senha pelo e-mail',
+            remota ? async () => {
+              const r = await chamar(() => api.contaCodigo(u.email, 'SENHA', idiomaDoEmail()));
+              if (r) avisar(tr('Link enviado para {email}.', { email: u.email }));
+            } : () => { DS.fecharModal(); vistaRecuperar(); },
+            { id: 'minha-recuperar-senha' }) : null)
+      ]));
+      return secoes;
+    };
+    DS.modal('Minha conta', [cabecalho,
+      ...DS.abasModal([
+        ['perfil', 'Perfil', null, perfil],
+        ['seguranca', 'Segurança', null, seguranca]
+      ], 'perfil')
+    ], { tamanho: 'md' });
   }
 
   /** Telas sem permissão ficam bloqueadas mesmo se alguém chamar mostrar() direto; telas só de consulta avisam no topo. */

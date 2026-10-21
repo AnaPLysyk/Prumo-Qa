@@ -10,6 +10,15 @@ export class ErroServico extends Error{constructor(public codigo:typeof codigosS
 
 // --- configuracaoDosServicos ---
 // ── configuracaoDosServicos ──
+/** "empresa", "empresa.atlassian.net" ou qualquer link do Jira copiado do navegador viram o endereço oficial do site Jira Cloud; qualquer outra coisa segue para a validação estrita. */
+export function enderecoDoSiteJira(valor?: string) {
+  const v = (valor ?? '').trim().toLowerCase();
+  if (/^[a-z0-9][a-z0-9-]{0,62}$/.test(v)) return `https://${v}.atlassian.net`;
+  // Qualquer endereço copiado do navegador serve (/browse/KAN-1, /jira/software/...): só o nome do site é aproveitado, sempre em HTTPS.
+  const m = /^(?:https?:\/\/)?([a-z0-9][a-z0-9-]{0,62})\.atlassian\.net(?:[/?#].*)?$/.exec(v);
+  return m ? `https://${m[1]}.atlassian.net` : valor;
+}
+
 /** GitHub e Qase usam destinos fixos; Jira aceita somente HTTPS em *.atlassian.net. */
 export function instanciaServico(servico: Servico, valor?: string) {
   if (servico === 'github') return 'https://api.github.com';
@@ -38,6 +47,7 @@ export function instanciaServico(servico: Servico, valor?: string) {
 
 /** Aplica o esquema de autenticação correto, sem expor a credencial ao chamador. */
 export function cabecalhosDoServico(config: ConfigServico): Record<string, string> {
+  if (config.servico === 'jira' && config.oauth) return { Authorization: 'Bearer ' + config.token };
   if (config.servico === 'jira') {
     const dados = Buffer.from(config.usuario + ':' + config.token).toString('base64');
     return { Authorization: 'Basic ' + dados };

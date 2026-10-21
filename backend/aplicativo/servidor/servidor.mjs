@@ -10,6 +10,12 @@ import { LIMITES, enviarPeloResend, rotaDeCodigos } from '../../login/servidor/c
 import { LIMITES_DE_CHAMADOS, rotaDeChamados } from '../../suporte/servidor/chamados.mjs';
 import { clienteDoGitHub } from '../../suporte/servidor/github.mjs';
 import { oauthDesktopAtivo } from '../../login/regras/oauthDesktop.mjs';
+import { integracoesDoServico } from '../../conexoes/servidor/autorizacao.mjs';
+import { SITE } from '../../login/servidor/modeloDeEmail.mjs';
+
+// Caminhos a partir de frontend/: páginas e script ficam no login; o estilo, no Design System (pasta web/, fora do instalador).
+const PAGINAS_DOS_EMAILS = new Map([['/conta-confirmada', 'login/web/conta-confirmada.html'], ['/recuperar-senha', 'login/web/recuperar-senha.html'],
+  ['/recuperar-senha.js', 'login/web/recuperar-senha.js'], ['/paginas.css', 'design-system/web/paginas.css']]);
 
 export { mensagem, enviarPeloResend } from '../../login/servidor/codigos.mjs';
 
@@ -17,7 +23,7 @@ export { mensagem, enviarPeloResend } from '../../login/servidor/codigos.mjs';
  * Cria o atendimento HTTP. `enviar` (Resend) e `suporte.github` são injetados: os testes usam uma caixa e um repositório em memória.
  * Sem configuração, cada parte recusa com 503 e o resto continua funcionando.
  */
-export function criarServico({ enviar, configurado = true, limites = LIMITES, suporte = null, autenticacao = null, oauthDesktop = false, agora = () => Date.now(), registrar = (linha) => console.log(linha) }) {
+export function criarServico({ enviar, configurado = true, limites = LIMITES, suporte = null, autenticacao = null, oauthDesktop = false, integracoes = null, agora = () => Date.now(), registrar = (linha) => console.log(linha) }) {
   const limitador = criarLimitador(agora);
   const codigos = rotaDeCodigos({ enviar, configurado, limites, limitador, registrar });
   const chamados = rotaDeChamados({ github: suporte?.github, configurado: !!suporte?.github, chaveAdmin: suporte?.chaveAdmin, limites: suporte?.limites ?? LIMITES_DE_CHAMADOS, limitador, registrar, agora });
@@ -49,20 +55,24 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
         });
         return res.end(fs.readFileSync(new URL('../../../frontend/login/web/' + nome, import.meta.url)));
       }
-      if (req.method === 'GET' && caminho === '/conta-confirmada') {
-        res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'",'X-Content-Type-Options':'nosniff'});
-        return res.end('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Prumo QA — E-mail confirmado</title><body style="font-family:system-ui;background:#101820;color:#fff;text-align:center;padding:4rem"><h1>E-mail confirmado</h1><p>Volte ao aplicativo Prumo QA para entrar com sua conta.</p></body></html>');
-      }
-      if (req.method === 'GET' && (caminho === '/recuperar-senha' || caminho === '/recuperar-senha.js')) {
+      // Páginas abertas pelos links dos e-mails, com a aparência da tela de entrada. O Better Auth volta para
+      // /conta-confirmada?error=... quando o link venceu: nesse caso a página não pode dizer que confirmou.
+      const paginaWeb = req.method === 'GET' && PAGINAS_DOS_EMAILS.get(caminho);
+      if (paginaWeb) {
         if (!autenticacao) return responder(res, 503, { erro: 'AUTH_NOT_CONFIGURED' });
-        const js=caminho.endsWith('.js');const nome=js?'recuperar-senha.js':'recuperar-senha.html';
-        res.writeHead(200,{
-          'Content-Type':js?'text/javascript; charset=utf-8':'text/html; charset=utf-8',
-          'Cache-Control':'no-store','Referrer-Policy':'no-referrer',
-          'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY',
-          'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"
+        const nome = caminho === '/conta-confirmada' && url.searchParams.has('error') ? 'login/web/confirmacao-recusada.html' : paginaWeb;
+        res.writeHead(200, {
+          'Content-Type': { html: 'text/html', js: 'text/javascript', css: 'text/css' }[nome.split('.').pop()] + '; charset=utf-8',
+          'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
+          'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
+          'Content-Security-Policy': `default-src 'none'; script-src 'self'; style-src 'self'; img-src ${SITE}; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`
         });
-        return res.end(fs.readFileSync(new URL('../../../frontend/login/web/'+nome,import.meta.url)));
+        return res.end(fs.readFileSync(new URL('../../../frontend/' + nome, import.meta.url)));
+      }
+      if (caminho.startsWith('/v1/integracoes/')) {
+        // GitHub App e Jira OAuth pelo navegador: sem as variáveis do aplicativo oficial a rota recusa, e o resto do serviço segue.
+        if (!integracoes) return responder(res, 503, { erro: 'INTEGRATION_NOT_CONFIGURED' });
+        return await integracoes(req, res, caminho, url.searchParams);
       }
       if (caminho === '/v1/codigos') return await codigos(req, res);
       if (caminho.startsWith('/v1/chamados') || caminho.startsWith('/v1/admin/')) return await chamados(req, res, caminho, url.searchParams);
@@ -102,5 +112,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.warn('Autenticação central incompleta: login permanece desabilitado.');
   }
   const porta = Number(env.PORT) || 10000;
-  http.createServer(criarServico({ enviar, configurado: comEmail, suporte, autenticacao, oauthDesktop: oauthDesktopAtivo(env) })).listen(porta, () => console.log(`serviço do Prumo QA na porta ${porta} (e-mail: ${comEmail ? 'sim' : 'NÃO'}; suporte: ${comSuporte ? 'sim' : 'NÃO'}; administração: ${(env.PRUMO_SUPORTE_CHAVE_ADMIN || '').length >= 32 ? 'sim' : 'NÃO'})`));
+  const integracoes = integracoesDoServico({ env, autenticacao, pool: autenticacao?.pool, limitador: criarLimitador(), registrar: (linha) => console.log(linha) });
+  http.createServer(criarServico({ enviar, configurado: comEmail, suporte, autenticacao, oauthDesktop: oauthDesktopAtivo(env), integracoes })).listen(porta, () => console.log(`serviço do Prumo QA na porta ${porta} (e-mail: ${comEmail ? 'sim' : 'NÃO'}; suporte: ${comSuporte ? 'sim' : 'NÃO'}; administração: ${(env.PRUMO_SUPORTE_CHAVE_ADMIN || '').length >= 32 ? 'sim' : 'NÃO'})`));
 }

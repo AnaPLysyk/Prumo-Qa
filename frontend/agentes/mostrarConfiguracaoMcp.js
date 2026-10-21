@@ -1,9 +1,9 @@
 'use strict';
-/** Agentes: configuração e testes do cliente MCP (Codex/Claude), independente do login de contas. */
+/** MCP por cliente externo: Codex e Claude com diagnóstico; Copilot e Gemini com configuração revisável. */
 async function mostrarConfiguracaoMcp(el) {
-    el.append(h('h1', {}, 'Agentes e MCP'), h('p', { class: 'suave' }, 'O servidor MCP é iniciado pelo próprio cliente de IA e continua funcionando mesmo com esta janela fechada. A configuração abaixo é uma proposta: nada é alterado sem sua confirmação.'));
+    el.append(h('h1', {}, 'Agentes e MCP'), h('p', { class: 'suave' }, 'O cliente de IA inicia o servidor MCP do projeto. Para consultar dados da sua conta, o Prumo precisa estar aberto com a sessão autenticada: ao sair da conta ou fechar o aplicativo, o acesso é revogado. A configuração abaixo é apenas uma proposta; nada é alterado sem sua confirmação.'));
     if (!estado.root) return el.append(semProjeto());
-    el.append(h('ol', { class: 'suave' }, h('li', {}, 'Escolha o cliente de IA que você usa (Codex ou Claude Code) e adicione a configuração do Prumo a ele.'), h('li', {}, 'Feche e reabra o cliente de IA para que ele leia a configuração.'), h('li', {}, 'Volte aqui e clique em "Testar integração" para confirmar que o servidor do Prumo responde.'), h('li', {}, 'No cliente, peça ao agente para usar o Prumo (por exemplo: "consulte o contexto do projeto"). A chamada aparece em "Última chamada observada".')));
+    el.append(h('ol', { class: 'suave' }, h('li', {}, 'Escolha Codex, Claude Code, Copilot ou Gemini. No chat do Prumo, a conexão é preparada por sessão; para falar diretamente no cliente, use o comando do cliente abaixo.'), h('li', {}, 'Revise e execute apenas o comando do cliente escolhido. Depois, feche e reabra esse cliente.'), h('li', {}, 'Em Codex ou Claude, "Testar integração" verifica o servidor pelo SDK. Isso não prova que a IA usou a ferramenta.'), h('li', {}, 'No cliente, peça "consulte o contexto do projeto" e confirme o uso em "Última chamada observada".')));
     const r = await chamar(() => api.conexoes(estado.root)); if (!r) return;
     for (const c of r) {
       const diagnostico = h('div', { 'aria-live': 'polite' });
@@ -27,5 +27,25 @@ async function mostrarConfiguracaoMcp(el) {
         h('h3', {}, '2. Testar e acompanhar'),
         h('button', { class: 'acao', onclick: async (e) => { const b=e.currentTarget; b.disabled=true; try { const x=await chamar(()=>api.testarIntegracao(estado.root,c.client)); if(x)mostrar(x); } finally { b.disabled=false; } } }, `Testar integração ${c.client}`),
         diagnostico);
+    }
+    // O chat do Prumo conecta o MCP automaticamente. Aqui a pessoa configura o OUTRO caminho:
+    // conversar diretamente pelo Copilot ou Gemini, sem abrir o chat do Prumo.
+    const plano = r[0];
+    if (plano?.configuration) {
+      const config = plano.configuration;
+      const lista = 'contexto_projeto,revisar_cobertura,consultar_evidencias,listar_politicas,perguntar_ao_orquestrador';
+      const windows = /Win/i.test(navigator.platform || '');
+      const aspas = (valor) => windows ? "'" + String(valor).replaceAll("'", "''") + "'" : "'" + String(valor).replaceAll("'", "'\\''") + "'";
+      const comando = (argumentos) => (windows ? '& ' : '') + argumentos.map(aspas).join(' ');
+      const ambiente = Object.entries(config.env || {});
+      const servidores = [
+        { cliente: 'GitHub Copilot', cli: windows ? 'copilot.cmd' : 'copilot', args: ['mcp', 'add', '--tools', lista, ...ambiente.flatMap(([k, v]) => ['--env', `${k}=${v}`]), plano.name, '--', config.command, ...config.args], verificar: 'copilot mcp list' },
+        { cliente: 'Gemini CLI', cli: windows ? 'gemini.cmd' : 'gemini', args: ['mcp', 'add', '--scope', 'user', '--include-tools', lista, ...ambiente.flatMap(([k, v]) => ['--env', `${k}=${v}`]), plano.name, config.command, ...config.args], verificar: 'gemini mcp list' }
+      ];
+      el.append(h('h2', {}, 'Outros clientes MCP'), h('p', { class: 'suave' }, 'Estes comandos conectam o MCP do projeto ao chat do próprio cliente, fora do Prumo. Revise antes de executar: nada é instalado ou registrado automaticamente. Para o chat do Início, basta autorizar a IA em Configurações > Assistente.'));
+      for (const item of servidores) el.append(h('h3', {}, item.cliente),
+        h('p', {}, '1. Faça login no cliente. 2. Execute o comando abaixo no terminal. 3. Feche e reabra o cliente. 4. Verifique com ', h('code', {}, item.verificar), '.'),
+        h('pre', {}, comando([item.cli, ...item.args])),
+        h('p', { class: 'suave' }, 'Ferramentas expostas pelo cliente: somente consultas. Uma configuração registrada não comprova uso: peça uma consulta real e confira a última chamada observada no Prumo.'));
     }
 }

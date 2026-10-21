@@ -57,6 +57,39 @@ test('regressão e investigação usam as execuções reais do projeto (PASS e F
   assert.equal(bug.agente.id, 'investigacao-bugs'); assert.match(bug.linhas.join(' '), /Últimas falhas: unit \(ORQ-1\)/);
 });
 
+test('sem projeto selecionado, não mistura execuções ou falhas de outros projetos', async () => {
+  for (const id of ['regressao', 'investigacao-bugs', 'orquestrador', 'qa-geral']) {
+    const r = await conversar({espacoId: null, pergunta: 'quais foram as falhas da regressão?', agente: id, base: dados});
+    assert.equal(r.agente.id, id);
+    assert.match(r.linhas.join(' '), /Selecione um projeto/);
+    assert.doesNotMatch(r.linhas.join(' '), /ORQ-1|2 execução\(ões\)|1 PASS, 1 FAIL/, 'não mistura dados de outra equipe');
+  }
+});
+
+test('diagnóstico com requisito aprovado: contabiliza contexto, inventário de testes e propõe caso sem afirmar cobertura', async () => {
+  const { atualizarEspaco } = await import('../../../../dist/projetos/banco/projetos.js');
+  const { salvarContextoDaPasta, aprovarContextoDaPasta } = await import('../../../../dist/agentes/regras/cicloDosContextos.js');
+  const { diretorioDados } = await import('../../../../dist/compartilhado/banco/diretorioDados.js');
+  const baseDoContexto = diretorioDados();
+  const projeto = await criarEspaco({ nome: 'Diagnóstico seguro de QA', descricao: 'somente laboratório' }, baseDoContexto);
+  const contexto = await salvarContextoDaPasta(projeto.raizContextos, { dados: {
+    tipo: 'requisito', titulo: 'Validar o limite do título', texto: 'O título aceita até 80 caracteres.',
+    origem: { tipo: 'pessoa', referencia: 'Revisão de requisito do laboratório' }
+  } }, 'QA de teste');
+  await aprovarContextoDaPasta(projeto.raizContextos, contexto.id, 'QA de teste');
+  const primeiro = await conversar({ espacoId: projeto.id, pergunta: 'faça um diagnóstico da qualidade do projeto', base: baseDoContexto });
+  assert.ok(primeiro.fatos.includes('requisitos:contextosAprovados=1'), 'contexto aprovado contado mesmo havendo resultado de busca');
+  assert.match(primeiro.linhas.join(' '), /Sem pasta de repositório vinculada/);
+  assert.ok(!primeiro.fatos.some(f => f.startsWith('requisitos:testesCatalogados=')));
+
+  atualizarEspaco(projeto.id, e => { e.pastaLocal = path.resolve('backend/projetos/exemplos/projeto-demo'); }, baseDoContexto);
+  const segundo = await conversar({ espacoId: projeto.id, pergunta: 'faça um diagnóstico da qualidade do projeto', base: baseDoContexto });
+  assert.ok(segundo.fatos.includes('requisitos:contextosAprovados=1'));
+  assert.ok(segundo.fatos.some(f => /^requisitos:testesCatalogados=[1-9][0-9]*$/.test(f)), 'inventário lido no projeto do laboratório: ' + JSON.stringify(segundo.fatos));
+  assert.match(segundo.linhas.join(' '), /Próximo teste candidato.*Validar o limite do título/);
+  assert.match(segundo.linhas.join(' '), /não comprova execução nem cobertura/);
+});
+
 test('estilos mudam a forma, nunca os fatos', () => {
   const a = agentesChat.find((x) => x.id === 'regressao'); const fatos = ['execucoes=2'];
   const linhas = ['2 execuções.', 'Última: PASS.', 'Próxima: amanhã.', 'Rotinas: 1.'];
@@ -99,7 +132,7 @@ test('IA externa autorizada: CLI sem shell recebe skill, fatos locais e pergunta
 });
 
 test('preferências do assistente: nome, estilo e voz pela interface; delegação só pela autorização dedicada', () => {
-  assert.deepEqual(lerPreferencias(dados).ia, { nome: 'Prumo', estilo: 'amigavel', voz: null, lerRespostas: false, delegacao: { claude: false, codex: false } });
+  assert.deepEqual(lerPreferencias(dados).ia, { nome: 'Prumo', estilo: 'amigavel', voz: null, lerRespostas: false, delegacao: { claude: false, codex: false, copilot: false, gemini: false } });
   alterarPreferencias({ ia: { nome: 'Aurora', estilo: 'tecnico', voz: 'Microsoft Maria', lerRespostas: true } }, dados);
   assert.throws(() => alterarPreferencias({ ia: { delegacao: { claude: true } } }, dados), /Unrecognized|unrecognized/);
   assert.throws(() => alterarPreferencias({ ia: { nome: '<script>' } }, dados));

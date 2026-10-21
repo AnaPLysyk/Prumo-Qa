@@ -14,3 +14,5 @@ Use `revisar_cobertura` com o requisito, a fonte e os testes existentes. A ferra
 Para cada lacuna, proponha casos com `propor_caso`: título claro, passos, resultado esperado, requisito coberto e risco. Verifique duplicidade antes (a ferramenta também verifica). Não proponha dezenas de casos de uma vez: poucos casos revisáveis valem mais. Propostas ficam como rascunho; só a pessoa as revisa e publica.
 
 Entregue: critérios testáveis, ambiguidades que exigem decisão humana, lacunas, redundâncias candidatas e o que não foi verificado.
+
+Gatilhos: aplique quando o pedido citar requisito, critério de aceite, ticket ou "o que falta testar". Para perguntas de testabilidade, palavras ambíguas e rastreabilidade honesta, consulte [testabilidade](references/testabilidade.md).

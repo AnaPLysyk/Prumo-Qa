@@ -9,8 +9,8 @@ const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 
 test('repositório independente é usado na interface somente sem Qase', () => {
   const t = read('frontend/testes/fluxos-repositorio-local.parte.js');
-  const v = read('frontend/testes/visao-geral-dos-testes.parte.js');
-  assert.match(v, /if \(!vq\) await F\.telaCasosLocais\(e, mem, corpo\)/);
+  const v = read('frontend/testes/tela-testes.parte.js');
+  assert.match(v, /if \(!vq && e\.manualAtivo !== false\) await F\.telaCasosLocais\(e, mem, corpo\)/);
   assert.match(t, /async function telaCasosLocais\(e, _mem, corpo\)/);
   assert.match(t, /if \(vinc\(e, 'qase'\)\) return/);
   assert.match(t, /api\.repositorioLocal\(e\.id\)/);
@@ -23,14 +23,14 @@ test('repositório independente é usado na interface somente sem Qase', () => {
 });
 
 test('o catálogo não apaga as seções locais de casos e suítes', () => {
-  const v = read('frontend/testes/visao-geral-dos-testes.parte.js');
+  const v = read('frontend/testes/tela-testes.parte.js');
   assert.match(v, /const area = h\('div', \{ id: 'cat-carregando' \}/);
   assert.match(v, /area\.replaceChildren\(\.\.\.\[/);
   assert.doesNotMatch(v, /corpo\.replaceChildren\(\.\.\.\[/);
 });
 
 test('casos locais persistem no novo núcleo, não em propostas nem Qase', () => {
-  const c = read('frontend/testes/montarFormularioProposta.js');
+  const c = read('frontend/testes/propostas.js');
   assert.match(c, /const local = !e\.vinculos\.some\(v => v\.servico === 'qase'\)/);
   assert.match(c, /local \? api\.casoLocalSalvar\(/);
   assert.match(c, /suiteLocalId: suiteLocal\.value \|\| null/);

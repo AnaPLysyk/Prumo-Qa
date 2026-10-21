@@ -17,7 +17,7 @@ test('padrão: todos os agentes ligados, IA externa e orquestração permitidas'
   const b = pasta(t); const c = regrasDosAgentes(b);
   assert.deepEqual([c.desligados, c.iaExterna, c.orquestracao], [[], true, true]);
   assert.ok(agentesDaPlataformaParaJanela(b).agentes.every((a) => a.ligado));
-  assert.equal(configuracaoDoEspaco(espaco, b).especializacoes.length, 8);
+  assert.equal(configuracaoDoEspaco(espaco, b).especializacoes.length, 9);
 });
 
 test('agente desligado: some das políticas do projeto (MCP), da lista do chat e do roteamento, mesmo citado pelo nome', (t) => {
@@ -42,6 +42,6 @@ test('o Orchestrator não pode ser desligado e agente desconhecido é recusado',
 test('arquivo ilegível não derruba o chat nem o MCP: vale o padrão', (t) => {
   const b = pasta(t); fs.mkdirSync(path.join(b, 'plataforma'), { recursive: true });
   fs.writeFileSync(path.join(b, 'plataforma', 'agentes-plataforma.json'), '{quebrado');
-  assert.equal(regrasDosAgentes(b).iaExterna, true); assert.equal(configuracaoDoEspaco(espaco, b).especializacoes.length, 8);
+  assert.equal(regrasDosAgentes(b).iaExterna, true); assert.equal(configuracaoDoEspaco(espaco, b).especializacoes.length, 9);
   assert.throws(() => agentesDaPlataformaParaJanela(b), /LOCAL_DATA_INVALID/, 'a Administração mostra o problema em vez de esconder');
 });

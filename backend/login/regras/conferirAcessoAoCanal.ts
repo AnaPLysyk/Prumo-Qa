@@ -25,9 +25,10 @@ export function conferirAcessoAoCanal(canal: CanalIpc, b?: string, agora = Date.
   ].includes(canal)) throw new Error('LOGIN_METHOD_DISABLED: use o código enviado ao e-mail.');
   // No login central, os caminhos locais de criação de admin, reset e OAuth ficam fechados
   // inclusive para chamadas diretas ao IPC (ocultar botões não é controle de acesso).
+  // conta:senha segue aberto: no login central ele troca a senha no Better Auth, com a sessão da pessoa.
   if (usarAutenticacaoRemota() && [
     'usuarios:ativar','acesso:github','acesso:google','conta:recuperar','conta:reenviarentrada',
-    'conta:confirmarentrada','conta:duasetapas','conta:senha','conta:githubiniciar',
+    'conta:confirmarentrada','conta:duasetapas','conta:githubiniciar',
     'conta:githubestado','conta:googleiniciar','conta:googleestado'
   ].includes(canal)) throw new Error('LOGIN_METHOD_DISABLED: use a autenticação central do Prumo.');
   if (regra === 'publico') return;

@@ -5,7 +5,7 @@ import { especializacoes } from "./tipos/persona.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { listarPropostas } from "../tickets/banco/tickets.js";
 import { listarOrquestracoes } from "./banco/orquestracao.js";
-import { listarAgentesPessoais, importarPreviasAntigas, excluirAgentePessoal, salvarAgentePessoal } from "./regras/agentesPessoais.js";
+import { listarAgentesPessoais, importarPreviasAntigas, excluirAgentePessoal, salvarAgentePessoal, lerPreferenciasDosAgentes, salvarPreferenciasDoAgente, consultarAgentePessoal } from "./regras/agentesPessoais.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { rastrearPergunta } from "./chat/conversar.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
@@ -17,8 +17,9 @@ import { servicosDoAplicativo } from "../conexoes/regras/nucleoServicos.js";
 import { salvarContextoDaPasta, aprovarContextoDaPasta, obterContextoDaPasta, desatualizarContextoDaPasta, excluirContextoDaPasta, permitirContextosNoMcp, conflitoDeContextoDaPasta } from "./regras/cicloDosContextos.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";
 import { agentesDoChat } from "./chat/roteamento.js";
-import { executavelDaIa, executarCliDeIa } from "./chat/consultarIaExterna.js";
+import { executavelDaIa, executarCliDeIa, nomesDosProvedores } from "./chat/consultarIaExterna.js";
 import { localizarClienteDeIa } from "../conexoes/ia/conectarIa.js";
+import { contaAutorizadaMcp } from "./mcp/segurancaDaSessao.js";
 import { lerPreferencias } from "../configuracoes/servico.js";
 import { regrasDosAgentes } from "../administracao/servico.js";
 import { aprenderTermos, decidirConhecimento, esquecerTermo, vocabularioDoAgente } from "./banco/atendimentos.js";
@@ -36,15 +37,23 @@ import { importarPastaDeSkill } from "./banco/importarPastaDeSkill.js";
 import { validarEspecializacao } from "./regras/regrasDasSkills.js";
 
 // controladorAgentes — operações relacionadas
-export const agentesEstado: TratadorDoCanal<'agentes:estado'> = a => ({ configuracao: configuracaoDoEspaco(a.espacoId), matriz: matrizDePoliticas(a.espacoId), especializacoes: especializacoes, propostasIA: listarPropostas(a.espacoId).filter(p => p.origem === 'IA').length });
+export const agentesEstado: TratadorDoCanal<'agentes:estado'> = a => ({ configuracao: configuracaoDoEspaco(a.espacoId), matriz: matrizDePoliticas(a.espacoId), especializacoes: especializacoes.map(x => ({ ...x, ...(regrasDosAgentes().perfis[x.id] ?? {}) })), preferencias: contaDaSessao() ? lerPreferenciasDosAgentes(contaDaSessao()!.id) : {}, propostasIA: listarPropostas(a.espacoId).filter(p => p.origem === 'IA').length });
 
 export const agentesOrquestracoes: TratadorDoCanal<'agentes:orquestracoes'> = a => listarOrquestracoes(a.espacoId);
 
+export const agentesPreferenciassalvar: TratadorDoCanal<'agentes:preferenciassalvar'> = (a) => {
+  const u = contaDaSessao(); if (!u) throw new Error('SESSION_REQUIRED');
+  return salvarPreferenciasDoAgente(a.id, a.preferencias, u.id);
+};
 export const agentesPessoais: TratadorDoCanal<'agentes:pessoais'> = (a) => {
   const u = contaDaSessao(); if (!u) throw new Error('SESSION_REQUIRED: entre com sua conta do Prumo para continuar.');
   return listarAgentesPessoais(a.espacoId, u.id);
 };
 
+export const agentesPessoalconsultar: TratadorDoCanal<'agentes:pessoalconsultar'> = (a) => {
+  const u = contaDaSessao(); if (!u) throw new Error('SESSION_REQUIRED');
+  return consultarAgentePessoal(a.espacoId, a.id, u.id);
+};
 export const agentesPessoaisimportar: TratadorDoCanal<'agentes:pessoaisimportar'> = (a) => {
   const u = contaDaSessao(); if (!u) throw new Error('SESSION_REQUIRED: entre com sua conta do Prumo para continuar.');
   return importarPreviasAntigas(a.espacoId, a.previas, u.id);
@@ -74,7 +83,17 @@ export const servicosImportar: TratadorDoCanal<'servicos:importar'> = async(a,j)
   const contexto=await salvarContextoDaPasta(e.raizContextos,{dados:{tipo:'requisito',titulo,texto,origem:{tipo:'documento',referencia:consulta.origem+'/browse/'+a.ticket}}},usuarioDoWindows());return {contexto};};
 
 // controladorAssistente — operações relacionadas
-export const assistenteAgentes: TratadorDoCanal<'assistente:agentes'> = a => { const ia = lerPreferencias().ia; return { agentes: agentesDoChat(a.espacoId), assistente: { nome: ia.nome, estilo: ia.estilo }, provedores: (['claude', 'codex'] as const).map(p => { const l = localizarClienteDeIa(p); return { id: p, encontrado: !!l, atalho: !!l?.shim, disponivel: regrasDosAgentes().iaExterna && !!executavelDaIa(p), autorizado: ia.delegacao[p], desligadaPelaAdministracao: !regrasDosAgentes().iaExterna }; }) }; };
+export const assistenteAgentes: TratadorDoCanal<'assistente:agentes'> = async a => {
+  const ia = lerPreferencias().ia;
+  const projetoComMcp = !!(a.espacoId && obterEspaco(a.espacoId).pastaLocal);
+  // Projeto vinculado não comprova autenticação. Confirma a ponte real do Electron, sem expor sua credencial.
+  const sessaoMcp = projetoComMcp && await contaAutorizadaMcp().then(usuario => !!usuario).catch(() => false);
+  const mcpEstado = !projetoComMcp ? 'SEM_PROJETO' : sessaoMcp ? 'SESSAO_AUTORIZADA' : 'SEM_SESSAO';
+  return { agentes: agentesDoChat(a.espacoId), assistente: { nome: ia.nome, estilo: ia.estilo }, provedores: (['claude', 'codex', 'copilot', 'gemini'] as const).map(p => {
+    const l = localizarClienteDeIa(p);
+    return { id: p, nome: nomesDosProvedores[p], mcp: 'automatico', projetoComMcp, mcpEstado, encontrado: !!l, atalho: !!l?.shim, disponivel: regrasDosAgentes().iaExterna && !!executavelDaIa(p), autorizado: ia.delegacao[p], desligadaPelaAdministracao: !regrasDosAgentes().iaExterna };
+  }) };
+};
 
 // Avaliar uma resposta. Corrigir o agente ensina só os termos da pergunta ao agente certo (a pergunta não é gravada).
 export const assistenteAvaliar: TratadorDoCanal<'assistente:avaliar'> = a => { const r = avaliarAtendimento(a.id, a.avaliacao); const termos = a.avaliacao === 'NAO_UTIL' && a.agenteCorreto && a.pergunta ? aprenderTermos(a.agenteCorreto, a.pergunta).termos : []; return { ...r, termos }; };
@@ -143,8 +162,8 @@ export const contextosSalvar: TratadorDoCanal<'contextos:salvar'> = a => salvarC
 
 // controladorPerfil — operações relacionadas
 export const iaDelegacao: TratadorDoCanal<'ia:delegacao'> = async (a, janela) => {
-  if (a.valor && !regrasDosAgentes().iaExterna) throw new Error('EXTERNAL_AI_DISABLED: a Administração desligou o uso de Claude Code e Codex nesta instalação.');
-  if (a.valor) { const nome = a.provedor === 'claude' ? 'Claude Code' : 'Codex'; const r = await dialog.showMessageBox(janela!, { type: 'question', buttons: ['Cancelar', 'Autorizar ' + nome], defaultId: 0, cancelId: 0, title: 'Autorizar ' + nome + ' no chat', message: 'Permitir que o chat do Prumo envie perguntas ao ' + nome + ' instalado neste computador?', detail: 'Quando você escolher ' + nome + ' no chat, a pergunta, a skill do agente e os fatos locais usados na resposta são enviados ao CLI, que usa a conta e as regras do próprio ' + nome + '. Você pode revogar a qualquer momento.' }); if (r.response !== 1) return { canceled: true, ia: lerPreferencias().ia }; }
+  if (a.valor && !regrasDosAgentes().iaExterna) throw new Error('EXTERNAL_AI_DISABLED: a Administração desligou o uso de Claude Code, Codex, Copilot e Gemini nesta instalação.');
+  if (a.valor) { const nome = nomesDosProvedores[a.provedor]; const r = await dialog.showMessageBox(janela!, { type: 'question', buttons: ['Cancelar', 'Autorizar ' + nome], defaultId: 0, cancelId: 0, title: 'Autorizar ' + nome + ' no chat', message: 'Permitir que o chat do Prumo envie perguntas ao ' + nome + ' instalado neste computador?', detail: 'Quando você escolher ' + nome + ' no chat, a pergunta, a skill do agente e os fatos locais usados na resposta são enviados ao CLI, que usa a conta e as regras do próprio ' + nome + '. Você pode revogar a qualquer momento.' }); if (r.response !== 1) return { canceled: true, ia: lerPreferencias().ia }; }
   return { canceled: false, ia: autorizarDelegacaoDeIa(a.provedor, a.valor).ia };
 };
 

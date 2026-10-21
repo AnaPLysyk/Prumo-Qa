@@ -12,6 +12,10 @@ Um projeto Prumo usa UUID próprio, pode ser local/manual e mantém vínculos in
 
 **Vínculos posteriores:** um projeto importado do Qase pode receber vínculos Jira/GitHub por escolha explícita. Um projeto manual pode ter Qase, Jira e GitHub adicionados depois, sem adivinhar correspondência por nomes.
 
+## Um recurso, um projeto
+
+O mesmo projeto Jira, projeto Qase, repositório GitHub ou pasta local não pode estar em mais de um projeto Prumo (`RESOURCE_ALREADY_LINKED` e `WORKSPACE_LOCAL_DUPLICATE`). A identidade do recurso é o serviço, a instância e o ID ou código, sem contar a conta usada para conectar. A regra vale ao criar projeto a partir de um recurso, ao vincular e na importação; remover o vínculo libera o recurso. Duplicidades gravadas antes da regra não são apagadas: aparecem como aviso no mapa de vínculos dos agentes (`duplicidades`).
+
 ## O que cada integração representa
 
 | Serviço | O que o Prumo lê | O que o Prumo publica (catálogo fechado) |
@@ -80,7 +84,7 @@ Referência: [Introduction to the Qase API](https://developers.qase.io/reference
 
 Nenhuma rota de exclusão está no catálogo de escrita, por decisão de segurança. A mudança de status leva o `updated_at` lido: se o defeito mudou no Qase depois da leitura, o Prumo recusa (`SERVICE_SCOPE_CHANGED`) e a pessoa vê o estado novo antes de decidir. Os campos personalizados são enviados com a chave = ID do campo e conferidos em `custom_fields` na releitura; se o Qase usar outra chave, a publicação aparece como não confirmada, nunca como sucesso. **Homologação de 16/10/2026 (conta da autora, projeto PQ):** o Qase aceitou o defeito com HTTP 200, mas não gravou o campo personalizado em nenhum formato testado (chave = ID, lista {id, value}); `GET /v1/custom_field` não expõe o `internal_id` citado na documentação. O Prumo registrou o defeito como enviado e não confirmado. Até o Qase esclarecer, campos personalizados em defeitos ficam sem garantia nesta conta.
 
-**Jornada do token (testada na janela real com Qase simulado):** Conexões › Conectar Qase (ou Nova conexão) › token › Conectar ao Qase › escolher projetos › Adicionar ao Prumo. Cada projeto escolhido vira um projeto Prumo vinculado: casos e suites em Testes, defeitos em Tickets. Um projeto criado à mão é vinculado a um projeto Qase existente por Listar recursos disponíveis, na linha da conta. A tela Conexões tem uma linha por serviço com contas, escrita no projeto e ações; o formulário abre sob a linha.
+**Jornada do token (testada na janela real com Qase simulado):** Projetos › Importar do Qase › **três passos**: **1** Abrir o Qase e criar o token, **2** colar o token e **Ver meus projetos** (o token some da tela depois de verificado), **3** escolher quais projetos vêm e **Trazer projetos**. Cada projeto escolhido vira um projeto Prumo vinculado: casos e suites em Testes, defeitos em Tickets. Um projeto criado à mão é vinculado a um projeto Qase existente por Listar recursos disponíveis, na linha da conta. A tela Conexões tem uma linha por serviço com contas, escrita no projeto e ações; o formulário abre sob a linha.
 
 ## Documentação oficial consultada
 

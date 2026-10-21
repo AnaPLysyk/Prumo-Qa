@@ -18,6 +18,7 @@ Projeto (qa.project.json) → IA (Claude Code, Codex) → MCP → núcleo do Pru
 - **executar_validacao**: roda uma capacidade do contrato depois da sua autenticação no sistema.
 - **consultar_evidencias**: devolve resultados e logs reais, preservando PASS, FAIL, BLOCKED e NOT_RUN.
 - **listar_politicas**: mostra o que a IA pode e não pode pedir neste projeto.
+- **perguntar_ao_orquestrador**: somente leitura; o Orquestrador local responde com os dados do projeto em todas as telas (execuções, logs, métricas, agenda, testes, tickets, agentes), sem IA externa, e informa as fontes. Pode ser bloqueada nas políticas do projeto.
 - **propor_caso** e **propor_bug**: criam um rascunho no computador. Nada é enviado ao Qase ou Jira.
 - **propor_aprendizado**: sugere um aprendizado para os agentes, como rascunho que você aprova.
 

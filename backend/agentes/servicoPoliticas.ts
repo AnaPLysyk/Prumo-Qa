@@ -49,6 +49,7 @@ export function capacidadeEfetiva(
     return { estado: 'BLOQUEADO', motivo: 'Bloqueada pela política deste projeto.' };
   }
 
+  if (definicao.orquestrador) return { estado: politica, motivo: 'Permitida: o Orquestrador responde com os dados locais do projeto.' };
   const habilitadas = especializacoes.filter(
     item => (configuracao.especializacoes as string[]).includes(item.id)
       && (item.capacidades as readonly string[]).includes(capacidade)
@@ -94,4 +95,4 @@ export function matrizDePoliticas(espacoId: string | null, base?: string) {
 
 // --- autorizarDelegacaoDeIa ---
 /** Autoriza ou revoga a delegação do chat ao Claude Code/Codex. Chamado só após confirmação nativa da pessoa. */
-export function autorizarDelegacaoDeIa(provedor: 'claude' | 'codex', valor: boolean, base?: string) { const p = lerPreferencias(base); return gravarPreferencias({ ...p, ia: { ...p.ia, delegacao: { ...p.ia.delegacao, [provedor]: valor } } }, base); }
+export function autorizarDelegacaoDeIa(provedor: 'claude' | 'codex' | 'copilot' | 'gemini', valor: boolean, base?: string) { const p = lerPreferencias(base); return gravarPreferencias({ ...p, ia: { ...p.ia, delegacao: { ...p.ia.delegacao, [provedor]: valor } } }, base); }

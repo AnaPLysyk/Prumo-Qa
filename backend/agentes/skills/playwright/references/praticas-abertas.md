@@ -21,3 +21,7 @@ Erro comum: inspecionar o DOM de uma aplicação dinâmica antes de ela terminar
 Os guias da TestDino organizam práticas em: locators e assertions, fixtures e configuração, autenticação com reaproveitamento de sessão, mock de rede, testes visuais e de acessibilidade, análise de trace, instabilidade, Page Object Model versus fixtures e helpers, integração contínua com sharding e migração a partir de Cypress ou Selenium. Use-os como leitura de apoio; a regra do projeto continua a desta Skill.
 
 Nada disso autoriza executar comandos livres: no Prumo, execução só por capability declarada e aprovada.
+
+## Falha em teste Playwright: ordem de diagnóstico
+
+Ideia de apoio, reescrita para o Prumo. Antes de mexer no teste, olhe nesta ordem: mensagem de erro e linha; o trace da execução que falhou (se existir e estiver no escopo autorizado); rede e console; estado da massa de dados; só então tempo e concorrência. Se o locator não encontra o elemento por papel ou rótulo, investigue o nome acessível antes de trocar por CSS. Espera fixa e retentativa nunca são a correção: registre a causa provável e a verificação que a confirmaria.

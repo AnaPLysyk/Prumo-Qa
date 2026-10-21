@@ -5,24 +5,17 @@
       "destino": "dist/renderer/fluxos.js",
       "origens": [
         "frontend/compartilhado/fluxos-abertura.parte.js",
-        "frontend/tickets/fluxos-tickets.parte.js",
-        "frontend/tickets/tickets-locais.parte.js",
-        "frontend/tickets/tickets-jira.parte.js",
-        "frontend/tickets/tickets-defeitos-qase.parte.js",
-        "frontend/tickets/tickets-issues-github.parte.js",
+        "frontend/tickets/tela-tickets.parte.js",
         "frontend/testes/fluxos-casos-qase.parte.js",
         "frontend/testes/fluxos-repositorio-local.parte.js",
         "frontend/testes/fluxos-planos-e-runs.parte.js",
-        "frontend/testes/fluxos-vinculos.parte.js",
-        "frontend/compartilhado/fluxos-fechamento.parte.js"
+        "frontend/testes/fluxos-vinculos.parte.js"
       ]
     },
     {
       "destino": "dist/renderer/tela-testes.js",
       "origens": [
-        "frontend/testes/visao-geral-dos-testes.parte.js",
-        "frontend/testes/editor-e-pipelines.parte.js",
-        "frontend/testes/ide-codigo.parte.js"
+        "frontend/testes/tela-testes.parte.js"
       ]
     },
     {
@@ -32,60 +25,36 @@
         "frontend/agentes/retratos-dos-agentes.parte.js",
         "frontend/compartilhado/exportar-e-icones.parte.js",
         "frontend/agentes/conversa-do-orchestrator.parte.js",
-        "frontend/agentes/orchestrator-flutuante.parte.js",
         "frontend/inicio/tela-inicio.parte.js",
         "frontend/logs/tela-logs.parte.js",
-        "frontend/logs/eventos-e-detalhes.parte.js",
-        "frontend/logs/filtros-e-atualizacao.parte.js",
         "frontend/metricas/tela-metricas.parte.js",
         "frontend/agentes/tela-agentes.parte.js",
-        "frontend/agentes/cerebro-do-agente.parte.js",
-        "frontend/agentes/atividades-do-agente.parte.js",
-        "frontend/configuracoes/ajustes-do-assistente.parte.js",
-        "frontend/configuracoes/perfil-e-conta.parte.js",
-        "frontend/configuracoes/aparencia-e-assistente.parte.js",
-        "frontend/configuracoes/navegacao-dos-ajustes.parte.js",
+        "frontend/configuracoes/tela-configuracoes.parte.js",
         "frontend/compartilhado/interfaces-fechamento.parte.js"
       ]
     },
     {
       "destino": "dist/renderer/administracao.js",
       "origens": [
-        "frontend/administracao/tela-administracao.parte.js",
-        "frontend/administracao/documentacao/explorador.parte.js",
-        "frontend/administracao/documentacao/fluxo.parte.js",
-        "frontend/administracao/documentacao/codigo-e-telas.parte.js",
-        "frontend/administracao/painel-e-navegacao.parte.js"
+        "frontend/administracao/tela-administracao.parte.js"
       ]
     },
     {
       "destino": "dist/renderer/ajuda.js",
       "origens": [
-        "frontend/ajuda/busca-e-indice.parte.js",
-        "frontend/ajuda/navegacao-e-conteudo.parte.js"
+        "frontend/ajuda/tela-ajuda.parte.js"
       ]
     },
     {
       "destino": "dist/renderer/suporte.js",
       "origens": [
-        "frontend/suporte/chamados-da-pessoa.parte.js",
-        "frontend/suporte/revisao-e-envio.parte.js",
-        "frontend/suporte/consultas-e-diagnostico.parte.js"
+        "frontend/suporte/tela-suporte.parte.js"
       ]
     },
     {
       "destino": "dist/renderer/interfaces.css",
       "origens": [
-        "frontend/compartilhado/interfaces-base.parte.css",
-        "frontend/agentes/conversa-do-orchestrator.parte.css",
-        "frontend/logs/tela-logs.parte.css",
-        "frontend/metricas/tela-metricas.parte.css",
-        "frontend/agentes/tela-agentes.parte.css",
-        "frontend/compartilhado/reflow-zoom-e-movimento.parte.css",
-        "frontend/agentes/espaco-profundo.parte.css",
-        "frontend/compartilhado/menuLateral.parte.css",
-        "frontend/agentes/seletor-de-agente.parte.css",
-        "frontend/configuracoes/ajustes-em-secoes.parte.css"
+        "frontend/design-system/estilos-das-telas.parte.css"
       ]
     }
   ]

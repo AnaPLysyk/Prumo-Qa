@@ -8,7 +8,6 @@ import { lerContasDeServico } from '../banco/contasDeServico.js';
 import { lerEspacos } from '../../projetos/banco/projetos.js';
 import { adicionarConta } from '../servicoContas.js';
 import { criarEspaco } from '../../projetos/servicoProjetos.js';
-import { vincularServicoAoEspaco } from '../../projetos/servicoProjetos.js';
 
 type Previa = { token: string; projetos: Recurso[]; expiraEm: number; timer: ReturnType<typeof setTimeout> };
 const LIMITE_PROJETOS = 1000, PRAZO_MS = 5 * 60_000;
@@ -113,24 +112,28 @@ export function importarProjetosQase(c: ContextoDosServicos) {
         const recurso = await new AdaptadorServico({
           ...conta, token: c.cofre.ler(conta.id)
         }, c.transporte, c.escrita).obterRecurso(codigo);
-        const espaco = await criarEspaco({ nome: recurso.nome, descricao: '' }, c.base);
-        try {
-          vincularServicoAoEspaco(espaco.id, 'qase', conta.id, recurso, c.base);
-          resultado.adicionados.push(codigo);
-        } catch (e) {
-          resultado.falhas.push({ codigo, erro: erroSeguro(e) });
-        }
+        await criarEspaco({ nome: recurso.nome, descricao: '' }, c.base, { servico: 'qase', conexaoId: conta.id, recurso });
+        resultado.adicionados.push(codigo);
       } catch (e) {
         resultado.falhas.push({ codigo, erro: erroSeguro(e) });
       }
     }
     return resultado;
   }
+  /** Dentro de um projeto Prumo: só conecta a conta (token vai ao cofre) e descarta a prévia; quem escolhe o projeto do Qase é a tela de vínculo, um por vez. */
+  async function conectar(previaId: string) {
+    const previa = previas.get(previaId);
+    if (!previa || Date.now() > previa.expiraEm) { limpar(previaId); throw new Error('QASE_PREVIEW_EXPIRED'); }
+    const existente = lerContasDeServico(c.base).contas.find(x => x.ativa && x.servico === 'qase' && (() => { try { return c.cofre.ler(x.id) === previa.token; } catch { return false; } })());
+    const conta = existente ?? await adicionarConta(c, { servico: 'qase', nome: 'Qase', token: previa.token });
+    limpar(previaId);
+    return { id: conta.id, nome: conta.nome };
+  }
   async function preverConta(conexaoId: string) {
     const conta = lerContasDeServico(c.base).contas.find(x => x.id === conexaoId && x.ativa && x.servico === 'qase');
     if (!conta) throw new Error('SERVICE_NOT_FOUND');
     return prever(c.cofre.ler(conta.id));
   }
-  return { prever, preverConta, importar, cancelar: (previaId: string) => { limpar(previaId); return { cancelada: true }; },
+  return { prever, preverConta, conectar, importar, cancelar: (previaId: string) => { limpar(previaId); return { cancelada: true }; },
     limparTodas: () => { for (const id of previas.keys()) limpar(id); } };
 }

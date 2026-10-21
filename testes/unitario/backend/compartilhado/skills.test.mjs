@@ -6,7 +6,7 @@ import path from 'node:path';
 import { raiz, fontesSkills, verificarSkills } from '../../../../docs/geradores/verificar-skills.mjs';
 
 test('manifesto corresponde às Skills e às políticas reais', () => {
-  assert.deepEqual(verificarSkills(), { skills: 8, estado: 'VALIDADO_ESTATICAMENTE' });
+  assert.deepEqual(verificarSkills(), { skills: 9, estado: 'VALIDADO_ESTATICAMENTE' });
 });
 
 test('capacidades externas permanecem somente da pessoa; execução exige autorização', () => {
@@ -15,11 +15,11 @@ test('capacidades externas permanecem somente da pessoa; execução exige autori
   assert.equal(capacidades.get('executar_testes'), 'EXIGE_AUTORIZACAO');
 });
 
-test('oito especializações têm profissão e área; interface distingue permissão efetiva', () => {
+test('nove especializações têm profissão e área; interface distingue permissão efetiva', () => {
   const fonte = fs.readFileSync(path.join(raiz, 'backend/agentes/tipos/persona.ts'), 'utf8');
   const perfis = [...fonte.matchAll(/skill: '([^']+)', capacidades: \[[^\]]*\], profissao: '([^']+)', especialidade: '([^']+)'/g)];
-  assert.equal(perfis.length, 8);
-  assert.equal(new Set(perfis.map(p => p[1])).size, 8);
+  assert.equal(perfis.length, 9);
+  assert.equal(new Set(perfis.map(p => p[1])).size, 9);
   assert.ok(perfis.every(p => p[2].length > 8 && p[3].length > 8));
   const persona = fs.readFileSync(path.join(raiz, 'backend/agentes/tipos/persona.ts'), 'utf8');
   assert.match(persona, /profissao: perfil\?\.profissao/);

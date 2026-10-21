@@ -1,28 +1,20 @@
-/** Assegura a montagem da Documentação Viva a partir de partes por responsabilidade. */
+/** Garante Documentação Viva e Administração numa fonte coesa com registro único da tela. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-test('Administração carrega um único bundle com árvore, fluxo, código e navegação', () => {
- const manifest=JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8'));
- const bundle=manifest.bundles.find(b=>b.destino==='dist/renderer/administracao.js');
- assert.ok(bundle);
- assert.deepEqual(bundle.origens,[
-  'frontend/administracao/tela-administracao.parte.js',
-  'frontend/administracao/documentacao/explorador.parte.js',
-  'frontend/administracao/documentacao/fluxo.parte.js',
-  'frontend/administracao/documentacao/codigo-e-telas.parte.js',
-  'frontend/administracao/painel-e-navegacao.parte.js'
- ]);
- const contents=bundle.origens.map(p=>fs.readFileSync(p,'utf8'));
- assert.ok(contents.every(s=>s.startsWith('/** ')));
- const codigo=contents.map(s=>s.slice(s.indexOf('\n')+1)).join('');
- assert.equal(codigo,fs.readFileSync(bundle.destino,'utf8'));
- assert.doesNotThrow(()=>new vm.Script(codigo));
- assert.equal((codigo.match(/abas\.administracao\s*=/g)||[]).length,1);
- const html=fs.readFileSync('frontend/compartilhado/runtime/index.html','utf8');
- assert.ok(html.includes('src="administracao.js"'));
- assert.ok(!html.includes('src="telas/administracao/mostrarAdministracao.js"'));
- assert.ok(!fs.existsSync('frontend/administracao/mostrarAdministracao.js'));
+test('Administração mantém árvore, fluxo, código e navegação em um único bundle', () => {
+  const m=JSON.parse(fs.readFileSync('frontend/construcao/telas-modulares.json','utf8'));
+  const b=m.bundles.find(x=>x.destino==='dist/renderer/administracao.js');
+  assert.deepEqual(b.origens,['frontend/administracao/tela-administracao.parte.js']);
+  const source=fs.readFileSync(b.origens[0],'utf8');
+  assert.match(source,/^\/\*\* /);
+  const codigo=source.slice(source.indexOf('\n')+1);
+  assert.equal(codigo,fs.readFileSync(b.destino,'utf8'));
+  assert.doesNotThrow(()=>new vm.Script(codigo));
+  assert.equal((codigo.match(/abas\.administracao\s*=/g)||[]).length,1);
+  const html=fs.readFileSync('frontend/compartilhado/runtime/index.html','utf8');
+  assert.ok(html.includes('src="administracao.js"'));
+  assert.ok(!html.includes('src="telas/administracao/mostrarAdministracao.js"'));
 });

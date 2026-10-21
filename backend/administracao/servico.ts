@@ -1,6 +1,6 @@
 /** servico: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
 import { lerLocal, gravarLocal } from "../compartilhado/banco/persistenciaLocal.js";
-import { AgentesDaPlataforma, agentesDaPlataformaPadrao, agentesDaPlataformaSchema, CodigoDoArquivo, LIMITE_CODIGO_ARQUIVO, LIMITE_CODIGO_TOTAL, LIMITE_MAPA, MapaDoAplicativo, mapaDoAplicativoSchema } from "./contratos.js";
+import { AgentesDaPlataforma, agentesDaPlataformaPadrao, agentesDaPlataformaSchema, perfilOficialSchema, CodigoDoArquivo, LIMITE_CODIGO_ARQUIVO, LIMITE_CODIGO_TOTAL, LIMITE_MAPA, MapaDoAplicativo, mapaDoAplicativoSchema } from "./contratos.js";
 import fs from "node:fs";
 import path from "node:path";
 import { falharCom } from "../compartilhado/erros.js";
@@ -79,15 +79,18 @@ export const especializacaoLigada = (id: string, b?: string) => !regrasDosAgente
 
 export function agentesDaPlataformaParaJanela(b?: string) {
   const c = lerAgentesDaPlataforma(b);
-  return { ...c, agentes: agentesChat.map((a) => ({ id: a.id, nome: a.nome, dominio: a.dominio, profissao: a.profissao, especialidade: a.especialidade, fixo: a.id === 'orquestrador', ligado: a.id === 'orquestrador' || !c.desligados.includes(a.id),
+  return { ...c, agentes: agentesChat.map((a) => ({ id: a.id, nome: c.perfis[a.id]?.nome ?? a.nome, dominio: a.dominio, profissao: c.perfis[a.id]?.profissao ?? a.profissao, especialidade: c.perfis[a.id]?.especialidade ?? a.especialidade, fixo: a.id === 'orquestrador', ligado: a.id === 'orquestrador' || !c.desligados.includes(a.id),
     capacidades: a.especializacao ? [...(especializacoes.find((e) => e.id === a.especializacao)?.capacidades ?? [])] : [] })) };
 }
 
-export function salvarAgentesDaPlataforma(d: { desligados: string[]; iaExterna: boolean; orquestracao: boolean }, b?: string, agora = new Date()) {
+export function salvarAgentesDaPlataforma(d: { desligados: string[]; iaExterna: boolean; orquestracao: boolean; perfis?: Record<string, {nome:string; profissao:string; especialidade:string; tom:string; robo?:number}> }, b?: string, agora = new Date()) {
   const validos = new Set(agentesChat.filter((a) => a.id !== 'orquestrador').map((a) => a.id));
   const desconhecido = d.desligados.find((id) => !validos.has(id)); if (desconhecido) throw new Error('AGENT_UNKNOWN: agente desconhecido ou que não pode ser desligado: ' + desconhecido + '.');
+  const perfis = d.perfis ?? regrasDosAgentes(b).perfis;
+  if (Object.keys(perfis).some(id => !validos.has(id))) throw new Error('AGENT_PROFILE_UNKNOWN');
+  for (const p of Object.values(perfis)) perfilOficialSchema.parse(p);
   const conta = contaDaSessao(b);
-  gravarAgentesDaPlataforma({ version: 1, desligados: [...new Set(d.desligados)], iaExterna: d.iaExterna, orquestracao: d.orquestracao, alteradoEm: agora.toISOString(), por: conta ? conta.nome + ' (' + conta.login + ')' : usuarioDoWindows() }, b);
+  gravarAgentesDaPlataforma({ version: 1, perfis, desligados: [...new Set(d.desligados)], iaExterna: d.iaExterna, orquestracao: d.orquestracao, alteradoEm: agora.toISOString(), por: conta ? conta.nome + ' (' + conta.login + ')' : usuarioDoWindows() }, b);
   return agentesDaPlataformaParaJanela(b);
 }
 

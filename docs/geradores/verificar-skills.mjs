@@ -9,7 +9,7 @@ export function fontesSkills(base = raiz) {
   const fonte = fs.readFileSync(path.join(base, 'backend/agentes/tipos/persona.ts'), 'utf8');
   const capacidades = new Map([...fonte.matchAll(/\{ id: '([^']+)', rotulo: '[^']+', ferramenta: (?:'[^']+'|null), editavel: \[[^\]]*\], padrao: '([^']+)'/g)].map(m => [m[1], m[2]]));
   const especializacoes = [...fonte.matchAll(/\{ id: '([^']+)', rotulo: '[^']+', skill: '([^']+)', capacidades: \[([^\]]*)\]/g)].map(m => ({ id: m[1], caminho: m[2] + '/SKILL.md', capacidades: [...m[3].matchAll(/'([^']+)'/g)].map(x => x[1]) }));
-  if (especializacoes.length !== 8 || capacidades.size !== 13) throw new Error('SKILLS_POLICY_FORMAT: formato ou catálogo mudou; revise o validador.');
+  if (especializacoes.length !== 9 || capacidades.size !== 14) throw new Error('SKILLS_POLICY_FORMAT: formato ou catálogo mudou; revise o validador.');
   return { capacidades, especializacoes };
 }
 

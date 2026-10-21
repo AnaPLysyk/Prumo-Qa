@@ -46,3 +46,5 @@ Exemplo fictício: “Só Editor salva”. Cenários relevantes verificam Editor
 Devolva à IA desenvolvedora requisito/fonte, achados, riscos, seleção justificada, redundâncias potenciais, bloqueios e evidências reais. Skill orienta; não garante invocação automática em todos os clientes e não substitui as permissões do núcleo.
 
 Para revisar um plano ou estratégia de teste antes de implementar, conduza a [entrevista de estratégia](references/estrategia.md).
+
+Para decidir qual Skill aplicar a cada pedido, técnicas adicionais (pares, exploratório com carta, adivinhação de erros), hierarquia de oráculos e a lista de conferência final, consulte [técnicas e gatilhos](references/tecnicas-e-gatilhos.md).

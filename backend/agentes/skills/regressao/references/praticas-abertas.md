@@ -30,3 +30,15 @@ Rodar a suíte completa a cada mudança é desperdício. Recomende a camada pelo
 ## Saúde da suíte
 
 Acompanhe duração, taxa de instabilidade e capacidade de detectar regressões. Duração subindo e instabilidade crescendo são alertas precoces; não espere bloquearem a release.
+
+## Matriz de impacto
+
+Antes de escolher a camada, cruze a mudança com o que ela pode afetar: dados e migrações, permissões, integrações externas, telas que usam o mesmo componente e fluxos críticos. Cada linha da matriz aponta o cenário ou a capability que a cobre, ou declara a lacuna. Mudança só de documentação pede apenas conferência dos links e do conteúdo.
+
+## Teste que acompanha uma correção
+
+Todo defeito corrigido pede um teste que reproduza o sintoma. Ele só prova algo se falhou antes da correção e passa depois, e essa comparação precisa de duas execuções autorizadas reais. Sem as duas, registre o teste como proposto e a prova como NOT_RUN.
+
+## Resultado só com execução
+
+Não escreva "deve passar" nem estime resultado de camada que não rodou. Relate por camada o que foi executado, o estado real e o que ficou de fora, com o motivo.

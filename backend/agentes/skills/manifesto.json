@@ -4,7 +4,7 @@
     {
       "id": "qa-geral",
       "caminho": "backend/agentes/skills/qa/SKILL.md",
-      "versao": "sha256:7c7b341dd4926679847348e62b549fd7af69d60ee93a872b8c2a45211ea3cea5",
+      "versao": "sha256:3752e17de8f7da309e6584e6c012c7fce677bda68251e85d2db9306d1a6c3779",
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
@@ -29,7 +29,7 @@
     {
       "id": "requisitos",
       "caminho": "backend/agentes/skills/requisitos/SKILL.md",
-      "versao": "sha256:48136398d075adb47c036b279483374bf6af8a232ab1b71b2d6b732f5dff9650",
+      "versao": "sha256:ec294fc2fc09a5fc3b8edc7d5e4334bdfc01119c06c421e63075092473fa1803",
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
@@ -77,7 +77,7 @@
     {
       "id": "api-rest",
       "caminho": "backend/agentes/skills/api-rest/SKILL.md",
-      "versao": "sha256:de596fdba232a52809110fce335bd8744e2b93040b3b035207e67629d1fce1a4",
+      "versao": "sha256:42e6d9e1c07b0a3282cb139f67c61a7e40aa82d0459fbc7f76f899e5c1a9ef3e",
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
@@ -102,7 +102,7 @@
     {
       "id": "acessibilidade",
       "caminho": "backend/agentes/skills/acessibilidade/SKILL.md",
-      "versao": "sha256:4032143f952b6a28cd644070154c99f39ba6005b693648cf479dade717801119",
+      "versao": "sha256:4bd13ec781ed9a12353e601529aa3711ce3e57c55497a2a975c7e8ec9550e4e7",
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
@@ -125,7 +125,7 @@
     {
       "id": "investigacao-bugs",
       "caminho": "backend/agentes/skills/investigacao-bugs/SKILL.md",
-      "versao": "sha256:8dd61a9e81c912d07464bbe82eea6004802713fb80d5e4450e0771afbbadb51d",
+      "versao": "sha256:820b65e8411b05d89c1765c3535c2a4bae0a57fcbe6c344c5d33c1b6369bcd47",
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
@@ -171,7 +171,7 @@
     {
       "id": "monitoramento",
       "caminho": "backend/agentes/skills/monitoramento/SKILL.md",
-      "versao": "sha256:2284a079ca9fbf60ebaac448255a9f831f3f349e1633eaaf362dab1f94fc7984",
+      "versao": "sha256:06316976899111246672eb2e359462f1d992b72f811953b6358d6fab9dac775b",
       "estado": "INSTRUCOES_DISPONIVEIS",
       "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
       "consumidores": [
@@ -185,6 +185,29 @@
       "permissoes": {
         "consultar_contexto": "PERMITIDO",
         "consultar_evidencias": "PERMITIDO",
+        "propor_aprendizado": "PERMITIDO"
+      },
+      "fontePoliticas": "backend/agentes/tipos/persona.ts"
+    },
+    {
+      "id": "ui-ux",
+      "caminho": "backend/agentes/skills/ui-ux/SKILL.md",
+      "versao": "sha256:afa146dcf5ac3a31669c98123a8529775b6a9292d60a98a4956bc1ca1e687949",
+      "estado": "INSTRUCOES_DISPONIVEIS",
+      "instalacaoCliente": "OPCIONAL_NAO_COMPROVADA",
+      "consumidores": [
+        "backend/agentes/chat/roteamento.ts"
+      ],
+      "capacidades": [
+        "consultar_contexto",
+        "revisar_cobertura",
+        "propor_casos",
+        "propor_aprendizado"
+      ],
+      "permissoes": {
+        "consultar_contexto": "PERMITIDO",
+        "revisar_cobertura": "PERMITIDO",
+        "propor_casos": "PERMITIDO",
         "propor_aprendizado": "PERMITIDO"
       },
       "fontePoliticas": "backend/agentes/tipos/persona.ts"

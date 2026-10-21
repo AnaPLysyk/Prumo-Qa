@@ -11,7 +11,8 @@ import { z } from "zod";
 
 // --- conectarIa ---
 // ── localizarClienteDeIa ──
-export function localizarClienteDeIa(cliente:'codex'|'claude') {
+export type ClienteDeChat='codex'|'claude'|'copilot'|'gemini';
+export function localizarClienteDeIa(cliente:ClienteDeChat) {
   const pastas=(process.env.PATH??'').split(path.delimiter).filter(d=>path.isAbsolute(d));
   // Instalação oficial do Codex Desktop também oferece CLI fora do PATH.
   if(cliente==='codex'&&process.platform==='win32'&&process.env.LOCALAPPDATA) {
@@ -31,20 +32,32 @@ export function localizarClienteDeIa(cliente:'codex'|'claude') {
     const exe=path.join(d,cliente+ext);
     try { if(fs.statSync(exe).isFile()) {if(ext==='.cmd')shim??=exe;else return {executable:exe,shim:false};} } catch { /* Próximo diretório explícito do PATH. */ }
   }
+  // CLIs instalados pelo npm (Copilot, Gemini) são um atalho .cmd que só chama um script Node ao lado: usa o script direto, sem shell.
+  const scriptsDoNpm:Partial<Record<ClienteDeChat,string>>={copilot:path.join('node_modules','@github','copilot','npm-loader.js'),gemini:path.join('node_modules','@google','gemini-cli','bundle','gemini.js')};
+  if(shim&&scriptsDoNpm[cliente]) {
+    const script=path.join(path.dirname(shim),scriptsDoNpm[cliente]!);
+    try { if(fs.statSync(script).isFile())return {executable:script,shim:false}; } catch { /* Instalação fora do padrão: continua só como atalho. */ }
+  }
   return shim?{executable:shim,shim:true}:null;
+}
+
+/** Como o cliente de IA inicia o servidor MCP do Prumo para uma pasta de projeto. */
+export function configuracaoDoServidorMcp(raiz:string,contrato?:string) {
+  const server=fileURLToPath(new URL('../../mcp.js',import.meta.url));
+  const env:Record<string,string>={...(process.env.PRUMO_DATA_DIR?{PRUMO_DATA_DIR:process.env.PRUMO_DATA_DIR}:{})};
+  // No aplicativo empacotado, process.execPath é o executável do Prumo (Electron), não um Node avulso:
+  // este modo o faz comportar-se como Node puro para o servidor MCP, sem abrir janela.
+  if(process.versions.electron)env.ELECTRON_RUN_AS_NODE='1';
+  return {command:process.execPath,args:[server,raiz,...(contrato?[contrato]:[])],env};
 }
 
 // ── conectarIa ──
 export function prepararConexao(p:Projeto,cliente:string,contrato?:string) {
   if(cliente!=='codex'&&cliente!=='claude')throw new Error('Use conectar codex ou conectar claude.');
   const nome=`prumo-${p.manifesto.id}-${hash(p.raiz).slice(0,8)}`;
-  const server=fileURLToPath(new URL('../../mcp.js',import.meta.url));
   if(process.env.PRUMO_DATA_DIR)pastaAtividades(p); // valida destino externo, sem escrever
-  const env:Record<string,string>={...(process.env.PRUMO_DATA_DIR?{PRUMO_DATA_DIR:process.env.PRUMO_DATA_DIR}:{})};
-  // No aplicativo empacotado, process.execPath é o executável do Prumo (Electron), não um Node avulso:
-  // este modo o faz comportar-se como Node puro para o servidor MCP, sem abrir janela.
-  if(process.versions.electron)env.ELECTRON_RUN_AS_NODE='1';
-  const configuracao={command:process.execPath,args:[server,p.raiz,...(contrato?[contrato]:[])],env};
+  const configuracao=configuracaoDoServidorMcp(p.raiz,contrato);
+  const env=configuracao.env;
   const ambiente=Object.entries(env).flatMap(([k,v])=>['--env',`${k}=${v}`]);
   const args=cliente==='codex'?['mcp','add',nome,...ambiente,'--',configuracao.command,...configuracao.args]:['mcp','add','--transport','stdio','--scope','user',nome,...ambiente,'--',configuracao.command,...configuracao.args];
   const instalado=localizarClienteDeIa(cliente);
@@ -91,7 +104,7 @@ export type Cliente = typeof clientes[number];
 
 export type Plano = ReturnType<typeof prepararConexao>;
 
-export const tools = ['contexto_projeto', 'revisar_cobertura', 'executar_validacao', 'consultar_evidencias', 'listar_politicas', 'propor_caso', 'propor_bug', 'propor_aprendizado'];
+export const tools = ['contexto_projeto', 'revisar_cobertura', 'executar_validacao', 'consultar_evidencias', 'perguntar_ao_orquestrador', 'listar_politicas', 'propor_caso', 'propor_bug', 'propor_aprendizado'];
 
 const digest = z.string().regex(/^[a-f0-9]{64}$/);
 

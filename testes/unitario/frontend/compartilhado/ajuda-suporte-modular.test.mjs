@@ -9,14 +9,14 @@ const html = fs.readFileSync('frontend/compartilhado/runtime/index.html', 'utf8'
 const bundles = [
   {
     saida: 'dist/renderer/ajuda.js',
-    partes: ['frontend/ajuda/busca-e-indice.parte.js', 'frontend/ajuda/navegacao-e-conteudo.parte.js'],
+    partes: ['frontend/ajuda/tela-ajuda.parte.js'],
     entrada: /abas\.ajuda\s*=/,
     marcador: /function pontuar\(/,
     antigo: 'frontend/ajuda/mostrarAjuda.js'
   },
   {
     saida: 'dist/renderer/suporte.js',
-    partes: ['frontend/suporte/chamados-da-pessoa.parte.js', 'frontend/suporte/revisao-e-envio.parte.js', 'frontend/suporte/consultas-e-diagnostico.parte.js'],
+    partes: ['frontend/suporte/tela-suporte.parte.js'],
     entrada: /abas\.suporte\s*=/,
     marcador: /async function desenharMeus\(/,
     antigo: 'frontend/suporte/mostrarSuporte.js'

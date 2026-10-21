@@ -10,12 +10,13 @@ import { z } from "zod";
  */
 export type EstadoCapacidade = 'PERMITIDO' | 'EXIGE_AUTORIZACAO' | 'BLOQUEADO' | 'SOMENTE_PESSOA';
 
-type DefCap = { id: string; rotulo: string; ferramenta: string | null; editavel: EstadoCapacidade[]; padrao: EstadoCapacidade; explicacao: string };
+type DefCap = { id: string; rotulo: string; ferramenta: string | null; editavel: EstadoCapacidade[]; padrao: EstadoCapacidade; explicacao: string; /** O Orquestrador responde (não há especialização): só a política do projeto vale. */ orquestrador?: true };
 
 export const capacidades: DefCap[] = [
   { id: 'consultar_contexto', rotulo: 'Ler o contexto do projeto', ferramenta: 'contexto_projeto', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Contexto autorizado e, se você habilitou, contextos do projeto. Somente leitura.' },
   { id: 'revisar_cobertura', rotulo: 'Revisar cobertura e riscos', ferramenta: 'revisar_cobertura', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Análise estrutural; não afirma execução.' },
   { id: 'consultar_evidencias', rotulo: 'Consultar evidências', ferramenta: 'consultar_evidencias', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Resultados e logs reais, com integridade.' },
+  { id: 'perguntar_ao_orquestrador', rotulo: 'Perguntar ao Orquestrador (leitura)', ferramenta: 'perguntar_ao_orquestrador', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', orquestrador: true, explicacao: 'O Orquestrador local responde com os dados deste projeto em todas as telas (execuções, logs, métricas, agenda, testes, tickets, agentes). Somente leitura, sem IA externa; nada é gravado.' },
   { id: 'propor_casos', rotulo: 'Propor casos de teste (rascunho)', ferramenta: 'propor_caso', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Cria só um rascunho local com checagem de duplicidade e limite por hora. Publicar no Qase é decisão da pessoa.' },
   { id: 'propor_bugs', rotulo: 'Propor bugs (rascunho)', ferramenta: 'propor_bug', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Cria só um rascunho local. Abrir o bug no Jira é decisão da pessoa.' },
   { id: 'propor_aprendizado', rotulo: 'Propor aprendizado (rascunho)', ferramenta: 'propor_aprendizado', editavel: ['PERMITIDO', 'BLOQUEADO'], padrao: 'PERMITIDO', explicacao: 'Sugere um conhecimento para o banco do agente como RASCUNHO, com limite por hora. Só a pessoa aprova no Cérebro.' },
@@ -36,7 +37,8 @@ export const especializacoes = [
   { id: 'acessibilidade', rotulo: 'Acessibilidade', skill: 'backend/agentes/skills/acessibilidade', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos', 'propor_aprendizado'], profissao: 'Especialista em Acessibilidade', especialidade: 'Barreiras de uso e navegação' },
   { id: 'investigacao-bugs', rotulo: 'Investigação de Bugs', skill: 'backend/agentes/skills/investigacao-bugs', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_bugs', 'propor_aprendizado'], profissao: 'Analista de Defeitos', especialidade: 'Reprodução e investigação de falhas' },
   { id: 'regressao', rotulo: 'Regressão', skill: 'backend/agentes/skills/regressao', capacidades: ['executar_testes', 'consultar_evidencias', 'propor_bugs', 'propor_aprendizado'], profissao: 'Engenheiro de Regressão', especialidade: 'Execuções e rotinas autorizadas' },
-  { id: 'monitoramento', rotulo: 'Monitoramento de Alterações', skill: 'backend/agentes/skills/monitoramento', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_aprendizado'], profissao: 'Analista de Qualidade', especialidade: 'Histórico e alterações observadas' }
+  { id: 'monitoramento', rotulo: 'Monitoramento de Alterações', skill: 'backend/agentes/skills/monitoramento', capacidades: ['consultar_contexto', 'consultar_evidencias', 'propor_aprendizado'], profissao: 'Analista de Qualidade', especialidade: 'Histórico e alterações observadas' },
+  { id: 'ui-ux', rotulo: 'UI e UX', skill: 'backend/agentes/skills/ui-ux', capacidades: ['consultar_contexto', 'revisar_cobertura', 'propor_casos', 'propor_aprendizado'], profissao: 'Designer de Produto', especialidade: 'Usabilidade, acessibilidade e clareza visual' }
 ] as const;
 
 export const idsEsp = especializacoes.map(e => e.id);
@@ -74,23 +76,25 @@ type Personalidade = { tom: string; foco: string; aberturas: string[]; assinatur
  */
 export const agentesChat: AgenteChat[] = [
   { id: 'orquestrador', nome: 'Prumo Orchestrator', especializacao: null, dominio: 'Conversa, roteamento e guia do sistema', aba: 'inicio', rotulo: 'Início',
-    palavras: ['ola', 'oi', 'bom dia', 'boa tarde', 'boa noite', 'ajuda', 'como faco', 'como funciona', 'onde fica', 'o que voce faz', 'tema', 'idioma', 'configur~', 'vincul~', 'conect~', 'instal~', 'atualiz~', 'banco de conhecimento', 'beekeeper', 'cerebro'] },
+    palavras: ['ola', 'oi', '!meu perfil', 'bom dia', 'boa tarde', 'boa noite', 'ajuda', 'como faco', 'como funciona', 'onde fica', 'o que voce faz', 'tema', 'idioma', 'configur~', 'vincul~', 'conect~', 'instal~', 'atualiz~', 'banco de conhecimento', 'beekeeper', 'cerebro'] },
   { id: 'qa-geral', nome: 'QA Geral', especializacao: 'qa-geral', dominio: 'Situação do projeto, estratégia, riscos e testes exploratórios', aba: 'testes', rotulo: 'Testes',
-    palavras: ['situacao', 'status', 'resumo', 'qualidade', 'proposta', 'rascunho', 'caso de teste', 'casos', 'cenario', 'plano', 'cobertura geral', 'meus testes', '!risco', 'estrategi~', '!exploratori~', 'heuristic~', 'prioriz~', 'prioridade', 'charter', 'sessao', 'piramide', 'manual', 'manuais', 'tecnica'] },
+    palavras: ['situacao', 'status', 'resumo', 'qualidade', 'proposta', 'rascunho', 'caso de teste', 'casos', 'cenario', 'plano', 'cobertura geral', 'meus testes', '!risco', '!risk', 'priorit~', 'test case', 'estrategi~', '!exploratori~', 'exploratory', 'heuristic~', 'prioriz~', 'prioridade', 'charter', 'sessao', 'piramide', 'manual', 'manuais', 'tecnica'] },
   { id: 'requisitos', nome: 'Análise de Requisitos', especializacao: 'requisitos', dominio: 'Contextos aprovados, requisitos, histórias e lacunas', aba: 'contextos', rotulo: 'Contextos',
-    palavras: ['!requisito', 'regra', 'criterio', 'aceite', 'contexto', 'lacuna', 'cobertura', 'rastreab~', 'decisao', 'restricao', 'historia', 'gherkin', 'bdd', 'dado que', 'ambigu~', 'testavel'] },
+    palavras: ['!requisito', '!requirement~', 'regra', 'criterio', 'aceite', 'contexto', 'lacuna', 'cobert~', 'coverage', 'rastreab~', 'decisao', 'restricao', 'historia', '!gherkin', 'bdd', 'dado que', 'ambigu~', 'testavel', 'limite~', 'fronteira', 'boundary', 'perfil', 'gravac~', 'persist~'] },
   { id: 'playwright', nome: 'Automação Playwright', especializacao: 'playwright', dominio: 'Testes de interface (E2E) do repositório', aba: 'testes', rotulo: 'Testes',
     palavras: ['!playwright', 'e2e', 'interface', 'tela', 'navegador', 'browser', 'funcional', 'automacao', 'automatiz~', 'seletor', 'locator', 'page object', 'cypress', 'mobile', 'web'] },
   { id: 'api-rest', nome: 'Testes de API REST', especializacao: 'api-rest', dominio: 'Testes de API e integração do repositório', aba: 'testes', rotulo: 'Testes',
-    palavras: ['!api', 'endpoint', 'rest', 'contrato', 'integracao', 'http', 'status code', 'payload', 'json', 'schema', 'swagger', 'openapi'] },
+    palavras: ['!api', 'endpoint', 'rest', 'contrato', 'integracao', 'http', '!status code', 'codigo de resposta', 'payload', 'json', 'schema', 'swagger', 'openapi'] },
   { id: 'acessibilidade', nome: 'Acessibilidade', especializacao: 'acessibilidade', dominio: 'Testes de acessibilidade do repositório', aba: 'testes', rotulo: 'Testes',
-    palavras: ['!acessib~', 'a11y', 'leitor de tela', 'contraste', 'teclado', 'wcag', 'aria', 'foco visivel', 'zoom'] },
+    palavras: ['!acessib~', '!accessib~', 'a11y', 'leitor de tela', 'contraste', 'teclado', '!wcag', 'aria', 'foco visivel', 'zoom'] },
   { id: 'investigacao-bugs', nome: 'Investigação de Bugs', especializacao: 'investigacao-bugs', dominio: 'Falhas, erros, bloqueios e propostas de bug', aba: 'logs', rotulo: 'Logs',
-    palavras: ['!falh~', '!erro', '!bug', '!quebr~', 'fail', 'failed', 'bloque~', 'blocked', 'log', '!investig~', 'problema', 'defeito', 'trace', 'classific~', 'flaky', 'instavel', 'intermitente', 'causa'] },
+    palavras: ['!falh~', '!erro', '!bug', '!quebr~', 'fail', 'failed', 'bloque~', 'blocked', 'log', '!investig~', 'problema', 'defeito', 'trace', 'classific~', '!flaky', 'instavel', 'intermitente', 'causa'] },
   { id: 'regressao', nome: 'Regressão', especializacao: 'regressao', dominio: 'Execuções, resultados e rotinas agendadas', aba: 'execucoes', rotulo: 'Execuções',
     palavras: ['!regressao', 'execucao', 'execucoes', 'rodou', 'rodada', 'run', 'resultado', 'pass', 'passou', 'smoke', 'agenda', 'rotina', 'proxima', 'agendad~', 'quando roda', 'suite'] },
   { id: 'monitoramento', nome: 'Monitoramento de Alterações', especializacao: 'monitoramento', dominio: 'Histórico de atividades e alterações recentes', aba: 'historico', rotulo: 'Histórico',
-    palavras: ['historico', 'alterac~', 'mudanc~', 'mudou', 'aconteceu', 'atividade', 'recente', 'ultima', 'timeline', 'monitor~', 'metrica', 'grafico'] }
+    palavras: ['historico', 'alterac~', 'mudanc~', 'mudou', 'aconteceu', 'atividade', 'recente', 'ultima', 'timeline', 'monitor~', 'metrica', '!grafico'] },
+  { id: 'ui-ux', nome: 'UI e UX', especializacao: 'ui-ux', dominio: 'Hierarquia visual, fluxos, acessibilidade e linguagem da interface', aba: 'agentes', rotulo: 'Agentes',
+    palavras: ['!ui', '!ux', '!usabilidade', '!design system', '!design', 'layout', 'responsivo', 'jornada', 'protótipo', 'experiencia do usuario', 'microcopy', 'tipografia', 'hierarquia visual'] }
 ].map(a => {
   const perfil = especializacoes.find(s => s.id === a.especializacao);
   return { ...a, profissao: perfil?.profissao ?? 'Coordenador de Qualidade', especialidade: perfil?.especialidade ?? 'Roteamento e orientação local' };
@@ -132,5 +136,7 @@ export const personalidades: Record<string, Personalidade> = {
   regressao: { tom: 'metódico e constante', foco: 'execuções, rotinas e o que mudou desde a última rodada',
     aberturas: ['Regressão aqui{pessoa}.', 'Regressão com os números{pessoa}.', 'Vamos às execuções{pessoa}.'], assinatura: 'Exit code zero valida a rodada, não cada caso.' },
   monitoramento: { tom: 'observador calmo', foco: 'o que mudou, quando e onde',
-    aberturas: ['Monitoramento aqui{pessoa}.', 'Olhando a linha do tempo{pessoa}.', 'Monitoramento com você{pessoa}.'], assinatura: 'Só mostro o que os registros comprovam.' }
+    aberturas: ['Monitoramento aqui{pessoa}.', 'Olhando a linha do tempo{pessoa}.', 'Monitoramento com você{pessoa}.'], assinatura: 'Só mostro o que os registros comprovam.' },
+  'ui-ux': { tom: 'analítico, colaborativo e preciso, sem floreios visuais', foco: 'a tarefa da pessoa, a hierarquia do conteúdo e a acessibilidade',
+    aberturas: ['UI e UX aqui{pessoa}.', 'Vamos conferir a jornada de uso{pessoa}.', 'UI e UX pronto para revisar{pessoa}.'], assinatura: 'Menos ruído, mais clareza; valide com quem usa.' }
 };

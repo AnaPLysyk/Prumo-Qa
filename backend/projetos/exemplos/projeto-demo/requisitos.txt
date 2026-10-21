@@ -2,7 +2,15 @@
 
 R1: Somente Editor pode salvar uma publicação.
 R2: O título deve conter entre 1 e 80 caracteres, inclusive.
+    - "Caractere" é um ponto de código Unicode: um emoji simples conta 1 (41 emojis cabem; 81 não). Sequências compostas
+      (bandeiras, emoji com ZWJ ou com acento combinado) contam cada ponto de código, não cada símbolo visível.
+    - Espaços no início e no fim são ignorados: o título é aparado antes de contar e é gravado aparado.
+      Um título só com espaços fica vazio (0 caracteres) e é recusado.
+    - Título que não seja texto (null, número, objeto) é recusado.
 R3: Uma gravação recusada não altera os dados; uma gravação aceita persiste para a próxima leitura.
+R4: O identificador da publicação deve ser um texto não vazio (espaços não contam). Id vazio, só com espaços ou que não seja texto é recusado.
+
+Respostas: 403 para perfil que não é Editor (verificado primeiro), 422 para id ou título inválido, 200 para gravação aceita.
 
 Dados em memória, sem banco, rede, credenciais ou serviços externos.
 O runner valida regras com assertions reais e grava resultados individuais no arquivo exclusivo da rodada.

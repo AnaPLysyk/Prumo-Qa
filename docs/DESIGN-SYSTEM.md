@@ -122,11 +122,63 @@ caixa e colunas opcionais somem em larguras menores.
 
 ## 7. Aplicação
 
-Grupo B (implementado com o DS): Tickets, Testes (Catálogo, Casos, Suites, Planos,
-Runs, Automação), Agendamentos, Execuções (evidências dentro da execução),
-Rastreabilidade, Suporte e Ajuda.
+Todas as telas seguem o Design System. Projetos, Testes, Tickets e os demais módulos possuem lógica própria, mas o visual (inclusive componentes específicos) vive em `frontend/design-system/`. Não há grupos de telas com folha de estilo própria.
 
-Grupo A (preservado; só correções comprovadas em `ds.css`): Início/Orchestrator,
-chat flutuante, Agentes/Cérebro, Métricas, Histórico, Logs, Conexões e Projetos.
-Correções: barra de Métricas/Histórico e abas de Agentes causavam rolagem
-horizontal entre 831 e 860 px.
+## Aplicação por tela
+
+Toda a apresentação editável reside em `frontend/design-system/`. As pastas de telas não contêm folhas de estilo próprias.
+
+- `estilo.css` e `qc.css`: tokens de cor, temas, tipografia e base da janela.
+- `ds.css` e `ds.js`: componentes reutilizáveis, layout de trabalho e regras de acessibilidade.
+- `estilos-das-telas.parte.css`: única fonte dos estilos específicos de todas as telas. O build a reúne em `dist/renderer/interfaces.css`. Cada seção conserva a indicação da tela de origem.
+- `qc.js`, `orbitas.js` e `robos.js`: identidade visual comum do sistema e dos agentes.
+- `painel-atividades.js`: canvas e apresentação das atividades dos agentes.
+- `modal-de-detalhes.css` e `modal-de-detalhes.js`: detalhes compartilhados.
+
+A IDE de Testes ocupa a janela como área de trabalho: explorador lateral, editor central e painel de contexto, sem cartões sobrepostos. O editor é o CodeMirror local, com `Ctrl+S` e gravação pelo contrato do backend. O login e os componentes do chat conservam sua composição específica, mas seus estilos permanecem no mesmo Design System.
+
+**Contrato de manutenção:** mudar cor, espaçamento, fonte, composição, animação, responsividade ou um componente visual somente em `frontend/design-system/`. Mudar consulta, estado, regra da tela ou pedido IPC em `frontend/<tela>/`. Não editar `dist/`, não reescrever bibliotecas vendorizadas de `frontend/compartilhado/vendor/`, não duplicar CSS e não criar pastas só para dividir funções pequenas.
+
+Os auxiliares visuais de formulários (`botao`, `campoPlataforma`, `dadosVisiveis` e `faltaEspaco`) também residem em `frontend/design-system/ds.js`, e não criam arquivos adicionais por tela.
+
+## Acabamento visual e bibliotecas
+
+O Prumo mantém a própria identidade: temas, tipografia, espaçamentos, componentes e estilos ficam em `frontend/design-system/`; a lógica fica na tela. **Usar uma biblioteca não significa trocar o Design System nem instalar um framework novo.** Bibliotecas precisam resolver um componente difícil, preservar o uso offline do Electron, respeitar CSP, acessibilidade e ter licença compatível. O código distribuído deve ser local, versionado e com sua atribuição.
+
+Ordem de adoção, somente quando a necessidade surgir na tela:
+- **Lucide (ícones):** candidato à padronização dos SVGs. Antes de instalar, comparar com `DS.icone()`, já centralizado, e evitar manter dois catálogos que façam a mesma coisa.
+- **Floating UI 1.8.0 (integrado):** `DS.info` posiciona dicas com `offset` + `flip` + `shift` e acompanhamento do alvo. O bundle local (~16 KB) está em `frontend/compartilhado/vendor/floating-ui-1.8.0.min.js`, com licença `FLOATING-UI-LICENSE.txt` e cópia declarada em `frontend/recursos.json`. É carregado antes de `ds.js`; o app não usa CDN e mantém o `<dialog>` nativo. Novos menus podem reutilizar a biblioteca se houver colisão comprovada.
+- **Tom Select (seleção pesquisável):** listas longas de projetos, contas ou recursos; listas pequenas continuam com seletor simples.
+- **flatpickr (datas):** agenda e filtros de período, quando o controle nativo não atender o fluxo de usuário.
+- **Plotly.js (gráficos):** métricas que exigem interação; tabelas e números simples não precisam da biblioteca.
+- **Driver.js (guia pontual):** opção para mostrar uma primeira ação numa tela complexa, somente se um teste de uso comprovar necessidade; não criar tours obrigatórios nem painéis explicativos novos.
+
+CodeMirror e Three.js já existem no aplicativo como bibliotecas locais. Não adicionar React, shadcn/ui, React Hook Form ou XYFlow ao renderer inteiro para fazer formulários comuns; essas opções só fazem sentido mediante decisão de arquitetura e necessidade comprovada.
+
+**Padrão de revisão por agentes (QA geral, Acessibilidade, Playwright e Regressão):** cada estado vazio mostra o que falta e uma ação clara (uma linha de apoio apenas quando necessária); formulários dão nome exato ao campo e ao botão, sem parágrafos repetidos; dados de origem/limitações aparecem perto da ação ou no ícone ⓘ, mas avisos críticos ficam visíveis. Uma ação principal por área, nada de cartão dentro de cartão ou efeitos desnecessários. Verificar com o Electron real: temas claro/escuro, janela estreita, contraste, foco, leitura por teclado, textos longos, rolagem horizontal, estado sem dados, sucesso e falha. Validar a mudança com inspeção, revisor independente e testes existentes. O modal **Minha conta** usa `DS.modal`, `DS.abasModal`, `DS.secao` e estilos `.ds-conta-*` em `ds.css` como exemplo desse padrão.
+
+## Mapa visual de conexões por projeto
+
+A tela **Projetos** apresenta uma lista compacta. Abrir um projeto mostra um **mapa de origem**, com um núcleo Prumo QA e cinco ramificações independentes:
+
+- **Manual / Prumo:** casos, tickets e propostas mantidos no próprio Prumo, sem fornecedor obrigatório.
+- **Jira:** projeto externo de gestão/requisitos. Mostra a chave efetivamente vinculada e o estado de validação.
+- **Qase:** projeto externo de casos e gestão de qualidade. Mostra a identidade específica da conta vinculada.
+- **GitHub:** repositório de código. Mostra o repositório escolhido e oferece trazer a cópia para o computador quando ainda não há pasta local.
+- **Pasta local:** diretório vinculado para a IDE e automações. Pode ser escolhido ou trocado pela confirmação nativa.
+
+Cada ramificação exibe a condição real **vinculado/não vinculado**, o identificador de origem e comandos adequados: **Conectar**, **Verificar**, **Remover**, **Escolher pasta** ou **Trocar pasta**. O desenho não pressupõe equivalência entre projetos de serviços diferentes e não cria vínculos apenas pelo nome. **Conectar** abre a lista real da conta e exige confirmação antes de persistir. **Remover** usa o contrato existente e não exclui dados remotos. Os metadados completos ficam recolhidos em *Detalhes técnicos* para a tela permanecer limpa.
+
+O mapa é só uma **representação dos vínculos**: não é o orquestrador de testes, não executa pipelines e não transfere dados entre fornecedores. O isolamento continua garantido por ID de projeto e por ID da conta/recurso. Alterar os vínculos de um projeto só reflete naquele projeto, inclusive ao abrir a IDE e os fluxos de Testes/Tickets.
+
+**Para fazer manutenção:** a regra de cada botão, a seleção de conta, os IDs e o estado do projeto ficam em `frontend/projetos/tela-projetos.js`. O componente visual reutilizável `DS.fluxoProjeto` fica em `frontend/design-system/ds.js`, e **todos** os seus estilos, linhas, estados, tamanhos e comportamento responsivo ficam em `frontend/design-system/ds.css`. Não crie outro componente por fornecedor, nem folha de estilo na pasta da tela. O seletor GitHub usa o mesmo fluxo de importação de Jira/Qase, com uma opção extra de clonagem local.
+
+**Editor de conexões:** o desenho usa portas circulares e cabos SVG calculados pelas posições reais dos módulos. Apenas o projeto interno (Manual) e os serviços efetivamente vinculados têm cabo; serviços desconectados têm portas livres. Clicar na porta livre abre a escolha da conta, recurso ou pasta; clicar numa porta vinculada permite conferir ou trocar a pasta, conforme o serviço. O cabo não simula sincronização, execução nem associação cruzada. A conexão acontece ao escolher um recurso real e confirmar no backend. Em janelas estreitas, a bancada reorganiza os módulos sem esconder as ações. Todas as regras visuais continuam no Design System, sem novos arquivos.
+
+## Conexões dentro de cada projeto
+
+A tela independente **Conexões** foi incorporada a **Projetos**. Cada projeto de qualidade tem o painel expansível **Configurar contas, vínculos e permissões deste projeto**. A autorização de conta do Jira, Qase ou GitHub continua armazenada no cofre e pode ser reutilizada, mas a escolha do recurso, os vínculos, o histórico de operações, a pasta local e a permissão de escrita são **por projeto**. Remover uma credencial compartilhada pode afetar outros projetos; remover um vínculo não remove a credencial nem modifica o recurso remoto.
+
+É possível autorizar uma conta antes de importar o primeiro projeto em **Projetos > Autorizar contas para importar projetos**. A integração Qase por token e sua prévia permanecem nessa área. O painel externo não é mais uma tela ou entrada do menu. A apresentação foi consolidada em frontend/projetos/tela-projetos.js, sem acrescentar arquivos.
+
+O seletor lateral troca o ID do projeto ativo, atualiza o nome e renova o conteúdo dos módulos pela navegação comum. No menu, as legendas de Tickets e Testes mostram as fontes habilitadas para o projeto atual. Funcionalidades manuais continuam disponíveis independentemente das conexões. O contexto visual do menu fica em frontend/compartilhado/navegacaoDaJanela.js; sua aparência em frontend/design-system/ds.css. Credenciais e validações de API permanecem no backend de conexões por segurança.

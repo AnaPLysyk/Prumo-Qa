@@ -64,8 +64,8 @@ function listarContextos(projeto: Projeto, filtro: Filtro = {}, base?: string) {
 }
 
 /** Consulta de contexto da tela, com projeto previamente vinculado e validado. */
-export const listarContextosDaPasta = async (raiz: string, filtro: Filtro = {}) =>
-  listarContextos(await abrirProjetoVinculado(raiz), filtro);
+export const listarContextosDaPasta = async (raiz: string, filtro: Filtro = {}, base?: string) =>
+  listarContextos(await abrirProjetoVinculado(raiz, base), filtro, base);
 
 /** Obtém somente o contexto solicitado, com versões e trilha de alterações. */
 export function obterContexto(projeto: Projeto, id: string, base?: string) {

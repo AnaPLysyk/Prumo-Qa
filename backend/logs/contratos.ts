@@ -1,7 +1,7 @@
 /** Lógica e contratos de logs: operações relacionadas no mesmo módulo. */
 import { z } from "zod";
 
-export const ferramentas = ['contexto_projeto','revisar_cobertura','executar_validacao','consultar_evidencias','listar_politicas','propor_caso','propor_bug','propor_aprendizado','desconhecida'] as const;
+export const ferramentas = ['contexto_projeto','revisar_cobertura','executar_validacao','consultar_evidencias','perguntar_ao_orquestrador','listar_politicas','propor_caso','propor_bug','propor_aprendizado','desconhecida'] as const;
 
 export const estados = ['STARTED','OK','NOT_VERIFIED','PASS','FAIL','BLOCKED','NOT_RUN','ERROR'] as const;
 

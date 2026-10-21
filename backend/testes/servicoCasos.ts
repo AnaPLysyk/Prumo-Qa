@@ -10,6 +10,7 @@ import { listarPropostas } from "../tickets/banco/tickets.js";
 export function salvarCasoLocal(entrada: z.input<typeof entradaCasoLocal>, base?: string) {
   const p = entradaCasoLocal.parse(entrada);
   const projeto = obterEspaco(p.espacoId, base);
+  if(projeto.manualAtivo===false)throw new Error('MANUAL_DISABLED');
   if (projeto.vinculos.some(v => v.servico === 'qase')) throw new Error('LOCAL_CASE_QASE_LINKED');
   const registro = lerRepositorioLocal(base);
   const originais = listarRepositorioLocal(p.espacoId, base);
@@ -37,6 +38,7 @@ export function salvarCasoLocal(entrada: z.input<typeof entradaCasoLocal>, base?
 
 export function salvarSuiteLocal(entrada: z.input<typeof entradaSuiteLocal>, base?: string) {
   const p = entradaSuiteLocal.parse(entrada); const projeto = obterEspaco(p.espacoId, base);
+  if(projeto.manualAtivo===false)throw new Error('MANUAL_DISABLED');
   if (projeto.vinculos.some(v => v.servico === 'qase')) throw new Error('LOCAL_SUITE_QASE_LINKED');
   const repo = lerRepositorioLocal(base);
   const atual = p.id ? repo.suites.find(s => s.id === p.id && s.espacoId === p.espacoId) : undefined;

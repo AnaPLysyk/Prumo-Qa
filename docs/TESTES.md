@@ -48,6 +48,12 @@ npm run test:prumo:regressao
 
 O executor `automacao/prumo-qa/executar.mjs` copia temporariamente os arquivos externos para a estrutura esperada pelas fixtures existentes, executa os testes contra o Prumo QA compilado e apaga apenas os arquivos que ele próprio criou. Se encontrar um arquivo no destino, recusa sobrescrevê-lo. Dados, perfis reais e credenciais externas não são necessários.
 
+## Abrir o front-end no Prumo Lab
+
+Para homologar telas sem usar o e-mail real, compile o Prumo QA (`npm run build`) e, no repositório irmão `Prumo-QA-Lab/`, execute `npm run app:lab`. A janela **Prumo QA — LAB** abre com conta fictícia. O Lab envia o código de cadastro para uma caixa HTTP local em memória, lê e confirma esse código pelo IPC normal, sem pular a validação de identidade. Cada abertura cria um perfil de dados temporário, separado dos perfis instalados; ao fechar a janela, os dados são apagados. As credenciais do terminal não são repassadas ao Electron; não são usados Render, Neon nem Resend.
+
+Para verificar a navegação completa no aplicativo real e o isolamento entre projetos, execute `npm run test:prumo:e2e` no Lab. Esse fluxo não substitui a homologação do cadastro central com e-mail verdadeiro e domínio validado.
+
 ## Pipeline de publicação
 
 Em *pull requests* e pushes, o GitHub Actions valida tipos, build e testes unitários do Prumo QA. Nas tags de release Windows, também exige integração, E2E, smoke e regressão pelo Prumo QA Lab. A pipeline continua gerando e verificando instaladores conforme suas regras.

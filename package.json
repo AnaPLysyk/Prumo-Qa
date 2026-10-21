@@ -1,6 +1,6 @@
 {
   "name": "prumo-qa",
-  "version": "2.18.0",
+  "version": "2.19.0",
   "description": "Engenharia de qualidade local: contexto, contratos, MCP, evidências e aplicativo desktop Windows",
   "private": true,
   "license": "UNLICENSED",
@@ -25,6 +25,7 @@
     "test:frontend": "node testes/unitario/executar.mjs --camada frontend",
     "prumo": "node dist/cli.js",
     "app": "npm run build && electron .",
+    "app:homologacao": "npm run build && node scripts/iniciar-homologacao.mjs",
     "icone": "electron site/release/gerar-icones.cjs",
     "dist": "npm run build && electron-builder --win nsis --publish never",
     "dist:mac": "npm run build && electron-builder --mac dmg --arm64 --x64 --publish never",

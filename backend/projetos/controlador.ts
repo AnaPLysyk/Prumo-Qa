@@ -6,8 +6,9 @@ import { contextoCompleto } from "../agentes/mcp/consultasDoProjeto.js";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
 import { obterEspaco } from "./banco/projetos.js";
 import { criarEspaco } from "./servicoProjetos.js";
-import { editarEspaco } from "./servicoProjetos.js";
+import { editarEspaco, configurarManualDoEspaco } from "./servicoProjetos.js";
 import { listarEspacos } from "./banco/projetos.js";
+import { donoDoRecurso } from "./unicidadeDosVinculos.js";
 import { dialog, app } from "electron";
 import { confirmarNoWindows } from "../aplicativo/janela/controleDaJanela.js";
 import { vincularPastaDoDisco } from "./servicoProjetos.js";
@@ -16,6 +17,7 @@ import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
 import { clonarOuAtualizarRepositorio, repositorioValido } from "./servicoRepositorioGit.js";
 import { raizDoAplicativo } from "../compartilhado/raizDoAplicativo.js";
 import { adicionarVinculo } from "./servicoProjetos.js";
+import { servicosDoAplicativo } from "../conexoes/regras/nucleoServicos.js";
 import { copiarDemonstracao } from "./servicoRepositorioGit.js";
 import { desvincularPasta } from "./servicoProjetos.js";
 import { gravarContratoProposto } from "./servicoProjetos.js";
@@ -25,13 +27,47 @@ import { situacaoProjeto } from "./servicoProjetos.js";
 import { listarPastasVinculadas } from "./servicoProjetos.js";
 import { visaoGeralDoProjeto } from "./servicoProjetos.js";
 
+import { arvoreDoRepositorio, lerArquivoDoRepositorio, gravarArquivoDoRepositorio } from "./ideRepositorio.js";
+
+function pastaParaIde(espacoId: string) { const e = obterEspaco(espacoId); if (!e.pastaLocal) throw new Error('IDE_SEM_REPOSITORIO'); return { e, pasta: e.pastaLocal }; }
+export const ideArvore: TratadorDoCanal<'ide:arvore'> = a => arvoreDoRepositorio(pastaParaIde(a.espacoId).pasta);
+export const ideArquivo: TratadorDoCanal<'ide:arquivo'> = a => lerArquivoDoRepositorio(pastaParaIde(a.espacoId).pasta, a.arquivo);
+export const ideGravar: TratadorDoCanal<'ide:gravar'> = async (a, j) => {
+  const { e, pasta } = pastaParaIde(a.espacoId);
+  const detalhe = 'Pasta: ' + pasta + '\nArquivo: ' + a.arquivo + '\nNada será executado, publicado ou enviado ao GitHub.';
+  if (!await confirmarNoWindows(j, 'Salvar código local', 'Gravar alterações no projeto ' + e.nome + '?', detalhe, 'Salvar arquivo')) return { canceled: true };
+  return gravarArquivoDoRepositorio(pasta, a.arquivo, a.conteudo, a.hashBase);
+};
+
 export const espacosAssociar: TratadorDoCanal<'espacos:associar'> = a=>associarEspaco(a.id,a.dados);
 
 export const espacosAutomacoes: TratadorDoCanal<'espacos:automacoes'> = async a=>{const e=obterEspaco(a.id);const k6=(await localizarK6())!==null;if(!e.pastaLocal)return {pastaLocal:null,estado:'SEM_PASTA',frameworks:[],capacidades:[],k6Disponivel:k6};const p=await carregarProjeto(e.pastaLocal);const c=await contextoCompleto(p);return {pastaLocal:p.raiz,estado:'INTEGRADO',frameworks:c.frameworks,capacidades:Object.keys(p.manifesto.commands),readOnly:p.manifesto.execution.readOnly,k6Disponivel:k6};};
 
 export const espacosCriar: TratadorDoCanal<'espacos:criar'> = a=>criarEspaco(a);
 
+/** Cada recurso diz se já está em algum projeto do Prumo (e qual), para a tela não oferecer o que não pode ser vinculado de novo. */
+export const projetosRecursos: TratadorDoCanal<'projetos:recursos'> = async a => {
+  const lista = await servicosDoAplicativo.listar(a.conexaoId, a.pagina);
+  const servico = servicosDoAplicativo.contas().find(c => c.id === a.conexaoId)?.servico;
+  const espacos = listarEspacos();
+  return { ...lista, recursos: lista.recursos.map(r => { const dono = servico ? donoDoRecurso(espacos, servico, r) : null; return { ...r, usadoPor: dono ? { id: dono.id, nome: dono.nome } : null }; }) };
+};
+export const projetosVincular: TratadorDoCanal<'projetos:vincular'> = async(a,j) => {
+  const e=obterEspaco(a.espacoId);
+  if(!await confirmarNoWindows(j,'Vincular serviço ao projeto',`Vincular ${a.recurso.nome} a ${e.nome}?`,
+    `Recurso: ${a.recurso.chave}\nOrigem: ${a.recurso.instancia}\nO recurso será revalidado e só este projeto receberá o vínculo. Nenhum dado externo será modificado.`,'Vincular')) return {canceled:true};
+  return servicosDoAplicativo.vincular(a.espacoId,a.conexaoId,a.recurso);
+};
+
+/** Importação sem correspondência automática: cada recurso escolhido ganha o seu próprio espaço. */
+export const projetosImportar: TratadorDoCanal<'projetos:importar'> = async (a,j) => {
+  if (!await confirmarNoWindows(j,'Importar projeto de serviço',`Criar projeto Prumo para ${a.recurso.nome}?`,
+    `Origem: ${a.recurso.instancia}\nRecurso: ${a.recurso.chave}\nNenhuma conexão com outro serviço será criada. Nenhum dado externo será modificado.`,'Importar')) return {canceled:true};
+  return servicosDoAplicativo.importarProjeto(a.conexaoId,a.recurso);
+};
+
 export const espacosEditar: TratadorDoCanal<'espacos:editar'> = a=>editarEspaco(a.id,a.dados);
+export const espacosManual: TratadorDoCanal<'espacos:manual'> = a=>configurarManualDoEspaco(a.id,a.ativo);
 
 export const espacosListar: TratadorDoCanal<'espacos:listar'> = ()=>listarEspacos();
 

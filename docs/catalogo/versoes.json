@@ -2,6 +2,52 @@
   "schemaVersion": 1,
   "versions": [
     {
+      "version": "2.19.0",
+      "status": "repositorio",
+      "date": null,
+      "title": "Importar com destino claro e painel de conexões arrastável",
+      "objective": "Deixar claro para onde cada importação vai, mostrar as conexões do projeto com a contagem certa e explicar em português as falhas de serviço.",
+      "features": [
+        "Importar pergunta primeiro de onde vem (Qase, Jira, GitHub, pasta do computador ou projeto manual) e depois decide: projeto novo, que nasce só com aquela conexão, ou vincular a um projeto que ainda não tem aquele serviço.",
+        "Painel de conexões com módulos e núcleo arrastáveis; a posição fica guardada por projeto e os cabos acompanham. Reorganizar volta ao desenho original.",
+        "Trilha de navegação nos painéis de projeto e no fluxo de importação.",
+        "Modo Só ver ou Integrado por ligação, com explicação no ⓘ."
+      ],
+      "improvements": [
+        "Trocar projeto mostra quantas conexões cada projeto tem e quais (Jira, Qase, GitHub e pasta local), sem contar as desligadas e o Manual.",
+        "Ícones próprios para cada origem, cinza quando desligada e com a cor da marca quando conectada.",
+        "Botões menores em telas e modais.",
+        "Códigos de serviço soltos, como SERVICE_NOT_FOUND, viram frases em português, com o código só como detalhe.",
+        "Os agentes recebem o mapa de vínculos do projeto selecionado e não misturam projetos."
+      ],
+      "fixes": [
+        "O arrasto no painel não impede o clique no emblema que abre a conexão.",
+        "A mesma pasta, projeto ou repositório não fica em dois projetos.",
+        "Em janela estreita as posições guardadas são ignoradas e voltam quando a janela alarga."
+      ],
+      "differential": "Cada projeto do Prumo acompanha um destino por ferramenta, e importar nunca decide sozinho onde o recurso entra.",
+      "howItWorks": [
+        "Projetos › Importar: escolha a origem, escolha o recurso e decida entre projeto novo ou projeto existente.",
+        "Arraste módulos e núcleo para organizar o painel; Reorganizar desfaz.",
+        "Em Só ver o Prumo apenas lê; em Integrado publica com a sua confirmação."
+      ],
+      "security": [
+        "Importar e vincular não enviam dados sem a sua escolha; nenhuma conexão é associada por semelhança de nome."
+      ],
+      "compatibility": [
+        "Projetos, contas e conexões existentes são preservados."
+      ],
+      "limitations": [
+        "Conectar pelo navegador depende do serviço de identidade do Prumo; sem ele, o caminho é o token de API.",
+        "A posição das conexões fica neste computador."
+      ],
+      "releaseUrl": null,
+      "migration": "Não precisa migrar.",
+      "afterUpdate": [
+        "Abrir Projetos e conferir o novo fluxo Importar."
+      ]
+    },
+    {
       "version": "2.18.0",
       "status": "publicada",
       "date": "2026-10-17",

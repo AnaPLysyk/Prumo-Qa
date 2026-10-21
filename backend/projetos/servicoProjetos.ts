@@ -15,6 +15,7 @@ import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { consultarAtividades } from "../logs/regras/iniciarAtividade.js";
 import { calcularMetricas } from "../metricas/servico.js";
+import { exigirPastaLivre, exigirRecursoLivre } from "./unicidadeDosVinculos.js";
 
 // ── servicoContrato ──
 /** Grava a proposta aprovada sem sobrescrever nada e confere com o mesmo validador do núcleo; se não passar, desfaz. */
@@ -98,7 +99,7 @@ export function resumirContratoProposto(p: PropostaContrato) {
 }
 
 // ── servicoProjetos ──
-export const abrirProjetoVinculado = (raiz: string) => projetoVinculado(raiz, diretorioDados());
+export const abrirProjetoVinculado = (raiz: string, base?: string) => projetoVinculado(raiz, diretorioDados(base));
 
 /** `registradoPeloPrumo`: vínculo criado por um fluxo do Prumo (ex.: bug aberto a partir de uma falha), nunca deduzido por nome. */
 export function associarEspaco(id:string,dados:z.input<typeof associacaoSchema>,base?:string,registradoPeloPrumo=false){const d=associacaoSchema.parse(dados);return atualizarEspaco(id,e=>{
@@ -112,15 +113,22 @@ export function associarEspaco(id:string,dados:z.input<typeof associacaoSchema>,
   if(e.relacoes.some(r=>JSON.stringify(r.de)===JSON.stringify(d.de)&&JSON.stringify(r.para)===JSON.stringify(d.para)))throw new Error('TRACE_DUPLICATE');
   e.relacoes.push({...d,id:randomUUID(),at:new Date().toISOString(),estado:'VINCULADO',origemRegistro:registradoPeloPrumo?'REGISTRADO_PELO_PRUMO':'DECLARADO_PELO_USUARIO'});e.relacoes=e.relacoes.slice(-500);eventoEspaco(e,'ASSOCIADO');},base);}
 
-export async function criarEspaco(dados:z.input<typeof dadosEspaco>,base?:string){
-  const d=dadosEspaco.parse(dados);const r=lerEspacos(base);if(r.espacos.length>=200)throw new Error('WORKSPACE_LIMIT');
+export async function criarEspaco(dados:z.input<typeof dadosEspaco>,base?:string,vinculoInicial?:{servico:Servico;conexaoId:string;recurso:Recurso}){
+  const d=dadosEspaco.parse(dados);const novoVinculo=vinculoInicial?vinculoSchema.parse({id:randomUUID(),...vinculoInicial,validadoEm:new Date().toISOString(),estado:'VALIDO'}):null;const r=lerEspacos(base);if(r.espacos.length>=200)throw new Error('WORKSPACE_LIMIT');
+  if(novoVinculo)exigirRecursoLivre(r.espacos,novoVinculo.servico,novoVinculo.recurso);
   const id=randomUUID();let raiz=path.join(diretorioDados(base),'espacos',id);semLinks(raiz);
   fs.mkdirSync(raiz,{recursive:true,mode:0o700});raiz=fs.realpathSync(raiz);
   fs.writeFileSync(path.join(raiz,'qa.project.json'),JSON.stringify({schemaVersion:2,id:'prumo-'+id,name:d.nome,context:{documentation:[],tests:[],code:[]},commands:{},execution:{requireApproval:true,readOnly:true,blockedByDefault:[],environment:'host'}}),{flag:'wx',mode:0o600});
   await adicionarVinculo(raiz,base);
   const atual=lerEspacos(base);if(atual.espacos.length>=200)throw new Error('WORKSPACE_LIMIT');
-  const e:Espaco={id,...d,criadoEm:new Date().toISOString(),raizContextos:raiz,vinculos:[],relacoes:[],historico:[]};eventoEspaco(e,'CRIADO');atual.espacos.push(e);gravarEspacos(atual,base);return e;
+  if(novoVinculo)exigirRecursoLivre(atual.espacos,novoVinculo.servico,novoVinculo.recurso);
+  const e:Espaco={id,...d,criadoEm:new Date().toISOString(),raizContextos:raiz,manualAtivo:true,vinculos:[],relacoes:[],historico:[]};eventoEspaco(e,'CRIADO');if(novoVinculo){e.vinculos.push(novoVinculo);eventoEspaco(e,'VINCULADO',{servico:novoVinculo.servico,vinculoId:novoVinculo.id});}atual.espacos.push(e);gravarEspacos(atual,base);return e;
 }
+
+/** Liga/desliga apenas o módulo local deste projeto, preservando dados já gravados. */
+export function configurarManualDoEspaco(id:string,ativo:boolean,base?:string){return atualizarEspaco(id,e=>{e.manualAtivo=ativo;eventoEspaco(e,'EDITADO');},base);}
+/** Revalida no backend, nunca confia no botão desabilitado da interface. */
+export function exigirManualAtivo(id:string,base?:string){const e=obterEspaco(id,base);if(e.manualAtivo===false)throw new Error('MANUAL_DISABLED: ative Manual/Prumo em Projetos para criar ou editar registros locais.');return e;}
 
 export function editarEspaco(id:string,dados:z.input<typeof dadosEspaco>,base?:string){const d=dadosEspaco.parse(dados);return atualizarEspaco(id,e=>{e.nome=d.nome;e.descricao=d.descricao;eventoEspaco(e,'EDITADO');},base);}
 
@@ -187,6 +195,9 @@ export function registrarConsultaExterna(id:string,servico:Servico,codigo:string
 
 export function registrarEscritaExterna(id:string,servico:Servico,codigo:string,base?:string){return atualizarEspaco(id,e=>eventoEspaco(e,'ESCRITA',{servico,codigo}),base);}
 
+/** Desliga o vínculo remoto no backend sem remover a conta ou o histórico. */
+export function alternarVinculoServico(id:string,servico:Servico,ativo:boolean,base?:string){return atualizarEspaco(id,e=>{const v=e.vinculos.find(x=>x.servico===servico);if(!v)throw new Error('WORKSPACE_LINK_NOT_FOUND');v.desligado=!ativo;eventoEspaco(e,'EDITADO',{servico,vinculoId:v.id});},base);}
+
 export function removerVinculoServico(id:string,servico:Servico,base?:string){return atualizarEspaco(id,e=>{const v=e.vinculos.find(v=>v.servico===servico);if(!v)throw new Error('WORKSPACE_LINK_NOT_FOUND');e.vinculos=e.vinculos.filter(v=>v.servico!==servico);eventoEspaco(e,'REMOVIDO',{servico,vinculoId:v.id});},base);}
 
 export function atualizarEstadoDoVinculo(id:string,servico:Servico,estado:z.infer<typeof vinculoSchema>['estado'],codigo?:string,recurso?:Recurso,base?:string){return atualizarEspaco(id,e=>{const v=e.vinculos.find(v=>v.servico===servico);if(!v)throw new Error('WORKSPACE_LINK_NOT_FOUND');v.estado=estado;if(estado==='VALIDO')v.validadoEm=new Date().toISOString();if(recurso)v.recurso=recurso;eventoEspaco(e,'VALIDACAO',{servico,vinculoId:v.id,...(codigo?{codigo}:{})});},base);}
@@ -199,7 +210,7 @@ export async function projetoVinculado(raiz: string, base?: string): Promise<Pro
 
 export async function vincularPastaAoEspaco(id:string,raiz:string,base?:string){
   obterEspaco(id,base);const s=await situacaoProjeto(raiz);if(s.state!=='INTEGRADO')throw new Error('WORKSPACE_LOCAL_CONTRACT_INVALID');
-  const outra=listarEspacos(base).find(e=>e.id!==id&&e.pastaLocal?.toLowerCase()===s.root.toLowerCase());if(outra)throw new Error('WORKSPACE_LOCAL_DUPLICATE');
+  exigirPastaLivre(listarEspacos(base),s.root,id);
   await adicionarVinculo(s.root,base);return atualizarEspaco(id,e=>{e.pastaLocal=s.root;eventoEspaco(e,'PASTA');},base);
 }
 
@@ -219,6 +230,7 @@ export async function vincularPastaDoDisco(id: string, pasta: string, confirmar:
 
 /** Seleção da lista não é confiança: o adaptador revalida o recurso antes de chamar esta função. */
 export function vincularServicoAoEspaco(id:string,servico:Servico,conexaoId:string,recurso:Recurso,base?:string){
+  exigirRecursoLivre(listarEspacos(base),servico,recurso,id);
   return atualizarEspaco(id,e=>{const antigo=e.vinculos.find(v=>v.servico===servico);if(antigo)throw new Error('WORKSPACE_LINK_EXISTS');
     const v=vinculoSchema.parse({id:randomUUID(),servico,conexaoId,recurso,validadoEm:new Date().toISOString(),estado:'VALIDO'});e.vinculos.push(v);eventoEspaco(e,'VINCULADO',{servico,vinculoId:v.id});},base);
 }

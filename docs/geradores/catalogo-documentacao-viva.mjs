@@ -92,6 +92,7 @@ export function gerarArquivosDosCanais() {
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   const destino=path.join(raiz,'aplicativo','api','arquivosDosCanais.ts');
-  fs.writeFileSync(destino,gerarArquivosDosCanais());
+  const texto = gerarArquivosDosCanais();
+  if (!fs.existsSync(destino) || fs.readFileSync(destino,'utf8') !== texto) fs.writeFileSync(destino,texto);
   console.log('Catálogo de canais da Documentação Viva atualizado.');
 }

@@ -3,6 +3,8 @@ import { matrizDePoliticas } from "../servicoPoliticas.js";
 import { agentesChat, Papel } from "../tipos/persona.js";
 import { especializacoes } from "../tipos/persona.js";
 import { regrasDosAgentes } from "../../administracao/servico.js";
+import { contaDaSessao } from "../../login/regras/sessao.js";
+import { lerPreferenciasDosAgentes } from "../regras/agentesPessoais.js";
 import { SEGUIMENTO, Turno, Proximo } from "../tipos/chat.js";
 import { semAcentos } from "../../compartilhado/texto.js";
 import { listarTrechosDeSkill } from "../banco/skills.js";
@@ -16,7 +18,8 @@ import { termosDaFrase } from "../regras/normalizacaoDoConhecimento.js";
 /** Apresenta na interface somente agentes habilitados e capacidades efetivas do projeto. */
 export function agentesDoChat(espacoId: string | null, base?: string) {
   const matriz = espacoId ? matrizDePoliticas(espacoId, base) : [];
-  const desligados = regrasDosAgentes(base).desligados;
+  const regras = regrasDosAgentes(base); const desligados = regras.desligados;
+  const usuario = contaDaSessao(base); const meus = usuario ? lerPreferenciasDosAgentes(usuario.id, base) : {};
 
   return agentesChat
     .filter(agente => agente.id === 'orquestrador' || !desligados.includes(agente.id))
@@ -27,10 +30,10 @@ export function agentesDoChat(espacoId: string | null, base?: string) {
 
       return {
         id: agente.id,
-        nome: agente.nome,
+        nome: meus[agente.id]?.apelido || regras.perfis[agente.id]?.nome || agente.nome,
         dominio: agente.dominio,
-        profissao: agente.profissao,
-        especialidade: agente.especialidade,
+        profissao: regras.perfis[agente.id]?.profissao ?? agente.profissao,
+        especialidade: regras.perfis[agente.id]?.especialidade ?? agente.especialidade,
         especializacao: agente.especializacao,
         aba: agente.aba,
         // Marcadores internos ! e ~ não são mostrados na interface.
@@ -65,11 +68,15 @@ export function escolherAgente(
   const frase = palavras.join(' ');
 
   const rota = ativos.map(agente => {
+    // Em empate de pontos, vence quem casou primeiro na pergunta (o assunto vem antes do complemento).
+    let primeiraPosicao = Infinity;
     const pontosVocabulário = agente.palavras.reduce((soma, termo) => {
       const forte = termo.startsWith('!');
       const palavra = forte ? termo.slice(1) : termo;
-      if (!termoCasaComPergunta(palavra, palavras, frase)) return soma;
+      const posicao = posicaoDoTermo(palavra, palavras, frase);
+      if (posicao < 0) return soma;
 
+      primeiraPosicao = Math.min(primeiraPosicao, posicao);
       const peso = forte ? 3 : palavra.replace('~', '').length > 5 ? 2 : 1;
       return soma + peso;
     }, 0);
@@ -82,8 +89,8 @@ export function escolherAgente(
       (mencionouAgente ? 10 : 0) +
       Math.min(6, extras.aprendidos?.[agente.id] ?? 0);
 
-    return { agente: agente.id, pontos };
-  }).sort((a, b) => b.pontos - a.pontos);
+    return { agente: agente.id, pontos, primeiraPosicao };
+  }).sort((a, b) => b.pontos - a.pontos || a.primeiraPosicao - b.primeiraPosicao);
 
   const melhor = rota[0]!;
   const ultimo = extras.historico?.at(-1);
@@ -104,7 +111,7 @@ export function escolherAgente(
 
   return {
     agente: escolhido,
-    rota: rota.filter(item => item.pontos > 0).slice(0, 4),
+    rota: rota.filter(item => item.pontos > 0).slice(0, 4).map(({ agente, pontos }) => ({ agente, pontos })),
     continuou
   };
 }
@@ -139,13 +146,33 @@ export function skillDoAgente(
 
 export const palavrasDaPergunta = (p: string) => semAcentos(p).split(/[^a-z0-9@]+/).filter(Boolean);
 
-/** Diz se um termo aparece na pergunta (frase exata, prefixo~ ou palavra). */
+/**
+ * Termo simples = palavra inteira (com plural); "~" = início de palavra; com espaço = expressão a partir do início de uma palavra.
+ * Termos simples de 10 letras ou mais toleram erro de digitação (até um terço das letras, mesmas 3 letras iniciais).
+ * Devolve a posição da primeira palavra que casou, ou -1.
+ */
+export function posicaoDoTermo(termo: string, palavras: string[], frase: string) {
+  if (termo.includes(' ')) {
+    const inicio = (' ' + frase).indexOf(' ' + termo);
+    return inicio < 0 ? -1 : (' ' + frase).slice(0, inicio).split(' ').length - 1;
+  }
+  if (termo.endsWith('~')) { const r = termo.slice(0, -1); return palavras.findIndex((w) => w.startsWith(r)); }
+  const exata = palavras.findIndex((w) => w === termo || w === termo + 's' || w === termo + 'es');
+  if (exata >= 0 || termo.length < 10) return exata;
+  return palavras.findIndex((w) => w.length >= 8 && w.slice(0, 3) === termo.slice(0, 3) && distanciaDeEdicao(w, termo) <= Math.floor(termo.length / 3));
+}
 
-/** Termo simples = palavra inteira (com plural); "~" = início de palavra; com espaço = expressão a partir do início de uma palavra. */
-export function termoCasaComPergunta(termo: string, palavras: string[], frase: string) {
-  if (termo.includes(' ')) return (' ' + frase).includes(' ' + termo);
-  if (termo.endsWith('~')) { const r = termo.slice(0, -1); return palavras.some((w) => w.startsWith(r)); }
-  return palavras.some((w) => w === termo || w === termo + 's' || w === termo + 'es');
+export const termoCasaComPergunta = (termo: string, palavras: string[], frase: string) => posicaoDoTermo(termo, palavras, frase) >= 0;
+
+/** Distância de Levenshtein entre duas palavras curtas. */
+function distanciaDeEdicao(a: string, b: string) {
+  let anterior = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const atual = [i];
+    for (let j = 1; j <= b.length; j++) atual[j] = Math.min(anterior[j]! + 1, atual[j - 1]! + 1, anterior[j - 1]! + (a[i - 1] === b[j - 1] ? 0 : 1));
+    anterior = atual;
+  }
+  return anterior[b.length]!;
 }
 
 /** Devolve os ids dos especialistas, na ordem da pontuação, ou null quando um agente só basta. */
@@ -153,6 +180,16 @@ export function planejarOrquestracao(rota: { agente: string; pontos: number }[])
   const fortes = rota.filter((r) => r.agente !== 'orquestrador' && r.pontos >= limitesOrquestracao.pontosMinimos)
     .sort((a, b) => b.pontos - a.pontos).slice(0, limitesOrquestracao.agentes).map((r) => r.agente);
   return fortes.length >= 2 ? fortes : null;
+}
+
+/** Pedidos explícitos de panorama recebem um diagnóstico de três especialidades, não só o agente com mais palavras-chave.
+ * Sem projeto ou com especialistas desligados, mantém o roteamento normal. Não executa testes nem usa IA externa.
+ */
+export function planejarDiagnosticoQa(pergunta: string, espacoId: string | null, desligados: readonly string[] = []): string[] | null {
+  if (!espacoId || !/(?:diagnostic|auditori|panorama|saude|check.?up|visao geral|analise geral|(?:analise|analisar) (?:da |do |a |o )?qualidade)/.test(semAcentos(pergunta))) return null;
+  if (!/(?:projeto|qualidade|qa|teste|sistema|entrega)/.test(semAcentos(pergunta))) return null;
+  const especialistas = ['regressao', 'investigacao-bugs', 'requisitos'].filter(id => !desligados.includes(id));
+  return especialistas.length >= 2 ? especialistas.slice(0, limitesOrquestracao.agentes) : null;
 }
 
 // ── proximosPassosSugeridos ──
@@ -166,7 +203,7 @@ const sugestaoPorPapel: Record<Papel, Proximo> = {
 
 /** Extrai o número de um fato no formato "falhas=3". */
 const numeroDoFato = (fatos: string[], chave: string): number =>
-  Number(fatos.find(fato => fato.startsWith(chave + '='))?.split('=')[1] ?? NaN);
+  Number(fatos.find(fato => fato.split(':').at(-1)?.startsWith(chave + '='))?.split('=').at(-1) ?? NaN);
 
 export function proximosPassosSugeridos(
   agente: string,
@@ -178,6 +215,11 @@ export function proximosPassosSugeridos(
 
   switch (agente) {
     case 'orquestrador':
+      if (numeroDoFato(fatos, 'fail') > 0) sugestoes.push({ rotulo: 'Revisar execuções com falha', aba: 'execucoes' });
+      else if (numeroDoFato(fatos, 'execucoes') === 0) sugestoes.push({ rotulo: 'Preparar primeira execução', aba: 'testes' });
+      if (numeroDoFato(fatos, 'contextosAprovados') === 0) sugestoes.push({ rotulo: 'Revisar requisitos', aba: 'contextos' });
+      if (numeroDoFato(fatos, 'testesCatalogados') === 0 && numeroDoFato(fatos, 'contextosAprovados') > 0) sugestoes.push({ rotulo: 'Propor casos para os requisitos', aba: 'testes' });
+      if (numeroDoFato(fatos, 'vinculosAusentes') > 0) sugestoes.push({ rotulo: 'Revisar vínculos de casos', aba: 'testes' });
       sugestoes.push(
         { rotulo: 'O que falhou?', pergunta: 'o que falhou?' },
         { rotulo: 'Situação do projeto', pergunta: 'qual a situação do projeto?' },

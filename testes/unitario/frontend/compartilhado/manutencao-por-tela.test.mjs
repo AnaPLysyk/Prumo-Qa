@@ -109,3 +109,19 @@ test('Ajuda e notificações têm fonte própria carregada após o runtime', () 
  assert.match(ajudaCodigo,/async function painelVersoes\(/);
  assert.match(notificacoes,/async function iniciarNotificacoes\(/);
 });
+
+test('todas as seções do menu compartilham o Design System', () => {
+ const html=fs.readFileSync('frontend/compartilhado/runtime/index.html','utf8');
+ const fonte=fs.readFileSync('frontend/design-system/ds.js','utf8');
+ const css=fs.readFileSync('frontend/design-system/ds.css','utf8');
+ for (const asset of ['estilo.css','qc.css','ds.css']) assert.ok(html.includes('href="'+asset+'"'), asset);
+ assert.ok(html.includes('src="ds.js"'));
+ const definicao=fonte.match(/const telas = new Set\(\[([^\]]+)\]\)/);
+ assert.ok(definicao, 'registro centralizado das telas');
+ const telas=new Set([...definicao[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
+ const menu=new Set([...html.matchAll(/data-aba="([^"]+)"/g)].map(x=>x[1]));
+ for (const tela of menu) assert.ok(telas.has(tela), 'tela sem Design System: '+tela);
+ assert.match(css, /#conteudo\[data-ds-tela\]/);
+ assert.match(css, /#conteudo\[data-ds-tela="inicio"\]/);
+ assert.match(css, /#conteudo\[data-ds-tela="agentes"\]/);
+});

@@ -37,7 +37,7 @@ const palavrasDoTexto = (texto: string): Set<string> =>
   new Set(textoComparavel(texto).split(' ').filter(palavra => palavra.length > 2));
 
 export function criarProposta(n: NovaProposta, b?: string, agora = new Date()): Proposta {
-  obterEspaco(n.espacoId, b);
+  if(obterEspaco(n.espacoId,b).manualAtivo===false)throw new Error('MANUAL_DISABLED');
 
   const dados = validarDadosDaProposta(n.tipo, n.dados) as Record<string, unknown>;
   const titulo = mascarar(

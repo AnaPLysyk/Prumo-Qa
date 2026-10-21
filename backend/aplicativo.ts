@@ -39,7 +39,7 @@ else {
     // macOS precisa do menu padrão (copiar, colar, sair com ⌘Q); nos outros sistemas a janela não tem menu.
     Menu.setApplicationMenu(process.platform === 'darwin' ? Menu.buildFromTemplate([{ role: 'appMenu' }, { role: 'editMenu' }, { role: 'windowMenu' }]) : null);
     // Nada de rede na janela: só file:// (a própria página) e devtools em desenvolvimento.
-    session.defaultSession.webRequest.onBeforeRequest((d, cb) => cb({ cancel: !(d.url.startsWith('file:') || d.url.startsWith('devtools:')) }));
+    session.defaultSession.webRequest.onBeforeRequest((d, cb) => cb({ cancel: !(d.url.startsWith('file:') || d.url.startsWith('devtools:') || (d.resourceType === 'image' && d.url.startsWith('https://fonts.gstatic.com/s/e/notoemoji/'))) }));
     session.defaultSession.setPermissionRequestHandler((_w, _p, cb) => cb(false));
     // Nenhum erro de bandeja ou worker impede a janela de abrir; o problema aparece como aviso.
     try { criarBandeja(); } catch (err) { empilharAviso({ tipo: 'WORKER_INTERROMPIDO', titulo: 'Bandeja', detalhe: (err as Error).message }); }

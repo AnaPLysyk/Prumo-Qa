@@ -37,6 +37,23 @@ window.PrumoLoginRemoto = ({
     );
   }
 
+  /** Aguarda a verificação remota, oferecendo reenvio e retorno ao login. */
+  function vistaAguardandoConfirmacao(email, reenviado=false) {
+    trocarVista(
+      ...cartao('Confirme seu e-mail', 'Enviamos um link de confirmação. Abra a mensagem, confirme o endereço e depois volte ao Prumo para entrar.'),
+      reenviado ? DS.alerta('Novo link solicitado. Confira a caixa de entrada e o spam.', 'info') : null,
+      DS.alerta('Endereço informado: ' + email, 'info'),
+      formulario([], 'Reenviar e-mail de confirmação', async form => {
+        const resposta = await api.contaCodigo(email, 'CADASTRO');
+        if (!resposta.ok) return mostrarErro(form, resposta.error);
+        vistaAguardandoConfirmacao(email, true);
+      }, [
+        link('Já confirmei meu e-mail — Entrar', () => vistaEntrarRemota(), 'entrada-confirmada'),
+        link('Corrigir e-mail', () => vistaCadastrarRemoto(), 'entrada-corrigir-email')
+      ])
+    );
+  }
+
   /** Novo cadastro fica pendente até a pessoa confirmar o endereço de e-mail. */
   function vistaCadastrarRemoto() {
     const nome = campo('registro-nome', 'Nome', 'text', {
@@ -62,7 +79,7 @@ window.PrumoLoginRemoto = ({
         senha.input.value = '';
         confirmar.input.value = '';
         if (!resposta.ok) return mostrarErro(form, resposta.error);
-        vistaEntrarRemota('Cadastro recebido. Confirme o e-mail pelo link enviado e depois entre com sua senha.');
+        vistaAguardandoConfirmacao(email.input.value.trim().toLowerCase());
       }, [link('Já tenho conta', () => vistaEntrarRemota(), 'entrada-voltar')])
     );
   }

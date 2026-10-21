@@ -10,6 +10,10 @@ export const origemPermitida = pathToFileURL(path.join(rendererDir, 'index.html'
 
 export const versao = app.getVersion();
 
+/** Na homologação, a janela mostra a versão que vai subir (ex.: 2.19.0-homologacao); `versao` segue a do pacote, usada no aviso de atualização e na Ajuda. */
+const versaoEmHomologacao = process.env.PRUMO_AMBIENTE === 'homologacao' ? process.env.PRUMO_VERSAO_HOMOLOGACAO ?? '' : '';
+export const versaoExibida = /^\d+\.\d+\.\d+$/.test(versaoEmHomologacao) ? versaoEmHomologacao + '-homologacao' : versao;
+
 export const arquivoVersoes = path.join(raizDoAplicativo, 'docs', 'catalogo', 'versoes.json');
 
 export type Resposta = { ok: true; data: unknown } | { ok: false; error: string };

@@ -1,8 +1,8 @@
 /** Registra os canais IPC do aplicativo e mantém contrato e autorização por canal. */
 import { agendaAutorizar, agendaEstado, agendaExcluir, agendaExecutar, agendaListar, agendaPermissoes, agendaPolitica, agendaRevogar, agendaRevogarPolitica, agendaSalvar, workerEstado, workerEventos, workerPausa } from "../../agendamentos/controlador.js";
-import { agentesEstado, agentesSalvar, agentesPessoais, agentesPessoalsalvar, agentesPessoalexcluir, agentesPessoaisimportar, agentesOrquestracoes, agentesRastrear, servicosImportar, assistenteAgentes, assistenteAvaliar, assistenteConversar, conversasListar, conhecimentoApagar, conhecimentoCriar, conhecimentoDecidir, conhecimentoEsquecer, conhecimentoEstado, conhecimentoListar, conhecimentoMostrar, conhecimentoVocabulario, skillsCriar, skillsDecidir, skillsImportar, skillsListar, iaDelegacao, perfilObter, perfilSalvar, contextosAprovar, contextosConflito, contextosDesatualizar, contextosExcluir, contextosListar, contextosMcp, contextosObter, contextosSalvar } from "../../agentes/controlador.js";
+import { agentesEstado, agentesSalvar, agentesPessoais, agentesPessoalconsultar, agentesPreferenciassalvar, agentesPessoalsalvar, agentesPessoalexcluir, agentesPessoaisimportar, agentesOrquestracoes, agentesRastrear, servicosImportar, assistenteAgentes, assistenteAvaliar, assistenteConversar, conversasListar, conhecimentoApagar, conhecimentoCriar, conhecimentoDecidir, conhecimentoEsquecer, conhecimentoEstado, conhecimentoListar, conhecimentoMostrar, conhecimentoVocabulario, skillsCriar, skillsDecidir, skillsImportar, skillsListar, iaDelegacao, perfilObter, perfilSalvar, contextosAprovar, contextosConflito, contextosDesatualizar, contextosExcluir, contextosListar, contextosMcp, contextosObter, contextosSalvar } from "../../agentes/controlador.js";
 import { administracaoCodigo, administracaoMapa, plataformaAgentes, plataformaSalvar, chamadosConfiguracao, chamadosChave, chamadosListar, chamadosDetalhe, chamadosAnexo, chamadosResponder, chamadosEstado, usuariosAtivar, usuariosListar, usuariosCriar, usuariosAlterar, usuariosSenha, usuariosDesbloquear, usuariosExcluir, papeisListar, papeisSalvar, papeisExcluir, acessoConfiguracao, acessoGithub, acessoGoogle, acessoSalvar } from "../../administracao/controlador.js";
-import { contaSair, contaCadastrar, contaRecuperar, contaCodigo, contaConfirmarentrada, contaReenviarentrada, contaDuasetapas, contaSenha, contaPerfil, contaGoogleestado, contaGoogleiniciar, contaGithubestado, contaGithubiniciar } from "../../login/controlador.js";
+import { contaSair, contaCadastrar, contaRecuperar, contaCodigo, contaConfirmarentrada, contaReenviarentrada, contaDuasetapas, contaSenha, contaPerfil, contaImagemlink, contaGoogleestado, contaGoogleiniciar, contaGithubestado, contaGithubiniciar } from "../../login/controlador.js";
 import { contaEntrar, contaSessao } from "../../login/controladorSessao.js";
 import { suporteAnexar, suporteEnviar, suporteMeus, suporteMeu, suporteAbrir, suporteChamado, suporteConsultar, suporteExportar, suportePreparar } from "../../suporte/controlador.js";
 import { ajudaDocumentos, ajudaIntegracoes, ajudaVersoes, dadosExcluir, dadosResumo, siteAbrir } from "../../ajuda/controlador.js";
@@ -10,14 +10,16 @@ import { appInfo } from "../controlador.js";
 import { registrarCanal } from "./registrarCanal.js";
 import { atualizacaoAbrir, atualizacaoInstalar, atualizacaoVerificar, preferenciasVisualizada } from "../../atualizacoes/controlador.js";
 import { interfaceExportar } from "../../compartilhado/controlador.js";
-import { conexaoAplicar, conexaoTestar, escritaEstado, escritaHabilitar, operacoesExecutar, operacoesListar, projetoConexoes, servicosAceite, servicosAdicionar, servicosQaseprevia, servicosQasepreviaconta, servicosQaseimportar, servicosQasecancelar, servicosConferir, servicosConsultar, servicosDesvincular, servicosListar, servicosRecursos, servicosRemover, servicosValidar, servicosVincular } from "../../conexoes/controlador.js";
+import { conexaoAplicar, conexaoTestar, escritaEstado, escritaHabilitar, operacoesExecutar, operacoesListar, projetoConexoes, servicosAceite, servicosAdicionar, servicosQaseprevia, servicosQasepreviaconta, servicosQaseimportar, servicosQasecancelar, servicosQaseconectar, servicosJiradescobrir, servicosConferir, servicosConsultar, servicosDesvincular, servicosAlternar, servicosListar, servicosGithubiniciar, servicosGithubestado, servicosAbrirCadastro, servicosAutorizar, servicosAutorizacaoestado, servicosAutorizacaoescolher, servicosAutorizacaodisponivel, servicosRecursos, servicosRemover, servicosTrocartoken, servicosValidar, servicosVincular } from "../../conexoes/controlador.js";
 import { preferenciasObter, preferenciasSalvar } from "../../configuracoes/controlador.js";
 import { projetoEvidencias, execucoesListar, vinculosMapa, jiraPrevia, jiraPublicar, runsBugs, runsCriar, runsExecutar, runsListar, runsPolitica, runsPreparar, runsPublicar, runsResultado, runsRevogar, testesArquivo, testesGravar, testesPipelines, testesCatalogo, repositorioListar, repositorioCaso, repositorioSuite } from "../../testes/controlador.js";
 import { projetoHistorico, diagnosticoListar, logsExportar, projetoLogs } from "../../logs/controlador.js";
 import { assistenteAbertura } from "../../inicio/controlador.js";
 import { execucoesMetricas } from "../../metricas/controlador.js";
-import { espacosAssociar, espacosAutomacoes, espacosCriar, espacosEditar, espacosListar, espacosObter, espacosPasta, espacosTrazer, projetosDemo, projetosDesvincular, projetosEscolher, projetosListar, projetoVisao } from "../../projetos/controlador.js";
+import { projetosRecursos, projetosVincular, projetosImportar, espacosAssociar, espacosAutomacoes, espacosCriar, espacosEditar, espacosManual, espacosListar, espacosObter, espacosPasta, espacosTrazer, projetosDemo, projetosDesvincular, projetosEscolher, projetosListar, projetoVisao } from "../../projetos/controlador.js";
 import { propostasCriar, propostasDescartar, propostasVincular, propostasEditar, propostasListar, propostasPublicar, propostasRevisar } from "../../tickets/controlador.js";
+
+import { ideArvore, ideArquivo, ideGravar } from "../../projetos/controlador.js";
 
 export function registrarCanaisIpc(): void {
   // Janela, navegação e dados básicos
@@ -55,9 +57,13 @@ export function registrarCanaisIpc(): void {
   registrarCanal('suporte:exportar', suporteExportar);
   // Projetos e espaços de trabalho
   registrarCanal('espacos:listar', espacosListar);
+  registrarCanal('projetos:recursos', projetosRecursos);
+  registrarCanal('projetos:vincular', projetosVincular);
+  registrarCanal('projetos:importar', projetosImportar);
   registrarCanal('espacos:criar', espacosCriar);
   registrarCanal('espacos:obter', espacosObter);
   registrarCanal('espacos:editar', espacosEditar);
+  registrarCanal('espacos:manual', espacosManual);
   registrarCanal('espacos:pasta', espacosPasta);
   registrarCanal('espacos:trazer', espacosTrazer);
   registrarCanal('espacos:automacoes', espacosAutomacoes);
@@ -65,15 +71,26 @@ export function registrarCanaisIpc(): void {
   // Conexões com serviços externos
   registrarCanal('servicos:listar', servicosListar);
   registrarCanal('servicos:adicionar', servicosAdicionar);
+  registrarCanal('servicos:githubiniciar', servicosGithubiniciar);
+  registrarCanal('servicos:githubestado', servicosGithubestado);
+  registrarCanal('servicos:abrircadastro', servicosAbrirCadastro);
+  registrarCanal('servicos:autorizar', servicosAutorizar);
+  registrarCanal('servicos:autorizacaodisponivel', servicosAutorizacaodisponivel);
+  registrarCanal('servicos:autorizacaoestado', servicosAutorizacaoestado);
+  registrarCanal('servicos:autorizacaoescolher', servicosAutorizacaoescolher);
   registrarCanal('servicos:qaseprevia', servicosQaseprevia);
   registrarCanal('servicos:qasepreviaconta', servicosQasepreviaconta);
   registrarCanal('servicos:qaseimportar', servicosQaseimportar);
   registrarCanal('servicos:qasecancelar', servicosQasecancelar);
+  registrarCanal('servicos:qaseconectar', servicosQaseconectar);
+  registrarCanal('servicos:jiradescobrir', servicosJiradescobrir);
   registrarCanal('servicos:validar', servicosValidar);
   registrarCanal('servicos:remover', servicosRemover);
+  registrarCanal('servicos:trocartoken', servicosTrocartoken);
   registrarCanal('servicos:recursos', servicosRecursos);
   registrarCanal('servicos:vincular', servicosVincular);
   registrarCanal('servicos:desvincular', servicosDesvincular);
+  registrarCanal('servicos:alternar', servicosAlternar);
   registrarCanal('servicos:conferir', servicosConferir);
   registrarCanal('servicos:consultar', servicosConsultar);
   registrarCanal('servicos:aceite', servicosAceite);
@@ -116,6 +133,9 @@ export function registrarCanaisIpc(): void {
   registrarCanal('runs:revogar', runsRevogar);
   // Vínculos e arquivos de automação
   registrarCanal('vinculos:mapa', vinculosMapa);
+  registrarCanal('ide:arvore', ideArvore);
+  registrarCanal('ide:arquivo', ideArquivo);
+  registrarCanal('ide:gravar', ideGravar);
   registrarCanal('testes:arquivo', testesArquivo);
   registrarCanal('testes:gravar', testesGravar);
   registrarCanal('testes:pipelines', testesPipelines);
@@ -144,6 +164,8 @@ export function registrarCanaisIpc(): void {
   registrarCanal('conta:recuperar', contaRecuperar);
   registrarCanal('conta:codigo', contaCodigo);
   registrarCanal('agentes:pessoais', agentesPessoais);
+registrarCanal('agentes:pessoalconsultar', agentesPessoalconsultar);
+registrarCanal('agentes:preferenciassalvar', agentesPreferenciassalvar);
   registrarCanal('agentes:pessoalsalvar', agentesPessoalsalvar);
   registrarCanal('agentes:pessoalexcluir', agentesPessoalexcluir);
   registrarCanal('agentes:pessoaisimportar', agentesPessoaisimportar);
@@ -166,6 +188,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('chamados:estado', chamadosEstado);
   registrarCanal('conta:senha', contaSenha);
   registrarCanal('conta:perfil', contaPerfil);
+  registrarCanal('conta:imagemlink', contaImagemlink);
   // Usuários e papéis
   registrarCanal('usuarios:ativar', usuariosAtivar);
   registrarCanal('usuarios:listar', usuariosListar);

@@ -14,7 +14,7 @@ const contexto = (provedor, o) => ({ o, agente, pergunta: 'Resuma os riscos.', l
 const base = (t) => { const b = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-chat-ia-')); t.after(() => fs.rmSync(b, { recursive: true, force: true })); return b; };
 const opcoes = (t, provedor, executor) => ({ pergunta: 'x', espacoId: null, base: base(t), autorizados: { [provedor]: true }, executavel: () => 'ia.exe', executor });
 
-for (const [provedor, modo] of [['claude', 'CLAUDE'], ['codex', 'CODEX']]) {
+for (const [provedor, modo] of [['claude', 'CLAUDE'], ['codex', 'CODEX'], ['copilot', 'COPILOT'], ['gemini', 'GEMINI']]) {
   test(`${provedor}: resposta do CLI vira o modo ${modo}, com segredo mascarado e limite de linhas`, async (t) => {
     const chamadas = [];
     const r = await consultarIaExterna(contexto(provedor, opcoes(t, provedor, async (exe, args, o) => { chamadas.push({ exe, args, o }); return { codigo: 0, saida: 'Risco 1: token=SEGREDO123456 vazou.\n\nRisco 2: falta cobertura.', erro: '' }; })));
@@ -54,4 +54,49 @@ test('um prompt que parece opção continua sendo só texto, depois de --', () =
 test('linhas APRENDIZADO: viram rascunho (no máximo duas) e saem do texto mostrado', () => {
   const r = separarAprendizados('Resposta.\nAPRENDIZADO: Login exige MFA no ambiente de teste\n- APRENDIZADO: Smoke roda em 2 min\nAPRENDIZADO: terceiro ignorado aqui');
   assert.equal(r.aprendizados.length, 2); assert.doesNotMatch(r.texto, /Login exige MFA|Smoke roda/);
+});
+
+test('com projeto vinculado, a IA recebe só o MCP do Prumo e só as consultas', () => {
+  const raiz = path.join(os.tmpdir(), 'projeto-x');
+  const claude = argumentosDoProvedorDeIa('claude', 'p', raiz);
+  const mcp = JSON.parse(claude[claude.indexOf('--mcp-config') + 1]);
+  assert.deepEqual(Object.keys(mcp.mcpServers), ['prumo']); assert.ok(mcp.mcpServers.prumo.args.includes(raiz)); assert.ok(claude.includes('--strict-mcp-config'));
+  const liberadas = claude.slice(claude.indexOf('--allowedTools') + 1, claude.indexOf('--settings'));
+  assert.deepEqual(liberadas, ['contexto_projeto', 'revisar_cobertura', 'consultar_evidencias', 'listar_politicas', 'perguntar_ao_orquestrador'].map(f => 'mcp__prumo__' + f));
+  for (const proibida of ['propor_', 'executar_validacao']) assert.ok(!claude.join(' ').includes(proibida));
+  const codex = argumentosDoProvedorDeIa('codex', 'p', raiz).join(' ');
+  assert.match(codex, /mcp_servers\.prumo\.command=/); assert.match(codex, /enabled_tools=\["contexto_projeto"/); assert.doesNotMatch(codex, /propor_|executar_validacao/);
+  const copilot = argumentosDoProvedorDeIa('copilot', 'p', raiz);
+  assert.ok(copilot.includes('--deny-tool=shell')); assert.ok(copilot.includes('--allow-all-tools'));
+  assert.deepEqual(copilot.slice(copilot.indexOf('--available-tools') + 1), ['contexto_projeto', 'revisar_cobertura', 'consultar_evidencias', 'listar_politicas', 'perguntar_ao_orquestrador'].map(f => `prumo(${f})`));
+  assert.ok(!copilot.some(a => /propor_|executar_validacao/.test(a)));
+});
+test('sem projeto vinculado não há MCP nem ferramenta liberada; copilot e gemini também mantêm o prompt como texto', () => {
+  assert.ok(!argumentosDoProvedorDeIa('claude', 'p').includes('--allowedTools')); assert.ok(!argumentosDoProvedorDeIa('copilot', 'p').includes('--additional-mcp-config'));
+  assert.equal(argumentosDoProvedorDeIa('copilot', '--x')[1], '--x'); assert.equal(argumentosDoProvedorDeIa('gemini', '--x')[1], '--x');
+  assert.ok(!argumentosDoProvedorDeIa('gemini', '--x').includes('--allowed-mcp-server-names'));
+});
+
+test('o CLI recebe a entrada padrão já fechada: quem espera texto adicional (codex exec) não trava até o tempo limite', async () => {
+  const { executarCliDeIa } = await import('../../../../dist/agentes/chat/consultarIaExterna.js');
+  const r = await executarCliDeIa(process.execPath, ['-e', "process.stdin.resume(); process.stdin.on('end', () => console.log('fim'))"], { timeoutMs: 5000 });
+  assert.equal(r.codigo, 0); assert.match(r.saida, /fim/);
+});
+
+test('Gemini usa MCP e política somente leitura temporários, sem registrar nada no perfil global', async () => {
+  const { executarCliDeIa } = await import('../../../../dist/agentes/chat/consultarIaExterna.js');
+  const programa = "const fs=require('node:fs'),path=require('node:path'); const d=process.cwd(),c=JSON.parse(fs.readFileSync(path.join(d,'.gemini','settings.json'),'utf8')),p=fs.readFileSync(path.join(d,'prumo-chat-leitura.toml'),'utf8');console.log(JSON.stringify({dir:d,nomes:Object.keys(c.mcpServers),ferramentas:c.mcpServers.prumo.includeTools,nega:p.includes('toolName = \\\"*\\\"'),permite:p.includes('mcpName = \\\"prumo\\\"'),naoAutorizaEdicao:!p.includes('propor_caso')}))";
+  const r = await executarCliDeIa(process.execPath, ['-e', programa, '--'], { timeoutMs: 5000, gemini: true, mcpGemini: { command: process.execPath, args: ['mcp.js', '/projeto'], env: {} } });
+  assert.equal(r.codigo, 0, r.erro);
+  const x = JSON.parse(r.saida.trim());
+  assert.deepEqual(x.nomes, ['prumo']); assert.equal(x.ferramentas.length, 5);
+  assert.equal(x.nega, true); assert.equal(x.permite, true); assert.equal(x.naoAutorizaEdicao, true);
+  assert.equal(fs.existsSync(x.dir), false, 'o arquivo MCP não deve persistir');
+});
+
+test('falha com motivo conhecido (limite de uso, login) é explicada sem repetir a saída do CLI', async (t) => {
+  for (const [saida, esperado] of [["You've hit your session limit · resets 3:10pm", /limite de uso/], ['Please log in first', /login/], ['Please set an Auth method in your Gemini settings.json', /login/]]) {
+    const r = await consultarIaExterna(contexto('claude', opcoes(t, 'claude', async () => ({ codigo: 1, saida, erro: '' }))));
+    assert.equal(r.modo, 'LOCAL'); assert.match(r.aviso, esperado); assert.doesNotMatch(r.aviso, /3:10pm|first/);
+  }
 });

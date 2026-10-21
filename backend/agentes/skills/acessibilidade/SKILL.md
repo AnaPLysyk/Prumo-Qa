@@ -18,3 +18,5 @@ Com Playwright confirmado, use locators por papel/rótulo e assertions do estado
 Entregue passos de reprodução, resultado esperado, observado, evidência e limitações. Separe achado confirmado, suspeita e verificação não executada. Preserve as permissões e a distinção entre análise e execução da Skill qa.
 
 Para varredura com axe-core, exclusões pontuais documentadas e checagens de teclado, diálogo e foco, consulte [práticas abertas](references/praticas-abertas.md).
+
+Gatilhos: aplique esta Skill quando a mudança tocar formulário, diálogo, menu, navegação, cor, tamanho de texto ou mensagem de erro. Para os critérios novos da WCAG 2.2 e armadilhas comuns, consulte o [checklist](references/wcag-22-checklist.md).

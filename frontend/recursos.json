@@ -42,28 +42,20 @@
       "destino": "dist/renderer/modal-de-detalhes.js"
     },
     {
-      "fonte": "frontend/inicio/identidade/qc.js",
+      "fonte": "frontend/design-system/qc.js",
       "destino": "dist/renderer/qc.js"
     },
     {
-      "fonte": "frontend/inicio/identidade/orbitas.js",
+      "fonte": "frontend/design-system/orbitas.js",
       "destino": "dist/renderer/orbitas.js"
     },
     {
-      "fonte": "frontend/inicio/identidade/robos.js",
+      "fonte": "frontend/design-system/robos.js",
       "destino": "dist/renderer/robos.js"
     },
     {
-      "fonte": "frontend/agentes/atividades/modelo-e-layout.js",
-      "destino": "dist/renderer/modelo-e-layout.js"
-    },
-    {
-      "fonte": "frontend/agentes/atividades/painel-atividades.js",
+      "fonte": "frontend/design-system/painel-atividades.js",
       "destino": "dist/renderer/painel-atividades.js"
-    },
-    {
-      "fonte": "frontend/agentes/atividades/painel-atividades.css",
-      "destino": "dist/renderer/painel-atividades.css"
     },
     {
       "fonte": "frontend/testes/execucoes-e-evidencias.js",
@@ -72,6 +64,14 @@
     {
       "fonte": "frontend/agendamentos/tela-agendamentos.js",
       "destino": "dist/renderer/tela-agendamentos.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/floating-ui-1.8.0.min.js",
+      "destino": "dist/renderer/vendor/floating-ui-1.8.0.min.js"
+    },
+    {
+      "fonte": "frontend/compartilhado/vendor/FLOATING-UI-LICENSE.txt",
+      "destino": "dist/renderer/vendor/FLOATING-UI-LICENSE.txt"
     },
     {
       "fonte": "frontend/compartilhado/vendor/three-0.159.0.min.js",

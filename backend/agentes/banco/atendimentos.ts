@@ -19,7 +19,7 @@ export function listarAtendimentos(espacoId: string | null, agente?: string | nu
     .map((r) => ({ id: Number(r.id), em: String(r.em), agente: String(r.agente_id), modo: String(r.modo), fontes: (() => { try { return JSON.parse(String(r.fontes)) as string[]; } catch { return []; } })(), avaliacao: (r.avaliacao as string | null) ?? null })));
 }
 
-export function registrarAtendimento(a: { espacoId: string | null; agente: string; modo: 'LOCAL' | 'CLAUDE' | 'CODEX'; fontes: string[] }, base?: string, agora = new Date()): number {
+export function registrarAtendimento(a: { espacoId: string | null; agente: string; modo: 'LOCAL' | 'CLAUDE' | 'CODEX' | 'COPILOT' | 'GEMINI' | 'MESA'; fontes: string[] }, base?: string, agora = new Date()): number {
   validarProjetoDoConhecimento(a.espacoId); validarAgenteDoConhecimento(a.agente);
   const pessoa = pessoaDoConhecimento(base);
   return comBancoDeConhecimento(base, (db) => { const r = db.prepare('INSERT INTO atendimentos (em, espaco_id, agente_id, modo, fontes, usuario_id) VALUES (?, ?, ?, ?, ?, ?)').run(agora.toISOString(), a.espacoId, a.agente, a.modo, JSON.stringify(a.fontes.slice(0, 10).map((f) => String(f).slice(0, 40))), pessoa);

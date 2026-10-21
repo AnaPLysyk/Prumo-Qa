@@ -145,6 +145,9 @@ export function idLocalDeIdentidadeRemota(id:string){
   return v.slice(0,8)+'-'+v.slice(8,12)+'-5'+v.slice(13,16)+'-a'+v.slice(17,20)+'-'+v.slice(20,32);
 }
 
+/** Só no app de homologação: e-mails de teste (PRUMO_HOMOLOGACAO_ADMINS) tratados como admin enquanto o serviço DEV não informa a marca. Fora da homologação a variável é ignorada. */
+const adminDeHomologacao=(email:string)=>process.env.PRUMO_AMBIENTE==='homologacao'&&String(process.env.PRUMO_HOMOLOGACAO_ADMINS||'').toLowerCase().split(',').map(x=>x.trim()).includes(email.toLowerCase());
+
 export function entrarComIdentidadeRemota(p:UsuarioRemoto,base?:string,agora=new Date()){
   if(!p.emailVerified||!/^[A-Za-z0-9_-]{8,128}$/.test(p.id)||!p.email)throw new Error('IDENTITY_INVALID');
   const r=lerContas(base),uuid=idLocalDeIdentidadeRemota(p.id);
@@ -157,8 +160,10 @@ export function entrarComIdentidadeRemota(p:UsuarioRemoto,base?:string,agora=new
     {papel:'qa',estado:'ATIVO',senha:null,recuperacao:null,trocarSenha:false,
     origem:'CADASTRO',admin:false,identidades:[{provedor:'better-auth',id:p.id,login:p.email.slice(0,60)}]},agora);
   if(usuario.estado!=='ATIVO')throw new Error('ACCOUNT_DISABLED');
-  // Sem autorização remota de admin, nunca manter elevação administrativa local.
-  if(usuario.admin||usuario.papel==='administrador')throw new Error('IDENTITY_ADMIN_MISMATCH');
+  // A marca admin vem sempre do serviço de identidade: concedida ou retirada lá, vale aqui no próximo acesso.
+  const admin=p.administrador===true||adminDeHomologacao(p.email);
+  if(usuario.papel==='administrador'&&!admin)throw new Error('IDENTITY_ADMIN_MISMATCH');
+  usuario.admin=admin;
   if(!existente){usuario.id=uuid;r.usuarios.push(usuario);}
   usuario.ultimoAcesso=agora.toISOString();
   gravarContas(r,base);iniciarSessao(usuario.id,agora.getTime());

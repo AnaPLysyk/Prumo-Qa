@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "id": "prumo-qa",
+  "name": "prumo-qa",
+  "context": {
+    "documentation": [
+      "AGENTS.md",
+      "docs",
+      "README.md"
+    ],
+    "tests": [
+      "testes"
+    ],
+    "code": [
+      "backend",
+      "frontend",
+      "scripts",
+      "package.json"
+    ]
+  },
+  "commands": {
+    "build": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    },
+    "typecheck": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    },
+    "test": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    },
+    "check": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "check"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    },
+    "check-isolado": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "check:isolado"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    },
+    "test-selecionar": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "test:selecionar"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    },
+    "test-unitarios": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "test:unitarios"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    },
+    "test-backend": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "test:backend"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    },
+    "test-frontend": {
+      "executable": "npm",
+      "args": [
+        "run",
+        "test:frontend"
+      ],
+      "cwd": ".",
+      "env": {},
+      "requiredFiles": [],
+      "requiredEnv": []
+    }
+  },
+  "execution": {
+    "requireApproval": true,
+    "blockedByDefault": [],
+    "environment": "host",
+    "readOnly": false,
+    "envAllowlist": [],
+    "timeoutMs": 300000,
+    "maxOutputBytes": 1048576
+  }
+}

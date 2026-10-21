@@ -13,6 +13,15 @@ on:
       - 'backend/testes/aprovacao/**'
       - 'backend/conexoes/regras/servicosDoAplicativo.ts'
       - 'backend/atualizacoes/**'
+      - 'backend/conexoes/integracoes/**'
+      - 'backend/conexoes/servidor/**'
+      - 'backend/conexoes/servicoContas.ts'
+      - 'testes/unitario/backend/conexoes/**'
+      - 'backend/projetos/**'
+      - 'backend/testes/servicoCasos.ts'
+      - 'backend/tickets/servicoPropostas.ts'
+      - 'frontend/projetos/**'
+      - 'testes/unitario/backend/projetos/manual-multiplataforma.test.mjs'
       - 'site/release/**'
   workflow_dispatch:
 
@@ -55,6 +64,8 @@ jobs:
           npm run build
       - name: Testes de plataforma (aprovação, cofre, atualização e nomes dos instaladores)
         run: node --test --test-concurrency=1 testes/unitario/backend/aplicativo/multiplataforma.test.mjs testes/unitario/backend/testes/aprovacao-multiplataforma.test.mjs
+      - name: Testes das conexões pelo navegador (GitHub App e Jira OAuth) em cada sistema
+        run: node --test --test-concurrency=1 testes/unitario/backend/conexoes/autorizacao-no-servidor.test.mjs testes/unitario/backend/conexoes/autorizacao-pelo-navegador.test.mjs testes/unitario/backend/conexoes/cliente-do-servico-de-autorizacao.test.mjs testes/unitario/backend/conexoes/contas-oauth.test.mjs
       - name: Gerar instaladores
         run: npm run dist:${{ matrix.alvo }}
       - name: Conferir os arquivos gerados e gerar o SHA-256

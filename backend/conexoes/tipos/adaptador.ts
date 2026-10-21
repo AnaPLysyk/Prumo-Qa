@@ -7,7 +7,8 @@ import { Servico, Recurso } from "../../projetos/contratos.js";
 // ── transporte ──
 export const codigosServico=['CREDENTIAL_UNAVAILABLE','CREDENTIAL_INVALID_OR_EXPIRED','SERVICE_PERMISSION','SERVICE_NOT_FOUND','SERVICE_RATE_LIMIT','SERVICE_TIMEOUT','SERVICE_UNAVAILABLE','SERVICE_RESPONSE_INVALID','SERVICE_REDIRECT_BLOCKED','SERVICE_RESPONSE_LIMIT','SERVICE_DESTINATION_BLOCKED','SERVICE_WRITE_BLOCKED','SERVICE_SCOPE_CHANGED','SERVICE_DUPLICATE','SERVICE_PLAN_LIMIT'] as const;
 
-export type PedidoServico={servico:Servico;instancia:string;caminho:string;headers:Record<string,string>;timeoutMs?:number};
+/** `nuvem`: id do site Jira numa conexão OAuth; o pedido sai por api.atlassian.com/ex/jira/<nuvem>, não pelo endereço do site. */
+export type PedidoServico={servico:Servico;instancia:string;caminho:string;headers:Record<string,string>;timeoutMs?:number;nuvem?:string};
 
 export type TransporteServico=(pedido:PedidoServico)=>Promise<unknown>;
 
@@ -50,7 +51,7 @@ export const operacoesServico=['tickets','ticket','campos','comentarios','defeit
 
 export type OperacaoServico=typeof operacoesServico[number];
 
-export type ConfigServico={id:string;servico:Servico;instancia:string;usuario?:string;contaId:string;token:string};
+export type ConfigServico={id:string;servico:Servico;instancia:string;usuario?:string;contaId:string;token:string;oauth?:boolean;nuvem?:string};
 
 export const obj=z.record(z.unknown());
 

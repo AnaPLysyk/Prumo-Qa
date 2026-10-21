@@ -2,7 +2,7 @@
 
 ## Autenticação central com PostgreSQL (em desenvolvimento)
 
-O modelo escolhido para a próxima entrega usa **e-mail e senha** com Better Auth no serviço Node.js do Render e PostgreSQL persistente. O Electron envia as credenciais por HTTPS a partir do processo principal; o login valida o e-mail confirmado e mantém sessão com cookie protegido no Main. O botão **Sair e trocar usuário** revoga a sessão remota, encerra a local e limpa o estado da interface. Em Configurações, **Recuperar acesso** envia um link ao e-mail. GitHub/Google ficam exclusivamente em Conexões nesta fase. Este modo só aparece após configurar `PRUMO_AUTH_API_URL`; o serviço DEV existe no Render, mas o banco e o envio de e-mail ainda não estão configurados; não há homologação E2E real.
+O modelo escolhido para a próxima entrega usa **e-mail e senha** com Better Auth no serviço Node.js do Render e PostgreSQL persistente. O Electron envia as credenciais por HTTPS a partir do processo principal; o login valida o e-mail confirmado e mantém sessão com cookie protegido no Main. O botão **Sair e trocar usuário** revoga a sessão remota, encerra a local e limpa o estado da interface. Em Configurações, **Recuperar acesso** envia um link ao e-mail. A entrada por GitHub/Google pertence ao Login e é diferente dos tokens usados em Projetos para vincular repositórios e recursos externos. Este modo só aparece após configurar `PRUMO_AUTH_API_URL`; o serviço DEV existe no Render, mas o banco e o envio de e-mail ainda não estão configurados; não há homologação E2E real.
 
 ## Contas antigas (compatibilidade)
 
@@ -17,8 +17,9 @@ As fontes da interface estão todas em `frontend/login/`:
 - `entrarNaConta.js` — inicializa a sessão, controla a entrada local legada, permissões e navegação.
 - `entradaRemota.js` — mostra os formulários de **login remoto, cadastro e recuperação**; solicita ações ao backend pelo preload.
 - `mensagensDeEntrada.js` — converte códigos de erro em mensagens claras, sem mostrar detalhes internos.
-- `vitrineDaEntrada.js` e `entrada.css` — apresentação e estilos do cartão de login.
-- `web/recuperar-senha.html` e `web/recuperar-senha.js` — página aberta no navegador, sem copiar esses arquivos para o instalador Electron.
+- `vitrineDaEntrada.js` e os estilos de `frontend/design-system/estilos-das-telas.parte.css` — apresentação e estilos do cartão de login.
+- `web/recuperar-senha.html`, `web/recuperar-senha.js`, `web/conta-confirmada.html` e `web/confirmacao-recusada.html` (estilo em `frontend/design-system/web/paginas.css`) — páginas abertas no navegador pelos links dos e-mails, com a aparência da tela de entrada; não vão para o instalador Electron. Quando o link de confirmação venceu, o servidor mostra `confirmacao-recusada.html` em vez de dizer que confirmou.
+- Os e-mails (confirmação, recuperação e códigos) saem de `backend/login/servidor/modeloDeEmail.mjs`: fundo noturno com o robô, cartão claro com a marca, botão azul ou código em destaque, e versão em texto puro. As cores repetem os tokens do Design System; `testes/unitario/backend/login/emails-do-prumo.test.mjs` acusa se divergirem.
 
 A lógica está em `backend/login/`. Os canais IPC ficam em `api/`, as decisões em `regras/`, os modelos em `tipos/`, os dados locais em `banco/` e a conexão externa em `integracoes/`. A autenticação Better Auth, executada no Render, fica em `servidor/`. Para ver como os arquivos se conectam, abra **Administração → Documentação Viva → Login**.
 
@@ -67,7 +68,7 @@ Só contas com a marca admin podem abrir **Administração**, que reúne usuári
 - Quem tem a marca admin pode criar contas, aprovar cadastros, trocar papéis, desativar, desbloquear ou excluir contas. Ao criar uma conta ou redefinir uma senha, o Prumo mostra uma **senha temporária** uma vez. A pessoa cria a própria senha ao entrar pela primeira vez.
 - Em **Configurações gerais**: cadastro aberto ou não, aprovação, papel dos novos cadastros, tempo de inatividade e quantas tentativas erradas bloqueiam a conta.
 - Para trocar uma senha esquecida, escolha **Esqueci a senha**, informe o e-mail da conta, digite o código recebido e crie uma senha nova. Se a conta não tiver e-mail (por exemplo, se foi criada por um admin ou pelo GitHub/Google), um admin precisa redefinir a senha.
-- Cada pessoa troca o próprio nome e a senha em **Minha conta**, no canto da janela. Em **Configurações › Meu perfil** também ficam **Redefinir senha** (pelo e-mail) e **Sair**.
+- Abra **Minha conta** pela foto no canto superior. Em **Perfil**, altere o nome e a foto e consulte seus dados. Em **Segurança**, troque a senha, configure a verificação em duas etapas (quando disponível) ou recupere o acesso por e-mail. Em **Configurações › Meu perfil** também ficam **Redefinir senha** (pelo e-mail) e **Sair**.
 - **Verificação em duas etapas:** em **Minha conta**, ligue para que, depois da senha, um código vá ao seu e-mail a cada entrada. Em **Configurações gerais**, um admin pode exigir isso de todas as contas com e-mail. Contas sem e-mail entram só com a senha. Sem o serviço do Prumo no ar, quem precisa do código não consegue entrar.
 - **Esqueci a senha** fica sempre na tela de entrada.
 
@@ -92,3 +93,14 @@ Em **Administração › Agentes**, quem tem a marca admin pode ligar ou desliga
 ## Meu perfil
 
 No menu da engrenagem, **Meu perfil** guarda como chamar você, seu papel no time, sua experiência e seu foco (até 160 caracteres). O perfil é da sua conta: outra pessoa que entra neste computador não vê nem usa o seu. Os agentes usam essas informações para adaptar as respostas, e o histórico de atendimentos também é só seu. Claude Code e Codex só recebem esses dados se você marcar **Compartilhar experiência, foco e conta com a IA externa**. Essa opção vem desmarcada; quando compartilhadas, as informações são tratadas como dados, não como instruções.
+## Homologação do cadastro (sem afetar produção)
+
+**Fluxo local legado:** a primeira conta ativa o administrador do computador. O código de 6 dígitos depende de serviço de e-mail realmente configurado. O erro `EMAIL_SERVICE_NOT_CONFIGURED` indica ausência da chave/remetente e não deve ser contornado com código fixo.
+
+**Cadastro central:** a instalação de homologação deve usar `PRUMO_AUTH_API_URL=https://prumo-qa-auth-dev.onrender.com` e um diretório de dados isolado. O fluxo faz cadastro com nome, e-mail e senha, exibe **Confirme seu e-mail**, possibilita **Reenviar e-mail de confirmação**, abre no navegador o link assinado do Better Auth e só permite entrar depois da verificação. Não cria automaticamente um administrador global no serviço público; a liberação administrativa requer um procedimento autorizado separado.
+
+**Pré-requisitos de homologação real:** no serviço `prumo-qa-auth-dev` do Render, revisar os comandos de instalação/início, configurar banco **exclusivo de testes** com tabelas do Better Auth, URL HTTPS do serviço, segredo >=32 caracteres, `RESEND_API_KEY` e `PRUMO_EMAIL_REMETENTE` de domínio verificado. Não compartilhar senhas, URLs internas do banco nem chaves no chat. O serviço informado no Render ainda não disponibiliza autenticação e envio, portanto testes unitários não são prova de entrega real do e-mail.
+
+Para a janela isolada, usar o processo do Electron com `PRUMO_DATA_DIR` apontando para diretório temporário exclusivo e `PRUMO_AUTH_API_URL` apontando para o serviço DEV. Não substituir a sessão instalada, não reaproveitar banco de produção e não liberar cadastro anônimo como Administrador.
+
+**Abrir homologação:** na raiz do projeto, execute `npm run app:homologacao`. O comando valida `/saude/autenticacao` do serviço DEV e só então abre o Electron com perfil isolado em `LOCALAPPDATA/PrumoQA-Homologacao-Cadastro`. Se o serviço estiver indisponível ou incompleto, ele informa o motivo e **não** abre uma tela local de administrador. O título da janela identifica Homologação. Para concluir a homologação real, confirme recebimento do link, clique de validação, login, logout e recuperação de senha usando exclusivamente contas de teste.

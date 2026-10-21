@@ -48,5 +48,6 @@ export async function enviarCodigoPorEmail(pedido: PedidoDeCodigo): Promise<void
   if (resposta.status === 400) {
     throw new Error('EMAIL_INVALID: o serviço de envio recusou este e-mail; confira o endereço.');
   }
+  if (resposta.status === 503) throw new Error('EMAIL_SERVICE_NOT_CONFIGURED: o serviço de e-mail ainda não está configurado neste ambiente.');
   throw new Error('EMAIL_SEND_FAILED: o serviço de envio não conseguiu mandar o e-mail agora; tente de novo em instantes.');
 }

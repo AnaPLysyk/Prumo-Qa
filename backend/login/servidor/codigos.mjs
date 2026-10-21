@@ -3,24 +3,37 @@
  * Não guarda e-mails nem códigos: só contadores em memória para limitar abuso. Nos registros, o e-mail aparece mascarado e o código nunca.
  */
 import { EMAIL, lerCorpo, lerObjeto, ipDe, mascarar, responder } from '../../compartilhado/servidor/comum.mjs';
+import { montarEmail } from './modeloDeEmail.mjs';
 
 export const FINALIDADES = ['CADASTRO', 'SENHA', 'ENTRADA'];
 export const IDIOMAS = ['pt-BR', 'en'];
 /** Limites por janela de tempo. O total por hora protege a cota do provedor. */
 export const LIMITES = { porEmail10min: 3, porEmailDia: 10, porIpHora: 30, totalHora: 300 };
 
-/** Texto fixo do e-mail: o único dado variável é o código, conferido como 6 dígitos antes de chegar aqui. */
+/** Textos de cada finalidade: chip do cartão, título e para que serve o código. */
+const TEXTOS = {
+  'pt-BR': {
+    CADASTRO: ['Confirmação de e-mail', 'Confirme seu e-mail', 'confirmar seu e-mail e concluir o cadastro no Prumo QA'],
+    SENHA: ['Recuperar acesso', 'Defina uma senha nova', 'definir uma senha nova no Prumo QA'],
+    ENTRADA: ['Duas etapas', 'Conclua a entrada', 'concluir a entrada no Prumo QA']
+  },
+  en: {
+    CADASTRO: ['E-mail confirmation', 'Confirm your e-mail', 'confirm your e-mail and finish signing up to Prumo QA'],
+    SENHA: ['Account recovery', 'Set a new password', 'set a new password in Prumo QA'],
+    ENTRADA: ['Two-step sign-in', 'Finish signing in', 'finish signing in to Prumo QA']
+  }
+};
+
+/** E-mail com a aparência do Prumo: o único dado variável é o código, conferido como 6 dígitos antes de chegar aqui. */
 export function mensagem({ codigo, finalidade, idioma }) {
   const en = idioma === 'en';
-  const acao = finalidade === 'SENHA' ? (en ? 'set a new password in Prumo QA' : 'definir uma senha nova no Prumo QA')
-    : finalidade === 'ENTRADA' ? (en ? 'finish signing in to Prumo QA' : 'concluir a entrada no Prumo QA')
-    : (en ? 'confirm your e-mail and finish signing up to Prumo QA' : 'confirmar seu e-mail e concluir o cadastro no Prumo QA');
+  const [chip, titulo, acao] = TEXTOS[en ? 'en' : 'pt-BR'][finalidade];
   const assunto = en ? `Your Prumo QA code: ${codigo}` : `Seu código do Prumo QA: ${codigo}`;
-  const linhas = en
-    ? [`Use the code ${codigo} to ${acao}.`, 'It is valid for 10 minutes and can be used once.', finalidade === 'ENTRADA' ? 'If it was not you, change your password: someone knows it. Without the code they cannot get in.' : 'If you did not request it, ignore this message: nothing changes without the code.']
-    : [`Use o código ${codigo} para ${acao}.`, 'Ele vale por 10 minutos e só pode ser usado uma vez.', finalidade === 'ENTRADA' ? 'Se não foi você, troque sua senha: alguém sabe ela. Sem o código, ninguém entra.' : 'Se você não pediu, ignore esta mensagem: nada muda sem o código.'];
-  const html = `<div style="font-family:system-ui,sans-serif;font-size:15px;line-height:1.5;color:#111"><p>${linhas[0].replace(codigo, `<strong style="font-size:22px;letter-spacing:.12em">${codigo}</strong>`)}</p><p>${linhas[1]}</p><p style="color:#555">${linhas[2]}</p><p style="color:#555">Prumo QA</p></div>`;
-  return { assunto, texto: linhas.join('\n\n') + '\n\nPrumo QA', html };
+  const observacao = en
+    ? 'It is valid for 10 minutes and can be used once. ' + (finalidade === 'ENTRADA' ? 'If it was not you, change your password: someone knows it. Without the code they cannot get in.' : 'If you did not request it, ignore this message: nothing changes without the code.')
+    : 'Ele vale por 10 minutos e só pode ser usado uma vez. ' + (finalidade === 'ENTRADA' ? 'Se não foi você, troque sua senha: alguém sabe ela. Sem o código, ninguém entra.' : 'Se você não pediu, ignore esta mensagem: nada muda sem o código.');
+  const texto = en ? `Use the code below to ${acao}.` : `Use o código abaixo para ${acao}.`;
+  return { assunto, ...montarEmail({ idioma: en ? 'en' : 'pt-BR', chip, titulo, texto, codigo, observacao }) };
 }
 
 /** Confere o pedido do aplicativo: só as chaves conhecidas, e-mail válido, código de 6 dígitos e finalidade da lista. */

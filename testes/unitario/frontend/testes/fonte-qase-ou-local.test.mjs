@@ -6,14 +6,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../');
-const visao = fs.readFileSync(path.join(raiz, 'frontend/testes/visao-geral-dos-testes.parte.js'), 'utf8');
+const visao = fs.readFileSync(path.join(raiz, 'frontend/testes/tela-testes.parte.js'), 'utf8');
 const caso = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-casos-qase.parte.js'), 'utf8');
-const fechamento = fs.readFileSync(path.join(raiz, 'frontend/compartilhado/fluxos-fechamento.parte.js'), 'utf8');
+const fechamento = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-vinculos.parte.js'), 'utf8');
 
 test('com Qase vinculado o comando principal cria direto na API; sem vinculo abre modo local', () => {
-  assert.match(visao, /vq\s*\?\s*\[DS\.acao\('Nova proposta de caso',\s*\(\)\s*=>\s*F\.novaProposta\(e\)/);
+  assert.match(visao, /vq\s*\?\s*\[\.\.\.\(manual\s*\?\s*\[DS\.acao\('Nova proposta de caso',\s*\(\)\s*=>\s*F\.novaProposta\(e\)/);
   assert.match(visao, /DS\.acao\('Novo caso no Qase',\s*\(\)\s*=>\s*F\.novoCasoQase\(e\),\s*\{ id: 'qase-novo', primaria: true/);
-  assert.match(visao, /:\s*\[DS\.acao\('Novo caso local',\s*\(\)\s*=>\s*F\.novaProposta\(e\)/);
+  assert.match(visao, /:\s*\(manual\s*\?\s*\[DS\.acao\('Novo caso local',\s*\(\)\s*=>\s*F\.novaProposta\(e\)/);
   assert.match(visao, /desabilitado:\s*!esc/, 'escrita desligada nao habilita envio');
   assert.match(fechamento, /novaProposta,\s*novoCasoQase,\s*telaCasosLocais,\s*abrirCasoLocal,\s*novaSuite/);
 });
@@ -48,7 +48,7 @@ test('repositório Qase carrega páginas adicionais sem repetir casos nem escond
 });
 
 test('classificação Qase fica na consulta remota e respeita caso manual ou automatizado', () => {
-  const fonte = fs.readFileSync(path.join(raiz, 'frontend/compartilhado/consultarServicoRemoto.js'), 'utf8');
+  const fonte = fs.readFileSync(path.join(raiz, 'frontend/compartilhado/servicosExternos.js'), 'utf8');
   const classificar = vm.runInNewContext(fonte + '\nclassificacaoCaso;', {});
   assert.equal(classificar({ isManual: true }), 'MANUAL');
   assert.equal(classificar({ isManual: true, isToBeAutomated: true }), 'MANUAL · automação planejada');

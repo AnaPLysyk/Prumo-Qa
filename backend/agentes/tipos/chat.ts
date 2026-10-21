@@ -20,7 +20,7 @@ export type EtapaDaOrquestracao = { ordem: number; agente: string; inicio: strin
 export type Orquestracao = {
   id: string; em: string; espacoId: string | null; responsavel: 'orquestrador'; modo: 'LOCAL';
   motivo: { agente: string; pontos: number }[]; agentes: string[]; dependencias: 'INDEPENDENTES';
-  etapas: EtapaDaOrquestracao[]; estado: 'CONCLUIDA' | 'PARCIAL' | 'FALHOU'; duracaoMs: number;
+  etapas: EtapaDaOrquestracao[]; estado: 'EXECUTANDO' | 'CONCLUIDA' | 'PARCIAL' | 'FALHOU'; duracaoMs: number; emExecucao?: string;
 };
 
 /** No máximo 3 especialistas por pergunta, cada um com pelo menos 3 pontos no roteamento (sinal forte da especialidade); 500 registros guardados. */
@@ -32,9 +32,15 @@ const estilos = ['amigavel', 'direto', 'tecnico'] as const;
 
 export type Estilo = (typeof estilos)[number];
 
-const provedores = ['local', 'claude', 'codex'] as const;
+const provedores = ['local', 'claude', 'codex', 'copilot', 'gemini'] as const;
 
 export type Provedor = (typeof provedores)[number];
+
+/** Com quem a pessoa fala: o Orchestrator local, uma IA externa ou a mesa (várias IAs autorizadas conversando, com o Orquestrador mediando). */
+export type ProvedorDeConversa = Provedor | 'mesa';
+
+/** Resultado estruturado da mesa: quem falou, o que cada IA disse e o resumo do Orquestrador. `linhas` da Resposta repete tudo em texto corrido. */
+export type MesaDeIas = { ias: { provedor: Exclude<Provedor, 'local'>; nome: string; linhas: string[] }[]; resumo: string[] };
 
 export type Pendente = 'nome' | 'papel' | null;
 
@@ -48,8 +54,8 @@ export type Proximo = { rotulo: string; pergunta?: string; aba?: string };
 
 export type Acao = { tipo: 'aprovar_conhecimento' | 'descartar_conhecimento'; id: string; rotulo: string };
 
-export type Resposta = { agente: { id: string; nome: string; especializacao: string | null }; linhas: string[]; fontes: Fonte[]; modo: 'LOCAL' | 'CLAUDE' | 'CODEX';
-  estilo: Estilo; rota: { agente: string; pontos: number }[]; fatos: string[]; aviso?: string; proximos: Proximo[]; acoes: Acao[]; pendente: Pendente; pessoa: string | null; continuou: boolean; orquestracao?: Orquestracao };
+export type Resposta = { agente: { id: string; nome: string; especializacao: string | null }; linhas: string[]; fontes: Fonte[]; modo: 'LOCAL' | 'CLAUDE' | 'CODEX' | 'COPILOT' | 'GEMINI' | 'MESA';
+  estilo: Estilo; rota: { agente: string; pontos: number }[]; fatos: string[]; aviso?: string; proximos: Proximo[]; acoes: Acao[]; pendente: Pendente; pessoa: string | null; continuou: boolean; orquestracao?: Orquestracao; mesa?: MesaDeIas };
 
 export const SEGUIMENTO = /^(e |e\?|mais |mais$|detalh|explica|explique|por que|porque|como assim|isso|esse|essa|esses|essas|o primeiro|a primeira|o segundo|a segunda|o ultimo|a ultima|outro|outra|continu|e ontem|e hoje|ok e |e agora)/;
 
@@ -78,14 +84,14 @@ export const PAPEIS: [RegExp, Papel][] = [[/\b(qa|tester|testador[a]?|analista d
 
 export type Meta = { linhas: string[]; pendente?: Pendente; acoes?: Acao[]; agente?: string; fontes?: Fonte[]; proximos?: Proximo[] };
 
-// Delegação opcional ao Claude Code ou Codex (CLI local, com autorização prévia).
-export type Executor = (comando: string, args: string[], opcoes: { timeoutMs: number; cwd?: string }) => Promise<{ codigo: number | null; saida: string; erro: string }>;
+// Delegação opcional aos CLIs autorizados. Gemini recebe o MCP por configuração temporária, sem mudar a conta do cliente.
+export type Executor = (comando: string, args: string[], opcoes: { timeoutMs: number; cwd?: string; gemini?: boolean; mcpGemini?: { command: string; args: string[]; env: Record<string, string> } }) => Promise<{ codigo: number | null; saida: string; erro: string; /** O processo nem chegou a rodar (executável ausente, sem permissão ou buffer estourado); sem isso, código nulo significa tempo esgotado. */ falhaAoExecutar?: boolean }>;
 
 export type PerfilParaIa = { comoChamar: string | null; papel: Papel | null; experiencia?: Experiencia | null; foco?: string | null; compartilharComIa?: boolean };
 
-export type ExtrasPrompt = { perfil?: PerfilParaIa | null; conta?: { nome: string; acesso: string } | null; historico?: Turno[]; conhecimentos?: { titulo: string; texto: string }[]; base?: string; skill?: string };
+export type ExtrasPrompt = { vinculos?: string[]; perfil?: PerfilParaIa | null; conta?: { nome: string; acesso: string } | null; historico?: Turno[]; conhecimentos?: { titulo: string; texto: string }[]; base?: string; skill?: string; /** Rodada de crítica da mesa: resposta curta e sem pedido de aprendizado. */ critica?: boolean };
 
-export type Opcoes = { espacoId: string | null; pergunta: string; agente?: string | null; estilo?: Estilo; nome?: string; provedor?: Provedor; primeira?: boolean;
+export type Opcoes = { espacoId: string | null; pergunta: string; agente?: string | null; estilo?: Estilo; nome?: string; provedor?: ProvedorDeConversa; primeira?: boolean;
   historico?: Turno[]; contexto?: ContextoChat | null;
   executavel?: (p: Exclude<Provedor, 'local'>) => string | null; executor?: Executor; autorizados?: Partial<Record<Exclude<Provedor, 'local'>, boolean>>; base?: string };
 

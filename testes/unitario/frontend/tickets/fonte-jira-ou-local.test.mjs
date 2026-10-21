@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const pasta = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../frontend/tickets');
-const arquivos = ['fluxos-tickets.parte.js', 'tickets-locais.parte.js', 'tickets-jira.parte.js', 'tickets-defeitos-qase.parte.js', 'tickets-issues-github.parte.js'];
+const arquivos = ['tela-tickets.parte.js'];
 const fonte = arquivos.map(nome => fs.readFileSync(path.join(pasta, nome), 'utf8')).join('\n');
 
 test('com Jira vinculado, o modo manual continua disponível sem publicar', () => {

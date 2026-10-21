@@ -1,6 +1,7 @@
 /** Controlador da funcionalidade login: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { cadastrarConta, confirmarEntrada, alterarMinhasDuasEtapas, entrarNaConta, alterarMeuNome, recuperarConta, reenviarCodigoDeEntrada, sairDaConta, trocarMinhaSenha } from "./regras/contas.js";
-import { cadastrarRemotamente, usarAutenticacaoRemota, pedirRecuperacaoRemota, entrarRemotamente, sairRemotamente } from "./integracoes/autenticacaoRemota.js";
+import { cadastrarRemotamente, usarAutenticacaoRemota, pedirRecuperacaoRemota, reenviarVerificacaoRemota, entrarRemotamente, sairRemotamente, trocarSenhaRemota } from "./integracoes/autenticacaoRemota.js";
+import { baixarImagemDoLink } from './regras/baixarImagemDoLink.js';
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { pedirCodigo } from "./regras/codigosPorEmail.js";
 import { entrarComIdentidadeRemota } from "./regras/entradaPorProvedor.js";
@@ -15,8 +16,9 @@ export const contaCadastrar: TratadorDoCanal<'conta:cadastrar'> = a =>
 
 export const contaCodigo:TratadorDoCanal<'conta:codigo'>=async a=>{
   if(usarAutenticacaoRemota()){
-    if(a.finalidade!=='SENHA')throw new Error('LOGIN_METHOD_DISABLED');
-    return pedirRecuperacaoRemota(a.email);
+    if(a.finalidade==='SENHA')return pedirRecuperacaoRemota(a.email);
+    if(a.finalidade==='CADASTRO')return reenviarVerificacaoRemota(a.email);
+    throw new Error('LOGIN_METHOD_DISABLED');
   }
   if(process.env.PRUMO_LOGIN_MVP === '1')throw new Error('IDENTITY_NOT_CONFIGURED');
   return pedirCodigo(a);
@@ -39,6 +41,8 @@ export const contaGoogleiniciar: TratadorDoCanal<'conta:googleiniciar'> = a => i
 
 export const contaPerfil: TratadorDoCanal<'conta:perfil'> = a => alterarMeuNome(a.nome);
 
+export const contaImagemlink: TratadorDoCanal<'conta:imagemlink'> = a => baixarImagemDoLink(a.link);
+
 export const contaRecuperar: TratadorDoCanal<'conta:recuperar'> = a => recuperarConta(a);
 
 export const contaReenviarentrada: TratadorDoCanal<'conta:reenviarentrada'> = a => reenviarCodigoDeEntrada(a);
@@ -52,4 +56,5 @@ export const contaSair: TratadorDoCanal<'conta:sair'> = async () => {
   return sairDaConta();
 };
 
-export const contaSenha: TratadorDoCanal<'conta:senha'> = a => trocarMinhaSenha(a);
+export const contaSenha: TratadorDoCanal<'conta:senha'> = a =>
+  usarAutenticacaoRemota() ? trocarSenhaRemota(a.atual, a.nova) : trocarMinhaSenha(a);

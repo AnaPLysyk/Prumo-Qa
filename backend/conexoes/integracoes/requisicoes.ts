@@ -38,11 +38,23 @@ export function motivoDaRecusa(texto:string,segredos:string[]=[]):string|undefin
   const m=mascarar(partes.join(' · '),segredos).replace(/\s+/g,' ').trim();return m?m.slice(0,200):undefined;
 }
 
-export async function requisitarServico(p:PedidoServico,metodo:'GET'|MetodoEscrita,corpo?:string|Buffer,tipoConteudo='application/json'):Promise<unknown>{
+/** Id de site Atlassian (UUID) aceito em conexões OAuth do Jira. */
+const NUVEM=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+/** Endereço final do pedido, já conferido: só os destinos fixos de cada serviço, o caminho sempre dentro da API e escrita só em rotas da lista fechada. */
+export function destinoDoPedido(p:PedidoServico,metodo:'GET'|MetodoEscrita):URL{
   const origem=instanciaServico(p.servico,p.instancia);if(origem!==p.instancia||!p.caminho.startsWith('/')||p.caminho.startsWith('//'))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
-  const u=new URL(p.caminho,origem);if(u.origin!==origem)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
-  const base=p.servico==='jira'?'/rest/api/3/':p.servico==='qase'?'/v1/':'/';if(!u.pathname.startsWith(base))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
-  if(metodo!=='GET'&&(u.search||!rotaEscritaPermitida(p.servico,metodo,u.pathname)))throw new ErroServico('SERVICE_WRITE_BLOCKED');
+  // Conexão OAuth do Jira: o destino é sempre api.atlassian.com/ex/jira/<id do site>; o caminho segue as mesmas regras do endereço do site.
+  if(p.nuvem!==undefined&&(p.servico!=='jira'||!NUVEM.test(p.nuvem)))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
+  const destino=p.nuvem?'https://api.atlassian.com':origem;const prefixo=p.nuvem?'/ex/jira/'+p.nuvem:'';
+  const u=new URL(prefixo+p.caminho,destino);if(u.origin!==destino)throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
+  const base=prefixo+(p.servico==='jira'?'/rest/api/3/':p.servico==='qase'?'/v1/':'/');if(!u.pathname.startsWith(base))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
+  if(metodo!=='GET'&&(u.search||!rotaEscritaPermitida(p.servico,metodo,u.pathname.slice(prefixo.length))))throw new ErroServico('SERVICE_WRITE_BLOCKED');
+  return u;
+}
+
+export async function requisitarServico(p:PedidoServico,metodo:'GET'|MetodoEscrita,corpo?:string|Buffer,tipoConteudo='application/json'):Promise<unknown>{
+  const u=destinoDoPedido(p,metodo);
   // Resolve uma vez e fixa o IP no socket TLS. Não segue redirects. Só as escritas (POST, PUT, PATCH) levam corpo.
   let ip:string;let dnsTimer:ReturnType<typeof setTimeout>|undefined;try{const r=await Promise.race([lookup(u.hostname,{family:4}),new Promise<never>((_,reject)=>{dnsTimer=setTimeout(()=>reject(new ErroServico('SERVICE_TIMEOUT')),3000);dnsTimer.unref();})]);ip=r.address;}catch(e){if(e instanceof ErroServico)throw e;throw new ErroServico('SERVICE_UNAVAILABLE');}finally{clearTimeout(dnsTimer);}
   if(!enderecoPublico(ip))throw new ErroServico('SERVICE_DESTINATION_BLOCKED');
@@ -94,7 +106,8 @@ export async function lerComCredencial(adaptador: PartesDoAdaptador, caminho: st
       servico: adaptador.c.servico,
       instancia: adaptador.c.instancia,
       caminho,
-      headers: cabecalhosDoServico(adaptador.c)
+      headers: cabecalhosDoServico(adaptador.c),
+      ...(adaptador.c.nuvem ? { nuvem: adaptador.c.nuvem } : {})
     });
   } catch (erro) {
     if (erro instanceof ErroServico) throw erro;
