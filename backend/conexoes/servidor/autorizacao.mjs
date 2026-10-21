@@ -161,6 +161,8 @@ export function criarBroker({ config, armazenamento, cifra, fetcher = fetch, ago
         await armazenamento.finalizar(t.id, 'PRONTO', cifra.cifrar(entrega, t.id)); return 'PRONTO';
       } catch { await armazenamento.finalizar(t.id, 'ERRO'); return 'ERRO'; }
     },
+    /** O app pergunta antes de oferecer "Conectar pelo navegador": só os serviços com o aplicativo oficial configurado aparecem como disponíveis. */
+    disponiveis: () => ({ github: !!config.github, jira: !!config.jira }),
     async estado({ ator, tentativa }) {
       const s = await armazenamento.situacao({ id: String(tentativa), ator, agora: agora() });
       if (!s) throw falha('ATTEMPT_NOT_FOUND');
@@ -223,6 +225,7 @@ export function rotaDeIntegracoes({ broker, sessao, limitador, registrar = () =>
     const ator = await sessao(req);
     if (!ator) return responder(res, 401, { erro: 'SESSION_REQUIRED' });
     try {
+      if (req.method === 'GET' && rota === 'disponiveis') return responder(res, 200, broker.disponiveis());
       if (req.method === 'GET' && rota === 'estado') {
         if (limitado('integracao-estado:' + ator, 60_000, 90)) return responder(res, 429, { erro: 'RATE_LIMIT' });
         return responder(res, 200, await broker.estado({ ator, tentativa: parametros.get('tentativa') }));
