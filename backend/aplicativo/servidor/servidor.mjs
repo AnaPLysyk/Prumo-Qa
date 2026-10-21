@@ -9,6 +9,7 @@ import { criarLimitador, responder } from '../../compartilhado/servidor/comum.mj
 import { LIMITES, enviarPeloResend, rotaDeCodigos } from '../../login/servidor/codigos.mjs';
 import { LIMITES_DE_CHAMADOS, rotaDeChamados } from '../../suporte/servidor/chamados.mjs';
 import { clienteDoGitHub } from '../../suporte/servidor/github.mjs';
+import { integracoesDoServico } from '../../conexoes/servidor/autorizacao.mjs';
 import { SITE } from '../../login/servidor/modeloDeEmail.mjs';
 
 // Caminhos a partir de frontend/: páginas e script ficam no login; o estilo, no Design System (pasta web/, fora do instalador).
@@ -21,7 +22,7 @@ export { mensagem, enviarPeloResend } from '../../login/servidor/codigos.mjs';
  * Cria o atendimento HTTP. `enviar` (Resend) e `suporte.github` são injetados: os testes usam uma caixa e um repositório em memória.
  * Sem configuração, cada parte recusa com 503 e o resto continua funcionando.
  */
-export function criarServico({ enviar, configurado = true, limites = LIMITES, suporte = null, autenticacao = null, agora = () => Date.now(), registrar = (linha) => console.log(linha) }) {
+export function criarServico({ enviar, configurado = true, limites = LIMITES, suporte = null, autenticacao = null, integracoes = null, agora = () => Date.now(), registrar = (linha) => console.log(linha) }) {
   const limitador = criarLimitador(agora);
   const codigos = rotaDeCodigos({ enviar, configurado, limites, limitador, registrar });
   const chamados = rotaDeChamados({ github: suporte?.github, configurado: !!suporte?.github, chaveAdmin: suporte?.chaveAdmin, limites: suporte?.limites ?? LIMITES_DE_CHAMADOS, limitador, registrar, agora });
@@ -53,6 +54,11 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
         });
         return res.end(fs.readFileSync(new URL('../../../frontend/' + nome, import.meta.url)));
       }
+      if (caminho.startsWith('/v1/integracoes/')) {
+        // GitHub App e Jira OAuth pelo navegador: sem as variáveis do aplicativo oficial a rota recusa, e o resto do serviço segue.
+        if (!integracoes) return responder(res, 503, { erro: 'INTEGRATION_NOT_CONFIGURED' });
+        return await integracoes(req, res, caminho, url.searchParams);
+      }
       if (caminho === '/v1/codigos') return await codigos(req, res);
       if (caminho.startsWith('/v1/chamados') || caminho.startsWith('/v1/admin/')) return await chamados(req, res, caminho, url.searchParams);
       return responder(res, 404, { erro: 'NOT_FOUND' });
@@ -76,5 +82,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     autenticacao=criarAutenticacao({env});
   }
   const porta = Number(env.PORT) || 10000;
-  http.createServer(criarServico({ enviar, configurado: comEmail, suporte, autenticacao })).listen(porta, () => console.log(`serviço do Prumo QA na porta ${porta} (e-mail: ${comEmail ? 'sim' : 'NÃO'}; suporte: ${comSuporte ? 'sim' : 'NÃO'}; administração: ${(env.PRUMO_SUPORTE_CHAVE_ADMIN || '').length >= 32 ? 'sim' : 'NÃO'})`));
+  const integracoes = integracoesDoServico({ env, autenticacao, pool: autenticacao?.pool, limitador: criarLimitador(), registrar: (linha) => console.log(linha) });
+  http.createServer(criarServico({ enviar, configurado: comEmail, suporte, autenticacao, integracoes })).listen(porta, () => console.log(`serviço do Prumo QA na porta ${porta} (e-mail: ${comEmail ? 'sim' : 'NÃO'}; suporte: ${comSuporte ? 'sim' : 'NÃO'}; administração: ${(env.PRUMO_SUPORTE_CHAVE_ADMIN || '').length >= 32 ? 'sim' : 'NÃO'})`));
 }

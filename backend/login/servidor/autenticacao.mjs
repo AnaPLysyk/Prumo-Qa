@@ -64,5 +64,5 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
     // endereços e o Better Auth juntava todo mundo num só contador de tentativas.
     advanced:{useSecureCookies:true,ipAddress:{ipAddressHeaders:['cf-connecting-ip']}}
   });
-  return {auth,atender:toNodeHandler(auth),checar:async()=>{await pool.query('SELECT 1');},fechar:()=>pool.end()};
+  return {auth,pool,atender:toNodeHandler(auth),checar:async()=>{await pool.query("SELECT 1");},fechar:()=>pool.end()};
 }
