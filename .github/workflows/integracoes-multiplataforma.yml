@@ -1,0 +1,26 @@
+name: Integrações OAuth - Windows macOS Linux
+on:
+  push:
+    paths:
+      - 'integracoes-universais/**'
+      - '.github/workflows/integracoes-multiplataforma.yml'
+  pull_request:
+    paths:
+      - 'integracoes-universais/**'
+      - '.github/workflows/integracoes-multiplataforma.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integration-unit:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test integracoes-universais/oauth-broker.test.mjs
