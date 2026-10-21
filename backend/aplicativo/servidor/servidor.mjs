@@ -11,8 +11,9 @@ import { LIMITES_DE_CHAMADOS, rotaDeChamados } from '../../suporte/servidor/cham
 import { clienteDoGitHub } from '../../suporte/servidor/github.mjs';
 import { SITE } from '../../login/servidor/modeloDeEmail.mjs';
 
-const PAGINAS_DOS_EMAILS = new Map([['/conta-confirmada', 'conta-confirmada.html'], ['/recuperar-senha', 'recuperar-senha.html'],
-  ['/recuperar-senha.js', 'recuperar-senha.js'], ['/paginas.css', 'paginas.css']]);
+// Caminhos a partir de frontend/: páginas e script ficam no login; o estilo, no Design System (pasta web/, fora do instalador).
+const PAGINAS_DOS_EMAILS = new Map([['/conta-confirmada', 'login/web/conta-confirmada.html'], ['/recuperar-senha', 'login/web/recuperar-senha.html'],
+  ['/recuperar-senha.js', 'login/web/recuperar-senha.js'], ['/paginas.css', 'design-system/web/paginas.css']]);
 
 export { mensagem, enviarPeloResend } from '../../login/servidor/codigos.mjs';
 
@@ -43,14 +44,14 @@ export function criarServico({ enviar, configurado = true, limites = LIMITES, su
       const paginaWeb = req.method === 'GET' && PAGINAS_DOS_EMAILS.get(caminho);
       if (paginaWeb) {
         if (!autenticacao) return responder(res, 503, { erro: 'AUTH_NOT_CONFIGURED' });
-        const nome = caminho === '/conta-confirmada' && url.searchParams.has('error') ? 'confirmacao-recusada.html' : paginaWeb;
+        const nome = caminho === '/conta-confirmada' && url.searchParams.has('error') ? 'login/web/confirmacao-recusada.html' : paginaWeb;
         res.writeHead(200, {
           'Content-Type': { html: 'text/html', js: 'text/javascript', css: 'text/css' }[nome.split('.').pop()] + '; charset=utf-8',
           'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
           'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY',
           'Content-Security-Policy': `default-src 'none'; script-src 'self'; style-src 'self'; img-src ${SITE}; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`
         });
-        return res.end(fs.readFileSync(new URL('../../../frontend/login/web/' + nome, import.meta.url)));
+        return res.end(fs.readFileSync(new URL('../../../frontend/' + nome, import.meta.url)));
       }
       if (caminho === '/v1/codigos') return await codigos(req, res);
       if (caminho.startsWith('/v1/chamados') || caminho.startsWith('/v1/admin/')) return await chamados(req, res, caminho, url.searchParams);

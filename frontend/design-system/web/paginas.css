@@ -1,7 +1,8 @@
 /* Páginas abertas pelos links dos e-mails: mesma aparência da tela de entrada (cores dos tokens de frontend/design-system). */
+:root { --fonte-ui: "Inter Variable", Inter, "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; font: 15px/1.55 Inter, 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif; color: #14233d; background: radial-gradient(60rem 36rem at 85% -8%, rgba(37, 99, 235, .16), transparent 62%), #060b18; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; font: 15px/1.55 var(--fonte-ui); color: #14233d; background: radial-gradient(60rem 36rem at 85% -8%, rgba(37, 99, 235, .16), transparent 62%), #060b18; }
 main { width: min(440px, 100%); display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .orbe { width: 150px; height: 150px; }
 .cartao { width: 100%; display: flex; flex-direction: column; gap: 12px; padding: 32px; background: #ffffff; border: 1px solid #cfd9ea; border-radius: 16px; box-shadow: 0 24px 48px -24px rgba(0, 0, 0, .6); }
