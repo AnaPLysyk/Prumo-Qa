@@ -1,5 +1,6 @@
 /** Identidade global do Prumo: Better Auth e PostgreSQL, somente no processo Node do Render. */
 import {betterAuth} from 'better-auth';
+import {customSession} from 'better-auth/plugins';
 import {toNodeHandler} from 'better-auth/node';
 import pg from 'pg';
 import {enviarPeloResend} from './codigos.mjs';
@@ -27,10 +28,13 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
   const mandar=enviar??enviarPeloResend({chave:env.RESEND_API_KEY,remetente:env.PRUMO_EMAIL_REMETENTE});
   // Quem cadastra escolhe o nome: só um primeiro nome de letras entra no e-mail, nunca endereço ou link.
   const saudacao=user=>{const nome=String(user.name||'').trim().split(/\s+/)[0];return /^\p{L}[\p{L}'-]{0,39}$/u.test(nome)?'Olá, '+nome+'!':'';};
+  const emailsAdmin=new Set(String(env.PRUMO_ADMIN_EMAILS||'').split(',').map(e=>e.trim().toLowerCase()).filter(Boolean));
   const auth=betterAuth({
     appName:'Prumo QA',
     baseURL,secret:env.BETTER_AUTH_SECRET,
     database:pool,
+    // Só o serviço decide quem administra: e-mails em PRUMO_ADMIN_EMAILS, com o e-mail já confirmado.
+    plugins:[customSession(async ({user,session})=>({user,session,administrador:user.emailVerified===true&&emailsAdmin.has(String(user.email).toLowerCase())}))],
     emailAndPassword:{
       enabled:true,minPasswordLength:10,maxPasswordLength:128,requireEmailVerification:true,revokeSessionsOnPasswordReset:true,
       sendResetPassword:async ({user,token})=>{
