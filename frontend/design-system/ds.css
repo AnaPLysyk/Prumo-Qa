@@ -304,6 +304,8 @@ button.ds-no:disabled { opacity: .55; cursor: not-allowed; text-decoration: line
 
 /* ---------- Ajustes de telas do Grupo B (sem mudar a identidade) ---------- */
 #conteudo[data-ds-tela] { max-width: 1180px; }
+/* O canvas de Agentes e os painéis visuais não devem ser comprimidos pelo limite das tabelas. */
+#conteudo[data-ds-tela="inicio"], #conteudo[data-ds-tela="agentes"] { max-width: none; }
 #conteudo[data-ds-tela] .barra { padding: 0; border: 0; background: none; }
 #conteudo[data-ds-tela] > section > .nota:first-child { margin-top: 0; }
 .ds-rodape-tela { margin-top: var(--ds-6); }
@@ -337,7 +339,11 @@ button.ds-no:disabled { opacity: .55; cursor: not-allowed; text-decoration: line
 .v36m-periodo, .v36h-segmento { flex-wrap: wrap; }
 @media (max-width: 860px) { .v36h-barra, .v36m-barra { padding-right: 0; padding-top: 44px; } }
 /* Agentes ≤ 860 px: as abas usavam margem negativa maior que o recuo do conteúdo e reservavam 190 px do topo. */
-@media (max-width: 860px) { .v36a-abas { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; gap: 20px; overflow-x: auto; } }
+@media (max-width: 860px) {
+  body[data-tela=agentes] main#conteudo { box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; }
+  /* Especificidade maior que o CSS modular das telas, carregado depois do núcleo. */
+  #conteudo .v36a-abas { box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; gap: 20px; overflow-x: auto; }
+}
 /* Barra em telas estreitas e zoom alto: período e busca encolhem em vez de empurrar a página. */
 .ds-barra > .ds-periodo, .ds-barra > .ds-busca { flex: 0 1 auto; max-width: 100%; min-width: 0; }
 .ds-barra > .ds-busca { flex: 1 1 200px; }
@@ -358,6 +364,11 @@ li.proj-vinculo .ds-sub { margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 760px) { li.proj-vinculo { grid-template-columns: minmax(0, 1fr) auto; } li.proj-vinculo .ds-sub { grid-column: 1 / -1; grid-row: 2; } }
 li.proj-vinculo { grid-template-columns: minmax(0, 260px) minmax(0, 1fr) auto auto; }
 li.proj-vinculo .ds-origem { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* Lista de repositórios no fluxo do projeto: ações nunca esmagam o nome do recurso. */
+.repos-github li.proj-vinculo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.repos-github li.proj-vinculo .ds-origem { flex: 0 1 220px; }
+.repos-github li.proj-vinculo .ds-sub { flex: 1 1 220px; min-width: 145px; }
+.repos-github li.proj-vinculo button { flex: none; }
 .ds-modal .ds-sub { display: block; font-size: 12px; color: var(--suave); margin-top: 2px; }
 .ds-modal > .ds-abas { position: sticky; top: 0; z-index: 2; margin-bottom: 18px; background: var(--painel); }
 #agentes-contextos { height: 38px; margin-right: 8px; }
@@ -371,8 +382,8 @@ details.ds-grupo-testes > summary::-webkit-details-marker { display: none; }
 details.ds-grupo-testes > summary::before { content: ""; width: 6px; height: 6px; border-right: 1.6px solid var(--suave); border-bottom: 1.6px solid var(--suave); transform: rotate(-45deg); transition: transform var(--ds-dur); }
 details.ds-grupo-testes[open] > summary::before { transform: rotate(45deg); }
 .ds-tag { font-family: var(--fonte-mono); font-size: 11px; }
-.ds-ide { display: grid; grid-template-columns: 250px minmax(0, 1fr) 300px; gap: 0; height: calc(100vh - 260px); min-height: 420px; margin-top: 12px; border: 1px solid var(--ds-linha-suave); border-radius: var(--ds-r2); overflow: hidden; background: color-mix(in srgb, var(--fundo) 65%, transparent); }
-.ds-ide-arvore { overflow: auto; padding: 10px 8px; border-right: 1px solid var(--ds-linha-suave); background: var(--ds-superficie); }
+.ds-ide { display: grid; grid-template-columns: minmax(184px, 240px) minmax(0, 1fr) minmax(228px, 282px); gap: 0; flex: 1; min-width: 0; min-height: 0; width: 100%; height: 100%; margin: 0; border: 0; border-radius: 0; overflow: hidden; background: var(--fundo2); }
+.ds-ide-arvore { min-width: 0; min-height: 0; overflow: auto; padding: 8px 6px; border-right: 1px solid var(--ds-linha-suave); background: var(--ds-superficie); }
 .ds-ide-arvore .ds-doc-grupo { margin: 2px 6px 8px; }
 .ds-ide-pasta { border: 0; padding: 0 0 0 8px; }
 .ds-ide-pasta > summary { list-style: none; display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; cursor: pointer; font-size: 12.5px; color: var(--suave); }
@@ -396,12 +407,13 @@ ol.ds-ide-linhas > li.ds-ide-teste { background: rgba(var(--qc-azul), .06); bord
 ol.ds-ide-linhas > li.ds-ide-teste[aria-current="true"] { background: rgba(var(--qc-azul), .13); box-shadow: inset 3px 0 0 var(--acento); }
 .ds-ide-marca { position: absolute; top: 4px; left: 58px; display: inline-flex; gap: 6px; align-items: center; padding: 0; border: 0; background: none; cursor: pointer; font-family: var(--fonte-ui); white-space: nowrap; }
 .ds-ide-marca:hover .ds-chip, .ds-ide-marca:hover .tipo { border-color: var(--acento); }
-.ds-ide-painel { overflow: auto; padding: 14px 16px; border-left: 1px solid var(--ds-linha-suave); background: var(--ds-superficie); display: flex; flex-direction: column; gap: 18px; }
+.ds-ide-painel { min-width: 0; min-height: 0; overflow: auto; padding: 14px 14px 18px; border-left: 1px solid var(--ds-linha-suave); background: var(--ds-superficie); display: flex; flex-direction: column; gap: 14px; }
 .ds-ide-painel .ds-lista > li { font-size: 12.5px; padding: 6px 0; }
 #ide-agentes { margin-top: 6px; gap: 6px 16px; }
 #ide-agentes > span { display: inline-flex; align-items: center; gap: 5px; }
-@media (max-width: 1240px) { .ds-ide { grid-template-columns: 220px minmax(0, 1fr); } .ds-ide-painel { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--ds-linha-suave); max-height: 280px; } .ds-ide { height: auto; } .ds-ide-editor { height: 60vh; } }
-@media (max-width: 760px) { .ds-ide { grid-template-columns: minmax(0, 1fr); } .ds-ide-arvore { max-height: 220px; border-right: 0; border-bottom: 1px solid var(--ds-linha-suave); } }
+@media (max-width: 1180px) { .ds-ide { grid-template-columns: minmax(164px, 214px) minmax(0, 1fr); } .ds-ide-painel { display: none; } }
+@media (max-width: 720px) { .ds-ide { grid-template-columns: minmax(132px, 174px) minmax(0, 1fr); } .ds-ide-arvore { max-height: none; border-right: 1px solid var(--ds-linha-suave); border-bottom: 0; } }
+@media (max-width: 510px) { .ds-ide { grid-template-columns: minmax(0, 1fr); } .ds-ide-arvore { display: none; } }
 /* nav herda flex/wrap de estilo.css (menu antigo); árvore e índice são listas verticais. */
 nav.ds-ide-arvore, .ds-doc nav.indice { display: block; }
 .ds-ide-painel h3.ds-h { margin: 0 0 8px; font: 600 var(--ds-fs-sm)/1.3 var(--fonte-ui); text-transform: none; letter-spacing: 0; color: var(--suave); }
@@ -416,11 +428,26 @@ nav.ds-ide-arvore, .ds-doc nav.indice { display: block; }
 .ds-info-botao:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
 .ds-info-texto { position: absolute; top: calc(100% + 6px); left: -8px; z-index: 60; display: none; width: max-content; max-width: min(380px, 80vw); padding: 10px 12px; border: 1px solid var(--linha); border-radius: var(--ds-r2); background: var(--painel); color: var(--texto); box-shadow: var(--ds-sombra-curta); font: 400 12.5px/1.5 var(--fonte-ui); letter-spacing: 0; text-transform: none; white-space: normal; }
 .ds-info:hover .ds-info-texto, .ds-info:focus-within .ds-info-texto, .ds-info[data-aberto] .ds-info-texto { display: block; }
+/* Floating UI: dicas posicionadas no diálogo/viewport, sem barra lateral ou corte. */
+.ds-info-texto[data-flutuante] {
+  position: fixed; z-index: 100; top: 0; left: 0; right: auto;
+  display: block; max-width: min(360px, calc(100vw - 24px));
+  pointer-events: none; white-space: normal; overflow-wrap: anywhere;
+}
 
 /* 2.13: IDE de Testes usa a tela inteira, como um editor: sem moldura de título, altura da janela. */
-.ds-ide-cheio .ds-ide { height: calc(100vh - 190px); min-height: 420px; margin-top: 8px; }
+.ds-ide-cheio .ds-ide { height: 100%; min-height: 0; margin: 0; }
 /* A IDE ocupa a largura toda da janela, sem a margem de leitura das outras telas. */
-main#conteudo:has(.ds-ide-cheio) { max-width: none; padding: 14px 18px 12px; }
+/* A IDE é uma área de trabalho, não um cartão dentro de outra página. */
+main#conteudo:has(> .ds-ide-cheio) { box-sizing: border-box; display: flex; flex-direction: column; width: 100%; max-width: none; height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; margin: 0; padding: 46px 0 0; }
+main#conteudo:has(> .ds-ide-cheio) > .segmentos.sub { flex: none; margin: 0; padding: 0 18px; background: var(--painel); }
+main#conteudo:has(> .ds-ide-cheio) > .ds-ide-modos { padding-left: 18px; }
+#sub-conteudo.ds-ide-cheio { display: flex; flex: 1; flex-direction: column; min-height: 0; width: 100%; overflow: hidden; }
+#sub-conteudo.ds-ide-cheio > .ds-ide { min-height: 0; flex: 1; }
+.ds-ide-editor, .ds-ide-cm { min-height: 0; }
+.ds-ide-painel .ds-bloco { margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.ds-ide-painel .ds-h { border: 0; }
+@media (max-height: 560px) { main#conteudo:has(> .ds-ide-cheio) { padding-top: 32px; } }
 
 /* 2.13: editor da IDE (CodeMirror embutido) com as cores do Design System, nos temas claro e escuro. */
 .ds-ide-barra { padding: 0 6px 8px; }
@@ -489,6 +516,17 @@ main#conteudo:has(.ds-ide-cheio) { max-width: none; padding: 14px 18px 12px; }
 .cx-recurso { cursor: default; }
 .cx-vazio { padding: 10px 4px; }
 .cx-rodape { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 12px; }
+.cx-painel-cab #conexao-descricao { display: inline-flex; align-items: center; gap: 8px; flex-basis: 100%; }
+.cx-fala { color: var(--suave); font-size: var(--ds-fs-md); }
+.cx-passos { display: grid; gap: 2px; }
+.cx-passo { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; align-items: start; padding: 10px 0; }
+.cx-passo-n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: var(--ds-fs-sm); font-weight: 700; color: var(--acento); background: color-mix(in srgb, var(--acento) 14%, transparent); }
+.cx-passo-corpo { display: grid; gap: 8px; min-width: 0; }
+.cx-passo-corpo > strong, .cx-passo-linha > strong { color: var(--texto); font-weight: 650; }
+.cx-passo-linha { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cx-passo-token input { flex: 1 1 260px; min-width: 0; }
+.cx-passos[hidden], .cx-verificado[hidden], .cx-painel [hidden] { display: none !important; }
+.cx-verificado { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 6px 0; color: var(--ok); font-size: var(--ds-fs-md); }
 .cx-ops { list-style: none; margin: 0; padding: 0; }
 .cx-ops li { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--ds-linha-suave); font-size: var(--ds-fs-sm); }
 @media (max-width: 900px) { .cx-linha { grid-template-columns: 1fr auto; } .cx-serve, .cx-escrita { grid-column: 1 / -1; } .cx-conta { grid-template-columns: 1fr; } }
@@ -499,3 +537,484 @@ main#conteudo:has(.ds-ide-cheio) { max-width: none; padding: 14px 18px 12px; }
 input[type="date"] { height: var(--ds-controle); padding: 5px 10px; font: inherit; font-size: var(--ds-fs-md); color: var(--texto); background-color: var(--ds-superficie); border: 1px solid var(--ds-linha-suave); border-radius: var(--raio); }
 /* Nas tabelas do Design System a palavra não quebra no meio (a caixa da tabela rola por dentro); no resto da página um caminho longo ainda pode quebrar. */
 .ds-tabela th, .ds-tabela td { overflow-wrap: normal; }
+
+/* Projetos: bancada radial, conectores de origem e cabos ligados a recursos reais. */
+#conteudo[data-ds-tela="projetos"] { max-width: none; width: 100%; padding: 24px clamp(20px,3vw,48px) 55px; }
+#conteudo[data-ds-tela="projetos"] > h1, #conteudo[data-ds-tela="projetos"] > p.ds-desc { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.ds-proj-topo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-bottom: 22px; border-bottom: 1px solid var(--ds-linha-suave); margin-bottom: 18px; }
+.ds-proj-topo .barra-acoes { margin: 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ds-proj-topo button.acao { min-height: 42px; padding: 8px 15px; border: 1px solid var(--linha); border-radius: 9px; background: color-mix(in srgb, var(--painel) 78%, transparent); color: var(--texto); box-shadow: none; font-size: 13px; }
+.ds-proj-topo button.acao:first-child { background: linear-gradient(135deg,#249aff,#0754e8); border-color: #278fff; color: #fff; font-weight: 600; box-shadow: 0 4px 18px rgba(27,123,255,.35); }
+.ds-proj-topo button.acao:hover { border-color: var(--acento); filter: brightness(1.12); }
+.ds-proj-busca { margin-left: auto; display: flex; align-items: center; gap: 8px; border: 1px solid var(--linha); border-radius: 9px; background: var(--painel); min-width: 175px; padding: 0 11px; }
+.ds-proj-busca .ds-ic { color: var(--suave); }
+.ds-proj-busca input { border: none; background: transparent; min-width: 0; height: 41px; width: 165px; font: 12px/1.4 var(--fonte-ui); color: var(--texto); outline: none; }
+.ds-proj-busca:focus-within { border-color: var(--acento); }
+.ds-proj-lista { display: grid; gap: 10px; margin-top: 0; }
+.ds-proj-item { margin: 0; padding: 0; border-bottom: 1px solid var(--ds-linha-suave); }
+.ds-proj-item > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 18px; padding: 10px 4px 17px; }
+.ds-proj-item > summary::-webkit-details-marker { display: none; }
+.ds-proj-item > summary::after { content: "⌄"; margin-left: auto; color: var(--suave); transition: transform .18s; font-size: 20px; }
+.ds-proj-item[open] > summary::after { transform: rotate(180deg); }
+.ds-proj-item > summary:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.ds-proj-resumo { display: flex; gap: 12px 18px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.ds-proj-resumo h2 { font-size: clamp(20px,2.2vw,30px); font-weight: 700; letter-spacing: -.045em; line-height: 1.15; margin: 0; }
+.ds-proj-contagem { font: 11px/1.5 var(--fonte-mono); color: var(--suave); }
+.ds-proj-item[data-selecionado="sim"] > summary h2 { color: var(--texto); }
+.ds-proj-item[data-selecionado="sim"] > summary .chip { border-color: color-mix(in srgb,var(--ok) 35%,transparent); color: var(--ok); background: color-mix(in srgb,var(--ok) 10%,transparent); }
+.ds-proj-conteudo { padding-bottom: 26px; }
+/* A bancada fica direto sobre o fundo da tela: sem painel próprio, grade ou moldura em volta (pedido de 21/10/2026). */
+.ds-proj-fluxo { background: none; border: none; border-radius: 0; overflow: hidden; min-width: 0; }
+.ds-proj-fluxo-barra { display: flex; justify-content: space-between; gap: 10px; padding: 9px 4px; color: var(--suave); font: 10px/1.5 var(--fonte-mono); letter-spacing: .09em; }
+.ds-proj-grafo { position: relative; display: grid; grid-template-columns: minmax(190px,1fr) minmax(255px,310px) minmax(190px,1fr); gap: clamp(14px,2.5vw,32px); min-height: 420px; padding: 15px 12px 21px; align-items: center; isolation: isolate; background: radial-gradient(circle at 50% 50%,rgba(11,81,191,.17),transparent 42%); }
+.ds-proj-cabos { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ds-proj-cabo { fill: none; stroke: #4caaff; stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 4px rgba(38,137,255,.8)); }
+.ds-proj-cabo[data-servico="jira"] { stroke: #48abff; }
+.ds-proj-cabo[data-servico="qase"] { stroke: var(--ds-qase); }
+.ds-proj-cabo[data-servico="github"] { stroke: #5bb8ff; }
+.ds-proj-cabo[data-servico="local"] { stroke: var(--ds-local); }
+.ds-proj-cabo[data-servico="manual"] { stroke: #4fd1a0; }
+.ds-proj-cabo[data-ativo="nao"] { stroke: #8da0c5; stroke-width: 1.6; stroke-dasharray: 4 7; opacity: .65; filter: none; }
+.ds-proj-grafo-col { display: grid; gap: 5px; min-width: 0; align-self: stretch; align-content: space-around; z-index: 2; }
+.ds-proj-grafo-col[data-lado="direita"] { align-content: space-evenly; }
+.ds-proj-modulo { position: relative; min-width: 0; display: flex; align-items: center; gap: 11px; padding: 5px 10px 5px 0; min-height: 108px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.ds-proj-modulo:hover, .ds-proj-modulo:focus-within { border-color: transparent; background: none; }
+.ds-proj-modulo-emblema { display: grid; place-items: center; flex: none; width: clamp(53px,5vw,64px); height: clamp(53px,5vw,64px); border-radius: 50%; color: var(--acento); background: radial-gradient(circle at center,rgba(var(--qc-azul),.15),#07112a 70%); border: 1px solid rgba(93,158,255,.65); box-shadow: inset 0 0 0 7px var(--fundo2),0 0 0 1px rgba(var(--qc-azul),.13),0 0 22px rgba(30,122,241,.14); }
+.ds-proj-modulo-emblema .ds-ic { width: 26px; height: 26px; stroke-width: 1.9; }
+.ds-proj-modulo-emblema svg:not(.ds-ic) { width: 30px; height: 30px; color: var(--texto); }
+.ds-proj-modulo[data-servico="qase"] .ds-proj-modulo-emblema { border-color: #9c76ed; color: #c19eff; background: radial-gradient(circle,rgba(146,92,236,.19),#0c0922 75%); }
+.ds-proj-modulo[data-servico="github"] .ds-proj-modulo-emblema { border-color: rgba(87,161,255,.7); }
+.ds-proj-modulo[data-servico="local"] .ds-proj-modulo-emblema { border-color: #788bb0; color: #c6d8f7; }
+.ds-proj-modulo[data-servico="manual"] .ds-proj-modulo-emblema { color: #43baff; }
+.ds-proj-modulo-corpo { display: flex; flex: 1; flex-direction: column; min-width: 0; gap: 5px; }
+.ds-proj-modulo-nome { font-size: clamp(13px,1.1vw,16px); color: var(--texto); font-weight: 700; line-height: 1.22; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.ds-proj-modulo-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--suave); }
+.ds-proj-status-led { width: 9px; height: 9px; border-radius: 50%; background: #7083a6; flex: none; }
+.ds-proj-modulo[data-vinculado="sim"] .ds-proj-modulo-status { color: var(--ok); }
+.ds-proj-modulo[data-vinculado="sim"] .ds-proj-status-led { background: var(--ok); box-shadow: 0 0 8px rgba(55,228,157,.25); }
+.ds-proj-modulo[data-estado="SEM_CREDENCIAL"] .ds-proj-modulo-status, .ds-proj-modulo[data-estado="INDISPONIVEL"] .ds-proj-modulo-status { color: var(--aviso); }
+.ds-proj-modulo[data-estado="SEM_CREDENCIAL"] .ds-proj-status-led, .ds-proj-modulo[data-estado="INDISPONIVEL"] .ds-proj-status-led { background: var(--aviso); }
+.ds-proj-modulo-recurso { color: var(--suave); font: 11px/1.6 var(--fonte-mono); max-width: 240px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ds-proj-modulo-acoes { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 3px; }
+.ds-proj-modulo-acoes .ds-link { color: var(--acento); font-size: 11px; padding: 2px 0; }
+.ds-proj-porta { position: absolute; z-index: 4; top: 50%; right: -13px; transform: translateY(-50%); width: 18px; height: 18px; display: grid; place-items: center; padding: 0; border: 2px solid #62b9ff; background: #0c254e; border-radius: 50%; box-shadow: 0 0 0 4px rgba(37,119,240,.10),0 0 12px rgba(40,160,255,.42); cursor: pointer; }
+.ds-proj-porta > span { display: block; width: 7px; height: 7px; border-radius: 50%; background: #64bdff; }
+.ds-proj-modulo[data-vinculado="nao"] .ds-proj-porta { border-color: #8192b5; background: #182039; box-shadow: none; }
+.ds-proj-modulo[data-vinculado="nao"] .ds-proj-porta > span { background: #8192b5; }
+.ds-proj-porta:hover { outline: 3px solid var(--ds-selecionado); } .ds-proj-porta:focus-visible { outline: 2px solid var(--acento); outline-offset: 4px; }
+.ds-proj-grafo-col[data-lado="direita"] .ds-proj-porta { right: auto; left: -14px; }
+.ds-proj-hub { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 9px; width: 100%; aspect-ratio: 1; z-index: 3; isolation: isolate; border: 1px solid var(--acento); border-radius: 50%; background: radial-gradient(circle at 48% 42%,color-mix(in srgb,var(--acento) 16%,var(--painel)) 0%,var(--painel) 70%); box-shadow: 0 0 0 7px rgba(var(--qc-azul),.08),0 8px 28px -12px rgba(var(--qc-azul),.5); padding: 30px 20px; }
+.ds-proj-hub::before { content: ""; position: absolute; inset: -8px; z-index: -1; border: 1px solid rgba(63,147,255,.4); border-radius: 50%; box-shadow: 0 0 17px rgba(47,120,239,.28); }
+.ds-proj-hub::after { display: none; }
+.ds-proj-hub-simbolo { position: relative; width: 42px; height: 42px; margin-bottom: 3px; }
+.ds-proj-camada { position: absolute; left: 8px; width: 27px; height: 17px; border: 2px solid #3b99ff; transform: rotate(-35deg) skew(15deg); border-radius: 3px; filter: drop-shadow(0 0 5px rgba(46,133,255,.45)); }
+.ds-proj-camada-1 { top: 3px; } .ds-proj-camada-2 { top: 12px; } .ds-proj-camada-3 { top: 21px; }
+.ds-proj-hub-legenda { color: var(--acento); letter-spacing: .14em; font: 700 10px/1.25 var(--fonte-mono); }
+/* O núcleo é sempre azul-noite, nos dois temas: o texto dele é claro fixo, nunca a cor de texto do tema. */
+.ds-proj-hub-nome { color: var(--texto); font-size: clamp(20px,2.15vw,28px); line-height: 1.12; font-weight: 750; letter-spacing: -.035em; overflow-wrap: anywhere; max-width: 280px; }
+.ds-proj-hub-descricao { color: var(--suave); font-size: 12px; line-height: 1.55; max-width: 270px; margin: 0; }
+.ds-proj-hub-porta { position: absolute; z-index: 5; width: 21px; height: 21px; border-radius: 50%; border: 2px solid #65baff; background: #308df2; box-shadow: 0 0 0 4px rgba(28,112,244,.24),0 0 10px rgba(51,139,255,.55); }
+.ds-proj-hub-porta[data-servico="jira"] { left: 2%; top: 28%; } .ds-proj-hub-porta[data-servico="qase"] { left: -2%; top: 49%; } .ds-proj-hub-porta[data-servico="manual"] { left: 4%; top: 76%; }
+.ds-proj-hub-porta[data-servico="github"] { right: 1%; top: 36%; } .ds-proj-hub-porta[data-servico="local"] { right: 0%; top: 70%; }
+.ds-proj-hub-porta[data-vinculado="nao"] { border-color: #879bbf; background: #596e96; box-shadow: 0 0 0 4px rgba(101,125,171,.13); }
+.ds-proj-barra { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px 0 10px; }
+.ds-proj-barra .barra-acoes { margin: 0; } .ds-proj-detalhes { margin-top: 11px; font-size: 12px; } .ds-proj-detalhes summary { display: inline-flex; color: var(--suave); cursor: pointer; padding: 6px 0; }
+.ds-proj-detalhes ul.proj-vinculos { margin: 5px 0 10px; }
+@media (max-width: 1200px) {
+ .ds-proj-grafo { grid-template-columns: minmax(175px,1fr) minmax(235px,270px) minmax(175px,1fr); gap: 14px; padding: 16px 10px; min-height: 400px; }
+ .ds-proj-modulo { gap: 8px; min-height: 120px; } .ds-proj-modulo-emblema { width: 57px; height: 57px; } .ds-proj-modulo-emblema .ds-ic { width: 27px; height: 27px; }
+ .ds-proj-hub { padding: 24px; gap: 9px; } .ds-proj-hub-nome { font-size: 22px; } .ds-proj-hub-descricao { font-size: 11px; }
+}
+@media (max-width: 950px) {
+ .ds-proj-grafo { display: flex; flex-direction: column; align-items: stretch; gap: 17px; padding: 20px 16px; min-height: 0; } .ds-proj-hub { order: -1; width: min(340px,80vw); align-self: center; }
+ .ds-proj-grafo-col,.ds-proj-grafo-col[data-lado="direita"] { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; align-self: stretch; }
+ .ds-proj-modulo { min-height: 115px; padding: 9px 4px; } .ds-proj-cabos,.ds-proj-hub-porta { display: none; }
+ .ds-proj-porta, .ds-proj-grafo-col[data-lado="direita"] .ds-proj-porta { left: auto; right: 4px; top: 14px; transform: none; }
+ .ds-proj-modulo-corpo { padding-right: 16px; }
+ .ds-proj-topo .ds-proj-busca { margin-left: 0; }
+}
+@media (max-width: 520px) {
+ .ds-proj-grafo-col,.ds-proj-grafo-col[data-lado="direita"] { grid-template-columns: minmax(0,1fr); }
+ .ds-proj-fluxo-barra { padding: 9px 6px; }
+ .ds-proj-topo { gap: 8px; } .ds-proj-topo .barra-acoes { gap: 6px; }
+ .ds-proj-hub { width: min(305px,82vw); } .ds-proj-hub-nome { font-size: 21px; }
+ .ds-proj-resumo h2 { font-size: 20px; } .ds-proj-item > summary { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) { .ds-proj-item > summary::after { transition: none; } }
+/* Gestão de credenciais dentro da tela Projetos. */
+.ds-proj-configuracoes { margin: 15px 0 0; border-top: 1px solid var(--ds-linha-suave); padding: 11px 0; }
+.ds-proj-configuracoes > summary { cursor: pointer; color: var(--acento); font-size: 13px; font-weight: 600; padding: 8px 0; }
+.ds-proj-configuracoes > summary:focus-visible { outline: 2px solid var(--acento); }
+.ds-proj-configuracoes-corpo { padding: 12px 0 22px; }
+.ds-proj-configuracoes .cx-servicos { border: 0; background: transparent; box-shadow: none; }
+.ds-proj-configuracoes .cx-secao-cab { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.ds-proj-configuracoes .cx-painel { max-width: 100%; }
+.ds-proj-configuracoes .ds-integracoes { max-width: none; }
+/* Lista integral de projetos e pastas, pesquisável e com rolagem. */
+.projeto-lista { max-height: min(60vh, 460px); overflow-y: auto; overscroll-behavior: contain; }
+.projeto-busca { position: sticky; top: 0; z-index: 1; box-sizing: border-box; width: 100%;
+  min-height: 35px; padding: 8px 10px; margin-bottom: 5px; border-radius: 7px;
+  border: 1px solid var(--linha); background: var(--painel); color: var(--texto);
+  font: 12px/1.4 var(--fonte-ui); }
+.projeto-busca:focus-visible { outline: 2px solid var(--acento); outline-offset: -1px; }
+.projeto-grupo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.projeto-grupo-titulo { color: var(--suave); font: 600 10px/1.4 var(--fonte-ui);
+  letter-spacing: .08em; padding: 9px 10px 5px; }
+.projeto-vazio { color: var(--suave); font: 12px/1.5 var(--fonte-ui); padding: 9px 10px; }
+.projeto-item[hidden], .projeto-grupo[hidden] { display: none !important; }
+.projeto-item[aria-current="true"] { color: var(--acento); font-weight: 700; background: rgba(var(--qc-azul),.11); }
+.projeto-item { white-space: normal; overflow-wrap: anywhere; min-height: 32px; }
+.seletor-projeto { position: relative; }
+.projeto-lista { position: absolute; left: 8px; right: 8px; top: 100%; z-index: 35; box-shadow: 0 12px 28px rgba(0,0,0,.2); }
+
+/* Projetos: uma bancada por vez, sem rolagem da página nem lista empilhada. */
+#conteudo[data-ds-tela="projetos"] {
+  box-sizing: border-box; display: flex; flex-direction: column;
+  width: 100%; max-width: none; height: 100dvh; min-height: 0;
+  margin: 0; overflow: hidden; padding: 52px clamp(12px,2vw,26px) 10px;
+}
+#conteudo[data-ds-tela="projetos"] > h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.ds-proj-workspace { position: relative; display: flex; flex: 1; flex-direction: column; width: 100%; min-width: 0; min-height: 0; gap: 7px; }
+.ds-proj-workspace-topo, .ds-proj-workspace-rodape { flex: none; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+.ds-proj-workspace-topo { padding: 2px 2px 8px; border-bottom: 1px solid var(--ds-linha-suave); }
+.ds-proj-workspace-rodape { padding: 3px 2px; color: var(--suave); font-size: 12px; }
+.ds-proj-contexto { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; gap: 2px; }
+.ds-proj-legenda { font: 700 10px/1.5 var(--fonte-mono); letter-spacing: .13em; color: var(--suave); }
+.ds-proj-trocar { padding: 4px 6px 4px 0; background: transparent; border: 0; color: var(--texto); cursor: pointer; font: 700 19px/1.3 var(--fonte-ui); max-width: 100%; }
+.ds-proj-trocar:hover { color: var(--acento); }
+.ds-proj-atalhos, .ds-proj-workspace-rodape { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ds-proj-workspace > .ds-proj-fluxo { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+.ds-proj-workspace .ds-proj-fluxo-barra { flex: none; padding: 3px 6px; }
+.ds-proj-workspace .ds-proj-grafo {
+  display: grid; flex: 1; height: auto; min-height: 0; overflow: hidden;
+  grid-template-columns: minmax(0,1fr) minmax(178px,258px) minmax(0,1fr);
+  align-items: center; gap: clamp(6px,1.3vw,18px); padding: 5px 8px;
+}
+.ds-proj-workspace .ds-proj-grafo-col,
+.ds-proj-workspace .ds-proj-grafo-col[data-lado="direita"] {
+  display: grid; grid-template-columns: minmax(0,1fr); align-self: stretch;
+  align-content: space-around; min-width: 0; gap: 4px;
+}
+.ds-proj-workspace .ds-proj-modulo { min-height: 0; padding: 3px 4px; gap: clamp(6px,.8vw,11px); }
+.ds-proj-workspace .ds-proj-modulo-emblema { flex: none; width: clamp(38px,4.4vw,56px); height: clamp(38px,4.4vw,56px); padding: 0; cursor: pointer; }
+.ds-proj-workspace .ds-proj-modulo-emblema:hover { border-color: var(--acento); box-shadow: 0 0 0 3px var(--ds-selecionado); }
+.ds-proj-workspace .ds-proj-modulo-corpo { min-width: 0; padding: 0; }
+.ds-proj-workspace .ds-proj-modulo-nome { font-size: clamp(11px,1.12vw,14px); overflow-wrap: normal; }
+.ds-proj-workspace .ds-proj-modulo-status { font-size: 11px; }
+.ds-proj-workspace .ds-proj-modulo-recurso { max-width: 100%; }
+.ds-proj-workspace .ds-proj-modulo-acoes { margin: 0; }
+/* O Orchestrator flutuante mora no canto inferior direito: a coluna da direita termina acima dele. */
+body[data-tela=projetos] .ds-proj-workspace .ds-proj-grafo-col[data-lado="direita"] { padding-bottom: clamp(96px,17vh,130px); }
+.ds-proj-workspace .ds-proj-hub { order: 0; justify-self: center; align-self: center; width: 100%; max-width: 208px; min-width: 0; padding: 14px; gap: 5px; }
+.ds-proj-workspace .ds-proj-hub-nome { font-size: clamp(16px,1.9vw,24px); overflow-wrap: anywhere; }
+.ds-proj-workspace .ds-proj-hub-descricao { max-height: 3.6em; overflow: hidden; }
+.ds-proj-workspace .ds-proj-hub-porta { cursor: pointer; padding: 0; }
+.ds-proj-workspace .ds-proj-hub-porta:hover { outline: 3px solid rgba(78,165,255,.35); }
+.ds-proj-workspace > .repos-github[hidden] { display: none; }
+.ds-proj-sobreposicao[hidden] { display: none !important; }
+/* Vínculo, edição e troca de projeto ocupam o lugar da bancada: a mesma área inteira, sem moldura nem rolagem curta. */
+.ds-proj-workspace:has(> .ds-proj-sobreposicao:not([hidden])) > :not(.ds-proj-sobreposicao) { display: none; }
+.ds-proj-sobreposicao { position: relative; z-index: auto; flex: 1; min-height: 0; display: flex; padding: 0; background: none; }
+.ds-proj-painel { flex: 1; width: 100%; min-height: 0; max-height: none; display: flex; flex-direction: column; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: hidden; }
+.ds-proj-painel-cab { background: none; display: flex; flex: none; justify-content: space-between; align-items: center; gap: 10px; padding: 2px 2px 12px; border-bottom: 1px solid var(--ds-linha-suave); }
+.ds-proj-painel-cab h2 { margin: 0; font-size: 20px; }
+.ds-proj-painel-cab h2:focus { outline: none; }
+.ds-proj-fechar { cursor: pointer; border: 1px solid var(--linha); border-radius: 8px; background: transparent; color: var(--texto); padding: 7px 10px; }
+.ds-proj-painel-corpo { flex: 1; min-height: 0; overflow: auto; padding: 18px 2px 8px; }
+.ds-proj-painel-corpo > h2 { margin: 0 0 10px; font-size: 16px; }
+.ds-proj-painel-recursos { width: 100%; min-width: 0; }
+.ds-proj-painel-abas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ds-proj-painel .repos-github li.proj-vinculo, .ds-proj-painel li.proj-vinculo { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.ds-proj-painel li.proj-vinculo .ds-sub { flex: 1 1 190px; min-width: 160px; overflow-wrap: anywhere; }
+.ds-proj-opcoes { display: grid; gap: 8px; margin: 14px 0; }
+.ds-proj-opcao { cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: left; min-width: 0; padding: 13px 15px; border: 1px solid var(--linha); border-radius: 9px; background: var(--fundo2); color: var(--texto); }
+.ds-proj-opcao[aria-current="true"] { border-color: var(--acento); }
+.ds-proj-opcao span { color: var(--suave); font-size: 12px; }
+/* Projetos vazio: apresentação ou uma etapa (criar/importar) por vez, centradas; a seção inteira rola só se a janela for mínima. */
+.ds-proj-vazio { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; overflow-y: auto; padding: 4px 0; }
+.ds-proj-vazio > :not([hidden]) { margin-block: auto; }
+.ds-proj-vazio-apresentacao[hidden], .ds-proj-vazio-painel[hidden] { display: none; }
+.ds-proj-vazio-apresentacao { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; }
+.ds-proj-vazio-simbolo { font-size: 76px; line-height: 1; color: var(--acento); }
+.ds-proj-vazio-apresentacao h2 { margin: 0; font-size: clamp(20px,2.5vw,30px); }
+.ds-proj-vazio-apresentacao > .ds-sub { max-width: 520px; }
+.ds-proj-vazio-acoes { display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; align-items: center; gap: 8px 18px; margin-top: 6px; }
+.ds-proj-vazio-acoes > .acao.primaria { grid-column: 1 / -1; justify-self: center; min-height: 38px; }
+.ds-proj-vazio-acoes > .acao:not(.primaria) { border-color: transparent; background: transparent; box-shadow: none; color: var(--acento); font-weight: 500; padding: 5px 3px; }
+.ds-proj-vazio-acoes > .acao:not(.primaria):hover { border-color: transparent; background: var(--ds-hover); }
+@media (max-width: 540px) { .ds-proj-vazio-acoes { grid-template-columns: minmax(0, 1fr); width: 100%; gap: 4px; } .ds-proj-vazio-acoes > .acao { width: 100%; } }
+.ds-proj-vazio-painel { width: min(100%,520px); display: flex; flex-direction: column; align-items: stretch; gap: 10px; text-align: left; }
+.ds-proj-voltar { align-self: flex-start; padding: 6px 0; border: 0; background: none; color: var(--acento); font: 600 13px/1.4 var(--fonte-ui); cursor: pointer; }
+.ds-proj-voltar:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; border-radius: 4px; }
+/* Formulário curto de projeto (vazio e painel): uma coluna legível, botão principal à esquerda. */
+.ds-proj-form { display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 520px; }
+.ds-proj-form h2 { margin: 0 0 6px; font-size: 22px; }
+.ds-proj-form .campo { margin: 6px 0; font-size: 13px; font-weight: 600; color: var(--texto); }
+.ds-proj-form .campo input { font-weight: 400; }
+.ds-proj-form-acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+/* Tarefa em foco (criar, importar, vincular): o Orchestrator flutuante sai da frente. */
+body:has(#projeto-painel:not([hidden])) .v36f, body:has(.ds-proj-vazio-painel:not([hidden])) .v36f { display: none; }
+@media (max-width: 960px) {
+  .ds-proj-workspace .ds-proj-grafo { grid-template-columns: minmax(0,1fr) minmax(150px,210px) minmax(0,1fr); gap: 5px; }
+  .ds-proj-workspace .ds-proj-hub { max-width: 205px; }
+  .ds-proj-workspace .ds-proj-modulo-emblema { width: 38px; height: 38px; }
+  .ds-proj-workspace .ds-proj-modulo-recurso { display: none; }
+  .ds-proj-workspace .ds-proj-porta { display: none; }
+}
+@media (max-width: 700px) {
+  #conteudo[data-ds-tela="projetos"] { padding: 36px 8px 6px; }
+  .ds-proj-workspace .ds-proj-grafo { grid-template-columns: minmax(0,1fr) minmax(128px,170px) minmax(0,1fr); gap: 2px; padding: 2px; }
+  .ds-proj-workspace .ds-proj-hub { max-width: 165px; padding: 12px; }
+  .ds-proj-workspace .ds-proj-hub-simbolo { transform: scale(.72); margin: -8px; }
+  .ds-proj-workspace .ds-proj-modulo { flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+  .ds-proj-workspace .ds-proj-modulo-nome { font-size: 10px; }
+  .ds-proj-workspace .ds-proj-modulo-acoes, .ds-proj-workspace .ds-proj-modulo-status { display: none; }
+  .ds-proj-workspace .ds-proj-hub-nome { font-size: 15px; }
+  .ds-proj-workspace .ds-proj-hub-descricao { display: none; }
+  .ds-proj-workspace-rodape { font-size: 10px; }
+}
+
+/* Etapa de conexões e painel usam a largura disponível, sem moldura lateral. */
+.ds-proj-vazio-painel:has(.cx-servicos, .proj-vinculos) { width: min(100%, 880px); }
+.ds-proj-vazio-painel .cx-painel, .ds-proj-painel .cx-painel { border-left: 0; padding-left: 0; }
+.ds-proj-painel-recursos > .ds-estado:only-child { padding-block: 24px; }
+
+/* Vínculo de projetos: busca no topo e paginação fixa no fim da área rolável. */
+.proj-vinculos-paginas { position: sticky; bottom: 0; z-index: 1; margin: 0; padding: 10px 0; background: var(--painel); border-top: 1px solid var(--linha); }
+.ds-proj-painel-recursos > .ds-busca, .ds-proj-vazio-corpo > .ds-busca, .ds-proj-painel-corpo > .ds-busca { max-width: none; margin: 8px 0; }
+
+/* Cabos conectados: o fio balança e a energia corre até o núcleo; desligados ou sem configuração não existem. */
+.ds-proj-cabo { stroke-dasharray: 9 7; animation: ds-cabo-fluxo 1.4s linear infinite, ds-cabo-balanco 3.2s ease-in-out infinite alternate; }
+@keyframes ds-cabo-fluxo { to { stroke-dashoffset: -32; } }
+@keyframes ds-cabo-balanco { from { transform: translateY(-1.5px); } to { transform: translateY(1.5px); } }
+@media (prefers-reduced-motion: reduce) { .ds-proj-cabo { animation: none; stroke-dasharray: none; } }
+
+/* Bancada de conexões, visual técnico: traço fino, sem manchas nem brilho quando desligada; cor e luz só em quem está conectado. */
+.ds-proj-grafo { background: none; }
+.ds-proj-modulo .ds-proj-modulo-emblema { background: var(--painel); color: var(--suave); border: 1.5px solid color-mix(in srgb, var(--suave) 45%, transparent); box-shadow: none; }
+.ds-proj-modulo .ds-proj-modulo-emblema svg:not(.ds-ic) { filter: grayscale(1); opacity: .75; }
+.ds-proj-modulo[data-vinculado="sim"] .ds-proj-modulo-emblema { color: var(--acento); border-color: var(--acento); box-shadow: 0 0 0 4px rgba(var(--qc-azul), .10); }
+.ds-proj-modulo[data-vinculado="sim"] .ds-proj-modulo-emblema svg:not(.ds-ic) { filter: none; opacity: 1; }
+.ds-proj-modulo[data-servico="manual"] .ds-proj-modulo-emblema { color: var(--acento); }
+.ds-proj-modulo .ds-proj-status-led { box-shadow: none; }
+.ds-proj-porta, .ds-proj-modulo[data-vinculado="nao"] .ds-proj-porta { width: 12px; height: 12px; background: var(--painel); border: 1.5px solid color-mix(in srgb, var(--suave) 55%, transparent); box-shadow: none; }
+.ds-proj-porta > span, .ds-proj-modulo[data-vinculado="nao"] .ds-proj-porta > span { width: 4px; height: 4px; background: color-mix(in srgb, var(--suave) 55%, transparent); }
+.ds-proj-modulo[data-vinculado="sim"] .ds-proj-porta { border-color: var(--acento); box-shadow: none; }
+.ds-proj-modulo[data-vinculado="sim"] .ds-proj-porta > span { background: var(--acento); }
+.ds-proj-hub-porta, .ds-proj-hub-porta[data-vinculado="nao"] { width: 12px; height: 12px; background: var(--painel); border: 1.5px solid color-mix(in srgb, var(--suave) 55%, transparent); box-shadow: none; }
+.ds-proj-hub-porta[data-vinculado="sim"] { background: var(--acento); border-color: var(--acento); }
+.ds-proj-hub { box-shadow: none; border-width: 1.5px; }
+.ds-proj-hub::before { box-shadow: none; border-color: color-mix(in srgb, var(--acento) 25%, transparent); }
+.ds-proj-camada { filter: none; border-color: var(--acento); }
+.ds-proj-cabo, .ds-proj-cabo[data-servico] { stroke: var(--acento); stroke-width: 1.8; filter: none; }
+.ds-proj-modulo[data-servico] .ds-proj-modulo-emblema { background: var(--painel); border-color: color-mix(in srgb, var(--suave) 45%, transparent); color: var(--suave); box-shadow: none; }
+.ds-proj-modulo[data-servico][data-vinculado="sim"] .ds-proj-modulo-emblema, .ds-proj-modulo[data-servico="manual"] .ds-proj-modulo-emblema { border-color: var(--acento); color: var(--acento); }
+.ds-proj-modulo[data-servico][data-vinculado="sim"] .ds-proj-modulo-emblema { box-shadow: 0 0 0 4px rgba(var(--qc-azul), .10); }
+/* Portas do núcleo distribuídas no anel, cada uma voltada para o lado do seu serviço. */
+.ds-proj-hub .ds-proj-hub-porta { transform: translate(-50%, -50%); }
+.ds-proj-hub .ds-proj-hub-porta[data-servico="jira"] { left: 6.7%; top: 25%; right: auto; }
+.ds-proj-hub .ds-proj-hub-porta[data-servico="qase"] { left: 0%; top: 50%; right: auto; }
+.ds-proj-hub .ds-proj-hub-porta[data-servico="manual"] { left: 6.7%; top: 75%; right: auto; }
+.ds-proj-hub .ds-proj-hub-porta[data-servico="github"] { left: 93.3%; top: 25%; right: auto; }
+.ds-proj-hub .ds-proj-hub-porta[data-servico="local"] { left: 93.3%; top: 75%; right: auto; }
+
+/* Configurações: conta em duas linhas (identificação e ações), texto longo quebra dentro do painel e o robô não cobre o conteúdo. */
+.ajuste-conta-linha { flex-wrap: wrap; align-items: flex-start; }
+.ajuste-conta-nome { flex: 1 1 160px; overflow-wrap: anywhere; }
+.ajuste-conta-acoes { flex: 1 1 100%; margin-left: 0; justify-content: flex-start; }
+body:has(#controles:not([hidden])) .v36f { display: none; }
+
+/* Foto do perfil: imagem (inclusive GIF), ou modelos animados feitos só com CSS. */
+.ds-avatar { overflow: hidden; position: relative; }
+.ds-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ds-avatar-grande { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: var(--acento); color: var(--acento-texto); font-weight: 650; font-size: 24px; overflow: hidden; }
+.ds-avatar-previa { display: flex; align-items: center; gap: 14px; }
+.ds-avatar-modelos { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+.ds-avatar-modelo { border: 1.5px solid var(--linha); border-radius: 50%; background: none; padding: 3px; cursor: pointer; }
+.ds-avatar-modelo:hover, .ds-avatar-modelo:focus-visible { border-color: var(--acento); }
+.ds-avatar-modelo .ds-avatar { width: 40px; height: 40px; }
+.ds-avatar[data-modelo] { background: var(--painel); }
+.ds-avatar[data-modelo] i { position: absolute; inset: 0; display: block; }
+.ds-avatar[data-modelo="orbita"] i { background: radial-gradient(circle at 50% 50%, var(--acento) 0 18%, transparent 20%), conic-gradient(from 0deg, transparent 0 70%, var(--acento) 100%); animation: ds-av-gira 2.4s linear infinite; }
+.ds-avatar[data-modelo="pulso"] i { background: radial-gradient(circle, var(--ok) 0 30%, transparent 32%); animation: ds-av-pulso 1.6s ease-in-out infinite; }
+.ds-avatar[data-modelo="onda"] i { background: repeating-linear-gradient(90deg, var(--acento) 0 3px, transparent 3px 7px); animation: ds-av-onda 1.2s linear infinite; mask: linear-gradient(transparent 0 25%, #000 25% 75%, transparent 75%); }
+.ds-avatar[data-modelo="radar"] i { background: conic-gradient(from 0deg, color-mix(in srgb, var(--aviso) 90%, transparent), transparent 35%); border-radius: 50%; animation: ds-av-gira 3s linear infinite; }
+@keyframes ds-av-gira { to { transform: rotate(360deg); } }
+@keyframes ds-av-pulso { 0%, 100% { transform: scale(.7); opacity: .6; } 50% { transform: scale(1.15); opacity: 1; } }
+@keyframes ds-av-onda { to { transform: translateX(-7px); } }
+@media (prefers-reduced-motion: reduce) { .ds-avatar[data-modelo] i { animation: none; } }
+
+/* Janela de foto: prévia grande, abas de origem e grade de opções com a personalidade do sistema. */
+.ds-avatar-previa { padding: 4px 0 14px; }
+.ds-avatar-previa > div { display: grid; gap: 4px; min-width: 0; }
+.ds-avatar-msg { margin: 0; min-height: 1.4em; color: var(--acento); font-size: var(--ds-fs-sm); }
+.ds-avatar-area { padding-top: 14px; min-height: 190px; }
+.ds-avatar-painel { display: grid; gap: 12px; max-width: 520px; }
+.ds-avatar-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 10px; }
+.ds-avatar-opcao { display: grid; justify-items: center; gap: 6px; padding: 10px 6px; border: 1.5px solid var(--ds-linha-suave); border-radius: 14px; background: none; color: var(--suave); font: inherit; font-size: var(--ds-fs-sm); cursor: pointer; transition: border-color .15s, transform .15s, background .15s; }
+.ds-avatar-opcao:hover, .ds-avatar-opcao:focus-visible { border-color: var(--acento); color: var(--texto); background: rgba(var(--qc-azul), .08); transform: translateY(-2px); }
+.ds-avatar-opcao img { width: 48px; height: 48px; object-fit: contain; }
+.ds-avatar-opcao .ds-avatar { width: 48px; height: 48px; }
+.ds-avatar-credito { margin: 12px 0 0; font-size: var(--ds-fs-sm); color: var(--suave); }
+.ds-avatar-grande { width: 84px; height: 84px; box-shadow: 0 0 0 4px rgba(var(--qc-azul), .14); }
+@media (prefers-reduced-motion: reduce) { .ds-avatar-opcao { transition: none; } }
+
+/* Rio de figurinhas: busca, categorias e grade que rola dentro da janela. */
+.ds-avatar-rio { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; max-height: 300px; overflow: auto; padding: 4px 2px; margin-top: 10px; }
+.ds-avatar-figurinha { padding: 8px; }
+.ds-avatar-figurinha img { width: 52px; height: 52px; }
+.ds-avatar-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ds-avatar-chip { padding: 4px 12px; border: 1px solid var(--ds-linha-suave); border-radius: 999px; background: none; color: var(--suave); font: inherit; font-size: var(--ds-fs-sm); cursor: pointer; }
+.ds-avatar-chip[aria-pressed="true"] { background: rgba(var(--qc-azul), .14); border-color: var(--acento); color: var(--texto); font-weight: 600; }
+#foto-busca { width: 100%; }
+.ds-avatar-area { min-height: 0; }
+/* Janela de foto com uma única rolagem (a da própria janela); a grade cresce com o conteúdo. */
+.ds-avatar-rio { max-height: none; overflow: visible; }
+.ds-avatar-previa { padding-bottom: 6px; }
+
+/* Foto clicável (abre a troca) e janela de foto enxuta: pouco texto, mais imagem. */
+.conta-foto-botao { position: relative; display: inline-grid; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; flex: none; }
+.conta-foto-botao:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
+.conta-foto-lapis { position: absolute; right: -2px; bottom: -2px; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: var(--painel); color: var(--acento); border: 1px solid var(--linha); font-size: 11px; line-height: 1; }
+.conta-quem { display: grid; justify-items: start; gap: 4px; }
+.ds-avatar-previa { justify-content: flex-start; }
+.ds-avatar-linha { display: flex; gap: 8px; align-items: center; }
+.ds-avatar-linha input { flex: 1; min-width: 0; }
+.ds-avatar-credito, .ds-avatar-area .ds-avatar-credito { display: none; }
+.ds-avatar-area > div > .ds-avatar-credito + * { margin: 0; }
+.conta-foto-botao { width: max-content; justify-self: start; }
+.ds-avatar[data-modelo] { border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--acento) 45%, transparent); background: color-mix(in srgb, var(--acento) 8%, var(--painel)); }
+
+
+/* Minha conta: retrato, identificação e formulários sem cartões aninhados. */
+.ds-conta-cabecalho { display: flex; gap: var(--ds-4); align-items: center; min-width: 0; padding: var(--ds-1) 0 var(--ds-4); border-bottom: 1px solid var(--ds-linha-suave); }
+.ds-conta-foto { align-self: center; }
+.ds-conta-foto .ds-avatar-grande { width: 64px; height: 64px; font-size: 21px; }
+.ds-conta-identidade { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.ds-conta-nome { font: 600 19px/1.25 var(--fonte-ui); letter-spacing: -.015em; color: var(--texto); overflow-wrap: anywhere; }
+.ds-conta-email { font-size: var(--ds-fs-md); color: var(--suave); overflow-wrap: anywhere; }
+.ds-conta-papel { font-size: var(--ds-fs-sm); color: var(--texto); }
+.ds-modal:has(.ds-conta-cabecalho) > .ds-abas { margin-top: var(--ds-3); }
+.ds-modal:has(.ds-conta-cabecalho) .ds-painel .ds-secao { margin-top: var(--ds-5); }
+.ds-modal:has(.ds-conta-cabecalho) .ds-painel .ds-secao:first-child { margin-top: var(--ds-3); }
+.ds-modal:has(.ds-conta-cabecalho) .ds-secao-cab h2 { margin: 0; font-size: var(--ds-fs-lg); font-weight: 600; color: var(--texto); }
+/* Metadados reais: três colunas para conta online; contas locais com login usam duas. */
+.ds-modal:has(.ds-conta-cabecalho) dl.ds-meta.linha { grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)); gap: var(--ds-3) var(--ds-5); }
+.ds-modal:has(.ds-conta-cabecalho) dl.ds-meta.linha:has(> div:nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ds-modal:has(.ds-conta-cabecalho) dl.ds-meta.linha dd { overflow-wrap: anywhere; }
+/* Dicas junto à borda direita abrem para dentro do modal, sem provocar rolagem lateral. */
+.ds-modal:has(.ds-conta-cabecalho) .ds-secao-cab .ds-info-texto {
+  left: auto; right: 0; width: max-content; max-width: min(340px, calc(100vw - 64px));
+}
+@media (max-width: 660px) {
+  .ds-modal:has(.ds-conta-cabecalho) dl.ds-meta.linha { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ds-modal:has(.ds-conta-cabecalho) dl.ds-meta.linha > div:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 420px) {
+  .ds-modal:has(.ds-conta-cabecalho) dl.ds-meta.linha { grid-template-columns: minmax(0, 1fr); }
+  .ds-modal:has(.ds-conta-cabecalho) dl.ds-meta.linha > div:first-child { grid-column: auto; }
+}
+.ds-conta-edicao { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--ds-3); max-width: 620px; }
+.ds-conta-edicao > .ds-campo { flex: 1 1 230px; }
+.ds-conta-edicao > .acao { flex: none; }
+.ds-conta-senhas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ds-3) var(--ds-4); max-width: 640px; }
+.ds-conta-senhas > :first-child { grid-column: 1 / -1; max-width: 310px; }
+.ds-conta-rodape { display: flex; justify-content: flex-end; margin-top: var(--ds-4); padding-top: var(--ds-3); border-top: 1px solid var(--ds-linha-suave); }
+.ds-conta-ajuda { margin: 0; font-size: var(--ds-fs-sm); line-height: 1.55; color: var(--suave); }
+.ds-conta-recuperacao { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--ds-3); }
+.ds-conta-recuperacao .ds-conta-ajuda { flex: 1 1 240px; }
+@media (max-width: 540px) {
+  .ds-conta-cabecalho { gap: var(--ds-3); }
+  .ds-conta-foto .ds-avatar-grande { width: 56px; height: 56px; }
+  .ds-conta-nome { font-size: 17px; }
+  .ds-conta-senhas { grid-template-columns: minmax(0, 1fr); }
+  .ds-conta-senhas > :first-child { grid-column: auto; max-width: none; }
+  .ds-conta-edicao > .acao, .ds-conta-recuperacao > .acao { width: 100%; }
+}
+
+/* ===== Topo: cápsula única com três alvos de ícone (36px, ritmo de 2px) ===== */
+html body .topo-direita { gap: 2px; padding: 4px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--linha) 70%, transparent); background: color-mix(in srgb, var(--painel) 78%, transparent); backdrop-filter: blur(10px); box-shadow: 0 1px 2px rgba(0,0,0,.10); }
+html body .topo-direita .ajustes-caixa { position: relative; display: flex; }
+/* alvo base: círculo 36px, mesmo comportamento nos três */
+html body .topo-direita :is(#conta-botao, #worker-estado, #ajustes) { position: relative; box-sizing: border-box; width: 36px; height: 36px; min-width: 0; padding: 0; margin: 0; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; backdrop-filter: none; box-shadow: none; color: var(--suave); font-size: 0; cursor: pointer; transition: background-color .15s, color .15s; }
+html body .topo-direita :is(#conta-botao, #worker-estado, #ajustes) svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+html body .topo-direita :is(#worker-estado, #ajustes):hover { background: rgba(var(--qc-azul), .12); color: var(--texto); }
+html body .topo-direita :is(#conta-botao, #worker-estado, #ajustes):focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+html body .topo-direita #ajustes[aria-expanded="true"] { background: color-mix(in srgb, var(--acento) 16%, transparent); color: var(--acento); }
+html body .topo-direita #ajustes svg { transition: transform .25s ease; }
+html body .topo-direita #ajustes:hover svg, html body .topo-direita #ajustes[aria-expanded="true"] svg { transform: rotate(45deg); }
+/* worker: cor = estado (tokens), forma = estado (relógio, giro, pausa, parada) */
+html body .topo-direita #worker-estado i { display: none; }
+html body .topo-direita #worker-estado[data-nivel="ok"] { color: var(--ok); }
+html body .topo-direita #worker-estado[data-nivel="aviso"] { color: var(--aviso); }
+html body .topo-direita #worker-estado[data-nivel="falha"] { color: var(--falha); }
+html body .topo-direita #worker-estado[data-nivel]:hover { background: color-mix(in srgb, currentColor 14%, transparent); color: inherit; }
+html body .topo-direita #worker-estado[data-nivel="ok"]:hover { color: var(--ok); } html body .topo-direita #worker-estado[data-nivel="aviso"]:hover { color: var(--aviso); } html body .topo-direita #worker-estado[data-nivel="falha"]:hover { color: var(--falha); }
+html body .topo-direita #worker-estado[data-fase="executando"] { color: var(--acento); }
+html body .topo-direita #worker-estado[data-fase="executando"]:hover { color: var(--acento); }
+html body .topo-direita #worker-estado[data-fase="executando"] svg { animation: topo-giro 1.8s linear infinite; }
+/* foto: só a foto; anel no hover e selo de seta (acento) */
+html body .topo-direita #conta-botao .conta-iniciais { width: 30px; height: 30px; font-size: 11.5px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--linha) 80%, transparent); transition: box-shadow .15s; }
+html body .topo-direita #conta-botao:hover .conta-iniciais, html body .topo-direita #conta-botao[aria-expanded="true"] .conta-iniciais { box-shadow: 0 0 0 2px var(--painel), 0 0 0 3.5px var(--acento); }
+html body .topo-direita #conta-botao::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 15px; height: 15px; border-radius: 50%; background: var(--acento); box-shadow: 0 0 0 2px var(--painel); opacity: 0; transform: scale(.6); transition: opacity .15s, transform .15s; }
+html body .topo-direita #conta-botao::before { content: ""; position: absolute; z-index: 1; right: 4px; bottom: 3.5px; width: 5px; height: 5px; border: solid var(--acento-texto); border-width: 0 1.8px 1.8px 0; transform: rotate(45deg) scale(.6); opacity: 0; transition: opacity .15s, transform .15s; }
+html body .topo-direita #conta-botao:is(:hover, :focus-visible, [aria-expanded="true"])::after { opacity: 1; transform: none; }
+html body .topo-direita #conta-botao:is(:hover, :focus-visible, [aria-expanded="true"])::before { opacity: 1; transform: rotate(45deg); }
+html body .topo-direita #conta-botao[aria-expanded="true"]::before { transform: rotate(225deg); bottom: 5px; }
+/* dica própria (duas linhas), atrasada para não atrapalhar */
+html body .topo-direita :is(#worker-estado, #ajustes, #conta-caixa)[data-dica]::before { content: attr(data-dica); position: absolute; top: calc(100% + 10px); right: 0; z-index: 30; width: max-content; max-width: 260px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--linha); background: var(--painel); color: var(--texto); font: 500 12px/1.45 var(--fonte-ui); text-align: left; white-space: pre-line; box-shadow: 0 6px 18px rgba(0,0,0,.18); opacity: 0; transform: translateY(-3px); pointer-events: none; transition: opacity .12s, transform .12s; }
+html body .topo-direita :is(#worker-estado, #ajustes, #conta-caixa)[data-dica]:is(:hover, :focus-visible, :has(:focus-visible)):not([aria-expanded="true"], :has([aria-expanded="true"]))::before { opacity: 1; transform: none; transition-delay: .4s; }
+@keyframes topo-giro { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { html body .topo-direita * , html body .topo-direita *::before, html body .topo-direita *::after { transition: none !important; animation: none !important; } }
+@media (max-width: 860px) { html body .topo-direita { width: max-content; margin: 8px 12px 0 auto; } }
+
+/* Painel de conexões: módulos e núcleo arrastáveis, modo "Só ver | Integrado". */
+@media (min-width: 951px) {
+  .ds-proj-modulo, .ds-proj-hub { cursor: grab; touch-action: none; }
+  .ds-proj-modulo a, .ds-proj-modulo button, .ds-proj-hub button { cursor: pointer; }
+}
+.ds-proj-modulo[data-movendo="sim"], .ds-proj-hub[data-movendo="sim"] { cursor: grabbing; z-index: 6; user-select: none; }
+.ds-proj-reorganizar { border: 0; background: none; color: var(--acento); font: inherit; letter-spacing: inherit; cursor: pointer; padding: 0 2px; }
+.ds-proj-reorganizar:hover { text-decoration: underline; }
+.ds-proj-modo { display: inline-flex; align-items: center; gap: 6px; margin-top: 3px; }
+.ds-proj-modo > button { border: 1px solid var(--ds-linha-suave); background: transparent; color: var(--suave); font-size: 11px; padding: 2px 10px; cursor: pointer; }
+.ds-proj-modo > button:first-of-type { border-radius: 999px 0 0 999px; margin-right: -7px; }
+.ds-proj-modo > button:nth-of-type(2) { border-radius: 0 999px 999px 0; }
+.ds-proj-modo > button[aria-pressed="true"] { background: color-mix(in srgb, var(--acento) 18%, transparent); border-color: var(--acento); color: var(--texto); font-weight: 650; }
+.ds-proj-modo[data-modo="integrado"] > button[aria-pressed="true"] { background: color-mix(in srgb, var(--ok) 20%, transparent); border-color: var(--ok); }
+
+/* Ícones das origens: traço único; cinza quando desligado, cor da marca quando conectado. */
+.ds-proj-modulo .ds-proj-marca { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; filter: none; opacity: 1; }
+.ds-proj-modulo .ds-proj-marca.preenchida { fill: currentColor; stroke: none; }
+.ds-proj-modulo[data-vinculado="sim"][data-servico="jira"] .ds-proj-modulo-emblema { color: #2684ff; border-color: #2684ff; }
+.ds-proj-modulo[data-vinculado="sim"][data-servico="qase"] .ds-proj-modulo-emblema { color: #a78bfa; border-color: #a78bfa; background: var(--painel); }
+.ds-proj-modulo[data-vinculado="sim"][data-servico="github"] .ds-proj-modulo-emblema { color: var(--texto); border-color: color-mix(in srgb, var(--texto) 55%, transparent); }
+.ds-proj-modulo[data-vinculado="sim"][data-servico="local"] .ds-proj-modulo-emblema { color: #38bdf8; border-color: #38bdf8; }
+.ds-proj-modulo[data-vinculado="sim"][data-servico="manual"] .ds-proj-modulo-emblema { color: #4fd1a0; border-color: #4fd1a0; }
+.ds-proj-modulo .ds-proj-modulo-emblema { width: 52px; height: 52px; }
+
+/* Trilha de navegação (breadcrumb). */
+.ds-trilha ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; margin: 0 0 2px; padding: 0; list-style: none; font-size: 12px; color: var(--suave); }
+.ds-trilha li + li::before { content: "\203A" / ""; margin-right: 6px; color: var(--suave); }
+.ds-trilha li[aria-current="page"] { color: var(--texto); font-weight: 600; }
+.ds-trilha-link { border: 0; background: none; padding: 1px 0; font: inherit; color: var(--acento); cursor: pointer; }
+.ds-trilha-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ds-proj-painel-titulos { min-width: 0; display: grid; gap: 2px; }
+
+/* Botões menores em telas e modais (o tamanho anterior pesava demais). */
+body button.acao { min-height: 28px; padding: 4px 12px; font-size: 12.5px; line-height: 1.2; }
+body button.acao.compacto { min-height: 24px; padding: 2px 10px; font-size: 12px; }
+.ds-proj-topo button.acao, body .ds-proj-topo button.acao { min-height: 30px; padding: 5px 13px; border-radius: 999px; font-size: 12.5px; }
+.ds-proj-vazio-acoes > .acao.primaria { min-height: 30px; }
+.ds-proj-fechar { padding: 4px 10px; font-size: 12px; border-radius: 999px; }
+.ds-proj-voltar { font-size: 12px; }
+dialog button.acao, .ds-modal button.acao, [role="dialog"] button.acao { min-height: 28px; padding: 4px 12px; font-size: 12.5px; }
+
+/* Importar: origens em fileira compacta e a decisão "projeto novo | já existente" em duas colunas, sem cartão dentro de cartão. */
+.ds-proj-origens { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.proj-decisao { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 36px; margin-top: 14px; }
+.proj-decisao-bloco { display: grid; gap: 8px; align-content: start; padding-top: 10px; border-top: 1px solid var(--ds-linha-suave); }
+.proj-decisao-bloco > strong { color: var(--texto); }
+.proj-decisao-bloco > input { max-width: 300px; }
+.proj-decisao-bloco > .acao { justify-self: start; }
+.proj-vinculo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 0; border-bottom: 1px solid var(--ds-linha-suave); }

@@ -3,7 +3,7 @@
 // Todo texto entra no DOM por textContent (nunca innerHTML).
 const api = window.prumo;
 const $ = (s) => document.querySelector(s);
-const estado = { aba: 'inicio', root: null, timer: null, jobId: undefined, ajudaAlvo: null, aviso: null, prefs: null };
+const estado = { aba: 'inicio', root: null, projetoSelecionadoId: null, timer: null, jobId: undefined, ajudaAlvo: null, aviso: null, prefs: null };
 
 // No DOM, append(null) escreve o texto "null". Nas telas, null/undefined/false sempre significam "nada a mostrar".
 for (const P of [Element.prototype, DocumentFragment.prototype]) for (const m of ['append', 'prepend', 'replaceChildren']) { const original = P[m]; P[m] = function (...nos) { return original.apply(this, nos.filter((n) => n != null && n !== false)); }; }
@@ -68,7 +68,18 @@ async function chamar(fn) {
 /** Como chamar(), mas sem aviso: qualquer falha vira null (para painéis que mostram o próprio estado vazio). */
 async function chamarSemAviso(fn) { try { const r = await fn(); return r && r.ok ? r.data : null; } catch { return null; } }
 /** 2.10.2: explicação primeiro, código técnico só como detalhe no fim ("CODIGO: texto" → "Texto (código CODIGO)"). */
+const TEXTO_DO_CODIGO = {
+  SERVICE_NOT_FOUND: 'O serviço não achou o que foi pedido. Confira o projeto ou o repositório ligado.',
+  SERVICE_PERMISSION: 'A conta conectada não tem permissão para isso.',
+  CREDENTIAL_INVALID_OR_EXPIRED: 'O token não vale mais. Conecte de novo em Projetos.',
+  CREDENTIAL_UNAVAILABLE: 'Não há conexão ativa para este serviço. Conecte em Projetos.',
+  SERVICE_RATE_LIMIT: 'O serviço pediu uma pausa. Tente de novo em alguns minutos.',
+  SERVICE_TIMEOUT: 'O serviço demorou demais para responder.',
+  SERVICE_UNAVAILABLE: 'O serviço está fora do ar agora.'
+};
 function textoErro(erro) {
+  const bruto = String(erro || '').trim();
+  if (TEXTO_DO_CODIGO[bruto]) return TEXTO_DO_CODIGO[bruto] + ' (código ' + bruto + ')';
   const m = /^([A-Z][A-Z0-9_]{2,63}):\s*([\s\S]+)$/.exec(String(erro || ''));
   if (!m) return String(erro || 'Falha sem detalhe.');
   const texto = m[2].trim(); return texto.charAt(0).toUpperCase() + texto.slice(1) + ' (código ' + m[1] + ')';
@@ -79,9 +90,9 @@ function semProjeto() {
 
 const abas = {};
 
-function salvarRaiz() { if (estado.espaco && estado.espaco.raizContextos !== estado.root) estado.espaco = null; try { if (estado.root) localStorage.setItem('raiz', estado.root); else localStorage.removeItem('raiz'); if (estado.espaco) localStorage.setItem('espaco', estado.espaco.id); else localStorage.removeItem('espaco'); } catch { /* sem armazenamento: ignora */ } }
+function salvarRaiz() { if (estado.espaco && estado.espaco.raizContextos !== estado.root) estado.espaco = null; estado.projetoSelecionadoId = estado.espaco?.id || null; try { if (estado.root) localStorage.setItem('raiz', estado.root); else localStorage.removeItem('raiz'); if (estado.espaco) localStorage.setItem('espaco', estado.espaco.id); else localStorage.removeItem('espaco'); } catch { /* sem armazenamento: ignora */ } }
 // 2.13: Execuções e Rastreabilidade deixaram de ser telas; viram subabas de Testes (Runs e Vínculos). Os nomes antigos continuam abrindo o lugar novo.
-const rotasVirtuais = { runs: ['testes', 'runs'], execucoes: ['testes', 'runs'], automacoes: ['testes', 'pipelines'], vinculos: ['testes', 'repositorio'], rastreabilidade: ['testes', 'repositorio'] };
+const rotasVirtuais = { conexoes: ['projetos', 'conexoes'], runs: ['testes', 'runs'], execucoes: ['testes', 'runs'], automacoes: ['testes', 'pipelines'], vinculos: ['testes', 'repositorio'], rastreabilidade: ['testes', 'repositorio'] };
 async function mostrar(aba) {
   if (rotasVirtuais[aba]) { const [pai, sub] = rotasVirtuais[aba]; (estado.sub ||= {})[pai] = sub; aba = pai; }
   clearInterval(estado.timer); estado.aba = aba;
@@ -92,12 +103,20 @@ async function mostrar(aba) {
   const locais = await chamar(api.projetos); const espacos = await chamar(api.espacos);
   // Consulta que falhou não prova que o projeto sumiu: só descarta a seleção quando as duas listas vieram.
   const consultou = !!locais && !!espacos;
-  if (espacos) estado.espaco = espacos.find(e => e.raizContextos === estado.root) || null;
+  // Seleção por ID evita mistura de projetos que tenham a mesma raiz (ou nenhuma raiz).
+  if (espacos) {
+    const id = estado.espaco?.id || estado.projetoSelecionadoId;
+    estado.espaco = (id ? espacos.find(e => e.id === id) : null)
+      || (!id && estado.root ? espacos.find(e => e.raizContextos === estado.root || e.pastaLocal === estado.root) : null)
+      || null;
+    estado.projetoSelecionadoId = estado.espaco?.id || null;
+  }
   const nome = estado.espaco || locais?.find((p) => p.root === estado.root);
   if (token !== estado.render) return;
   if (estado.root && !nome && consultou) estado.root = null;
   // 2.10.2: um só nome de projeto atual para lateral, Suporte e Projetos (inclusive pasta com contrato local, como a demonstração).
   if (nome || consultou) { estado.projetoNome = nome ? (nome.nome || nome.name || nome.id) : null; estado.projetoLegado = !!nome && !estado.espaco; $('#projeto-atual').textContent = estado.projetoNome || 'nenhum selecionado'; }
+  if (typeof atualizarMenuDoProjeto === 'function') atualizarMenuDoProjeto(estado.espaco);
   try { await abas[aba](el); } catch {
     if (token !== estado.render) return;
     // Uma tela parcialmente montada não deve substituir o conteúdo por uma área incompleta.
@@ -107,7 +126,7 @@ async function mostrar(aba) {
   }
   if (token !== estado.render) return;
   $('#conteudo').replaceChildren(...el.childNodes);
-  if (typeof montarSeletorProjeto === 'function') montarSeletorProjeto();
+  if (typeof montarSeletorProjeto === 'function') montarSeletorProjeto(espacos, locais);
 }
 
 (async () => {
@@ -116,7 +135,7 @@ async function mostrar(aba) {
   const info = await chamar(api.info); if (info) $('#versao').textContent = 'v' + info.version;
   // 2.11: com o login ligado, nada mais carrega antes de a pessoa entrar (a tela de entrada recarrega a janela ao concluir).
   if (window.PrumoConta && !(await window.PrumoConta.iniciar())) return;
-  try { estado.root = localStorage.getItem('raiz'); } catch { /* ignora */ }
+  try { estado.root = localStorage.getItem('raiz'); estado.projetoSelecionadoId = localStorage.getItem('espaco'); } catch { /* ignora */ }
   for (const b of document.querySelectorAll('#nav button')) b.addEventListener('click', () => mostrar(b.dataset.aba));
   iniciarMenu();
   await iniciarAgenda();

@@ -7,19 +7,39 @@ Crie o projeto no Prumo antes de conectar serviços. Você escolhe depois quais 
 Em **Projetos**:
 
 - **Criar projeto manual**: informe o nome e a descrição. Vincular uma pasta, conectar serviços e usar IA são opções.
-- **Importar projetos do Qase**: informe o token e escolha os projetos que quer importar. Eles já ficam vinculados no Prumo.
+ - **Importar projetos do Jira, Qase ou GitHub:** consulte as contas já conectadas, escolha recursos reais e confirme a criação de um espaço Prumo independente por recurso. A importação por token do Qase continua em Projetos > Configurar contas e conexões.
 
 Depois, no projeto, **Vincular repositório local…** liga uma pasta de código e **Escolher repositório do GitHub…** liga um repositório. Dá para ficar só no local.
 
+## O painel de conexões
+
+Cada bolha (Jira, Qase, GitHub, pasta local, Manual) e o núcleo do projeto podem ser **arrastados** para onde você quiser; os cabos acompanham e a posição fica guardada neste computador, por projeto. Mover nunca desfaz uma conexão: só **Remover** desvincula. **Reorganizar** (no topo do painel) devolve tudo ao lugar original. Em tela estreita o painel mantém a ordem original.
+
+Cada ligação de Jira, Qase e GitHub tem dois modos, no próprio painel:
+- **Só ver**: o Prumo e os agentes apenas leem a ferramenta.
+- **Integrado**: você publica na ferramenta os defeitos e melhorias que abriu, comenta resultados, anexa evidências e muda o status com os agentes e as funções normais de QA. Cada envio mostra o que vai sair e só acontece com a sua confirmação. No Jira isso inclui criar ticket, editar, comentar, anexar e transicionar.
+
+## Importar sem confusão
+
+**Importar** pergunta primeiro **de onde vem**: Qase, Jira, GitHub, uma pasta do computador ou um projeto manual. Depois de escolher o projeto, o repositório ou a pasta, você decide onde ele entra:
+- **Projeto novo**: nasce só com aquela conexão. Nada vem de outros projetos; o resto você conecta depois, do jeito normal.
+- **Projeto que já existe**: o recurso é vinculado a esse projeto. Só aparecem para vincular os projetos que ainda não têm aquele serviço.
+
+Uma trilha no topo (por exemplo **Importar › GitHub › Destino**) mostra onde você está e deixa voltar um passo. No núcleo do painel não há mais "Trocar projeto": para trocar, use o seletor de projeto do topo.
+
+## Um projeto, um destino
+
+Cada projeto do Jira, cada projeto do Qase, cada repositório do GitHub e cada pasta local fica em **um único** projeto do Prumo, mesmo que você o enxergue por duas contas. Isso evita que os agentes e as automações tenham mais de um destino possível. Na lista de escolha, o que já está em outro projeto aparece marcado ("já está em …") e oferece **Abrir** esse projeto em vez de vincular de novo. Para mover um destino, remova o vínculo do projeto atual e vincule no outro. Vínculos repetidos de versões anteriores continuam funcionando, mas os agentes avisam e não agem neles até você resolver.
+
 ## Conectar um serviço
 
-Em **Conexões**, cada serviço tem uma linha com **Conectar**. O formulário diz o que o token precisa:
+Em **Projetos**, clique na bolha do serviço e escolha **Conectar**. **GitHub** e **Jira** se conectam pelo navegador, igual em Windows, macOS e Linux: o Prumo abre a página do serviço, você autoriza e volta, sem gerar nem colar token. O **Qase** ainda usa token de API:
 
-- **Jira**: endereço Cloud (*.atlassian.net), e-mail e token de API sem escopos.
-- **Qase**: token da API v1.
-- **GitHub**: token fine-grained com Issues Read and write; Contents, Pull requests e Actions Read-only; Metadata, que o GitHub marca sozinho.
+- **Jira**: clique em **Conectar com Jira**. O navegador abre a página da Atlassian; você escolhe os sites que o Prumo pode acessar e volta. Com mais de um site autorizado, o Prumo pergunta qual conectar. O acesso é renovado sozinho. A escrita no Jira continua desligada até você habilitá-la por projeto. Se a conexão pelo navegador ainda não estiver ativa no seu ambiente, o Prumo mostra direto **Prefiro usar um token de API**: clique em **Abrir a Atlassian**, crie o token (Segurança › Criar token de API), cole aqui e clique em **Conectar**. O Prumo **descobre o seu site Jira sozinho**: testa os sites prováveis (os das suas conexões, o domínio da sua empresa e o início do seu e-mail) e o próprio Jira confirma. Só se não achar ele pede o e-mail da sua conta Atlassian (que pode ser diferente do e-mail do Prumo) e, em último caso, o nome do site (o que vem antes de `.atlassian.net`). O nome da conexão é gerado sozinho.
+- **Qase**: o Qase não oferece autorização pelo navegador, então são três passos curtos: **1** clique em **Abrir o Qase** e crie um token (Perfil › API tokens); **2** cole o token e clique em **Ver meus projetos** (depois de verificado, o token some da tela); **3** escolha quais projetos vêm para o Prumo e clique em **Trazer projetos**. Cada projeto vira um projeto Prumo independente, sem vínculos por nomes coincidentes.
+- **GitHub (recomendado)**: clique em **Conectar com GitHub**. O navegador abre a página do **GitHub App do Prumo QA**; depois de autorizar, o GitHub pede em **quais repositórios** instalar o aplicativo: o Prumo só enxerga esses. Se você ainda não instalou o aplicativo, o Prumo avisa e oferece **Escolher repositórios no GitHub**. O acesso expira e é renovado sozinho; ao remover a conexão, o Prumo também pede ao GitHub que revogue a autorização. Se a autorização pelo navegador não estiver disponível, o Windows ainda pode usar o **Git Credential Manager** e, em **Configuração avançada**, um token pessoal.
 
-O token fica protegido no cofre do sistema. Se esse cofre não estiver disponível, o Prumo não salva o token.
+As credenciais de integração ficam protegidas no cofre do sistema e nunca são enviadas à interface do aplicativo. Se esse cofre não estiver disponível, o Prumo não registra a conexão.
 
 Para conectar um projeto que já existe no serviço, use **Listar recursos disponíveis** na conta. Confira a chave, o ID e a conta e escolha **Vincular**. A lista vem diretamente do serviço; o Prumo não escolhe projetos por nomes parecidos. Para trocar o projeto, remova o vínculo em **Projetos** e crie outro. Para trocar o token, remova e refaça a conexão.
 
@@ -48,107 +68,83 @@ A documentação de uso fica em **Ajuda**, dentro do aplicativo, e no **site ofi
 
 A organização do código segue o nome da tela: `frontend/login/` contém sua interface e `backend/login/` contém as regras, dados e integrações. O mesmo padrão vale para Projetos, Testes, Tickets e as outras telas. As rotas HTTP remotas ficam em `backend/<tela>/servidor/`; a entrada comum fica em `backend/aplicativo/servidor/`. A página web de recuperação fica em `frontend/login/web/`, separada das telas Electron.
 
-Para atualizar o catálogo de canais usado pela Documentação Viva execute `npm run documentacao:viva`. O build também o atualiza automaticamente. Não são gerados arquivos `LEIA-ME` por pasta. O login do MVP usa somente o módulo remoto Better Auth/PostgreSQL; o fluxo local anterior continua disponível apenas para compatibilidade. Os arquivos históricos `v36`/`v40` no `dist/` são derivados do manifesto `frontend/construcao/telas-modulares.json` e não devem ser editados.
+Para atualizar o catálogo de canais usado pela Documentação Viva execute `npm run documentacao:viva`. O build também o atualiza automaticamente. Não são gerados arquivos `LEIA-ME` por pasta. O login do MVP usa somente o módulo remoto Better Auth/PostgreSQL; o fluxo local anterior continua disponível apenas para compatibilidade. Os bundles atuais no `dist/renderer/` são derivados do manifesto `frontend/construcao/telas-modulares.json` e não devem ser editados.
 
 ## Manutenção da tela Projetos
 
-Abra **Administração → Documentação Viva → Projetos** antes de editar. Todas as fontes visuais estão em `frontend/projetos/`, com responsabilidades separadas:
+Abra a Documentação Viva antes de editar. A lógica de Projetos permanece em `frontend/projetos/tela-projetos.js`; toda a apresentação e os componentes visuais ficam em `frontend/design-system/`:
 
-- `mostrarProjetos.js`: abre a tela e consulta os projetos, delegando cada seção a um arquivo próprio.
-- `mostrarPastasLocais.js`: lista as pastas com contrato `qa.project.json`, permite selecionar, vincular e desvincular.
-- `componentes/montarDiagnosticoPasta.js`: explica os problemas encontrados ao vincular uma pasta.
-- `componentes/montarSecaoProjeto.js`: apresenta nome, descrição e ações de um projeto.
-- `componentes/montarVinculosProjeto.js`: exibe vínculos com serviços e a pasta local, com ações de validar e remover.
-- `selecionarProjeto.js`: guarda o projeto ativo e abre a área solicitada, sem copiar o código de Testes.
-- `modais/criarEditarProjeto/abrirFormularioProjeto.js`: formulário manual de cadastro e edição.
-- `modais/escolherRepositorioGithub/abrirRepositoriosGithub.js`: seleção de conexão, paginação e vínculo de repositório.
+- `tela-projetos.js`: reúne a navegação, o formulário de cadastro, a seleção do repositório GitHub, a apresentação de vínculos, a lista de pastas locais e os diagnósticos. Dentro do arquivo, os blocos têm comentários de responsabilidade e funções com nomes descritivos.
 
 A lista de pastas e seu diagnóstico não ficam mais no arquivo compartilhado `frontend/compartilhado/runtime/app.js`: todo o comportamento visual de Projetos agora está em `frontend/projetos/`.
 
-O backend dessa tela continua em `backend/projetos/`: canais IPC em `api/`, persistência em `banco/`, regras em `regras/` e contratos em `tipos/`. Conexões com serviços pertencem à tela Conexões; Projetos utiliza seus canais públicos, sem duplicar a autenticação dos serviços.
+O backend da tela fica em `backend/projetos/`: `controlador.ts` define os canais, `servicoProjetos.ts` gerencia os espaços e o vínculo inicial, `banco/projetos.ts` persiste, e `contratos.ts` valida as identidades. A autenticação e a validação dos recursos externos pertencem a `backend/conexoes/`.
 
 Para modificar a tela, altere sempre os arquivos de `frontend/projetos/`, nunca as cópias compiladas em `dist/renderer/`. O teste `testes/unitario/frontend/projetos/tela-projetos-modular.test.mjs` confere a montagem, a ordem de carregamento, a edição e os vínculos sem chamar serviços externos. Execute-o antes da suíte de testes completa.
 
 ## Manutenção da tela Tickets
 
-A implementação visual de Tickets fica exclusivamente em `frontend/tickets/`. Os cinco fragmentos possuem responsabilidades diferentes:
+A tela de Tickets fica em um único arquivo: `frontend/tickets/tela-tickets.parte.js`. Dentro dele, as funções de listagem, rascunhos locais, operações do Jira, defeitos Qase e Issues GitHub continuam identificadas pelo nome e agrupadas por fluxo, mas não ficam espalhadas em arquivos distintos.
 
-- `fluxos-tickets.parte.js`: tela principal, filtros, consulta e lista unificada de tickets Jira, defeitos Qase, Issues GitHub e rascunhos Prumo.
-- `tickets-locais.parte.js`: criação de rascunhos, classificação, revisão, vínculos e escolha do destino para publicação.
-- `tickets-jira.parte.js`: consulta avançada, detalhe, comentários, transições, edição e criação de tickets no Jira.
-- `tickets-defeitos-qase.parte.js`: detalhe de defeitos Qase, relações com Jira e alteração de status quando autorizada.
-- `tickets-issues-github.parte.js`: leitura dos detalhes de Issues do repositório GitHub vinculado.
+O manifesto `frontend/construcao/telas-modulares.json` inclui a fonte única de Tickets em `dist/renderer/fluxos.js`. **Edite a fonte da tela, nunca o bundle gerado.**
 
-O manifesto `frontend/construcao/telas-modulares.json` estabelece a ordem desses fragmentos, reunidos automaticamente em `dist/renderer/fluxos-v40.js`. **Edite as fontes de `frontend/tickets/`, nunca o bundle gerado.**
-
-As regras de Tickets ficam em `backend/tickets/`: `api/` são canais IPC, `banco/` é persistência local, `regras/` organiza a criação, revisão e publicação, `integracoes/` executa chamadas autorizadas ao Jira e `tipos/` define os contratos. O login nas plataformas externas pertence à tela Conexões e não deve ser implementado novamente em Tickets.
+As regras de Tickets ficam em `backend/tickets/`: `api/` são canais IPC, `banco/` é persistência local, `regras/` organiza a criação, revisão e publicação, `integracoes/` executa chamadas autorizadas ao Jira e `tipos/` define os contratos. O login nas plataformas externas pertence à área de conexões em Projetos e não deve ser implementado novamente em Tickets.
 
 Para conferir a separação sem publicar nada, execute `node --test testes/unitario/frontend/tickets/modulos-tickets.test.mjs testes/unitario/frontend/tickets/fonte-jira-ou-local.test.mjs`, depois o build e a suíte unitária. Operações reais de escrita em Jira/Qase/GitHub ainda exigem homologação manual com permissão e confirmação explícitas.
 
-## Manutenção da tela Conexões
+## Manutenção das conexões dentro de Projetos
 
-A autenticação da conta do **Prumo QA** pertence exclusivamente a `frontend/login/` e `backend/login/`. As credenciais de **Jira, Qase e GitHub** não fazem login no aplicativo: elas permitem consultar os serviços e realizar ações somente depois das confirmações necessárias.
+As contas de Jira, Qase e GitHub não fazem login no Prumo; o login do aplicativo pertence exclusivamente ao módulo Login. As contas autorizadas para integrações são gerenciadas em **Projetos > bolha do serviço > Contas e permissões**. Para começar sem nenhum projeto, use **Projetos > Criar projeto manual** ou **Importar do Qase/Jira/GitHub**.
 
-Na tela `frontend/conexoes/`:
+O formulário de credenciais, o botão de autorização do GitHub, a prévia e importação de projetos Qase, a validação de contas, a habilitação de escrita e o histórico de operações estão em frontend/projetos/tela-projetos.js. O Device Flow fica em backend/conexoes/integracoes/autorizacaoGitHub.ts e os canais respectivos são registrados no controlador de Conexões. O mapa visual e os estilos pertencem ao Design System. A configuração MCP de Claude Code e Codex permanece em frontend/agentes/mostrarConfiguracaoMcp.js e requer selecionar o projeto correspondente.
 
-- `mostrarConexoes.js`: abre a tela, lista contas vinculadas e organiza as ações de cada serviço.
-- `componentes/apresentarProjetosQase.js`: filtra, seleciona e importa os projetos presentes na prévia da API do Qase; cancelar descarta a prévia.
-- `componentes/mostrarPermissoesConexao.js`: orienta quais permissões cada serviço exige, sem participar do armazenamento de credenciais.
-- `formularios/abrirFormularioConexao.js`: exibe os campos específicos de Qase, Jira e GitHub e envia o pedido de validação ao backend.
-- `mostrarOperacoesExternas.js`: mostra as operações externas recentes sem permitir escrita automaticamente.
-- `mostrarIntegracoesDosAgentes.js`: exibe as conexões de IA e permite abrir o painel MCP, sem implementar outra autenticação.
-- `frontend/agentes/mostrarConfiguracaoMcp.js`: configura e testa os clientes Codex/Claude Code. Esse código pertence a Agentes, não ao runtime compartilhado `app.js`.
+Contas autorizadas são compartilháveis, mas vincular Jira, Qase e GitHub, habilitar escrita ou consultar informações é por projeto. A exclusão de uma credencial compartilhada pode afetar outros projetos. No backend, backend/conexoes/ preserva o cofre e as chamadas autenticadas; backend/projetos/ armazena os vínculos.
 
-No backend, `backend/conexoes/api/` recebe os pedidos IPC; `banco/` protege e recupera credenciais; `integracoes/`, `github/` e `ia/` acessam os sistemas correspondentes; `escrita/` verifica permissões e registra operações; `tipos/` contém os contratos. Nenhuma dessas pastas substitui `backend/login/`.
-
-Para conferir o comportamento do formulário sem enviar credenciais reais, execute `node --test testes/unitario/frontend/conexoes/campos-por-servico.test.mjs no Prumo QA e node automacao/prumo-qa/executar.mjs --tipo regressao --arquivo frontend/conexoes/mensagens-login-qase.test.mjs no Prumo QA Lab`. O teste visual completo e a homologação real das permissões externas ainda são etapas separadas.
+Validação dos formulários: testes/unitario/frontend/projetos/campos-por-servico.test.mjs e arquitetura-da-tela.test.mjs. A homologação visual em Electron e a validação de contas externas reais são etapas distintas.
 
 ## Manutenção da tela Agentes
 
-A tela de agentes está em `frontend/agentes/`, não no runtime compartilhado. A divisão do bundle `interfaces-v36.js` mantém três responsabilidades:
+A tela de agentes está em `frontend/agentes/`, não no runtime compartilhado. Cada fluxo possui uma fonte principal fácil de localizar:
 
-- `tela-agentes.parte.js`: cadastro, seleção, permissões e configurações de agentes.
-- `cerebro-do-agente.parte.js`: visualização dos neurônios, vínculos e habilidades do agente.
-- `atividades-do-agente.parte.js`: orquestrações e abertura do painel de atividades.
-- `atividades/modelo-e-layout.js`: transforma os registros observados (MCP, conversas e worker) em nós e ligações e calcula suas posições no canvas, sem fazer chamadas de API.
-- `atividades/painel-atividades-v41.js`: controles do canvas, navegação, atualização dos registros e apresentação visual. Carregado depois do modelo, conforme `frontend/recursos.json` e `frontend/compartilhado/runtime/index.html`.
-- `mostrarConfiguracaoMcp.js`: orientação e teste das conexões MCP de Claude Code e Codex, exibido também por Conexões.
+- `tela-agentes.parte.js`: reúne cadastro, seleção, permissões, cérebro visual e orquestrações, com funções e comentários de responsabilidade.
+- `frontend/design-system/painel-atividades.js`: reúne modelo, posições calculadas, canvas, navegação e atualização das atividades. Mantém leitura de dados separada do desenho, dentro do mesmo arquivo.
+- `mostrarConfiguracaoMcp.js`: orientação e teste das conexões MCP de Claude Code e Codex, exibido também por Projetos quando este projeto está selecionado.
 
-Os fragmentos do bundle são concatenados exatamente na ordem indicada em `frontend/construcao/telas-modulares.json`; não edite diretamente `dist/renderer/interfaces-v36.js`. As permissões e a execução ficam no backend em `backend/agentes/`.
+Os fragmentos do bundle são concatenados exatamente na ordem indicada em `frontend/construcao/telas-modulares.json`; não edite diretamente `dist/renderer/interfaces.js`. As permissões e a execução ficam no backend em `backend/agentes/`.
 
 A separação em arquivos não constitui homologação manual do painel, nem prova de conexão com IA externa. Primeiro confira a tela em um perfil de homologação, depois avalie as APIs de IA/MCP conforme as permissões de cada agente.
 
 ## Manutenção de Agendamentos e Testes › Runs
 
-A tela `frontend/agendamentos/operacao-v40.js` registra `abas.agenda` e cuida da lista, dos formulários, das autorizações e das políticas do worker. Os arquivos `mostrarAgendamentos.js` e `cartoes/montarCartaoRotina.js` eram implementações antigas substituídas pela tela nova e foram retirados.
+A tela `frontend/agendamentos/tela-agendamentos.js` registra `abas.agenda` e reúne a lista de rotinas, o cálculo de horários do formulário, os campos, a edição, as autorizações e as políticas do worker. Os arquivos `mostrarAgendamentos.js` e `cartoes/montarCartaoRotina.js` eram implementações antigas substituídas pela tela nova e foram retirados.
 
 `frontend/testes/execucoes-e-evidencias.js` contém os detalhes de Runs, logs e evidências locais, além de `abas.evidencias` e da API de interface `window.PrumoOperacao`. A ordem de carga depende de `frontend/recursos.json` e `frontend/compartilhado/runtime/index.html`. As operações de execução permanecem no backend; nenhuma chamada de escrita externa foi alterada nesta divisão.
 
 ## Manutenção da tela Métricas
 
-A versão ativa está em `frontend/metricas/tela-metricas.parte.js`, montada no bundle `interfaces-v36.js`. A implementação antiga `mostrarMetricas.js` e seu auxiliar `componentes/montarVisuaisMetricas.js` eram carregados antes da versão v36 e depois substituídos. Ambos foram retirados do frontend e do carregamento para evitar duas fontes concorrentes da mesma tela.
+A versão ativa está em `frontend/metricas/tela-metricas.parte.js`, montada no bundle `interfaces.js`. A implementação antiga `mostrarMetricas.js` e seu auxiliar `componentes/montarVisuaisMetricas.js` eram carregados antes da versão v36 e depois substituídos. Ambos foram retirados do frontend e do carregamento para evitar duas fontes concorrentes da mesma tela.
 
 ## Manutenção da tela Logs
 
-O terminal visual mantém a responsabilidade na pasta `frontend/logs/`: `tela-logs.parte.js` monta a interface e os botões; `eventos-e-detalhes.parte.js` prepara as linhas e a inspeção de eventos; `filtros-e-atualizacao.parte.js` filtra, consulta o backend e controla a atualização automática. As três partes são montadas nesta ordem no `interfaces-v36.js` pelo manifesto `frontend/construcao/telas-modulares.json`.
+O terminal visual mantém a responsabilidade na pasta `frontend/logs/`: `tela-logs.parte.js` monta a interface e os botões; `eventos-e-detalhes.parte.js` prepara as linhas e a inspeção de eventos; `filtros-e-atualizacao.parte.js` filtra, consulta o backend e controla a atualização automática. As três partes são montadas nesta ordem no `interfaces.js` pelo manifesto `frontend/construcao/telas-modulares.json`.
 
 As consultas e a exportação continuam em `backend/logs/api`, com regras de processamento em `backend/logs/regras` e persistência em `backend/logs/banco`. A modularização não altera os eventos, o intervalo de atualização nem a comunicação IPC. Ainda é necessária homologação visual real, incluindo navegação, seguir saída, filtros e exportação.
 
 ## Manutenção da Administração
 
-A Documentação Viva utiliza o bundle `administracao.js`, gerado de cinco fragmentos em `frontend/administracao/`: `tela-administracao.parte.js` inicia a interface, `documentacao/explorador.parte.js` cria o índice e a árvore, `documentacao/fluxo.parte.js` desenha o fluxograma, `documentacao/codigo-e-telas.parte.js` exibe o código com explicações e `painel-e-navegacao.parte.js` registra abas e resumo do sistema. Edite essas fontes; não modifique o bundle de `dist/renderer/`.
+Administração possui uma fonte principal: `frontend/administracao/tela-administracao.parte.js`, que reúne navegação, documentação viva, usuários, papéis, agentes, configurações gerais e gestão de chamados de suporte. Os fluxos permanecem identificáveis por função, sem exigir abrir arquivos auxiliares da mesma tela. O estilo local está em `frontend/design-system/estilos-das-telas.parte.css` e reutiliza os tokens do Design System.
 
-`gerenciarAcessos.js` permanece responsável por usuários, papéis, agentes e configurações gerais; `chamadosDeSuporte.js` cuida da gestão dos chamados. Os canais e as regras permanecem em `backend/administracao/`. O mesmo JavaScript original foi distribuído entre os cinco fragmentos sem alterar suas instruções executáveis.
+O build gera `dist/renderer/administracao.js`. As regras de autorização e de persistência continuam em `backend/administracao/`, sem duplicá-las no front-end.
 
 ## Manutenção de Configurações
 
-O painel de Configurações em `frontend/configuracoes/` tem quatro partes no bundle `interfaces-v36.js`: `ajustes-do-assistente.parte.js` prepara o estado e os controles compartilhados, `perfil-e-conta.parte.js` apresenta e salva dados de perfil, `aparencia-e-assistente.parte.js` cuida de aparência, voz e IA externa e `navegacao-dos-ajustes.parte.js` controla as abas e a atualização das informações. `preferenciasDaJanela.js` mantém tema, idioma e cor. A navegação, o menu lateral e o seletor de projeto ficam em `frontend/compartilhado/navegacaoDaJanela.js`.
+O painel de Configurações em `frontend/configuracoes/` tem quatro partes no bundle `interfaces.js`: `ajustes-do-assistente.parte.js` prepara o estado e os controles compartilhados, `perfil-e-conta.parte.js` apresenta e salva dados de perfil, `aparencia-e-assistente.parte.js` cuida de aparência, voz e IA externa e `navegacao-dos-ajustes.parte.js` controla as abas e a atualização das informações. `preferenciasDaJanela.js` mantém tema, idioma e cor. A navegação, o menu lateral e o seletor de projeto ficam em `frontend/compartilhado/navegacaoDaJanela.js`.
 
 Os fragmentos preservam o código anterior na mesma ordem; a persistência e a autorização permanecem nas APIs já existentes. A homologação manual do painel e as permissões de usuário ainda precisam ser conferidas na aplicação real.
 
 ## Manutenção da tela Início
 
-A única implementação da tela Início fica em `frontend/inicio/tela-inicio-v36.parte.js` e usa `conversa.montar()`. A antiga `frontend/inicio/mostrarInicio.js`, carregada antes e sobrescrita pelo bundle, foi retirada. `frontend/inicio/identidade/qc.js` continua necessário aos retratos, esfera e estados visuais do assistente; `orbitas-v36.js` e `robos-v36.js` também permanecem com seus usos próprios.
+A única implementação da tela Início fica em `frontend/inicio/tela-inicio-v36.parte.js` e usa `conversa.montar()`. A antiga `frontend/inicio/mostrarInicio.js`, carregada antes e sobrescrita pelo bundle, foi retirada. `frontend/design-system/qc.js` continua necessário aos retratos, esfera e estados visuais do assistente; `frontend/design-system/orbitas.js` e `frontend/design-system/robos.js` também permanecem com seus usos próprios.
 
 ## Manutenção do runtime compartilhado e limpeza de código antigo
 
@@ -239,3 +235,48 @@ A auditoria do Orquestrador local usa especialistas para conferência de assinat
 - O plano gratuito do Qase não permite vincular um caso a um ticket do Jira. Em uma das contas testadas, os campos personalizados dos defeitos também não foram salvos.
 - Sem permissão de leitura e escrita em Issues, o GitHub pode criar o chamado sem os rótulos. O Prumo avisa quando isso acontece.
 - Status antigos de commit do GitHub não aparecem, só check runs.
+
+
+## Isolamento das origens
+
+## Origem e isolamento dos projetos
+
+**Projetos** é o cadastro central do Prumo QA. Cada projeto tem seu próprio ID, pasta de contexto, histórico, relações, repositório local opcional e até um vínculo por serviço. Os vínculos de outros projetos não são reutilizados nem associados por semelhança de nomes.
+
+- **Criar projeto manual:** cria um espaço Prumo sem conexões externas.
+- **Importar projetos do Jira:** escolhe uma conta conectada, consulta os projetos disponíveis e cria um espaço por projeto escolhido.
+- **Importar projetos do Qase (TMS):** permite escolher projetos de uma conta já vinculada; o fluxo de prévia e token em Conexões continua disponível.
+- **Importar projetos do GitHub:** escolhe um repositório remoto e cria seu espaço Prumo, sem clonagem automática.
+- **Vincular Jira ou Qase a um projeto existente:** acrescenta somente o serviço selecionado ao espaço escolhido. O repositório GitHub ou a pasta local também podem ser vinculados explicitamente.
+
+A criação/importação exige confirmação na janela nativa do aplicativo; os recursos externos são revalidados no backend antes de serem persistidos. Uma reimportação da mesma identidade remota retorna o projeto existente, sem criar duplicata. Projetos Qase ambíguos entre contas distintas são recusados. A importação não cria vínculos Jira/Qase/GitHub cruzados, não executa código nem publica ou altera recursos remotos.
+
+**Permissões:** leitura de projetos e seus recursos exige Projetos VER; importação, criação e novos vínculos exigem Projetos USAR. Credenciais são administradas em Projetos > bolha do serviço > Contas e permissões. A IDE trabalha somente com o repositório local ou GitHub associado ao projeto selecionado. Cada tela deve utilizar o ID do projeto selecionado para escopar todas as consultas, execuções, casos, tickets e evidências.
+
+**Manutenção:** alterações de comportamento de Projetos em `frontend/projetos/tela-projetos.js`; identidade, contratos, persistência e vínculo inicial em `backend/projetos/controlador.ts`, `servicoProjetos.ts`, `contratos.ts` e `banco/projetos.ts`. Validação das contas e APIs externas pertence a `backend/conexoes/`. Os controles e toda a aparência da interface continuam centralizados em `frontend/design-system/`, inclusive os botões e campos compartilhados.
+
+## Mapa visual de conexões por projeto
+
+A tela **Projetos** apresenta **somente um projeto por vez**, sem rolagem da bancada nem mapas empilhados. No estado inicial vazio, é possível criar manualmente ou importar do Qase, Jira ou GitHub. O nome no topo e a bolha central permitem trocar entre os projetos cadastrados. O mapa tem um núcleo Prumo QA e cinco ramificações independentes:
+
+- **Manual / Prumo:** casos, tickets e propostas mantidos no próprio Prumo, sem fornecedor obrigatório.
+- **Jira:** projeto externo de gestão/requisitos. Mostra a chave efetivamente vinculada e o estado de validação.
+- **Qase:** projeto externo de casos e gestão de qualidade. Mostra a identidade específica da conta vinculada.
+- **GitHub:** repositório de código. Mostra o repositório escolhido e oferece trazer a cópia para o computador quando ainda não há pasta local.
+- **Pasta local:** diretório vinculado para a IDE e automações. Pode ser escolhido ou trocado pela confirmação nativa.
+
+Cada ramificação exibe a condição real **vinculado/não vinculado**, o identificador de origem e comandos adequados: **Conectar**, **Verificar**, **Remover**, **Escolher pasta** ou **Trocar pasta**. O desenho não pressupõe equivalência entre projetos de serviços diferentes e não cria vínculos apenas pelo nome. **Conectar** abre a lista real da conta e exige confirmação antes de persistir. **Remover** usa o contrato existente e não exclui dados remotos. A configuração, a lista de recursos e os dados técnicos aparecem somente no painel da bolha correspondente, com a ação **Fechar**.
+
+O mapa é só uma **representação dos vínculos**: não é o orquestrador de testes, não executa pipelines e não transfere dados entre fornecedores. O isolamento continua garantido por ID de projeto e por ID da conta/recurso. Alterar os vínculos de um projeto só reflete naquele projeto, inclusive ao abrir a IDE e os fluxos de Testes/Tickets.
+
+**Para fazer manutenção:** a regra de cada botão, a seleção de conta, os IDs e o estado do projeto ficam em `frontend/projetos/tela-projetos.js`. O componente visual reutilizável `DS.fluxoProjeto` fica em `frontend/design-system/ds.js`, e **todos** os seus estilos, linhas, estados, tamanhos e comportamento responsivo ficam em `frontend/design-system/ds.css`. Não crie outro componente por fornecedor, nem folha de estilo na pasta da tela. O seletor GitHub usa o mesmo fluxo de importação de Jira/Qase, com uma opção extra de clonagem local.
+
+**Editor de conexões:** o desenho usa portas circulares e cabos SVG calculados pelas posições reais dos módulos. Apenas o projeto interno (Manual) e os serviços efetivamente vinculados têm cabo; serviços desconectados têm portas livres. Clicar na porta livre abre a escolha da conta, recurso ou pasta; clicar numa porta vinculada permite conferir ou trocar a pasta, conforme o serviço. O cabo não simula sincronização, execução nem associação cruzada. A conexão acontece ao escolher um recurso real e confirmar no backend. Em janelas estreitas, a bancada reorganiza os módulos sem esconder as ações. Todas as regras visuais continuam no Design System, sem novos arquivos.
+
+## Conexões dentro de cada projeto
+
+A antiga tela independente **Conexões** foi incorporada à bancada **Projetos**. Clique na bolha do serviço para abrir um painel sobreposto e depois em **Fechar** para retornar ao mapa. O botão **Contas e permissões** permite ver todos os serviços. Credenciais autorizadas podem ser reutilizadas, mas recursos, vínculos e permissão de escrita pertencem ao projeto ativo. Remover uma credencial compartilhada pode afetar outros projetos; remover um vínculo não altera o serviço externo.
+
+Sem nenhum projeto, escolha **Criar projeto manual** ou **Importar do Qase/Jira/GitHub**. A importação do Qase pode começar pela autorização do token, mostrar os projetos existentes e importar apenas os selecionados. A importação cria projetos independentes; conectar outra plataforma depois, dentro da bolha de um projeto, acrescenta somente o recurso autorizado àquele projeto.
+
+O seletor lateral troca o ID do projeto ativo, atualiza o nome e renova o conteúdo dos módulos pela navegação comum. No menu, as legendas de Tickets e Testes mostram as fontes habilitadas para o projeto atual. Funcionalidades manuais continuam disponíveis independentemente das conexões. O contexto visual do menu fica em frontend/compartilhado/navegacaoDaJanela.js; sua aparência em frontend/design-system/ds.css. Credenciais e validações de API permanecem no backend de conexões por segurança.
