@@ -50,7 +50,9 @@ export function criarAutenticacao({env=process.env, enviar}={}) {
     rateLimit:{enabled:true,storage:'database',window:60,max:100,
       customRules:{'/sign-in/email':{window:60,max:5},'/sign-up/email':{window:60,max:3},
         '/request-password-reset':{window:60,max:3}}},
-    advanced:{useSecureCookies:true}
+    // No Render, a Cloudflare reescreve CF-Connecting-IP com o IP real; o X-Forwarded-For chega com vários
+    // endereços e o Better Auth juntava todo mundo num só contador de tentativas.
+    advanced:{useSecureCookies:true,ipAddress:{ipAddressHeaders:['cf-connecting-ip']}}
   });
   return {auth,atender:toNodeHandler(auth),checar:async()=>{await pool.query('SELECT 1');},fechar:()=>pool.end()};
 }
