@@ -76,7 +76,7 @@ const PrumoModeloAtividades = (() => {
       const externos = new Map();
       d.agentes.forEach((ag, i) => {
         const lista = ordenadas.filter((c) => c.agente === ag.id); if (!lista.length) return;
-        const hub = { id: 'ag:' + ag.id, tipo: 'agente', titulo: ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome, sub: tr('{n} conversas', { n: lista.length }), cor: CORES_AGENTE[i % CORES_AGENTE.length], folhas: [], ocultas: Math.max(0, lista.length - MAX_FOLHAS) };
+        const hub = { id: 'ag:' + ag.id, agenteId: ag.id, tipo: 'agente', titulo: ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome, sub: tr('{n} conversas', { n: lista.length }), cor: CORES_AGENTE[i % CORES_AGENTE.length], folhas: [], ocultas: Math.max(0, lista.length - MAX_FOLHAS) };
         hubs.push(hub); sec.hubs.push(hub); arestas.push({ de: 'orq', para: hub.id, tipo: 'fonte', vivo: lista.some((c) => recente(c.em)), peso: lista.length });
         for (const c of lista.slice(0, MAX_FOLHAS)) {
           const f = { id: 'cv:' + c.id, tipo: 'conversa', dado: c, cor: hub.cor, etiqueta: c.modo === 'LOCAL' ? tr('resposta local') : c.modo === 'MESA' ? tr('mesa de IAs') : c.modo === 'CLAUDE' ? 'Claude Code' : 'Codex', estado: '', hora: data(c.em) + ' ' + curto(c.em), vivo: recente(c.em),
@@ -114,7 +114,7 @@ const PrumoModeloAtividades = (() => {
           const nome = d.agentes.find(a => a.id === id)?.nome || id;
           let hub = porAgente.get(id);
           if (!hub) {
-            hub = { id: 'diagnostico-agente:' + id, tipo: 'agente', dado: { registro: o, etapa: o.etapas.find(x => x.agente === id) || null, agente: nome }, titulo: nome,
+            hub = { id: 'diagnostico-agente:' + id, agenteId: id, tipo: 'agente', dado: { registro: o, etapa: o.etapas.find(x => x.agente === id) || null, agente: nome }, titulo: nome,
               sub: tr('Consultas verificadas'), cor: CORES_AGENTE[i % CORES_AGENTE.length],
               folhas: [], ocultas: 0 };
             porAgente.set(id, hub); hubs.push(hub); sec.hubs.push(hub);
@@ -152,6 +152,15 @@ const PrumoModeloAtividades = (() => {
         }
       });
     }
+    // Elenco: todo agente do projeto aparece no fluxo, pelo nome, mesmo sem conversa registrada; clicar abre o fluxo dele.
+    const cobertos = new Set(hubs.filter(x => x.agenteId).map(x => x.agenteId));
+    const faltam = (d.agentes || []).filter(ag => !cobertos.has(ag.id));
+    if (faltam.length) {
+      const sec = { id: 'elenco', titulo: tr('Agentes do projeto'), fontes: [], hubs: [] }; secoes.push(sec);
+      faltam.forEach((ag, i) => { const hub = { id: 'agente:' + ag.id, agenteId: ag.id, tipo: 'agente', titulo: ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome, sub: tr('sem conversas ainda'), cor: CORES_AGENTE[(i + 3) % CORES_AGENTE.length], folhas: [], ocultas: 0 }; hubs.push(hub); sec.hubs.push(hub); });
+    }
+    const trabalhando = new Set(d.ativos.idsDosAgentes);
+    for (const h of hubs) if (h.agenteId) { h.vivo = trabalhando.has(h.agenteId); if (h.vivo) h.sub = tr('trabalhando agora') + ' · ' + h.sub; }
     return { fontes, hubs, folhas, arestas, secoes, ativos: d.ativos };
   }
 
@@ -168,10 +177,10 @@ const PrumoModeloAtividades = (() => {
     // Cada seção é montada em coordenadas próprias: janelas no alto; hubs em linhas que quebram ao passar de LARG_LINHA,
     // cada hub com sua grade de folhas logo abaixo.
     const blocos = m.secoes.map((sec) => {
-      const local = new Map(); let x = 0, y = TOPO + JH + GAP.linhaHub, alturaLinha = 0, largura = 0;
+      const local = new Map(); let x = 0, y = sec.fontes.length ? TOPO + JH + GAP.linhaHub : TOPO, alturaLinha = 0, largura = 0;
       for (const hub of sec.hubs) {
         const n = hub.folhas.length + (hub.ocultas ? 1 : 0), cols = Math.max(1, Math.min(MAX_COLUNAS, Math.ceil(Math.sqrt(n / 1.6)))), rows = Math.ceil(n / cols);
-        const w = Math.max(HW, cols * FW + (cols - 1) * GAP.folhaX), hTotal = HH + GAP.linhaFolha + rows * (FH + GAP.folhaY);
+        const w = Math.max(HW, cols * FW + (cols - 1) * GAP.folhaX), hTotal = HH + (n ? GAP.linhaFolha + rows * (FH + GAP.folhaY) : 0);
         if (x > 0 && x + w > LARG_LINHA) { x = 0; y += alturaLinha + GAP.linhaHub * .7; alturaLinha = 0; }
         const yFolha = y + HH + GAP.linhaFolha;
         local.set(hub.id, { x: x + (w - HW) / 2, y, w: HW, h: HH });
@@ -206,7 +215,6 @@ const PrumoModeloAtividades = (() => {
 // Pan e zoom por mouse, toque (pinça), trackpad e teclado; funciona em qualquer largura de janela.
 const PrumoPainelAtividades = (() => {
   const { sv, classe, curto, temaClaro, assinatura, modelar, dispor } = PrumoModeloAtividades;
-  const CORES_DO_ELENCO = ['#7abaff', '#80ddda', '#bea1f8', '#ffba90', '#a7de82', '#ffa1bf', '#f2d38c', '#99b8ff', '#62d4f0'];
   function montar(host, o) {
     let vista = { x: 0, y: 0, k: 1 }, dados = null, layout = null, modelo = null, ultimaAssinatura = '', timer = null, ajustado = false, carregando = false;
     const ponteiros = new Map(); let arrasto = null, pinca = null, arrastou = false;
@@ -238,23 +246,8 @@ const PrumoPainelAtividades = (() => {
       ...[['ok', 'PASS · OK'], ['falha', 'FAIL · ERROR'], ['aviso', 'BLOCKED · STARTED · NOT_VERIFIED']].map(([c, t]) => h('span', {}, h('i', { class: c }), h('span', { 'data-i18n-ignore': '' }, t))),
       h('span', {}, h('i', { class: 'pulso' }), h('span', {}, tr('Pulso: registrado nos últimos 90 s'))),
       h('span', {}, h('i', { class: 'delegacao' }), h('span', {}, tr('Delegação do chat à IA externa'))));
-    // Elenco: todos os agentes do projeto, pelo nome; clicar abre o fluxo, a conversa e a comunicação daquele agente.
-    const elenco = h('div', { class: 'pa-elenco', role: 'list', 'aria-label': tr('Agentes do projeto') });
-    function desenharElenco(d, ativos) {
-      const trabalhando = new Set(ativos?.idsDosAgentes || []);
-      elenco.replaceChildren(...(d.agentes || []).map((ag, i) => {
-        const ocupado = trabalhando.has(ag.id);
-        const conv = (d.conversas || []).filter(c => c.agente === ag.id).length, etapas = (d.orquestracoes || []).reduce((n, x) => n + x.etapas.filter(e => e.agente === ag.id).length, 0);
-        const botaoAgente = h('button', { type: 'button', class: 'pa-agente', role: 'listitem', 'data-agente': ag.id, 'data-estado': ocupado ? 'trabalhando' : 'livre', onclick: () => o.abrirAgente?.(ag, { ...d, ativos }),
-          title: tr('Ver o fluxo e a conversa de {n}', { n: ag.nome }) },
-          h('i', { class: 'pa-agente-ponto', 'aria-hidden': 'true' }), h('strong', { 'data-i18n-ignore': '' }, ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome),
-          h('small', {}, ocupado ? tr('trabalhando') : tr('livre')), h('small', { class: 'pa-agente-conta' }, tr('{c} conversas · {e} etapas', { c: conv, e: etapas })));
-        botaoAgente.style.setProperty('--pa-cor', CORES_DO_ELENCO[i % CORES_DO_ELENCO.length]); // a CSP não aceita atributo style inline
-        return botaoAgente;
-      }));
-    }
     const palco = h('div', { class: 'pa-palco' }, vp, mini, lateral);
-    raiz.append(barra, elenco, palco, legenda, ajuda); host.replaceChildren(raiz);
+    raiz.append(barra, palco, legenda, ajuda); host.replaceChildren(raiz);
     // O canvas ocupa a altura que sobra na janela abaixo dele (legenda e ajuda incluídas), com um mínimo legível.
     function medirAltura() {
       if (!raiz.isConnected || document.fullscreenElement === raiz) return;
@@ -381,7 +374,8 @@ const PrumoPainelAtividades = (() => {
       el.style.setProperty('--cor', f.cor); pos(el, p); return el;
     }
     function hub(x, p) {
-      const el = h(x.dado ? 'button' : 'div', { ...(x.dado ? { type: 'button', onclick: () => o.abrirDiagnostico?.(x.dado) } : {}), class: 'pa-hub pa-' + x.tipo, 'data-no': x.id, role: x.dado ? undefined : 'group', 'aria-label': x.titulo + ' · ' + x.sub }, h('span', { class: 'pa-hub-marca', 'aria-hidden': 'true' }), h('span', { class: 'pa-hub-texto' }, h('strong', { 'data-i18n-ignore': '' }, x.titulo), h('small', {}, x.sub)));
+      const abre = x.agenteId ? () => o.abrirAgente?.(((dados && dados.agentes) || []).find(g => g.id === x.agenteId) || { id: x.agenteId, nome: x.titulo }, { ...dados, ativos: modelo && modelo.ativos }) : x.dado ? () => o.abrirDiagnostico?.(x.dado) : null;
+      const el = h(abre ? 'button' : 'div', { ...(abre ? { type: 'button', onclick: abre } : {}), class: 'pa-hub pa-' + x.tipo + (x.vivo ? ' vivo' : ''), 'data-no': x.id, 'data-agente': x.agenteId || null, role: abre ? undefined : 'group', 'aria-label': x.titulo + ' · ' + x.sub }, h('span', { class: 'pa-hub-marca', 'aria-hidden': 'true' }), h('span', { class: 'pa-hub-texto' }, h('strong', { 'data-i18n-ignore': '' }, x.titulo), h('small', {}, x.sub)));
       el.style.setProperty('--cor', x.cor); pos(el, p); return el;
     }
     function folha(f, p, novo) {
@@ -435,7 +429,6 @@ const PrumoPainelAtividades = (() => {
       if (foco) camada.querySelector(`[data-no="${CSS.escape(foco)}"]`)?.focus({ preventScroll: true });
       const ativos = modelo;
       const a = ativos.ativos || { agentes: 0, operacoes: 0, testes: 0, investigacoes: 0 };
-      desenharElenco(dados, a);
       const conv = ativos.folhas.filter(f => f.tipo === 'conversa').length;
       contagem.textContent = [tr('{n} agentes trabalhando', { n: a.agentes }), tr('{n} operações ativas', { n: a.operacoes }), tr('{n} testes ativos', { n: a.testes }), tr('{n} investigações ativas', { n: a.investigacoes }), tr('{n} conversas', { n: conv })].join(' · ');
       if (!ajustado && vp.clientWidth) { ajustar(false); ajustado = true; } else aplicar();

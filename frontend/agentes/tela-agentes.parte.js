@@ -532,7 +532,7 @@
         }
       }
       const orq = h('section', { class: 'v36a-orq', id: 'v36-orquestracoes', 'aria-label': tr('Orquestrações recentes') }, note(tr('Carregando orquestrações…')));
-      body.replaceChildren(h('div', { class: 'v36a-topo v36a-topo-painel' }, h('div', {}, h('h2', { class: 'v36a-titulo' }, tr('Painel de atividades')), h('p', { class: 'v36a-painel-intro' }, tr('Acompanhe evidências e análises reais do projeto. Conversas não significam correções executadas.'))), botaoDiagnostico), resultado, host);
+      body.replaceChildren(h('div', { class: 'v36a-topo v36a-topo-painel' }, botaoDiagnostico), resultado, host);
       painelVivo = PrumoPainelAtividades.montar(host, {
         lateral: { rotulo: tr('Orquestrações'), conteudo: orq },
         reduzido, ativo: () => activeTab === 'activity' && estado.aba === 'agentes' && estado.espaco?.id === e.id,

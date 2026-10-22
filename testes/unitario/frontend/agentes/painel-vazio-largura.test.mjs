@@ -9,13 +9,14 @@ test('o aviso do painel de atividades vazio tem largura própria: em % do contê
   assert.doesNotMatch(regra, /width:min\(440px,80%\)/);
 });
 
-test('o painel lista todos os agentes pelo nome e clicar abre o fluxo do agente; a cor vai por propriedade, não por style inline (a CSP bloqueia)', () => {
+test('todo agente do projeto aparece no canvas pelo nome, clicar abre o fluxo dele, e o painel não repete título nem subtítulo da tela', () => {
   const painel = fs.readFileSync('frontend/design-system/painel-atividades.js', 'utf8');
   const tela = fs.readFileSync('frontend/agentes/tela-agentes.parte.js', 'utf8');
-  assert.match(painel, /\(d\.agentes \|\| \[\]\)\.map\(\(ag, i\)/);
-  assert.match(painel, /o\.abrirAgente\?\.\(ag, \{ \.\.\.d, ativos \}\)/);
-  assert.match(painel, /style\.setProperty\('--pa-cor'/);
-  assert.doesNotMatch(painel, /style: '--pa-cor/);
+  assert.match(painel, /const faltam = \(d\.agentes \|\| \[\]\)\.filter/);
+  assert.match(painel, /o\.abrirAgente\?\.\(/);
+  assert.doesNotMatch(painel, /pa-elenco|desenharElenco|style: '--pa-cor/);
   assert.match(tela, /abrirAgente: \(ag, d\) =>/);
   assert.match(tela, /pediu a \{a\} que consultasse o projeto\./);
+  assert.doesNotMatch(tela, /class: 'v36a-titulo' \}, tr\('Painel de atividades'\)/);
+  assert.doesNotMatch(tela, /v36a-painel-intro/);
 });
