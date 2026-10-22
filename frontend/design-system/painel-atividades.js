@@ -9,7 +9,7 @@ const PrumoModeloAtividades = (() => {
   const sv = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs || {})) if (v != null) e.setAttribute(k, v); return e; };
   const TAM = { janela: [340, 196], hub: [216, 58], folha: [208, 104] };
   const GAP = { folhaX: 18, folhaY: 22, hub: 46, secao: 120, linhaHub: 150, linhaFolha: 96 };
-  const MAX_COLUNAS = 4, MAX_FOLHAS = 24, RECENTE_MS = 90000;
+  const MAX_COLUNAS = 4, MAX_FOLHAS = 24, RECENTE_MS = 120000;
   const CORES_FERRAMENTA = { contexto_projeto: '#62d4f0', revisar_cobertura: '#b99cff', executar_validacao: '#6fe0a0', consultar_evidencias: '#f3cf5a', desconhecida: '#a3adbd' };
   const CORES_AGENTE = ['#7abaff', '#80ddda', '#bea1f8', '#ffba90', '#a7de82', '#ffa1bf', '#f2d38c', '#99b8ff', '#62d4f0'];
   const CORES_ROTINA = ['#ff8fb7', '#ffb36b', '#f3cf5a', '#9fe870'];
@@ -17,7 +17,9 @@ const PrumoModeloAtividades = (() => {
   const curto = (iso) => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); };
   const data = (iso) => { if (!iso) return ''; const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); };
   const duracao = (n) => (n == null ? '' : n < 1000 ? Math.round(n) + ' ms' : (n / 1000).toFixed(1) + ' s');
-  const recente = (iso) => !!iso && Date.now() - Date.parse(iso) < RECENTE_MS;
+  /** Dentro da janela de atividade (padrão 2 min); tolera até 5 s de relógio adiantado e ignora datas inválidas. */
+  const dentroDaJanela = (iso, ms = RECENTE_MS) => { const t = Date.parse(iso); const dt = Date.now() - t; return !!iso && !isNaN(t) && dt >= -5000 && dt < ms; };
+  const recente = (iso) => dentroDaJanela(iso);
   const temaClaro = () => { const t = document.documentElement.dataset.tema; return t === 'claro' || (t !== 'escuro' && matchMedia('(prefers-color-scheme: light)').matches); };
   const corCodex = () => (temaClaro() ? '#3b4a63' : '#e8edf6');
   /** Aparelho e navegador como o runner declarou ("Pixel 7 · Chromium 126 · 412x915"); sem registro, nada é mostrado nem inferido. */
@@ -27,22 +29,25 @@ const PrumoModeloAtividades = (() => {
 
   // ---------- Modelo: fontes (janelas), hubs e folhas, com as arestas que os registros comprovam ----------
   function modelar(d) {
-    const agora = Date.now(), recenteAtivo = (at, janela = 120000) => !!at && agora - Date.parse(at) >= 0 && agora - Date.parse(at) < janela;
-    d = { ...d, conversas: d.conversas || [], orquestracoes: d.orquestracoes || [], auditoria: d.auditoria || [] };
+    const recenteAtivo = dentroDaJanela, EXECUTANDO_MS = 300000;
+    d = { ...d, atividades: d.atividades || [], execucoes: d.execucoes || [], agentes: d.agentes || [], conversas: d.conversas || [], auditoria: d.auditoria || [],
+      orquestracoes: (d.orquestracoes || []).map(o => ({ ...o, etapas: o.etapas || [], agentes: o.agentes || [] })) };
+    // Investigação longa continua ativa enquanto houver etapa nova: vale o fim da última etapa, não só o início.
+    const ultimaDaInvestigacao = (o) => o.etapas.reduce((m, e) => (e.fim && e.fim > m ? e.fim : m), o.em);
     // O canvas só mostra o que está acontecendo agora (ou acabou de acontecer, até 2 minutos): sem atividade, sem terminal.
     // O histórico completo fica nas Orquestrações (lateral), em Logs e em Testes › Runs.
     d = { ...d,
       atividades: d.atividades.filter(x => recenteAtivo(x.at)),
       conversas: d.conversas.filter(c => recenteAtivo(c.em)),
-      execucoes: d.execucoes.filter(x => x.estado === 'EXECUTANDO' ? recenteAtivo(x.heartbeat || x.inicio || x.iniciadoEm, 300000) : recenteAtivo(x.termino || x.terminadoEm)),
-      orquestracoes: d.orquestracoes.filter(o => recenteAtivo(o.em)),
+      execucoes: d.execucoes.filter(x => x.estado === 'EXECUTANDO' ? recenteAtivo(x.heartbeat || x.inicio || x.iniciadoEm, EXECUTANDO_MS) : recenteAtivo(x.termino || x.terminadoEm)),
+      orquestracoes: d.orquestracoes.filter(o => recenteAtivo(ultimaDaInvestigacao(o)) || (o.estado === 'EXECUTANDO' && recenteAtivo(o.em, EXECUTANDO_MS))),
       auditoria: d.auditoria.filter(a => recenteAtivo(a.at))
     };
     d.ativos = {
       operacoes: d.atividades.filter(x => x.state === 'STARTED' && recenteAtivo(x.at)).length,
-      testes: d.execucoes.filter(x => x.estado === 'EXECUTANDO' && recenteAtivo(x.heartbeat || x.inicio || x.iniciadoEm)).length,
-      investigacoes: d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao && recenteAtivo(o.em)).length,
-      idsDosAgentes: [...new Set([...d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao && recenteAtivo(o.em)).map(o => o.emExecucao), ...d.conversas.filter(c => recente(c.em)).map(c => c.agente)])]
+      testes: d.execucoes.filter(x => x.estado === 'EXECUTANDO').length,
+      investigacoes: d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao).length,
+      idsDosAgentes: [...new Set([...d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao).map(o => o.emExecucao), ...d.conversas.map(c => c.agente)])].filter(id => id && d.agentes.some(a => a.id === id))
     };
     d.ativos.agentes = d.ativos.idsDosAgentes.length;
     const fontes = [], hubs = [], folhas = [], arestas = [], secoes = [];
@@ -77,17 +82,17 @@ const PrumoModeloAtividades = (() => {
     if (d.conversas.length) {
       const sec = { id: 'chat', titulo: tr('Orchestrator → agentes'), fontes: [], hubs: [] }; secoes.push(sec);
       const ordenadas = [...d.conversas].sort((a, b) => b.em.localeCompare(a.em));
-      const orq = { id: 'orq', tipo: 'orquestrador', titulo: 'Prumo Orchestrator', sub: tr('{n} conversas roteadas', { n: ordenadas.length }), vivo: ordenadas.some((c) => recente(c.em)), cor: '#7cb6ff',
+      const orq = { id: 'orq', tipo: 'orquestrador', titulo: 'Prumo Orchestrator', sub: tr(ordenadas.length === 1 ? '{n} conversa roteada' : '{n} conversas roteadas', { n: ordenadas.length }), vivo: ordenadas.some((c) => recente(c.em)), cor: '#7cb6ff',
         linhas: ordenadas.slice(0, 7).map((c) => ({ hora: curto(c.em), texto: '› ' + (c.pergunta || 'Atendimento sem texto persistido').slice(0, 42), estado: '→ ' + (c.agenteNome || c.agente), extra: '' })) };
       fontes.push(orq); sec.fontes.push(orq);
       const externos = new Map();
       d.agentes.forEach((ag, i) => {
         const lista = ordenadas.filter((c) => c.agente === ag.id); if (!lista.length) return;
-        const hub = { id: 'ag:' + ag.id, agenteId: ag.id, tipo: 'agente', titulo: ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome, sub: tr('{n} conversas', { n: lista.length }), cor: CORES_AGENTE[i % CORES_AGENTE.length], folhas: [], ocultas: Math.max(0, lista.length - MAX_FOLHAS) };
+        const hub = { id: 'ag:' + ag.id, agenteId: ag.id, tipo: 'agente', titulo: ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome, sub: tr(lista.length === 1 ? '{n} conversa' : '{n} conversas', { n: lista.length }), cor: CORES_AGENTE[i % CORES_AGENTE.length], folhas: [], ocultas: Math.max(0, lista.length - MAX_FOLHAS) };
         hubs.push(hub); sec.hubs.push(hub); arestas.push({ de: 'orq', para: hub.id, tipo: 'fonte', vivo: lista.some((c) => recente(c.em)), peso: lista.length });
         for (const c of lista.slice(0, MAX_FOLHAS)) {
           const f = { id: 'cv:' + c.id, tipo: 'conversa', dado: c, cor: hub.cor, etiqueta: c.modo === 'LOCAL' ? tr('resposta local') : c.modo === 'MESA' ? tr('mesa de IAs') : c.modo === 'CLAUDE' ? 'Claude Code' : 'Codex', estado: '', hora: data(c.em) + ' ' + curto(c.em), vivo: recente(c.em),
-            linhas: ['› ' + (c.pergunta || 'Atendimento sem texto persistido'), '‹ ' + (c.linhas?.[0] || c.avaliacao || 'Sem avaliação'), c.fontes.length ? tr('fontes: {f}', { f: c.fontes.map((x) => typeof x === 'string' ? x : x.rotulo).join(', ') }) : (c.estilo || c.modo)], rotulo: ag.nome + ': ' + (c.pergunta || 'Atendimento') };
+            linhas: ['› ' + (c.pergunta || tr('Atendimento sem texto persistido')), ...((c.linhas?.[0] || c.avaliacao) ? ['‹ ' + (c.linhas?.[0] || c.avaliacao)] : []), c.fontes.length ? tr('fontes: {f}', { f: c.fontes.map((x) => typeof x === 'string' ? x : x.rotulo).join(', ') }) : (c.estilo || c.modo)], rotulo: ag.nome + ': ' + (c.pergunta || 'Atendimento') };
           folhas.push(f); hub.folhas.push(f); arestas.push({ de: hub.id, para: f.id, tipo: 'folha', vivo: f.vivo });
           if (c.modo !== 'LOCAL' && c.modo !== 'MESA') { const p = c.modo === 'CLAUDE' ? 'claude' : 'codex'; if (!externos.has(p)) externos.set(p, []); externos.get(p).push(c); arestas.push({ de: f.id, para: 'ext:' + p, tipo: 'delegacao', vivo: f.vivo, cor: p === 'claude' ? '#d97757' : corCodex() }); }
         }
@@ -105,7 +110,7 @@ const PrumoModeloAtividades = (() => {
       const sec = { id: 'diagnosticos', titulo: tr('Investigações dos agentes'), fontes: [], hubs: [] }; secoes.push(sec);
       const porAgente = new Map();
       for (const o of recentes) {
-        const emCurso = o.estado === 'EXECUTANDO' && Date.now() - Date.parse(o.em) < 120000;
+        const emCurso = o.estado === 'EXECUTANDO' && dentroDaJanela(ultimaDaInvestigacao(o), EXECUTANDO_MS);
         const nomeEstado = emCurso ? 'Em análise' : o.estado === 'EXECUTANDO' ? 'Interrompida' : o.estado;
         const f = { id: 'diagnostico:' + o.id, tipo: 'investigacao', dado: { registro: o, etapa: null, agente: 'Prumo Orchestrator' }, titulo: tr('Diagnóstico do projeto'),
           sub: tr(nomeEstado) + ' · ' + curto(o.em), vivo: emCurso, cor: '#8baeff',
@@ -160,7 +165,8 @@ const PrumoModeloAtividades = (() => {
       });
     }
     // 4) Sistema e conexões: cada ação auditada, com a descrição do que ela faz; chamadas a Jira, Qase e GitHub ficam num terminal à parte.
-    if ((d.auditoria || []).length) {
+    // O terminal do sistema nunca aparece sozinho: só acompanha outra atividade (conversa, investigação, operação ou teste).
+    if ((d.auditoria || []).length && fontes.length) {
       const eventos = [...d.auditoria].sort((a, b) => b.at.localeCompare(a.at));
       const ehConexao = (e) => /^(servicos|projetos|github|jira|qase|integracoes|conexoes):/.test(e.canal);
       const monta = (id, titulo, lista, cor) => ({ id, tipo: 'sistema', titulo, sub: tr('{n} ações registradas', { n: lista.length }), vivo: lista.some(e => recente(e.at)), cor,
@@ -230,8 +236,8 @@ const PrumoPainelAtividades = (() => {
   function montar(host, o) {
     let vista = { x: 0, y: 0, k: 1 }, dados = null, layout = null, modelo = null, ultimaAssinatura = '', timer = null, ajustado = false, carregando = false;
     const ponteiros = new Map(); let arrasto = null, pinca = null, arrastou = false;
-    const status = h('span', { class: 'pa-status', role: 'status' }, h('i'), h('span', {}, tr('Consultando atividades locais…')));
-    const contagem = h('span', { class: 'pa-contagem', 'data-i18n-ignore': '' });
+    const status = h('span', { class: 'pa-status' }, h('i'), h('span', {}, tr('Consultando atividades locais…')));
+    const contagem = h('span', { class: 'pa-contagem', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true', 'data-i18n-ignore': '' });
     const vivoChk = h('input', { type: 'checkbox', id: 'pa-ao-vivo', checked: true, onchange: () => agendar() });
     const zoomTxt = h('span', { class: 'pa-zoom-txt', 'aria-live': 'off' }, '100%');
     const btn = (rot, titulo, fn, attrs = {}) => h('button', { type: 'button', class: 'pa-btn', title: tr(titulo), 'aria-label': tr(titulo), onclick: fn, ...attrs }, rot);
@@ -275,14 +281,14 @@ const PrumoPainelAtividades = (() => {
         vista.x = Math.min(W - m, Math.max(m - lw, vista.x)); vista.y = Math.min(H - m, Math.max(m - lh, vista.y)); }
       mundo.style.transform = `translate(${vista.x}px, ${vista.y}px) scale(${vista.k})`;
       const g = 26 * vista.k; vp.style.backgroundSize = `${g}px ${g}px`; vp.style.backgroundPosition = `${vista.x}px ${vista.y}px`;
-      raiz.classList.toggle('pa-longe', vista.k < .5); zoomTxt.textContent = Math.round(vista.k * 100) + '%'; desenharMini();
+      raiz.classList.toggle('pa-longe', vista.k < .4); zoomTxt.textContent = Math.round(vista.k * 100) + '%'; desenharMini();
     }
     const limitarK = (k) => Math.max(.12, Math.min(2.5, k));
     function zoomEm(px, py, fator) { const k = limitarK(vista.k * fator); const f = k / vista.k; vista = { x: px - (px - vista.x) * f, y: py - (py - vista.y) * f, k }; aplicar(); }
     function zoomCentro(f) { zoomEm(vp.clientWidth / 2, vp.clientHeight / 2, f); }
     function ajustar(animar) {
       if (!layout) return; const W = vp.clientWidth || 800, H = vp.clientHeight || 500, m = 40;
-      const k = limitarK(Math.min((W - m * 2) / layout.largura, (H - m * 2) / layout.altura, 1.1));
+      const k = limitarK(Math.max(.6, Math.min((W - m * 2) / layout.largura, (H - m * 2) / layout.altura, 1.1)));
       const alvo = { k, x: (W - layout.largura * k) / 2, y: Math.max(m, (H - layout.altura * k) / 2) };
       if (animar && !o.reduzido()) animarPara(alvo); else { vista = alvo; aplicar(); }
     }
@@ -392,7 +398,7 @@ const PrumoPainelAtividades = (() => {
       el.style.setProperty('--cor', x.cor); pos(el, p); return el;
     }
     function folha(f, p, novo) {
-      const attrs = { type: 'button', class: 'pa-folha pa-' + f.tipo + (f.vivo ? ' vivo' : '') + (novo ? ' novo' : ''), 'data-no': f.id, 'aria-label': f.rotulo, onclick: () => abrir(f) };
+      const attrs = { type: 'button', class: 'pa-folha pa-' + f.tipo + (f.vivo ? ' vivo' : '') + (novo ? ' novo' : ''), 'data-no': f.id, 'aria-label': f.rotulo + (f.vivo ? ' · ' + tr('ativo') : ''), onclick: () => abrir(f) };
       if (f.tipo === 'operacao') attrs['data-activity'] = f.dado.operationId; else if (f.tipo === 'conversa') attrs['data-conversa'] = f.dado.id; else if (f.tipo === 'diagnostico') attrs['data-diagnostico'] = f.dado.registro.id; else attrs['data-execucao'] = f.dado.id;
       const el = h('button', attrs,
         h('span', { class: 'pa-folha-topo' }, h('span', { class: 'pa-tag', 'data-i18n-ignore': '' }, f.etiqueta), f.estado ? h('span', { class: 'pa-folha-estado ' + classe(f.estado), 'data-i18n-ignore': '' }, f.estado) : null, h('span', { class: 'pa-folha-hora' }, f.hora)),
@@ -438,10 +444,11 @@ const PrumoPainelAtividades = (() => {
         h('span', {}, tr('Os terminais aparecem quando um agente conversa, um teste roda ou uma conexão é consultada, e saem sozinhos depois. O histórico fica em Logs.')),
         h('button', { type: 'button', class: 'pa-btn pa-btn-texto', onclick: () => o.abrirTela('logs') }, tr('Abrir Logs'))));
       // Passar o mouse num nó destaca as linhas dele.
-      camada.querySelectorAll('[data-no]').forEach((el) => { el.addEventListener('pointerenter', () => destacar(el.dataset.no, true)); el.addEventListener('pointerleave', () => destacar(el.dataset.no, false)); });
+      camada.querySelectorAll('[data-no]').forEach((el) => { el.addEventListener('pointerenter', () => destacar(el.dataset.no, true)); el.addEventListener('pointerleave', () => destacar(el.dataset.no, false)); el.addEventListener('focusin', () => destacar(el.dataset.no, true)); el.addEventListener('focusout', () => destacar(el.dataset.no, false)); });
       if (foco) camada.querySelector(`[data-no="${CSS.escape(foco)}"]`)?.focus({ preventScroll: true });
       const ativos = modelo;
       const a = ativos.ativos || { agentes: 0, operacoes: 0, testes: 0, investigacoes: 0 };
+      legenda.hidden = ajuda.hidden = !ativos.fontes.length; // sem atividade, sem legenda nem instruções de zoom
       const conv = ativos.folhas.filter(f => f.tipo === 'conversa').length;
       contagem.textContent = [tr('{n} agentes trabalhando', { n: a.agentes }), tr('{n} operações ativas', { n: a.operacoes }), tr('{n} testes ativos', { n: a.testes }), tr('{n} investigações ativas', { n: a.investigacoes }), tr('{n} conversas', { n: conv })].join(' · ');
       if (!ajustado && vp.clientWidth) { ajustar(false); ajustado = true; } else aplicar();
@@ -459,10 +466,10 @@ const PrumoPainelAtividades = (() => {
         if (!d) { status.lastChild.textContent = tr('Histórico indisponível para este projeto.'); status.className = 'pa-status erro'; return; }
         o.aoAtualizar?.(d);
         // Enquanto houver pulso, redesenha a cada 15 s para o pulso expirar sozinho após 90 s.
-        const nova = assinatura(d) + (modelo && [...modelo.folhas, ...modelo.fontes].some((x) => x.vivo) ? '#' + Math.floor(Date.now() / 15000) : '');
+        const nova = assinatura(d) + (modelo && modelo.fontes.length ? '#' + Math.floor(Date.now() / 15000) : '');
         status.className = 'pa-status' + (vivoChk.checked ? ' vivo' : ''); status.lastChild.textContent = (vivoChk.checked ? tr('AO VIVO · REGISTROS LOCAIS') : tr('REGISTROS LOCAIS')) + ' · ' + curto(new Date().toISOString());
         // Recalcula periodicamente: processos sem atualização expiram e não permanecem falsamente ativos.
-        if (nova !== ultimaAssinatura || manual || modelo?.fontes.some(x => x.vivo)) { const antes = dados ? new Set(modelo.folhas.map((f) => f.id)) : null; dados = d; ultimaAssinatura = nova; render(antes); }
+        if (nova !== ultimaAssinatura || manual || modelo?.fontes.length) { const antes = dados ? new Set(modelo.folhas.map((f) => f.id)) : null; dados = d; ultimaAssinatura = nova; render(antes); }
         if (d.avisos?.length) status.title = d.avisos.join(' ');
       } finally { carregando = false; }
     }
@@ -472,7 +479,7 @@ const PrumoPainelAtividades = (() => {
       parar(); status.classList.toggle('vivo', vivoChk.checked);
       if (vivoChk.checked) timer = setInterval(() => { if (!raiz.isConnected || !o.ativo()) { destruir(); return; } if (!document.hidden) carregar(false); }, 3000);
     }
-    carregar(false).then(agendar);
+    carregar(false).catch(() => {}).finally(() => { if (raiz.isConnected) agendar(); });
     return { parar: destruir, abrirLateral, atualizar: () => { medirAltura(); return carregar(true); }, recalcular: medirAltura, focarInvestigacao };
   }
   return { montar };

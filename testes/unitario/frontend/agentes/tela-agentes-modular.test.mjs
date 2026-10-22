@@ -215,3 +215,21 @@ test('aparelho e navegador aparecem só quando o runner os declarou', () => {
   assert.deepEqual([...modelo.ambientesDoTeste({ resultado: { ambientes: [{ projeto: 'mobile', dispositivo: 'Pixel 7', navegador: 'chromium', versaoDoNavegador: '126', viewport: '412x915' }, { projeto: 'desktop', navegador: 'webkit' }] } })], ['Pixel 7 · chromium 126 · 412x915', 'desktop · webkit']);
   assert.deepEqual([...modelo.ambientesDoTeste({ resultado: { status: 'PASS' } })], [], 'sem registro, nada é inferido');
 });
+
+test('janela de atividade do painel: 2 min, relógio adiantado tolerado, datas inválidas ignoradas, agentes desconhecidos não contam e dados ausentes não quebram', () => {
+  const js = fs.readFileSync('frontend/design-system/painel-atividades.js', 'utf8');
+  const modelo = vm.runInNewContext(js + '\nPrumoModeloAtividades;', { tr: (x, v) => x.replace(/\{(\w+)\}/g, (_, k) => v?.[k] ?? '') });
+  const ha = (s) => new Date(Date.now() - s * 1000).toISOString();
+  const conv = (id, em, agente = 'regressao') => ({ id, em, agente, agenteNome: 'Regressão', modo: 'LOCAL', fontes: [] });
+  const base = { agentes: [{ id: 'regressao', nome: 'Regressão' }] };
+  const ids = (conversas) => modelo.modelar({ ...base, conversas }).folhas.filter(f => f.tipo === 'conversa').map(f => f.id);
+  assert.deepEqual([...ids([conv('a', ha(119)), conv('b', ha(121))])], ['cv:a'], '119 s entra, 121 s sai');
+  assert.deepEqual([...ids([conv('futura', ha(-3)), conv('muito-futura', ha(-60)), conv('invalida', 'ontem')])], ['cv:futura'], 'até 5 s de relógio adiantado; o resto é ignorado');
+  assert.equal(modelo.modelar({ ...base, conversas: [conv('x', ha(5), 'agente-fantasma')] }).ativos.agentes, 0, 'agente que não existe no elenco não conta');
+  assert.equal(modelo.modelar({ conversas: [conv('x', ha(5))] }).fontes.length >= 0, true, 'sem atividades, execuções nem agentes: não quebra');
+  const longa = { id: 'o', em: ha(400), estado: 'EXECUTANDO', agentes: ['regressao'], emExecucao: 'regressao', etapas: [{ agente: 'regressao', estado: 'CONCLUIDA', inicio: ha(300), fim: ha(30), fontes: [], fatos: [] }] };
+  assert.equal(modelo.modelar({ ...base, orquestracoes: [longa] }).ativos.investigacoes, 1, 'investigação longa continua ativa enquanto há etapa recente');
+  const exec = { id: 'e', estado: 'EXECUTANDO', heartbeat: ha(200), rotinaId: 'r', rotina: 'R', capability: 'x', tipo: 't', ambiente: 'local', executor: 'worker', criadoEm: ha(300) };
+  const g = modelo.modelar({ ...base, execucoes: [exec] });
+  assert.equal(g.ativos.testes, 1, 'execução com batimento de 200 s ainda conta'); assert.ok(g.fontes.some(x => x.tipo === 'worker'));
+});
