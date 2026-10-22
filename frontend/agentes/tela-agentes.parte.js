@@ -465,6 +465,12 @@
           const agentes = roster?.agentes || [];
           // Conversas recentes de cada agente: só metadados e o texto que a própria pessoa deixou gravado neste computador.
           const conversas = (await Promise.all(agentes.map(a => chamarSemAviso(() => api.conversasListar(e.id, a.id)).then(l => (l || []).map(c => ({ ...c, fontes: (c.fontes || []).map(f => typeof f === 'string' ? f : f.rotulo), agenteNome: a.nome })))))).flat();
+          // Conversas de agora, com o texto que acabou de passar pelo chat (só na memória desta janela): completam o registro gravado.
+          for (const v of window.PrumoConversasAoVivo || []) {
+            const gravada = conversas.find(c => c.agente === v.agente && Math.abs(Date.parse(c.em) - Date.parse(v.em)) < 20000 && !c.pergunta);
+            if (gravada) Object.assign(gravada, { pergunta: v.pergunta, linhas: v.linhas, semTexto: false, orquestrou: v.orquestrou });
+            else if (!conversas.some(c => c.id === v.id)) conversas.push({ ...v, semTexto: false });
+          }
           const avisos = [!hist ? tr('Histórico do núcleo indisponível.') : null, hist && !hist.complete ? tr('Histórico parcial: registros inválidos excluídos.') : null, !execs ? tr('Execuções indisponíveis.') : null].filter(Boolean);
           return { atividades: hist?.activities || [], conversas, auditoria: (sistema?.auditoria?.eventos || []).filter(x => !e.id || !x.espacoId || x.espacoId === e.id), agentes, execucoes: execs?.execucoes || [], orquestracoes: diagnosticos?.orquestracoes || [], totalExecucoes: execs?.total, avisos };
         },
@@ -484,6 +490,25 @@
             ...((etapa?.fatos || []).slice(0, 12).map(f => h('p', {}, f))),
             button(tr('Abrir Logs'), () => { document.querySelector('.v36-dialog[open]')?.close(); void mostrar('logs'); }))]),
         // Clicar num agente do elenco: o fluxo dele em ordem de tempo, o que conversou e com quem se comunicou. Só registros reais deste computador.
+        // Clicar num terminal: o que aconteceu nele, em ordem, com cor por quem fala e por resultado. Só registros reais deste computador.
+        abrirTerminal: (f) => {
+          const cor = (el, c) => { if (c) el.style.setProperty('--cor', c); return el; };
+          const tom = st => (['PASS', 'OK', 'CONCLUIDO', 'CONCLUIDA', 'APROVADO'].includes(st) ? 'ok' : ['FAIL', 'ERROR', 'FALHOU', 'PERDIDO'].includes(st) ? 'falha' : st ? 'aviso' : '');
+          const itens = f.detalhes?.length ? f.detalhes : (f.linhas || []).map(l => ({ hora: l.hora, tipo: 'acao', quem: '', cor: f.cor, texto: l.texto, estado: l.estado, notas: [l.extra].filter(Boolean) }));
+          const linha = it => {
+            const notas = (it.notas || []).filter(Boolean).map(n => h('span', { class: 'pa-dlg-nota', 'data-i18n-ignore': '' }, n));
+            const estado = it.estado ? h('span', { class: 'pa-dlg-estado', 'data-tom': tom(it.estado), 'data-i18n-ignore': '' }, it.estado) : null;
+            if (it.tipo === 'fala') return cor(h('li', { class: 'pa-dlg-msg fala' }, h('div', { class: 'pa-dlg-balao' }, h('div', { class: 'pa-dlg-quem' }, it.quem, h('time', {}, it.hora)), h('p', { 'data-i18n-ignore': '' }, it.texto))), it.cor);
+            if (it.tipo === 'resposta') return cor(h('li', { class: 'pa-dlg-msg resposta' }, h('span', { class: 'pa-dlg-avatar', 'aria-hidden': 'true', 'data-i18n-ignore': '' }, String(it.quem || '?').slice(0, 1).toUpperCase()),
+              h('div', { class: 'pa-dlg-balao' }, h('div', { class: 'pa-dlg-quem' }, it.quem, estado, h('time', {}, it.hora)), h('p', { 'data-i18n-ignore': '' }, it.texto), notas.length ? h('div', { class: 'pa-dlg-notas' }, ...notas) : null)), it.cor);
+            return cor(h('li', { class: 'pa-dlg-acao' }, h('time', {}, it.hora), h('div', {}, h('div', { class: 'pa-dlg-quem' }, it.quem, estado), h('p', { 'data-i18n-ignore': '' }, it.texto), notas.length ? h('div', { class: 'pa-dlg-notas' }, ...notas) : null)), it.cor);
+          };
+          const topo = cor(h('div', { class: 'pa-dlg-topo' }, h('span', { class: 'pa-dlg-avatar grande', 'aria-hidden': 'true', 'data-i18n-ignore': '' }, String(f.titulo || '?').slice(0, 1).toUpperCase()),
+            h('div', {}, h('strong', { 'data-i18n-ignore': '' }, f.titulo), h('span', {}, f.sub || '')), f.vivo ? h('span', { class: 'pa-dlg-estado', 'data-tom': 'ok' }, tr('ATIVO')) : null), f.cor);
+          caixa(tr('Terminal: ') + f.titulo, [topo,
+            itens.length ? h('ol', { class: 'pa-dlg-linha' }, ...itens.map(linha)) : note(tr('Ainda não há registro neste terminal.')),
+            note(tr('Registros reais deste computador; o que sai da tela some do painel depois de 2 minutos, mas continua nos Logs.'))]);
+        },
         abrirAgente: (ag, d) => {
           const nomeDe = id => (d.agentes.find(x => x.id === id)?.nome) || id;
           const quando = iso => iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';

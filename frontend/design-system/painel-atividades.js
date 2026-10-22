@@ -181,6 +181,23 @@ const PrumoModeloAtividades = (() => {
     if (hubs.some(x => x.id === 'tool:perguntar_ao_orquestrador') && fontes.some(x => x.id === 'orq')) arestas.push({ de: 'tool:perguntar_ao_orquestrador', para: 'orq', tipo: 'fonte', vivo: hubs.find(x => x.id === 'tool:perguntar_ao_orquestrador').folhas.some(x => x.vivo), peso: 1 });
     const trabalhando = new Set(d.ativos.idsDosAgentes);
     for (const h of hubs) if (h.agenteId) { h.vivo = trabalhando.has(h.agenteId); if (h.vivo) h.sub = tr('trabalhando agora') + ' · ' + h.sub; }
+    // Detalhes de cada terminal, em ordem de tempo, para a janela aberta ao clicar nele. Só registros reais.
+    const cores = { pessoa: '#7cb6ff', orq: '#8baeff', claude: '#d97757', codex: '#8b95a8', sistema: '#9fb0ff', conexao: '#6fe0a0', worker: '#ffb36b' };
+    const nomeAg = (id) => (d.agentes || []).find(a => a.id === id)?.nome || id;
+    const cv = (c) => [{ em: c.em, hora: curto(c.em), tipo: 'fala', quem: tr('Pessoa'), cor: cores.pessoa, texto: c.pergunta || tr('Atendimento sem texto persistido') },
+      { em: c.em, hora: curto(c.em), tipo: 'resposta', quem: c.modo === 'CLAUDE' ? 'Claude Code' : c.modo === 'CODEX' ? 'Codex' : (c.agenteNome || nomeAg(c.agente)), cor: c.modo === 'CLAUDE' ? cores.claude : c.modo === 'CODEX' ? cores.codex : cores.orq,
+        texto: (c.linhas || []).join('\n') || c.avaliacao || tr('Sem resposta gravada'), notas: [c.modo === 'LOCAL' ? tr('resposta local') : c.modo === 'MESA' ? tr('mesa de IAs') : '', c.orquestrou ? tr('orquestrou {n} especialistas', { n: c.orquestrou }) : '', c.fontes?.length ? tr('fontes: {f}', { f: c.fontes.join(', ') }) : ''].filter(Boolean) }];
+    const ehConexaoEv = (e) => /^(servicos|projetos|github|jira|qase|integracoes|conexoes):/.test(e.canal);
+    for (const f of fontes) {
+      const asc = (l) => l.sort((a, b) => String(a.em).localeCompare(String(b.em)));
+      if (f.id === 'orq') f.detalhes = asc(d.conversas.flatMap(cv));
+      else if (f.id.startsWith('ext:')) f.detalhes = asc(d.conversas.filter(c => c.modo === (f.id === 'ext:claude' ? 'CLAUDE' : 'CODEX')).flatMap(cv));
+      else if (f.id.startsWith('cli:')) f.detalhes = asc(d.atividades.filter(a => 'cli:' + a.origin + ' · ' + a.client === f.id).map(a => ({ em: a.at, hora: curto(a.at), tipo: 'acao', quem: nomeCliente(a.client), cor: f.cor, texto: a.tool, estado: a.state, notas: [duracao(a.durationMs), a.summary?.code, a.summary?.findings != null ? tr('{a} achados · {g} lacunas', { a: a.summary.findings, g: a.summary.gaps ?? 0 }) : ''].filter(Boolean) })));
+      else if (f.id === 'worker') f.detalhes = asc(d.execucoes.map(x => ({ em: x.termino || x.inicio || x.criadoEm, hora: curto(x.termino || x.inicio || x.criadoEm), tipo: 'acao', quem: x.rotina, cor: cores.worker, texto: (x.capability || x.tipo) + ' · ' + x.ambiente, estado: x.resultado?.status || x.estado,
+        notas: [duracao(x.duracaoMs), ...ambientesDoTeste(x).map(a => tr('aparelho/navegador: {a}', { a })), x.resultado?.motivo || ''].filter(Boolean) })));
+      else if (f.id.startsWith('sistema:')) f.detalhes = asc(d.auditoria.filter(e => (f.id === 'sistema:conexoes') === ehConexaoEv(e)).map(e => ({ em: e.at, hora: curto(e.at), tipo: 'sistema', quem: f.id === 'sistema:conexoes' ? tr('Conexões') : tr('Sistema'), cor: f.id === 'sistema:conexoes' ? cores.conexao : cores.sistema, texto: e.descricao || e.canal, estado: e.estado, notas: [e.canal, duracao(e.duracaoMs)].filter(Boolean) })));
+      else if (f.id.startsWith('diagnostico:')) { const o = d.orquestracoes.find(x => 'diagnostico:' + x.id === f.id); f.detalhes = o ? asc(o.etapas.flatMap(e => [{ em: e.inicio, hora: curto(e.inicio), tipo: 'fala', quem: 'Prumo Orchestrator', cor: cores.orq, texto: tr('pediu a {a} que consultasse o projeto.', { a: nomeAg(e.agente) }) }, { em: e.fim, hora: curto(e.fim), tipo: 'resposta', quem: nomeAg(e.agente), cor: cores.orq, texto: (e.fatos || []).join('\n') || (e.erro ? tr('Falha na consulta') : tr('Consultado')), estado: e.estado, notas: [e.fontes?.length ? tr('fontes: {f}', { f: e.fontes.join(', ') }) : ''].filter(Boolean) }])) : []; }
+    }
     return { fontes, hubs, folhas, arestas, secoes, ativos: d.ativos };
   }
 
@@ -388,7 +405,7 @@ const PrumoPainelAtividades = (() => {
     function janela(f, p) {
       const corpo = h('div', { class: 'pa-janela-corpo', 'data-i18n-ignore': '' }, ...f.linhas.map((l) => h('div', { class: 'pa-tty' }, h('span', { class: 'pa-tty-hora' }, l.hora), ' ', h('span', { class: 'pa-tty-cmd' }, l.texto), ' ', h('span', { class: 'pa-tty-estado ' + classe(String(l.estado).replace(/^→ /, '')) }, l.estado), l.extra ? h('span', { class: 'pa-tty-extra' }, ' ' + l.extra) : null)),
         h('div', { class: 'pa-tty pa-cursor' }, h('span', { class: 'pa-tty-hora' }, '$'), ' ', h('span', { class: 'pa-caret' })));
-      const abre = f.agenteId ? () => o.abrirAgente?.(((dados && dados.agentes) || []).find(g => g.id === f.agenteId) || { id: f.agenteId, nome: f.titulo }, { ...dados, ativos: modelo && modelo.ativos }) : f.dado ? () => o.abrirDiagnostico?.(f.dado) : null;
+      const abre = f.detalhes?.length || f.linhas?.length ? () => o.abrirTerminal?.(f) : f.agenteId ? () => o.abrirAgente?.(((dados && dados.agentes) || []).find(g => g.id === f.agenteId) || { id: f.agenteId, nome: f.titulo }, { ...dados, ativos: modelo && modelo.ativos }) : f.dado ? () => o.abrirDiagnostico?.(f.dado) : null;
       const el = h(abre ? 'button' : 'div', { ...(abre ? { type: 'button', onclick: abre } : {}), class: 'pa-janela pa-' + f.tipo + (f.vivo ? ' vivo' : ''), 'data-no': f.id, role: abre ? undefined : 'group', 'aria-label': f.titulo + ' · ' + f.sub },
         h('div', { class: 'pa-janela-titulo' }, h('span', { class: 'pa-luzes', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), h('strong', { 'data-i18n-ignore': '' }, f.titulo), f.vivo ? h('span', { class: 'pa-ao-vivo' }, tr('ATIVO')) : null),
         h('div', { class: 'pa-janela-sub' }, f.sub), corpo);

@@ -19,7 +19,7 @@
   const INTERLOCUTORES = { local: { nome: 'Prumo Orchestrator', marca: 'P' }, claude: { nome: 'Claude Code', marca: 'C' }, codex: { nome: 'Codex', marca: 'X' }, copilot: { nome: 'GitHub Copilot', marca: 'G' }, gemini: { nome: 'Gemini CLI', marca: '✦' }, mesa: { nome: 'Mesa de IAs', marca: '⇄' } };
   const MODO_DO_INTERLOCUTOR = { LOCAL: 'local', CLAUDE: 'claude', CODEX: 'codex', COPILOT: 'copilot', GEMINI: 'gemini', MESA: 'mesa' };
   const conversa = (() => {
-    let el = null, msgs, entrada, enviar, chips, seletorAgente, interlocutores, linhaConexao, interlocutor = 'local', rodapeTexto, fila = Promise.resolve(), primeira = true, projeto, versao = 0, roster = null, historico = [], pendente = null;
+    let el = null, msgs, entrada, enviar, chips, emUso, seletorAgente, interlocutores, linhaConexao, interlocutor = 'local', rodapeTexto, fila = Promise.resolve(), primeira = true, projeto, versao = 0, roster = null, historico = [], pendente = null;
     const nomeIa = () => estado.prefs?.ia?.nome || 'Prumo';
     const rolar = () => { msgs.scrollTop = msgs.scrollHeight; };
     function bolha(quem, rotulo, ia = 'local') {
@@ -38,7 +38,6 @@
         for (const [i, l] of linhas.entries()) { await digitar(l, v, i === 0 ? rotulo : null, ia); falarVoz(l); }
         if (v !== versao) return;
         if (fontes?.length) { msgs.append(h('div', { class: 'v36c-fontes' }, fontes.map((f) => h('button', { type: 'button', class: 'v36c-fonte', onclick: () => abrirTela(f.aba) }, f.rotulo, h('span', { 'aria-hidden': 'true' }, '↗'))))); rolar(); }
-        if (proximos) sugerir(proximos);
       }).catch(() => {});
       return fila;
     }
@@ -99,13 +98,38 @@
     const idAtual = () => estado.espaco?.id ?? null;
     async function saudar() {
       const v = versao; const abertura = await chamar(() => api.assistenteAbertura(idAtual())); if (v !== versao || !abertura) return;
-      pendente = abertura.pendente; void falar(abertura.linhas, null, abertura.proximos);
+      pendente = abertura.pendente; void falar(abertura.linhas, null, null);
     }
-    function reiniciar() { versao++; primeira = true; fila = Promise.resolve(); historico = []; pendente = null; delete el.dataset.conversou; msgs.replaceChildren(); projeto = idAtual(); void sugerir(INICIAIS); void saudar(); }
+    function reiniciar() { versao++; primeira = true; fila = Promise.resolve(); historico = []; pendente = null; delete el.dataset.conversou; msgs.replaceChildren(); projeto = idAtual(); emUso.hidden = true; emUso.replaceChildren(); void saudar(); }
     function sincronizar() { if (!el) return; void carregarRoster(); entrada.setAttribute('aria-label', tr('Mensagem para o Prumo')); mostrarConexao(); if (projeto !== idAtual()) void reiniciar(); }
     function ajustarAltura() { entrada.style.height = 'auto'; entrada.style.height = Math.min(125, entrada.scrollHeight) + 'px'; }
+    /** "@qa-geral ...", "@claude ...", "@mesa ..." escolhem quem responde, sem botão fixo; vale até outra menção ("@orquestrador" volta ao automático). */
+    function aplicarMencao(q) {
+      const m = /^@([\w-]+)\s*/.exec(q); if (!m) return q;
+      const chave = m[1].toLowerCase(); const semAcento = (x) => String(x).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-');
+      const externo = (roster?.provedores || []).find((p) => p.id === chave && p.disponivel && p.autorizado);
+      const agente = (roster?.agentes || []).find((a) => a.id === chave || semAcento(a.nome) === chave);
+      if (externo || (chave === 'mesa' && interlocutor !== 'mesa' && (roster?.provedores || []).filter((p) => p.disponivel && p.autorizado).length >= 2)) { if (interlocutor !== chave) escolherInterlocutor(chave); }
+      else if (chave === 'orquestrador' || chave === 'prumo' || chave === 'auto') { if (interlocutor !== 'local') escolherInterlocutor('local'); seletorAgente.value = ''; }
+      else if (agente) seletorAgente.value = agente.id;
+      else return q;
+      return q.slice(m[0].length);
+    }
+    /** Chip do agente que acabou de responder (e da IA externa, se foi ela): aparece com o uso e troca quando o agente muda. */
+    function mostrarEmUso(r, ia) {
+      const nomes = [r.agente?.nome, ia !== 'local' ? INTERLOCUTORES[ia]?.nome : null].filter(Boolean);
+      emUso.replaceChildren(...nomes.map((n) => h('span', { class: 'v36c-uso', 'data-ia': ia }, h('i', { 'aria-hidden': 'true' }), n)));
+      emUso.hidden = !nomes.length;
+    }
+    /** Conversa de agora para o Painel de atividades: fica só na memória desta janela (nada é gravado), por 2 minutos. */
+    function publicarAoVivo(r, pergunta, ia) {
+      const lista = (window.PrumoConversasAoVivo ||= []);
+      lista.push({ id: 'vivo-' + Date.now() + '-' + lista.length, em: new Date().toISOString(), agente: r.agente?.id || 'orquestrador', agenteNome: r.agente?.nome || 'Prumo Orchestrator', pergunta,
+        linhas: (r.mesa ? [...r.mesa.ias.flatMap((x) => x.linhas), ...r.mesa.resumo] : r.linhas || []).slice(0, 12), modo: String(r.modo || 'LOCAL'), fontes: (r.fontes || []).map((x) => x.rotulo), orquestrou: r.orquestracao?.agentes?.length || 0 });
+      while (lista.length > 30 || (lista[0] && Date.now() - Date.parse(lista[0].em) > 600000)) lista.shift();
+    }
     async function perguntar(q, topico) {
-      q = String(q || '').trim(); if (q.length < 2 || enviar.disabled) return;
+      q = String(q || '').trim(); q = aplicarMencao(q); if (q.length < 2 || enviar.disabled) return;
       sincronizar(); const v = versao; const { texto } = bolha('voce'); texto.textContent = q; rolar(); entrada.value = ''; ajustarAltura();
       enviar.disabled = true; const id = idAtual(); const fim = ocupado();
       try {
@@ -130,7 +154,8 @@
           for (const x of r.mesa.ias) await falar(x.linhas, null, null, x.nome + ' · ' + origem, x.provedor);
           await falar(r.mesa.resumo, fontes, r.proximos || [], tr('Orquestrador') + ' · ' + tr('resumo da mesa'), 'mesa');
         } else await falar(r.linhas.length ? r.linhas : [tr('Não encontrei nada sobre isso nos dados locais deste projeto.')], fontes, r.proximos || [], rotulo + (r.orquestracao ? ' · ' + tr('orquestrou {n} especialistas', { n: r.orquestracao.agentes.length }) : ''), ia);
-        if (v === versao) controlesResposta(r, pergunta);
+        if (v === versao) { controlesResposta(r, pergunta); mostrarEmUso(r, ia); }
+        publicarAoVivo(r, pergunta, ia);
       } catch { fim(); avisar(tr('Falha ao consultar o assistente local.'), true); } finally { enviar.disabled = false; }
     }
     function montar() {
@@ -143,19 +168,21 @@
       linhaConexao = h('div', { class: 'v36c-conexao', role: 'status', hidden: true });
       const form = h('form', { id: 'chat-form', class: 'v36c-compor' }, h('span', { class: 'v36c-faisca', 'aria-hidden': 'true' }, icone('faisca', 16)), entrada, enviar);
       chips = h('div', { class: 'v36c-chips', role: 'group', 'aria-label': tr('Sugestões de mensagens') });
+      // Agente em uso: aparece quando alguém responde e muda conforme o agente muda; nada fixo na tela.
+      emUso = h('div', { class: 'v36c-em-uso', role: 'status', 'aria-live': 'polite', hidden: true });
       const orbita = h('div', { class: 'v36c-orbita', role: 'img', 'aria-label': tr('Prumo Orchestrator, esfera original com três órbitas') }, qc.campo(212, estadoOrb(estado.worker), ''));
       PrumoOrbitas.anexar(orbita);
       el = h('section', { class: 'v36c', id: 'v36-conversa', 'aria-label': tr('Conversa com o Prumo Orchestrator') },
         h('h1', { class: 'v36-sr' }, 'Prumo QA'),
         h('div', { class: 'v36c-topo' }, orbita), msgs,
-        h('div', { class: 'v36c-interacao' }, h('div', { class: 'v36c-sugestoes' }, h('span', { class: 'v36c-faisca', 'aria-hidden': 'true' }, icone('faisca', 15)), h('span', {}, tr('O que vamos explorar?'))), chips),
-        h('div', { class: 'v36c-compor-caixa' }, interlocutores, linhaConexao, h('div', { class: 'v36c-opcoes' }, seletorAgente), form, h('div', { class: 'v36c-rodape' }, rodapeTexto = h('span', {}, tr('Respostas com os dados deste computador, sem modelo de IA.')), h('span', {}, 'Enter envia · Shift+Enter quebra linha'))));
+        h('div', { class: 'v36c-interacao' }, emUso, chips),
+        h('div', { class: 'v36c-compor-caixa' }, h('div', { class: 'v36-sr' }, interlocutores, linhaConexao, seletorAgente), form, h('div', { class: 'v36c-rodape' }, rodapeTexto = h('span', {}, tr('Respostas com os dados deste computador, sem modelo de IA.')), h('span', {}, 'Enter envia · Shift+Enter quebra linha'))));
       form.addEventListener('submit', (e) => { e.preventDefault(); void perguntar(entrada.value); });
       entrada.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); } });
       entrada.addEventListener('input', ajustarAltura);
       void reiniciar(); void carregarRoster(); return el;
     }
-    function contexto(aba, texto) { void montar(); void sincronizar(); void falar([texto], null, PROXIMOS[TOPICO_DA_TELA[aba]] || INICIAIS); }
+    function contexto(aba, texto) { void montar(); void sincronizar(); void falar([texto], null, null); }
     function focar() { setTimeout(() => entrada?.focus({ preventScroll: true }), 220); }
     function estadoOrbita() { el?.querySelectorAll('.qc-orb, .qc-campo').forEach((e) => { e.dataset.estado = estadoOrb(estado.worker); }); }
     return { montar, sincronizar, contexto, focar, estadoOrbita, recarregar: () => { if (el) { void carregarRoster(); } } };
