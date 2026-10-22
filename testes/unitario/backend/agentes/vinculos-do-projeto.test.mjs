@@ -8,7 +8,7 @@ import path from 'node:path';
 
 const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo vinculos '));
 process.env.PRUMO_DATA_DIR = dados;
-await import('../../../apoio/conhecimento-memoria.mjs');
+await import('../../utilitarios/conhecimento-memoria.mjs');
 const { mapaDeVinculosDoProjeto, linhasDoMapaDeVinculos } = await import('../../../../dist/agentes/regras/vinculosDoProjeto.js');
 const { responderComDadosLocais } = await import('../../../../dist/agentes/chat/responderComDadosLocais.js');
 const { montarPrompt } = await import('../../../../dist/agentes/chat/consultarIaExterna.js');

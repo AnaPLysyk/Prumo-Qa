@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const dados = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo mcp orquestrador '));
 process.env.PRUMO_DATA_DIR = dados;
-await import('../../../apoio/conhecimento-memoria.mjs');
+await import('../../utilitarios/conhecimento-memoria.mjs');
 const { McpServer } = await import('@modelcontextprotocol/sdk/server/mcp.js');
 const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
 const { InMemoryTransport } = await import('@modelcontextprotocol/sdk/inMemory.js');

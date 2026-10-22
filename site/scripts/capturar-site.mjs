@@ -19,7 +19,7 @@ let s, app;
 const limpezas = [];
 // O código de confirmação do e-mail vai para a caixa local (serviço de envio em 127.0.0.1), nunca para o Resend.
 try {
-  const { caixaDeEmail } = await import(pathToFileURL(path.join(repo, 'testes/apoio/caixa-de-email.mjs')).href);
+  const { caixaDeEmail } = await import(pathToFileURL(path.join(repo, 'testes/unitario/utilitarios/caixa-de-email.mjs')).href);
   const caixa = await caixaDeEmail();
   const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO: caixa.url }; delete env.ELECTRON_RUN_AS_NODE;
   s = await servidorFixture();
@@ -74,7 +74,7 @@ try {
     console.log('telas capturadas');
   } else {
   // Repositório sintético para o catálogo de testes (nada de projeto real)
-  const { fixture } = await import('../../testes/apoio/fixtures.mjs'); const f = await fixture({ after(fn) { limpezas.push(fn); } });
+  const { fixture } = await import('../../testes/unitario/utilitarios/fixtures.mjs'); const f = await fixture({ after(fn) { limpezas.push(fn); } });
   const escreve = async (rel, txt) => { const p = path.join(f.root, rel); fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, txt); };
   await escreve('tests/e2e/checkout.spec.ts', "import { test } from '@playwright/test';\ntest.describe('Checkout', () => {\n  test('paga com cartão @smoke', async ({ page }) => { // Qase: SFQ-31\n    await page.goto('/'); await test.step('Escolher produto', async () => {}); await test.step('Pagar com cartão', async () => {}); });\n  test('recusa cartão vencido @regression', async ({ page }) => { await page.goto('/'); });\n});\n");
   await escreve('tests/e2e/login.spec.ts', "import { test } from '@playwright/test';\ntest.describe('Login', () => {\n  test('entra com senha válida', async ({ page }) => { await page.goto('/'); });\n  test('bloqueia após 5 tentativas', async ({ page }) => { await page.goto('/'); });\n});\n");

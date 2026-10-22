@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 export const raiz = fileURLToPath(new URL('../../', import.meta.url));
 export const naturezas = ['unitario'];
 export const camadas = ['backend', 'frontend'];
-/** Simuladores necessários são versionados em testes/apoio; não exigem outro repositório. */
+/** Simuladores necessários são versionados em testes/unitario/utilitarios; não exigem outro repositório. */
 export function arquivosDeTeste(base = raiz, pasta = 'testes') {
   return fs.readdirSync(path.join(base, pasta), { withFileTypes: true }).flatMap(e => {
     const arquivo = pasta + '/' + e.name;
@@ -53,8 +53,8 @@ export function planoDeExecucao(selecao, env = process.env, isolado = false) {
   if (Object.entries(env).some(([k, v]) => (k === 'PRUMO_APP_EXE' || k.startsWith('PRUMO_MIGRACAO')) && v)) throw new Error('TEST_REAL_PROFILE_BLOCKED: remova PRUMO_APP_EXE e flags PRUMO_MIGRACAO');
   if (isolado && env.PRUMO_DATA_DIR) throw new Error('TEST_DATA_PROFILE_BLOCKED: remova PRUMO_DATA_DIR externo');
   if (!selecao.length) throw new Error('TEST_SELECTION_EMPTY');
-  return [...(isolado ? ['--require', './testes/apoio/bloquear-efeitos.cjs'] : []),
-    '--require', './testes/apoio/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
+  return [...(isolado ? ['--require', './testes/unitario/utilitarios/bloquear-efeitos.cjs'] : []),
+    '--require', './testes/unitario/utilitarios/conhecimento-hook.cjs', '--experimental-test-module-mocks', '--test', '--test-concurrency=1', ...selecao.map(t => t.arquivo)];
 }
 export async function executar(args = process.argv.slice(2)) {
   const { filtros, listar, isolado } = argumentos(args);
@@ -66,7 +66,7 @@ export async function executar(args = process.argv.slice(2)) {
   for (const p of pendentes) console.log('NOT_RUN|' + p.motivo + '|' + p.arquivo);
   const arquivosApoio = ['bloquear-efeitos.cjs', 'conhecimento-hook.cjs', 'conhecimento-substitutos.cjs', 'conhecimento-falso.mjs'];
   for (const nome of arquivosApoio) {
-    if (!fs.existsSync(path.join(raiz, 'testes', 'apoio', nome))) {
+    if (!fs.existsSync(path.join(raiz, 'testes', 'unitario', 'utilitarios', nome))) {
       throw new Error('TEST_APOIO_AUSENTE: ' + nome);
     }
   }

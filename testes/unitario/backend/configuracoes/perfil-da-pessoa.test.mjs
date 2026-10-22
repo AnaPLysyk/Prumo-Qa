@@ -13,7 +13,7 @@ import { pessoaDoConhecimento } from '../../../../dist/agentes/banco/comBancoDeC
 import { entrarNaConta, sairDaConta } from '../../../../dist/login/regras/contas.js';
 import { criarContaPelaAdministracao } from '../../../../dist/administracao/servico.js';
 import { encerrarSessao } from '../../../../dist/login/regras/sessao.js';
-import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
+import { criarPrimeiraConta } from '../../utilitarios/contas-por-email.mjs';
 import { LIMITE_FOCO, normalizarFoco } from '../../../../dist/agentes/regras/normalizacaoDoConhecimento.js';
 import { criarEsquemaDoConhecimento } from "../../../../dist/agentes/banco/comBancoDeConhecimento.js";
 import { personalidadeParaIa } from '../../../../dist/agentes/servicoEstiloDoChat.js';

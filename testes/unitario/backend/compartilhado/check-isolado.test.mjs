@@ -26,7 +26,7 @@ test('E2E fica NOT_RUN; entram sÃ³ arquivos sem janela, inclusive migraÃ§Ã�
   const helper = ['janela', '.mjs'].join('');
   for (const n of nomes) fs.mkdirSync(path.join(base, path.dirname(n)), { recursive: true });
   fs.writeFileSync(path.join(base, nomes[0]), "import test from 'node:test';\ntest('offline', () => {});");
-  fs.writeFileSync(path.join(base, nomes[1]), "import { abrir } from '../../../apoio/" + helper + "';\n");
+  fs.writeFileSync(path.join(base, nomes[1]), "import { abrir } from '../../utilitarios/" + helper + "';\n");
   fs.writeFileSync(path.join(base, nomes[2]), "import test from 'node:test';\n");
   const grupo = dividirPorIsolamento(catalogar(nomes), base);
   assert.deepEqual(grupo.elegiveis.map(x => x.arquivo), [nomes[0], nomes[2]]);
@@ -37,14 +37,14 @@ test('plano isolado instala bloqueador antes dos testes e recusa perfil externo 
   const primeiro = catalogar(['testes/unitario/backend/compartilhado/x.test.mjs'])[0];
   const argv = planoDeExecucao([primeiro], {}, true);
   assert.deepEqual(argv.slice(0, 4), [
-    '--require', './testes/apoio/bloquear-efeitos.cjs',
-    '--require', './testes/apoio/conhecimento-hook.cjs'
+    '--require', './testes/unitario/utilitarios/bloquear-efeitos.cjs',
+    '--require', './testes/unitario/utilitarios/conhecimento-hook.cjs'
   ]);
   assert.throws(() => planoDeExecucao([primeiro], { PRUMO_DATA_DIR: 'C:\\PrumoQA' }, true), /TEST_DATA_PROFILE_BLOCKED/);
 });
 
 test('bloqueador impede subprocesso de navegador, SQLite require e TCP remoto sem abrir esses recursos', () => {
-  const guard = path.join(raiz, 'testes', 'apoio', 'bloquear-efeitos.cjs');
+  const guard = path.join(raiz, 'testes', 'unitario', 'utilitarios', 'bloquear-efeitos.cjs');
   const amostras = [
     ["require('node:sqlite')", /TEST_ISOLATION_BLOCKED/],
     ["require('node:child_process').spawnSync('electron', [])", /TEST_ISOLATION_BLOCKED/],

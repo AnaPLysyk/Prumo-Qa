@@ -7,5 +7,5 @@ for (const [arquivo, membros] of Object.entries(substitutos)) {
   const exports = Object.fromEntries(
     Object.entries(membros).map(([exportado, nome]) => [exportado, memoria[nome]])
   );
-  mock.module('../../dist/' + arquivo, { exports });
+  mock.module('../../../dist/' + arquivo, { exports });
 }

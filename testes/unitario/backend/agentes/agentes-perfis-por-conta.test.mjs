@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
+import { criarPrimeiraConta } from '../../utilitarios/contas-por-email.mjs';
 import { criarContaPelaAdministracao, salvarAgentesDaPlataforma, agentesDaPlataformaParaJanela } from '../../../../dist/administracao/servico.js';
 import { entrarNaConta, sairDaConta, trocarMinhaSenha } from '../../../../dist/login/regras/contas.js';
 import { encerrarSessao, contaDaSessao } from '../../../../dist/login/regras/sessao.js';

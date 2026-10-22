@@ -1,4 +1,4 @@
-require('../../testes/apoio/conhecimento-hook.cjs');
+require('../../testes/unitario/utilitarios/conhecimento-hook.cjs');
 const { pathToFileURL } = require('node:url');
 const path = require('node:path');
 const { app } = require('electron');

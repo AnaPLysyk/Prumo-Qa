@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { entrarNaConta } from '../../../../dist/login/regras/contas.js';
-import { criarPrimeiraConta } from '../../../apoio/contas-por-email.mjs';
+import { criarPrimeiraConta } from '../../utilitarios/contas-por-email.mjs';
 import { estadoDaEntrada as estadoDaEntradaGithub, iniciarEntrada } from '../../../../dist/login/regras/entradaPorProvedor.js';
 import { encerrarSessao, situacaoDaSessao } from '../../../../dist/login/regras/sessao.js';
 import { gravarContas } from '../../../../dist/login/banco/contas.js';

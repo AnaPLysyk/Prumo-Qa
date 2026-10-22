@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../utilitarios/fixtures.mjs';
 import { contextoCompleto } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { analisarPlaywright } from '../../../../dist/testes/regras/revisaoDeCobertura.js';

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { symlink,readFile,writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fixture } from '../../../apoio/fixtures.mjs';
+import { fixture } from '../../utilitarios/fixtures.mjs';
 import { carregarProjeto } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';
 import { contextoProjeto } from '../../../../dist/agentes/mcp/consultasDoProjeto.js';
 import { normalizarComando } from '../../../../dist/compartilhado/projeto/carregarProjeto.js';

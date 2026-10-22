@@ -27,8 +27,8 @@ test('os arquivos unitarios seguem pasta, camada e modulo existente', () => {
 test('apenas unitarios e auxiliares ficam no repositorio do aplicativo', () => {
   const itens = fs.readdirSync(path.join(raiz, 'testes'), { withFileTypes: true });
   assert.deepEqual(itens.filter(e => e.isFile()).map(e => e.name), []);
-  assert.deepEqual(itens.filter(e => e.isDirectory()).map(e => e.name).sort(), ['apoio', 'unitario']);
-  assert.ok(fs.readdirSync(path.join(raiz, 'testes', 'apoio')).every(n => !n.endsWith('.test.mjs')));
+  assert.deepEqual(itens.filter(e => e.isDirectory()).map(e => e.name).sort(), ['unitario']);
+  assert.ok(fs.readdirSync(path.join(raiz, 'testes', 'unitario', 'utilitarios')).every(n => !n.endsWith('.test.mjs')));
 });
 
 test('servidores HTTP reais e Electron pertencem ao Lab, não aos unitários', () => {
@@ -57,7 +57,7 @@ test('selecao ampla executa somente unidades, sem ignorar casos sintéticos', ()
 
 test('runner preserva hook, nao compila de novo e recusa perfil instalado', () => {
   const argv = planoDeExecucao([exemplos[0]], {});
-  assert.ok(argv.includes('./testes/apoio/conhecimento-hook.cjs'));
+  assert.ok(argv.includes('./testes/unitario/utilitarios/conhecimento-hook.cjs'));
   assert.ok(argv.includes('--test'));
   assert.ok(!argv.includes('build'));
   for (const env of [{ PRUMO_APP_EXE: 'app.exe' }, { PRUMO_MIGRACAO_26: '1' }, { PRUMO_MIGRACAO: '0' }])
