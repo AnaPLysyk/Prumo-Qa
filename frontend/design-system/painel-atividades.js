@@ -35,8 +35,9 @@ const PrumoModeloAtividades = (() => {
       operacoes: d.atividades.filter(x => x.state === 'STARTED' && recenteAtivo(x.at)).length,
       testes: d.execucoes.filter(x => x.estado === 'EXECUTANDO' && recenteAtivo(x.heartbeat || x.inicio || x.iniciadoEm)).length,
       investigacoes: d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao && recenteAtivo(o.em)).length,
-      agentes: new Set([...d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao && recenteAtivo(o.em)).map(o => o.emExecucao), ...d.conversas.filter(c => recente(c.em)).map(c => c.agente)]).size
+      idsDosAgentes: [...new Set([...d.orquestracoes.filter(o => o.estado === 'EXECUTANDO' && !!o.emExecucao && recenteAtivo(o.em)).map(o => o.emExecucao), ...d.conversas.filter(c => recente(c.em)).map(c => c.agente)])]
     };
+    d.ativos.agentes = d.ativos.idsDosAgentes.length;
     const fontes = [], hubs = [], folhas = [], arestas = [], secoes = [];
     // 1) Clientes MCP/CLI → ferramentas do núcleo → operações.
     if (d.atividades.length) {
@@ -205,6 +206,7 @@ const PrumoModeloAtividades = (() => {
 // Pan e zoom por mouse, toque (pinça), trackpad e teclado; funciona em qualquer largura de janela.
 const PrumoPainelAtividades = (() => {
   const { sv, classe, curto, temaClaro, assinatura, modelar, dispor } = PrumoModeloAtividades;
+  const CORES_DO_ELENCO = ['#7abaff', '#80ddda', '#bea1f8', '#ffba90', '#a7de82', '#ffa1bf', '#f2d38c', '#99b8ff', '#62d4f0'];
   function montar(host, o) {
     let vista = { x: 0, y: 0, k: 1 }, dados = null, layout = null, modelo = null, ultimaAssinatura = '', timer = null, ajustado = false, carregando = false;
     const ponteiros = new Map(); let arrasto = null, pinca = null, arrastou = false;
@@ -236,8 +238,23 @@ const PrumoPainelAtividades = (() => {
       ...[['ok', 'PASS · OK'], ['falha', 'FAIL · ERROR'], ['aviso', 'BLOCKED · STARTED · NOT_VERIFIED']].map(([c, t]) => h('span', {}, h('i', { class: c }), h('span', { 'data-i18n-ignore': '' }, t))),
       h('span', {}, h('i', { class: 'pulso' }), h('span', {}, tr('Pulso: registrado nos últimos 90 s'))),
       h('span', {}, h('i', { class: 'delegacao' }), h('span', {}, tr('Delegação do chat à IA externa'))));
+    // Elenco: todos os agentes do projeto, pelo nome; clicar abre o fluxo, a conversa e a comunicação daquele agente.
+    const elenco = h('div', { class: 'pa-elenco', role: 'list', 'aria-label': tr('Agentes do projeto') });
+    function desenharElenco(d, ativos) {
+      const trabalhando = new Set(ativos?.idsDosAgentes || []);
+      elenco.replaceChildren(...(d.agentes || []).map((ag, i) => {
+        const ocupado = trabalhando.has(ag.id);
+        const conv = (d.conversas || []).filter(c => c.agente === ag.id).length, etapas = (d.orquestracoes || []).reduce((n, x) => n + x.etapas.filter(e => e.agente === ag.id).length, 0);
+        const botaoAgente = h('button', { type: 'button', class: 'pa-agente', role: 'listitem', 'data-agente': ag.id, 'data-estado': ocupado ? 'trabalhando' : 'livre', onclick: () => o.abrirAgente?.(ag, { ...d, ativos }),
+          title: tr('Ver o fluxo e a conversa de {n}', { n: ag.nome }) },
+          h('i', { class: 'pa-agente-ponto', 'aria-hidden': 'true' }), h('strong', { 'data-i18n-ignore': '' }, ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome),
+          h('small', {}, ocupado ? tr('trabalhando') : tr('livre')), h('small', { class: 'pa-agente-conta' }, tr('{c} conversas · {e} etapas', { c: conv, e: etapas })));
+        botaoAgente.style.setProperty('--pa-cor', CORES_DO_ELENCO[i % CORES_DO_ELENCO.length]); // a CSP não aceita atributo style inline
+        return botaoAgente;
+      }));
+    }
     const palco = h('div', { class: 'pa-palco' }, vp, mini, lateral);
-    raiz.append(barra, palco, legenda, ajuda); host.replaceChildren(raiz);
+    raiz.append(barra, elenco, palco, legenda, ajuda); host.replaceChildren(raiz);
     // O canvas ocupa a altura que sobra na janela abaixo dele (legenda e ajuda incluídas), com um mínimo legível.
     function medirAltura() {
       if (!raiz.isConnected || document.fullscreenElement === raiz) return;
@@ -418,6 +435,7 @@ const PrumoPainelAtividades = (() => {
       if (foco) camada.querySelector(`[data-no="${CSS.escape(foco)}"]`)?.focus({ preventScroll: true });
       const ativos = modelo;
       const a = ativos.ativos || { agentes: 0, operacoes: 0, testes: 0, investigacoes: 0 };
+      desenharElenco(dados, a);
       const conv = ativos.folhas.filter(f => f.tipo === 'conversa').length;
       contagem.textContent = [tr('{n} agentes trabalhando', { n: a.agentes }), tr('{n} operações ativas', { n: a.operacoes }), tr('{n} testes ativos', { n: a.testes }), tr('{n} investigações ativas', { n: a.investigacoes }), tr('{n} conversas', { n: conv })].join(' · ');
       if (!ajustado && vp.clientWidth) { ajustar(false); ajustado = true; } else aplicar();

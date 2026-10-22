@@ -100,6 +100,7 @@
     function resumoCaps(x) { const c = capsDe(x); const auth = c.filter(k => k.estado === 'EXIGE_AUTORIZACAO').length, bloq = c.filter(k => k.estado === 'BLOQUEADO').length;
       return [h('strong', {}, tr('{n} capacidades', { n: c.length })), auth ? h('small', {}, tr('{n} exige autorização', { n: auth })) : null, bloq ? h('small', { class: 'v36a-bloq' }, tr('{n} bloqueada(s)', { n: bloq })) : null]; }
     function list() {
+      definirDetalheDaTrilha();
       const search = h('input', { type: 'search', 'aria-label': tr('Buscar agente'), placeholder: tr('Localizar agente'), oninput: render, autocomplete: 'off' });
       const lista = h('div', { class: 'v36a-constelacao', id: 'v36-agent-list', role: 'list' }); const conta = h('span', { class: 'v36a-conta' });
       const novo = h('button', { type: 'button', class: 'v36a-primario', id: 'v36-agent-new', onclick: () => detail({ version: 1, id: 'pessoal-' + crypto.randomUUID(), nome: '', descricao: '', objetivo: '', instrucoes: '', ferramenta: 'projeto', publico: false, meu: true, preview: true, index: drafts.length + s.especializacoes.length }, true) }, '+ ', tr('Novo agente pessoal'));
@@ -239,6 +240,7 @@
         field(tr('Origem da pasta importada'), fonte), h('div', { class: 'v36a-skill-acoes' }, importar));
     }
     function detail(x, isNew = false) {
+      definirDetalheDaTrilha([[x.nome || tr('Novo agente')]]);
       const pol = { ...s.configuracao.politicas }, esp = new Set(s.configuracao.especializacoes);
       const alheio = x.preview && x.meu === false;
       const podeAdministrar = !!window.PrumoConta?.pode?.('administracao');
@@ -293,7 +295,7 @@
         }
       });
       const exportar = h('button', { type: 'button', class: 'v36a-quieto', onclick: () => { try { void download('prumo-agente-' + x.id + '.json', JSON.stringify(x.preview ? validateDraft(read()) : { fonte: 'nucleo', especializacao: { id: x.id, rotulo: x.rotulo, skill: x.skill, capacidades: x.capacidades }, configuracao: s.configuracao }, null, 2)); } catch (err) { avisar('Exportação recusada: ' + err.message, true); } } }, tr('Exportar JSON'));
-      const barra = h('div', { class: 'v36a-barra' }, h('button', { type: 'button', class: 'v36a-voltar', onclick: list }, '← ', tr('Agentes')), h('div', { class: 'v36a-barra-acoes' }));
+      const barra = h('div', { class: 'v36a-barra' }, h('div', { class: 'v36a-barra-acoes' }));
       if (x.preview) { const file = h('input', { type: 'file', accept: '.json,application/json', id: 'v36-agent-import', class: 'v36-sr', onchange: async ev => { const f = ev.target.files[0]; if (!f) return; try { if (f.size > 32768) throw Error('Arquivo excede 32 KiB.'); const d = validateDraft(JSON.parse(await f.text())); name.value = d.nome; desc.value = d.descricao; goal.value = d.objetivo; instructions.value = d.instrucoes; ferramenta.value = d.ferramenta; sync(); avisar('Configuração importada. Revise e confirme antes de salvar.'); } catch (err) { avisar('Importação recusada: ' + err.message, true); } ev.target.value = ''; } });
         barra.lastChild.append(h('label', { class: 'v36a-quieto', title: tr('A importação só preenche o formulário; revise antes de salvar.') }, '↥ ', h('span', {}, tr('Importar agente JSON')), file)); }
       if (x.preview && !alheio && !isNew && drafts.some((a) => a.id === x.id)) barra.lastChild.append(h('button', { type: 'button', class: 'v36a-quieto', id: 'v36-agent-excluir', onclick: async () => {
@@ -342,6 +344,7 @@
     function figuraRobo(host, x, modo, area) { if (!PrumoRobos.criar(host, x.index, modo, area)) host.append(portrait(x.index, modo !== 'lista')); return host; }
     const bolinha = (cor) => { const i = h('i'); i.style.background = cor; return i; };
     async function brain(x) {
+      definirDetalheDaTrilha([[x.nome, () => detail(x)], ['Cérebro']]);
       const caps = capsDe(x); const mudou = lerMudancas()[x.id];
       const tema = document.documentElement.dataset.tema, claroTema = tema === 'claro' || (tema !== 'escuro' && matchMedia('(prefers-color-scheme: light)').matches);
       // Tons claros no escuro e tons fortes no claro, para ponto, linha e legenda terem contraste nos dois temas.
@@ -425,7 +428,7 @@
         h('label', { for: 'v36-brain-pergunta' }, tr('Testar uma pergunta'), DS.info('Mostra o caminho que o chat faria agora com esta pergunta. Não chama IA e não grava nada.')),
         h('div', { class: 'v36a-sim-linha' }, pergunta, h('button', { type: 'submit', class: 'v36a-primario' }, tr('Simular')), h('button', { type: 'button', class: 'v36a-quieto', onclick: () => { pergunta.value = ''; limpar(); pergunta.focus(); } }, tr('Limpar'))),
         rastro);
-      stage.append(h('div', { class: 'v36a-cerebro-topo' }, h('button', { type: 'button', class: 'v36a-voltar', onclick: () => detail(x) }, '← ', tr('Configuração')), h('strong', { 'data-i18n-ignore': '' }, x.nome), DS.info('Cada ponto é um conhecimento configurado deste agente. Selecione um para consultar. Isso não representa memória aprendida automaticamente.'), h('span', {}, tr('{n} conhecimentos', { n: neuronios.length }))),
+      stage.append(h('div', { class: 'v36a-cerebro-topo' }, DS.info('Cada ponto é um conhecimento configurado deste agente. Selecione um para consultar. Isso não representa memória aprendida automaticamente.'), h('span', {}, tr('{n} conhecimentos', { n: neuronios.length }))),
         h('div', { class: 'v36a-cerebro-corpo' }, campo, h('aside', { class: 'v36a-cerebro-lado', 'aria-label': tr('Testar e consultar o cérebro') }, simulador, inspect, legenda)));
       stage.style.setProperty('--face-color', x.id === 'ui-ux' ? '#9e92ff' : palette[x.index % 8]); neural(stage, { pontos: 110 });
       body.replaceChildren(stage); figuraRobo(face, x, 'cerebro', campo);
@@ -558,6 +561,33 @@
             ...(etapa?.erro ? [h('p', {}, tr('Falha: ') + etapa.erro)] : []),
             ...((etapa?.fatos || []).slice(0, 12).map(f => h('p', {}, f))),
             button(tr('Abrir Logs'), () => { document.querySelector('.v36-dialog[open]')?.close(); void mostrar('logs'); }))]),
+        // Clicar num agente do elenco: o fluxo dele em ordem de tempo, o que conversou e com quem se comunicou. Só registros reais deste computador.
+        abrirAgente: (ag, d) => {
+          const nomeDe = id => (d.agentes.find(x => x.id === id)?.nome) || id;
+          const quando = iso => iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+          const eventos = [];
+          for (const c of (d.conversas || []).filter(x => x.agente === ag.id)) eventos.push({ em: c.em, tipo: tr('Conversa'), nos: [
+            h('p', { class: 'pa-fala' }, h('b', {}, tr('Pessoa › ')), c.pergunta || tr('Atendimento sem texto persistido')),
+            h('p', { class: 'pa-fala' }, h('b', {}, nomeDe(ag.id) + ' › '), (c.linhas && c.linhas.join(' ')) || c.avaliacao || tr('Sem resposta gravada')),
+            h('small', {}, [c.modo === 'LOCAL' ? tr('resposta local') : c.modo === 'MESA' ? tr('mesa de IAs') : c.modo, c.fontes?.length ? tr('fontes: {f}', { f: c.fontes.join(', ') }) : ''].filter(Boolean).join(' · '))] });
+          for (const o of (d.orquestracoes || [])) {
+            const et = o.etapas.find(x => x.agente === ag.id), outros = o.agentes.filter(id => id !== ag.id);
+            if (!et && o.emExecucao !== ag.id) continue;
+            eventos.push({ em: et?.inicio || o.em, tipo: tr('Investigação'), nos: [
+              h('p', { class: 'pa-fala' }, h('b', {}, 'Prumo Orchestrator › '), tr('pediu a {a} que consultasse o projeto.', { a: nomeDe(ag.id) })),
+              ...((et?.fatos || []).slice(0, 8).map(f => h('p', { class: 'pa-fala' }, h('b', {}, nomeDe(ag.id) + ' › '), f))),
+              et?.erro ? h('p', { class: 'pa-fala' }, h('b', {}, nomeDe(ag.id) + ' › '), tr('Falha na consulta')) : null,
+              h('small', {}, [et ? tr(et.estado) : tr('Em análise'), et?.fontes?.length ? tr('fontes: {f}', { f: et.fontes.join(', ') }) : '', outros.length ? tr('na mesma investigação: {a}', { a: outros.map(nomeDe).join(', ') }) : ''].filter(Boolean).join(' · '))] });
+          }
+          eventos.sort((a, b) => String(a.em).localeCompare(String(b.em)));
+          const trabalhando = d.ativos?.idsDosAgentes?.includes(ag.id);
+          caixa(tr('Agente: ') + (ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome), [
+            note(trabalhando ? tr('Trabalhando agora.') : tr('Livre: sem atividade em andamento. Abaixo, o que já aconteceu com este agente neste projeto.')),
+            eventos.length
+              ? h('ol', { class: 'pa-fluxo' }, eventos.map(e => h('li', {}, h('time', {}, quando(e.em)), h('em', {}, e.tipo), ...e.nos.filter(Boolean))))
+              : note(tr('Ainda não há conversa nem investigação registrada para este agente. Pergunte a ele na tela Início ou rode um diagnóstico.')),
+            button(tr('Abrir Logs'), () => { document.querySelector('.v36-dialog[open]')?.close(); void mostrar('logs'); })]);
+        },
         abrirConversa: (c) => caixa((c.semTexto ? 'Atendimento · ' : 'Conversa · ') + (c.agenteNome || c.agente), [note(c.semTexto ? 'Registro local de metadados. A pergunta e a resposta não foram gravadas.' : tr('Gravada somente neste computador. Resposta {m}.', { m: c.modo === 'LOCAL' ? tr('local, sem modelo de IA') : c.modo })), h('pre', {}, JSON.stringify({ em: c.em, agente: c.agente, ...(c.semTexto ? { avaliacao: c.avaliacao } : { pergunta: c.pergunta, resposta: c.linhas }), fontes: c.fontes, modo: c.modo }, null, 2))]),
         abrirExecucao: (x) => caixa(tr('Execução {r}', { r: x.rotina }), [note(tr('Registro real do worker. Evidências e logs completos ficam em Testes › Runs.')),
           h('div', { class: 'v36a-diagnostico-etapa-info' },
