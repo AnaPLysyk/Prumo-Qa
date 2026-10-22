@@ -163,19 +163,13 @@ test('Políticas do projeto aparecem em aba própria, nunca no rodapé da lista 
   assert.match(js, /disabled: !podeAdministrar/, 'regras continuam protegidas para conta comum');
 });
 
-test('painel diagnostica problemas por consultas reais e exibe etapas, sem simular correções', () => {
+test('o Painel de atividades é só o fluxo ao vivo dos agentes: sem botão de diagnóstico, com o histórico de orquestrações na lateral', () => {
   const js = fs.readFileSync('frontend/agentes/tela-agentes.parte.js', 'utf8');
   const css = fs.readFileSync('frontend/design-system/estilos-das-telas.parte.css', 'utf8');
-  assert.match(js, /id: 'v36-diagnosticar-projeto'/);
-  assert.match(js, /api\.assistenteConversar\(e\.id,/);
+  assert.doesNotMatch(js, /v36-diagnosticar-projeto|Diagnosticar problemas/);
   assert.match(js, /api\.agentesOrquestracoes\(e\.id\)/);
-  assert.match(js, /id: 'v36-diagnostico'/);
   assert.match(js, /id: 'v36-orquestracoes'/);
-  assert.match(js, /registro\.etapas\.find\(x => x\.agente === id\)/);
-  assert.match(js, /'data-estado': estado/);
-  assert.match(js, /Nenhum teste ou correção foi executado/);
   assert.doesNotMatch(js, /setTimeout\([^)]*CONCLUIDA/, 'não simular progresso concluído');
-  assert.match(css, /\.v36a-diagnostico-passos/);
   assert.match(css, /\.v36a-aba\{flex:none;white-space:nowrap/, 'abas sem quebrar em janelas estreitas');
 });
 
@@ -232,4 +226,17 @@ test('janela de atividade do painel: 2 min, relógio adiantado tolerado, datas i
   const exec = { id: 'e', estado: 'EXECUTANDO', heartbeat: ha(200), rotinaId: 'r', rotina: 'R', capability: 'x', tipo: 't', ambiente: 'local', executor: 'worker', criadoEm: ha(300) };
   const g = modelo.modelar({ ...base, execucoes: [exec] });
   assert.equal(g.ativos.testes, 1, 'execução com batimento de 200 s ainda conta'); assert.ok(g.fontes.some(x => x.tipo === 'worker'));
+});
+
+test('o terminal do cliente MCP que pergunta ao Orchestrator liga ao Orchestrator, e o teste mostra aparelho e navegador declarados', () => {
+  const js = fs.readFileSync('frontend/design-system/painel-atividades.js', 'utf8');
+  const modelo = vm.runInNewContext(js + '\nPrumoModeloAtividades;', { tr: (x, v) => x.replace(/\{(\w+)\}/g, (_, k) => v?.[k] ?? '') });
+  const em = new Date().toISOString();
+  const g =modelo.modelar({ agentes: [{ id: 'qa-geral', nome: 'QA Geral' }], atividades: [{ operationId: 'o1', state: 'STARTED', at: em, tool: 'perguntar_ao_orquestrador', origin: 'MCP', client: 'claude' }],
+    conversas: [{ id: 'c', em, agente: 'qa-geral', agenteNome: 'QA Geral', modo: 'CLAUDE', fontes: [] }],
+    execucoes: [{ id: 'x', estado: 'EXECUTANDO', heartbeat: em, rotinaId: 'r', rotina: 'Login mobile', capability: 'e2e', tipo: 't', ambiente: 'local', executor: 'worker', criadoEm: em, resultado: { ambientes: [{ dispositivo: 'Pixel 7', navegador: 'chromium', versaoDoNavegador: '126' }] } }] });
+  assert.ok(g.arestas.some(a => a.de === 'tool:perguntar_ao_orquestrador' && a.para === 'orq'), 'cliente MCP → Orchestrator');
+  assert.ok(g.arestas.some(a => a.de === 'cli:MCP · claude'), 'cliente MCP → ferramenta');
+  assert.ok(g.fontes.some(x => x.id === 'ext:claude'), 'IA externa que respondeu aparece');
+  assert.match(g.fontes.find(x => x.tipo === 'worker').linhas[0].extra, /Pixel 7 · chromium 126/);
 });

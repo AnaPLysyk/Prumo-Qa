@@ -453,86 +453,8 @@
     async function activity() {
       painelVivo?.parar();
       const host = h('div', { class: 'v36a-painel' });
-      // O diagnóstico é uma operação real de consulta e registra cada etapa no backend.
-      // Não altera o código e não afirma que falhas foram corrigidas.
-      const resultado = h('section', { class: 'v36a-diagnostico', id: 'v36-diagnostico', role: 'status', 'aria-live': 'polite' });
-      const botaoDiagnostico = h('button', { type: 'button', class: 'v36a-primario', id: 'v36-diagnosticar-projeto', onclick: diagnosticar }, tr('Diagnosticar problemas'));
-      const nomeAgente = id => s.especializacoes.find(a => a.id === id)?.rotulo || id;
-      function verEtapas(registro, resposta) {
-        const progresso = registro.estado === 'EXECUTANDO';
-        const nomeEstado = { EXECUTANDO: 'Investigando', CONCLUIDA: 'Consultas concluídas', PARCIAL: 'Algumas consultas falharam', FALHOU: 'Sem evidências suficientes', SEM_DADOS: 'Sem dados' };
-        const passos = registro.agentes.map((id, i) => {
-          const etapa = registro.etapas.find(x => x.agente === id);
-          const estado = etapa?.estado || (registro.emExecucao === id ? 'EXECUTANDO' : 'PENDENTE');
-          const texto = { EXECUTANDO: 'Consultando', PENDENTE: 'Aguardando', CONCLUIDA: 'Consultado', SEM_DADOS: 'Sem dados', FALHOU: 'Falha na consulta' }[estado] || estado;
-          return h('li', { class: 'v36a-diagnostico-passo', 'data-estado': estado },
-            h('span', { class: 'v36a-diagnostico-ordem' }, String(i + 1)),
-            h('strong', { 'data-i18n-ignore': '' }, nomeAgente(id)),
-            h('span', { class: 'v36a-diagnostico-estado' }, tr(texto)),
-            etapa?.fontes?.length ? h('small', {}, tr('Fontes: ') + etapa.fontes.join(', ')) : null,
-            etapa?.erro ? h('small', {}, tr('Falha: ') + etapa.erro) : null);
-        });
-        resultado.replaceChildren(
-          h('div', { class: 'v36a-diagnostico-cab' }, h('h3', {}, tr('Investigação do projeto')),
-            h('span', { class: 'v36a-diagnostico-situacao', 'data-estado': registro.estado }, tr(nomeEstado[registro.estado] || registro.estado))),
-          h('p', { class: 'suave' }, progresso
-            ? tr('O Prumo está consultando os especialistas e registrando as etapas. Nenhum teste ou correção foi executado.')
-            : tr('Consultas concluídas: resultados locais, não correções automáticas. Consulte as evidências antes de agir.')),
-          h('ol', { class: 'v36a-diagnostico-passos' }, ...passos),
-          resposta ? h('div', { class: 'v36a-diagnostico-achados' },
-            h('h4', {}, tr('Achados e próximos passos')),
-            ...resposta.linhas.filter(l => /Prioridade|Sem execuções|Rastreabilidade|falha|FAIL|lacuna|contexto aprovado/i.test(l)).slice(0, 2).map(l => h('p', {}, l)),
-            h('details', { class: 'v36a-diagnostico-detalhes', ontoggle: () => painelVivo?.recalcular() },
-              h('summary', {}, tr('Ver análise completa')),
-              ...resposta.linhas.filter(l => l && !/^Consultei \d+ especialistas/.test(l)).slice(0, 14).map(l => h('p', {}, l))),
-            h('div', { class: 'v36a-diagnostico-acoes' },
-              button(tr('Ver fluxo dos agentes'), async () => { host.scrollIntoView({ behavior: reduzido() ? 'auto' : 'smooth', block: 'start' }); await painelVivo?.atualizar(); painelVivo?.focarInvestigacao(); }),
-              button(tr('Ver execuções'), () => void mostrar('execucoes')),
-              button(tr('Revisar testes'), () => void mostrar('testes')),
-              button(tr('Conversar com o Orchestrator'), () => flutuante?.abrir()))
-          ) : null);
-      }
-      async function diagnosticar() {
-        botaoDiagnostico.disabled = true;
-        resultado.replaceChildren(h('p', { class: 'suave' }, tr('Iniciando consulta dos especialistas do projeto…')));
-        let intervalo;
-        let ativo = true;
-        let idVisto = null;
-        const acompanhar = async () => {
-          if (!ativo || !resultado.isConnected || activeTab !== 'activity') return;
-          const dados = await chamarSemAviso(() => api.agentesOrquestracoes(e.id));
-          if (!dados?.orquestracoes?.length || !ativo) return;
-          // Apenas registros surgidos após este clique: não confundir com análises antigas.
-          const atual = dados.orquestracoes.find(o => o.id === idVisto ||
-            (o.em >= inicio && o.modo === 'LOCAL'));
-          if (!atual) return;
-          idVisto = atual.id; verEtapas(atual);
-          await mostrarOrquestracoes(orq);
-        };
-        const inicio = new Date().toISOString();
-        try {
-          intervalo = setInterval(() => void acompanhar(), 850);
-          const resposta = await chamar(() => api.assistenteConversar(e.id,
-            'Faça um diagnóstico da qualidade do projeto QA: examine falhas, execução de testes, requisitos, riscos e evidências. Não execute nem modifique nada.',
-            { agente: null, provedor: 'local', primeira: false, historico: [] }));
-          if (!resposta) {
-            resultado.replaceChildren(note(tr('Não foi possível executar a consulta. Nenhuma correção foi realizada.')));
-            return;
-          }
-          if (resposta.orquestracao) {
-            idVisto = resposta.orquestracao.id;
-            verEtapas(resposta.orquestracao, resposta);
-            await mostrarOrquestracoes(orq);
-            await painelVivo?.atualizar();
-          } else resultado.replaceChildren(note(tr('Nenhum diagnóstico multiagente foi iniciado. Verifique as especializações habilitadas e a política do projeto.')));
-        } catch {
-          resultado.replaceChildren(note(tr('A investigação falhou. Verifique o estado do projeto e tente novamente.')));
-        } finally {
-          ativo = false; clearInterval(intervalo); botaoDiagnostico.disabled = false;
-        }
-      }
       const orq = h('section', { class: 'v36a-orq', id: 'v36-orquestracoes', 'aria-label': tr('Orquestrações recentes') }, note(tr('Carregando orquestrações…')));
-      body.replaceChildren(h('div', { class: 'v36a-topo v36a-topo-painel' }, botaoDiagnostico), resultado, host);
+      body.replaceChildren(host);
       painelVivo = PrumoPainelAtividades.montar(host, {
         lateral: { rotulo: tr('Orquestrações'), conteudo: orq },
         reduzido, ativo: () => activeTab === 'activity' && estado.aba === 'agentes' && estado.espaco?.id === e.id,

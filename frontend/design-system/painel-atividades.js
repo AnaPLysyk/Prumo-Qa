@@ -149,7 +149,7 @@ const PrumoModeloAtividades = (() => {
     if (d.execucoes.length) {
       const sec = { id: 'worker', titulo: tr('Worker → rotinas'), fontes: [], hubs: [] }; secoes.push(sec);
       const w = { id: 'worker', tipo: 'worker', titulo: 'Worker Prumo', sub: tr('{n} execuções na fila do projeto', { n: d.totalExecucoes ?? d.execucoes.length }), vivo: d.execucoes.some((x) => x.estado === 'EXECUTANDO' || recente(x.termino || x.inicio)), cor: '#ff8fb7',
-        linhas: d.execucoes.slice(0, 7).map((x) => ({ hora: curto(x.termino || x.inicio || x.criadoEm), texto: x.rotina, estado: x.resultado?.status || x.estado, extra: duracao(x.duracaoMs) })) };
+        linhas: d.execucoes.slice(0, 7).map((x) => ({ hora: curto(x.termino || x.inicio || x.criadoEm), texto: x.rotina, estado: x.resultado?.status || x.estado, extra: ambientesDoTeste(x)[0] || duracao(x.duracaoMs) })) };
       fontes.push(w); sec.fontes.push(w);
       const porRotina = new Map(); for (const x of d.execucoes) { if (!porRotina.has(x.rotinaId)) porRotina.set(x.rotinaId, []); porRotina.get(x.rotinaId).push(x); }
       [...porRotina.values()].forEach((lista, i) => {
@@ -177,6 +177,8 @@ const PrumoModeloAtividades = (() => {
       if (conexoes.length) sec.fontes.push(monta('sistema:conexoes', tr('Conexões Jira · Qase · GitHub'), conexoes, '#6fe0a0'));
       if (sec.fontes.length) { secoes.push(sec); fontes.push(...sec.fontes); }
     }
+    // Cliente MCP que pergunta ao Orchestrator: a ferramenta registrada liga ao terminal do Orchestrator.
+    if (hubs.some(x => x.id === 'tool:perguntar_ao_orquestrador') && fontes.some(x => x.id === 'orq')) arestas.push({ de: 'tool:perguntar_ao_orquestrador', para: 'orq', tipo: 'fonte', vivo: hubs.find(x => x.id === 'tool:perguntar_ao_orquestrador').folhas.some(x => x.vivo), peso: 1 });
     const trabalhando = new Set(d.ativos.idsDosAgentes);
     for (const h of hubs) if (h.agenteId) { h.vivo = trabalhando.has(h.agenteId); if (h.vivo) h.sub = tr('trabalhando agora') + ' · ' + h.sub; }
     return { fontes, hubs, folhas, arestas, secoes, ativos: d.ativos };
@@ -441,8 +443,7 @@ const PrumoPainelAtividades = (() => {
       camada.replaceChildren(...nos);
       if (!modelo.fontes.length) camada.append(h('div', { class: 'pa-vazio' },
         h('strong', {}, tr('Nenhuma atividade agora')),
-        h('span', {}, tr('Os terminais aparecem quando um agente conversa, um teste roda ou uma conexão é consultada, e saem sozinhos depois. O histórico fica em Logs.')),
-        h('button', { type: 'button', class: 'pa-btn pa-btn-texto', onclick: () => o.abrirTela('logs') }, tr('Abrir Logs'))));
+        h('span', {}, tr('Os terminais aparecem quando um agente conversa, um teste roda ou uma conexão é consultada, e saem sozinhos depois. O histórico fica em Logs.'))));
       // Passar o mouse num nó destaca as linhas dele.
       camada.querySelectorAll('[data-no]').forEach((el) => { el.addEventListener('pointerenter', () => destacar(el.dataset.no, true)); el.addEventListener('pointerleave', () => destacar(el.dataset.no, false)); el.addEventListener('focusin', () => destacar(el.dataset.no, true)); el.addEventListener('focusout', () => destacar(el.dataset.no, false)); });
       if (foco) camada.querySelector(`[data-no="${CSS.escape(foco)}"]`)?.focus({ preventScroll: true });
