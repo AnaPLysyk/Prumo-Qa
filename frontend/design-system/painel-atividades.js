@@ -27,10 +27,17 @@ const PrumoModeloAtividades = (() => {
 
   // ---------- Modelo: fontes (janelas), hubs e folhas, com as arestas que os registros comprovam ----------
   function modelar(d) {
-    // Mostra o histórico real recente (conversas, operações, testes e investigações) e marca como "vivo" só o que está em andamento:
-    // processo sem batimento há mais de 2 minutos não conta como ativo.
     const agora = Date.now(), recenteAtivo = (at, janela = 120000) => !!at && agora - Date.parse(at) >= 0 && agora - Date.parse(at) < janela;
-    d = { ...d, conversas: d.conversas || [], orquestracoes: d.orquestracoes || [] };
+    d = { ...d, conversas: d.conversas || [], orquestracoes: d.orquestracoes || [], auditoria: d.auditoria || [] };
+    // O canvas só mostra o que está acontecendo agora (ou acabou de acontecer, até 2 minutos): sem atividade, sem terminal.
+    // O histórico completo fica nas Orquestrações (lateral), em Logs e em Testes › Runs.
+    d = { ...d,
+      atividades: d.atividades.filter(x => recenteAtivo(x.at)),
+      conversas: d.conversas.filter(c => recenteAtivo(c.em)),
+      execucoes: d.execucoes.filter(x => x.estado === 'EXECUTANDO' ? recenteAtivo(x.heartbeat || x.inicio || x.iniciadoEm, 300000) : recenteAtivo(x.termino || x.terminadoEm)),
+      orquestracoes: d.orquestracoes.filter(o => recenteAtivo(o.em)),
+      auditoria: d.auditoria.filter(a => recenteAtivo(a.at))
+    };
     d.ativos = {
       operacoes: d.atividades.filter(x => x.state === 'STARTED' && recenteAtivo(x.at)).length,
       testes: d.execucoes.filter(x => x.estado === 'EXECUTANDO' && recenteAtivo(x.heartbeat || x.inicio || x.iniciadoEm)).length,
@@ -152,31 +159,7 @@ const PrumoModeloAtividades = (() => {
         }
       });
     }
-    // 4) Conversa entre agentes: um terminal por agente com o diálogo Orchestrator → agente (pedidos, fatos e fontes) e as conversas com a pessoa.
-    {
-      const dialogos = new Map();
-      const poe = (id, linha) => { if (!dialogos.has(id)) dialogos.set(id, []); dialogos.get(id).push(linha); };
-      const nomeDe = (id) => (d.agentes || []).find(a => a.id === id)?.nome || id;
-      for (const o of d.orquestracoes) for (const et of o.etapas) {
-        poe(et.agente, { em: et.inicio, hora: curto(et.inicio), texto: 'Orchestrator › ' + tr('consulte o projeto'), estado: '', extra: '' });
-        for (const fato of (et.fatos || []).slice(0, 3)) poe(et.agente, { em: et.fim, hora: curto(et.fim), texto: nomeDe(et.agente) + ' › ' + String(fato).slice(0, 60), estado: et.estado, extra: '' });
-        if (et.erro) poe(et.agente, { em: et.fim, hora: curto(et.fim), texto: nomeDe(et.agente) + ' › ' + tr('falha na consulta'), estado: 'ERROR', extra: '' });
-      }
-      for (const c of d.conversas) poe(c.agente, { em: c.em, hora: curto(c.em), texto: tr('Pessoa') + ' › ' + (c.pergunta || tr('Atendimento sem texto persistido')).slice(0, 40), estado: '', extra: '' });
-      const ativos = [...dialogos].filter(([id]) => (d.agentes || []).some(a => a.id === id)).sort((a, b) => String(b[1].at(-1)?.em).localeCompare(String(a[1].at(-1)?.em))).slice(0, 6);
-      if (ativos.length) {
-        const sec = { id: 'dialogo', titulo: tr('Conversa entre agentes'), fontes: [], hubs: [] }; secoes.push(sec);
-        for (const [id, linhas] of ativos) {
-          const ordenadas = linhas.sort((a, b) => String(b.em).localeCompare(String(a.em))).slice(0, 7);
-          const f = { id: 'dialogo:' + id, tipo: 'dialogo', agenteId: id, titulo: id === 'orquestrador' ? tr('Guia do sistema') : nomeDe(id), sub: tr('{n} mensagens', { n: linhas.length }), vivo: ordenadas.some(l => recente(l.em)), cor: CORES_AGENTE[(d.agentes || []).findIndex(a => a.id === id) % CORES_AGENTE.length] || '#8fb4ff', linhas: ordenadas.map(({ hora, texto, estado, extra }) => ({ hora, texto, estado, extra })) };
-          fontes.push(f); sec.fontes.push(f);
-        }
-        // A conversa nasce no Orchestrator: liga a investigação de cada pedido ao terminal do agente que respondeu.
-        const janelas = new Set(sec.fontes.map(x => x.id));
-        for (const o of d.orquestracoes) for (const et of o.etapas) if (janelas.has('dialogo:' + et.agente) && fontes.some(x => x.id === 'diagnostico:' + o.id)) arestas.push({ de: 'diagnostico:' + o.id, para: 'dialogo:' + et.agente, tipo: 'fonte', vivo: o.estado === 'EXECUTANDO' && o.emExecucao === et.agente, peso: 1 });
-      }
-    }
-    // 5) Sistema e conexões: cada ação auditada, com a descrição do que ela faz; chamadas a Jira, Qase e GitHub ficam num terminal à parte.
+    // 4) Sistema e conexões: cada ação auditada, com a descrição do que ela faz; chamadas a Jira, Qase e GitHub ficam num terminal à parte.
     if ((d.auditoria || []).length) {
       const eventos = [...d.auditoria].sort((a, b) => b.at.localeCompare(a.at));
       const ehConexao = (e) => /^(servicos|projetos|github|jira|qase|integracoes|conexoes):/.test(e.canal);
@@ -187,13 +170,6 @@ const PrumoModeloAtividades = (() => {
       if (resto.length) sec.fontes.push(monta('sistema:acoes', tr('Sistema Prumo'), resto, '#9fb0ff'));
       if (conexoes.length) sec.fontes.push(monta('sistema:conexoes', tr('Conexões Jira · Qase · GitHub'), conexoes, '#6fe0a0'));
       if (sec.fontes.length) { secoes.push(sec); fontes.push(...sec.fontes); }
-    }
-    // Elenco: todo agente do projeto aparece no fluxo, pelo nome, mesmo sem conversa registrada; clicar abre o fluxo dele.
-    const cobertos = new Set(hubs.filter(x => x.agenteId).map(x => x.agenteId));
-    const faltam = (d.agentes || []).filter(ag => !cobertos.has(ag.id));
-    if (faltam.length) {
-      const sec = { id: 'elenco', titulo: tr('Agentes do projeto'), fontes: [], hubs: [] }; secoes.push(sec);
-      faltam.forEach((ag, i) => { const hub = { id: 'agente:' + ag.id, agenteId: ag.id, tipo: 'agente', titulo: ag.id === 'orquestrador' ? tr('Guia do sistema') : ag.nome, sub: tr('sem conversas ainda'), cor: CORES_AGENTE[(i + 3) % CORES_AGENTE.length], folhas: [], ocultas: 0 }; hubs.push(hub); sec.hubs.push(hub); });
     }
     const trabalhando = new Set(d.ativos.idsDosAgentes);
     for (const h of hubs) if (h.agenteId) { h.vivo = trabalhando.has(h.agenteId); if (h.vivo) h.sub = tr('trabalhando agora') + ' · ' + h.sub; }
@@ -458,8 +434,8 @@ const PrumoPainelAtividades = (() => {
       for (const f of modelo.folhas) nos.push(folha(f, layout.pos.get(f.id), anteriores && !anteriores.has(f.id)));
       camada.replaceChildren(...nos);
       if (!modelo.fontes.length) camada.append(h('div', { class: 'pa-vazio' },
-        h('strong', {}, tr('Nenhum agente ou teste em execução')),
-        h('span', {}, tr('As janelas aparecem somente durante trabalhos reais. Consultas e alterações concluídas ficam em Logs.')),
+        h('strong', {}, tr('Nenhuma atividade agora')),
+        h('span', {}, tr('Os terminais aparecem quando um agente conversa, um teste roda ou uma conexão é consultada, e saem sozinhos depois. O histórico fica em Logs.')),
         h('button', { type: 'button', class: 'pa-btn pa-btn-texto', onclick: () => o.abrirTela('logs') }, tr('Abrir Logs'))));
       // Passar o mouse num nó destaca as linhas dele.
       camada.querySelectorAll('[data-no]').forEach((el) => { el.addEventListener('pointerenter', () => destacar(el.dataset.no, true)); el.addEventListener('pointerleave', () => destacar(el.dataset.no, false)); });

@@ -179,29 +179,34 @@ test('painel diagnostica problemas por consultas reais e exibe etapas, sem simul
   assert.match(css, /\.v36a-aba\{flex:none;white-space:nowrap/, 'abas sem quebrar em janelas estreitas');
 });
 
-test('o painel mostra o histórico real (conversas, operações, testes) e conta como ativo só o que está em andamento', () => {
+test('sem atividade o painel não desenha terminal nenhum; só aparece o que acontece agora e sai depois de 2 minutos', () => {
   const js = fs.readFileSync('frontend/design-system/painel-atividades.js', 'utf8');
   const modelo = vm.runInNewContext(js + '\nPrumoModeloAtividades;', { tr: (x, v) => x.replace(/\{(\w+)\}/g, (_, k) => v?.[k] ?? '') });
-  const em = new Date().toISOString(), antigo = new Date(Date.now() - 3600000).toISOString();
-  const registro = { id: 'diag-real', em, estado: 'CONCLUIDA', agentes: ['regressao', 'investigacao-bugs'], etapas: [{ agente: 'regressao', estado: 'CONCLUIDA', fontes: ['Execuções'], inicio: em, fim: em }], emExecucao: undefined };
-  const dados = { atividades: [], conversas: [{ id: 'conversa-antiga', em: antigo, agente: 'regressao', agenteNome: 'Regressão', modo: 'LOCAL', fontes: [] }],
-    execucoes: [], agentes: [{ id: 'regressao', nome: 'Regressão' }, { id: 'investigacao-bugs', nome: 'Investigação' }], orquestracoes: [registro] };
+  const agora = new Date().toISOString(), antigo = new Date(Date.now() - 3600000).toISOString();
+  const registro = { id: 'diag-real', em: antigo, estado: 'CONCLUIDA', agentes: ['regressao', 'investigacao-bugs'], etapas: [{ agente: 'regressao', estado: 'CONCLUIDA', fontes: ['Execuções'], inicio: antigo, fim: antigo }], emExecucao: undefined };
+  const dados = { atividades: [{ operationId: 'velha', state: 'PASS', at: antigo, tool: 'contexto_projeto', origin: 'MCP', client: 'claude' }],
+    conversas: [{ id: 'conversa-antiga', em: antigo, agente: 'regressao', agenteNome: 'Regressão', modo: 'LOCAL', fontes: [] }],
+    execucoes: [], agentes: [{ id: 'regressao', nome: 'Regressão' }, { id: 'investigacao-bugs', nome: 'Investigação' }], orquestracoes: [registro],
+    auditoria: [{ id: 'a0', at: antigo, canal: 'espacos:criar', estado: 'OK', duracaoMs: 5 }] };
   let grafo = modelo.modelar(dados);
-  assert.ok(grafo.folhas.some(x => x.tipo === 'conversa'), 'a conversa registrada aparece, mesmo sendo antiga');
-  assert.ok(grafo.fontes.some(x => x.tipo === 'orquestrador') && grafo.fontes.some(x => x.tipo === 'investigacao'), 'histórico concluído continua visível');
-  assert.equal(grafo.ativos.agentes, 0, 'nada em andamento: nenhum agente trabalhando');
-  registro.estado = 'EXECUTANDO'; registro.emExecucao = 'investigacao-bugs';
+  assert.equal(grafo.fontes.length, 0, 'tudo é antigo: nenhum terminal');
+  assert.equal(grafo.hubs.length, 0); assert.equal(grafo.folhas.length, 0);
+  dados.conversas.push({ id: 'agora', em: agora, agente: 'regressao', agenteNome: 'Regressão', pergunta: 'Houve regressão?', modo: 'LOCAL', fontes: [] });
+  dados.auditoria.push({ id: 'a1', at: agora, canal: 'espacos:criar', estado: 'OK', duracaoMs: 20, descricao: 'Criar um projeto.' }, { id: 'a2', at: agora, canal: 'servicos:listar', estado: 'OK', duracaoMs: 5, descricao: 'Listar as conexões.' });
   grafo = modelo.modelar(dados);
-  assert.equal(grafo.ativos.investigacoes, 1); assert.equal(grafo.ativos.agentes, 1);
-  assert.equal(grafo.hubs.filter(x => x.tipo === 'agente').length >= 2, true);
+  assert.ok(grafo.fontes.some(x => x.tipo === 'orquestrador'), 'conversa recente abre o terminal do Orchestrator');
+  assert.equal(grafo.folhas.filter(x => x.tipo === 'conversa').length, 1, 'só a conversa de agora');
+  assert.ok(grafo.arestas.some(a => a.de === 'orq' && a.para === 'ag:regressao'), 'Orchestrator ligado ao agente que respondeu');
+  assert.equal(grafo.fontes.find(x => x.id === 'sistema:acoes').linhas[0].texto, 'Criar um projeto.');
+  assert.equal(grafo.fontes.find(x => x.id === 'sistema:conexoes').linhas[0].texto, 'Listar as conexões.');
+  assert.equal(grafo.ativos.agentes, 1);
+  registro.em = agora; registro.estado = 'EXECUTANDO'; registro.emExecucao = 'investigacao-bugs';
+  grafo = modelo.modelar(dados);
+  assert.equal(grafo.ativos.investigacoes, 1);
   assert.equal(grafo.folhas.find(x => x.id === 'diagnostico-etapa:diag-real:investigacao-bugs').estado, 'EXECUTANDO');
-  assert.ok(grafo.arestas.some(x => x.de === 'diagnostico:diag-real' && x.para === 'diagnostico-agente:regressao'));
   assert.ok(modelo.dispor(grafo, 960, 640).pos.has('diagnostico-etapa:diag-real:regressao'));
-  const op = { ...dados, orquestracoes: [], atividades: [{ operationId: 'ab', state: 'STARTED', at: em, tool: 'executar_validacao', origin: 'MCP', client: 'claude' }] };
+  const op = { ...dados, conversas: [], orquestracoes: [], auditoria: [], atividades: [{ operationId: 'ab', state: 'STARTED', at: agora, tool: 'executar_validacao', origin: 'MCP', client: 'claude' }] };
   assert.equal(modelo.modelar(op).ativos.operacoes, 1, 'operação MCP em andamento conta como ativa');
-  op.atividades[0].state = 'PASS';
-  const depois = modelo.modelar(op);
-  assert.equal(depois.ativos.operacoes, 0); assert.ok(depois.folhas.some(x => x.tipo === 'operacao'), 'encerrada, ela continua no histórico');
 });
 
 test('aparelho e navegador aparecem só quando o runner os declarou', () => {
@@ -209,23 +214,4 @@ test('aparelho e navegador aparecem só quando o runner os declarou', () => {
   const modelo = vm.runInNewContext(js + '\nPrumoModeloAtividades;', { tr: x => x });
   assert.deepEqual([...modelo.ambientesDoTeste({ resultado: { ambientes: [{ projeto: 'mobile', dispositivo: 'Pixel 7', navegador: 'chromium', versaoDoNavegador: '126', viewport: '412x915' }, { projeto: 'desktop', navegador: 'webkit' }] } })], ['Pixel 7 · chromium 126 · 412x915', 'desktop · webkit']);
   assert.deepEqual([...modelo.ambientesDoTeste({ resultado: { status: 'PASS' } })], [], 'sem registro, nada é inferido');
-});
-
-test('o painel mostra o sistema ao vivo: terminal por agente com o diálogo, ações do sistema com descrição e conexões à parte', () => {
-  const js = fs.readFileSync('frontend/design-system/painel-atividades.js', 'utf8');
-  const modelo = vm.runInNewContext(js + '\nPrumoModeloAtividades;', { tr: (x, v) => x.replace(/\{(\w+)\}/g, (_, k) => v?.[k] ?? '') });
-  const em = new Date().toISOString();
-  const dados = { atividades: [], conversas: [{ id: 'c1', em, agente: 'regressao', agenteNome: 'Regressão', pergunta: 'Houve regressão?', modo: 'LOCAL', fontes: [] }], execucoes: [],
-    agentes: [{ id: 'regressao', nome: 'Regressão' }, { id: 'qa-geral', nome: 'QA Geral' }],
-    orquestracoes: [{ id: 'o1', em, estado: 'CONCLUIDA', agentes: ['regressao'], etapas: [{ agente: 'regressao', estado: 'CONCLUIDA', inicio: em, fim: em, fontes: ['Execuções'], fatos: ['3 execuções recentes'] }] }],
-    auditoria: [{ id: 'a1', at: em, canal: 'espacos:criar', estado: 'OK', duracaoMs: 20, descricao: 'Criar um projeto.' }, { id: 'a2', at: em, canal: 'servicos:listar', estado: 'OK', duracaoMs: 5, descricao: 'Listar as conexões.' }] };
-  const grafo = modelo.modelar(dados);
-  const dialogo = grafo.fontes.find(x => x.id === 'dialogo:regressao');
-  assert.ok(dialogo && dialogo.agenteId === 'regressao', 'o agente tem terminal próprio');
-  assert.ok(dialogo.linhas.some(l => l.texto.startsWith('Orchestrator ›')) && dialogo.linhas.some(l => l.texto.includes('3 execuções recentes')) && dialogo.linhas.some(l => l.texto.startsWith('Pessoa ›')), 'pedido, fato e fala da pessoa');
-  assert.ok(grafo.arestas.some(a => a.de === 'diagnostico:o1' && a.para === 'dialogo:regressao'), 'a investigação liga ao terminal do agente');
-  assert.equal(grafo.fontes.find(x => x.id === 'sistema:acoes').linhas[0].texto, 'Criar um projeto.');
-  assert.equal(grafo.fontes.find(x => x.id === 'sistema:conexoes').linhas[0].texto, 'Listar as conexões.');
-  assert.ok(grafo.hubs.some(h => h.id === 'agente:qa-geral'), 'agente sem atividade continua aparecendo pelo nome');
-  assert.ok(modelo.dispor(grafo, 1200, 700).pos.has('dialogo:regressao'));
 });
