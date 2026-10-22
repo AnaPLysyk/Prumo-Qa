@@ -1,0 +1,68 @@
+/* Caixa de confirmação do processo principal (caixa-de-confirmacao.html). Cores e fontes vêm de estilo.css e qc.css. */
+html, body.caixa-confirmacao { height: 100%; background: transparent; }
+body.caixa-confirmacao { margin: 0; min-height: 0; display: grid; place-items: center; grid-template-columns: none; padding: 16px; overflow: hidden;
+  background: color-mix(in srgb, #01040c 58%, transparent); animation: cc-fundo .16s ease both; }
+body.caixa-confirmacao::before { display: none; }
+:root[data-tema="claro"] body.caixa-confirmacao { background: color-mix(in srgb, #0d1a33 34%, transparent); }
+:root[data-tema="claro"] .cc-cartao { box-shadow: 0 30px 80px -28px rgba(20, 35, 61, .5); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema="escuro"]):not([data-tema="claro"]) body.caixa-confirmacao { background: color-mix(in srgb, #0d1a33 34%, transparent); }
+  :root:not([data-tema="escuro"]):not([data-tema="claro"]) .cc-cartao { box-shadow: 0 30px 80px -28px rgba(20, 35, 61, .5); }
+}
+/* Sem a janela do app por trás (bandeja), a caixa ocupa a própria janela. */
+/* Ali o processo principal mede a altura natural do cartão para dimensionar a janela: nada encolhe nem rola por dentro. */
+body.caixa-confirmacao.cc-solta { padding: 0; background: var(--painel); animation: none; overflow: auto; }
+body.cc-solta .cc-cartao { width: 100%; max-width: none; max-height: none; overflow: visible; border: 0; border-radius: 0; box-shadow: none; animation: none; align-self: start; }
+body.cc-solta .cc-detalhe { overflow: visible; }
+
+/* Detalhe longo rola dentro do cartão; título e botões ficam sempre à vista. */
+.cc-cartao { position: relative; width: min(470px, 100%); max-height: calc(100vh - 32px); overflow: hidden; display: flex; flex-direction: column; gap: 16px;
+  padding: 22px 24px 20px; border: 1px solid color-mix(in srgb, var(--linha) 80%, transparent); border-radius: 18px;
+  background: radial-gradient(22rem 9rem at 0 0, color-mix(in srgb, var(--cc-tom) 14%, transparent), transparent 70%), var(--painel);
+  box-shadow: 0 30px 90px -24px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .02) inset; animation: cc-entra .2s cubic-bezier(.2, .8, .3, 1) both;
+  --cc-tom: var(--acento); }
+.cc-cartao[hidden] { display: none; }
+.cc-cartao[data-tipo="warning"] { --cc-tom: var(--aviso); }
+.cc-cartao[data-tipo="error"], .cc-cartao[data-tipo="perigo"] { --cc-tom: var(--falha); }
+.cc-cartao.cc-saindo { opacity: .6; transition: opacity .12s; }
+
+.cc-topo { display: flex; align-items: flex-start; gap: 14px; }
+.cc-icone { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; color: var(--cc-tom);
+  background: color-mix(in srgb, var(--cc-tom) 15%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--cc-tom) 30%, transparent) inset, 0 10px 26px -14px var(--cc-tom); }
+.cc-icone svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cc-textos { min-width: 0; padding-top: 1px; }
+.cc-titulo { margin: 0 0 3px; font-size: 11.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--suave); }
+.cc-mensagem { margin: 0; font: 600 16.5px/1.38 var(--fonte-ui); letter-spacing: -.01em; color: var(--texto); overflow-wrap: anywhere; }
+.cc-textos:not(:has(.cc-titulo)) { padding-top: 10px; }
+
+.cc-topo, .cc-marcar, .cc-botoes { flex: none; }
+.cc-detalhe { flex: 0 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; padding-left: 58px; color: var(--suave); font-size: 13px; line-height: 1.5; }
+.cc-detalhe > * { flex: none; }
+.cc-detalhe p { margin: 0; overflow-wrap: anywhere; }
+.cc-dados { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 0; padding: 10px 12px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--linha) 70%, transparent); background: color-mix(in srgb, var(--fundo) 55%, transparent); }
+.cc-dados dt { padding: 0; font-size: 12px; color: var(--suave); }
+.cc-dados dd { margin: 0; color: var(--texto); overflow-wrap: anywhere; }
+.cc-dados dd.cc-codigo { font: 12px/1.5 var(--fonte-mono); }
+.cc-endereco { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; color: var(--texto);
+  border: 1px solid color-mix(in srgb, var(--acento) 32%, var(--linha)); background: color-mix(in srgb, var(--acento) 8%, var(--fundo)); }
+.cc-endereco svg { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--acento); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.cc-endereco-texto { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 12.5px/1.4 var(--fonte-mono); color: var(--suave); }
+.cc-endereco-texto strong { font-weight: 600; color: var(--texto); }
+
+.cc-marcar { display: flex; flex-direction: row; align-items: center; gap: 9px; margin-left: 58px; font-size: 13px; color: var(--texto); cursor: pointer; }
+.cc-marcar[hidden] { display: none; }
+.cc-marcar input { width: 16px; height: 16px; margin: 0; accent-color: var(--acento); }
+
+.cc-botoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 4px; padding-top: 16px; border-top: 1px solid color-mix(in srgb, var(--linha) 55%, transparent); }
+.cc-botoes button.acao { min-height: 36px; padding: 7px 18px; font: 500 13px/1.2 var(--fonte-ui); }
+.cc-botoes button.secundaria { background: transparent; color: var(--texto); }
+.cc-botoes button.primaria { box-shadow: 0 8px 22px -12px rgba(var(--qc-azul), .9); }
+.cc-botoes button.primaria:hover { background: color-mix(in srgb, var(--acento) 88%, white); }
+.cc-botoes button.perigo-cheio { background: var(--falha); border-color: var(--falha); color: #fff; font-weight: 600; box-shadow: 0 8px 22px -12px var(--falha); }
+.cc-botoes button.perigo-cheio:hover { background: color-mix(in srgb, var(--falha) 86%, black); }
+
+@keyframes cc-fundo { from { opacity: 0; } }
+@keyframes cc-entra { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+@media (prefers-reduced-motion: reduce) { body.caixa-confirmacao, .cc-cartao { animation: none; } }
+@media (max-width: 420px) { .cc-detalhe, .cc-marcar { padding-left: 0; margin-left: 0; } .cc-botoes button.acao { flex: 1 1 auto; } }

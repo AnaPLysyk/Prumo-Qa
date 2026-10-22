@@ -85,6 +85,8 @@ function abrirProjetosDaOrigem(painel, servico, espaco = null, autorizar = null,
   /** Importar não escolhe o destino sozinho: ou cria um projeto novo (que nasce só com esta conexão) ou vincula a um projeto que já existe e ainda não tem este serviço. */
   async function decidirDestino(conta, recurso, voltarLista) {
     const existentes = (await chamar(api.espacos)) || [];
+    // Sem outro projeto para vincular, não há o que decidir: o recurso vira o projeto novo direto.
+    if (!existentes.length) return selecionarRecurso(conta, recurso);
     const nomeDe = servico === 'github' ? 'repositório ' : 'projeto ';
     const linhas = existentes.map(p => {
       const jaTem = (p.vinculos || []).some(v => v.servico === servico);
@@ -192,6 +194,12 @@ const AJUDA_DO_MODO = {
 function montarFluxoProjeto(espaco, abrirConexao, escrita = null) {
   const vinculo = servico => (espaco.vinculos || []).find(v => v.servico === servico);
   const atualizar = fn => async () => { const r = await chamar(fn); if (r && !r.canceled) mostrar('projetos'); };
+  // A confirmação do Windows tem "Cancelar" como padrão: se a pessoa só apertar Enter, nada é gravado. Avisa e relê o estado real para a tela não sugerir o contrário.
+  const alterarEscrita = async (servico, integrar) => {
+    const r = await chamar(() => api.escritaHabilitar(espaco.id, servico, integrar));
+    if (r?.canceled) avisar(tr('Alteração cancelada: o modo do {servico} continua como estava. Confirme na janela do Windows para integrar.', { servico: servico[0].toUpperCase() + servico.slice(1) }), true);
+    mostrar('projetos');
+  };
   const origens = [{
     servico: 'manual', nome: 'Manual / Prumo', vinculado: espaco.manualAtivo !== false,
     estado: espaco.manualAtivo === false ? 'Desativado' : 'Disponível',
@@ -204,15 +212,14 @@ function montarFluxoProjeto(espaco, abrirConexao, escrita = null) {
     origens.push({
       servico, nome, vinculado: !!v, desligado: !!v?.desligado, estado: v?.estado || 'Não vinculado',
       // Dois modos por ligação: só ver (nada vai ao serviço) ou integrado (publicar, comentar e editar com os agentes, sempre com a sua confirmação).
-      modo: v && !v.desligado ? { integrado: !!escrita?.[servico], aoAlterar: integrar => atualizar(() => api.escritaHabilitar(espaco.id, servico, integrar))(), ajuda: AJUDA_DO_MODO[servico] } : null,
+      modo: v && !v.desligado ? { integrado: !!escrita?.[servico], aoAlterar: integrar => alterarEscrita(servico, integrar), ajuda: AJUDA_DO_MODO[servico] } : null,
       detalhe: v ? v.recurso.chave + ' · ' + (escrita?.[servico] ? tr('integrado') : tr('só leitura')) : 'Escolha um projeto da conta conectada',
       acoes: v ? [
         // Desligar agora impede consultas e escrita também no backend (não só a cor do cabo).
         [v.desligado ? 'Ligar' : 'Desligar', atualizar(() => api.servicoAlternar(espaco.id, servico, !!v.desligado))],
         ...(v.desligado ? [] : [['Verificar', atualizar(() => api.servicoConferir(espaco.id, servico))]]),
         ['Remover', atualizar(() => api.servicoDesvincular(espaco.id, servico))],
-        ...(servico === 'github' && !espaco.pastaLocal
-          ? [['Trazer código', atualizar(() => api.espacoTrazer(espaco.id))]] : [])
+        ...(servico === 'github' ? [['Usar clone na IDE', () => window.PrumoCodigo.origem(espaco)]] : [])
       ] : [['Conectar', () => abrirConexao(servico)]]
     });
   }
@@ -221,7 +228,7 @@ function montarFluxoProjeto(espaco, abrirConexao, escrita = null) {
     estado: espaco.pastaLocal ? 'Vinculada' : 'Não vinculada',
     detalhe: espaco.pastaLocal || 'Código e arquivos deste computador',
     acoes: [[espaco.pastaLocal ? 'Trocar pasta' : 'Escolher pasta',
-      atualizar(() => api.espacoPasta(espaco.id))]]
+      atualizar(() => api.espacoPasta(espaco.id))], [espaco.pastaLocal ? 'Código e publicação' : 'Criar projeto do zero', () => window.PrumoCodigo.origem(espaco)]]
   });
   return DS.fluxoProjeto({
     nome: espaco.nome, descricao: espaco.descricao, codigo: espaco.id,
@@ -369,6 +376,7 @@ function montarSecaoProjeto(espaco, projetos, escrita = null) {
       const area = abrirPainel('Escolha o repositório do projeto');
       area.append(h('p', { class: 'ds-sub' }, 'Com o repositório, os agentes analisam o código e já começam a trabalhar nele, seja desenvolvimento ou automação.'),
         h('div', { class: 'ds-proj-atalhos' },
+          DS.acao('Criar projeto do zero', () => window.PrumoCodigo.criar(espaco), { id: 'repositorio-criar' }),
           DS.acao('Escolher pasta deste computador', async () => { const r = await chamar(() => api.espacoPasta(espaco.id)); if (r && !r.canceled) mostrar('projetos'); }, { id: 'repositorio-pasta', primaria: true }),
           DS.acao('Vincular repositório do GitHub', () => abrirConexao('github'), { id: 'repositorio-github' })));
     });
@@ -394,13 +402,14 @@ abas.projetos = async elemento => {
     const apresentacao = h('div', { class:'ds-proj-vazio-apresentacao' });
     const corpo = h('div', { class:'ds-proj-vazio-corpo' });
     // Criar ou importar ocupa o lugar da apresentação, numa coluna centrada: nada empilhado com rolagem própria.
-    const voltar = () => { etapa.hidden = true; corpo.replaceChildren(); apresentacao.hidden = false; apresentacao.querySelector?.('#espaco-novo')?.focus(); };
+    const voltar = () => { definirDetalheDaTrilha(); etapa.hidden = true; corpo.replaceChildren(); apresentacao.hidden = false; apresentacao.querySelector?.('#espaco-novo')?.focus(); };
     const etapa = h('div', { class:'ds-proj-vazio-painel', hidden:true, onkeydown: ev => { if (ev.key === 'Escape') { ev.stopPropagation(); voltar(); } } },
-      h('button', { type:'button', class:'ds-proj-voltar', id:'projetos-voltar', onclick:voltar }, '← Voltar'), corpo);
-    const abrirEtapa = () => { apresentacao.hidden = true; etapa.hidden = false; corpo.replaceChildren(); return corpo; };
-    const novo = () => abrirFormularioProjeto(abrirEtapa(), null, voltar);
+      corpo);
+    // A trilha da tela (Início › Projetos › Novo projeto) mostra onde a pessoa está; a importação desenha a própria trilha dentro do painel.
+    const abrirEtapa = atual => { apresentacao.hidden = true; etapa.hidden = false; corpo.replaceChildren(); definirDetalheDaTrilha(atual ? [[atual]] : []); return corpo; };
+    const novo = () => abrirFormularioProjeto(abrirEtapa('Novo projeto'), null, voltar);
     const importar = servico => {
-      const abrirLista = () => abrirProjetosDaOrigem(abrirEtapa(), servico, null, autorizar, [['Início', voltar]]);
+      const abrirLista = () => abrirProjetosDaOrigem(abrirEtapa('Importar do ' + { jira: 'Jira', qase: 'Qase', github: 'GitHub' }[servico]), servico, null, autorizar);
       const autorizar = () => {
         corpo.replaceChildren();
         void mostrarConexoesDoProjeto(corpo, null, servico, { soFormulario: true, aoConectar: () => { avisar('Conta conectada.'); void abrirLista(); }, aoCancelar: abrirLista });
@@ -483,7 +492,8 @@ function criarApresentacaoProjetosQase(controleQase,limparPrevia){
           h('div',{class:'cx-passo-linha'},h('strong',{},achei),infoCx('Nada é enviado ao Qase nesta etapa. Cada projeto escolhido vira um projeto independente no Prumo.')),
           h('div',{class:'cx-barra'},filtro,h('label',{class:'cx-todos'},todos,' Todos')),
           lista,
-          h('div',{class:'cx-rodape'},status,h('span',{class:'cx-acoes'},botao('Voltar',async()=>{await limparPrevia();container.replaceChildren();aoVoltar?.();}),importar)))));
+          h('div',{class:'cx-rodape'},status,h('span',{class:'cx-acoes'},importar)))));
+    container.prepend(DS.trilha([['Token do Qase',async()=>{await limparPrevia();container.replaceChildren();aoVoltar?.();}],['Escolher projetos']],{semAtual:false}));
     render();
   }
   return apresentarProjetos;
@@ -898,7 +908,7 @@ async function mostrarConexoesDoProjeto(el, e, servicoDesejado = null, opcoes = 
       h('span',{class:'cx-estado'},e ? (doProjeto ? chipCx('vinculado: '+doProjeto.recurso.chave,'ok') : h('span',{class:'suave'},'Não vinculado a este projeto')) : ativas.length?chipCx(ativas.length===1?'conta autorizada':ativas.length+' contas autorizadas','ok'):h('span',{class:'suave'},'Sem conta autorizada')),
       // Escrita no projeto selecionado: desligada por padrão; cada operação ainda pede confirmação.
       e?h('span',{class:'cx-escrita','data-escrita':sv},chipCx(perm?.[sv]?'escrita habilitada':'somente leitura',perm?.[sv]?'aviso':null),
-        botao(perm?.[sv]?'Desabilitar escrita':'Habilitar escrita…',async()=>{const r=await chamar(()=>api.escritaHabilitar(e.id,sv,!perm?.[sv]));if(r&&!r.canceled)mostrar('projetos');},'escrita-'+sv)):h('span',{class:'cx-escrita'}),
+        botao(perm?.[sv]?'Desabilitar escrita':'Habilitar escrita…',async()=>{const r=await chamar(()=>api.escritaHabilitar(e.id,sv,!perm?.[sv]));if(r?.canceled)avisar(tr('Alteração cancelada: o modo do {servico} continua como estava. Confirme na janela do Windows para integrar.',{servico:sv[0].toUpperCase()+sv.slice(1)}),true);if(r)mostrar('projetos');},'escrita-'+sv)):h('span',{class:'cx-escrita'}),
       h('span',{class:'cx-acoes'},botao(ativas.length?'Adicionar conta':'Conectar '+nomeSv,()=>abrirPainel(sv,bloco),'integracao-conectar-'+sv)));
     const contasNo=ativas.map(c=>{
       const conta=h('div',{class:'cx-conta','data-conta':c.id},
@@ -944,7 +954,7 @@ async function mostrarOperacoesExternas(el,e) {
     h('ul', { id: 'conexoes-operacoes', class: 'cx-ops' }, ops.map(o => h('li', {}, seloOp(o.estado), h('span', {}, o.resumo), h('span', { class: 'suave' }, hora(o.atualizadoEm)), o.erro ? h('span', { class: 'cx-erro' }, o.erro) : null)))));
 };
 
-/** Conexões como ponto de distribuição: serviços de teste e tickets (linhas da tela base) e, abaixo, a IA por MCP (Claude Code e Codex). */
+/** Conexões como ponto de distribuição: serviços de teste e tickets (linhas da tela base) e, abaixo, a IA por MCP (Claude Code, Codex, GitHub Copilot e Gemini CLI). */
 // A configuracao MCP fica em frontend/agentes/mostrarConfiguracaoMcp.js.
 async function mostrarIntegracoesDosAgentes(el,e) {
   const centro = h('div', { id: 'integracoes-agentes', class: 'ds-integracoes' });
@@ -953,13 +963,13 @@ async function mostrarIntegracoesDosAgentes(el,e) {
   const clientes = e?.id === estado.espaco?.id && e.raizContextos ? await chamarSemAviso(() => api.conexoes(e.raizContextos)) : null;
   const painelMcp = h('div', { id: 'conexao-mcp-painel' }); let carregado = false;
   const mcp = h('details', { id: 'conexao-mcp', ontoggle: async (ev) => { if (!ev.currentTarget.open || carregado) return; carregado = true; if (e?.id !== estado.espaco?.id) { painelMcp.replaceChildren(DS.estadoTela('vazio','Selecione este projeto para configurar seus agentes.',null,[DS.acao('Usar projeto',()=>escolherEspaco(e,'agentes'))])); return; } await mostrarConfiguracaoMcp(painelMcp); painelMcp.querySelector('h1')?.remove(); } },
-    h('summary', {}, tr('Configurar e testar Claude Code e Codex (MCP)')), painelMcp);
+    h('summary', {}, tr('Conectar sua IA ao Prumo (MCP)')), painelMcp);
   const abrirMcp = () => { mcp.open = true; mcp.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   const linha = (atributos, nome, detalhe, situacao, ...acoes) => h('div', { class: 'ds-integra', ...atributos }, h('strong', { 'data-i18n-ignore': '' }, nome), h('span', { class: 'suave' }, detalhe), h('span', { class: 'ds-integra-estado' }, situacao), h('span', { class: 'ds-integra-acoes' }, acoes));
-  const ia = ['claude', 'codex'].map((cliente) => {
-    const nome = cliente === 'claude' ? 'Claude Code' : 'Codex'; const c = clientes?.find((x) => x.client === cliente);
+  const ia = ORDEM_DAS_IAS.map((cliente) => {
+    const nome = IAS_DO_MCP[cliente].nome; const c = clientes?.find((x) => x.client === cliente);
     const usado = c?.lastObserved ? tr('Última chamada: {quando}', { quando: hora(c.lastObserved.at) }) : tr('Nenhuma chamada observada');
-    return linha({ 'data-integracao': cliente }, nome, e ? (c ? usado : tr('Estado indisponível agora.')) : tr('Selecione um projeto para configurar.'), c ? selo(c.state) : null, e ? botao(tr('Configurar e testar'), abrirMcp, 'integracao-' + cliente) : null);
+    return linha({ 'data-integracao': cliente }, nome, e ? (c ? usado : tr('Estado indisponível agora.')) : tr('Selecione um projeto para configurar.'), c ? selo(c.state) : null, e ? botao(tr('Conectar e testar'), abrirMcp, 'integracao-' + cliente) : null);
   });
   centro.append(DS.secao('IA por MCP', [h('div', { id: 'integracoes-ia' }, ia), mcp], { acoes: [botao(tr('Abrir Agentes'), () => mostrar('agentes'), 'integracao-abrir-agentes')] }));
 };

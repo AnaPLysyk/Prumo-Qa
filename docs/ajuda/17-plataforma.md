@@ -96,7 +96,7 @@ Para conferir a separação sem publicar nada, execute `node --test testes/unita
 
 As contas de Jira, Qase e GitHub não fazem login no Prumo; o login do aplicativo pertence exclusivamente ao módulo Login. As contas autorizadas para integrações são gerenciadas em **Projetos > bolha do serviço > Contas e permissões**. Para começar sem nenhum projeto, use **Projetos > Criar projeto manual** ou **Importar do Qase/Jira/GitHub**.
 
-O formulário de credenciais, o botão de autorização do GitHub, a prévia e importação de projetos Qase, a validação de contas, a habilitação de escrita e o histórico de operações estão em frontend/projetos/tela-projetos.js. O Device Flow fica em backend/conexoes/integracoes/autorizacaoGitHub.ts e os canais respectivos são registrados no controlador de Conexões. O mapa visual e os estilos pertencem ao Design System. A configuração MCP de Claude Code e Codex permanece em frontend/agentes/mostrarConfiguracaoMcp.js e requer selecionar o projeto correspondente.
+O formulário de credenciais, o botão de autorização do GitHub, a prévia e importação de projetos Qase, a validação de contas, a habilitação de escrita e o histórico de operações estão em frontend/projetos/tela-projetos.js. O Device Flow fica em backend/conexoes/integracoes/autorizacaoGitHub.ts e os canais respectivos são registrados no controlador de Conexões. O mapa visual e os estilos pertencem ao Design System. A configuração MCP de Claude Code, Codex, GitHub Copilot e Gemini CLI permanece em frontend/agentes/mostrarConfiguracaoMcp.js e requer selecionar o projeto correspondente.
 
 Contas autorizadas são compartilháveis, mas vincular Jira, Qase e GitHub, habilitar escrita ou consultar informações é por projeto. A exclusão de uma credencial compartilhada pode afetar outros projetos. No backend, backend/conexoes/ preserva o cofre e as chamadas autenticadas; backend/projetos/ armazena os vínculos.
 
@@ -108,7 +108,7 @@ A tela de agentes está em `frontend/agentes/`, não no runtime compartilhado. C
 
 - `tela-agentes.parte.js`: reúne cadastro, seleção, permissões, cérebro visual e orquestrações, com funções e comentários de responsabilidade.
 - `frontend/design-system/painel-atividades.js`: reúne modelo, posições calculadas, canvas, navegação e atualização das atividades. Mantém leitura de dados separada do desenho, dentro do mesmo arquivo.
-- `mostrarConfiguracaoMcp.js`: orientação e teste das conexões MCP de Claude Code e Codex, exibido também por Projetos quando este projeto está selecionado.
+- `mostrarConfiguracaoMcp.js`: passo a passo para conectar Claude Code, Codex, GitHub Copilot e Gemini CLI por MCP (instalar, conectar, testar e usar), exibido em **IA e regras** e também por Projetos quando este projeto está selecionado.
 
 Os fragmentos do bundle são concatenados exatamente na ordem indicada em `frontend/construcao/telas-modulares.json`; não edite diretamente `dist/renderer/interfaces.js`. As permissões e a execução ficam no backend em `backend/agentes/`.
 
@@ -170,7 +170,7 @@ Este fluxo utiliza tarefas determinísticas de inspeção feitas por agentes int
 
 Para cobrir todas as áreas versionadas, execute `npm run auditoria:agentes -- --todas-as-pastas`. O resultado detalhado fica em `.prumo/auditorias/revisao-todas-as-pastas.json`. Cada arquivo do inventário é lido, e um segundo agente confere sua integridade; o relatório separa **candidatos** de falhas efetivamente encontradas. Inspeção automatizada não equivale a compreender manualmente cada função.
 
-Na primeira vistoria ampla, sete candidatos de tamanho elevado foram analisados e preservados: `catalogoDeContratos.ts` é a fonte central dos esquemas IPC/MCP; `registrarCanaisIpc.ts` concentra o registro dos canais; três arquivos CodeMirror são código de terceiros necessário ao editor; `i18n-en-v41.js` contém as traduções utilizadas pela interface; `formulario-caso-local-execucao.test.mjs` reúne cenários separados por comportamento. O tamanho isoladamente não justificou criar pastas extras ou remover funcionalidades.
+Na primeira vistoria ampla, sete candidatos de tamanho elevado foram analisados e preservados: `catalogoDeContratos.ts` é a fonte central dos esquemas IPC/MCP; `registrarCanaisIpc.ts` concentra o registro dos canais; a pasta do Monaco é código de terceiros necessário ao editor; `i18n-en-v41.js` contém as traduções utilizadas pela interface; `formulario-caso-local-execucao.test.mjs` reúne cenários separados por comportamento. O tamanho isoladamente não justificou criar pastas extras ou remover funcionalidades.
 
 ## Andamento da auditoria de manutenção
 

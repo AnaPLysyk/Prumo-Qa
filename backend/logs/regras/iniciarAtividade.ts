@@ -123,7 +123,7 @@ const avisarFalhaDoDiario = (fase: string, id: string) => {
 
 export function iniciarAtividade(p:Projeto,tool:string,origem:Origem,entrada:unknown={},opcoes:{base?:string;diagnostico?:(fase:string,id:string)=>void}={}) {
   const id=randomUUID();const inicio=performance.now();const r=comoObjeto(entrada);
-  const cliente=origem.origin==='CLI'?'terminal':/sdk|test|acceptance|demonstracao|lab-avaliador|inspector/i.test(origem.client??'')?'sdk':/codex/i.test(origem.client??'')?'codex':/claude/i.test(origem.client??'')?'claude':'outro';
+  const cliente=origem.origin==='CLI'?'terminal':/sdk|test|acceptance|demonstracao|lab-avaliador|inspector/i.test(origem.client??'')?'sdk':/codex/i.test(origem.client??'')?'codex':/claude/i.test(origem.client??'')?'claude':/copilot/i.test(origem.client??'')?'copilot':/gemini/i.test(origem.client??'')?'gemini':'outro';
   const e:Omit<Evento,'level'|'digest'>={version:1,operationId:id,projectId:hash(p.manifesto.id),rootHash:hash(p.raiz),manifestHash:p.manifestoHash,
     tool:ferramentas.includes(tool as typeof ferramentas[number])?tool as typeof ferramentas[number]:'desconhecida',origin:origem.origin,client:cliente,clientIdentity:'declarada',clientClassificationVersion:2,
     phase:'start',at:new Date().toISOString(),durationMs:0,state:'STARTED',input:tool==='revisar_cobertura'?{candidates:Math.min(comoLista(r.candidates).length,1000000),existingTests:Math.min(comoLista(r.existingTests).length,1000000),hasRequirement:typeof r.requirement==='string'&&!!r.requirement.trim(),hasSource:typeof r.source==='string'&&!!r.source.trim()}:{},summary:resumoVazio()};

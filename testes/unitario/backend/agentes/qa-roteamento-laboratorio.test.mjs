@@ -269,7 +269,7 @@ for (const [provedor, modo] of provedores) {
       assert.match(sem, /enabled_tools=\["contexto_projeto","revisar_cobertura","consultar_evidencias","listar_politicas","perguntar_ao_orquestrador"\]/); assert.ok(args.includes('read-only')); assert.ok(args.includes('shell_tool'));
     }
     if (provedor === 'copilot') {
-      assert.deepEqual(args.slice(args.indexOf('--available-tools') + 1), ferramentasDeConsulta.map((f) => `prumo(${f})`));
+      assert.deepEqual(args.slice(args.indexOf('--available-tools') + 1), ferramentasDeConsulta.map((f) => `prumo-${f}`));
       const mcp = JSON.parse(args[args.indexOf('--additional-mcp-config') + 1]); assert.deepEqual(mcp.mcpServers.prumo.tools, ferramentasDeConsulta);
       assert.ok(args.includes('--deny-tool=shell') && args.includes('--deny-tool=write'));
     }

@@ -1,5 +1,6 @@
 /** Controlador da funcionalidade atualizacoes: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
-import { dialog, shell, app } from "electron";
+import { shell, app } from "electron";
+import { perguntarNaJanela } from "../aplicativo/janela/caixaDeConfirmacao.js";
 import { repositorio } from "../ajuda/contratos.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { estadoDoAplicativo } from "../aplicativo/estadoDoAplicativo.js";
@@ -18,7 +19,7 @@ import { marcarVersaoVista } from "./servicoVerificacao.js";
 
 export const atualizacaoAbrir: TratadorDoCanal<'atualizacao:abrir'> = async (_a, janela) => {
   if (!estadoDoAplicativo.ultimaRelease || !new RegExp(`^https://github\\.com/${repositorio}/releases/tag/v\\d+\\.\\d+\\.\\d+$`).test(estadoDoAplicativo.ultimaRelease)) throw new Error('NO_VERIFIED_RELEASE: verifique as atualizações antes.');
-  const r = await dialog.showMessageBox(janela!, { type: 'question', title: 'Abrir página oficial', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true,
+  const r = await perguntarNaJanela(janela, { type: 'question', title: 'Abrir página oficial', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true,
     message: 'Abrir a página oficial da nova versão?', detail: `${estadoDoAplicativo.ultimaRelease}\n\nO Prumo não baixa nem instala nada. Confira o SHA-256 informado na página antes de executar o instalador.` });
   if (r.response !== 1) return { opened: false };
   await shell.openExternal(estadoDoAplicativo.ultimaRelease); return { opened: true };
@@ -35,7 +36,7 @@ export const atualizacaoInstalar: TratadorDoCanal<'atualizacao:instalar'> = asyn
   const plataforma = plataformaDoInstalador();
   if (!plataforma) throw new Error('UPDATE_UNSUPPORTED: não há instalador oficial para este sistema; baixe pela página de download.');
   const ehWindows = plataforma === 'win';
-  const r = await dialog.showMessageBox(janela!, { type: 'question', title: 'Atualizar o Prumo QA', buttons: ['Cancelar', 'Atualizar agora'], defaultId: 1, cancelId: 0, noLink: true,
+  const r = await perguntarNaJanela(janela, { type: 'question', title: 'Atualizar o Prumo QA', buttons: ['Cancelar', 'Atualizar agora'], defaultId: 1, cancelId: 0, noLink: true,
     message: `Atualizar para a versão ${v} agora?`, detail: `O Prumo baixa o instalador oficial da release v${v} no GitHub, confere o SHA-256 publicado, fecha, instala e abre de novo. Projetos, histórico e evidências são mantidos.\n\nO instalador não é assinado digitalmente; a conferência do SHA-256 garante que o arquivo é o publicado na release.` });
   if (r.response !== 1) return { canceled: true };
   const teste = !app.isPackaged ? process.env.PRUMO_UPDATE_TEST_DOWNLOAD : undefined;

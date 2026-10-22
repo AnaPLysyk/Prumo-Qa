@@ -8,11 +8,23 @@ Home and chat (floating or in the side panel) use the same agents. A conversatio
 
 Without an external AI, the assistant searches local data, shows its sources and suggests next steps. It does not access the internet. A chat answer does not mean a test was run.
 
-## Claude Code and Codex in the chat
+## QA and IT questions
 
-Claude Code and Codex are optional. The chat uses them only if you authorize them in **Settings** and the program is installed. It asks for an answer without tools, MCP or hooks. The answer identifies its source. Without authorization or the program, chat uses local data and tells you.
+Ask anything about software quality and IT: concepts (regression, smoke, test pyramid), techniques (partitioning, boundary values, decision tables), writing test cases and bug reports, automation, APIs, performance, security, accessibility, CI/CD and agile. If you connected and authorized an AI (Claude Code, GitHub Copilot, Codex or Gemini), Prumo sends the question to the first one that answers, and it acts as a quality engineer; Claude also searches the web when the topic is recent or asks for sources, and cites the links. With no AI available, Prumo answers from its offline QA fundamentals and says so. Questions about your project (failures, runs, metrics) are still answered from the data on this computer, which never leaves it. Answers appear formatted, with lists, bold, code and tables.
 
-MCP is the other direction: Claude and Codex calling Prumo.
+## Voice in the chat
+
+Next to **Send**, the chat box has three buttons. **Microphone**: you speak, click again, and the transcribed text appears in the box for you to review and send. **Headset**: voice-only conversation — you speak, Prumo transcribes it into the chat, answers in text and audio, and listens again until you end it. **Speaker**: turns on reading messages aloud and opens the **voices and characters** panel. Each message also has a listen button, to hear only that one.
+
+In the panel you choose, for each speaker (you, Prumo, Claude Code, Codex, Copilot, Gemini or the Table), one of the voices installed in Windows and a character: normal voice, narrator, robot, child, deep or quick. Characters change the pitch and pace of the chosen voice. For more voices, install them in Windows Settings › Time & language › Speech.
+
+Transcription happens on this computer, with the Whisper model. The first time, Prumo asks for your confirmation and downloads the model (about 76 MB, from huggingface.co); after that the audio never leaves the computer and is not saved to a file. Windows must allow the microphone for Prumo.
+
+## External AIs in the chat
+
+Claude Code, Codex, GitHub Copilot and Gemini CLI are optional. The chat uses one only if you authorize it in **Settings** and the program is installed. For project questions, it can provide the Prumo MCP with read-only tools. For general QA and IT questions, the project MCP is not needed and project data is not sent to the client. The answer identifies its source. Without authorization or the program, chat uses local data and tells you.
+
+After an external answer, the header reports **MCP confirmed** with the MCP tools that completed during that question, **MCP not confirmed** when no MCP call was observed, or **general question · MCP not needed** when the question did not require project data. MCP availability alone is never proof of use.
 
 ## Profile and knowledge
 
@@ -22,7 +34,7 @@ Any learning suggested by a conversation or AI starts as a draft. You can approv
 
 ## Agents
 
-The screen shows the **Prumo Orchestrator**, the Codex and Claude Code clients connected over MCP and the eight specializations. Each agent has:
+The screen shows the **Prumo Orchestrator**, Claude Code, Codex, GitHub Copilot and Gemini CLI clients connected over MCP and the official specializations. Each agent has:
 
 - **Configuration**: turns the specialization on or off and defines what the AI may request. The block is enforced by the MCP server on every call.
 - **Skills**: short instructions for agents. Only approved Skills are sent to Claude Code or Codex, selected based on the question (up to 8 KB). When importing a Skill folder, Prumo accepts only open licenses. Each snippet starts as a draft and no script is run.
@@ -32,7 +44,7 @@ The screen shows the **Prumo Orchestrator**, the Codex and Claude Code clients c
 
 Only the owner can edit, run or delete a personal agent. Making its profile public lets other accounts on this computer view it, but not access the owner's data or run the query. The queries are read-only; core agents remain under Administration.
 
-The **Agents › Project policies** tab at the top contains enabled specializations, editable permissions, human-only operations and the MCP client diagnostic. It is separate from the agent list. Admins can save shared policy changes after native confirmation; regular accounts have read-only access.
+The **Agents › AI and rules** tab at the top has three parts. **Connect AI** walks you through connecting Claude Code, Codex, GitHub Copilot or Gemini CLI to Prumo over MCP (install, connect, test, use). **My rules** keeps rules for this account only: one for all agents and one per agent; they apply in the chat and in connected AIs and never grant permissions. **Project rules** holds enabled specializations, editable permissions and human-only operations. It is separate from the agent list. Admins can save shared policy changes after native confirmation; regular accounts have read-only access.
 
 ## Activity panel
 

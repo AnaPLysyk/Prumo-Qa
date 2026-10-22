@@ -89,7 +89,7 @@ test('falha ao abrir uma tela mostra estado recuperável, sem deixar conteúdo p
 test('seletor lateral lista todos os projetos QA e pastas legadas sem duplicar', () => {
   const fonte = fs.readFileSync('frontend/compartilhado/navegacaoDaJanela.js','utf8');
   const inicio = fonte.indexOf('function montarSeletorProjeto(');
-  const fim = fonte.indexOf('/** Reflete o projeto ativo',inicio);
+  const fim = fonte.indexOf('/** Trilha de telas',inicio);
   assert.ok(inicio>=0 && fim>inicio);
   class No {
     constructor(tag,attrs={},...filhos) {
@@ -116,12 +116,12 @@ test('seletor lateral lista todos os projetos QA e pastas legadas sem duplicar',
     }
   }
   const btn=new No('button'),list=new No('div');list.hidden=true;
-  const chamadas=[];
+  const chamadas=[], eventos=[];
   const estado={aba:'tickets',root:null,espaco:null,jobId:'anterior'};
   const ctx={estado,
     $:s=>s==='#projeto-botao'?btn:s==='#projeto-lista'?list:null,
     h:(tag,props,...children)=>new No(tag,props,...children),
-    document:{addEventListener(){}},
+    document:{addEventListener:(tipo,fn)=>eventos.push({tipo,fn})},
     paraBusca:s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),
     salvarRaiz:()=>chamadas.push('persistir'),
     mostrar:t=>chamadas.push(t)
@@ -157,8 +157,8 @@ test('seletor lateral lista todos os projetos QA e pastas legadas sem duplicar',
   assert.equal(list.hidden,false);
   const busca=list.children[0];assert.equal(busca.focused,true);
   busca.value='Jira';busca.attrs.oninput();
-  assert.equal(itens.find(n=>n.textContent==='Via Jira').hidden,false);
-  assert.equal(itens.find(n=>n.textContent==='Manual').hidden,true);
+  assert.equal(itens.find(n=>n.textContent.includes('Via Jira')).hidden,false);
+  assert.equal(itens.find(n=>n.textContent.includes('Manual')).hidden,true);
   itens.find(n=>n.attrs['data-projeto']==='B').attrs.onclick();
   assert.equal(estado.espaco.id,'B');
   assert.equal(estado.root,'');
@@ -166,6 +166,11 @@ test('seletor lateral lista todos os projetos QA e pastas legadas sem duplicar',
   assert.equal(chamadas.at(-1),'tickets');
   assert.equal(list.hidden,true);
   ctx.montarSeletorProjeto(projetos,pastas);
+  assert.equal(eventos.length,1,'o clique global deve ser registrado uma única vez');
+  btn.onclick({stopPropagation(){}});
+  assert.equal(list.hidden,false);
+  eventos[0].fn({target:new No('div')});
+  assert.equal(list.hidden,true,'a instância nova deve fechar ao clicar fora');
   const b=list.querySelectorAll('button[data-seletor-item]').find(n=>n.attrs['data-projeto']==='B');
   assert.equal(b.attrs['aria-current'],'true');
   list.querySelectorAll('button[data-seletor-item]').find(n=>n.attrs['data-seletor-item']==='local').attrs.onclick();

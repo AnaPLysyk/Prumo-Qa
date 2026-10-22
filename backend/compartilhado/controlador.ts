@@ -10,7 +10,8 @@ export const interfaceExportar: TratadorDoCanal<'interface:exportar'> = async (a
   if (Buffer.byteLength(a.texto, 'utf8') > 2 * 1024 * 1024) throw new Error('EXPORT_FORMAT_INVALID: conteúdo excede 2 MiB');
   const csv = a.tipo === 'metricas-csv'; const ext = csv ? 'csv' : 'json';
   if (!csv) { try { JSON.parse(a.texto); } catch { throw new Error('EXPORT_FORMAT_INVALID'); } }
-  const destino = await dialog.showSaveDialog(janela!, { title: 'Exportar ' + (a.tipo === 'agente' ? 'agente' : a.tipo === 'evidencia-json' ? 'evidências' : 'métricas'), defaultPath: 'prumo-' + a.tipo + '.' + ext, filters: [{ name: ext.toUpperCase(), extensions: [ext] }] });
+  const nome = a.tipo === 'agente' ? 'agente' : a.tipo === 'evidencia-json' ? 'evidências' : a.tipo === 'repositorio-json' ? 'casos do repositório' : 'métricas';
+  const destino = await dialog.showSaveDialog(janela!, { title: 'Exportar ' + nome, defaultPath: 'prumo-' + a.tipo + '.' + ext, filters: [{ name: ext.toUpperCase(), extensions: [ext] }] });
   if (destino.canceled || !destino.filePath) return { exported: false };
   if (path.extname(destino.filePath).toLowerCase() !== '.' + ext) throw new Error('EXPORT_FORMAT_INVALID: escolha um arquivo .' + ext);
   fs.writeFileSync(destino.filePath, a.texto, { flag: 'w', mode: 0o600 });

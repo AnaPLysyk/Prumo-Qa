@@ -11,6 +11,7 @@ import { z } from "zod";
 import { atualizarEspaco, gravarEspacos, lerEspacos, listarEspacos, gravarPastasVinculadas, lerPastasVinculadas, obterEspaco } from "./banco/projetos.js";
 import { listarPropostas } from "../tickets/banco/tickets.js";
 import { lerRepositorioLocal } from "../testes/banco/local.js";
+import { listarRunsLocais } from "../testes/banco/runs.js";
 import { semLinks } from "../compartilhado/seguranca/semLinks.js";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { consultarAtividades } from "../logs/regras/iniciarAtividade.js";
@@ -109,9 +110,14 @@ export function associarEspaco(id:string,dados:z.input<typeof associacaoSchema>,
       const propostaLegada = listarPropostas(id,base).some(p=>p.id===ref.id&&p.tipo===(ref.tipo==='caso-local'?'caso':'bug')&&p.origem==='PESSOA'&&p.estado!=='DESCARTADA'&&!p.remoto);
       if(ref.vinculoId||ref.origem!=='prumo'||!(casoNovo||propostaLegada))throw new Error('TRACE_LOCAL_REFERENCE_INVALID');
     }
+    // Run local (com ou sem Qase): só deste projeto, para o ticket aberto por uma falha ficar ligado à run onde ela aconteceu.
+    if(ref.tipo==='run'&&(ref.vinculoId||ref.origem!=='prumo'||!listarRunsLocais(id,base).some(r=>r.id===ref.id)))throw new Error('TRACE_LOCAL_REFERENCE_INVALID');
   }
   if(e.relacoes.some(r=>JSON.stringify(r.de)===JSON.stringify(d.de)&&JSON.stringify(r.para)===JSON.stringify(d.para)))throw new Error('TRACE_DUPLICATE');
   e.relacoes.push({...d,id:randomUUID(),at:new Date().toISOString(),estado:'VINCULADO',origemRegistro:registradoPeloPrumo?'REGISTRADO_PELO_PRUMO':'DECLARADO_PELO_USUARIO'});e.relacoes=e.relacoes.slice(-500);eventoEspaco(e,'ASSOCIADO');},base);}
+
+/** Remove um vínculo declarado (só dados locais); a justificativa não participa da comparação. */
+export function desassociarEspaco(id:string,dados:z.input<typeof associacaoSchema>,base?:string){const d=associacaoSchema.parse(dados);let removidos=0;atualizarEspaco(id,e=>{const antes=e.relacoes.length;e.relacoes=e.relacoes.filter(r=>!(JSON.stringify(r.de)===JSON.stringify(d.de)&&JSON.stringify(r.para)===JSON.stringify(d.para)));removidos=antes-e.relacoes.length;if(removidos)eventoEspaco(e,'EDITADO');},base);if(!removidos)throw new Error('TRACE_NOT_FOUND');return {removidos};}
 
 export async function criarEspaco(dados:z.input<typeof dadosEspaco>,base?:string,vinculoInicial?:{servico:Servico;conexaoId:string;recurso:Recurso}){
   const d=dadosEspaco.parse(dados);const novoVinculo=vinculoInicial?vinculoSchema.parse({id:randomUUID(),...vinculoInicial,validadoEm:new Date().toISOString(),estado:'VALIDO'}):null;const r=lerEspacos(base);if(r.espacos.length>=200)throw new Error('WORKSPACE_LIMIT');

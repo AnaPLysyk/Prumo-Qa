@@ -45,7 +45,7 @@ export type MesaDeIas = { ias: { provedor: Exclude<Provedor, 'local'>; nome: str
 export type Pendente = 'nome' | 'papel' | null;
 
 /** Um turno da memória da sessão (fica só na janela). */
-export type Turno = { pergunta: string; agente: string; pendente?: Pendente };
+export type Turno = { pergunta: string; agente: string; pendente?: Pendente; /** Começo da resposta dada, só na memória da janela, para a IA entender "e o segundo?". */ resposta?: string };
 
 /** Contexto de onde a pergunta nasceu (por exemplo, o teste aberto na visão de código). */
 export type ContextoChat = { tipo: 'teste'; arquivo: string; linha?: number | null };
@@ -55,6 +55,7 @@ export type Proximo = { rotulo: string; pergunta?: string; aba?: string };
 export type Acao = { tipo: 'aprovar_conhecimento' | 'descartar_conhecimento'; id: string; rotulo: string };
 
 export type Resposta = { agente: { id: string; nome: string; especializacao: string | null }; linhas: string[]; fontes: Fonte[]; modo: 'LOCAL' | 'CLAUDE' | 'CODEX' | 'COPILOT' | 'GEMINI' | 'MESA';
+  mcp?: { estado: 'CONFIRMADO' | 'NAO_CONFIRMADO' | 'SEM_PROJETO' | 'NAO_NECESSARIO'; ferramentas: string[] };
   estilo: Estilo; rota: { agente: string; pontos: number }[]; fatos: string[]; aviso?: string; proximos: Proximo[]; acoes: Acao[]; pendente: Pendente; pessoa: string | null; continuou: boolean; orquestracao?: Orquestracao; mesa?: MesaDeIas };
 
 export const SEGUIMENTO = /^(e |e\?|mais |mais$|detalh|explica|explique|por que|porque|como assim|isso|esse|essa|esses|essas|o primeiro|a primeira|o segundo|a segunda|o ultimo|a ultima|outro|outra|continu|e ontem|e hoje|ok e |e agora)/;

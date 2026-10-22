@@ -9,7 +9,7 @@
   const relacoesDe = (e, tipos, id) => (e?.relacoes || []).filter((r) => [r.de, r.para].some((x) => tipos.includes(x.tipo) && String(x.id) === String(id)));
   const outroLado = (r, tipos, id) => ([r.de, r.para].find((x) => !(tipos.includes(x.tipo) && String(x.id) === String(id))) || r.para);
   const vigente = (e, ref) => !ref.vinculoId || e.vinculos.some((v) => v.id === ref.vinculoId);
-  const servicoDoTipo = { 'caso-local': 'prumo', 'ticket-local': 'prumo', jira: 'jira', 'jira-bug': 'jira', qase: 'qase', 'qase-run': 'qase', 'qase-defeito': 'qase', github: 'github', 'github-pr': 'github', 'github-commit': 'github', automacao: 'local', evidencia: 'local', execucao: 'local', run: 'prumo', contexto: 'prumo', pasta: 'local', projeto: 'prumo', servico: 'prumo' };
+  const servicoDoTipo = { 'caso-local': 'prumo', 'ticket-local': 'prumo', jira: 'jira', 'jira-bug': 'jira', qase: 'qase', 'qase-run': 'qase', 'qase-defeito': 'qase', github: 'github', 'github-pr': 'github', 'github-commit': 'github', 'github-issue': 'github', automacao: 'local', evidencia: 'local', execucao: 'local', run: 'prumo', contexto: 'prumo', pasta: 'local', projeto: 'prumo', servico: 'prumo' };
   const escritaDesligada = (servico) => DS.notaPermissao(tr('Escrita no {s} desligada. Habilite em Projetos — Conexões.', { s: DS.nomesServico[servico] }));
   const atualizarEspaco = async (e) => { const r = await api.espacoObter(e.id); if (r.ok) { estado.espaco = r.data; return r.data; } return e; };
   const resultadoOp = (destino, r) => { if (r && destino?.isConnected) destino.append(painelResultado(r)); return r; };
@@ -26,7 +26,7 @@
   }
   function blocoRelacoes(e, tipos, id) {
     const rels = relacoesDe(e, tipos, id);
-    return DS.bloco('Vínculos no Prumo', rels.length ? h('div', { class: 'ds-celula-nos' }, rels.map((r) => { const o = outroLado(r, tipos, id); return noRef(e, o, ({ qase: 'Caso ', 'qase-defeito': 'Defeito ', automacao: '', 'jira-bug': 'Bug ' }[o.tipo] ?? '') + o.id); }))
+    return DS.bloco('Vínculos no Prumo', rels.length ? h('div', { class: 'ds-celula-nos' }, rels.map((r) => { const o = outroLado(r, tipos, id); return noRef(e, o, o.tipo === 'caso-local' ? tr('Cenário do Prumo') : ({ qase: 'Caso ', 'qase-defeito': 'Defeito ', automacao: '', 'jira-bug': 'Bug ' }[o.tipo] ?? '') + o.id); }))
       : h('p', { class: 'suave' }, tr('Nenhum vínculo declarado.')), DS.link('Ver em Testes › Repositório', () => { DS.fecharModal(); mostrar('vinculos'); }));
   }
 

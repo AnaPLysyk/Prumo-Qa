@@ -2,9 +2,56 @@
   "schemaVersion": 1,
   "versions": [
     {
-      "version": "2.19.0",
+      "version": "2.20.0",
       "status": "repositorio",
       "date": null,
+      "title": "Chat com IAs e evidência real do MCP",
+      "objective": "Permitir conversar com IAs externas pelo chat e deixar explícito quando uma resposta usou ferramentas MCP de verdade.",
+      "features": [
+        "Perguntas gerais de QA e TI podem ser encaminhadas para uma IA externa autorizada, sem enviar os dados do projeto quando o MCP não é necessário.",
+        "Perguntas sobre o projeto podem usar o MCP do Prumo em modo somente leitura.",
+        "O chat identifica a IA que respondeu e diferencia MCP confirmado, MCP não confirmado, MCP sem projeto e pergunta geral sem necessidade de MCP."
+      ],
+      "improvements": [
+        "A evidência lista as ferramentas MCP concluídas durante a pergunta, em vez de tratar disponibilidade como uso.",
+        "Respostas gerais têm orientação de engenheiro de qualidade, exemplos práticos e sugestões de próximos passos.",
+        "Claude Code pode pesquisar a web somente no fluxo de conhecimento geral, quando aplicável."
+      ],
+      "fixes": [
+        "Perguntas conceituais não dependem mais de selecionar um projeto para receber uma resposta.",
+        "O cabeçalho não chama uma resposta geral de 'via CLI, sem MCP' de forma ambígua."
+      ],
+      "differential": "O chat separa claramente resposta externa, consulta MCP observada e resposta geral que não precisava de dados do projeto.",
+      "howItWorks": [
+        "Escolha uma IA no chat ou deixe o modo automático usar uma IA autorizada.",
+        "Para perguntas de projeto, o cliente recebe somente as ferramentas de consulta permitidas.",
+        "Confira no cabeçalho se o MCP foi confirmado e quais ferramentas foram usadas."
+      ],
+      "security": [
+        "O MCP do chat libera somente consultas e revalida a sessão e as políticas no servidor.",
+        "Edição de arquivos, shell, execução e publicação continuam bloqueados nesse fluxo.",
+        "Disponibilidade do MCP não é apresentada como prova de uso."
+      ],
+      "compatibility": [
+        "Conversas, projetos, conexões e configurações existentes são preservados."
+      ],
+      "limitations": [
+        "A confirmação depende de um evento MCP concluído e observado para a mesma pergunta.",
+        "Perguntas gerais não usam o MCP do projeto por desenho.",
+        "A IA externa precisa estar instalada, autorizada e autenticada no próprio cliente."
+      ],
+      "releaseUrl": null,
+      "migration": "Não precisa migrar.",
+      "afterUpdate": [
+        "Abra o chat e escolha uma IA autorizada.",
+        "Faça uma pergunta geral e depois uma pergunta sobre o projeto.",
+        "Confira a diferença entre 'pergunta geral · MCP não necessário' e 'MCP confirmado'."
+      ]
+    },
+    {
+      "version": "2.19.0",
+      "status": "publicada",
+      "date": "2026-10-21",
       "title": "Importar com destino claro e painel de conexões arrastável",
       "objective": "Deixar claro para onde cada importação vai, mostrar as conexões do projeto com a contagem certa e explicar em português as falhas de serviço.",
       "features": [
@@ -41,7 +88,7 @@
         "Conectar pelo navegador depende do serviço de identidade do Prumo; sem ele, o caminho é o token de API.",
         "A posição das conexões fica neste computador."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.19.0",
       "migration": "Não precisa migrar.",
       "afterUpdate": [
         "Abrir Projetos e conferir o novo fluxo Importar."
@@ -493,7 +540,7 @@
       ],
       "differential": "Os agentes ficam mais fortes com o conhecimento da equipe e de Skills abertas, sempre com aprovação humana antes de chegar à IA.",
       "howItWorks": [
-        "O editor (CodeMirror 5) vem embutido, sem rede. Salvar leva o SHA-256 do que foi lido e é recusado se o arquivo mudou fora do Prumo; a troca é atômica e o fim de linha original é preservado."
+        "O editor (Monaco, o do VS Code) vem embutido, numa página isolada e sem rede. Salvar leva o SHA-256 do que foi lido e é recusado se o arquivo mudou fora do Prumo; a troca é atômica e o fim de linha original é preservado."
       ],
       "security": [
         "Um único canal de escrita (testes:gravar): só arquivos de teste e pipelines, só dentro da pasta vinculada, sem link simbólico, até 300 KB, com confirmação nativa do Windows; arquivo com o que parece um segredo não é aberto para edição.",

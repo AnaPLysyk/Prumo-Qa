@@ -8,11 +8,25 @@ O Início e o chat (flutuante ou lateral) usam os mesmos agentes. A conversa gua
 
 Sem conectar uma IA externa, o assistente consulta os dados locais, mostra as fontes e sugere próximos passos. Ele não acessa a internet. Uma resposta do chat nunca significa que um teste foi executado.
 
+## Perguntas de QA e TI
+
+Pergunte qualquer coisa de qualidade de software e de TI: conceitos (regressão, smoke, pirâmide de testes), técnicas (partição, valor-limite, tabela de decisão), como escrever casos e relatos de bug, automação, API, performance, segurança, acessibilidade, CI/CD e métodos ágeis. Se você conectou e autorizou uma IA (Claude Code, GitHub Copilot, Codex ou Gemini), o Prumo manda a pergunta para a primeira que responder e ela age como engenheiro de qualidade; o Claude também pesquisa na web quando o assunto é recente ou pede fonte, e cita os links. Sem nenhuma IA disponível, o Prumo responde com a base offline de fundamentos de QA e avisa que a resposta é dela. Perguntas sobre o seu projeto (falhas, execuções, métricas) continuam sendo respondidas com os dados deste computador, sem sair dele. As respostas aparecem formatadas, com listas, negrito, código e tabelas.
+
+## Voz no chat
+
+Ao lado de **Enviar**, o campo de conversa tem três botões. **Microfone**: você fala, clica de novo, e o texto transcrito aparece no campo para você revisar e enviar. **Fone**: conversa só por voz — você fala, o Prumo transcreve no chat, responde em texto e em áudio e volta a ouvir, até você encerrar. **Alto-falante**: liga a leitura em voz alta das mensagens e abre o painel de **vozes e personagens**. Cada mensagem também tem um botão de ouvir, para escutar só aquela fala.
+
+No painel você escolhe, para cada quem fala (você, o Prumo, Claude Code, Codex, Copilot, Gemini ou a Mesa), uma das vozes instaladas no Windows e um personagem: voz normal, narradora, robô, criança, grave ou ligeira. Os personagens mudam tom e ritmo da voz escolhida. Para ter mais vozes, instale-as em Configurações do Windows › Hora e idioma › Fala.
+
+A transcrição acontece neste computador, com o modelo Whisper. Na primeira vez o Prumo pede sua confirmação e baixa o modelo (cerca de 76 MB, de huggingface.co); depois disso o áudio nunca sai do computador e não é gravado em arquivo. O Windows precisa permitir o microfone para o Prumo.
+
 ## Falar com Claude Code, Codex, Copilot ou Gemini
 
 Na tela Início você escolhe com quem fala: o **Orchestrator** (direto, com os dados deste computador) ou uma IA externa. As IAs externas são opcionais: só aparecem se você autorizar em **Configurações > Assistente** e se o programa estiver instalado. Cada resposta traz o nome e a cor de quem respondeu. A linha de conexão informa se existe pasta local para preparar o MCP, mas não comprova uma chamada real. Para consultar dados da conta pelo MCP, mantenha o Prumo aberto e autenticado; fechar ou sair da conta revoga a sessão.
 
 Com uma pasta local de projeto vinculada, o chat prepara o MCP do Prumo para a IA selecionada e permite apenas as consultas (contexto, cobertura, evidências, políticas e pergunta ao Orquestrador). Propostas, execuções, edição de arquivos e shell ficam bloqueados no chat. No Gemini CLI, a configuração MCP é temporária por conversa, não altera as configurações globais do Gemini. A indicação **MCP disponível** não comprova que a IA chamou uma ferramenta; isso aparece nas atividades observadas do projeto. Sem autorização, instalação ou resposta do cliente, o Prumo usa os dados locais e avisa.
+
+Depois de uma resposta externa, o cabeçalho informa **MCP confirmado** e lista as ferramentas MCP que terminaram durante aquela pergunta. Se aparecer **MCP não confirmado**, a IA respondeu, mas não há chamada MCP observada para aquela resposta. Em perguntas gerais de QA e TI, aparece **pergunta geral · MCP não necessário**, porque esse modo não envia os dados do projeto ao cliente. Não trate a disponibilidade da conexão como prova de uso.
 
 Há duas formas de usar: **pelo Prumo** (o chat da tela Início) e **pelo cliente da IA** (você conversa no Claude Code, Codex, Copilot ou Gemini e conecta o MCP do Prumo em Conexões).
 
@@ -40,7 +54,7 @@ A tela mostra o **Prumo Orchestrator**, as integrações com os clientes de IA d
 - **Skills**: instruções curtas para os agentes. Só as aprovadas são enviadas ao Claude Code ou ao Codex, conforme a pergunta (até 8 KB). Ao importar uma pasta de Skill, o Prumo aceita apenas licenças abertas; cada trecho começa como rascunho e nenhum script é executado.
 - **Cérebro**: tudo o que o agente consulta, agrupado por cor. **Testar uma pergunta** mostra que agente responderia e por quê, sem chamar IA e sem gravar nada.
 
-Na aba **Agentes › Políticas do projeto** (no topo, ao lado de **Agentes** e **Painel de atividades**), o Admin marca as **especializações habilitadas** e ajusta as **Permissões dos agentes**. Contas comuns consultam essas regras, sem poder alterá-las. Se precisar saber por que uma permissão existe, abra **Detalhes** na própria linha. As **Ações reservadas à pessoa** ficam separadas e não podem ser liberadas para os agentes. **Salvar permissões…** só fica disponível após uma alteração e exige a confirmação nativa do sistema; sair sem salvar não aplica as mudanças.
+A aba **Agentes › IA e regras** (no topo, ao lado de **Agentes** e **Painel de atividades**) tem três partes. **Conectar IA** mostra, passo a passo, como ligar Claude Code, Codex, GitHub Copilot ou Gemini CLI ao Prumo por MCP. **Minhas regras** guarda as regras só desta conta: uma para todos os agentes e uma por agente; valem no chat e nas IAs conectadas, sem liberar permissões. Em **Regras do projeto**, o Admin marca as **especializações habilitadas** e ajusta as **Permissões dos agentes**. Contas comuns consultam essas regras, sem poder alterá-las. Se precisar saber por que uma permissão existe, abra o **i** na própria linha. As **Ações reservadas à pessoa** ficam separadas e não podem ser liberadas para os agentes. **Salvar permissões…** só fica disponível após uma alteração e exige a confirmação nativa do sistema; sair sem salvar não aplica as mudanças.
 
 Em **Administração › Agentes**, o Admin pode mudar o nome, a profissão, a especialidade, a personalidade e a aparência 3D dos agentes oficiais; esses ajustes valem para as contas desta instalação. Em **Agentes**, cada pessoa pode configurar **Para a minha conta**: apelido e orientações que não alteram o agente oficial, as capacidades nem as políticas. As preferências são mantidas por ID da conta e não passam para outra conta no mesmo computador. Ainda não há sincronização automática desses perfis entre computadores.
 

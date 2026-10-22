@@ -3,7 +3,9 @@ import { z } from "zod";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { codificarParaUrl } from "../../compartilhado/texto.js";
 import { marcadorDaOperacao } from "../../conexoes/escrita/chaveDaOperacao.js";
+import { ErroServico } from "../../conexoes/integracoes/configuracaoDosServicos.js";
 import { DefOperacao } from "../../conexoes/tipos/operacao.js";
+import { enviarArquivoAoQase } from "./enviarArquivoAoQase.js";
 import { conferirCasosNoQase, listarNoQase, resultadosDaRun } from "./casosQase.js";
 import { conferirIdsDoObjetoQase, idCriadoNoQase } from "./casosQase.js";
 import { criarRun, completarRun, publicar, criarPlano } from "../tipos/escritaQase.js";
@@ -50,18 +52,28 @@ let esperaDaConfirmacao = 1200;
 
 export const definirEsperaDaConfirmacao = (ms: number) => { esperaDaConfirmacao = ms; };
 
+/** Hashes que o resultado leva: os já enviados antes (anexos) e os dos arquivos que este envio subiu, no máximo 10. */
+const anexosDe = (r: z.infer<typeof publicar>['resultados'][number], hashes: Map<string, string>) => [...(r.anexos ?? []), ...(r.arquivos ?? []).map(a => hashes.get(a)).filter((h): h is string => !!h)].slice(0, 10);
+const evidenciasDe = (p: z.infer<typeof publicar>) => p.resultados.reduce((n, r) => n + (r.arquivos?.length ?? 0), 0);
+
 export const publicarResultadosNoQase: DefOperacao<z.infer<typeof publicar>> = {
-  id: 'qase.publicar_resultados', servico: 'qase', rotulo: 'Publicar resultados na run do Qase', efeito: 'Envia o resultado de cada caso (passed, failed, blocked ou skipped) à run. Casos que esta mesma publicação já registrou não são reenviados; depois do envio a run é relida para confirmar.', exigeConfirmacao: true, schema: publicar,
-  resumo: p => `Publicar ${p.resultados.length} resultado(s) na run ${p.runId}: ${(['passed', 'failed', 'blocked', 'skipped'] as const).map(s => `${p.resultados.filter(r => r.status === s).length} ${s}`).filter(t => !t.startsWith('0')).join(', ')}`,
-  async executar(ctx, rec, p, k) {
+  id: 'qase.publicar_resultados', servico: 'qase', rotulo: 'Publicar resultados na run do Qase', efeito: 'Envia o resultado de cada caso (passed, failed, blocked, skipped ou invalid), com o resultado dos passos e os arquivos de evidência do cenário quando houver, à run. Casos que esta mesma publicação já registrou não são reenviados; depois do envio a run é relida para confirmar.', exigeConfirmacao: true, schema: publicar,
+  resumo: p => `Publicar ${p.resultados.length} resultado(s) na run ${p.runId}: ${(['passed', 'failed', 'blocked', 'skipped', 'invalid'] as const).map(s => `${p.resultados.filter(r => r.status === s).length} ${s}`).filter(t => !t.startsWith('0')).join(', ')}${evidenciasDe(p) ? `; ${evidenciasDe(p)} arquivo(s) de evidência` : ''}`,
+  async executar(ctx, rec, p, k, aux) {
     const m = `[${marcadorDaOperacao(k)}]`; await ctx.ler(`/v1/run/${codificarParaUrl(rec.chave)}/${p.runId}`);
     const existentes = await resultadosDaRun(ctx, rec, p.runId); const feitos = new Set(existentes.filter(e => String(e.comment ?? '').includes(m)).map(e => Number(e.case_id)));
     const faltam = p.resultados.filter(r => !feitos.has(r.casoId)); let enviados = 0;
+    // Evidências: cada arquivo sobe uma vez e o hash vai em todos os cenários que o citam. Arquivo fora das pastas de evidência é ignorado, nunca enviado.
+    const hashes = new Map<string, string>(); let ignorados = 0;
+    for (const caminho of new Set(faltam.flatMap(r => r.arquivos ?? []))) {
+      try { const x = await enviarArquivoAoQase(ctx, rec.chave, caminho, aux); if (x.hash) hashes.set(caminho, x.hash); }
+      catch (e) { if (e instanceof ErroServico && e.codigo === 'SERVICE_WRITE_BLOCKED') ignorados++; else throw e; }
+    }
     for (let i = 0; i < faltam.length; i += 200) {
-      const lote = faltam.slice(i, i + 200).map(r => ({ case_id: r.casoId, status: r.status, ...(r.tempoMs !== undefined ? { time_ms: r.tempoMs } : {}), comment: `${mascarar(r.comentario)}\n${m}`.trim(), ...(r.stacktrace ? { stacktrace: mascarar(r.stacktrace) } : {}), ...(r.anexos ? { attachments: r.anexos } : {}) }));
+      const lote = faltam.slice(i, i + 200).map(r => ({ case_id: r.casoId, status: r.status, ...(r.tempoMs !== undefined ? { time_ms: r.tempoMs } : {}), comment: `${mascarar(r.comentario)}\n${m}`.trim(), ...(r.passos?.length ? { steps: r.passos.map(x => ({ status: x.status, ...(x.comentario ? { comment: mascarar(x.comentario) } : {}) })) } : {}), ...(r.stacktrace ? { stacktrace: mascarar(r.stacktrace) } : {}), ...(anexosDe(r, hashes).length ? { attachments: anexosDe(r, hashes) } : {}) }));
       await ctx.enviar('POST', `/v1/result/${codificarParaUrl(rec.chave)}/${p.runId}/bulk`, JSON.stringify({ results: lote })); enviados += lote.length;
     }
-    return { id: String(p.runId), detalhes: { enviados, jaRegistrados: p.resultados.length - faltam.length } };
+    return { id: String(p.runId), detalhes: { enviados, jaRegistrados: p.resultados.length - faltam.length, arquivosEnviados: hashes.size, arquivosIgnorados: ignorados } };
   },
   async reconciliar(ctx, rec, p, k) {
     const m = `[${marcadorDaOperacao(k)}]`; const feitos = new Set((await resultadosDaRun(ctx, rec, p.runId)).filter(e => String(e.comment ?? '').includes(m)).map(e => Number(e.case_id)));

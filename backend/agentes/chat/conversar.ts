@@ -15,7 +15,8 @@ import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { nomeParaChamar, aplicarEstilo } from "../servicoEstiloDoChat.js";
 import { pesosAprendidos } from "../banco/atendimentos.js";
 import { registrarOrquestracao } from "../banco/orquestracao.js";
-import { consultarIaExterna, nomesDosProvedores } from "./consultarIaExterna.js";
+import { consultarIaExterna, nomesDosProvedores, responderComIaAutomatica } from "./consultarIaExterna.js";
+import { responderComFundamentosDeQa } from "./responderComFundamentosDeQa.js";
 import { conduzirMesaDeIas } from "./mesaDeIas.js";
 import { tentarOuPadrao } from "./responderComDadosLocais.js";
 import { regrasDosAgentes } from "../../administracao/servico.js";
@@ -203,6 +204,25 @@ function juntarConhecimentos(o: Opcoes, agente: AgenteChat, pergunta: string, hi
   if (continuou && !rel.length) local.linhas.push('Sobre isso não tenho mais nada registrado. Posso chamar outro agente, ou você me ensina com "lembra que…".');
 }
 
+/**
+ * Pergunta de conhecimento (conceito, técnica, pedido de exemplo, boa prática, TI em geral): vai para a IA, que sabe QA e TI.
+ * Ficam locais só os assuntos que a IA não sabe: dados do projeto (execuções, falhas, métricas, logs...), ajuda do próprio Prumo e conversa sobre a relação (nome, papel).
+ */
+export function perguntaDeConhecimento(pergunta: string, comProjeto = false): boolean {
+  const t = semAcentos(pergunta).trim();
+  if (t.split(/\s+/).length < 2 || /^(oi|ola|opa|e ai|bom dia|boa tarde|boa noite|obrigad[oa]|valeu|ok|certo|tchau)\b[\s!.,?]*$/.test(t)) return false;
+  const emGeral = /\b(em geral|geralmente|normalmente|costuma|costumam|boas praticas|na teoria|conceito)\b/.test(t);
+  // Ajuda do próprio aplicativo: o guia local conhece as telas, e a IA não.
+  if (/\b(prumo|neste (app|aplicativo|sistema)|nesta tela|aqui no|orquestrador|nesta aba|neste botao)\b/.test(t)) return false;
+  const guiaDoApp = /\b(vincular|conectar|agendar|exportar|tema|idioma|cerebro|beekeeper|cadastrar projeto|criar projeto|novo projeto)\b/.test(t) && /\b(como (eu )?(faco|posso|consigo)|onde (fica|vejo|acho|esta|fica)|para que serve|onde eu)\b/.test(t) && !emGeral;
+  if (guiaDoApp) return false;
+  // Dados do projeto: a IA não os tem, só o Prumo.
+  if (!emGeral && (/\b(meu|minha|meus|minhas|nosso|nossa|neste|nesse|deste|desse|desta|dessa)\b.*\b(projeto|execuc|teste|falh|suite|run|ticket|bug|rotina|agenda|caso)/.test(t) || /\b(ultim[oa]s?|hoje|ontem|esta semana|agora)\b.*\b(execuc|falh|run|teste)/.test(t))) return false;
+  if (/\b(como (esta|estao|anda|andam)|situacao|status|resumo|falhou|falharam|diagnostico|quantos? (testes|execucoes|runs|bugs|casos|projetos))\b/.test(t)) return false;
+  if (comProjeto && !emGeral && /\b(falha|falhas|falharam|erro|erros|execucao|execucoes|logs?|metricas?|historico|agendamentos?|rotinas?|cobertura|vinculos?|propostas?|runs?|resultados?|projeto|projetos)\b/.test(t)) return false;
+  return true;
+}
+
 export async function conversar(o: Opcoes): Promise<Resposta> {
   const pergunta = o.pergunta.trim(); const estilo = o.estilo ?? 'amigavel'; const nome = (o.nome || 'Prumo').slice(0, 40); const historico = (o.historico ?? []).slice(-6);
   const perfil = tentarOuPadrao(() => lerPerfil(o.base), null); const pessoa = nomeParaChamar(perfil, o.base);
@@ -240,6 +260,19 @@ export async function conversar(o: Opcoes): Promise<Resposta> {
   const comum = { rota: r.rota, continuou: r.continuou, proximos, ...(orquestracao ? { orquestracao } : {}), ...(aviso ? { aviso } : {}) };
   const provedor = externaDesligada ? 'local' : o.provedor ?? 'local'; const chave = pergunta + '|' + historico.length;
   const vestido = () => aplicarEstilo(local.linhas, estilo, nome, agente, !!o.primeira, local.fatos, pessoa, chave);
+
+  // 3b) Conhecimento de QA e TI: a IA externa autorizada responde como engenheiro de qualidade (com pesquisa na web quando tem); sem nenhuma, a base offline do Prumo.
+  const seguimentoGeral = r.continuou && !!historico.at(-1)?.resposta && (local.generico || local.vazio);
+  // Só no modo automático (ninguém escolheu uma IA): quem escolheu Claude, Codex, Copilot, Gemini ou a Mesa fala com ela, com o MCP do Prumo.
+  if (!teste && !o.agente && (o.provedor ?? 'local') === 'local' && (perguntaDeConhecimento(pergunta, !!o.espacoId) || seguimentoGeral)) {
+    const base = { o, agente, pergunta, estilo, nome, perfil, historico, comum, montar };
+    const automatica = plataforma.iaExterna ? await responderComIaAutomatica(base) : { avisos: [] as string[] };
+    if ('resposta' in automatica) return automatica.resposta;
+    const fundamentos = responderComFundamentosDeQa(pergunta);
+    const falhas = automatica.avisos.length ? `${automatica.avisos.join('; ')}.` : '';
+    if (fundamentos) return montar(agente, { linhas: fundamentos, fontes: [], fatos: ['fundamentos=' + fundamentos.length] }, 'LOCAL', { ...comum, aviso: [falhas, 'Resposta da base offline do Prumo; com uma IA conectada e autorizada a resposta é completa e pesquisa na web.'].filter(Boolean).join(' ') });
+    return montar(agente, { linhas: ['Não tenho essa resposta na base offline do Prumo. Conecte e autorize o Claude Code, o GitHub Copilot, o Codex ou o Gemini (Ajustes › Assistente, e entre na conta dele) e eu respondo como engenheiro de qualidade, com pesquisa na web.'], fontes: [{ rotulo: 'Conexões', aba: 'conexoes' }], fatos: [] }, 'LOCAL', { ...comum, ...(falhas ? { aviso: falhas } : {}) });
+  }
   if (provedor === 'local') return montar(agente, { ...local, linhas: vestido() }, 'LOCAL', comum);
 
   if (provedor === 'mesa') return conduzirMesaDeIas({ o, agente, pergunta, local, estilo, nome, perfil, historico, comum, montar, vestido });

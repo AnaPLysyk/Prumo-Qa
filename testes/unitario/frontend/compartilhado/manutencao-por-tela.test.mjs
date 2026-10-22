@@ -43,7 +43,9 @@ test('toda fonte visual tem entrada declarada ou pertence à página de recupera
   const html=fs.readFileSync('frontend/compartilhado/runtime/index.html','utf8');
   const scripts=new Set([...html.matchAll(/(?:src|href)="telas\/([^"]+)"/g)].map(x=>'frontend/'+x[1]));
   const arquivos=arquivosEm('frontend').filter(x=>/\.(?:js|css|html)$/.test(x));
-  const semEntrada=arquivos.filter(x=>!recursos.has(x)&&!partes.has(x)&&!scripts.has(x)&&!x.includes('/web/'));
+  // A página isolada do editor (editor.html, editor.js e o Monaco) é aberta pelo iframe do clienteDoEditor.js, não por um script do index.html.
+  const doEditorIsolado=x=>x.startsWith('frontend/editor-de-codigo/')&&x!=='frontend/editor-de-codigo/clienteDoEditor.js';
+  const semEntrada=arquivos.filter(x=>!recursos.has(x)&&!partes.has(x)&&!scripts.has(x)&&!x.includes('/web/')&&!doEditorIsolado(x));
   assert.deepEqual(semEntrada,[],'fonte sem entrada de uso; revise antes de excluir');
 });
 test('o MVP remoto nao carrega SDK Supabase experimental',()=>{

@@ -55,7 +55,8 @@ function montar(opcoes={}) {
       :{ok:false,error:{message:'GITHUB_CONNECTION_NOT_CONFIGURED: configure o OAuth App'}};}
   };
   const DS={info:texto=>h('span',{},texto),chip:texto=>h('span',{},texto),carregando:texto=>h('span',{},texto),
-    secao:(titulo,conteudo)=>h('section',{},titulo,conteudo)};
+    secao:(titulo,conteudo)=>h('section',{},titulo,conteudo),
+    trilha:itens=>h('nav',{},itens.map(([t,a])=>a?h('button',{onclick:a},t):h('span',{},t)))};
   const ctx={h,botao,campoPlataforma,DS,tr:texto=>texto,abas:{},api,estado:{espaco:null},avisar:(...xs)=>notificacoes.push(xs),
     chamar:async fn=>{const r=await fn();return r.ok?r.data:null;},mostrar:name=>telas.push(name),hora:String};
   vm.createContext(ctx);vm.runInContext(fonte,ctx);
@@ -114,7 +115,7 @@ test('Qase pode selecionar todos, buscar e desmarcar registros visíveis',async(
 test('Cancelar Qase descarta a prévia e não importa projetos',async()=>{
   const v=await montar();v.abrir();v.tela.querySelector('#conexao-token').value='fake';
   await v.clicar('qase-conectar');
-  const botao=v.tela.querySelector('#conexao-qase-projetos').querySelectorAll('button').find(x=>x.children.includes('Voltar'));
+  const botao=v.tela.querySelector('#conexao-qase-projetos').querySelectorAll('button').find(x=>x.children.includes('Token do Qase'));
   await botao.attrs.onclick();
   assert.deepEqual(v.chamadas.map(x=>x[0]),['prever','cancelar']);
 });
@@ -259,7 +260,7 @@ test('Qase: depois de verificar, o token some da tela e o passo 3 pergunta o que
   assert.equal(importar.disabled,true);
   const caixa=v.tela.querySelectorAll('[data-codigo]')[0];caixa.checked=true;caixa.dispatchEvent({type:'change'});
   assert.equal(importar.textContent,'Trazer 1 projeto');
-  const voltar=v.tela.querySelector('#conexao-qase-projetos').querySelectorAll('button').find(x=>x.children.includes('Voltar'));
+  const voltar=v.tela.querySelector('#conexao-qase-projetos').querySelectorAll('button').find(x=>x.children.includes('Token do Qase'));
   await voltar.attrs.onclick();
   assert.equal(v.tela.querySelector('#qase-passos').hidden,false);
   assert.equal(v.tela.querySelector('#qase-verificado').hidden,true);

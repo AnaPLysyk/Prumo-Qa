@@ -1,5 +1,9 @@
 # Segurança e limites de confiança
 
+## Início manual de casos em runs
+
+`runs:andamento` permite consultar com Testes VER; informar um caso para iniciar exige Testes USAR no processo principal. A autoria vem da sessão, nunca dos parâmetros da janela. `andamento-manual.json` usa a persistência local validada e separa projeto, run, caso e vínculo Qase. Um início não é resultado nem execução automatizada. Para uma run remota, o backend consulta a run e confere a participação do caso antes de gravar; preparar um registro de automação vinculado a uma run remota também confere seus casos. A foto usa a preferência local do perfil, sem nova requisição de imagem. Nada desse acompanhamento altera atribuição ou resultado no Qase. Resultados manuais permanecem identificados como MANUAL e não substituem evidências de execução.
+
 ## Autenticação online (MVP em desenvolvimento, ainda não publicada)
 
 A nova arquitetura mantém o login visual em `frontend/login/`, a autorização e a sessão IPC em `backend/login/` e a API central no Render em `backend/login/servidor/`. O processo principal do Electron envia e-mail e senha por HTTPS para Better Auth, que valida os hashes de senha, os e-mails e as sessões em PostgreSQL. A senha **não é gravada nos arquivos locais do Prumo**; o cookie de sessão fica somente no processo principal, sem acesso do Renderer. Sair revoga a sessão remota e encerra a sessão local. Pastas de dados são separadas por identidade autenticada, mas arquivos já presentes no perfil do Windows não são automaticamente apagados e não estão protegidos de outros usuários com acesso ao mesmo perfil do sistema operacional.
@@ -52,9 +56,27 @@ Variáveis no Render (sem elas as rotas respondem 503 `INTEGRATION_NOT_CONFIGURE
 
 Limites conhecidos: o Qase não tem OAuth público documentado e segue por token de API; abrir a página de tokens não significa autorização concluída. Contas conectadas por token antes desta versão continuam funcionando; para migrar, remova a conexão e conecte de novo pelo navegador (o Prumo recusa duplicar a mesma conta). A homologação com contas de teste reais do GitHub e da Atlassian depende de os dois aplicativos serem cadastrados e das variáveis estarem no Render.
 
+## Perguntas de conhecimento e pesquisa na web
+
+No modo automático do chat (ninguém escolheu uma IA), uma pergunta de conhecimento de QA e TI — conceito, técnica, boa prática, nunca dado do projeto — vai para as IAs já autorizadas em Ajustes › Assistente, uma por vez (Claude Code, Copilot, Codex, Gemini), em pasta temporária vazia, sem o servidor MCP do Prumo e sem os fatos locais do projeto; só a pergunta, as últimas trocas da sessão (sem gravar) e o conhecimento aprovado da pessoa vão no prompt. Perguntas sobre execuções, falhas, métricas e demais dados do projeto continuam locais. Somente ao Claude Code, nesse caminho, são liberadas as ferramentas `WebSearch` e `WebFetch` (leitura da web; nenhuma outra ferramenta, edição ou execução). O conteúdo de páginas é tratado como dado, nunca como instrução, e a resposta passa pelo mascaramento de segredos. A Administração pode desligar o uso de IA externa, e então só a base offline responde. Quem escolhe uma IA ou a Mesa mantém o comportamento anterior (com o MCP do Prumo, somente leitura).
+
+## Voz: microfone e transcrição local
+
+A janela só pode usar o **microfone** (nunca a câmera) e só a própria página do Prumo (`controleDaJanela.ts`: o pedido de permissão e a checagem aceitam apenas `media` de áudio vindo de `index.html`; qualquer outra permissão é negada). O áudio é gravado na memória da janela, convertido para 16 kHz e enviado ao processo principal pelo canal `voz:transcrever` (limite de 60 s, validado pelo contrato); a transcrição é feita localmente pelo Whisper (`backend/voz/reconhecimento.ts`) e só o texto volta. Nenhum áudio é gravado em disco nem enviado pela rede. A única chamada de rede da voz é o download do modelo `onnx-community/whisper-base` (huggingface.co, host e modelo fixos), feito uma vez por `voz:preparar` **depois de uma confirmação nativa**; a transcrição nunca baixa nada (`allowRemoteModels` fica desligado). O modelo fica em `modelos-voz`, na pasta de dados do Prumo.
+
 ## Em poucas palavras
 
 O Prumo limita o que pode ler e executar, pede confirmação do sistema para ações protegidas e guarda tokens no cofre do sistema quando há suporte. O login central foi projetado para separar contas do Prumo, mas não é uma barreira de segurança entre pessoas que compartilham a mesma conta do sistema operacional. Os testes automatizados não comprovam uma autenticação humana real, e o Prumo não é uma sandbox: comandos e dependências do próprio projeto ainda precisam ser confiáveis. O instalador não tem assinatura digital; confira o SHA-256, sabendo que ele não confirma quem criou o arquivo.
+
+## Caixa de confirmação do processo principal
+
+Neste documento, "confirmação nativa" (ou "do Windows") é a caixa que o processo principal mostra antes de uma ação protegida. Ela tem o visual do Design System, mas não faz parte da página do app: é outra página (`dist/renderer/caixa-de-confirmacao.html`) desenhada por cima da janela, sem preload, com sandbox e sem navegação. A página do app não lê, não clica nem desenha por cima dela, e não consegue responder por ela.
+
+- O texto e os botões vêm do processo principal pela URL da caixa. A escolha volta pelo fragmento da própria caixa (`#resposta=<botão>&marcado=0|1`, só no quadro principal), e só um índice de botão existente é aceito.
+- **Imitação:** a página pode desenhar algo parecido, mas uma imitação não autoriza nada. Para reduzir a troca de última hora (uma caixa falsa no lugar da real), a caixa só aceita resposta depois de ficar na tela por 400 ms (700 ms quando a ação apaga algo). Com mouse, ela também espera que o ponteiro se mexa sobre ela. Teclado, toque e caneta respondem direto.
+- Confirmações vêm uma por vez; aviso de um botão só não entra na fila. Fechar a janela pelo X (que a esconde na bandeja), a caixa falhar ao carregar ou o processo dela cair contam como Cancelar. Pergunta feita para uma janela que já fechou, ou com o app saindo, é cancelada sem abrir nada.
+- Com o app só na bandeja, a caixa abre numa janela própria. A autenticação do Windows (CredUI do broker) continua sendo a do sistema.
+- Limite conhecido: a caixa usa a mesma sessão do navegador que a página e lê dela só a cor de destaque, entre as cinco conhecidas.
 
 ## Sistemas e consolidação 2.13
 
@@ -115,10 +137,10 @@ Credenciais usam o cofre do Electron (DPAPI, Keychain ou Secret Service/KWallet)
 ## IDE de Testes: escrita de arquivos (2.13)
 
 - **Canal único:** `testes:gravar`. Grava ou cria só arquivo de teste (`*.spec.*`, `*.test.*`, `*.feature`, `test_*.py`), ou pipeline do GitHub Actions (`.github/workflows/*.yml`, sem subpastas; a confirmação avisa que é CI/CD e que só vale depois de enviado ao GitHub), dentro da pasta vinculada ao projeto, sem link simbólico (de arquivo ou de pasta), em pasta que não seja `node_modules`, `.git`, `dist`, `.prumo` e similares, e até 300 KB de texto.
-- **Confirmação nativa do Windows** a cada gravação, com a pasta, o arquivo e o efeito (arquivo novo ou conteúdo substituído). A página não consegue simular essa caixa.
+- **Confirmação nativa do Windows** a cada gravação, com a pasta, o arquivo e o efeito (arquivo novo ou conteúdo substituído). A página não consegue responder por essa caixa.
 - **Sem sobrescrever o que a pessoa não viu:** a gravação leva o SHA-256 do conteúdo lido; se o arquivo mudou fora do Prumo, é recusada (`TEST_FILE_CHANGED`); criar sobre um arquivo existente também (`TEST_FILE_EXISTS`). A troca é atômica (arquivo temporário e renomeação) e o fim de linha original (CRLF) é preservado.
 - **Segredos:** arquivo cujo conteúdo teria algo mascarado não é aberto para edição, para que a máscara nunca seja gravada por cima do valor real nem o valor real apareça na janela.
-- O editor (CodeMirror 5) vem embutido no aplicativo e não usa rede nem `eval`; nada é executado ao editar. Com o login ligado, o canal exige o nível Usar na tela Testes.
+- O editor (Monaco, o do VS Code) vem embutido no aplicativo e roda numa página isolada (`telas/editor-de-codigo/editor.html`, em um iframe) com política própria: sem rede, sem acesso à ponte do aplicativo e comunicação só por mensagens. É nessa página, e não na janela principal, que `style-src` aceita estilos em linha, porque o Monaco os cria. Ler e gravar arquivos continua sendo da janela, pelos mesmos canais. Nada é executado ao editar. Com o login ligado, o canal exige o nível Usar na tela Testes.
 
 ## Trazer o repositório do GitHub (2.13)
 
@@ -161,6 +183,10 @@ Projetos Prumo têm UUID independente da pasta local opcional. Leituras e relaç
 
 O diagnóstico de integração inspeciona configurações por projeção de metadados, sem devolver segredos; o teste executa exclusivamente o runtime e servidor do próprio Prumo, nunca command/args/env livres encontrados na configuração externa. A consulta SDK é `consultar_evidencias`, sem capability executável. Evidência de protocolo fica em `integracoes`, fora do projeto; SDK não conta como uso observado Codex/Claude. Identidade declarada não é autenticação, e registros antigos não comprovam UTILIZADO nesta tela.
 
+**Conectar IA (Agentes › IA e regras).** Claude Code, Codex, GitHub Copilot e Gemini CLI se conectam pelo mesmo servidor MCP; as políticas do projeto continuam valendo no servidor a cada chamada, sem filtro de ferramentas no cliente. **Conectar ao Prumo** (`conexao:aplicar`) só roda depois da confirmação nativa e executa o `mcp add` do próprio CLI, no escopo do usuário, sem shell (scripts `.js` do npm pelo Node do computador). Antes de escrever, confere os nomes já configurados (`codex mcp list --json` ou o JSON do cliente lido sem seguir atalhos) e não sobrescreve servidor com o mesmo nome; falha nessa leitura recusa a escrita. A inspeção de Copilot (`~/.copilot/mcp-config.json`) e Gemini (`~/.gemini/settings.json`) só aceita a entrada local idêntica à do Prumo, sem env além de `PRUMO_DATA_DIR`/`ELECTRON_RUN_AS_NODE`.
+
+**Regras pessoais.** As regras de **Minhas regras** (uma para todos os agentes, id reservado `todos`, e uma por agente) ficam na pasta da própria conta e entram no prompt da IA externa e nas respostas de `contexto_projeto` e `listar_politicas` só para a conta do escopo MCP. São dados de preferência: o texto avisa que nunca ampliam permissões, e o servidor continua aplicando as políticas do projeto.
+
 O histórico registra referências de contextos efetivamente incluídos na resposta ou consultados na revisão: id, versão, hash, estado e finalidade; no máximo 100 por operação. Não registra texto privado, título, origem textual ou aprovador. Disponibilidade não comprova obediência do modelo. Campos novos são opcionais para manter logs anteriores legíveis.
 
 Além da atualização descrita historicamente abaixo, a 2.6 permite consulta **explícita** de chamados públicos: GET somente em `api.github.com/repos/AnaPLysyk/Prumo-Qa/issues/<n>` e `/events?per_page=100`. Sem cookies, credenciais, redirecionamento ou upload; timeout de 8 s por requisição e até 1 MiB de resposta. O número vem de esquema estrito. Texto de issue é dado exibido por textContent; nenhum comando é formado a partir dele. Status e datas vêm dos rótulos/eventos retornados, com histórico parcial declarado; issue fechada não comprova correção publicada.
@@ -186,6 +212,12 @@ Essa barreira protege a interface do produto contra autorização fabricada pela
 ## Execução
 
 Sem shell no spawn do núcleo. `node` aceita entrypoints locais ou `--test` com arquivos explícitos; eval, loaders, opções arbitrárias e globs são recusados. `npm` aceita apenas `run <script>` e resolve npm-cli.js junto ao executável Node, sem executar npm.cmd por shell. O npm usa seu próprio mecanismo de scripts: um script aprovado pode executar outros comandos. Portanto **scripts do projeto precisam ser confiáveis e revisados**. O Prumo não é sandbox do sistema operacional.
+
+**Terminal da IDE (exceção deliberada à regra acima).** Em Testes › IDE › Código com pasta local, o painel **Terminal** (xterm.js, em página isolada como o editor) roda comandos de uma linha com um shell (`cmd` no Windows, `sh` nos outros sistemas). Os limites são estes:
+- **Confirmação nativa a cada comando**, com a pasta e o texto exato. Sem confirmação nada roda; o canal `ide:comandoexecutar` pede o nível Usar em Testes. Quebra de linha e caracteres de controle são recusados, e texto colado no terminal nunca executa sozinho.
+- **Roda na raiz da pasta vinculada do projeto** (`cwd`), um comando por projeto de cada vez, sem entrada de teclado, por até 10 minutos e 1,5 MB de saída, que sai mascarada como nos outros logs. Parar (Ctrl+C) encerra o processo e os filhos.
+- **O Prumo não é sandbox:** o comando tem as permissões da conta do Windows e pode alterar arquivos fora da pasta; a caixa de confirmação avisa isso. Por isso o terminal só existe com pasta local e nunca é ferramenta MCP nem roda por agendamento. O Orquestrador só pede um comando quando a frase termina em "no terminal" e a execução cai na mesma confirmação.
+- **Ambiente:** herda o do Windows (o PATH é o que acha node, npm e git), menos variáveis com nome de segredo (token, secret, password, credential, api key, private, auth, cookie, session) e as do próprio Prumo, do Electron e `NODE_OPTIONS`. É a diferença para a execução de testes, que não herda o PATH.
 
 Somente SystemRoot/WINDIR (Windows), allowlist explícita e metadados internos da rodada atravessam para o subprocesso. PATH, HOME, NODE_OPTIONS, NODE_TEST_CONTEXT e segredos não são herdados. Para npm, PATH é construído explicitamente com o diretório do Node e System32; o npm acrescenta seus bins locais. Variáveis sensíveis ou que reconfiguram runtime são recusadas por nome. Valores permitidos são mascarados nas saídas, assim como padrões comuns de tokens, senhas, Bearer, URLs com credenciais e chaves privadas. Redação não reconhece todos os formatos possíveis: não use segredos em dados sintéticos.
 
@@ -232,7 +264,7 @@ Falha de escrita de atividade mantém o resultado do núcleo e avisa em stderr (
 
 ## Aplicativo 2.9: escrita externa, agentes e catálogo
 
-- **Escrita desligada por padrão**, por projeto e serviço (Conexões). Cada operação mostra a prévia, pede confirmação nativa do Windows e só então envia. Rotas de escrita em lista fechada por serviço; sem DELETE, sem redirecionamento, IP público fixado e tamanho limitado.
+- **Escrita desligada por padrão**, por projeto e serviço (Conexões). Cada operação mostra a prévia, pede confirmação nativa do Windows e só então envia. Rotas de escrita em lista fechada por serviço; o único DELETE é o de suíte vazia do Qase (rota exata, nunca caso, plano ou run), sem redirecionamento, IP público fixado e tamanho limitado.
 - **Idempotência**: a chave é o resumo do projeto, da operação e dos parâmetros; um marcador `prumo-xxxxxxxxxx` vai em rótulo, descrição ou comentário. Após resposta perdida o Prumo reconcilia lendo o serviço; repetir não duplica. O resultado só vira CONFIRMADA depois de reler.
 - **GitHub**: escrita apenas em branches `prumo/...`, nunca na principal, sem force push e fora de `.github/`; o Pull Request nasce como rascunho.
 - **Agentes**: as políticas por capacidade valem no servidor MCP a cada chamada (8 ferramentas desde a 2.10, com `propor_aprendizado`, e `perguntar_ao_orquestrador`, de leitura: o Orquestrador local responde com os dados do projeto vinculado, sem IA externa, sem gravar a pergunta nem a resposta, com segredos mascarados, sob a capacidade `perguntar_ao_orquestrador` e a Administração dos agentes). A IA só cria rascunhos locais com limite por hora; não cria nem reutiliza aprovações humanas e não acessa credenciais.

@@ -5,7 +5,7 @@ import { especializacoes } from "./tipos/persona.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { listarPropostas } from "../tickets/banco/tickets.js";
 import { listarOrquestracoes } from "./banco/orquestracao.js";
-import { listarAgentesPessoais, importarPreviasAntigas, excluirAgentePessoal, salvarAgentePessoal, lerPreferenciasDosAgentes, salvarPreferenciasDoAgente, consultarAgentePessoal } from "./regras/agentesPessoais.js";
+import { listarAgentesPessoais, importarPreviasAntigas, agentePessoalDoDono, excluirAgentePessoal,salvarAgentePessoal, lerPreferenciasDosAgentes, salvarPreferenciasDoAgente, consultarAgentePessoal } from "./regras/agentesPessoais.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import { rastrearPergunta } from "./chat/conversar.js";
 import { textoNoIdioma } from "../aplicativo/bandeja/conteudoDaBandeja.js";
@@ -26,6 +26,7 @@ import { aprenderTermos, decidirConhecimento, esquecerTermo, vocabularioDoAgente
 import { avaliarAtendimento, registrarAtendimento, listarAtendimentos } from "./banco/atendimentos.js";
 import { conversar } from "./chat/conversar.js";
 import { dialog, shell } from "electron";
+import { perguntarNaJanela } from "../aplicativo/janela/caixaDeConfirmacao.js";
 import { apagarConhecimento, registrarConhecimento, listarConhecimentos } from "./banco/conhecimento.js";
 import { estadoConhecimento } from "./banco/conhecimento.js";
 import { caminhoConhecimento } from "./banco/comBancoDeConhecimento.js";
@@ -59,8 +60,10 @@ export const agentesPessoaisimportar: TratadorDoCanal<'agentes:pessoaisimportar'
   return importarPreviasAntigas(a.espacoId, a.previas, u.id);
 };
 
-export const agentesPessoalexcluir: TratadorDoCanal<'agentes:pessoalexcluir'> = (a) => {
+export const agentesPessoalexcluir: TratadorDoCanal<'agentes:pessoalexcluir'> = async (a, janela) => {
   const u = contaDaSessao(); if (!u) throw new Error('SESSION_REQUIRED: entre com sua conta do Prumo para continuar.');
+  const i = idiomaAtual(); const agente = agentePessoalDoDono(a.id, u.id);
+  if (!(await confirmarNoWindows(janela, textoNoIdioma('agExcluirTitulo', i), textoNoIdioma('agExcluirMsg', i, { n: agente.nome }), textoNoIdioma('agExcluirDet', i), textoNoIdioma('excluirBtn', i)))) return { excluido: false, canceled: true };
   return excluirAgentePessoal(a.id, u.id);
 };
 
@@ -112,7 +115,7 @@ export const conversasListar: TratadorDoCanal<'conversas:listar'> = a => { let a
     .sort((x, y) => y.em.localeCompare(x.em)).slice(0, 40); };
 
 // controladorConhecimento — operações relacionadas
-export const conhecimentoApagar: TratadorDoCanal<'conhecimento:apagar'> = async (a, janela) => { const r = await dialog.showMessageBox(janela!, { type: 'warning', buttons: ['Cancelar', 'Apagar'], defaultId: 0, cancelId: 0, title: 'Apagar conhecimento', message: 'Apagar este conhecimento do banco deste computador?', detail: 'Os agentes deixam de usá-lo. O conhecimento inicial do Prumo não pode ser apagado, só descartado.' }); return r.response === 1 ? apagarConhecimento(a.id) : { apagado: false, canceled: true }; };
+export const conhecimentoApagar: TratadorDoCanal<'conhecimento:apagar'> = async (a, janela) => { const r = await perguntarNaJanela(janela, { type: 'warning', buttons: ['Cancelar', 'Apagar'], defaultId: 0, cancelId: 0, title: 'Apagar conhecimento', message: 'Apagar este conhecimento do banco deste computador?', detail: 'Os agentes deixam de usá-lo. O conhecimento inicial do Prumo não pode ser apagado, só descartado.' }); return r.response === 1 ? apagarConhecimento(a.id) : { apagado: false, canceled: true }; };
 
 export const conhecimentoCriar: TratadorDoCanal<'conhecimento:criar'> = a => registrarConhecimento({ espacoId: a.espacoId, agente: a.agente, tipo: a.tipo, titulo: a.titulo, texto: a.texto, origem: 'PESSOA' });
 
@@ -163,7 +166,7 @@ export const contextosSalvar: TratadorDoCanal<'contextos:salvar'> = a => salvarC
 // controladorPerfil — operações relacionadas
 export const iaDelegacao: TratadorDoCanal<'ia:delegacao'> = async (a, janela) => {
   if (a.valor && !regrasDosAgentes().iaExterna) throw new Error('EXTERNAL_AI_DISABLED: a Administração desligou o uso de Claude Code, Codex, Copilot e Gemini nesta instalação.');
-  if (a.valor) { const nome = nomesDosProvedores[a.provedor]; const r = await dialog.showMessageBox(janela!, { type: 'question', buttons: ['Cancelar', 'Autorizar ' + nome], defaultId: 0, cancelId: 0, title: 'Autorizar ' + nome + ' no chat', message: 'Permitir que o chat do Prumo envie perguntas ao ' + nome + ' instalado neste computador?', detail: 'Quando você escolher ' + nome + ' no chat, a pergunta, a skill do agente e os fatos locais usados na resposta são enviados ao CLI, que usa a conta e as regras do próprio ' + nome + '. Você pode revogar a qualquer momento.' }); if (r.response !== 1) return { canceled: true, ia: lerPreferencias().ia }; }
+  if (a.valor) { const nome = nomesDosProvedores[a.provedor]; const r = await perguntarNaJanela(janela, { type: 'question', buttons: ['Cancelar', 'Autorizar ' + nome], defaultId: 0, cancelId: 0, title: 'Autorizar ' + nome + ' no chat', message: 'Permitir que o chat do Prumo envie perguntas ao ' + nome + ' instalado neste computador?', detail: 'Quando você escolher ' + nome + ' no chat, a pergunta, a skill do agente e os fatos locais usados na resposta são enviados ao CLI, que usa a conta e as regras do próprio ' + nome + '. Você pode revogar a qualquer momento.' }); if (r.response !== 1) return { canceled: true, ia: lerPreferencias().ia }; }
   return { canceled: false, ia: autorizarDelegacaoDeIa(a.provedor, a.valor).ia };
 };
 

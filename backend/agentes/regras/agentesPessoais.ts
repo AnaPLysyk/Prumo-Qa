@@ -37,13 +37,27 @@ export function lerPreferenciasDosAgentes(usuarioId: string, b?: string) {
   return Object.fromEntries(ler(b).ajustes.filter(x => x.usuarioId === usuarioId)
     .map(({ agenteId, apelido, orientacao }) => [agenteId, { apelido, orientacao }]));
 }
+/** Id reservado da regra pessoal que vale para todos os agentes (não é um agente). */
+export const PARA_TODOS_OS_AGENTES = 'todos';
 export function salvarPreferenciasDoAgente(id: string, dados: z.infer<typeof preferenciasDoAgenteSchema>, usuarioId: string, b?: string) {
-  if (id === 'orquestrador' || !agentesChat.some(x => x.id === id)) throw new Error('AGENT_NOT_FOUND');
+  if (id !== PARA_TODOS_OS_AGENTES && (id === 'orquestrador' || !agentesChat.some(x => x.id === id))) throw new Error('AGENT_NOT_FOUND');
   const d = preferenciasDoAgenteSchema.parse(dados), r = ler(b);
   r.ajustes = r.ajustes.filter(x => !(x.agenteId === id && x.usuarioId === usuarioId));
   if (d.apelido || d.orientacao) r.ajustes.push({ agenteId: id, usuarioId, ...d });
   gravar(r, b);
   return d;
+}
+
+/** As regras que a própria pessoa escreveu (para todos e por agente), do jeito que as IAs conectadas por MCP as recebem. */
+export function regrasDaPessoaParaIa(usuarioId: string | null, b?: string) {
+  if (!usuarioId) return { disponivel: false, motivo: 'Sem conta autenticada: não há regras pessoais.' };
+  const p = lerPreferenciasDosAgentes(usuarioId, b);
+  return {
+    disponivel: true,
+    paraTodos: p[PARA_TODOS_OS_AGENTES]?.orientacao || null,
+    porAgente: agentesChat.filter(a => p[a.id]?.orientacao).map(a => ({ agente: a.id, nome: a.nome, regra: p[a.id]!.orientacao })),
+    aviso: 'Regras pessoais da conta conectada: siga-as ao responder. Nunca ampliam permissões nem autorizam ações.'
+  };
 }
 
 /** Os agentes do projeto que esta pessoa pode ver: os dela e os públicos das outras. */
@@ -65,6 +79,13 @@ export function salvarAgentePessoal(espacoId: string, dados: z.infer<typeof dado
   const id = d.id ?? 'pessoal-' + randomUUID();
   r.agentes.push({ id, donoId: usuarioId, espacoId, nome: d.nome, descricao: d.descricao, objetivo: d.objetivo, instrucoes: d.instrucoes, publico: d.publico, ferramenta: d.ferramenta, criadoEm: quando, atualizadoEm: quando });
   gravar(r, b); return { id };
+}
+
+/** O agente da própria pessoa, para mostrar o nome na confirmação de exclusão; de outra pessoa responde como inexistente. */
+export function agentePessoalDoDono(id: string, usuarioId: string, b?: string) {
+  const agente = ler(b).agentes.find((x) => x.id === id && x.donoId === usuarioId);
+  if (!agente) throw new Error('AGENT_NOT_FOUND: agente não encontrado.');
+  return agente;
 }
 
 export function excluirAgentePessoal(id: string, usuarioId: string, b?: string) {

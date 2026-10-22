@@ -32,15 +32,15 @@ function localizarGit(): string | null {
 
 const GIT_AUSENTE = 'GIT_UNAVAILABLE: o git não foi encontrado neste computador. Instale o Git para Windows (git-scm.com) e tente de novo, ou vincule uma pasta que você já tem.';
 
-function git(args: string[], cwd: string | undefined, limiteMs: number): Promise<{ codigo: number; saida: string }> {
+function git(args: string[], cwd: string | undefined, limiteMs: number, limiteSaida = 20_000): Promise<{ codigo: number; saida: string; truncado: boolean }> {
   return new Promise((resolve, reject) => {
     const exe = localizarGit(); if (!exe) { reject(new Error(GIT_AUSENTE)); return; }
     const filho = spawn(exe, args, { cwd, env: ambienteDoGit(), windowsHide: true, shell: false });
-    let saida = ''; const acumular = (b: Buffer) => { if (saida.length < 20_000) saida += b.toString('utf8'); };
+    let saida = '', truncado = false; const acumular = (b: Buffer) => { if (saida.length < limiteSaida) saida += b.toString('utf8'); else truncado = true; };
     filho.stdout.on('data', acumular); filho.stderr.on('data', acumular);
     const relogio = setTimeout(() => { filho.kill(); reject(new Error('GIT_TIMEOUT: o git demorou demais e foi interrompido.')); }, limiteMs);
     filho.on('error', (e: NodeJS.ErrnoException) => { clearTimeout(relogio); reject(new Error(e.code === 'ENOENT' ? GIT_AUSENTE : 'GIT_FAILED: não foi possível iniciar o git.')); });
-    filho.on('close', (codigo) => { clearTimeout(relogio); resolve({ codigo: codigo ?? 1, saida: saida.trim() }); });
+    filho.on('close', (codigo) => { clearTimeout(relogio); resolve({ codigo: codigo ?? 1, saida: truncado ? saida.slice(0, limiteSaida) : (args.includes('-z') ? saida : saida.trim()), truncado }); });
   });
 }
 
@@ -48,6 +48,10 @@ const motivo = (saida: string) => {
   if (/Authentication failed|could not read Username|terminal prompts disabled|Permission denied|403|404|not found|Repository not found/i.test(saida)) return 'GIT_AUTH: o git deste computador não conseguiu acessar o repositório. Se ele é privado, entre no GitHub pelo Git Credential Manager (um `git clone` manual uma vez) e tente de novo.';
   return 'GIT_FAILED: o git recusou a operação. ' + saida.split('\n').slice(-2).join(' ').slice(0, 200);
 };
+
+/** Consulta do git que só lê o repositório: sem shell, sem hooks, sem bloquear o índice e com caminhos literais (nunca padrões). */
+export const consultarGitSomenteLeitura = (args: string[], cwd: string, limiteMs = 15_000, limiteSaida = 20_000) =>
+  git(['--no-optional-locks', '--literal-pathspecs', ...seguras('https'), ...args], cwd, limiteMs, limiteSaida);
 
 /** Clona (pasta nova) ou atualiza (pasta que o Prumo já clonou antes). `url` vem do backend, montada de um `dono/repositorio` validado. */
 export async function clonarOuAtualizarRepositorio(url: string, destino: string, opcoes: Opcoes = {}): Promise<ResultadoDoClone> {

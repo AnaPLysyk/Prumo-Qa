@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <!-- Página isolada do terminal (xterm.js). Sem rede e sem acesso ao aplicativo: desenha a saída que a janela manda e devolve o que a pessoa digitou. O xterm cria estilos em linha, por isso style-src aceita 'unsafe-inline' aqui e não na janela principal. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Terminal</title>
+  <link rel="stylesheet" href="vendor/xterm/xterm.css">
+  <style>
+    @font-face { font-family: "JetBrains Mono Variable"; font-style: normal; font-display: swap; font-weight: 100 800; src: url("../../../../assets/fontes/jetbrains-mono-latin-wght-normal.woff2") format("woff2-variations"); }
+    html, body, #terminal { height: 100%; margin: 0; overflow: hidden; }
+    html { color-scheme: dark; } html:has(body[data-tema="claro"]) { color-scheme: light; }
+    body { background: transparent; }
+    #terminal { box-sizing: border-box; padding: 6px 10px 0; }
+    .xterm .xterm-viewport { background-color: transparent !important; }
+  </style>
+</head>
+<body>
+  <div id="terminal"></div>
+  <script src="vendor/xterm/xterm.js"></script>
+  <script src="vendor/xterm/addon-fit.js"></script>
+  <script src="terminal.js"></script>
+</body>
+</html>

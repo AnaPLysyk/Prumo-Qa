@@ -10,7 +10,7 @@ const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 test('repositório independente é usado na interface somente sem Qase', () => {
   const t = read('frontend/testes/fluxos-repositorio-local.parte.js');
   const v = read('frontend/testes/tela-testes.parte.js');
-  assert.match(v, /if \(!vq && e\.manualAtivo !== false\) await F\.telaCasosLocais\(e, mem, corpo\)/);
+  assert.match(v, /memoriaDaTela\('testes', e\.id\)\.totalCasosLocais = 1/);
   assert.match(t, /async function telaCasosLocais\(e, _mem, corpo\)/);
   assert.match(t, /if \(vinc\(e, 'qase'\)\) return/);
   assert.match(t, /api\.repositorioLocal\(e\.id\)/);
@@ -39,9 +39,15 @@ test('casos locais persistem no novo núcleo, não em propostas nem Qase', () =>
   assert.match(c, /local \? dadosLocal : d/);
 });
 
+test('caso local legado é descartado pela API de propostas, sem quebrar a remoção', () => {
+  const t = read('frontend/testes/tela-testes.parte.js');
+  assert.match(t, /if \(l\.local\?\.legado\) \{ const r = await api\.propostaDescartar\(l\.local\.id\)/);
+  assert.match(t, /else if \(l\.local\) \{ const r = await api\.casoLocalSalvar\(\{ espacoId: e\.id, id: l\.local\.id, remover: true \}\)/);
+});
+
 test('suítes locais têm formulário próprio, edição e escopo do projeto', () => {
   const t = read('frontend/testes/fluxos-repositorio-local.parte.js');
-  assert.match(t, /function formularioSuiteLocal\(e, suites, atual = null\)/);
+  assert.match(t, /function formularioSuiteLocal\(e, suites, atual = null, paiInicial = null\)/);
   assert.match(t, /api\.suiteLocalSalvar\(\{ espacoId: e\.id/);
   assert.match(t, /'Nova suíte local'/);
   assert.match(t, /data-suite-local/);
@@ -82,6 +88,6 @@ test('canais locais são estritos, autorizados e expostos apenas pela ponte', ()
 
 test('detalhe do caso local exibe os dados de teste dos passos, não apenas ação e resultado', () => {
   const t = read('frontend/testes/fluxos-casos-qase.parte.js');
-  assert.match(t, /DS\.bloco\('Passos', passos\.length \? DS\.tabela\(\{ colunas: \['Ação', 'Dados de teste', 'Resultado esperado'\]/);
-  assert.match(t, /celulas: \[s\.acao, s\.dados \|\| '—', s\.esperado \|\| '—'\]/);
+  assert.match(t, /DS\.bloco\(tr\('Passos \(\{n\}\)', \{ n: passos\.length \}\), passos\.length \? DS\.tabela\(\{ colunas: \['#', 'Passo', 'Dados de teste', 'Resultado esperado'\]/);
+  assert.match(t, /s\.dados \|\| '—', s\.formato === 'bdd' \? '—' : \(s\.esperado \|\| '—'\)\]/);
 });

@@ -2,10 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' file: blob: https://fonts.gstatic.com; media-src blob:; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; frame-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' file: blob: https://fonts.gstatic.com; media-src blob:; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Prumo QA</title>
-  <link rel="stylesheet" href="vendor/codemirror-5.65.20.css">
   <link rel="stylesheet" href="estilo.css">
   <link rel="stylesheet" href="qc.css">
   <link rel="stylesheet" href="status.css">
@@ -13,7 +12,7 @@
 <body>
   <header id="lateral">
       <div class="marca"><img src="../../assets/prumo-icon.png" alt="" width="26" height="26"><strong>Prumo QA</strong><span id="versao" class="suave"></span><button id="menu-alternar" class="menu-alternar" type="button" aria-controls="nav" aria-expanded="true" aria-label="Recolher menu" title="Recolher menu"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg></button></div>
-      <div class="seletor-projeto"><button id="projeto-botao" class="projeto" type="button" aria-expanded="false" aria-controls="projeto-lista" title="Trocar de projeto"><span class="suave">Projeto</span><strong id="projeto-atual">nenhum selecionado</strong><svg class="seta" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></button><div id="projeto-lista" class="projeto-lista" role="group" aria-label="Projetos e pastas locais" hidden></div></div>
+      <div class="seletor-projeto"><button id="projeto-botao" class="projeto" type="button" aria-expanded="false" aria-controls="projeto-lista" title="Trocar de projeto"><strong id="projeto-atual">nenhum selecionado</strong><svg class="seta" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg></button><div id="projeto-lista" class="projeto-lista" role="group" aria-label="Projetos e pastas locais" hidden></div></div>
       <nav id="nav" aria-label="Seções">
         <div class="grupo-nav" role="group" aria-label="Trabalho"><span class="grupo-rotulo" aria-hidden="true">Trabalho</span><button data-aba="inicio" title="Início"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Início</span></button><button data-aba="projetos" title="Projetos"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Projetos</span></button><button data-aba="agentes" title="Agentes"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 14h.01M15 14h.01"/></svg><span>Agentes</span></button></div>
         <div class="grupo-nav" role="group" aria-label="Qualidade"><span class="grupo-rotulo" aria-hidden="true">Qualidade</span><button data-aba="tickets" title="Tickets"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 8a2 2 0 0 0 0 4v0a2 2 0 0 1 0 4v2h16v-2a2 2 0 0 1 0-4v0a2 2 0 0 0 0-4V6H4z"/></svg><span>Tickets</span></button><button data-aba="testes" title="Testes"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg><span>Testes</span></button><button data-aba="agenda" title="Agendamentos"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Agendamentos</span></button></div>
@@ -46,6 +45,7 @@
   <script src="app.js"></script>
   <script src="telas/compartilhado/notificacoes.js"></script>
   <script src="telas/ajuda/paineis-da-ajuda.js"></script>
+  <script src="telas/projetos/fluxo-do-codigo.js"></script>
   <script src="telas/projetos/tela-projetos.js"></script>
   <script src="telas/agentes/mostrarConfiguracaoMcp.js"></script>
   <script src="telas/compartilhado/servicosExternos.js"></script>
@@ -55,11 +55,8 @@
   <script src="telas/compartilhado/navegacaoDaJanela.js"></script>
   <script src="telas/testes/propostas.js"></script>
   <script src="vendor/three-0.159.0.min.js"></script>
-  <script src="vendor/codemirror-5.65.20.js"></script>
-  <script src="vendor/codemirror-modo-javascript.js"></script>
-  <script src="vendor/codemirror-modo-python.js"></script>
-  <script src="vendor/codemirror-modo-gherkin.js"></script>
-  <script src="vendor/codemirror-modo-yaml.js"></script>
+  <script src="telas/editor-de-codigo/clienteDoEditor.js"></script>
+  <script src="telas/editor-de-codigo/clienteDoTerminal.js"></script>
   <script src="robos.js"></script>
   <script src="orbitas.js"></script>
   <script src="painel-atividades.js"></script>

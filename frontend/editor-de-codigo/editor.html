@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <!-- Página isolada do editor (Monaco). Sem rede e sem acesso ao aplicativo: só recebe e devolve mensagens da janela. O Monaco cria estilos em linha, por isso style-src aceita 'unsafe-inline' aqui e não na janela principal. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Editor de código</title>
+  <style>
+    @font-face { font-family: "JetBrains Mono Variable"; font-style: normal; font-display: swap; font-weight: 100 800; src: url("../../../../assets/fontes/jetbrains-mono-latin-wght-normal.woff2") format("woff2-variations"); }
+    html, body, #editor { height: 100%; margin: 0; overflow: hidden; }
+    html { color-scheme: dark; } html:has(body[data-tema="claro"]) { color-scheme: light; }
+    body { background: transparent; }
+    .git-add { border-left: 3px solid #54d39b; margin-left: 4px; }
+    .git-mod { border-left: 3px solid #6ea8ff; margin-left: 4px; }
+    .git-del { border-left: 3px solid #ff7b8c; margin-left: 4px; opacity: .8; }
+  </style>
+</head>
+<body>
+  <div id="editor" role="application"></div>
+  <script src="vendor/vs/loader.js"></script>
+  <script src="editor.js"></script>
+</body>
+</html>

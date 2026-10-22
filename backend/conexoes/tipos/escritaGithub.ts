@@ -26,9 +26,9 @@ export const abrirPr = z.object({ branch: ramo, base: ramoBase.optional(), titul
  * Lista fechada das únicas escritas remotas que o Prumo sabe fazer. Cada rota é método + caminho exatos, sem query string.
  * Conferida contra a documentação oficial: Jira Cloud REST v3 (developer.atlassian.com), Qase TestOps API v1 (qase-tms/specs) e GitHub REST
  * (docs.github.com, versão 2022-11-28). O transporte recusa qualquer outra combinação com SERVICE_WRITE_BLOCKED, mesmo que um adaptador peça.
- * Nenhuma rota apaga recurso, altera permissões ou mexe em configuração: só cria ou complementa o que a pessoa autorizou.
+ * Nenhuma rota altera permissões ou mexe em configuração. A única exceção que apaga é a suíte do Qase (DELETE), que o Prumo só envia para suíte vazia, com confirmação nativa.
  */
-export type MetodoEscrita = 'POST' | 'PUT' | 'PATCH';
+export type MetodoEscrita = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 const chave = '[A-Z][A-Z0-9_]*-\\d+';
 
@@ -48,6 +48,8 @@ export const rotas: Record<Servico, { metodo: MetodoEscrita; caminho: RegExp }[]
   qase: [
     { metodo: 'POST', caminho: new RegExp(`^/v1/(case|suite|plan|run|defect)/${codigoQase}$`) },
     { metodo: 'PATCH', caminho: new RegExp(`^/v1/case/${codigoQase}/\\d{1,15}$`) },
+    { metodo: 'PATCH', caminho: new RegExp(`^/v1/suite/${codigoQase}/\\d{1,15}$`) },
+    { metodo: 'DELETE', caminho: new RegExp(`^/v1/suite/${codigoQase}/\\d{1,15}$`) },
     { metodo: 'PATCH', caminho: new RegExp(`^/v1/defect/${codigoQase}/status/\\d{1,15}$`) },
     { metodo: 'POST', caminho: new RegExp(`^/v1/run/${codigoQase}/\\d{1,15}/complete$`) },
     { metodo: 'POST', caminho: new RegExp(`^/v1/result/${codigoQase}/\\d{1,15}$`) },
@@ -56,6 +58,9 @@ export const rotas: Record<Servico, { metodo: MetodoEscrita; caminho: RegExp }[]
     { metodo: 'POST', caminho: new RegExp(`^/v1/case/${codigoQase}/external-issue/attach$`) }
   ],
   github: [
+    { metodo: 'POST', caminho: /^\/user\/repos$/ },
+    { metodo: 'POST', caminho: new RegExp(`^/repos/${dono}/${dono}/git/(blobs|trees|commits)$`) },
+    { metodo: 'PATCH', caminho: new RegExp(`^/repos/${dono}/${dono}/git/refs/heads/prumo/projeto-[a-f0-9-]{36}$`) },
     { metodo: 'POST', caminho: new RegExp(`^/repos/${dono}/${dono}/git/refs$`) },
     { metodo: 'PUT', caminho: new RegExp(`^/repos/${dono}/${dono}/contents/[^?#]{1,500}$`) },
     { metodo: 'POST', caminho: new RegExp(`^/repos/${dono}/${dono}/pulls$`) },

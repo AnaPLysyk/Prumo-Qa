@@ -11,6 +11,6 @@ Com o Prumo, você pode:
 - executar apenas verificações permitidas pelo projeto, depois de aprovar;
 - consultar os resultados e as evidências guardados no computador.
 
-Claude Code e Codex são opcionais. Eles se conectam ao Prumo pelo MCP (protocolo de comunicação entre aplicativos).
+Claude Code, Codex, GitHub Copilot e Gemini CLI são opcionais. Eles se conectam ao Prumo pelo MCP (protocolo de comunicação entre aplicativos).
 
 Os dados ficam neste computador. O Prumo não tem servidor próprio, inteligência artificial própria nem telemetria. Arquivos e contextos locais não são enviados automaticamente. Para publicar algo em outro serviço, você precisa confirmar.

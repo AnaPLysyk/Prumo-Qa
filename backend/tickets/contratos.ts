@@ -43,11 +43,20 @@ export const classificacoesDeFalha = ['PRODUTO', 'OUTRO_BUG', 'MELHORIA'] as con
 export const dadosBug = z.object({ classificacao: z.enum(classificacoesDeFalha).optional(), resumo: z.string().trim().min(3).max(255), descricao: z.string().max(8000).default(''), origem: z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/).optional(), rotulos: z.array(z.string().regex(/^[A-Za-z0-9_.-]{1,50}$/)).max(10).default([]), tipoId: z.string().regex(/^\d{1,12}$/).optional() }).strict();
 
 const revisaoSchema = z.object({ duplicidade: z.boolean(), requisito: z.boolean(), risco: z.boolean(), cobertura: z.boolean(), por: z.string().max(200), em: z.string().datetime() }).strict();
+const destinoSchema = z.enum(['jira', 'qase', 'github']);
+const publicacaoSchema = z.object({
+  destino: destinoSchema,
+  estado: z.enum(['SUCESSO', 'FALHA']),
+  remoto: z.object({ id: z.string().optional(), chave: z.string().optional(), url: z.string().optional() }).strict().nullable(),
+  erro: z.string().max(500).optional(),
+  em: z.string().datetime()
+}).strict();
 
 export const propostaSchema = z.object({
   id: z.string().uuid(), espacoId: z.string().uuid(), tipo: z.enum(['caso', 'bug']), origem: z.enum(['PESSOA', 'PRUMO', 'IA']), cliente: z.string().max(60).optional(),
   estado: z.enum(['RASCUNHO', 'REVISADA', 'PUBLICADA', 'VINCULADA', 'DESCARTADA']), titulo: z.string().max(255), dados: z.record(z.unknown()), requisito: z.string().max(500).default(''), risco: z.string().max(300).default(''),
   similares: z.array(z.string().uuid()).max(10).default([]), revisao: revisaoSchema.nullable().default(null), remoto: z.object({ id: z.string().optional(), chave: z.string().optional(), url: z.string().optional() }).strict().nullable().default(null),
+  publicacoes: z.array(publicacaoSchema).max(3).default([]),
   falhaDeOrigem: z.object({ runLocalId: z.string().uuid(), casoId: z.number().int() }).strict().optional(), criadaEm: z.string().datetime(), atualizadaEm: z.string().datetime()
 }).strict();
 
@@ -57,4 +66,6 @@ export const registro = z.object({ version: z.literal(1), itens: z.array(propost
 
 export type Registro = z.infer<typeof registro>;
 
+export type DestinoPublicacao = z.infer<typeof destinoSchema>;
+export type ResultadoPublicacao = z.infer<typeof publicacaoSchema>;
 export type NovaProposta = { espacoId: string; tipo: 'caso' | 'bug'; origem: 'PESSOA' | 'PRUMO' | 'IA'; cliente?: string; dados: unknown; requisito?: string; risco?: string; falhaDeOrigem?: Proposta['falhaDeOrigem'] };

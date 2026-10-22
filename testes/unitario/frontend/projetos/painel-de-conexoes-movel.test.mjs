@@ -44,7 +44,9 @@ test('cada ligação tem o controle Só ver | Integrado, com ajuda do que o modo
   assert.match(ds, /'aria-pressed': String\(!s\.modo\.integrado\)/);
   assert.match(ds, /'Só ver'\)/);
   assert.match(ds, /'Integrado'\)/);
-  assert.match(tela, /modo: v && !v\.desligado \? \{ integrado: !!escrita\?\.\[servico\], aoAlterar: integrar => atualizar\(\(\) => api\.escritaHabilitar\(espaco\.id, servico, integrar\)\)\(\), ajuda: AJUDA_DO_MODO\[servico\] \} : null/);
+  assert.match(tela, /modo: v && !v\.desligado \? \{ integrado: !!escrita\?\.\[servico\], aoAlterar: integrar => alterarEscrita\(servico, integrar\), ajuda: AJUDA_DO_MODO\[servico\] \} : null/);
+  // Regressão: cancelar a confirmação do Windows avisa e relê o estado, em vez de ficar mudo.
+  assert.match(tela, /api\.escritaHabilitar\(espaco\.id, servico, integrar\)\);\s*if \(r\?\.canceled\) avisar\(/);
   assert.doesNotMatch(tela, /'Integrar \(enviar também\)'/);
   for (const frase of ['publica os defeitos e melhorias que abriu no Jira, comenta resultados', 'criar casos, defeitos e runs e publicar resultados no Qase', 'criar issues e branches, gravar testes e abrir Pull Request em rascunho'])
     assert.ok(tela.includes(frase), frase);

@@ -68,7 +68,7 @@ test('com projeto vinculado, a IA recebe só o MCP do Prumo e só as consultas',
   assert.match(codex, /mcp_servers\.prumo\.command=/); assert.match(codex, /enabled_tools=\["contexto_projeto"/); assert.doesNotMatch(codex, /propor_|executar_validacao/);
   const copilot = argumentosDoProvedorDeIa('copilot', 'p', raiz);
   assert.ok(copilot.includes('--deny-tool=shell')); assert.ok(copilot.includes('--allow-all-tools'));
-  assert.deepEqual(copilot.slice(copilot.indexOf('--available-tools') + 1), ['contexto_projeto', 'revisar_cobertura', 'consultar_evidencias', 'listar_politicas', 'perguntar_ao_orquestrador'].map(f => `prumo(${f})`));
+  assert.deepEqual(copilot.slice(copilot.indexOf('--available-tools') + 1), ['contexto_projeto', 'revisar_cobertura', 'consultar_evidencias', 'listar_politicas', 'perguntar_ao_orquestrador'].map(f => `prumo-${f}`), 'nome que o modelo vê; "prumo(x)" deixaria o Copilot sem ferramentas');
   assert.ok(!copilot.some(a => /propor_|executar_validacao/.test(a)));
 });
 test('sem projeto vinculado não há MCP nem ferramenta liberada; copilot e gemini também mantêm o prompt como texto', () => {

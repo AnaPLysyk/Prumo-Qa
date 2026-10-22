@@ -47,5 +47,5 @@
     DS.modal('Declarar vínculo', [nav, painel, DS.info('Um vínculo declarado registra a sua decisão. Não comprova cobertura nem execução.')], { tamanho: 'md' });
   }
   /** Expõe o fluxo completo às telas mantendo o escopo interno fechado. */
-  window.PrumoFluxos = Object.freeze({ abrirCaso, telaPropostas, telaSuites, telaPlanos, telaRuns, telaVinculos, novaProposta, novoCasoQase, telaCasosLocais, abrirCasoLocal, novaSuite, novoPlano, prepararRun, avancadaQase, carregarQase, tipoCaso, rotuloTipoCaso, resultadosLocais, ticketsExternos, vinc, relacoesDe, outroLado, noRef });
+  window.PrumoFluxos = Object.freeze({ abrirCaso, telaPropostas, telaSuites, telaPlanos, telaRuns, telaVinculos, novaProposta, novoCasoQase, telaCasosLocais, formularioSuiteLocal, abrirCasoLocal, novaSuite, editarSuiteQase, apagarSuiteQase, novoPlano, prepararRun, avancadaQase, carregarQase, tipoCaso, rotuloTipoCaso, resultadosLocais, ticketsExternos, vinc, relacoesDe, outroLado, noRef });
 })();

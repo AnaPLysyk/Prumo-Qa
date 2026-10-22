@@ -21,23 +21,34 @@ function aplicarMenu(fechado, salvar = true) { document.body.dataset.menu = fech
 function montarSeletorProjeto(espacos, pastas) {
   const btn = $('#projeto-botao'), lista = $('#projeto-lista');
   if (!btn || !lista) return;
+  const trocaAtual = (montarSeletorProjeto.troca || 0) + 1;
+  montarSeletorProjeto.troca = trocaAtual;
   const projetos = Array.isArray(espacos) ? espacos : [];
   const locais = (Array.isArray(pastas) ? pastas : []).filter(p =>
     p.root && !projetos.some(e => e.raizContextos === p.root || e.pastaLocal === p.root));
   const item = (nome, ativo, fn, extra = {}) =>
     h('button', { type: 'button', class: 'projeto-item', 'aria-current': ativo ? 'true' : null,
-      onclick: fn, ...extra }, nome);
+      onclick: fn, ...extra }, h('span', { class: 'projeto-item-nome' }, nome), ativo ? h('span', { class: 'projeto-item-estado' }, 'Ativo') : null);
   const fechar = () => { lista.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
-  const escolher = e => {
+  const escolher = async e => {
     estado.espaco = e;
     estado.projetoSelecionadoId = e.id;
     estado.root = e.raizContextos;
     estado.jobId = undefined;
     salvarRaiz();
     fechar();
-    void mostrar(estado.aba);
+    const botao = $('#projeto-botao');
+    if (botao) { botao.setAttribute('data-contexto', 'carregando'); botao.disabled = true; }
+    try {
+      await Promise.resolve(mostrar(estado.aba));
+    } finally {
+      if (botao && trocaAtual === montarSeletorProjeto.troca) {
+        botao.setAttribute('data-contexto', 'ativo');
+        botao.disabled = false;
+      }
+    }
   };
-  const escolherLocal = p => {
+  const escolherLocal = async p => {
     estado.espaco = null;
     estado.projetoSelecionadoId = null;
     estado.root = p.root;
@@ -45,7 +56,16 @@ function montarSeletorProjeto(espacos, pastas) {
     salvarRaiz();
     fechar();
     // Pasta legada não é cadastro QA: apresenta a opção de vincular em Projetos.
-    void mostrar('projetos');
+    const botao = $('#projeto-botao');
+    if (botao) { botao.setAttribute('data-contexto', 'carregando'); botao.disabled = true; }
+    try {
+      await Promise.resolve(mostrar('projetos'));
+    } finally {
+      if (botao && trocaAtual === montarSeletorProjeto.troca) {
+        botao.setAttribute('data-contexto', 'local');
+        botao.disabled = false;
+      }
+    }
   };
   // Menos informação no seletor: título de grupo só quando há projetos e pastas juntos; busca só com muitos itens.
   const doisGrupos = projetos.length > 0 && locais.length > 0;
@@ -95,6 +115,7 @@ function montarSeletorProjeto(espacos, pastas) {
   lista.onkeydown = ev => { if (ev.key === 'Escape') { ev.stopPropagation(); fechar(); btn.focus(); } };
   const caixaSeletor = btn.closest?.('.seletor-projeto');
   if (caixaSeletor) caixaSeletor.onfocusout = ev => { if (!lista.hidden && ev.relatedTarget && !caixaSeletor.contains(ev.relatedTarget)) fechar(); };
+  montarSeletorProjeto.elementosAtuais = { btn, lista, fechar };
   btn.onclick = ev => {
     ev.stopPropagation();
     const abrir = lista.hidden;
@@ -105,35 +126,54 @@ function montarSeletorProjeto(espacos, pastas) {
   if (!montarSeletorProjeto.ligado) {
     montarSeletorProjeto.ligado = true;
     document.addEventListener('click', ev => {
-      if (!lista.hidden && !lista.contains(ev.target) && !btn.contains(ev.target)) fechar();
+      const atuais = montarSeletorProjeto.elementosAtuais;
+      if (atuais && !atuais.lista.hidden && !atuais.lista.contains(ev.target) && !atuais.btn.contains(ev.target)) atuais.fechar();
     });
   }
 }
 
-/** Reflete o projeto ativo nas fontes dos módulos (dica do botão), sem legenda embaixo de cada item do menu. */
+/** Trilha de telas (breadcrumb): as telas visitadas até aqui, no topo da tela; clicar numa anterior volta a ela. Só aparece da segunda em diante. */
+const trilhaDeTelas = { telas: [], detalhe: [] };
+const rotuloDaTela = (aba) => document.querySelector('#nav button[data-aba="' + aba + '"] span')?.textContent?.trim() || aba;
+/** Chamada a cada troca de tela: voltar a uma tela já visitada corta a trilha ali; uma nova entra no fim (no máximo 6). */
+function registrarTela(aba) {
+  const i = trilhaDeTelas.telas.indexOf(aba);
+  trilhaDeTelas.telas = i >= 0 ? trilhaDeTelas.telas.slice(0, i + 1) : [...trilhaDeTelas.telas, aba].slice(-6);
+  trilhaDeTelas.detalhe = [];
+}
+/** Etapas dentro da tela atual (por exemplo Agentes › Cérebro), depois do nome dela; sem itens, limpa. */
+function definirDetalheDaTrilha(itens = []) { trilhaDeTelas.detalhe = itens; desenharTrilha(); }
+function desenharTrilha() {
+  const { telas, detalhe } = trilhaDeTelas;
+  const itens = [...telas.map((aba, i) => [rotuloDaTela(aba), i < telas.length - 1 || detalhe.length ? () => mostrar(aba) : null]), ...detalhe];
+  const antigo = document.getElementById('trilha-de-telas');
+  const no = itens.length > 1 ? DS.trilha(itens, { rotulo: 'Telas visitadas' }) : null;
+  if (no) no.id = 'trilha-de-telas';
+  if (antigo) { if (no) antigo.replaceWith(no); else antigo.remove(); } else if (no) document.getElementById('conteudo')?.prepend(no);
+}
+
+/** Marca o projeto ativo no menu. A dica de cada botão continua sendo só o nome original da tela. */
 function atualizarMenuDoProjeto(espaco) {
-  const vinculos = espaco?.vinculos || [];
-  const tem = servico => vinculos.some(v => v.servico === servico);
-  const fontes = {
-    projetos: espaco ? ['Gerenciar conexões'] : ['Criar projeto'],
-    tickets: [...(tem('jira') ? ['Jira'] : []), ...(tem('qase') ? ['Qase'] : []),
-      ...(tem('github') ? ['GitHub'] : []), 'Prumo'],
-    testes: [...(tem('qase') ? ['Qase'] : []), ...(tem('github') ? ['GitHub'] : []),
-      ...(espaco?.pastaLocal ? ['Local'] : []), 'Prumo'],
-    agenda: ['Projeto'], evidencias: ['Projeto'], metricas: ['Projeto'],
-    logs: ['Projeto'], agentes: ['Projeto']
-  };
-  for (const b of document.querySelectorAll('#nav button[data-aba]')) {
-    const tipo = b.dataset.aba, opcoes = fontes[tipo];
-    if (!opcoes) continue;
-    const titulo = b.querySelector('span')?.textContent?.trim() || tipo;
-    b.title = espaco ? titulo + ' — ' + espaco.nome + ' — ' + opcoes.join(', ') : titulo + ' — Nenhum projeto selecionado';
-    b.dataset.projeto = espaco?.id || '';
-  }
+  for (const b of document.querySelectorAll('#nav button[data-aba]')) b.dataset.projeto = espaco?.id || '';
   document.querySelector('#lateral')?.setAttribute('data-projeto-ativo', espaco?.id || '');
 }
 
+/**
+ * Menus flutuantes são exclusivos: abrir um fecha o que estava aberto. Cada gatilho para a propagação do clique, então a escuta fica na captura.
+ * Gatilho de menu = botão com aria-haspopup aberto, cujo painel flutua (absolute/fixed). Acordeões, abas e o chat flutuante do Orquestrador (que é diálogo, não menu) ficam de fora.
+ */
+function iniciarMenusExclusivos() {
+  document.addEventListener('click', (ev) => {
+    for (const gatilho of document.querySelectorAll('[aria-haspopup][aria-expanded="true"][aria-controls]')) {
+      const painel = document.getElementById(gatilho.getAttribute('aria-controls'));
+      if (!painel || painel.hidden || gatilho.contains(ev.target) || painel.contains(ev.target) || !/^(absolute|fixed)$/.test(getComputedStyle(painel).position)) continue;
+      gatilho.click();
+    }
+  }, true);
+}
+
 function iniciarAjustes() {
+  iniciarMenusExclusivos();
   const bt = $('#ajustes'); const pop = $('#controles'); if (!bt || !pop) return;
   const abrir = (v) => { pop.hidden = !v; bt.setAttribute('aria-expanded', String(v)); };
   bt.addEventListener('click', (ev) => { ev.stopPropagation(); abrir(pop.hidden); });

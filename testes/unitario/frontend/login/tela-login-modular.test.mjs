@@ -14,7 +14,7 @@ function montar(api) {
   const login = carregar('frontend/login/entradaRemota.js').PrumoLoginRemoto({
     api, DS: { alerta: texto => ({ texto }) },
     campo: id => ({ input: { id, value: '' }, no: { id } }),
-    cartao: titulo => [{ titulo }],
+    cartao: titulo => [{ titulo }], comTrilha: nos => nos,
     formulario: (campos, titulo, enviar, links) => ({ tipo: 'formulario', campos, titulo, enviar, links }),
     trocarVista: (...nos) => vistas.push(nos),
     mostrarErro: (_form, erro) => erros.push(erro),

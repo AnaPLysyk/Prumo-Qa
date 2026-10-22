@@ -57,7 +57,7 @@ test('lacunas existentes permanecem visíveis após a mudança de estados vazios
 
 test('sem Qase, ausência de pasta não impede cadastrar casos e suítes locais', () => {
   const origem = fonte('frontend/testes/tela-testes.parte.js');
-  assert.match(origem, /if \(src\.cat\?\.semPasta && !vq\)/);
+  assert.match(origem, /if \(src\.cat\?\.semPasta && !vq && !src\.locais\?\.casos\?\.length && !src\.locais\?\.suites\?\.length\)/);
   assert.match(origem, /Você já pode criar casos e suítes locais sem Qase ou GitHub/);
   assert.match(origem, /Seus casos e suítes locais continuam disponíveis acima/);
   assert.doesNotMatch(origem, /Vincule a pasta do repositório \(ou o repositório do GitHub\) e o projeto do Qase em Projetos\./);
@@ -66,18 +66,21 @@ test('sem Qase, ausência de pasta não impede cadastrar casos e suítes locais'
 test('Runs distingue falha na consulta de lista vazia e permite repetir a busca', async () => {
   const codigo = fonte('frontend/testes/fluxos-planos-e-runs.parte.js');
   const inicio = codigo.indexOf('async function telaRuns(e, mem, corpo, esc) {');
-  const fim = codigo.indexOf('\n  async function prepararRun(e)', inicio);
+  const fim = codigo.indexOf('\n  async function prepararRun(', inicio);
   assert.ok(inicio > 0 && fim > inicio);
   const elementos = new Map();
   const no = (tipo, atributos = {}, ...filhos) => {
-    const n = { tipo, atributos, filhos, replaceChildren(...itens) { this.filhos = itens; }, append(...itens) { this.filhos.push(...itens); } };
+    const n = { tipo, atributos, filhos, value: atributos.value || '', replaceChildren(...itens) { this.filhos = itens; }, append(...itens) { this.filhos.push(...itens); }, addEventListener() {} };
     if (atributos.id) elementos.set(atributos.id, n);
     return n;
   };
   const DS = {
     esqueleto: () => ({ tipo: 'carregando' }),
     barra: (...nos) => ({ tipo: 'barra', nos }),
-    selecao: () => ({ tipo: 'selecao' }),
+    busca: ({ id, valor }) => { const input = no('input', { id, value: valor }); return { input, no: no('busca', {}, input) }; },
+    selecao: ({ id, opcoes, valor }) => { const select = no('select', { id }); select.opcoes = opcoes; select.value = valor; return select; },
+    campo: (rotulo, controle) => no('campo', { rotulo }, controle),
+    info: (texto) => ({ tipo: 'info', texto }),
     acao: (texto, fn, attrs = {}) => ({ texto, fn, attrs }),
     estadoTela: (tipo, titulo, descricao, acoes = [], attrs = {}) => ({ tipo, titulo, descricao, acoes, attrs }),
     alerta: (texto, tom) => ({ tipo: 'alerta', texto, tom }),
@@ -85,11 +88,11 @@ test('Runs distingue falha na consulta de lista vazia e permite repetir a busca'
     tabela: (config) => ({ tipo: 'tabela', config }),
     resumo: (dados) => ({ tipo: 'resumo', dados })
   };
-  let erro = true, tentativas = 0;
+  let erro = true, tentativas = 0, consultasMetricas = 0, espacoConsultado = null, filtroExecucoes = null;
   const api = {
-    runs: async () => { tentativas++; return erro ? { ok: false, error: 'DB_UNAVAILABLE' } : { ok: true, data: [] }; },
-    execucoes: async () => erro ? null : { execucoes: [] },
-    metricasExecucoes: async () => null
+    runs: async (espacoId) => { tentativas++; espacoConsultado = espacoId; return erro ? { ok: false, error: 'DB_UNAVAILABLE' } : { ok: true, data: [] }; },
+    execucoes: async (filtro) => { filtroExecucoes = filtro; return erro ? null : { execucoes: [] }; },
+    metricasExecucoes: async () => { consultasMetricas++; return null; }
   };
   const ctx = {
     DS, h: no, estado: { filtroExec: null }, api,
@@ -105,6 +108,15 @@ test('Runs distingue falha na consulta de lista vazia e permite repetir a busca'
   const corpo = no('main'), memoria = {};
   await telaRuns({ id: 'projeto-1' }, memoria, corpo, false);
   const area = elementos.get('runs-area'), fonteConsulta = corpo.filhos.find(x => x.tipo === 'div' && x !== area && x.filhos.some(y => y?.tipo === 'alerta'));
+  assert.equal(elementos.has('runs-resumo'), false, 'não renderiza o resumo global zerado');
+  assert.equal(elementos.has('runs-filtro-origem'), true, 'oferece filtro por origem');
+  assert.equal(elementos.has('runs-filtro-status'), true, 'oferece filtro por status');
+  assert.equal(elementos.has('runs-filtro-ambiente'), true, 'oferece filtro por ambiente');
+  assert.equal(elementos.has('runs-filtro-de'), true, 'oferece filtro por período inicial');
+  assert.equal(elementos.has('runs-filtro-ate'), true, 'oferece filtro por período final');
+  assert.equal(consultasMetricas, 0, 'não consulta métricas que não são exibidas');
+  assert.equal(espacoConsultado, 'projeto-1', 'runs locais permanecem limitadas ao espaço selecionado');
+  assert.equal(filtroExecucoes.espacoId, 'projeto-1', 'execuções permanecem limitadas ao espaço selecionado');
   assert.equal(area.filhos[0].tipo, 'erro');
   assert.equal(area.filhos[0].attrs.id, 'runs-falha-consulta');
   assert.ok(fonteConsulta, 'erro de leitura permanece visível');
@@ -117,10 +129,55 @@ test('Runs distingue falha na consulta de lista vazia e permite repetir a busca'
   assert.equal(area.filhos[0].attrs.id, 'runs-vazio');
 });
 
+test('filtro avançado de Runs combina espaço de busca, origem, status, ambiente e datas inclusivas', () => {
+  const codigo = fonte('frontend/testes/fluxos-planos-e-runs.parte.js');
+  const inicio = codigo.indexOf('  function passaFiltroRun(');
+  const fim = codigo.indexOf('\n  async function telaRuns(', inicio);
+  assert.ok(inicio >= 0 && fim > inicio);
+  const contexto = vm.createContext({});
+  vm.runInContext(`${codigo.slice(inicio, fim)}\nglobalThis.passaFiltroRun = passaFiltroRun;`, contexto);
+  const passar = (filtros) => contexto.passaFiltroRun({
+    origem: 'prumo', texto: 'Run Pagamento PR-42', ambiente: 'Homologação', data: '2026-10-22',
+    statuses: [{ valor: 'FAIL' }]
+  }, filtros);
+  assert.equal(passar({ busca: 'pagamento', origem: 'prumo', status: 'FAIL', ambiente: 'Homologação', de: '2026-10-22', ate: '2026-10-22' }), true);
+  assert.equal(passar({ busca: 'PAGAMENTO', origem: 'qase', status: '', ambiente: '', de: '', ate: '' }), false);
+  assert.equal(passar({ busca: '', origem: '', status: 'PASS', ambiente: '', de: '', ate: '' }), false);
+  assert.equal(passar({ busca: '', origem: '', status: '', ambiente: 'Teste', de: '', ate: '' }), false);
+  assert.equal(passar({ busca: '', origem: '', status: '', ambiente: '', de: '2026-10-23', ate: '' }), false);
+  assert.equal(passar({ busca: '', origem: '', status: '', ambiente: '', de: '', ate: '2026-10-21' }), false);
+});
+
+test('Runs remove o assistente e oferece edição e exclusão local', () => {
+  const lista = fonte('frontend/testes/fluxos-planos-e-runs.parte.js');
+  const qase = fonte('frontend/testes/pagina-da-run-qase.parte.js');
+  assert.doesNotMatch(qase, /qs-assistente|Abrir assistente/);
+  assert.match(lista, /h\('summary', \{\}, tr\('Filtros avançados'\), ajudaFiltros\)/);
+  assert.doesNotMatch(lista, /tr\('Filtros avançados'\)\), DS\.info/);
+  assert.match(lista, /api\.runEditar\(r\.id, titulo\.value, ambiente\.value\)/);
+  assert.match(lista, /api\.runApagar\(r\.id\)/);
+});
+
+test('Preparar run carrega e filtra casos do repositório', () => {
+  const codigo = fonte('frontend/testes/fluxos-planos-e-runs.parte.js');
+  assert.match(codigo, /carregarCasosDoRepositorio/);
+  assert.match(codigo, /pagina\.proxima != null/);
+  assert.match(codigo, /Buscar casos do repositório/);
+  assert.match(codigo, /Casos do repositório \(\{n\}\)/);
+});
+
+test('canais de run local têm contratos e confirmação para apagar', () => {
+  const contratos = fonte('backend/aplicativo/api/catalogoDeContratos.ts');
+  const controlador = fonte('backend/testes/controlador.ts');
+  assert.match(contratos, /'runs:editar':/);
+  assert.match(contratos, /'runs:apagar': somenteId/);
+  assert.match(controlador, /confirmarNoWindows[\s\S]*removerRunLocal/);
+});
+
 test('Novo plano não permite criar com consulta Qase indisponível', async () => {
   const codigo = fonte('frontend/testes/fluxos-planos-e-runs.parte.js');
   const inicio = codigo.indexOf('async function novoPlano(e, esc) {');
-  const fim = codigo.indexOf('\n  async function telaPlanos(', inicio);
+  const fim = codigo.indexOf('\n  // ---- Runs: locais', inicio);
   assert.ok(inicio > 0 && fim > inicio);
   let erro = true, consultas = 0;
   const modais = [], mem = {};
@@ -139,6 +196,14 @@ test('Novo plano não permite criar com consulta Qase indisponível', async () =
   assert.equal(modais[0].conteudo.tipo, 'erro');
   assert.equal(modais[0].conteudo.acoes[0].texto, 'Tentar novamente');
   assert.equal(consultas, 1);
+});
+
+test('detalhe do plano preserva erros de consulta total e parcial de runs', () => {
+  const codigo = fonte('frontend/testes/pagina-do-plano-qase.parte.js');
+  assert.match(codigo, /if \(runs\?\.erro && !doPlano\.length\) return DS\.estadoTela\('erro', tr\('Não foi possível consultar as runs do plano'\)/);
+  assert.match(codigo, /return h\('div', \{\}, runs\?\.erro \? DS\.alerta\(tr\('Consulta parcial do Qase: algumas runs podem não aparecer\.'\), 'falha'\)/);
+  assert.match(codigo, /suites\?\.erro \? DS\.alerta\(tr\('Suítes do Qase indisponíveis: \{e\}'/);
+  assert.doesNotMatch(codigo, /N\?o foi poss\?vel consultar as runs do plano/);
 });
 
 test('Evidências conserva o filtro ao repetir consulta e logs indisponíveis não parecem vazios', async () => {

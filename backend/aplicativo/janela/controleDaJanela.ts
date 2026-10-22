@@ -1,5 +1,6 @@
 /** controleDaJanela: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
-import { BrowserWindow, app, Notification, dialog } from "electron";
+import { BrowserWindow, app, Notification } from "electron";
+import { perguntarNaJanela } from "./caixaDeConfirmacao.js";
 import path from "node:path";
 import { textoNoIdioma } from "../bandeja/conteudoDaBandeja.js";
 import { estadoDoAplicativo } from "../estadoDoAplicativo.js";
@@ -20,6 +21,10 @@ export function criarJanela(): BrowserWindow {
   janela.once('ready-to-show', () => janela.show());
   // O <title> da página sobrescreveria o aviso de homologação na barra da janela.
   if (homologacao) janela.on('page-title-updated', e => e.preventDefault());
+  // Único recurso do aparelho liberado: o microfone (sem câmera), só para a própria página do Prumo, para ditar mensagens ao chat.
+  const microfoneDoPrumo = (url: string, tipos?: readonly string[]) => url.startsWith(origemPermitida) && (tipos ?? ['audio']).every(t => t === 'audio');
+  janela.webContents.session.setPermissionRequestHandler((_wc, permissao, aceitar, detalhes) => aceitar(permissao === 'media' && microfoneDoPrumo(detalhes.requestingUrl, (detalhes as { mediaTypes?: string[] }).mediaTypes)));
+  janela.webContents.session.setPermissionCheckHandler((_wc, permissao, origem) => permissao === 'media' && microfoneDoPrumo(origem, ['audio']));
   janela.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   // A única navegação permitida é recarregar a própria página (ao entrar ou sair da conta, para não sobrar dado da sessão anterior).
   janela.webContents.on('will-navigate', (e, url) => { if (url !== origemPermitida) e.preventDefault(); });
@@ -53,4 +58,4 @@ export function navegarPara(destino: string) {
 }
 
 // --- confirmarNoWindows ---
-export const confirmarNoWindows = async (janela: BrowserWindow | null, titulo: string, mensagem: string, detalhe: string, botao: string) => (await dialog.showMessageBox(janela!, { type: 'warning', title: titulo, buttons: ['Cancelar', botao], defaultId: 0, cancelId: 0, noLink: true, message: mensagem, detail: detalhe })).response === 1;
+export const confirmarNoWindows = async (janela: BrowserWindow | null, titulo: string, mensagem: string, detalhe: string, botao: string) => (await perguntarNaJanela(janela, { type: 'warning', title: titulo, buttons: ['Cancelar', botao], defaultId: 0, cancelId: 0, noLink: true, message: mensagem, detail: detalhe })).response === 1;

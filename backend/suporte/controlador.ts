@@ -1,5 +1,6 @@
 /** Controlador da funcionalidade suporte: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { dialog, shell, safeStorage } from "electron";
+import { perguntarNaJanela } from "../aplicativo/janela/caixaDeConfirmacao.js";
 import { repositorio } from "../ajuda/contratos.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { enderecoOficialDoRelato, prepararRelato, resumoDoDiagnosticoParaRelato } from "./servicoRelato.js";
@@ -25,7 +26,7 @@ export const suporteAbrir: TratadorDoCanal<'suporte:abrir'> = async (a, janela) 
   const p = prepararRelatoDaJanela(a);
   if (!p.ok || !('url' in p)) throw new Error('SUPPORT_BLOCKED_SECRET: o relato contém algo que parece segredo ou está incompleto; revise antes de enviar.');
   if (!enderecoOficialDoRelato(p.url)) throw new Error('SUPPORT_URL_FORBIDDEN: endereço não autorizado.');
-  const r = await dialog.showMessageBox(janela!, { type: 'warning', title: 'Abrir formulário do GitHub', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true,
+  const r = await perguntarNaJanela(janela, { type: 'warning', title: 'Abrir formulário do GitHub', buttons: ['Cancelar', 'Abrir no navegador'], defaultId: 0, cancelId: 0, noLink: true,
     message: 'Abrir o formulário de issue já preenchido?', detail: `${p.aviso}
 
 Issues do repositório público ${repositorio} são visíveis para qualquer pessoa. Nada é publicado até você enviar no navegador.
@@ -42,7 +43,7 @@ export const suporteAnexar: TratadorDoCanal<'suporte:anexar'> = async (_a, janel
 };
 
 export const suporteChamado: TratadorDoCanal<'suporte:chamado'> = async (a,janela) => {
-  const r=await dialog.showMessageBox(janela!,{type:'question',buttons:['Cancelar','Abrir chamado'],defaultId:0,cancelId:0,message:`Abrir o chamado #${a.numero} no GitHub oficial?`});
+  const r=await perguntarNaJanela(janela, {type:'question',buttons:['Cancelar','Abrir chamado'],defaultId:0,cancelId:0,message:`Abrir o chamado #${a.numero} no GitHub oficial?`});
   if(r.response!==1)return {opened:false};
   await shell.openExternal(`https://github.com/${repositorio}/issues/${a.numero}`);return {opened:true};
 };

@@ -75,7 +75,26 @@ const TEXTO_DO_CODIGO = {
   CREDENTIAL_UNAVAILABLE: 'Não há conexão ativa para este serviço. Conecte em Projetos.',
   SERVICE_RATE_LIMIT: 'O serviço pediu uma pausa. Tente de novo em alguns minutos.',
   SERVICE_TIMEOUT: 'O serviço demorou demais para responder.',
-  SERVICE_UNAVAILABLE: 'O serviço está fora do ar agora.'
+  SERVICE_UNAVAILABLE: 'O serviço está fora do ar agora.',
+  LOCAL_CASE_LIMIT: 'O Prumo guarda até 1.000 cenários por projeto. Remova algum para criar outro.',
+  LOCAL_SUITE_LIMIT: 'O Prumo guarda até 100 suítes. Remova alguma para criar outra.',
+  LOCAL_CASE_NOT_FOUND: 'Este cenário não existe mais (talvez já tenha sido removido).',
+  MANUAL_DISABLED: 'O módulo Manual/Prumo está desligado neste projeto. Ligue em Projetos para escrever cenários.',
+  // IDE e terminal: o texto vem antes do código.
+  IDE_ARQUIVO_ALTERADO: 'O arquivo mudou fora do Prumo depois de aberto. Feche a aba e abra de novo antes de salvar, para não apagar a mudança.',
+  IDE_ARQUIVO_EXISTENTE: 'Já existe um arquivo com esse nome. Abra-o pelo explorador para editar.',
+  IDE_CAMINHO_INVALIDO: 'Esse caminho não vale: use um caminho dentro da pasta do projeto, sem "..", sem pastas internas do Git e sem arquivos de credenciais.',
+  IDE_SEGREDO_PROTEGIDO: 'O arquivo parece ter um segredo e o Prumo não o edita. Mexa nele em outro editor.',
+  IDE_CONTEUDO_INVALIDO: 'O conteúdo é grande demais (limite de 300 KB) ou não é texto.',
+  IDE_SEM_REPOSITORIO: 'Este projeto não tem pasta local. Vincule uma pasta ou traga o repositório do GitHub.',
+  IDE_ATALHO_RECUSADO: 'O caminho passa por um atalho (link simbólico), que o Prumo não segue por segurança.',
+  IDE_FORA_DO_REPOSITORIO: 'Esse caminho sai da pasta do projeto, então foi recusado.',
+  TERMINAL_COMANDO_VAZIO: 'Digite um comando.',
+  TERMINAL_COMANDO_LONGO: 'O comando passa de 1.000 caracteres.',
+  TERMINAL_COMANDO_INVALIDO: 'O comando precisa ser de uma linha só, sem caracteres de controle.',
+  TERMINAL_COMANDO_DESCONHECIDO: 'Esse comando já saiu da memória do Prumo, que guarda a saída por 10 minutos.',
+  CODE_SCOPE_CHANGED: 'O projeto ou a pasta mudou enquanto você confirmava. Faça de novo.',
+  CODE_BUSY: 'Já há uma operação de código neste projeto. Espere terminar.'
 };
 function textoErro(erro) {
   const bruto = String(erro || '').trim();
@@ -96,6 +115,7 @@ const rotasVirtuais = { conexoes: ['projetos', 'conexoes'], runs: ['testes', 'ru
 async function mostrar(aba) {
   if (rotasVirtuais[aba]) { const [pai, sub] = rotasVirtuais[aba]; (estado.sub ||= {})[pai] = sub; aba = pai; }
   clearInterval(estado.timer); estado.aba = aba;
+  if (typeof registrarTela === 'function') registrarTela(aba);
   for (const b of document.querySelectorAll('#nav button')) { if (b.dataset.aba === aba) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
   // Corrida de navegação: cada renderização usa um token e constrói num contêiner separado; só a mais recente é anexada.
   // Sem isso, duas trocas rápidas de aba escreviam no mesmo elemento e misturavam conteúdos ou duplicavam ids.
@@ -115,9 +135,17 @@ async function mostrar(aba) {
   if (token !== estado.render) return;
   if (estado.root && !nome && consultou) estado.root = null;
   // 2.10.2: um só nome de projeto atual para lateral, Suporte e Projetos (inclusive pasta com contrato local, como a demonstração).
-  if (nome || consultou) { estado.projetoNome = nome ? (nome.nome || nome.name || nome.id) : null; estado.projetoLegado = !!nome && !estado.espaco; $('#projeto-atual').textContent = estado.projetoNome || 'nenhum selecionado'; }
+  if (nome || consultou) {
+    estado.projetoNome = nome ? (nome.nome || nome.name || nome.id) : null;
+    estado.projetoLegado = !!nome && !estado.espaco;
+    const atual = estado.projetoNome || 'nenhum selecionado';
+    $('#projeto-atual').textContent = atual;
+    const seletor = $('#projeto-botao');
+    if (seletor?.setAttribute) seletor.setAttribute('aria-label', 'Contexto ativo: ' + atual + '. Trocar projeto');
+  }
   if (typeof atualizarMenuDoProjeto === 'function') atualizarMenuDoProjeto(estado.espaco);
-  try { await abas[aba](el); } catch {
+  try { await abas[aba](el); } catch (erro) {
+    console.error("Falha ao carregar a seção " + aba + ":", erro?.stack || erro);
     if (token !== estado.render) return;
     // Uma tela parcialmente montada não deve substituir o conteúdo por uma área incompleta.
     el.replaceChildren(DS.estadoTela('erro', 'Não foi possível abrir esta tela', 'A seção falhou ao carregar. Tente novamente.',
@@ -126,6 +154,7 @@ async function mostrar(aba) {
   }
   if (token !== estado.render) return;
   $('#conteudo').replaceChildren(...el.childNodes);
+  if (typeof desenharTrilha === 'function') desenharTrilha();
   if (typeof montarSeletorProjeto === 'function') montarSeletorProjeto(espacos, locais);
 }
 

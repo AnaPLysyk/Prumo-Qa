@@ -58,6 +58,8 @@ function rotuloDaReferencia(r: { tipo: string; id: string }) {
   if (r.tipo === 'qase-defeito') return `Defeito Qase ${r.id}`;
   if (r.tipo === 'github-pr') return `PR ${r.id}`;
   if (r.tipo === 'github-commit') return `Commit ${r.id.slice(0, 7)}`;
+  if (r.tipo === 'github-issue') return `Issue #${r.id}`;
+  if (r.tipo === 'run') return `Run local ${r.id.slice(0, 8)}`;
   return `${r.tipo} ${r.id}`;
 }
 

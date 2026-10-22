@@ -1,5 +1,4 @@
 /** publicarRunLocal: fluxo consolidado por responsabilidade, com operações identificadas por nome. */
-import path from "node:path";
 import { executarOperacao } from "../../conexoes/escrita/executarOperacao.js";
 import { Auxiliar } from "../../conexoes/tipos/operacao.js";
 import { RegistroOperacao } from "../../conexoes/tipos/operacoesExternas.js";
@@ -13,21 +12,19 @@ import { gravarPublicacoesJira, lerPublicacoesJira } from "../banco/publicacoes.
 import { codigoDoErroDePublicacao, publicacaoPodeRepetir } from "../servicoExecucoes.js";
 import { montarComentario } from "../regras/propostasDeBugs.js";
 import { Pub, PublicadorJira, registroPub } from "../tipos/escritaQase.js";
+import { arquivosDoCenario, pastasDeEvidencia } from "./evidenciasDaRun.js";
 
 // --- publicarRunLocal ---
 // ── publicarRunLocal ──
-/** Publica os resultados ainda não publicados (nunca NOT_RUN) e relê a run no Qase. */
+/** Publica os resultados ainda não publicados (nunca NOT_RUN) e relê a run no Qase. Cada cenário leva as suas evidências (rodada de automação e anexos manuais), salvo `anexarEvidencia: false`. */
 export async function publicarRunLocal(d: Dep, runLocalId: string, o: { confirmado: boolean; origem?: 'MANUAL' | 'AGENDADO'; anexarEvidencia?: boolean; aux?: Auxiliar }) {
   const run = obterRunLocal(runLocalId, d.base); if (!run.runIdRemoto) throw new Error('RUN_NOT_CREATED: crie a run no Qase antes de publicar.');
   const pendentes = run.casos.filter(c => c.resultado && c.resultado.status !== 'NOT_RUN' && !c.publicado); if (!pendentes.length) return { operacao: null as RegistroOperacao | null, publicados: 0 };
-  const e = obterEspaco(run.espacoId, d.base); const raiz = e.pastaLocal ? path.join(e.pastaLocal, '.prumo', 'evidencias') : null; const aux: Auxiliar = o.aux ?? { arquivosAutorizados: [], raizesDeEvidencia: raiz ? [raiz] : [] };
-  const resultados: { casoId: number; status: 'passed' | 'failed' | 'blocked'; comentario: string; anexos?: string[] }[] = [];
+  const e = obterEspaco(run.espacoId, d.base); const aux: Auxiliar = o.aux ?? { arquivosAutorizados: [], raizesDeEvidencia: e.pastaLocal ? pastasDeEvidencia(e.pastaLocal).raizes : [] };
+  const resultados: { casoId: number; status: 'passed' | 'failed' | 'blocked' | 'skipped' | 'invalid'; comentario: string; arquivos?: string[] }[] = [];
   for (const c of pendentes.slice(0, 200)) {
-    const r = c.resultado!; const item: (typeof resultados)[number] = { casoId: c.casoId, status: paraQase[r.status as 'PASS' | 'FAIL' | 'BLOCKED'], comentario: `Prumo QA (${r.origem === 'MANUAL' ? 'declarado por ' + (r.por ?? 'pessoa') : 'execução'}${r.granularidade === 'RODADA' ? ', escopo da rodada' : ''}): ${r.comentario}`.slice(0, 1900) };
-    if (o.anexarEvidencia && r.evidenciaId && r.status !== 'PASS' && raiz) {
-      const anexo = await executarOperacao(d.executor, run.espacoId, 'qase.anexar', { arquivo: path.join(raiz, `${r.evidenciaId}.json`) }, { base: d.base, confirmado: o.confirmado, origem: 'MANUAL', aux, agora: d.agora });
-      if (anexo.estado === 'CONFIRMADA' && anexo.remoto?.id) item.anexos = [anexo.remoto.id];
-    }
+    const r = c.resultado!; const item: (typeof resultados)[number] = { casoId: c.casoId, status: paraQase[r.status as keyof typeof paraQase], comentario: `Prumo QA (${r.origem === 'MANUAL' ? 'declarado por ' + (r.por ?? 'pessoa') : 'execução'}${r.granularidade === 'RODADA' ? ', escopo da rodada' : ''}): ${r.comentario}`.slice(0, 1900) };
+    if (o.anexarEvidencia !== false && e.pastaLocal) { const arquivos = arquivosDoCenario(e.pastaLocal, run, c, true).map(a => a.caminho); if (arquivos.length) item.arquivos = arquivos; }
     resultados.push(item);
   }
   const reg = await executarOperacao(d.executor, run.espacoId, 'qase.publicar_resultados', { runId: run.runIdRemoto, resultados }, { base: d.base, confirmado: o.confirmado, origem: o.origem ?? 'MANUAL', runPolitica: run.runIdRemoto, aux, agora: d.agora });

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mascarar } from "../compartilhado/seguranca/mascarar.js";
 import { obterEspaco } from "../projetos/banco/projetos.js";
 import { gravarPropostas, lerPropostas, alterarProposta, obterProposta } from "./banco/tickets.js";
-import { MAX_IA_POR_HORA, MAX_PROPOSTAS, NovaProposta, Proposta, propostaSchema, dadosBug } from "./contratos.js";
+import { DestinoPublicacao, MAX_IA_POR_HORA, MAX_PROPOSTAS, NovaProposta, Proposta, propostaSchema, dadosBug } from "./contratos.js";
 import { executarOperacao } from "../conexoes/escrita/executarOperacao.js";
 import { Executor } from "../conexoes/tipos/operacoesExternas.js";
 import { associarEspaco } from "../projetos/servicoProjetos.js";
@@ -93,6 +93,7 @@ export function criarProposta(n: NovaProposta, b?: string, agora = new Date()): 
     similares,
     revisao: null,
     remoto: null,
+    publicacoes: [],
     ...(n.falhaDeOrigem ? { falhaDeOrigem: n.falhaDeOrigem } : {}),
     criadaEm: agora.toISOString(),
     atualizadaEm: agora.toISOString()
@@ -122,7 +123,15 @@ export function revisarProposta(id: string, r: { duplicidade: boolean; requisito
 /** Pré-condição de publicação: IA exige revisão completa; as demais origens exigem ao menos a confirmação da pessoa (feita no diálogo nativo). */
 export function podePublicar(p: Proposta) { if (p.estado === 'PUBLICADA' || p.estado === 'VINCULADA' || p.estado === 'DESCARTADA') throw new Error('PROPOSAL_CLOSED'); if (p.origem === 'IA' && p.estado !== 'REVISADA') throw new Error('REVIEW_REQUIRED: proposta de IA precisa ser revisada antes de publicar.'); return true; }
 
-export const marcarPublicada = (id: string, remoto: { id?: string; chave?: string; url?: string }, b?: string) => alterarProposta(id, p => { p.estado = 'PUBLICADA'; p.remoto = remoto; }, b);
+export const marcarPublicada = (id: string, remoto: { id?: string; chave?: string; url?: string }, b?: string, destino?: DestinoPublicacao) => alterarProposta(id, p => {
+  p.estado = 'PUBLICADA';
+  // `remoto` is the legacy single-link field; never replace an earlier destination.
+  if (!p.remoto) p.remoto = remoto;
+  if (destino) p.publicacoes.push({ destino, estado: 'SUCESSO', remoto, em: new Date().toISOString() });
+}, b);
+
+export const registrarFalhaPublicacao = (id: string, destino: DestinoPublicacao, erro: string, b?: string) =>
+  alterarProposta(id, p => { p.publicacoes.push({ destino, estado: 'FALHA', remoto: null, erro: erro.slice(0, 500), em: new Date().toISOString() }); }, b);
 
 /** Parâmetros da issue no GitHub a partir do rascunho local: o mesmo objeto alimenta a prévia confirmada e o envio. */
 export function parametrosDaIssueGithub(p: Proposta) {
@@ -149,44 +158,44 @@ export function parametrosDoDefeitoQase(p: Proposta, o: OpcoesDefeitoQase) {
  * Publicação de uma proposta (a pessoa decidiu): vira a operação externa correspondente (caso Qase, ticket Jira, defeito Qase ou issue GitHub), marca a proposta
  * como publicada com o identificador remoto e registra o vínculo como REGISTRADO_PELO_PRUMO. Idempotente: a chave da operação vem do conteúdo.
  */
-export async function publicarProposta(ex: Executor, id: string, o: { confirmado: boolean; tipoId?: string; destino?: 'jira' | 'qase' | 'github'; severidadeQase?: number; marcoQase?: number; camposQase?: Record<string, string>; base?: string }) {
+export async function publicarProposta(ex: Executor, id: string, o: { confirmado: boolean; tipoId?: string; destino?: DestinoPublicacao; destinos?: DestinoPublicacao[]; severidadeQase?: number; marcoQase?: number; camposQase?: Record<string, string>; base?: string }) {
   const b = o.base; const p = obterProposta(id, b); podePublicar(p); const e = obterEspaco(p.espacoId, b);
   if (p.tipo === 'caso') {
     const reg = await executarOperacao(ex, p.espacoId, 'qase.criar_caso', p.dados, { base: b, confirmado: o.confirmado });
     if (reg.estado === 'CONFIRMADA' && reg.remoto?.id) {
-      marcarPublicada(id, { id: reg.remoto.id, chave: reg.remoto.chave }, b);
+      marcarPublicada(id, { id: reg.remoto.id, chave: reg.remoto.chave }, b, 'qase');
       const ticket = typeof p.dados.ticket === 'string' ? p.dados.ticket : null; const jv = e.vinculos.find(v => v.servico === 'jira'); const qv = e.vinculos.find(v => v.servico === 'qase');
       if (ticket && jv && qv) { try { associarEspaco(p.espacoId, { de: { tipo: 'jira', id: ticket, vinculoId: jv.id, origem: jv.recurso.instancia }, para: { tipo: 'qase', id: reg.remoto.id, vinculoId: qv.id, origem: qv.recurso.chave }, justificativa: 'Caso criado pelo Prumo a partir do ticket (proposta publicada)' }, b, true); } catch (erro) { if ((erro as Error).message !== 'TRACE_DUPLICATE') throw erro; /* vínculo já existente */ } }
     }
-    return reg;
+    return { ...reg, destinos: [{ destino: 'qase', estado: reg.estado === 'CONFIRMADA' ? 'CONFIRMADA' : 'FALHA', ...(reg.remoto ? { remoto: reg.remoto } : {}), ...(reg.erro ? { erro: reg.erro } : {}) }] };
   }
-  if (o.destino === 'github') {
-    // Issue no GitHub: rastreador do repositório. Não é GitHub Actions: criar a issue não dispara pipeline.
-    const reg = await executarOperacao(ex, p.espacoId, 'github.criar_issue', parametrosDaIssueGithub(p), { base: b, confirmado: o.confirmado });
-    if (reg.estado === 'CONFIRMADA' && reg.remoto?.chave) marcarPublicada(id, { id: reg.remoto.id, chave: reg.remoto.chave, url: reg.remoto.url }, b);
-    return reg;
-  }
-  if (o.destino === 'qase') {
-    const reg = await executarOperacao(ex, p.espacoId, 'qase.criar_defeito', parametrosDoDefeitoQase(p, o), { base: b, confirmado: o.confirmado });
-    if (reg.estado === 'CONFIRMADA' && reg.remoto?.id) {
-      marcarPublicada(id, { id: reg.remoto.id, chave: reg.remoto.chave }, b);
-      const vq = e.vinculos.find(v => v.servico === 'qase');
-      if (p.falhaDeOrigem && vq) { try {
-        associarEspaco(p.espacoId, { de: { tipo: 'qase-defeito', id: reg.remoto.id, vinculoId: vq.id, origem: vq.recurso.chave },
-          para: { tipo: 'qase', id: String(p.falhaDeOrigem.casoId), vinculoId: vq.id, origem: vq.recurso.chave },
-          justificativa: 'Defeito Qase publicado a partir de uma falha de run no Prumo' }, b, true);
-      } catch (erro) { if ((erro as Error).message !== 'TRACE_DUPLICATE') throw erro; } }
+  const destinos = [...new Set(o.destinos?.length ? o.destinos : [o.destino ?? 'jira'])];
+  const resultados: Array<{ destino: DestinoPublicacao; estado: 'CONFIRMADA' | 'FALHA'; remoto?: unknown; erro?: string }> = [];
+  for (const destino of destinos) {
+    try {
+      const reg = destino === 'github'
+        ? await executarOperacao(ex, p.espacoId, 'github.criar_issue', parametrosDaIssueGithub(p), { base: b, confirmado: o.confirmado })
+        : destino === 'qase'
+          ? await executarOperacao(ex, p.espacoId, 'qase.criar_defeito', parametrosDoDefeitoQase(p, o), { base: b, confirmado: o.confirmado })
+          : await executarOperacao(ex, p.espacoId, 'jira.criar_ticket', (() => {
+              const tipoId = o.tipoId ?? (typeof p.dados.tipoId === 'string' ? p.dados.tipoId : undefined);
+              if (!tipoId) throw new Error('ISSUE_TYPE_REQUIRED: escolha o tipo do ticket (ex.: Bug) antes de publicar.');
+              return { tipoId, resumo: p.dados.resumo, descricao: p.dados.descricao ?? '', rotulos: p.dados.rotulos ?? [], ...(p.dados.origem ? { origem: p.dados.origem } : {}) };
+            })(), { base: b, confirmado: o.confirmado });
+      if (reg.estado === 'CONFIRMADA' && (reg.remoto?.chave || reg.remoto?.id)) {
+        marcarPublicada(id, { id: reg.remoto.id, chave: reg.remoto.chave, url: reg.remoto.url }, b, destino);
+        resultados.push({ destino, estado: 'CONFIRMADA', remoto: reg.remoto });
+      } else {
+        registrarFalhaPublicacao(id, destino, reg.erro ?? reg.estado, b);
+        resultados.push({ destino, estado: 'FALHA', erro: reg.erro ?? reg.estado });
+      }
+    } catch (erro) {
+      const mensagem = (erro as Error).message;
+      registrarFalhaPublicacao(id, destino, mensagem, b);
+      resultados.push({ destino, estado: 'FALHA', erro: mensagem });
     }
-    return reg;
   }
-  const tipoId = o.tipoId ?? (typeof p.dados.tipoId === 'string' ? p.dados.tipoId : undefined); if (!tipoId) throw new Error('ISSUE_TYPE_REQUIRED: escolha o tipo do ticket (ex.: Bug) antes de publicar.');
-  const reg = await executarOperacao(ex, p.espacoId, 'jira.criar_ticket', { tipoId, resumo: p.dados.resumo, descricao: p.dados.descricao ?? '', rotulos: p.dados.rotulos ?? [], ...(p.dados.origem ? { origem: p.dados.origem } : {}) }, { base: b, confirmado: o.confirmado });
-  if (reg.estado === 'CONFIRMADA' && reg.remoto?.chave) {
-    marcarPublicada(id, { id: reg.remoto.id, chave: reg.remoto.chave, url: reg.remoto.url }, b);
-    const jv = e.vinculos.find(v => v.servico === 'jira'); const qv = e.vinculos.find(v => v.servico === 'qase');
-    if (p.falhaDeOrigem && jv && qv) { try { associarEspaco(p.espacoId, { de: { tipo: 'jira-bug', id: reg.remoto.chave, vinculoId: jv.id, origem: jv.recurso.instancia }, para: { tipo: 'qase', id: String(p.falhaDeOrigem.casoId), vinculoId: qv.id, origem: qv.recurso.chave }, justificativa: 'Bug aberto pelo Prumo a partir da falha na run' }, b, true); } catch (erro) { if ((erro as Error).message !== 'TRACE_DUPLICATE') throw erro; /* vínculo já existente */ } }
-  }
-  return reg;
+  return { destinos: resultados, estado: resultados.some(x => x.estado === 'CONFIRMADA') ? 'CONFIRMADA' : 'FALHA' };
 }
 
 /** Anexos: a página só indica "evidência de uma execução" ou "escolher arquivo"; o caminho vem do projeto ou do diálogo nativo, nunca da página. */

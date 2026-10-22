@@ -24,7 +24,7 @@ const PrumoModeloAtividades = (() => {
   const corCodex = () => (temaClaro() ? '#3b4a63' : '#e8edf6');
   /** Aparelho e navegador como o runner declarou ("Pixel 7 · Chromium 126 · 412x915"); sem registro, nada é mostrado nem inferido. */
   const ambientesDoTeste = (x) => (x.resultado?.ambientes || []).map((a) => [a.dispositivo || a.projeto, [a.navegador, a.versaoDoNavegador].filter(Boolean).join(' '), a.viewport, a.plataforma].filter(Boolean).join(' · '));
-  const nomeCliente = (c) => (c === 'claude' ? 'Claude Code' : c === 'codex' ? 'Codex' : c || 'cliente');
+  const nomeCliente = (c) => ({ claude: 'Claude Code', codex: 'Codex', copilot: 'GitHub Copilot', gemini: 'Gemini CLI' })[c] || c || 'cliente';
   const assinatura = (d) => JSON.stringify([d.atividades.map((a) => a.operationId + a.state), d.conversas.map((c) => c.id + ':' + (c.avaliacao || '')), (d.auditoria || []).map((a) => a.id + a.estado), d.execucoes.map((x) => x.id + x.estado), (d.orquestracoes || []).map((o) => o.id + ':' + o.estado + ':' + o.etapas.length + ':' + (o.emExecucao || ''))]);
 
   // ---------- Modelo: fontes (janelas), hubs e folhas, com as arestas que os registros comprovam ----------

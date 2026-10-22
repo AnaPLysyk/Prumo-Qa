@@ -147,18 +147,20 @@ test('políticas de Agentes separam controles editáveis de operações humanas 
   assert.ok(editavel.children[0].children.some(x => x?.tag === 'details'), 'justificativa disponível sob demanda');
 });
 
-test('Políticas do projeto aparecem em aba própria, nunca no rodapé da lista de agentes', () => {
+test('IA e regras aparecem em aba própria, nunca no rodapé da lista de agentes', () => {
   const js = fs.readFileSync('frontend/agentes/tela-agentes.parte.js', 'utf8');
   const css = fs.readFileSync('frontend/design-system/estilos-das-telas.parte.css', 'utf8');
-  const lista = js.slice(js.indexOf('function list() {'), js.indexOf('    // Políticas são uma área própria'));
+  const lista = js.slice(js.indexOf('function list() {'), js.indexOf('    // IA e regras é uma área própria'));
   assert.ok(lista.length > 1000);
   assert.doesNotMatch(lista, /legacyPolicies\(\)/, 'lista não insere políticas no rodapé');
   assert.doesNotMatch(lista, /id: 'v36-clients'/, 'diagnóstico MCP não ocupa rodapé de agentes');
   assert.match(js, /'data-agent-tab': 'policies'/);
-  assert.match(js, /else if \(tab === 'policies'\) policies\(\)/);
-  assert.match(js, /function policies\(\) \{/);
+  assert.match(js, /else if \(tab === 'policies'\) policies\(parteDasPoliticas, iaDoAtalho\)/);
+  assert.match(js, /function policies\(parte = 'conectar', ia = null\) \{/);
   assert.match(js, /id: 'v36-agent-policies'/);
-  assert.match(js, /showTab\('policies'\); const d = document\.getElementById\('v36-clients'\)/, 'atalho de cliente leva à aba correta');
+  assert.match(js, /parteDasPoliticas = 'conectar'; iaDoAtalho = c\.client; showTab\('policies'\)/, 'atalho de cliente leva à IA certa em Conectar IA');
+  assert.match(js, /\[\['conectar', 'Conectar IA'\], \['minhas', 'Minhas regras'\], \['projeto', 'Regras do projeto'\]\]/, 'três partes, na ordem de uso');
+  assert.match(js, /api\.agentePreferenciasSalvar\(id, \{ apelido: pref\[id\]\?\.apelido \|\| '', orientacao: v\.trim\(\) \}\)/, 'regras pessoais usam o canal da própria conta (id todos para a regra geral)');
   assert.match(css, /:has\(#v36-agent-policies\) \.v36f/);
   assert.match(js, /disabled: !podeAdministrar/, 'regras continuam protegidas para conta comum');
 });

@@ -24,7 +24,8 @@ try {
   const env = { ...process.env, PRUMO_DATA_DIR: dados, PRUMO_SEM_AVISO_AUTOMATICO: '1', PRUMO_SERVICO: caixa.url }; delete env.ELECTRON_RUN_AS_NODE;
   s = await servidorFixture();
   app = await electron.launch({ executablePath: electronPath, args: [path.join(repo, 'site/scripts/desktop-entry.cjs')], env, timeout: 30000 });
-  await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
+  // As confirmações são uma página do processo principal (caixa-de-confirmacao.html): a captura responde "confirmar" por lá.
+  await app.evaluate(({ webContents }) => { setInterval(() => { for (const wc of webContents.getAllWebContents()) if (/caixa-de-confirmacao\.html\?[^#]*$/.test(wc.getURL()) && !wc.isLoading()) void wc.executeJavaScript("location.hash = 'resposta=' + (document.querySelectorAll('.cc-botoes button').length - 1) + '&marcado=0'").catch(() => {}); }, 150); });
   await app.evaluate((_, p) => {
     const https = process.getBuiltinModule('node:https'), http = process.getBuiltinModule('node:http'), dns = process.getBuiltinModule('node:dns');
     dns.promises.lookup = async () => ({ address: '93.184.216.34', family: 4 });
@@ -92,7 +93,7 @@ try {
   const sub = async (k) => { await page.click(`[data-sub=${k}]`); await page.waitForTimeout(600); };
   await ir('inicio'); await page.waitForTimeout(6500); await tirar('inicio');
   await ir('testes'); await sub('repositorio'); await texto('aplica desconto progressivo'); await tirar('testes');
-  await sub('ide'); await page.click('.ds-ide-arquivo[data-arquivo="tests/e2e/checkout.spec.ts"]'); await page.waitForSelector('.ds-ide-linhas'); await page.click('#ide-editar'); await page.waitForSelector('.ds-ide-cm .CodeMirror'); await page.waitForTimeout(500); await tirar('codigo');
+  await sub('ide'); await page.click('.ds-ide-arquivo[data-arquivo="tests/e2e/checkout.spec.ts"]'); await page.waitForSelector('.ds-ide-linhas'); await page.click('#ide-editar'); await page.waitForSelector('.ds-wb-editor-quadro'); await page.waitForTimeout(500); await tirar('codigo');
   await sub('runs'); await texto('Regressão da sprint 42'); await tirar('runs');
   await ir('tickets'); await texto('SMART-1'); await tirar('tickets');
   await ir('agentes'); await page.waitForTimeout(1200); await tirar('agentes');

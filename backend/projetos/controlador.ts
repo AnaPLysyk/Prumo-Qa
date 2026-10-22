@@ -1,6 +1,6 @@
 /** Controlador da funcionalidade projetos: atende canais IPC e delega ao serviço responsável, sem alterar validação nem permissões. */
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
-import { associarEspaco } from "./servicoProjetos.js";
+import { associarEspaco, desassociarEspaco } from "./servicoProjetos.js";
 import { localizarK6 } from "../agendamentos/servicoK6.js";
 import { contextoCompleto } from "../agentes/mcp/consultasDoProjeto.js";
 import { carregarProjeto } from "../compartilhado/projeto/carregarProjeto.js";
@@ -27,11 +27,15 @@ import { situacaoProjeto } from "./servicoProjetos.js";
 import { listarPastasVinculadas } from "./servicoProjetos.js";
 import { visaoGeralDoProjeto } from "./servicoProjetos.js";
 
-import { arvoreDoRepositorio, lerArquivoDoRepositorio, gravarArquivoDoRepositorio } from "./ideRepositorio.js";
+import { arvoreDoRepositorio, lerArquivoDoRepositorio, gravarArquivoDoRepositorio, buscarNoRepositorio } from "./ideRepositorio.js";
+import { estadoDoGit, diferencaDoGit } from "./ideGit.js";
 
 function pastaParaIde(espacoId: string) { const e = obterEspaco(espacoId); if (!e.pastaLocal) throw new Error('IDE_SEM_REPOSITORIO'); return { e, pasta: e.pastaLocal }; }
 export const ideArvore: TratadorDoCanal<'ide:arvore'> = a => arvoreDoRepositorio(pastaParaIde(a.espacoId).pasta);
 export const ideArquivo: TratadorDoCanal<'ide:arquivo'> = a => lerArquivoDoRepositorio(pastaParaIde(a.espacoId).pasta, a.arquivo);
+export const ideBuscar: TratadorDoCanal<'ide:buscar'> = a => buscarNoRepositorio(pastaParaIde(a.espacoId).pasta, a.consulta, a.diferenciarCaixa, a.regex);
+export const ideGitEstado: TratadorDoCanal<'ide:gitestado'> = a => estadoDoGit(pastaParaIde(a.espacoId).pasta);
+export const ideGitDiff: TratadorDoCanal<'ide:gitdiff'> = a => diferencaDoGit(pastaParaIde(a.espacoId).pasta, a.arquivo);
 export const ideGravar: TratadorDoCanal<'ide:gravar'> = async (a, j) => {
   const { e, pasta } = pastaParaIde(a.espacoId);
   const detalhe = 'Pasta: ' + pasta + '\nArquivo: ' + a.arquivo + '\nNada será executado, publicado ou enviado ao GitHub.';
@@ -39,7 +43,11 @@ export const ideGravar: TratadorDoCanal<'ide:gravar'> = async (a, j) => {
   return gravarArquivoDoRepositorio(pasta, a.arquivo, a.conteudo, a.hashBase);
 };
 
-export const espacosAssociar: TratadorDoCanal<'espacos:associar'> = a=>associarEspaco(a.id,a.dados);
+export const espacosAssociar: TratadorDoCanal<'espacos:associar'> = async (a, j) => {
+  if (!a.remover) return associarEspaco(a.id, a.dados);
+  if (!(await confirmarNoWindows(j, 'Remover vínculo', 'Remover o vínculo declarado entre estes itens?', `${a.dados.de.tipo} ${a.dados.de.id} ↔ ${a.dados.para.tipo} ${a.dados.para.id}`, 'Remover'))) return { canceled: true };
+  return desassociarEspaco(a.id, a.dados);
+};
 
 export const espacosAutomacoes: TratadorDoCanal<'espacos:automacoes'> = async a=>{const e=obterEspaco(a.id);const k6=(await localizarK6())!==null;if(!e.pastaLocal)return {pastaLocal:null,estado:'SEM_PASTA',frameworks:[],capacidades:[],k6Disponivel:k6};const p=await carregarProjeto(e.pastaLocal);const c=await contextoCompleto(p);return {pastaLocal:p.raiz,estado:'INTEGRADO',frameworks:c.frameworks,capacidades:Object.keys(p.manifesto.commands),readOnly:p.manifesto.execution.readOnly,k6Disponivel:k6};};
 
@@ -86,10 +94,10 @@ export const espacosTrazer: TratadorDoCanal<'espacos:trazer'> = async (a, j) => 
   if (!gh) throw new Error('GITHUB_NOT_LINKED: vincule um repositório do GitHub ao projeto, em Projetos, antes de trazê-lo.');
   const chave = String(gh.recurso.chave); if (!repositorioValido(chave)) throw new Error('GIT_URL_INVALID: o repositório vinculado tem um nome que o Prumo não aceita.');
   const raizDosClones = path.join(diretorioDados(), 'repositorios', e.id); const destino = path.join(raizDosClones, chave.split('/')[1]!);
-  const atualizar = !!e.pastaLocal;
-  if (atualizar && path.resolve(e.pastaLocal!).toLowerCase() !== path.resolve(destino).toLowerCase()) throw new Error('CLONE_NOT_FROM_PRUMO: a pasta deste projeto não foi trazida pelo Prumo; atualize-a com o seu próprio git.');
+  const atualizar = !!e.pastaLocal && path.resolve(e.pastaLocal).toLowerCase() === path.resolve(destino).toLowerCase();
+  if (e.pastaLocal && !atualizar && !a.trocar) throw new Error('CLONE_NOT_FROM_PRUMO: a pasta deste projeto não foi trazida pelo Prumo; atualize-a com o seu próprio git.');
   const url = `https://github.com/${chave}.git`;
-  const detalhe = `Repositório: ${chave}\nDestino: ${destino}\n${atualizar ? 'Atualiza só por avanço (fast-forward); mudanças suas não são sobrescritas.' : 'Cópia nova com os últimos 50 commits da ramificação principal.'}\nUsa o git instalado neste computador e as credenciais dele; o Prumo não entrega a sua credencial ao git. Hooks e links simbólicos ficam desligados e nada é executado.`;
+  const detalhe = `Repositório: ${chave}\nDestino: ${destino}\n${a.trocar && e.pastaLocal ? 'A IDE passará a usar esta cópia; a pasta anterior será preservada: ' + e.pastaLocal + '\n' : ''}${atualizar ? 'Atualiza só por avanço (fast-forward); mudanças suas não são sobrescritas.' : 'Cópia nova com os últimos 50 commits da ramificação principal.'}\nUsa o git instalado neste computador e as credenciais dele; o Prumo não entrega a sua credencial ao git. Hooks e links simbólicos ficam desligados e nada é executado.`;
   if (!await confirmarNoWindows(j, atualizar ? 'Atualizar repositório do GitHub' : 'Trazer repositório do GitHub', `${atualizar ? 'Atualizar' : 'Baixar'} ${chave} em uma pasta deste computador?`, detalhe, atualizar ? 'Atualizar' : 'Baixar')) return { canceled: true };
   const r = await clonarOuAtualizarRepositorio(url, destino);
   if (atualizar) return { canceled: false, acao: r.acao, pasta: r.pasta, ramo: r.ramo };

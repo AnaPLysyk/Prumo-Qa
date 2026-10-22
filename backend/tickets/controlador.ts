@@ -25,16 +25,21 @@ export const propostasEditar: TratadorDoCanal<'propostas:editar'> = a => editarP
 export const propostasListar: TratadorDoCanal<'propostas:listar'> = a => listarPropostas(a.espacoId);
 
 export const propostasPublicar: TratadorDoCanal<'propostas:publicar'> = async (a, j) => {
-  const i = idiomaAtual(); const p = obterProposta(a.id); podePublicar(p); const e = obterEspaco(p.espacoId); const op = p.tipo === 'caso' ? 'qase.criar_caso' : a.destino === 'qase' ? 'qase.criar_defeito' : a.destino === 'github' ? 'github.criar_issue' : 'jira.criar_ticket';
+  const i = idiomaAtual(); const p = obterProposta(a.id); podePublicar(p); const e = obterEspaco(p.espacoId);
+  const destinos = [...new Set(a.destinos?.length ? a.destinos : [a.destino ?? 'jira'])];
   // A prévia confirmada usa o mesmo tipo do envio real; sem tipo, recusa antes de pedir confirmação.
   const tipoId = a.tipoId ?? (typeof p.dados.tipoId === 'string' ? p.dados.tipoId : undefined);
-  if (p.tipo !== 'caso' && (a.destino ?? 'jira') === 'jira' && !tipoId) throw new Error('ISSUE_TYPE_REQUIRED: escolha o tipo do ticket (ex.: Bug) antes de publicar.');
-  const parametros = p.tipo === 'caso' ? p.dados : a.destino === 'github' ? parametrosDaIssueGithub(p) : a.destino === 'qase'
+  if (p.tipo !== 'caso' && destinos.includes('jira') && !tipoId) throw new Error('ISSUE_TYPE_REQUIRED: escolha o tipo do ticket (ex.: Bug) antes de publicar.');
+  const parametros = p.tipo === 'caso' ? p.dados : destinos[0] === 'github' ? parametrosDaIssueGithub(p) : destinos[0] === 'qase'
     ? parametrosDoDefeitoQase(p, a)
     : { tipoId, resumo: p.dados.resumo, descricao: p.dados.descricao ?? '', rotulos: p.dados.rotulos ?? [], ...(p.dados.origem ? { origem: p.dados.origem } : {}) };
-  const prev = prepararOperacao(p.espacoId, op, parametros);
-  if (!(await confirmarNoWindows(j, textoNoIdioma('opTitulo', i), textoNoIdioma('opMsg', i, { s: nomeServico[prev.servico], r: prev.rotulo }), textoNoIdioma('opDet', i, { x: prev.resumo + '\n\n' + prev.efeito, p: e.nome }), textoNoIdioma('opBtn', i)))) return { canceled: true };
-  return { canceled: false, ...(await publicarProposta(servicosDoAplicativo, a.id, { confirmado: true, tipoId: a.tipoId, destino: a.destino, severidadeQase: a.severidadeQase, marcoQase: a.marcoQase, camposQase: a.camposQase })) };
+  const previews = destinos.map(destino => {
+    const op = p.tipo === 'caso' ? 'qase.criar_caso' : destino === 'qase' ? 'qase.criar_defeito' : destino === 'github' ? 'github.criar_issue' : 'jira.criar_ticket';
+    return prepararOperacao(p.espacoId, op, parametros);
+  });
+  const detalhe = previews.map((prev, i) => `${destinos[i]}: ${prev.resumo}\n${prev.efeito}`).join('\n\n');
+  if (!(await confirmarNoWindows(j, textoNoIdioma('opTitulo', i), textoNoIdioma('opMsg', i, { s: destinos.join(', '), r: 'publicar proposta' }), textoNoIdioma('opDet', i, { x: detalhe, p: e.nome }), textoNoIdioma('opBtn', i)))) return { canceled: true };
+  return { canceled: false, ...(await publicarProposta(servicosDoAplicativo, a.id, { confirmado: true, tipoId: a.tipoId, destino: a.destino, destinos: a.destinos, severidadeQase: a.severidadeQase, marcoQase: a.marcoQase, camposQase: a.camposQase })) };
 };
 
 export const propostasRevisar: TratadorDoCanal<'propostas:revisar'> = async (a, j) => {

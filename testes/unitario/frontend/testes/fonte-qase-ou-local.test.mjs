@@ -11,11 +11,11 @@ const caso = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-casos-qase.
 const fechamento = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-vinculos.parte.js'), 'utf8');
 
 test('com Qase vinculado o comando principal cria direto na API; sem vinculo abre modo local', () => {
-  assert.match(visao, /vq\s*\?\s*\[\.\.\.\(manual\s*\?\s*\[DS\.acao\('Nova proposta de caso',\s*\(\)\s*=>\s*F\.novaProposta\(e\)/);
-  assert.match(visao, /DS\.acao\('Novo caso no Qase',\s*\(\)\s*=>\s*F\.novoCasoQase\(e\),\s*\{ id: 'qase-novo', primaria: true/);
-  assert.match(visao, /:\s*\(manual\s*\?\s*\[DS\.acao\('Novo caso local',\s*\(\)\s*=>\s*F\.novaProposta\(e\)/);
-  assert.match(visao, /desabilitado:\s*!esc/, 'escrita desligada nao habilita envio');
-  assert.match(fechamento, /novaProposta,\s*novoCasoQase,\s*telaCasosLocais,\s*abrirCasoLocal,\s*novaSuite/);
+  assert.match(visao, /menuCriar\(e, \{ modoCriar, vq, esc, mem \}\)/); assert.match(visao, /item\('pr-nova', 'Novo cenário'/);
+  assert.match(visao, /const modoCriar = vq && !manual \? 'direto' : manual \? 'local' : null/); assert.match(visao, /item\('su-nova', 'Nova suíte'/);
+  assert.match(visao, /qase\.criar_caso/); assert.match(visao, /caso-local[\s\S]{0,200}tipo: 'qase'/);
+  assert.match(visao, /desabilitado: !perm\.qase/, 'escrita desligada nao habilita envio'); assert.match(visao, /if \(!perm\.qase\) \{ avisar\(/);
+  assert.match(fechamento, /novaProposta,\s*novoCasoQase,\s*telaCasosLocais,\s*formularioSuiteLocal,\s*abrirCasoLocal,\s*novaSuite/);
 });
 
 test('fluxo conectado grava somente no Qase, usando operacao remota confirmada', () => {
@@ -44,7 +44,7 @@ test('repositório Qase carrega páginas adicionais sem repetir casos nem escond
   assert.match(visao, /if\s*\(proxima\.erro\)\s*return/);
   assert.match(visao, /new Map\(\[\.\.\.src\.casos\.itens,\s*\.\.\.proxima\.itens\]/);
   assert.match(visao, /mem\.casos\s*=\s*\{\s*itens:/);
-  assert.match(visao, /casos carregados do Qase/);
+  assert.match(visao, /cat-origem/);
 });
 
 test('classificação Qase fica na consulta remota e respeita caso manual ou automatizado', () => {
@@ -68,6 +68,7 @@ test('falha de resultados locais em Testes não é interpretada como consulta va
     vinc: () => null,
     api: {
       testesCatalogo: async () => ({ ok: true, data: { semPasta: true } }),
+      repositorioLocal: async () => ({ ok: true, data: { casos: [], suites: [] } }),
       runs: async () => { chamadas++; return falhar ? { ok: false, error: 'SERVICE_UNAVAILABLE' } : { ok: true, data: [{ id: 'run-1' }] }; }
     }
   };

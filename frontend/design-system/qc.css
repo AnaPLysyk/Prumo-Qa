@@ -159,7 +159,7 @@ input, select, textarea { border-radius: 10px; }
 body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(40rem 30rem at 85% -5%, rgba(var(--qc-azul), .12), transparent 60%), radial-gradient(34rem 26rem at 10% 110%, rgba(var(--qc-vermelho), .06), transparent 60%); animation: qc-deriva 22s ease-in-out infinite alternate; }
 @keyframes qc-deriva { to { transform: translate3d(-2%, 2%, 0) scale(1.06); } }
 @media (prefers-reduced-motion: reduce) { body::before, body, header#lateral, .menu-alternar { animation: none; transition: none; } }
-main#conteudo > * { animation: qc-entra .35s ease both; }
+main#conteudo > * { animation: qc-entra .35s ease backwards; }
 @keyframes qc-entra { from { opacity: 0; transform: translateY(6px); } }
 @media (prefers-reduced-motion: reduce) { main#conteudo > * { animation: none; } }
 
@@ -200,16 +200,20 @@ body[data-menu="fechado"] header#lateral nav button { padding: 5px 0; }
 
 /* seletor de projeto (lateral) e lista de projetos em linhas */
 .seletor-projeto { display: flex; flex-direction: column; gap: 4px; flex: none; }
-header#lateral button.projeto { position: relative; width: 100%; text-align: left; font: inherit; color: var(--texto); cursor: pointer; padding: 8px 30px 8px 25px; border-radius: 12px; border: 0; background: none; transition: background .2s; }
-header#lateral button.projeto:hover, header#lateral button.projeto[aria-expanded="true"] { background: rgba(var(--qc-azul), .08); }
-header#lateral button.projeto strong { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+header#lateral button.projeto { position: relative; width: 100%; text-align: left; font: inherit; color: var(--texto); cursor: pointer; padding: 7px 30px 8px 10px; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--linha) 70%, transparent); border-radius: 0; background: none; transition: background .2s, border-color .2s, opacity .2s; }
+header#lateral button.projeto::before { content: ""; position: absolute; left: 0; bottom: -1px; width: 28px; height: 2px; border-radius: 2px; background: var(--acento); opacity: .75; }
+header#lateral button.projeto:hover, header#lateral button.projeto[aria-expanded="true"] { background: rgba(var(--qc-azul), .06); }
+header#lateral button.projeto strong { display: block; font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+header#lateral button.projeto[data-contexto="carregando"] { opacity: .68; cursor: wait; }
 header#lateral button.projeto .seta { position: absolute; right: 10px; top: 50%; margin-top: -8px; color: var(--suave); transition: transform .25s; }
 header#lateral button.projeto[aria-expanded="true"] .seta { transform: rotate(180deg); }
-.projeto-lista { display: flex; flex-direction: column; gap: 1px; padding: 4px; border: 1px solid var(--linha); border-radius: 12px; background: var(--painel); max-height: 220px; overflow-y: auto; animation: qc-entra .18s ease both; }
+.projeto-lista { display: flex; flex-direction: column; gap: 1px; padding: 5px 2px; border: 1px solid color-mix(in srgb, var(--linha) 78%, transparent); border-radius: 8px; background: var(--painel); max-height: 220px; overflow-y: auto; animation: qc-entra .18s ease both; }
 .projeto-lista[hidden] { display: none; }
-.projeto-item { font: inherit; font-size: 13px; text-align: left; border: 0; border-radius: 8px; padding: 7px 10px; background: none; color: var(--texto); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.projeto-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: inherit; font-size: 13px; text-align: left; border: 0; border-radius: 8px; padding: 7px 10px; background: none; color: var(--texto); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .projeto-item:hover { background: rgba(var(--qc-azul), .12); }
 .projeto-item[aria-selected="true"] { color: var(--acento); font-weight: 600; }
+.projeto-item[aria-current="true"] { color: var(--acento); font-weight: 700; background: rgba(var(--qc-azul), .11); }
+.projeto-item-estado { flex: none; color: var(--acento); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
 /* Seletor sem projetos: só o aviso e a ação principal. */
 .projeto-item.projeto-criar { margin: 2px 4px 4px; text-align: center; font-weight: 600; color: var(--acento-texto); background: var(--acento); }
 .projeto-item.projeto-criar:hover { background: var(--acento); filter: brightness(1.08); }

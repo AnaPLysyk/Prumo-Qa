@@ -223,11 +223,8 @@ test('Jira, Qase e GitHub oferecem importação de projetos distintos sem associ
     assert.ok(!botoes.some(x => x.tipo === 'botao' && x.texto === 'Criar projeto'), 'importar nunca cria sozinho: primeiro escolhe o recurso e depois decide o destino');
     const escolher = botoes.find(x => x.tipo === 'botao' && x.texto === 'Escolher');
     assert.ok(escolher, servico + ' precisa oferecer a escolha do recurso');
+    // Sem nenhum outro projeto para vincular, não há destino a decidir: escolher já cria o projeto novo.
     await escolher.onClick();
-    const criar = percorrer(painel).find(x => x.tipo === 'botao' && x.texto === 'Criar projeto');
-    assert.ok(criar, servico + ': depois de escolher, oferece criar um projeto novo');
-    assert.deepEqual(chamadas, [['listar', conta.id, 0]], 'nada foi criado ainda');
-    await criar.onClick();
     assert.deepEqual(chamadas, [['listar', conta.id, 0], ['importar', conta.id, recurso.id]]);
     assert.equal(contexto.estado.espaco.id, espaco.id);
     assert.deepEqual(navegacao, ['projetos']);
@@ -319,37 +316,22 @@ test('cabos no Design System refletem apenas origens realmente vinculadas', () =
   assert.match(css, /\.ds-proj-porta:focus-visible/);
 });
 
-test('trocar projeto altera as fontes dos módulos no menu, sem reaproveitar Jira de outro projeto', () => {
+test('trocar projeto marca o menu e não troca a dica original dos botões', () => {
   const codigo = fs.readFileSync('frontend/compartilhado/navegacaoDaJanela.js','utf8');
   const inicio = codigo.indexOf('function atualizarMenuDoProjeto(');
   const fim = codigo.indexOf('function iniciarAjustes()', inicio);
   assert.ok(inicio >= 0 && fim > inicio, 'a atualização deve pertencer à navegação');
-  const menu = ['projetos','tickets','testes','agentes'].map(tipo => {
-    const nome = {projetos:'Projetos',tickets:'Tickets',testes:'Testes',agentes:'Agentes'}[tipo];
-    const b = { dataset:{aba:tipo}, title:'', nodes:[], append(node){this.nodes.push(node);},
-      querySelector(seletor){ return seletor==='span' ? {textContent:nome} : null; }};
-    return b;
-  });
+  const menu = ['projetos','tickets','testes','agentes'].map(tipo => ({ dataset:{aba:tipo}, title:tipo }));
   const lateral={setAttribute(k,v){this[k]=v;}};
-  const ctx={document:{querySelectorAll:()=>menu,querySelector:()=>lateral},
-    h:(tag,attrs)=>({tag,attrs,textContent:''})};
+  const ctx={document:{querySelectorAll:()=>menu,querySelector:()=>lateral}};
   vm.createContext(ctx); vm.runInContext(codigo.slice(inicio,fim),ctx);
-  const pA={id:'A',nome:'Projeto A',pastaLocal:null,vinculos:[{servico:'jira'},{servico:'github'}]};
-  const pB={id:'B',nome:'Projeto B',pastaLocal:'C:/codigo',vinculos:[{servico:'qase'}]};
-  ctx.atualizarMenuDoProjeto(pA);
-  assert.match(menu[1].title,/Jira/);
-  assert.match(menu[1].title,/GitHub/);
-  assert.doesNotMatch(menu[2].title,/Qase/);
-  ctx.atualizarMenuDoProjeto(pB);
-  assert.doesNotMatch(menu[1].title,/Jira/);
-  assert.match(menu[1].title,/Qase/);
-  assert.match(menu[2].title,/Local/);
-  assert.equal(menu[1].dataset.projeto,'B');
-  assert.equal(lateral['data-projeto-ativo'],'B');
-  // Pedido de 21/10/2026: o menu não leva legenda embaixo de cada item (ficava amontoado).
-  assert.ok(menu.every(b=>b.nodes.length===0),'nenhuma legenda no menu');
+  ctx.atualizarMenuDoProjeto({id:'A',nome:'Projeto A',vinculos:[{servico:'jira'}]});
+  assert.equal(menu[1].dataset.projeto,'A');
+  assert.equal(lateral['data-projeto-ativo'],'A');
+  // Pedido de 21/10/2026: ao passar o mouse, o menu mostra a informação original (o nome), sem projeto nem fontes.
+  assert.deepEqual(menu.map(b=>b.title),['projetos','tickets','testes','agentes']);
   ctx.atualizarMenuDoProjeto(null);
-  assert.match(menu[1].title,/Nenhum projeto selecionado/);
+  assert.equal(menu[1].dataset.projeto,'');
 });
 
 test('criar projeto manual abre a bancada sem exigir repositório', async () => {

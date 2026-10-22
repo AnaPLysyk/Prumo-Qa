@@ -3,7 +3,8 @@ import { workerDoAplicativo } from "../../agendamentos/worker/workerDoAplicativo
 import { empilharAviso } from "../estadoDoAplicativo.js";
 import { estadoDoAplicativo } from "../estadoDoAplicativo.js";
 import { idiomaAtual } from "../../configuracoes/servico.js";
-import { nativeImage, Tray, Menu, app, dialog } from "electron";
+import { nativeImage, Tray, Menu, app } from "electron";
+import { perguntarNaJanela } from "../janela/caixaDeConfirmacao.js";
 import path from "node:path";
 import { mostrarJanela, navegarPara } from "../janela/controleDaJanela.js";
 import { raizDoAplicativo } from "../../compartilhado/raizDoAplicativo.js";
@@ -80,5 +81,5 @@ export function acaoDoMenuDaBandeja(id: ItemMenu['id'], atualizar: () => void) {
       u: estado.ultimoErro ?? textoNoIdioma('nenhum', idioma)
     })
   };
-  void (janela ? dialog.showMessageBox(janela, opcoes) : dialog.showMessageBox(opcoes));
+  void perguntarNaJanela(janela, opcoes);
 }

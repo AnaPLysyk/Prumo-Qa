@@ -2,7 +2,7 @@
 
 Encontre aqui soluções para problemas comuns. Se precisar de mais ajuda, consulte **Ajuda › Suporte e avisos de atualização**.
 
-- **A conexão MCP não aparece.** Feche e reabra o cliente de IA. Em **Conexões**, clique em **Testar integração**. Se as chamadas aparecerem em **Logs**, a conexão está funcionando. Se você reinstalou o Prumo em outra pasta, configure a conexão novamente.
+- **A conexão MCP não aparece.** Feche e reabra o cliente de IA. Em **Agentes › IA e regras › Conectar IA**, clique em **Testar conexão**. Se as chamadas aparecerem em **Logs**, a conexão está funcionando. Se você reinstalou o Prumo em outra pasta, configure a conexão novamente.
 - **O projeto não tem contrato ou o contrato é inválido.** Leia a mensagem para saber o motivo. Corrija o arquivo `qa.project.json` ou remova-o para que o Prumo possa sugerir outro. O projeto não será vinculado enquanto o contrato estiver inválido.
 - **Não aparecem logs.** Talvez ainda não tenha havido chamadas neste projeto ou outro projeto esteja selecionado. Confira **Projeto**, no topo do menu lateral.
 - **As métricas estão parciais.** Há um registro inválido ou incompleto. O Prumo avisa e não inclui esse registro nos cálculos nem o altera.

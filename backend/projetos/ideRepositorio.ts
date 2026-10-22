@@ -9,8 +9,8 @@ import { IGNORAR } from '../testes/tipos/catalogoDeTestes.js';
 const MAX_ARQUIVOS = 8000;
 const MAX_PROFUNDIDADE = 24;
 const MAX_BYTES = 300_000;
-const bloqueado = (nome: string) => IGNORAR.has(nome.toLowerCase()) || ['.idea', '.vscode-test', '.gitmodules'].includes(nome.toLowerCase());
-const segredo = (nome: string) => /^(?:\.env(?:\..+)?|id_(?:rsa|ed25519|ecdsa)|.*\.(?:pem|p12|pfx|key|asc)|credentials(?:\..*)?|secrets?(?:\..*)?)$/i.test(nome);
+export const bloqueado = (nome: string) => IGNORAR.has(nome.toLowerCase()) || ['.idea', '.vscode-test', '.gitmodules'].includes(nome.toLowerCase());
+export const segredo = (nome: string) => /^(?:\.env(?:\..+)?|id_(?:rsa|ed25519|ecdsa)|.*\.(?:pem|p12|pfx|key|asc)|credentials(?:\..*)?|secrets?(?:\..*)?)$/i.test(nome);
 
 export type NoDoRepositorio = { nome: string; arquivo: string; tipo: 'pasta' | 'arquivo'; filhos?: NoDoRepositorio[] };
 
@@ -19,7 +19,7 @@ function raizReal(raiz: string): string {
   if (!fs.statSync(r).isDirectory()) throw new Error('IDE_SEM_REPOSITORIO');
   return r;
 }
-function caminhoSeguro(raiz: string, relativo: string): string {
+export function caminhoSeguroDoRepositorio(raiz: string, relativo: string): string {
   const rel = String(relativo).replaceAll('\\', '/');
   const partes = rel.split('/');
   if (!rel || rel.length > 400 || rel.startsWith('/') || /^[a-z]:/i.test(rel) || /[\u0000-\u001f]/.test(rel)
@@ -36,7 +36,7 @@ function caminhoSeguro(raiz: string, relativo: string): string {
   }
   return atual;
 }
-function conteudoOriginal(alvo: string): string {
+export function conteudoOriginal(alvo: string): string {
   const st = fs.lstatSync(alvo);
   if (!st.isFile() || st.isSymbolicLink() || st.size > MAX_BYTES) throw new Error('IDE_ARQUIVO_INDISPONIVEL');
   const bytes = fs.readFileSync(alvo);
@@ -79,7 +79,7 @@ export function arvoreDoRepositorio(raiz: string) {
 }
 
 export function lerArquivoDoRepositorio(raiz: string, arquivo: string) {
-  const alvo = caminhoSeguro(raiz, arquivo);
+  const alvo = caminhoSeguroDoRepositorio(raiz, arquivo);
   const original = conteudoOriginal(alvo);
   const conteudo = mascarar(original);
   return { arquivo, conteudo, hash: hash(original), linhas: original.split(/\r?\n/).length, editavel: conteudo === original };
@@ -88,7 +88,7 @@ export function lerArquivoDoRepositorio(raiz: string, arquivo: string) {
 /** Salva apenas texto com confirmação feita pelo controlador, SHA de concorrência e troca atômica. */
 export function gravarArquivoDoRepositorio(raiz: string, arquivo: string, conteudo: string, hashBase: string | null) {
   if (Buffer.byteLength(conteudo, 'utf8') > MAX_BYTES || conteudo.includes('\u0000')) throw new Error('IDE_CONTEUDO_INVALIDO');
-  const alvo = caminhoSeguro(raiz, arquivo);
+  const alvo = caminhoSeguroDoRepositorio(raiz, arquivo);
   const base = raizReal(raiz);
   const pasta = path.dirname(alvo);
   let original: string | null = null;
@@ -111,4 +111,49 @@ export function gravarArquivoDoRepositorio(raiz: string, arquivo: string, conteu
   try { fs.writeFileSync(temporario, texto, { encoding: 'utf8', flag: 'wx' }); if (original !== null) fs.chmodSync(temporario, fs.statSync(alvo).mode); fs.renameSync(temporario, alvo); }
   finally { fs.rmSync(temporario, { force: true }); }
   return { arquivo, linhas: texto.split(/\r?\n/).length, hash: hash(texto), criado: original === null };
+}
+
+const MAX_RESULTADOS = 500, MAX_CONSULTA = 200, MAX_LINHA_BUSCA = 2000, TEMPO_BUSCA_MS = 8000;
+/** Trechos como `(a+)+` são a forma clássica de regex catastrófica; recusados antes de compilar. */
+const regexPerigosa = (r: string) => /\([^)]*[+*][^)]*\)\s*[+*{]/.test(r);
+
+/** Busca texto (ou regex) nos mesmos arquivos seguros que a árvore lista. Somente leitura, com limites de resultados, arquivos e tempo. */
+export function buscarNoRepositorio(raiz: string, consulta: string, diferenciarCaixa = false, regex = false) {
+  if (!consulta || consulta.length > MAX_CONSULTA) throw new Error('IDE_BUSCA_INVALIDA: a consulta deve ter de 1 a ' + MAX_CONSULTA + ' caracteres.');
+  if (regex && regexPerigosa(consulta)) throw new Error('IDE_BUSCA_REGEX_INVALIDA: a expressão tem repetições aninhadas e pode travar a busca.');
+  let er: RegExp;
+  const literal = consulta.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  try { er = new RegExp(regex ? consulta : literal, diferenciarCaixa ? '' : 'i'); }
+  catch { throw new Error('IDE_BUSCA_REGEX_INVALIDA: a expressão regular é inválida.'); }
+  const base = raizReal(raiz), fim = Date.now() + TEMPO_BUSCA_MS;
+  const resultados: { arquivo: string; linha: number; trecho: string }[] = [];
+  let truncado = false, arquivos = 0;
+  const visitar = (dir: string, relativo: string, nivel: number) => {
+    if (truncado || nivel > MAX_PROFUNDIDADE) return;
+    let entradas: fs.Dirent[];
+    try { entradas = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    entradas.sort((a, b) => Number(b.isDirectory()) - Number(a.isDirectory()) || a.name.localeCompare(b.name, 'pt-BR'));
+    for (const e of entradas) {
+      if (truncado) return;
+      if (e.isSymbolicLink() || bloqueado(e.name) || segredo(e.name)) continue;
+      const absoluto = path.join(dir, e.name), arquivo = relativo ? relativo + '/' + e.name : e.name;
+      if (e.isDirectory()) {
+        try { if (!fs.realpathSync(absoluto).toLowerCase().startsWith((base + path.sep).toLowerCase())) continue; } catch { continue; }
+        visitar(absoluto, arquivo, nivel + 1);
+      } else if (e.isFile()) {
+        if (++arquivos > MAX_ARQUIVOS || Date.now() > fim) { truncado = true; return; }
+        let texto: string;
+        try { texto = conteudoOriginal(absoluto); } catch { continue; }
+        const linhas = texto.split(/\r?\n/);
+        for (let i = 0; i < linhas.length; i++) {
+          const linha = (linhas[i] ?? '').slice(0, MAX_LINHA_BUSCA);
+          if (!er.test(linha)) continue;
+          if (resultados.length >= MAX_RESULTADOS) { truncado = true; return; }
+          resultados.push({ arquivo, linha: i + 1, trecho: mascarar(linha.trim()).slice(0, 200) });
+        }
+      }
+    }
+  };
+  visitar(base, '', 0);
+  return { resultados, truncado };
 }

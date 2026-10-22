@@ -117,7 +117,7 @@ Cada chamada IPC grava, em `%LOCALAPPDATA%\PrumoQA\diagnostico`, apenas canal, e
 
 ## Segurança da janela
 
-`contextIsolation`, `sandbox` e `webSecurity` ligados; `nodeIntegration` desligado; CSP `default-src 'none'`; toda requisição que não seja `file:` é cancelada; navegação e novas janelas são negadas; permissões do navegador negadas; DevTools só fora do pacote. Cada canal IPC recusa remetente que não seja a página do app, valida os argumentos e só aceita raízes **já vinculadas**. A janela nunca recebe caminho livre para ler/executar: a pasta de um projeto só entra pelo diálogo nativo. Alterar a configuração do Codex exige uma caixa de confirmação **nativa** do processo principal, que a página não consegue simular. A autenticação humana antes de executar (`aprovar.exe`, CredUI + LogonUser) é a mesma do CLI/MCP e não foi alterada.
+`contextIsolation`, `sandbox` e `webSecurity` ligados; `nodeIntegration` desligado; CSP `default-src 'none'`; toda requisição que não seja `file:` é cancelada; navegação e novas janelas são negadas; permissões do navegador negadas; DevTools só fora do pacote. Cada canal IPC recusa remetente que não seja a página do app, valida os argumentos e só aceita raízes **já vinculadas**. A janela nunca recebe caminho livre para ler/executar: a pasta de um projeto só entra pelo diálogo nativo. Alterar a configuração do Codex exige a caixa de confirmação do processo principal (ver "Caixa de confirmação do processo principal" em SEGURANCA.md): a página não responde por ela, e imitar o visual não autoriza nada. A autenticação humana antes de executar (`aprovar.exe`, CredUI + LogonUser) é a mesma do CLI/MCP e não foi alterada.
 
 ## Desenvolvimento
 

@@ -16,11 +16,13 @@ Ferramentas de build (electron-builder, playwright-core, typescript) são depend
 
 ## Código de terceiros
 
-Dois arquivos de terceiros são distribuídos como estão, com a licença junto: **Three.js 0.159.0** (MIT, `frontend/compartilhado/vendor/THREE-LICENSE.txt`) e **CodeMirror 5.65.20** (MIT, `frontend/compartilhado/vendor/CODEMIRROR-LICENSE.txt`), o editor da IDE de Testes, com os modos JavaScript/TypeScript, Python, Gherkin e YAML. Foram obtidos do pacote oficial `codemirror` no npm, sem alteração e sem acesso à rede em tempo de execução.
+Dois arquivos de terceiros são distribuídos como estão, com a licença junto: **Three.js 0.159.0** (MIT, `frontend/compartilhado/vendor/THREE-LICENSE.txt`) e **Monaco Editor 0.57.0** (MIT, `frontend/editor-de-codigo/vendor/LICENSE.txt` e `ThirdPartyNotices.txt`), o editor da IDE de Testes (o mesmo editor do VS Code). Foram obtidos do pacote oficial `monaco-editor` no npm, sem alteração (só sem as traduções e as cópias duplicadas dos trabalhadores de linguagem) e sem acesso à rede em tempo de execução. O terminal da IDE usa **xterm.js 6.0.0** e **@xterm/addon-fit 0.11.0** (MIT, `frontend/editor-de-codigo/vendor/xterm/LICENSE-*.txt`), do mesmo modo, sem alteração (só sem o comentário que aponta para o mapa de código).
 
 As fontes **Inter** (`assets/fontes/INTER-LICENSE.txt`) e **JetBrains Mono** (`assets/fontes/JETBRAINS-MONO-LICENSE.txt`) são distribuídas sob a SIL Open Font License 1.1, no subconjunto latino, obtidas dos pacotes `@fontsource-variable/inter` e `@fontsource-variable/jetbrains-mono` sem alteração. A janela só carrega fontes do próprio aplicativo (`font-src 'self'`).
 
 Nenhum código de projetos terceiros foi copiado para o repositório. As referências conceituais ao QA Orchestrator anterior estão em `docs/ORIGEM.md`.
+
+A transcrição de voz usa **@huggingface/transformers 4.3.1** (Apache-2.0) com **onnxruntime-node** (MIT) e o modelo **Whisper base** da OpenAI, em formato ONNX (`onnx-community/whisper-base`, MIT). O modelo não vai no instalador: é baixado uma vez, com confirmação da pessoa, para a pasta de dados.
 
 ## Assinatura de código
 

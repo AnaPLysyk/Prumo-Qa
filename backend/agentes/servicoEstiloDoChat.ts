@@ -5,6 +5,7 @@ import { lerPerfil } from "./banco/perfil.js";
 import { proximosPassosSugeridos } from "./chat/roteamento.js";
 import { tentarOuPadrao } from "./chat/responderComDadosLocais.js";
 import { situacaoDoProjeto } from "../inicio/servico.js";
+import { obterEspaco } from "../projetos/banco/projetos.js";
 import { contaDaSessao } from "../login/regras/sessao.js";
 import type { Perfil } from "./tipos/conhecimento.js";
 
@@ -69,7 +70,15 @@ export function personalidadeParaIa(agenteId: string, perfil: PerfilParaIa | nul
 /** Abertura da conversa: cumprimenta pelo nome (o do Meu perfil ou o da conta que entrou), resume a situação e pergunta o que ainda falta saber. */
 export function saudacao(espacoId: string | null, nomeAssistente = 'Prumo', base?: string): { linhas: string[]; pendente: Pendente; proximos: Proximo[]; pessoa: string | null } {
   const perfil = tentarOuPadrao(() => lerPerfil(base), null); const pessoa = nomeParaChamar(perfil, base); const nome = nomeAssistente.slice(0, 40);
-  const linhas = [pessoa ? `Oi, ${pessoa}! Aqui é ${nome}.` : `Olá! Sou ${nome}, seu colega de qualidade neste computador.`, ...situacaoDoProjeto(espacoId, base)];
+  const saudar = pessoa ? `Oi, ${pessoa}! Aqui é ${nome}.` : `Olá! Sou ${nome}, seu colega de qualidade neste computador.`;
+  const situacao = situacaoDoProjeto(espacoId, base);
+  // Com projeto: diz onde a pessoa está e o que há nele em UMA mensagem (lista curta), em vez de várias frases soltas.
+  const espaco = espacoId ? tentarOuPadrao(() => obterEspaco(espacoId, base), null) : null;
+  const ferramentas = [...new Set((espaco?.vinculos ?? []).filter((v) => !v.desligado).map((v) => ({ jira: 'Jira', qase: 'Qase', github: 'GitHub' })[v.servico]))];
+  const linhas = espaco
+    ? [`${saudar} Você está no projeto **${espaco.nome}**${ferramentas.length ? `, ligado a ${ferramentas.length > 1 ? ferramentas.slice(0, -1).join(', ') + ' e ' + ferramentas.at(-1) : ferramentas[0]}` : ', ainda sem Jira, Qase ou GitHub ligados'}${espaco.pastaLocal ? ' e com a pasta do repositório vinculada' : ''}.`,
+      `Como está agora:\n${situacao.map((l) => `- ${l}`).join('\n')}`]
+    : [saudar, ...situacao];
   if (!pessoa) return { linhas: [...linhas, 'Antes de começarmos: como você quer que eu te chame?'], pendente: 'nome', proximos: [], pessoa };
   if (!perfil?.papel) return { linhas: [...linhas, 'Qual é o seu papel no time: QA, desenvolvimento, produto (PO) ou análise? Assim eu ajusto a conversa.'], pendente: 'papel', proximos: [], pessoa };
   const conheco = perfil.foco ? [`Vou priorizar ${perfil.foco} nas respostas.`] : [];

@@ -12,8 +12,8 @@ test('painel MCP pertence a Agentes e não fica dentro do runtime compartilhado'
   const telaAgentes = ler('frontend/agentes/tela-agentes.parte.js');
   const integracao = ler('frontend/projetos/tela-projetos.js');
   assert.doesNotMatch(compartilhado, /async conexoes\(el\)/);
-  assert.match(agente, /async function mostrarConfiguracaoMcp\(el\)/);
-  assert.match(telaAgentes, /mostrarConfiguracaoMcp\(clientContent\)/);
+  assert.match(agente, /async function mostrarConfiguracaoMcp\(el, opcoes = \{\}\)/);
+  assert.match(telaAgentes, /mostrarConfiguracaoMcp\(conteudo, \{ ia \}\)/);
   assert.match(integracao, /mostrarConfiguracaoMcp\(painelMcp\)/);
   const elementos = [];
   const contexto = {

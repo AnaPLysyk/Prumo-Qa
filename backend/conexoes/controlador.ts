@@ -1,5 +1,6 @@
 /** Controlador da tela conexoes: concentra canais de entrada, organizados por área funcional. */
 import { dialog } from "electron";
+import { perguntarNaJanela } from "../aplicativo/janela/caixaDeConfirmacao.js";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { aplicarConexao, prepararConexao } from "./ia/conectarIa.js";
 import { projetoVinculado, removerVinculoServico, alternarVinculoServico } from "../projetos/servicoProjetos.js";
@@ -18,6 +19,7 @@ import { obterEspaco } from "../projetos/banco/projetos.js";
 import { resolverAnexo } from "../tickets/servicoPropostas.js";
 import { listarOperacoes } from "./banco/operacoes.js";
 import { situacaoDasConexoesDeIa } from "./servicoIaDiagnostico.js";
+import { nomesDosProvedores } from "../agentes/chat/consultarIaExterna.js";
 import { iniciarConexaoGithub, estadoConexaoGithub } from './integracoes/autorizacaoGitHub.js';
 import { shell } from 'electron';
 import { autorizacaoDoAplicativo } from './integracoes/autorizacaoDoAplicativo.js';
@@ -29,8 +31,8 @@ import { disponiveisNoServico } from './integracoes/servicoDeAutorizacao.js';
 export const conexaoAplicar: TratadorDoCanal<'conexao:aplicar'> = async (a, janela) => {
   const p = await projetoVinculado(a.root);
   const plano = prepararConexao(p, a.client);
-  const r = await dialog.showMessageBox(janela!, { type: 'warning', title: 'Confirmar conexão', buttons: ['Cancelar', 'Adicionar configuração'], defaultId: 0, cancelId: 0, noLink: true,
-    message: `Adicionar o servidor MCP "${plano.name}" ao ${a.client}?`,
+  const r = await perguntarNaJanela(janela, { type: 'warning', title: 'Confirmar conexão', buttons: ['Cancelar', 'Adicionar configuração'], defaultId: 0, cancelId: 0, noLink: true,
+    message: `Conectar ${nomesDosProvedores[a.client]} ao Prumo (servidor MCP "${plano.name}")?`,
     detail: `Destino: ${plano.destination}\n\nComando:\n${plano.command}\n\nConfigurações existentes com o mesmo nome não são sobrescritas. Isto não comprova uma sessão ativa.` });
   if (r.response !== 1) return { configured: false, reason: 'Cancelado; nenhuma alteração.' };
   return aplicarConexao(plano, plano.confirmation);

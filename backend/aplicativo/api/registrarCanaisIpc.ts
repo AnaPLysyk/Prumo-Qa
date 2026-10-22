@@ -1,4 +1,5 @@
 /** Registra os canais IPC do aplicativo e mantém contrato e autorização por canal. */
+import { ideCriarprojeto, ideRepositorio, idePublicacao, idePublicar, ideComandoexecutar, ideComandosaida, ideComandoparar } from '../../projetos/controladorCodigo.js';
 import { agendaAutorizar, agendaEstado, agendaExcluir, agendaExecutar, agendaListar, agendaPermissoes, agendaPolitica, agendaRevogar, agendaRevogarPolitica, agendaSalvar, workerEstado, workerEventos, workerPausa } from "../../agendamentos/controlador.js";
 import { agentesEstado, agentesSalvar, agentesPessoais, agentesPessoalconsultar, agentesPreferenciassalvar, agentesPessoalsalvar, agentesPessoalexcluir, agentesPessoaisimportar, agentesOrquestracoes, agentesRastrear, servicosImportar, assistenteAgentes, assistenteAvaliar, assistenteConversar, conversasListar, conhecimentoApagar, conhecimentoCriar, conhecimentoDecidir, conhecimentoEsquecer, conhecimentoEstado, conhecimentoListar, conhecimentoMostrar, conhecimentoVocabulario, skillsCriar, skillsDecidir, skillsImportar, skillsListar, iaDelegacao, perfilObter, perfilSalvar, contextosAprovar, contextosConflito, contextosDesatualizar, contextosExcluir, contextosListar, contextosMcp, contextosObter, contextosSalvar } from "../../agentes/controlador.js";
 import { administracaoCodigo, administracaoMapa, plataformaAgentes, plataformaSalvar, chamadosConfiguracao, chamadosChave, chamadosListar, chamadosDetalhe, chamadosAnexo, chamadosResponder, chamadosEstado, usuariosAtivar, usuariosListar, usuariosCriar, usuariosAlterar, usuariosSenha, usuariosDesbloquear, usuariosExcluir, papeisListar, papeisSalvar, papeisExcluir, acessoConfiguracao, acessoGithub, acessoGoogle, acessoSalvar } from "../../administracao/controlador.js";
@@ -12,14 +13,15 @@ import { atualizacaoAbrir, atualizacaoInstalar, atualizacaoVerificar, preferenci
 import { interfaceExportar } from "../../compartilhado/controlador.js";
 import { conexaoAplicar, conexaoTestar, escritaEstado, escritaHabilitar, operacoesExecutar, operacoesListar, projetoConexoes, servicosAceite, servicosAdicionar, servicosQaseprevia, servicosQasepreviaconta, servicosQaseimportar, servicosQasecancelar, servicosQaseconectar, servicosJiradescobrir, servicosConferir, servicosConsultar, servicosDesvincular, servicosAlternar, servicosListar, servicosGithubiniciar, servicosGithubestado, servicosAbrirCadastro, servicosAutorizar, servicosAutorizacaoestado, servicosAutorizacaoescolher, servicosAutorizacaodisponivel, servicosRecursos, servicosRemover, servicosTrocartoken, servicosValidar, servicosVincular } from "../../conexoes/controlador.js";
 import { preferenciasObter, preferenciasSalvar } from "../../configuracoes/controlador.js";
-import { projetoEvidencias, execucoesListar, vinculosMapa, jiraPrevia, jiraPublicar, runsBugs, runsCriar, runsExecutar, runsListar, runsPolitica, runsPreparar, runsPublicar, runsResultado, runsRevogar, testesArquivo, testesGravar, testesPipelines, testesCatalogo, repositorioListar, repositorioCaso, repositorioSuite } from "../../testes/controlador.js";
+import { projetoEvidencias, execucoesListar, vinculosMapa, jiraPrevia, jiraPublicar, runsApagar, runsBugs, runsCriar, runsEditar, runsExecutar, runsListar, runsPolitica, runsPreparar, runsPublicar, runsResultado, runsAndamento, runsEvidencias, runsEvidenciar, runsRevogar, testesArquivo, testesGravar, testesPipelines, testesCatalogo, repositorioImportar, repositorioListar, repositorioCaso, repositorioSuite } from "../../testes/controlador.js";
 import { projetoHistorico, diagnosticoListar, logsExportar, projetoLogs } from "../../logs/controlador.js";
 import { assistenteAbertura } from "../../inicio/controlador.js";
+import { vozEstado, vozPreparar, vozTranscrever } from "../../voz/controlador.js";
 import { execucoesMetricas } from "../../metricas/controlador.js";
 import { projetosRecursos, projetosVincular, projetosImportar, espacosAssociar, espacosAutomacoes, espacosCriar, espacosEditar, espacosManual, espacosListar, espacosObter, espacosPasta, espacosTrazer, projetosDemo, projetosDesvincular, projetosEscolher, projetosListar, projetoVisao } from "../../projetos/controlador.js";
 import { propostasCriar, propostasDescartar, propostasVincular, propostasEditar, propostasListar, propostasPublicar, propostasRevisar } from "../../tickets/controlador.js";
 
-import { ideArvore, ideArquivo, ideGravar } from "../../projetos/controlador.js";
+import { ideArvore, ideArquivo, ideGravar, ideBuscar, ideGitEstado, ideGitDiff } from "../../projetos/controlador.js";
 
 export function registrarCanaisIpc(): void {
   // Janela, navegação e dados básicos
@@ -44,6 +46,9 @@ export function registrarCanaisIpc(): void {
   registrarCanal('dados:resumo', dadosResumo);
   registrarCanal('conexao:aplicar', conexaoAplicar);
   registrarCanal('logs:exportar', logsExportar);
+  registrarCanal('voz:estado', vozEstado);
+  registrarCanal('voz:preparar', vozPreparar);
+  registrarCanal('voz:transcrever', vozTranscrever);
   registrarCanal('dados:excluir', dadosExcluir);
   registrarCanal('atualizacao:verificar', atualizacaoVerificar);
   registrarCanal('preferencias:obter', preferenciasObter);
@@ -111,6 +116,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('operacoes:executar', operacoesExecutar);
   // Casos e suítes locais
   registrarCanal('repositorio:listar', repositorioListar);
+  registrarCanal('repositorio:importar', repositorioImportar);
   registrarCanal('repositorio:caso', repositorioCaso);
   registrarCanal('repositorio:suite', repositorioSuite);
   // Propostas de casos e defeitos
@@ -124,18 +130,33 @@ export function registrarCanaisIpc(): void {
   // Execuções e publicações de testes
   registrarCanal('runs:listar', runsListar);
   registrarCanal('runs:preparar', runsPreparar);
+  registrarCanal('runs:editar', runsEditar);
+  registrarCanal('runs:apagar', runsApagar);
   registrarCanal('runs:criar', runsCriar);
   registrarCanal('runs:executar', runsExecutar);
   registrarCanal('runs:resultado', runsResultado);
+  registrarCanal('runs:andamento', runsAndamento);
+  registrarCanal('runs:evidencias', runsEvidencias);
+  registrarCanal('runs:evidenciar', runsEvidenciar);
   registrarCanal('runs:publicar', runsPublicar);
   registrarCanal('runs:bugs', runsBugs);
   registrarCanal('runs:politica', runsPolitica);
   registrarCanal('runs:revogar', runsRevogar);
   // Vínculos e arquivos de automação
   registrarCanal('vinculos:mapa', vinculosMapa);
+  registrarCanal('ide:criarprojeto', ideCriarprojeto);
+  registrarCanal('ide:repositorio', ideRepositorio);
+  registrarCanal('ide:publicacao', idePublicacao);
+  registrarCanal('ide:publicar', idePublicar);
+  registrarCanal('ide:comandoexecutar', ideComandoexecutar);
+  registrarCanal('ide:comandosaida', ideComandosaida);
+  registrarCanal('ide:comandoparar', ideComandoparar);
   registrarCanal('ide:arvore', ideArvore);
   registrarCanal('ide:arquivo', ideArquivo);
   registrarCanal('ide:gravar', ideGravar);
+  registrarCanal('ide:buscar', ideBuscar);
+  registrarCanal('ide:gitestado', ideGitEstado);
+  registrarCanal('ide:gitdiff', ideGitDiff);
   registrarCanal('testes:arquivo', testesArquivo);
   registrarCanal('testes:gravar', testesGravar);
   registrarCanal('testes:pipelines', testesPipelines);

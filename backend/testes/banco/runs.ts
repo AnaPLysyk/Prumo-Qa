@@ -37,4 +37,12 @@ export function alterarRunLocal(
   return execucao;
 }
 
+export function removerRunLocal(id: string, base?: string) {
+  const registroExecucoes = lerRunsLocais(base);
+  const antes = registroExecucoes.itens.length;
+  registroExecucoes.itens = registroExecucoes.itens.filter(item => item.id !== id);
+  if (registroExecucoes.itens.length === antes) throw new Error('RUN_NOT_FOUND');
+  gravarRunsLocais(registroExecucoes, base);
+}
+
 export const listarRunsLocais = (espacoId?: string, b?: string) => lerRunsLocais(b).itens.filter(r => !espacoId || r.espacoId === espacoId).sort((a, c) => c.criadaEm.localeCompare(a.criadaEm));

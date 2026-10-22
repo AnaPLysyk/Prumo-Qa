@@ -47,7 +47,7 @@ function montarContexto() {
   };
   const ctx = {
     h, campoPlataforma: campo, campoTexto: (_rotulo, id, attrs) => campo('', { ...attrs, id }),
-    avisar: texto => avisos.push(texto),
+    avisar: texto => avisos.push(texto), textoErro: e => String(e),
     api: {
       casoLocalSalvar: async dados => { chamadas.push({ fn: 'casoLocalSalvar', dados }); return { ok: true, data: { id: 'novo' } }; },
       propostaCriar: async (...args) => { chamadas.push({ fn: 'propostaCriar', args }); return { ok: true }; },
@@ -88,7 +88,7 @@ test('UI real do formulário envia criação local com passos e suíte somente a
   assert.equal(dados.espacoId, 'projeto-1');
   assert.equal(dados.suiteLocalId, 'suite-1');
   assert.equal(dados.dados.titulo, 'Validar acesso');
-  assert.deepEqual(JSON.parse(JSON.stringify(dados.dados.passos)), [{ acao: 'Informar login', esperado: 'Acesso permitido', dados: 'usuario=qa.teste' }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(dados.dados.passos)), [{ acao: 'Informar login', esperado: 'Acesso permitido', dados: 'usuario=qa.teste', formato: 'normal' }]);
   assert.equal(a.concluidos, 1);
   assert.match(a.avisos[0], /somente neste computador/);
 });
@@ -158,7 +158,7 @@ test('o botão de salvar impede submissões simultâneas e reativa após respost
 function montarSuite() {
   const a = montarContexto(); const estado = { chamadas: [], fechado: false, navegou: false, modal: null };
   const completo = fs.readFileSync(path.join(raiz, 'frontend/testes/fluxos-repositorio-local.parte.js'), 'utf8');
-  const inicio = completo.indexOf('  function formularioSuiteLocal(e, suites, atual = null) {');
+  const inicio = completo.indexOf('  function formularioSuiteLocal(e, suites, atual = null, paiInicial = null) {');
   const fim = completo.indexOf('  async function telaCasosLocais(e, _mem, corpo) {', inicio);
   assert.ok(inicio > 0 && fim > inicio, 'função de suíte isolada da interface do repositório');
   a.ctx.tr = texto => texto;
@@ -282,6 +282,8 @@ function montarVinculoJira(resposta) {
   assert.ok(ini > 0 && fim > ini, 'fluxo de vínculo presente');
   a.ctx.api.repositorioLocal = async () => ({ ok: true, data: { casos: [], suites: [] } });
   a.ctx.api.propostas = async () => ({ ok: true, data: [] });
+  a.ctx.api.testesCatalogo = async () => ({ ok: true, data: { catalogo: { features: [] } } });
+  a.ctx.api.espacoAutomacoes = async () => ({ ok: true, data: { capacidades: [] } });
   a.ctx.api.servicoConsultar = async (...args) => { estado.consultas.push(args); return resposta; };
   a.ctx.api.espacoAssociar = async (...args) => { estado.associacoes.push(args); return { ok: true }; };
   a.ctx.chamar = async fn => { const r = await fn(); return r?.ok ? r.data : null; };
@@ -294,6 +296,7 @@ function montarVinculoJira(resposta) {
     acao: (_rotulo, callback, opcoes = {}) => a.ctx.h('button', { id: opcoes.id, onclick: callback }),
     bloco: (titulo, filho) => a.ctx.h('section', {}, titulo, filho),
     texto: (t, fallback) => t || fallback,
+    info: (t) => a.ctx.h('p', {}, t),
     origem: () => 'Prumo local',
     meta: campos => a.ctx.h('div', {}, campos),
     alerta: texto => a.ctx.h('span', { class: 'erro' }, texto),

@@ -15,13 +15,13 @@ import { Delegada } from './catalogoDeTestes.js';
  */
 const statusLocal = z.enum(['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN']);
 
-const resultadoSchema = z.object({ status: statusLocal, origem: z.enum(['EXECUCAO', 'MANUAL']), granularidade: z.enum(['CENARIO', 'RODADA', 'DECLARADO']), evidenciaId: z.string().uuid().optional(), comentario: z.string().max(2000).default(''), tempoMs: z.number().int().min(0).optional(), por: z.string().max(200).optional(), em: z.string().datetime() }).strict();
+const resultadoSchema = z.object({ status: z.enum(['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'SKIPPED', 'INVALID']), origem: z.enum(['EXECUCAO', 'MANUAL']), granularidade: z.enum(['CENARIO', 'RODADA', 'DECLARADO']), evidenciaId: z.string().uuid().optional(), comentario: z.string().max(2000).default(''), tempoMs: z.number().int().min(0).optional(), por: z.string().max(200).optional(), em: z.string().datetime() }).strict();
 
-const casoSchema = z.object({ casoId: z.number().int().positive(), titulo: z.string().max(255), capability: z.string().max(80).nullable(), casoRunner: z.string().max(100).nullable(), resultado: resultadoSchema.nullable(), publicado: z.boolean() }).strict();
+const casoSchema = z.object({ casoId: z.number().int().positive(), casoLocalId: z.string().uuid().optional(), titulo: z.string().max(255), capability: z.string().max(80).nullable(), casoRunner: z.string().max(100).nullable(), resultado: resultadoSchema.nullable(), publicado: z.boolean() }).strict();
 
 export const runSchema = z.object({
   id: z.string().uuid(), espacoId: z.string().uuid(), titulo: z.string().max(255), ambiente: z.string().max(40), runIdRemoto: z.number().int().positive().nullable(), planoId: z.number().int().positive().nullable(), marcoId: z.number().int().positive().nullable().optional(), ambienteQaseId: z.number().int().positive().nullable().optional(),
-  estado: z.enum(['PREPARADA', 'CRIADA', 'EXECUTADA', 'PARCIAL', 'PUBLICADA']), confirmadaNoQase: z.boolean(), criadaEm: z.string().datetime(), atualizadaEm: z.string().datetime(), casos: z.array(casoSchema).min(1).max(500),
+  estado: z.enum(['PREPARADA', 'CRIADA', 'EXECUTADA', 'PARCIAL', 'PUBLICADA']), confirmadaNoQase: z.boolean(), criadaEm: z.string().datetime(), atualizadaEm: z.string().datetime(), casos: z.array(casoSchema).min(1).max(1000),
   execucoes: z.array(z.object({ capability: z.string().max(80), evidenciaId: z.string().uuid(), status: statusLocal, em: z.string().datetime() }).strict()).max(200),
   publicacoes: z.array(z.object({ em: z.string().datetime(), estado: z.string().max(20), enviados: z.number().int(), operacaoId: z.string().uuid() }).strict()).max(200)
 }).strict();
@@ -38,4 +38,4 @@ export type Execucao = { executar: typeof executarValidacao; modo: 'MANUAL' | 'A
 
 /** Casos que só existem neste computador (testes do código, sem Qase) usam ids a partir daqui; o Qase nunca chega perto disso. */
 export const CASO_LOCAL_MIN = 1_000_000_000;
-export const paraQase = { PASS: 'passed', FAIL: 'failed', BLOCKED: 'blocked' } as const;
+export const paraQase = { PASS: 'passed', FAIL: 'failed', BLOCKED: 'blocked', SKIPPED: 'skipped', INVALID: 'invalid' } as const;

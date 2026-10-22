@@ -1,6 +1,6 @@
 /** servicoIaDiagnostico: mantém reunidas as operações do mesmo fluxo. */
 import { diretorioDados } from "../compartilhado/banco/diretorioDados.js";
-import { prepararConexao, Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools } from "./ia/conectarIa.js";
+import { prepararConexao, Plano, Cliente, claudeConfigSchema, clientes, Registro, registroSchema, tools, lerConfiguracaoDoCliente } from "./ia/conectarIa.js";
 import { projetoVinculado } from "../projetos/servicoProjetos.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -19,7 +19,7 @@ import { hash } from "../compartilhado/seguranca/hash.js";
 /** Propõe a configuração; nada é alterado aqui. */
 export async function situacaoDasConexoesDeIa(raiz: string) {
   const p = await projetoVinculado(raiz, diretorioDados());
-  return (['codex', 'claude'] as const).map(c => { const x = prepararConexao(p, c); const d=diagnosticarIntegracao(p,c); return { ...d, name: x.name, installed: x.installed, destination: x.destination, command: x.command, configuration:x.configuration, notice:x.notice+' '+d.notice, automatic: c === 'codex' && x.installed && !x.manualOnly }; });
+  return clientes.map(c => { const x = prepararConexao(p, c); const d=diagnosticarIntegracao(p,c); return { ...d, name: x.name, installed: x.installed, destination: x.destination, command: x.command, configuration:x.configuration, notice:x.notice+' '+d.notice, automatic: x.installed && !x.manualOnly }; });
 }
 
 // servicoIaDiagnostico — responsabilidade deste trecho
@@ -42,7 +42,8 @@ export function conferirServidores(plano: Plano, servidores: unknown) {
     const c = s.transport ?? s;
     const env = c.env ?? s.env ?? {};
     const nativo=comandoEhNodeDoPrumo(c.command);
-    return (c.type===undefined||c.type==='stdio')&&!c.url&&(mesmoCaminho(c.command, plano.configuration.command)||nativo) &&
+    // O Copilot grava servidores locais como type "local".
+    return (c.type===undefined||c.type==='stdio'||c.type==='local')&&!c.url&&(mesmoCaminho(c.command, plano.configuration.command)||nativo) &&
       Array.isArray(c.args) && c.args.length === plano.configuration.args.length &&
       c.args.every((v: unknown, i: number) => mesmoCaminho(v, plano.configuration.args[i]!)) &&
       env && typeof env === 'object' && !Array.isArray(env) &&
@@ -77,14 +78,14 @@ export function inspecionarIntegracao(p: Projeto, client: Cliente) {
       const r = spawnSync(plano.executable, ['mcp', 'list', '--json'], { cwd:p.raiz, shell: false, windowsHide: true, encoding: 'utf8', timeout: 15000, maxBuffer: 1024 * 1024 });
       if (r.error || r.status !== 0) throw new Error('inspection');
       servidores = JSON.parse(r.stdout);
+    } else if (client === 'copilot' || client === 'gemini') {
+      // Copilot (~/.copilot/mcp-config.json) e Gemini (~/.gemini/settings.json) guardam os servidores em mcpServers.
+      const config = lerConfiguracaoDoCliente(plano.destination).mcpServers ?? {};
+      if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error('inspection');
+      servidores = Object.values(config);
     } else {
-      semLinks(plano.destination);
-      let c=claudeConfigSchema.parse({});
-      if(fs.existsSync(plano.destination)){
-        const st = fs.lstatSync(plano.destination);
-        if (!st.isFile() || st.nlink !== 1 || st.size > 1024 * 1024) throw new Error('inspection');
-        c = claudeConfigSchema.parse(JSON.parse(fs.readFileSync(plano.destination, 'utf8')));
-      }
+      // O ~/.claude.json guarda também o histórico dos projetos e cresce com o uso.
+      const c = claudeConfigSchema.parse(lerConfiguracaoDoCliente(plano.destination, 16 * 1024 * 1024));
       const projetoConfig=Object.keys(c.projects??{}).find(k=>mesmoCaminho(k,p.raiz));
       const local=projetoConfig?c.projects[projetoConfig]!:{mcpServers:{},disabledMcpjsonServers:[] as string[]};
       // Claude Code: configurações de usuário e do projeto selecionado; não lê projetos vizinhos.

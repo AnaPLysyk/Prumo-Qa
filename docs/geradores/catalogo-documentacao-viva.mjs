@@ -11,6 +11,7 @@ export const telas = {
   testes: 'Testes: IDE, Repositório, Runs e Planos — casos, automações, execuções com aprovação humana, evidências, vínculos e o comentário de resultado no Jira.',
   agendamentos: 'Agendamentos: rotinas, fila de trabalhos, worker residente, autorizações prévias e k6.',
   metricas: 'Métricas: números reais calculados das execuções e do diário de operações.',
+  voz: 'Voz: transcrição local do que a pessoa fala (Whisper), sem enviar áudio para fora; o modelo é baixado uma vez, com confirmação.',
   logs: 'Logs: o que o aplicativo e as IAs fizeram, e o histórico das operações do projeto consolidado para o chat e as métricas.',
   conexoes: 'Conexões: contas de Jira, Qase e GitHub, leitura e escrita controlada nesses serviços e a conexão das IAs pelo MCP.',
   agentes: 'Agentes: as especializações, o chat, o Cérebro, as Skills, o conhecimento e os contextos do projeto (requisitos, regras, critérios e decisões, com aprovação humana).',

@@ -9,7 +9,7 @@ import { espacoDaRaiz, projetoVinculado } from "../../projetos/servicoProjetos.j
 import { exigirCapacidade } from "../servicoPoliticas.js";
 import { MeiosDoServidorMcp } from "../tipos/mcp.js";
 import { projetoAindaVinculado, contaAutorizadaMcp, conferirAcessoMcp } from "./segurancaDaSessao.js";
-import { registrarConsultarEvidencias, registrarContextoProjeto, registrarExecutarValidacao, registrarListarPoliticas, registrarRevisarCobertura, respostaDaFerramentaMcp } from "./consultasDoProjeto.js";
+import { registrarConsultarEvidencias, registrarConsultarRepositorio, registrarContextoProjeto, registrarExecutarValidacao, registrarListarPoliticas, registrarRevisarCobertura, respostaDaFerramentaMcp } from "./consultasDoProjeto.js";
 import { registrarPerguntarAoOrquestrador, registrarProporAprendizado, registrarProporBug, registrarProporCaso, registrarRoteirosMcp } from "./consultasDoProjeto.js";
 import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from "../../compartilhado/banco/diretorioDados.js";
 
@@ -79,7 +79,7 @@ export async function criarServidor(raiz: string, contratoLeitura?: string) {
     resposta: fn => respostaDaFerramentaMcp(() => autorizado('consultar_contexto', fn)),
     guarda: (capacidade, fn) => respostaDaFerramentaMcp(() => autorizado(capacidade, async () => { exigirCapacidade(espaco()?.id ?? null, capacidade); return fn(); })),
   };
-  registrarContextoProjeto(m); registrarRevisarCobertura(m); registrarExecutarValidacao(m); registrarConsultarEvidencias(m);
+  registrarContextoProjeto(m); registrarConsultarRepositorio(m); registrarRevisarCobertura(m); registrarExecutarValidacao(m); registrarConsultarEvidencias(m);
   registrarListarPoliticas(m); registrarProporCaso(m); registrarProporBug(m); registrarProporAprendizado(m);
   registrarPerguntarAoOrquestrador(m); registrarRoteirosMcp(m);
   return servidor;

@@ -4,7 +4,7 @@ import { ContextoServico } from "../../conexoes/tipos/adaptador.js";
 import { Recurso } from "../../projetos/contratos.js";
 import { z } from "zod";
 import { DefOperacao, Remoto } from "../../conexoes/tipos/operacao.js";
-import { associarTicket, esquemaCaso, editarCaso, criarSuite, Pagina } from "../tipos/escritaQase.js";
+import { associarTicket, esquemaCaso, editarCaso, editarSuite, apagarSuite, criarSuite, Pagina } from "../tipos/escritaQase.js";
 import { mascarar } from "../../compartilhado/seguranca/mascarar.js";
 import { ErroServico } from "../../conexoes/integracoes/configuracaoDosServicos.js";
 
@@ -69,11 +69,16 @@ export const conferirIdsDoObjetoQase = (valor: unknown, esperados: number[]): bo
     [...esperadosUnicos].every(id => lidosUnicos.has(id));
 };
 
+/** Passo BDD vira "Dado …" no Qase; passo normal segue como ação, dados e resultado esperado. */
+const passoParaQase = (s: { acao: string; esperado: string; dados: string; formato?: string; palavra?: string }) =>
+  ({ action: mascarar(s.formato === 'bdd' && s.palavra ? s.palavra + ' ' + s.acao : s.acao), expected_result: mascarar(s.esperado), data: mascarar(s.dados) });
+
 export const corpoDoCasoQase = (p: z.infer<typeof esquemaCaso>) => ({
   title: mascarar(p.titulo), description: mascarar(p.descricao), preconditions: mascarar(p.preCondicoes), postconditions: mascarar(p.posCondicoes),
-  steps: p.passos.map(s => ({ action: mascarar(s.acao), expected_result: mascarar(s.esperado), data: mascarar(s.dados) })), steps_type: 'classic',
+  steps: p.passos.map(passoParaQase), steps_type: 'classic',
   ...flagsDeAutomacao(p.automacao), tags: p.tags,
-  ...(p.suiteId ? { suite_id: p.suiteId } : {}), ...(p.prioridade !== undefined ? { priority: p.prioridade } : {}), ...(p.severidade !== undefined ? { severity: p.severidade } : {}), ...(p.tipo !== undefined ? { type: p.tipo } : {})
+  ...(p.suiteId ? { suite_id: p.suiteId } : {}), ...(p.prioridade !== undefined ? { priority: p.prioridade } : {}), ...(p.severidade !== undefined ? { severity: p.severidade } : {}), ...(p.tipo !== undefined ? { type: p.tipo } : {}),
+  ...(p.status !== undefined ? { status: p.status } : {}), ...(p.comportamento !== undefined ? { behavior: p.comportamento } : {}), ...(p.camada !== undefined ? { layer: p.camada } : {}), ...(p.instavel !== undefined ? { is_flaky: p.instavel ? 1 : 0 } : {})
 });
 
 export const camposDeSistema = async (ctx: ContextoServico) => z.object({ result: z.array(z.record(z.unknown())).default([]) }).passthrough().parse(await ctx.ler('/v1/system_field')).result.slice(0, 40).map(c => ctx.limpar(c));
@@ -155,19 +160,22 @@ export const criarCasoNoQase: DefOperacao<z.infer<typeof esquemaCaso>> = {
 };
 
 export const editarCasoNoQase: DefOperacao<z.infer<typeof editarCaso>> = {
-  id: 'qase.editar_caso', servico: 'qase', rotulo: 'Editar caso de teste no Qase', efeito: 'Altera título, descrição, pré-condições, passos, prioridade ou automação de um caso existente do projeto vinculado.', exigeConfirmacao: true, schema: editarCaso,
+  id: 'qase.editar_caso', servico: 'qase', rotulo: 'Editar caso de teste no Qase', efeito: 'Altera título, descrição, pré e pós-condições, passos, severidade, prioridade, tipo, status (inclusive marcar como obsoleto), comportamento, camada, tags ou automação de um caso existente do projeto vinculado.', exigeConfirmacao: true, schema: editarCaso,
   resumo: p => `Editar caso ${p.casoId}: ${Object.keys(p).filter(k => k !== 'casoId').join(', ')}`,
   async executar(ctx, rec, p) {
     await ctx.ler(`/v1/case/${codificarParaUrl(rec.chave)}/${p.casoId}`); // 404 se o caso não pertence ao projeto vinculado
-    const c: Record<string, unknown> = {}; if (p.titulo !== undefined) c.title = mascarar(p.titulo); if (p.descricao !== undefined) c.description = mascarar(p.descricao); if (p.preCondicoes !== undefined) c.preconditions = mascarar(p.preCondicoes);
-    if (p.passos) { c.steps = p.passos.map(s => ({ action: mascarar(s.acao), expected_result: mascarar(s.esperado), data: mascarar(s.dados) })); c.steps_type = 'classic'; } if (p.prioridade !== undefined) c.priority = p.prioridade;
+    const c: Record<string, unknown> = {}; if (p.titulo !== undefined) c.title = mascarar(p.titulo); if (p.descricao !== undefined) c.description = mascarar(p.descricao); if (p.preCondicoes !== undefined) c.preconditions = mascarar(p.preCondicoes); if (p.posCondicoes !== undefined) c.postconditions = mascarar(p.posCondicoes);
+    if (p.passos) { c.steps = p.passos.map(passoParaQase); c.steps_type = 'classic'; } if (p.prioridade !== undefined) c.priority = p.prioridade;
+    if (p.severidade !== undefined) c.severity = p.severidade; if (p.tipo !== undefined) c.type = p.tipo; if (p.status !== undefined) c.status = p.status; if (p.comportamento !== undefined) c.behavior = p.comportamento; if (p.camada !== undefined) c.layer = p.camada; if (p.instavel !== undefined) c.is_flaky = p.instavel ? 1 : 0; if (p.tags !== undefined) c.tags = p.tags;
     if (p.automacao) Object.assign(c, flagsDeAutomacao(p.automacao));
     await ctx.enviar('PATCH', `/v1/case/${codificarParaUrl(rec.chave)}/${p.casoId}`, JSON.stringify(c)); return { id: String(p.casoId), chave: `${rec.chave}-${p.casoId}` };
   },
   async confirmar(ctx, rec, p) {
     const c = z.object({ result: z.object({
       title: z.string().optional(), description: z.string().nullable().optional(),
-      preconditions: z.string().nullable().optional(), priority: z.number().nullable().optional(),
+      preconditions: z.string().nullable().optional(), priority: z.number().nullable().optional(), severity: z.number().nullable().optional(), type: z.number().nullable().optional(), status: z.union([z.number(), z.string()]).nullable().optional(),
+      postconditions: z.string().nullable().optional(), behavior: z.union([z.number(), z.string()]).nullable().optional(), layer: z.union([z.number(), z.string()]).nullable().optional(),
+      tags: z.array(z.union([z.string(), z.object({ title: z.string() }).passthrough()])).optional(),
       steps: z.array(z.object({ action: z.string(), expected_result: z.string().nullable().optional(), data: z.string().nullable().optional() }).passthrough()).optional(),
       isManual: z.union([z.boolean(), z.number()]).optional(), isToBeAutomated: z.union([z.boolean(), z.number()]).optional(), automation: z.number().nullable().optional()
     }).passthrough() }).passthrough().parse(await ctx.ler(`/v1/case/${codificarParaUrl(rec.chave)}/${p.casoId}`)).result;
@@ -175,7 +183,14 @@ export const editarCasoNoQase: DefOperacao<z.infer<typeof editarCaso>> = {
     if (p.descricao !== undefined && c.description !== mascarar(p.descricao)) return false;
     if (p.preCondicoes !== undefined && c.preconditions !== mascarar(p.preCondicoes)) return false;
     if (p.prioridade !== undefined && c.priority !== p.prioridade) return false;
-    if (p.passos !== undefined && (c.steps?.length !== p.passos.length || p.passos.some((s, i) => c.steps?.[i]?.action !== mascarar(s.acao) || (c.steps?.[i]?.expected_result ?? '') !== mascarar(s.esperado) || (c.steps?.[i]?.data ?? '') !== mascarar(s.dados)))) return false;
+    if (p.severidade !== undefined && c.severity !== p.severidade) return false;
+    if (p.tipo !== undefined && c.type !== p.tipo) return false;
+    if (p.status !== undefined && ({ actual: 0, draft: 1, deprecated: 2 } as Record<string, number>)[String(c.status)] !== p.status && Number(c.status) !== p.status) return false;
+    if (p.posCondicoes !== undefined && (c.postconditions ?? '') !== mascarar(p.posCondicoes)) return false;
+    if (p.comportamento !== undefined && Number(c.behavior) !== p.comportamento) return false;
+    if (p.camada !== undefined && Number(c.layer) !== p.camada) return false;
+    if (p.tags !== undefined && p.tags.some(t => !c.tags?.some(tag => (typeof tag === 'string' ? tag : tag.title) === t))) return false;
+    if (p.passos !== undefined && (c.steps?.length !== p.passos.length || p.passos.some((s, i) => c.steps?.[i]?.action !== passoParaQase(s).action || (c.steps?.[i]?.expected_result ?? '') !== mascarar(s.esperado) || (c.steps?.[i]?.data ?? '') !== mascarar(s.dados)))) return false;
     if (p.automacao !== undefined && automacaoLida(c) !== p.automacao) return false;
     return true;
   }
@@ -202,6 +217,38 @@ export const criarSuiteNoQase: DefOperacao<z.infer<typeof criarSuite>> = {
     const suite = (await listarNoQase(ctx, rec, 'suite', { search: p.titulo }))
       .find(s => String(s.id) === remoto.id);
     return !!suite && mesmaSuite(suite, p) && (suite.description ?? '') === mascarar(p.descricao);
+  }
+};
+
+export const editarSuiteNoQase: DefOperacao<z.infer<typeof editarSuite>> = {
+  id: 'qase.editar_suite', servico: 'qase', rotulo: 'Editar suíte no Qase', efeito: 'Altera o título e a descrição de uma suíte existente do projeto Qase vinculado. Não move nem apaga suítes ou casos.', exigeConfirmacao: true, schema: editarSuite,
+  resumo: p => `Editar suíte ${p.suiteId}: ${[p.titulo !== undefined ? 'título' : null, p.descricao !== undefined ? 'descrição' : null].filter(Boolean).join(', ')}`,
+  async executar(ctx, rec, p) {
+    await ctx.ler(`/v1/suite/${codificarParaUrl(rec.chave)}/${p.suiteId}`); // 404 se a suíte não pertence ao projeto vinculado
+    const corpo: Record<string, unknown> = {}; if (p.titulo !== undefined) corpo.title = mascarar(p.titulo); if (p.descricao !== undefined) corpo.description = mascarar(p.descricao);
+    await ctx.enviar('PATCH', `/v1/suite/${codificarParaUrl(rec.chave)}/${p.suiteId}`, JSON.stringify(corpo)); return { id: String(p.suiteId), detalhes: { suite: p.suiteId } };
+  },
+  async confirmar(ctx, rec, p) {
+    const s = z.object({ result: z.object({ title: z.string().optional(), description: z.string().nullable().optional() }).passthrough() }).passthrough().parse(await ctx.ler(`/v1/suite/${codificarParaUrl(rec.chave)}/${p.suiteId}`)).result;
+    if (p.titulo !== undefined && s.title !== mascarar(p.titulo)) return false;
+    if (p.descricao !== undefined && (s.description ?? '') !== mascarar(p.descricao)) return false;
+    return true;
+  }
+};
+
+export const apagarSuiteNoQase: DefOperacao<z.infer<typeof apagarSuite>> = {
+  id: 'qase.apagar_suite', servico: 'qase', rotulo: 'Apagar suíte no Qase', efeito: 'Apaga do projeto Qase vinculado uma suíte que não tem casos nem suítes filhas. Se houver qualquer um, nada é apagado.', exigeConfirmacao: true, schema: apagarSuite,
+  resumo: p => `Apagar a suíte ${p.suiteId} (vazia) do Qase`,
+  async executar(ctx, rec, p) {
+    const suite = z.object({ result: z.object({ cases_count: z.number().int().nonnegative().optional() }).passthrough() }).passthrough().parse(await ctx.ler(`/v1/suite/${codificarParaUrl(rec.chave)}/${p.suiteId}`)).result;
+    if ((suite.cases_count ?? 0) > 0) throw new ErroServico('SERVICE_WRITE_BLOCKED'); // só suíte vazia
+    if ((await listarNoQase(ctx, rec, 'suite', {})).some(s => Number(s.parent_id) === p.suiteId)) throw new ErroServico('SERVICE_WRITE_BLOCKED');
+    await ctx.enviar('DELETE', `/v1/suite/${codificarParaUrl(rec.chave)}/${p.suiteId}`, '');
+    return { id: String(p.suiteId), detalhes: { suite: p.suiteId } };
+  },
+  async confirmar(ctx, rec, p) {
+    try { await ctx.ler(`/v1/suite/${codificarParaUrl(rec.chave)}/${p.suiteId}`); return false; }
+    catch (e) { return e instanceof ErroServico && e.codigo === 'SERVICE_NOT_FOUND'; }
   }
 };
 

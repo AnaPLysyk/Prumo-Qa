@@ -3,6 +3,7 @@ import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { descreverOperacao } from "../aplicativo/api/catalogoDeContratos.js";
 import { lerDiagnostico, lerAuditoria } from "./banco/diagnostico.js";
 import { dialog } from "electron";
+import { perguntarNaJanela } from "../aplicativo/janela/caixaDeConfirmacao.js";
 import fs from "node:fs";
 import { exportarLogs } from "./regras/consultasDoDiario.js";
 import { listarHistoricoDoProjeto } from "./regras/consultasDoDiario.js";
@@ -14,7 +15,7 @@ export const diagnosticoListar: TratadorDoCanal<'diagnostico:listar'> = () => {
 };
 
 export const logsExportar: TratadorDoCanal<'logs:exportar'> = async (a, janela) => {
-  const aviso = await dialog.showMessageBox(janela!, { type: 'info', title: 'Exportar logs', buttons: ['Cancelar', 'Continuar'], defaultId: 0, cancelId: 0, noLink: true,
+  const aviso = await perguntarNaJanela(janela, { type: 'info', title: 'Exportar logs', buttons: ['Cancelar', 'Continuar'], defaultId: 0, cancelId: 0, noLink: true,
     message: 'Os registros podem conter informações relacionadas ao projeto (identificadores, contagens, estados).', detail: 'O arquivo será gravado onde você escolher. O Prumo não envia nada pela rede.' });
   if (aviso.response !== 1) return { exported: false };
   const conteudo = await exportarLogs(a.root);

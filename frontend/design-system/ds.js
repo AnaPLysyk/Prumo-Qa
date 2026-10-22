@@ -20,16 +20,20 @@ const DS = (() => {
     ok: ['M5 12.5l4.5 4.5L19 7'],
     relogio: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M12 7v5l3 2'],
     play: ['M8 5l11 7-11 7z'],
+    ramo: ['M6 3v12', 'M6 15a3 3 0 1 0 .01 0', 'M18 6a3 3 0 1 0 .01 0', 'M18 9a9 9 0 0 1-9 9'],
     pausa: ['M8 5v14', 'M16 5v14'],
     arquivo: ['M6 3h8l4 4v14H6z', 'M14 3v4h4'],
     imagem: ['M4 5h16v14H4z', 'M4 16l5-5 4 4 3-3 4 4', 'M15.5 9.5v.01'],
     video: ['M3 6h13v12H3z', 'M16 10l5-3v10l-5-3z'],
     codigo: ['M8 7l-5 5 5 5', 'M16 7l5 5-5 5'],
     baixar: ['M12 4v11', 'M7 10l5 5 5-5', 'M5 20h14'],
+    subir: ['M12 15V4', 'M7 9l5-5 5 5', 'M5 20h14'],
     cadeado: ['M6 11h12v10H6z', 'M8 11V8a4 4 0 0 1 8 0v3'],
     vazio: ['M4 7h16v12H4z', 'M4 7l3-3h10l3 3', 'M9 12h6'],
     livro: ['M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z', 'M4 19V5'],
     pasta: ['M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'],
+    ajustes: ['M4 7h9', 'M17 7h3', 'M13 5v4', 'M4 17h3', 'M11 17h9', 'M7 15v4'],
+    lixeira: ['M4 7h16', 'M10 11v6', 'M14 11v6', 'M6 7l1 13h10l1-13', 'M9 7V4h6v3'],
     editar: ['M4 20h4L19 9l-4-4L4 16z', 'M13.5 6.5l4 4'],
     filtro: ['M4 5h16l-6 7v6l-4 2v-8z'],
     escudo: ['M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z'],
@@ -69,8 +73,11 @@ const DS = (() => {
   function barra(...filhos) { return h('div', { class: 'ds-barra', role: 'search' }, ...filhos); }
   function busca({ id, placeholder, valor = '', aoEnter, rotulo }) {
     const input = h('input', { id, type: 'search', placeholder: tr(placeholder), 'aria-label': tr(rotulo || placeholder), value: valor, maxlength: 100, autocomplete: 'off' });
-    if (aoEnter) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); aoEnter(); } });
-    return { input, no: h('div', { class: 'ds-busca' }, icone('busca'), input) };
+    if (!aoEnter) return { input, no: h('div', { class: 'ds-busca' }, icone('busca'), input) };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); aoEnter(); } });
+    // Com ação de busca, a lupa também busca: a tela não precisa de um botão "Buscar" separado.
+    const lupa = h('button', { type: 'button', class: 'ds-busca-lupa', 'aria-label': tr('Buscar'), title: tr('Buscar'), onclick: () => aoEnter() }, icone('busca'));
+    return { input, no: h('div', { class: 'ds-busca' }, lupa, input) };
   }
   function selecao({ id, rotulo, opcoes, valor = '', aoMudar }) {
     const s = h('select', { id, 'aria-label': tr(rotulo) }, opcoes.map(([v, txt]) => h('option', { value: v, selected: String(v) === String(valor) }, t(txt))));

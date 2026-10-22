@@ -27,13 +27,6 @@
   const visibilidade = (x) => (x.meu === false ? tr('Público de {dono} · só leitura', { dono: x.dono || tr('outra conta') }) : x.publico ? tr('Seu · público') : tr('Seu · só você vê'));
   const iconeCerebro = () => sv('svg', { class: 'v36-icone', viewBox: '0 0 24 24', width: 26, height: 26, 'aria-hidden': 'true' }, sv('path', { d: 'M12 18V5a3 3 0 0 0-5.7-1.3A4.5 4.5 0 0 0 4 10.5 4.4 4.4 0 0 0 5 17.5 3.5 3.5 0 0 0 12 18Z' }), sv('path', { d: 'M12 18V5a3 3 0 0 1 5.7-1.3A4.5 4.5 0 0 1 20 10.5a4.4 4.4 0 0 1-1 7A3.5 3.5 0 0 1 12 18Z' }), sv('path', { d: 'M8 9a3 3 0 0 1-3 3m3 2a3 3 0 0 0 3 3m5-8a3 3 0 0 0 3 3m-3 2a3 3 0 0 1-3 3' }));
   const iconeBusca = () => sv('svg', { class: 'v36-icone', viewBox: '0 0 24 24', width: 16, height: 16, 'aria-hidden': 'true' }, sv('circle', { cx: 10.5, cy: 10.5, r: 6.5 }), sv('path', { d: 'm15.5 15.5 4.5 4.5' }));
-  function iconeCliente(cliente) {
-    const caixa = h('span', { class: 'v36a-cliente-icone ' + cliente });
-    const marca = cliente === 'claude'
-      ? sv('svg', { viewBox: '0 0 64 64', 'aria-hidden': 'true' }, ...Array.from({ length: 12 }, (_, i) => sv('path', { d: 'M32 32 L' + (32 + Math.cos(i * Math.PI / 6) * (i % 2 ? 19 : 26)).toFixed(1) + ' ' + (32 + Math.sin(i * Math.PI / 6) * (i % 2 ? 19 : 26)).toFixed(1), stroke: '#d97757', 'stroke-width': 6.5, 'stroke-linecap': 'round' })))
-      : sv('svg', { viewBox: '0 0 64 64', 'aria-hidden': 'true' }, ...Array.from({ length: 6 }, (_, i) => sv('rect', { x: 26, y: 9, width: 12, height: 30, rx: 6, fill: 'none', stroke: 'currentColor', 'stroke-width': 3.4, transform: 'rotate(' + i * 60 + ' 32 32)' })));
-    caixa.append(marca); return caixa;
-  }
   const CORES_NEURONIO = ['#6ea8ff', '#5bd9bd', '#bea1f8', '#f2c977', '#ff9fb8', '#7ad7ff', '#a7de82', '#ffba90'];
   // Céu profundo da tela Agentes: nebulosas lentas, estrelas em três profundidades e meteoros raros. Decorativo.
   function espaco(el) {
@@ -65,7 +58,7 @@
       const orbe = h('span', { class: 'v36a-orbe' }, h('img', { src: asset('robo-original.png'), alt: '' })); PrumoOrbitas.anexar(orbe);
       const orq = h('button', { type: 'button', class: 'v36a-astro v36a-astro-orq', role: 'listitem', id: 'v36-orquestrador-sempre', 'aria-label': tr('Conversar com o Prumo Orchestrator'), onclick: () => flutuante?.abrir() },
         h('span', { class: 'v36a-astro-figura' }, orbe), h('span', { class: 'v36a-astro-nome' }, 'Prumo Orchestrator'), h('span', { class: 'v36a-astro-sub' }, tr('Assistente local no Prumo')),
-        h('span', { class: 'v36a-astro-estado' }, h('i', { class: 'ok' }), h('span', {}, tr('Sem modelo de IA'))));
+        h('span', { class: 'v36a-astro-estado' }, h('i', { class: 'ok' }), h('span', {}, tr('Local, com IA quando conectada'))));
       el.append(h('div', { class: 'v36a-constelacao', role: 'list' }, orq), h('div', { class: 'v36a-sem' }, note(motivo)),
         h('div', { class: 'v36a-acoes' }, button(tr('Escolher projeto'), () => void mostrar('projetos'), { id: 'v36-agentes-projetos' }), button(tr('Abrir Conexões'), () => void abrirPainelDeConexoes(estado.espaco), { id: 'v36-agentes-conexoes' }),
           tentar ? button(tr('Tentar novamente'), () => void mostrar('agentes'), { id: 'v36-agentes-recarregar' }) : null));
@@ -80,11 +73,11 @@
     let drafts;
     try { drafts = await carregarPessoais(e.id); }
     catch { disponivel(tr('Não foi possível consultar os agentes pessoais deste projeto. Nenhum agente foi alterado.'), true); return; }
-    let activeTab = 'agents', painelVivo = null;
+    let activeTab = 'agents', painelVivo = null, parteDasPoliticas = 'conectar', iaDoAtalho = null;
     const body = h('div', { id: 'v36-agents-body', class: 'v36a-corpo' });
     const tabs = h('div', { class: 'v36a-abas', role: 'group', 'aria-label': tr('Áreas de agentes') },
       h('button', { type: 'button', class: 'v36a-aba', 'data-agent-tab': 'agents', 'aria-pressed': 'true', onclick: () => showTab('agents') }, tr('Agentes')),
-      h('button', { type: 'button', class: 'v36a-aba', 'data-agent-tab': 'policies', 'aria-pressed': 'false', onclick: () => showTab('policies') }, tr('Políticas do projeto')),
+      h('button', { type: 'button', class: 'v36a-aba', 'data-agent-tab': 'policies', 'aria-pressed': 'false', onclick: () => showTab('policies') }, tr('IA e regras')),
       h('button', { type: 'button', class: 'v36a-aba', 'data-agent-tab': 'activity', 'aria-pressed': 'false', onclick: () => showTab('activity') }, tr('Painel de atividades')));
     el.append(tabs, body);
     const habilitada = (id) => s.configuracao.especializacoes.includes(id);
@@ -94,7 +87,7 @@
       if (tab !== 'activity') painelVivo?.parar();
       tabs.querySelectorAll('[data-agent-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.agentTab === tab)));
       if (tab === 'agents') void list();
-      else if (tab === 'policies') policies();
+      else if (tab === 'policies') policies(parteDasPoliticas, iaDoAtalho);
       else void activity();
     }
     function resumoCaps(x) { const c = capsDe(x); const auth = c.filter(k => k.estado === 'EXIGE_AUTORIZACAO').length, bloq = c.filter(k => k.estado === 'BLOQUEADO').length;
@@ -108,14 +101,15 @@
       const orq = h('button', { type: 'button', class: 'v36a-astro v36a-astro-orq', role: 'listitem', 'aria-label': tr('Conversar com o Prumo Orchestrator'), onclick: () => flutuante?.abrir() },
         h('span', { class: 'v36a-astro-figura' }, orbe),
         h('span', { class: 'v36a-astro-nome' }, 'Prumo Orchestrator'), h('span', { class: 'v36a-astro-sub' }, tr('Assistente local no Prumo')),
-        h('span', { class: 'v36a-astro-estado' }, h('i', { class: 'ok' }), h('span', {}, tr('Sem modelo de IA'))));
+        h('span', { class: 'v36a-astro-estado' }, h('i', { class: 'ok' }), h('span', {}, tr('Local, com IA quando conectada'))));
       const clientesEl = []; let clientes = [];
-      if (estado.root) void chamar(() => api.conexoes(estado.root)).then((r) => { if (!r || !lista.isConnected) return; clientes = r; render(); });
+      // Só as IAs instaladas ou já ligadas ao Prumo aparecem entre os agentes; as outras ficam em IA e regras.
+      if (estado.root) void chamar(() => api.conexoes(estado.root)).then((r) => { if (!r || !lista.isConnected) return; clientes = r.filter((c) => c.installed || c.state !== 'NAO_CONFIGURADO'); render(); });
       function astroCliente(c) {
-        const nome = c.client === 'claude' ? 'Claude Code' : c.client === 'codex' ? 'Codex' : c.client;
+        const nome = IAS_DO_MCP[c.client]?.nome || c.client;
         const usado = c.lastObserved ? tr('Última chamada: {quando}', { quando: hora(c.lastObserved.at) }) : tr('Nenhuma chamada observada');
-        return h('button', { type: 'button', class: 'v36a-astro v36a-astro-cliente', role: 'listitem', 'data-cliente': c.client, 'aria-label': tr('Cliente MCP {nome}', { nome }), onclick: () => { showTab('policies'); const d = document.getElementById('v36-clients'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); } } },
-          h('span', { class: 'v36a-astro-figura' }, iconeCliente(c.client)), h('span', { class: 'v36a-astro-nome' }, nome), h('span', { class: 'v36a-astro-sub' }, tr('Cliente conectado por MCP')),
+        return h('button', { type: 'button', class: 'v36a-astro v36a-astro-cliente', role: 'listitem', 'data-cliente': c.client, 'aria-label': tr('Cliente MCP {nome}', { nome }), onclick: () => { parteDasPoliticas = 'conectar'; iaDoAtalho = c.client; showTab('policies'); } },
+          h('span', { class: 'v36a-astro-figura' }, iconeDaIa(c.client)), h('span', { class: 'v36a-astro-nome' }, nome), h('span', { class: 'v36a-astro-sub' }, tr('Cliente conectado por MCP')),
           h('span', { class: 'v36a-astro-estado' }, h('i', { class: c.state === 'UTILIZADO' || c.state === 'VALIDADO' ? 'ok' : c.state === 'ERRO' ? 'erro' : 'off' }), h('span', {}, selo(c.state))), h('span', { class: 'v36a-astro-sub' }, usado));
       }
       function render() {
@@ -139,20 +133,64 @@
         lista);
       render();
     }
-    // Políticas são uma área própria, não um rodapé escondido abaixo dos robôs.
-    function policies() {
-      const clientContent = h('div', { id: 'v36-client-panel' }); let loaded = false;
-      const clients = h('details', { class: 'v36a-secao-extra', id: 'v36-clients', ontoggle: async ev => {
-        if (!ev.currentTarget.open || loaded) return;
-        loaded = true; await mostrarConfiguracaoMcp(clientContent);
-        clientContent.querySelector('h1')?.remove();
-      } }, h('summary', {}, tr('Clientes MCP · diagnóstico e configuração')), clientContent);
+    // IA e regras é uma área própria, não um rodapé escondido abaixo dos robôs: conectar a IA da pessoa,
+    // as regras dela (só dela) e as regras do projeto (do Admin), uma parte de cada vez.
+    function policies(parte = 'conectar', ia = null) {
+      parteDasPoliticas = parte; iaDoAtalho = null;
+      definirDetalheDaTrilha();
+      const partes = [['conectar', 'Conectar IA'], ['minhas', 'Minhas regras'], ['projeto', 'Regras do projeto']];
+      const conteudo = h('div', { class: 'v36a-politicas-parte', id: 'v36-politicas-' + parte });
       body.replaceChildren(
         h('header', { class: 'v36a-politicas-cabecalho' },
-          h('h2', {}, tr('Políticas do projeto')),
-          h('p', {}, tr('Gerencie especializações e permissões do projeto. As operações restritas continuam exigindo uma pessoa.'))),
-        legacyPolicies(),
-        h('section', { class: 'v36a-politicas-mcp', 'aria-label': tr('Clientes MCP') }, clients));
+          h('h2', {}, tr('IA e regras'), DS.info(['Conecte o Claude Code, o Codex, o GitHub Copilot ou o Gemini CLI: eles passam a usar os dados e os agentes do Prumo pelo MCP.', 'Suas regras valem só para você. As regras do projeto valem para todas as pessoas e IAs, e só o Admin altera.', 'O Prumo precisa estar aberto e com você conectado; ações reservadas sempre pedem uma pessoa.'], { id: 'v36a-politicas-sobre', rotulo: 'Como funciona' })),
+          h('div', { class: 'v36a-politicas-partes', role: 'group', 'aria-label': tr('Partes de IA e regras') },
+            partes.map(([id, rotulo], i) => h('button', { type: 'button', class: 'v36a-politicas-passo', 'data-parte': id, 'aria-pressed': String(id === parte), onclick: () => policies(id) },
+              h('span', { class: 'v36a-politicas-num', 'aria-hidden': 'true' }, String(i + 1)), h('span', {}, tr(rotulo)))))),
+        h('section', { class: 'v36a-politicas', id: 'v36-agent-policies', 'aria-label': tr(partes.find(([id]) => id === parte)[1]) }, conteudo));
+      if (parte === 'conectar') void mostrarConfiguracaoMcp(conteudo, { ia }).then(() => conteudo.querySelector('h1')?.remove());
+      else conteudo.append(parte === 'minhas' ? minhasRegras() : legacyPolicies());
+    }
+    // Regras pessoais: só desta conta. Valem no chat do Prumo e nas IAs conectadas por MCP; nunca liberam permissões.
+    function minhasRegras() {
+      const pref = s.preferencias || {};
+      const regras = new Map([['todos', pref.todos?.orientacao || ''], ...s.especializacoes.map(x => [x.id, pref[x.id]?.orientacao || ''])]);
+      const salvas = new Map(regras);
+      let escolhido = s.especializacoes[0]?.id;
+      const nomeDe = (x) => pref[x.id]?.apelido || x.rotulo;
+      const salvar = h('button', { type: 'button', class: 'v36a-primario', id: 'v36-regras-salvar', disabled: true }, tr('Salvar minhas regras'));
+      const mudou = () => { salvar.disabled = ![...regras].some(([id, v]) => v.trim() !== salvas.get(id).trim()); };
+      const todos = h('textarea', { id: 'v36-regra-todos', rows: 3, maxlength: 1000, placeholder: tr('Ex.: Responda em tópicos curtos e sempre cite o ticket.'), oninput: ev => { regras.set('todos', ev.target.value); mudou(); } }, regras.get('todos'));
+      const doAgente = h('textarea', { id: 'v36-regra-agente', rows: 3, maxlength: 1000, oninput: ev => { regras.set(escolhido, ev.target.value); mudou(); marcar(); } });
+      const agentes = h('div', { class: 'v36a-regras-agentes', role: 'group', 'aria-label': tr('Escolha o agente') });
+      function escolher(id) {
+        escolhido = id; const x = s.especializacoes.find(a => a.id === id);
+        doAgente.value = regras.get(id); doAgente.placeholder = tr('Ex.: {nome}, priorize os riscos de negócio.', { nome: nomeDe(x) });
+        doAgente.setAttribute('aria-label', tr('Regra para {nome}', { nome: nomeDe(x) })); marcar();
+      }
+      function marcar() {
+        agentes.replaceChildren(...s.especializacoes.map((x, i) => {
+          const b = h('button', { type: 'button', class: 'v36a-regra-agente', 'data-regra-agente': x.id, 'aria-pressed': String(x.id === escolhido), onclick: () => { escolher(x.id); doAgente.focus(); } },
+            h('i', { 'aria-hidden': 'true' }), h('span', { 'data-i18n-ignore': '' }, nomeDe(x)), regras.get(x.id).trim() ? h('b', { class: 'v36a-regra-marca', title: tr('Tem regra') }, tr('com regra')) : null);
+          b.style.setProperty('--face-color', x.id === 'ui-ux' ? '#9e92ff' : palette[(Number.isInteger(x.robo) ? x.robo : i) % 8]); return b;
+        }));
+      }
+      salvar.addEventListener('click', async () => {
+        salvar.disabled = true;
+        for (const [id, v] of regras) {
+          if (v.trim() === salvas.get(id).trim()) continue;
+          const r = await chamar(() => api.agentePreferenciasSalvar(id, { apelido: pref[id]?.apelido || '', orientacao: v.trim() }));
+          if (!r) { mudou(); return; }
+          salvas.set(id, v.trim()); s.preferencias = { ...s.preferencias, [id]: { apelido: pref[id]?.apelido || '', orientacao: v.trim() } };
+        }
+        avisar(tr('Suas regras foram salvas.')); mudou(); marcar();
+      });
+      escolher(escolhido);
+      const bloco = (titulo, sub, ...campos) => h('section', { class: 'v36a-regras-bloco', 'aria-label': tr(titulo) }, h('div', { class: 'v36a-regras-rotulo' }, h('h3', {}, tr(titulo)), h('p', {}, tr(sub))), h('div', { class: 'v36a-regras-campos' }, ...campos));
+      return h('div', { class: 'v36a-regras', id: 'v36-minhas-regras' },
+        h('p', { class: 'v36a-politicas-quem' }, h('span', { class: 'v36a-selo-pessoal' }, tr('Só você')), tr('Valem no chat do Prumo e em qualquer IA conectada. Nunca liberam permissões.')),
+        bloco('Para todos os agentes', 'Vale em toda conversa.', todos),
+        bloco('Para um agente', 'Escolha o agente e escreva a regra dele.', agentes, doAgente),
+        h('div', { class: 'v36a-salvar' }, salvar));
     }
     // Configuração editável pelo Admin; usuários comuns consultam sem poder alterar.
     function legacyPolicies() {
@@ -166,7 +204,6 @@
       }
       const selecionadas = h('fieldset', { class: 'v36a-politicas-especializacoes' },
         h('legend', {}, tr('Especializações habilitadas')),
-        h('p', { class: 'v36a-politicas-intro' }, tr('Escolha quais especialistas podem atuar neste projeto.')),
         h('div', { id: 'ag-especializacoes', class: 'v36a-esps' }, s.especializacoes.map(x => h('label', { class: 'v36a-check' }, h('input', { type: 'checkbox', 'data-esp': x.id, checked: esp.has(x.id), disabled: !podeAdministrar, onchange: ev => { ev.target.checked ? esp.add(x.id) : esp.delete(x.id); dirty(); } }), h('span', {}, x.rotulo)))),
         contagem);
       const editaveis = s.matriz.filter(c => c.editavel.length).map(c => c.id);
@@ -175,12 +212,13 @@
         h('div', { class: 'v36a-politicas-grupo-cab' }, h('h3', {}, tr(titulo)), h('p', {}, tr(descricao))),
         policyTable(pol, dirty, ids, !podeAdministrar));
       dirty();
-      return h('section', { class: 'v36a-politicas', id: 'v36-agent-policies', 'aria-label': tr('Permissões e especializações') },
+      return h('div', { class: 'v36a-politicas-regras', 'aria-label': tr('Permissões e especializações') },
         h('div', { class: 'v36a-politicas-conteudo' },
+          h('p', { class: 'v36a-politicas-quem' }, h('span', { class: 'v36a-selo-pessoal do-projeto' }, tr(podeAdministrar ? 'Todo o projeto' : 'Só o Admin altera')), tr('Valem para todas as pessoas e IAs deste projeto.')),
           selecionadas,
-          secao('Permissões dos agentes', 'Defina o que os especialistas podem fazer neste projeto.', editaveis),
+          secao('Permissões dos agentes', 'O que as IAs podem fazer neste projeto.', editaveis),
           secao('Ações reservadas à pessoa', 'Estas operações exigem decisão humana e não podem ser liberadas para agentes.', reservadas, true),
-          podeAdministrar ? h('div', { class: 'v36a-salvar' }, h('span', { class: 'v36a-politicas-rodape-texto' }, tr('Salvar exige confirmação nativa.')), save) : h('p', { class: 'suave' }, tr('Somente o Admin altera as políticas gerais.'))));
+          podeAdministrar ? h('div', { class: 'v36a-salvar' }, h('span', { class: 'v36a-politicas-rodape-texto' }, tr('Salvar exige confirmação nativa.')), save) : null));
     }
     function policyTable(pol, change, caps, somenteLeitura = false) {
       const nomes = { PERMITIDO: 'Permitido', BLOQUEADO: 'Bloqueado', EXIGE_AUTORIZACAO: 'Exige autorização', SOMENTE_PESSOA: 'Somente pessoa' };
@@ -193,12 +231,12 @@
               h('strong', {}, tr(c.rotulo)),
               c.id === 'executar_testes' ? h('small', { class: 'v36a-cap-alerta' }, tr('Cada execução exige autorização humana.')) : null,
               h('details', { class: 'v36a-cap-detalhes' },
-                h('summary', {}, tr('Detalhes')),
+                h('summary', { 'aria-label': tr('Detalhes'), title: tr('Detalhes') }, 'i'),
                 h('p', {}, tr(c.motivo)))),
             h('div', { class: 'v36a-cap-controle' },
               diferente ? h('small', { class: 'v36a-cap-estado' }, tr('Estado atual: ') + tr(nomes[c.estado] || c.estado)) : null,
               c.editavel.length
-                ? h('select', { disabled: somenteLeitura, 'data-pol': c.id, 'aria-label': tr('Permissão: ') + tr(c.rotulo), onchange: ev => { pol[c.id] = ev.target.value; change(); } },
+                ? h('select', { disabled: somenteLeitura, 'data-pol': c.id, 'data-estado': atual, 'aria-label': tr('Permissão: ') + tr(c.rotulo), onchange: ev => { pol[c.id] = ev.target.value; ev.target.setAttribute?.('data-estado', ev.target.value); change(); } },
                     c.editavel.map(v => h('option', { value: v, selected: atual === v }, tr(nomes[v] || v))))
                 : h('span', { class: 'v36a-pessoa' }, tr('Somente pessoa'))));
         }));
@@ -299,8 +337,7 @@
       if (x.preview) { const file = h('input', { type: 'file', accept: '.json,application/json', id: 'v36-agent-import', class: 'v36-sr', onchange: async ev => { const f = ev.target.files[0]; if (!f) return; try { if (f.size > 32768) throw Error('Arquivo excede 32 KiB.'); const d = validateDraft(JSON.parse(await f.text())); name.value = d.nome; desc.value = d.descricao; goal.value = d.objetivo; instructions.value = d.instrucoes; ferramenta.value = d.ferramenta; sync(); avisar('Configuração importada. Revise e confirme antes de salvar.'); } catch (err) { avisar('Importação recusada: ' + err.message, true); } ev.target.value = ''; } });
         barra.lastChild.append(h('label', { class: 'v36a-quieto', title: tr('A importação só preenche o formulário; revise antes de salvar.') }, '↥ ', h('span', {}, tr('Importar agente JSON')), file)); }
       if (x.preview && !alheio && !isNew && drafts.some((a) => a.id === x.id)) barra.lastChild.append(h('button', { type: 'button', class: 'v36a-quieto', id: 'v36-agent-excluir', onclick: async () => {
-        if (!confirm(tr('Excluir o agente {nome}? Isso não pode ser desfeito.', { nome: x.nome }))) return;
-        const r = await chamar(() => api.agentePessoalExcluir(x.id)); if (!r) return; avisar(tr('Agente excluído.')); drafts = await carregarPessoais(e.id); void list();
+        const r = await chamar(() => api.agentePessoalExcluir(x.id)); if (!r || r.canceled) return; avisar(tr('Agente excluído.')); drafts = await carregarPessoais(e.id); void list();
       } }, tr('Excluir agente')));
       barra.lastChild.append(exportar);
       const retrato = h('div', { class: 'v36a-retrato-robo' });

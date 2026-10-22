@@ -135,7 +135,7 @@ Toda a apresentação editável reside em `frontend/design-system/`. As pastas d
 - `painel-atividades.js`: canvas e apresentação das atividades dos agentes.
 - `modal-de-detalhes.css` e `modal-de-detalhes.js`: detalhes compartilhados.
 
-A IDE de Testes ocupa a janela como área de trabalho: explorador lateral, editor central e painel de contexto, sem cartões sobrepostos. O editor é o CodeMirror local, com `Ctrl+S` e gravação pelo contrato do backend. O login e os componentes do chat conservam sua composição específica, mas seus estilos permanecem no mesmo Design System.
+A IDE de Testes ocupa a janela como área de trabalho: explorador lateral, editor central e painel inferior, sem cartões sobrepostos. O editor é o Monaco local (o do VS Code) numa página isolada, com `Ctrl+S` e gravação pelo contrato do backend. O login e os componentes do chat conservam sua composição específica, mas seus estilos permanecem no mesmo Design System.
 
 **Contrato de manutenção:** mudar cor, espaçamento, fonte, composição, animação, responsividade ou um componente visual somente em `frontend/design-system/`. Mudar consulta, estado, regra da tela ou pedido IPC em `frontend/<tela>/`. Não editar `dist/`, não reescrever bibliotecas vendorizadas de `frontend/compartilhado/vendor/`, não duplicar CSS e não criar pastas só para dividir funções pequenas.
 
@@ -153,7 +153,7 @@ Ordem de adoção, somente quando a necessidade surgir na tela:
 - **Plotly.js (gráficos):** métricas que exigem interação; tabelas e números simples não precisam da biblioteca.
 - **Driver.js (guia pontual):** opção para mostrar uma primeira ação numa tela complexa, somente se um teste de uso comprovar necessidade; não criar tours obrigatórios nem painéis explicativos novos.
 
-CodeMirror e Three.js já existem no aplicativo como bibliotecas locais. Não adicionar React, shadcn/ui, React Hook Form ou XYFlow ao renderer inteiro para fazer formulários comuns; essas opções só fazem sentido mediante decisão de arquitetura e necessidade comprovada.
+Monaco e Three.js já existem no aplicativo como bibliotecas locais. Não adicionar React, shadcn/ui, React Hook Form ou XYFlow ao renderer inteiro para fazer formulários comuns; essas opções só fazem sentido mediante decisão de arquitetura e necessidade comprovada.
 
 **Padrão de revisão por agentes (QA geral, Acessibilidade, Playwright e Regressão):** cada estado vazio mostra o que falta e uma ação clara (uma linha de apoio apenas quando necessária); formulários dão nome exato ao campo e ao botão, sem parágrafos repetidos; dados de origem/limitações aparecem perto da ação ou no ícone ⓘ, mas avisos críticos ficam visíveis. Uma ação principal por área, nada de cartão dentro de cartão ou efeitos desnecessários. Verificar com o Electron real: temas claro/escuro, janela estreita, contraste, foco, leitura por teclado, textos longos, rolagem horizontal, estado sem dados, sucesso e falha. Validar a mudança com inspeção, revisor independente e testes existentes. O modal **Minha conta** usa `DS.modal`, `DS.abasModal`, `DS.secao` e estilos `.ds-conta-*` em `ds.css` como exemplo desse padrão.
 

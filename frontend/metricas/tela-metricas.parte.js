@@ -19,9 +19,9 @@
       const pad = cats.length > 1 ? iw / (cats.length - 1 + .72) * .36 : iw / 2, esp = cats.length > 1 ? (iw - pad * 2) / (cats.length - 1) : 0;
       const X = (i) => m.l + pad + i * esp, Y = (v) => m.t + ih - (v / topo) * ih;
       const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': series.map((s) => s.nome + ': ' + s.valores.reduce((a, b) => a + b, 0)).join(', ') });
-      for (let v = 0; v <= topo; v += passo) { svg.append(sv('line', { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), stroke: t.linha, 'stroke-dasharray': '2 3', 'stroke-width': 1 }), txt(m.l - 10, Y(v) + 3, String(v), { 'text-anchor': 'end', 'font-size': 10, fill: t.suave })); }
+      for (let v = 0; v <= topo; v += passo) { svg.append(sv('line', { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), stroke: t.linha, 'stroke-dasharray': '2 3', 'stroke-width': 1 }), txt(m.l - 10, Y(v) + 3, String(v), { 'text-anchor': 'end', 'font-size': 11, fill: t.suave })); }
       const salto = Math.max(1, Math.ceil(cats.length / 8));
-      cats.forEach((c, i) => { if (i % salto === 0 || i === cats.length - 1 && cats.length <= 8) svg.append(txt(X(i), H - 8, c, { 'text-anchor': 'middle', 'font-size': 10, fill: t.suave })); });
+      cats.forEach((c, i) => { if (i % salto === 0 || i === cats.length - 1 && cats.length <= 8) svg.append(txt(X(i), H - 8, c, { 'text-anchor': 'middle', 'font-size': 11, fill: t.suave })); });
       series.forEach((s, si) => {
         const pts = s.valores.map((v, i) => [X(i), Y(v)]);
         if (si === 0 && tipo === 'bars') { const bw = Math.max(3, Math.min(28, esp * .6 || 28)); s.valores.forEach((v, i) => { if (v) svg.append(sv('rect', { x: X(i) - bw / 2, y: Y(v), width: bw, height: m.t + ih - Y(v), rx: 3, fill: t.acento, opacity: .9 })); }); return; }
@@ -42,8 +42,8 @@
       const m = { l: 112, r: 26, t: 7, b: 12 }, iw = W - m.l - m.r, banda = (H - m.t - m.b) / itens.length, alt = Math.min(22, banda * .42), max = Math.max(1, ...itens.map((i) => i.n)) * 1.17;
       const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': itens.map((i) => i.rot + ': ' + i.n + sufixo).join(', ') }); const dica = () => dicaDe(host);
       itens.forEach((it, k) => { const cy = m.t + banda * (k + .5), w = (it.n / max) * iw;
-        svg.append(sv('line', { x1: m.l, x2: W - m.r, y1: cy, y2: cy, stroke: t.linha, 'stroke-width': 1 }), txt(m.l - 4, cy + 3, it.rot, { 'text-anchor': 'end', 'font-size': 10, fill: t.suave }));
-        const r = sv('rect', { x: m.l, y: cy - alt / 2, width: Math.max(it.n ? 2 : 0, w), height: alt, fill: it.cor }); svg.append(r, txt(m.l + w + 5, cy + 3, String(it.n), { 'font-size': 10, fill: t.suave }));
+        svg.append(sv('line', { x1: m.l, x2: W - m.r, y1: cy, y2: cy, stroke: t.linha, 'stroke-width': 1 }), txt(m.l - 4, cy + 3, it.rot, { 'text-anchor': 'end', 'font-size': 11, fill: t.suave }));
+        const r = sv('rect', { x: m.l, y: cy - alt / 2, width: Math.max(it.n ? 2 : 0, w), height: alt, fill: it.cor }); svg.append(r, txt(m.l + w + 5, cy + 3, String(it.n), { 'font-size': 11, fill: t.suave }));
         r.addEventListener('pointermove', (e) => { const b = host.getBoundingClientRect(); dica().mostrar(e.clientX - b.left, e.clientY - b.top, [h('b', {}, it.rot), h('div', {}, it.n + sufixo)]); }); r.addEventListener('pointerleave', () => dica().esconder()); });
       host.replaceChildren(svg);
     }
@@ -69,7 +69,7 @@
       itens.forEach((it) => { const w = (it.n / total) * (W - 8); const r = sv('rect', { x, y, width: Math.max(0, w - 2), height: alt, rx: 3, fill: it.cor }); svg.append(r); x += w;
         r.addEventListener('pointermove', (e) => { const b = host.getBoundingClientRect(); dica().mostrar(e.clientX - b.left, e.clientY - b.top, [h('b', {}, it.rot), h('div', {}, it.n + ' / ' + total)]); }); r.addEventListener('pointerleave', () => dica().esconder()); });
       let lx = 2; const ly = y + alt + 30;
-      itens.forEach((it) => { const label = it.rot + ' · ' + it.n; svg.append(sv('rect', { x: lx, y: ly - 9, width: 10, height: 10, fill: it.cor }), txt(lx + 15, ly, label, { 'font-size': 10, fill: t.suave })); lx += 30 + label.length * 6; });
+      itens.forEach((it) => { const label = it.rot + ' · ' + it.n; svg.append(sv('rect', { x: lx, y: ly - 9, width: 10, height: 10, fill: it.cor }), txt(lx + 15, ly, label, { 'font-size': 11, fill: t.suave })); lx += 30 + label.length * 6; });
       host.replaceChildren(svg);
     }
     return { linhaTempo, barras, rosca, faixas };

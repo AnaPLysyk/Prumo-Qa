@@ -59,6 +59,6 @@ export function planoDaConsultaQase(r: Recurso, operacao: OperacaoServico, p: z.
   const detalhe = operacao === 'caso' || operacao === 'run' || operacao === 'defeito';
   const statusDefeito = operacao === 'defeitos' && filtros?.status ? z.enum(['open', 'resolved', 'in_progress', 'invalid']).safeParse(filtros.status) : null;
   if (statusDefeito && !statusDefeito.success) throw new ErroServico('SERVICE_RESPONSE_INVALID');
-  const endpoint = '/v1/' + tipo + '/' + codificarParaUrl(r.chave) + (detalhe ? '/' + idNumericoDaConsulta(id) : '') + '?' + parametrosDaUrl({ offset: detalhe ? undefined : p.offset, limit: detalhe ? undefined : p.limite, status: statusDefeito?.success ? statusDefeito.data : undefined, include: operacao === 'casos' || operacao === 'caso' ? 'external_issues' : undefined, run: operacao === 'resultados' && id ? idNumericoDaConsulta(id) : undefined });
+  const endpoint = '/v1/' + tipo + '/' + codificarParaUrl(r.chave) + (detalhe ? '/' + idNumericoDaConsulta(id) : '') + '?' + parametrosDaUrl({ offset: detalhe ? undefined : p.offset, limit: detalhe ? undefined : p.limite, status: statusDefeito?.success ? statusDefeito.data : undefined, include: operacao === 'casos' || operacao === 'caso' ? 'external_issues' : operacao === 'run' ? 'cases' : undefined, run: operacao === 'resultados' && id ? idNumericoDaConsulta(id) : undefined });
   return { endpoint, envelope: detalhe ? 'qase-item' : 'qase-page' };
 }

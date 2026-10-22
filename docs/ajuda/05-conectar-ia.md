@@ -1,30 +1,35 @@
 # Como conectar uma IA
 
-O uso de inteligência artificial é opcional. Claude Code e Codex podem se conectar ao Prumo pelo MCP (protocolo que permite a comunicação entre aplicativos). O Prumo confere as permissões, e você decide se autoriza as ações.
+O uso de inteligência artificial é opcional. Claude Code, Codex, GitHub Copilot e Gemini CLI podem se conectar ao Prumo pelo MCP (protocolo que permite a comunicação entre aplicativos). Depois de conectada, a sua IA lê o contexto do projeto, pergunta ao Prumo Orchestrator e propõe casos, bugs e aprendizados como rascunho. O Prumo confere as permissões, e você decide se autoriza as ações.
 
-O servidor MCP roda neste computador. O cliente de IA inicia o processo e se comunica com ele diretamente; não há um servidor remoto do Prumo. Fechar a janela do Prumo não encerra uma sessão que já foi iniciada.
+O servidor MCP roda neste computador. O cliente de IA inicia o processo e se comunica com ele diretamente; não há um servidor remoto do Prumo. O Prumo precisa estar aberto e com você conectado: ao sair da conta ou fechar o aplicativo, a IA perde o acesso aos seus dados.
 
 ## Conectar
 
-1. Selecione um projeto que tenha uma pasta vinculada e um arquivo `qa.project.json`.
-2. Em **Conexões › IA por MCP**, clique **Configurar e testar** na linha do Claude Code ou do Codex.
-3. Adicione a configuração:
-   - **Codex** (quando o cliente é localizado): **Adicionar ao Codex…** pede confirmação nativa e não sobrescreve uma configuração com o mesmo nome.
-   - **Claude Code**: em **Ver o que será configurado**, confira onde será feita a configuração e qual comando será usado. Depois, execute-o no terminal (PowerShell no Windows).
-4. Feche e reabra o cliente de IA.
-5. Clique **Testar integração** e, no cliente, peça algo como "consulte o contexto do projeto". A chamada aparece em Última chamada observada e em Logs.
+Abra **Agentes › IA e regras › Conectar IA** (ou **Projetos › Contas e permissões › IA por MCP**). Escolha a sua IA. Cada uma mostra o estado em palavras simples: **Não instalada**, **Pronta para conectar**, **Conectada**, **Conectada e em uso** ou **Precisa de atenção**. Siga os quatro passos; o que falta fica em destaque.
+
+1. **Instalar**: se a IA não estiver no computador, copie o comando do npm (`npm.cmd install -g …` no Windows), rode no terminal e entre na sua conta pelo próprio cliente.
+2. **Conectar**: **Conectar ao Prumo** pede confirmação nativa e roda o `mcp add` do próprio cliente, no escopo do seu usuário, sem sobrescrever um servidor com o mesmo nome. Se preferir, **Prefiro copiar o comando** mostra o comando para o terminal. Depois, feche e abra a IA de novo.
+3. **Testar**: **Testar conexão** confere se o servidor do Prumo responde.
+4. **Usar**: na sua IA, peça algo como "Use o Prumo e leia o contexto deste projeto" ou "Pergunte ao Orchestrator do Prumo como está a regressão". Clique num exemplo para copiá-lo. A chamada aparece em **Última chamada** e em **Logs**.
+
+Com conta pessoal do Google, o Gemini CLI pode recusar o login; nesse caso, defina a variável `GEMINI_API_KEY` antes de abrir.
+
+## Regras
+
+Em **Agentes › IA e regras › Minhas regras** você escreve regras só suas: uma **para todos os agentes** e, se quiser, uma **para cada agente**. Elas valem no chat do Prumo e em qualquer IA conectada (a IA as recebe em `contexto_projeto` e `listar_politicas`), nunca passam para outra conta e nunca liberam permissões. As **Regras do projeto** (especializações e permissões) valem para todas as pessoas e IAs, e só o Admin altera.
 
 ## Estados
 
 - **NÃO CONFIGURADO**: o cliente não tem a configuração do Prumo.
 - **CONFIGURADO**: a configuração existe, mas não foi testada nem usada.
-- **VALIDADO**: o Testar integração passou.
+- **VALIDADO**: o Testar conexão passou.
 - **UTILIZADO**: o cliente fez pelo menos uma chamada.
 - **ERRO**: o último teste falhou, há registro inválido ou não foi possível inspecionar a configuração. Falha na inspeção nunca vira "não configurado".
 
-**Testar integração** inicia o servidor do Prumo, confirma que a conexão MCP funciona e consulta apenas as evidências. Isso verifica o servidor local, mas não confirma que Claude ou Codex o usaram. Nenhum teste do projeto é executado.
+**Testar conexão** inicia o servidor do Prumo, confirma que a conexão MCP funciona e consulta apenas as evidências. Isso verifica o servidor local, mas não confirma que a sua IA o usou. Nenhum teste do projeto é executado.
 
-O próprio cliente informa seu nome nos registros; o Prumo não confirma essa identidade. **Detalhes técnicos** mostra o contexto enviado, mas não confirma que a IA seguiu as instruções.
+O próprio cliente informa seu nome nos registros; o Prumo não confirma essa identidade. **Detalhes técnicos** mostra o arquivo de configuração, o comando e o último teste, mas não confirma que a IA seguiu as instruções.
 
 ## Skill de QA
 

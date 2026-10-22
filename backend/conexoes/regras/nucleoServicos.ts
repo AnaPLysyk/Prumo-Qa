@@ -1,4 +1,5 @@
 /** Núcleo das conexões e fachada de aplicação — arquivos relacionados agrupados para manutenção. */
+import { criarRepositorio } from '../github/criarRepositorio.js';
 import { z } from "zod";
 import { cofreCredenciais } from "../banco/credenciais.js";
 import { listarContas, lerContasDeServico, gravarContasDeServico } from "../banco/contasDeServico.js";
@@ -122,6 +123,7 @@ export function nucleoServicos(protetor: Protetor, transporte: TransporteServico
     return atual;
   };
   return {
+    criarRepositorio: (espacoId: string, conexaoId: string, nome: string, privado: boolean) => criarRepositorio(c, espacoId, conexaoId, nome, privado),
     contas: () => listarContas(base),
     qasePrever: (token: string) => importacaoQase.prever(token),
     qasePreverConta: (conexaoId: string) => importacaoQase.preverConta(conexaoId),

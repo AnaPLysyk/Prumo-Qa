@@ -114,6 +114,8 @@ export function jqlDeTickets(projetoId: string, f: Filtros = {}): string {
   const c = [`project = ${projetoId}`];
   if (f.q) c.push(/^[A-Z][A-Z0-9_]*-\d+$/.test(f.q) ? `key = ${f.q}` : `text ~ ${textoEntreAspasJql(f.q)}`);
   if (f.tipo) c.push(`issuetype = ${textoEntreAspasJql(f.tipo)}`); if (f.status) c.push(`status = ${textoEntreAspasJql(f.status)}`);
+  // Situação vale para qualquer fluxo do Jira: categoria do status pelo ID fixo (2 a fazer, 4 em andamento, 3 concluído), que não muda com o idioma.
+  if (f.situacao) c.push(`statusCategory = ${{ aberto: 2, andamento: 4, concluido: 3 }[f.situacao]}`);
   if (f.desde) c.push(`updated >= ${textoEntreAspasJql(f.desde)}`); if (f.ate) c.push(`updated <= ${textoEntreAspasJql(f.ate + ' 23:59')}`); if (f.pai) c.push(`parent = ${f.pai}`);
   return c.join(' AND ') + ' ORDER BY updated DESC';
 }

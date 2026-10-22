@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prumo QA</title>
+  <link rel="stylesheet" href="estilo.css">
+  <link rel="stylesheet" href="qc.css">
+  <link rel="stylesheet" href="caixa-de-confirmacao.css">
+</head>
+<body class="caixa-confirmacao">
+  <section class="cc-cartao" role="alertdialog" aria-modal="true" aria-labelledby="cc-mensagem" aria-describedby="cc-detalhe" hidden>
+    <div class="cc-topo">
+      <span class="cc-icone" aria-hidden="true"></span>
+      <div class="cc-textos">
+        <p class="cc-titulo" id="cc-titulo"></p>
+        <h1 class="cc-mensagem" id="cc-mensagem"></h1>
+      </div>
+    </div>
+    <div class="cc-detalhe" id="cc-detalhe"></div>
+    <label class="cc-marcar" hidden><input type="checkbox"><span></span></label>
+    <div class="cc-botoes"></div>
+  </section>
+  <script src="caixa-de-confirmacao.js"></script>
+</body>
+</html>

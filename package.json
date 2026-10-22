@@ -1,6 +1,6 @@
 {
   "name": "prumo-qa",
-  "version": "2.19.0",
+  "version": "2.20.0",
   "description": "Engenharia de qualidade local: contexto, contratos, MCP, evidências e aplicativo desktop Windows",
   "private": true,
   "license": "UNLICENSED",
@@ -38,6 +38,7 @@
     "documentacao:viva": "node docs/geradores/catalogo-documentacao-viva.mjs"
   },
   "dependencies": {
+    "@huggingface/transformers": "4.3.1",
     "@modelcontextprotocol/sdk": "1.32.1",
     "pino": "10.4.0",
     "zod": "^3.25.76"

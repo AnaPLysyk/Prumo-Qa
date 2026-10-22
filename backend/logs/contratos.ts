@@ -1,7 +1,7 @@
 /** Lógica e contratos de logs: operações relacionadas no mesmo módulo. */
 import { z } from "zod";
 
-export const ferramentas = ['contexto_projeto','revisar_cobertura','executar_validacao','consultar_evidencias','perguntar_ao_orquestrador','listar_politicas','propor_caso','propor_bug','propor_aprendizado','desconhecida'] as const;
+export const ferramentas = ['contexto_projeto','consultar_repositorio','revisar_cobertura','executar_validacao','consultar_evidencias','perguntar_ao_orquestrador','listar_politicas','propor_caso','propor_bug','propor_aprendizado','desconhecida'] as const;
 
 export const estados = ['STARTED','OK','NOT_VERIFIED','PASS','FAIL','BLOCKED','NOT_RUN','ERROR'] as const;
 
@@ -64,7 +64,7 @@ const entradaSchema = z.object({candidates:contagem.optional(),existingTests:con
 export const eventoSchema = z.object({
   version:z.literal(1), operationId:z.string().uuid(), projectId:z.string().max(100), rootHash:z.string().regex(/^[a-f0-9]{64}$/),
   manifestHash:z.string().regex(/^[a-f0-9]{64}$/), tool:z.enum(ferramentas), origin:z.enum(['CLI','MCP']),
-  client:z.enum(['codex','claude','sdk','outro','terminal']), clientIdentity:z.literal('declarada'),
+  client:z.enum(['codex','claude','copilot','gemini','sdk','outro','terminal']), clientIdentity:z.literal('declarada'),
   clientClassificationVersion:z.literal(2).optional(),
   phase:z.enum(['start','end']), at:z.string().datetime(), durationMs:z.number().finite().nonnegative(),
   state:z.enum(estados), input:entradaSchema, summary:resumoSchema,

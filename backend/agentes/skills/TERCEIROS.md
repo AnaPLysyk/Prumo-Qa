@@ -85,3 +85,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Também de 22/10/2026: `qa/references/areas-de-qa.md` é texto original do Prumo, sem trecho copiado. O recorte de áreas (prontidão de release, pós-mortem, dados e ambientes de teste, mobile, visual, banco, e-mail/OTP, pagamentos, analytics, testes de sistemas com IA, caos, produção, contrato, métricas, triagem, curadoria e migração) foi conferido contra o índice de [petrkindlmann/qa-skills](https://github.com/petrkindlmann/qa-skills) (MIT) apenas para não deixar áreas de fora.
+
+Também de 22/10/2026: `qa/references/ciclo-com-agentes.md` é texto original do Prumo. O desenho em planejador, gerador e curador foi conferido contra a documentação pública dos [Playwright Test Agents](https://playwright.dev/docs/test-agents) (sem texto copiado); as travas (aprovação humana, BLOCKED sem aprovação, revisão de testes ignorados) são do Prumo.

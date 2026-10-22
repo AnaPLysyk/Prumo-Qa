@@ -84,9 +84,11 @@ test('o front-end liga Código à árvore completa e CI/CD às fontes local e Gi
   const fonte = fs.readFileSync('frontend/testes/tela-testes.parte.js', 'utf8');
   const preload = fs.readFileSync('backend/aplicativo/preload.cjs', 'utf8');
   assert.match(fonte, /api\.ideArvore\(e\.id\)/);
-  assert.match(fonte, /api\.ideArquivo\(e\.id, arquivo\)/);
-  assert.match(fonte, /api\.ideGravar\(id, rel, conteudo, base\)/);
+  assert.match(fonte, /lerArquivoLocal\(api\.ideArquivo, e, arquivo\)/);
+  assert.match(fonte, /api\.ideGravar\(e\.id, arquivo, texto, hash\)/);
+  const workbench = fs.readFileSync('frontend/testes/ide-workbench.parte.js', 'utf8');
+  for (const canal of ['ideBuscar', 'ideGitEstado', 'ideGitDiff']) assert.match(workbench, new RegExp('api\\.' + canal + '\\(e\\.id'));
   assert.match(fonte, /pipelinesDoGithub\(/);
   assert.match(fonte, /'github', 'arquivos', \{\}, '\.github\/workflows'/);
-  for (const metodo of ['ideArvore', 'ideArquivo', 'ideGravar']) assert.match(preload, new RegExp(metodo + ':'));
+  for (const metodo of ['ideArvore', 'ideArquivo', 'ideGravar', 'ideBuscar', 'ideGitEstado', 'ideGitDiff']) assert.match(preload, new RegExp(metodo + ':'));
 });

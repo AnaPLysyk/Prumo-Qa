@@ -44,9 +44,9 @@
       const l = h('div', { class: 'ds-cab-acoes ds-passo-linha' }, a, d, x, h('button', { type: 'button', class: 'ds-icone-btn', 'aria-label': tr('Remover passo'), onclick: () => l.remove() }, DS.icone('fechar'))); for (const i of [a, d, x]) i.style.flex = '1'; passos.append(l); };
     for (const p of (c.steps?.length ? c.steps : [{}])) linha(p);
     const saida = h('div', { id: 'caso-ed-saida' });
-    DS.modal(tr('Editar caso {id}', { id }), [h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Título', titulo, { inteiro: true }), DS.campo('Tipo de execução', auto), h('span'), DS.campo('Descrição', desc, { inteiro: true }), DS.campo('Pré-condições', pre, { inteiro: true }),
+    DS.modal(tr('Editar caso {id}', { id }), [DS.trilha([['Casos', () => DS.fecharModal()], [tr('Caso {id}', { id }), () => abrirCaso(e, id)], ['Editar']], { semAtual: false }), h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Título', titulo, { inteiro: true }), DS.campo('Tipo de execução', auto), h('span'), DS.campo('Descrição', desc, { inteiro: true }), DS.campo('Pré-condições', pre, { inteiro: true }),
       h('div', { class: 'ds-campo inteiro' }, h('span', {}, tr('Passos')), passos, h('div', {}, DS.link('Adicionar passo', () => linha({}), { seta: false })))), saida,
-      DS.rodape(h('span', { class: 'ds-form-msg' }, tr('Qase {p} · confirmação nativa antes de enviar', { p: vinc(e, 'qase')?.recurso.chave })), DS.acao('Cancelar', () => abrirCaso(e, id)), DS.acao('Salvar no Qase…', async () => {
+      DS.rodape(h('span', { class: 'ds-form-msg' }, tr('Qase {p} · confirmação nativa antes de enviar', { p: vinc(e, 'qase')?.recurso.chave })), DS.acao('Salvar no Qase…', async () => {
         const p = { casoId: Number(id) }; if (titulo.value !== (c.title || '')) p.titulo = titulo.value; if (desc.value !== (c.description || '')) p.descricao = desc.value; if (pre.value !== (c.preconditions || '')) p.preCondicoes = pre.value; if (auto.value !== tipo0) p.automacao = auto.value;
         const novos = [...passos.children].map((l) => ({ acao: l.querySelector('.passo-acao').value, dados: l.querySelector('.passo-dados').value, esperado: l.querySelector('.passo-esperado').value })).filter((s) => s.acao.trim());
         const antigos = (c.steps || []).map((s) => ({ acao: s.action || '', dados: s.data || '', esperado: s.expected_result || '' })); if (JSON.stringify(novos) !== JSON.stringify(antigos)) p.passos = novos;
@@ -158,14 +158,20 @@
       const atualizado = await atualizarEspaco(e); void abrirCasoLocal(atualizado, caso);
     };
     const passos = Array.isArray(caso.dados.passos) ? caso.dados.passos : [];
+    const [cat, aut] = await Promise.all([api.testesCatalogo(e.id), api.espacoAutomacoes(e.id)]);
+    const autoLista = vinculados.filter(ref => ref.tipo === 'automacao');
+    const autoOpcoes = [...((aut.ok && aut.data.capacidades) || []).map(x => [x, tr('Automação') + ' · ' + x]),
+      ...((cat.ok && cat.data?.catalogo?.features) || []).flatMap(f => f.testes.map(t => [f.arquivo + ':' + t.linha, f.nome + ' · ' + t.titulo]))];
     DS.modal('Caso local · ' + caso.titulo, h('div', { class: 'ds-detalhe' },
       h('section', { class: 'ds-detalhe-main' },
         DS.bloco('Descrição', DS.texto(caso.dados.descricao, 'Sem descrição.')),
         DS.bloco('Pré-condições', DS.texto(caso.dados.preCondicoes, 'Sem pré-condições.')),
-        DS.bloco('Passos', passos.length ? DS.tabela({ colunas: ['Ação', 'Dados de teste', 'Resultado esperado'], linhas: passos.map(s => ({ celulas: [s.acao, s.dados || '—', s.esperado || '—'] })) }) : h('p', { class: 'suave' }, tr('Nenhum passo cadastrado.'))),
+        DS.bloco(tr('Passos ({n})', { n: passos.length }), passos.length ? DS.tabela({ colunas: ['#', 'Passo', 'Dados de teste', 'Resultado esperado'], linhas: passos.map((s, i) => ({ celulas: [String(i + 1), s.formato === 'bdd' ? h('span', {}, h('span', { class: 'rep-passo-bdd' }, s.palavra || ''), s.acao) : s.acao, s.dados || '—', s.formato === 'bdd' ? '—' : (s.esperado || '—')] })) }) : h('p', { class: 'suave' }, tr('Nenhum passo cadastrado.'))),
+        caso.dados.posCondicoes ? DS.bloco('Pós-condições', DS.texto(caso.dados.posCondicoes)) : null,
+        DS.bloco('Automação e features', blocoAutomacaoLocal(e, caso, autoLista, autoOpcoes, associar, saida)),
         DS.bloco('Tickets relacionados', lista), saida),
       h('aside', {},
-        DS.meta([['Origem', DS.origem('prumo', 'Prumo · local')], ['Estado', 'Caso local'], ['Suíte', repositorio.data.suites.find(s => s.id === caso.suiteLocalId)?.titulo || 'Sem suíte'], ['Automação', caso.dados.automacao || 'manual'], ['Criado', hora(caso.criadaEm)]]),
+        DS.meta([['Origem', DS.origem('prumo', 'Prumo · local')], ['Estado', 'Caso local'], ['Tags', (caso.dados.tags || []).map(t => '@' + t).join(', ') || null], ['Suíte', repositorio.data.suites.find(s => s.id === caso.suiteLocalId)?.titulo || 'Sem suíte'], ['Automação', caso.dados.automacao || 'manual'], ['Criado', hora(caso.criadaEm)]]),
         DS.acao('Editar caso', () => DS.modal('Editar caso local', formularioProposta(e, caso, () => { DS.fecharModal(); void mostrar('testes'); }, repositorio.data.suites), { tamanho: 'md' }), { id: 'caso-local-editar' }),
         disponiveis.length ? DS.bloco('Vincular ticket local', h('div', { class: 'ds-cab-acoes' }, seletor, DS.acao('Associar', () => {
           if (seletor.value) void associar({ tipo: 'ticket-local', id: seletor.value, origem: 'prumo' });
@@ -186,6 +192,15 @@
         }, { id: 'caso-local-associar-jira' }))) : null)),
     { tamanho: 'lg', subtitulo: [DS.origem('prumo', 'Repositório local')] });
   }
+  /** Liga o cenário local a uma automação (capability) ou a um teste/feature lido do código; não comprova execução. */
+  function blocoAutomacaoLocal(e, caso, ligadas, opcoes, associar, saida) {
+    const seletor = h('select', { id: 'caso-local-automacao', 'aria-label': tr('Automação ou feature') }, h('option', { value: '' }, tr('Selecionar automação ou feature')), opcoes.filter(([v]) => !ligadas.some(a => a.id === v)).map(([v, t]) => h('option', { value: v }, t)));
+    return h('div', { class: 'ds-acoes-col' },
+      ligadas.length ? h('div', { class: 'ds-celula-nos' }, ligadas.map(a => h('span', { class: 'ds-chip', 'data-tom': 'info' }, a.id))) : h('p', { class: 'suave' }, tr('Nenhuma automação ou feature vinculada.')),
+      opcoes.length ? h('div', { class: 'ds-cab-acoes' }, seletor, DS.acao('Vincular', () => { if (seletor.value) void associar({ tipo: 'automacao', id: seletor.value, origem: 'qa.project.json' }); }, { id: 'caso-local-vincular-automacao', compacto: true }))
+        : DS.info('Vincule uma pasta de código em Projetos para ligar este cenário a automações e features.'),
+      DS.info('O vínculo registra a sua decisão. Só um resultado registrado comprova a execução.'));
+  }
   async function novaProposta(e) {
     const local = !vinc(e, 'qase');
     const r = local ? await api.repositorioLocal(e.id) : null;
@@ -205,6 +220,23 @@
     DS.modal('Nova suite no Qase', [!esc ? DS.alerta('Escrita no Qase desligada. Habilite em Projetos para criar suites.', 'aviso', 'cadeado') : null, h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Título da suite', titulo, { inteiro: true })), saida,
       DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Criar suite…', async () => { const r = await executarOperacao(e, 'qase.criar_suite', { titulo: titulo.value }); if (r) { saida.replaceChildren(painelResultado(r)); if (r.estado === 'CONFIRMADA') delete memoriaDaTela('testes', e.id).suites; } }, { id: 'su-criar', primaria: true, desabilitado: !esc }))], { tamanho: 'sm' });
     titulo.focus();
+  }
+  /** Edita título e descrição de uma suíte do Qase (operação com confirmação nativa); só muda o que foi alterado. */
+  function editarSuiteQase(e, suite) {
+    const titulo = h('input', { id: 'su-ed-titulo', maxlength: 255, value: suite.titulo }); const descricao = h('textarea', { id: 'su-ed-descricao', rows: 4, maxlength: 4000 }); descricao.value = suite.descricao || ''; const saida = h('div', { id: 'su-ed-saida', 'aria-live': 'polite' });
+    DS.modal('Editar suíte no Qase', [h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Título da suíte', titulo, { inteiro: true }), DS.campo('Descrição', descricao, { inteiro: true })), saida,
+      DS.rodape(h('span', { class: 'ds-form-msg' }, tr('A alteração vai ao Qase após a confirmação nativa.')), DS.acao('Cancelar', () => DS.fecharModal()), DS.acao('Salvar no Qase…', async () => {
+        const p = { suiteId: Number(suite.id) }; if (titulo.value.trim() !== suite.titulo) p.titulo = titulo.value.trim(); if (descricao.value !== (suite.descricao || '')) p.descricao = descricao.value;
+        if (Object.keys(p).length === 1) { saida.replaceChildren(DS.alerta(tr('Nenhuma alteração para salvar.'), 'aviso')); return; }
+        if (p.titulo !== undefined && p.titulo.length < 2) { saida.replaceChildren(DS.alerta(tr('O título precisa de pelo menos 2 caracteres.'), 'aviso')); titulo.focus(); return; }
+        const r = await executarOperacao(e, 'qase.editar_suite', p); if (!r) return; if (r.estado === 'CONFIRMADA') { delete memoriaDaTela('testes', e.id).suites; DS.fecharModal(); void mostrar('testes'); } else saida.replaceChildren(painelResultado(r));
+      }, { id: 'su-ed-salvar', primaria: true }))], { tamanho: 'md' });
+    titulo.focus();
+  }
+  /** Apaga do Qase uma suíte vazia (a operação confere de novo no Qase e pede a confirmação nativa). */
+  async function apagarSuiteQase(e, suite) {
+    const r = await executarOperacao(e, 'qase.apagar_suite', { suiteId: Number(suite.id) }); if (!r) return;
+    if (r.estado === 'CONFIRMADA') { delete memoriaDaTela('testes', e.id).suites; avisar(tr('Suíte apagada do Qase.')); void mostrar('testes'); } else DS.modal('Apagar suíte no Qase', [painelResultado(r), DS.rodape(DS.acao('Fechar', () => DS.fecharModal()))], { tamanho: 'sm' });
   }
   async function telaSuites(e, mem, corpo) {
     const area = h('div', { id: 'suites-area' }, DS.esqueleto(5)); const fonte = h('div'); corpo.append(DS.barra(DS.acao('Atualizar', async () => { delete mem.suites; await carregar(); }, { id: 'suites-atualizar', icone: 'atualizar' })), fonte, area);

@@ -34,7 +34,7 @@ Detalhes confirmados na documentação oficial (15/10/2026):
 
 ## Publicação de bug e melhoria: escolher o destino
 
-Todo bug ou melhoria nasce como **rascunho local** (Tickets › Novo rascunho local, ou a partir de uma falha de run). No rascunho, **Destino da publicação** oferece só o que está vinculado ao projeto ativo:
+**Tickets › Novo ticket** cria direto na ferramenta integrada ao projeto: vínculo que não está desligado e com escrita habilitada. É ticket no Jira, defeito no Qase ou issue no GitHub, só com os campos daquela ferramenta e com a mesma confirmação abaixo. Com mais de uma integrada, a pessoa escolhe o destino; sem nenhuma, o ticket fica como **rascunho local**. Rascunhos locais também nascem de falhas de run e de sugestões da IA. No rascunho, **Destino da publicação** oferece só o que está vinculado ao projeto ativo:
 
 | Destino | Quando aparece | O que acontece |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ Todo bug ou melhoria nasce como **rascunho local** (Tickets › Novo rascunho lo
 | Defeitos Qase | Qase vinculado e classificação diferente de Melhoria | defeito com a severidade escolhida entre as opções do Qase e o resultado observado |
 | GitHub Issues | repositório GitHub vinculado | issue com rótulo `bug` ou `enhancement` (mais `prumo-qa`) |
 
-Em todos os destinos externos: escrita habilitada por projeto e serviço (Conexões), prévia, confirmação nativa do Windows, chave de idempotência, marcador no item criado e releitura para confirmar. Falha parcial não vira sucesso; resposta perdida é conciliada pelo marcador antes de qualquer reenvio. Publicar em dois destinos exige duas ações confirmadas; o Prumo não espelha um defeito automaticamente em outro serviço.
+Em todos os destinos externos: escrita habilitada por projeto e serviço (Conexões), prévia, confirmação nativa do Windows, chave de idempotência, marcador no item criado e releitura para confirmar. Uma proposta pode ser marcada para um ou mais destinos na mesma ação; a confirmação nativa é única e cada destino é executado e registrado separadamente. Falha parcial não vira sucesso: sucessos permanecem registrados, destinos com falha podem ser tentados novamente e resposta perdida é conciliada pelo marcador antes de qualquer reenvio. O Prumo não espelha um defeito automaticamente em outro serviço sem a seleção explícita dos destinos.
 
 A lista de Tickets mostra lado a lado tickets do Jira, defeitos do Qase, issues abertas do GitHub e rascunhos locais, cada um com sua origem e ID próprios; nada é mesclado por título.
 

@@ -66,10 +66,12 @@ function novaMontagem(): Montagem {
 /** Orquestrador: responde pelo guia do sistema; sem assunto conhecido, resume o projeto e o que os agentes sabem fazer. */
 function comoOrquestrador(c: Montagem, q: Pergunta) {
   // "Onde este projeto está ligado?": responde pelo mapa gravado no projeto (Jira, Qase, GitHub, pasta local e Manual).
-  if (/\bvincul|\brelacionad|\bligad[oa]s?\b|onde (esta|fica|foi) (o |a )?(projeto|repositorio|jira|qase|github)|em quais (ferramentas|apps|aplicativos|servicos)/.test(q.semAcento)) {
+  if (/\bvinculad|\bvinculos?\b|\brelacionad|\bligad[oa]s?\b|onde (esta|fica|foi) (o |a )?(projeto|repositorio|jira|qase|github)|em quais (ferramentas|apps|aplicativos|servicos)/.test(q.semAcento)) {
     if (!q.espaco) return c.semProjeto();
     c.linhas.push(...linhasDoMapaDeVinculos(mapaDeVinculosDoProjeto(q.espaco, q.base))); c.fonte({ rotulo: 'Projetos', aba: 'projetos' }); c.fatos.push(`vinculos=${q.espaco.vinculos.length}`); return;
   }
+  // Saudação: apresenta o que o Prumo faz, sem cobrar um projeto de quem só disse oi.
+  if (/^(oi|ola|opa|e ai|bom dia|boa tarde|boa noite|hey|hello|hi)\b[\s!.,?]*$/.test(q.semAcento.trim())) { c.linhas.push('Oi! Sou o Prumo, o engenheiro de qualidade aqui do seu lado. Pergunte sobre QA e TI (técnicas de teste, bugs, automação, boas práticas) ou sobre os dados do seu projeto: execuções, falhas, requisitos e métricas.'); return; }
   const g = guia.filter(([ks]) => ks.some((k) => q.semAcento.includes(k)));
   if (g.length) { for (const [, texto, f] of g.slice(0, 2)) { c.linhas.push(texto); c.fonte(f); } return; }
   c.generico = true; c.linhas.push(...situacaoDoProjeto(q.espacoId, q.base));

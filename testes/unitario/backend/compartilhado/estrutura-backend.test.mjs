@@ -7,7 +7,7 @@ import path from 'node:path';
 import ts from 'typescript';
 
 const raiz = 'backend';
-const telas = ['inicio', 'projetos', 'tickets', 'testes', 'agendamentos', 'metricas', 'logs', 'conexoes', 'agentes', 'suporte', 'ajuda', 'configuracoes', 'atualizacoes', 'administracao', 'login'];
+const telas = ['inicio', 'projetos', 'tickets', 'testes', 'agendamentos', 'metricas', 'logs', 'conexoes', 'agentes', 'suporte', 'ajuda', 'configuracoes', 'atualizacoes', 'administracao', 'login', 'voz'];
 const apoio = ['aplicativo', 'terminal', 'compartilhado'];
 const entradas = ['aplicativo.ts', 'cli.ts', 'mcp.ts'];
 // Tabela única de dados de propósito: o catálogo reúne todos os canais e ferramentas num só lugar.

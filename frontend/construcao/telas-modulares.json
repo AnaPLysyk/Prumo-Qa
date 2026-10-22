@@ -8,13 +8,18 @@
         "frontend/tickets/tela-tickets.parte.js",
         "frontend/testes/fluxos-casos-qase.parte.js",
         "frontend/testes/fluxos-repositorio-local.parte.js",
+        "frontend/testes/execucao-manual.parte.js",
         "frontend/testes/fluxos-planos-e-runs.parte.js",
+        "frontend/testes/evidencias-do-cenario.parte.js",
+        "frontend/testes/pagina-da-run-qase.parte.js",
+        "frontend/testes/pagina-do-plano-qase.parte.js",
         "frontend/testes/fluxos-vinculos.parte.js"
       ]
     },
     {
       "destino": "dist/renderer/tela-testes.js",
       "origens": [
+        "frontend/testes/ide-workbench.parte.js",
         "frontend/testes/tela-testes.parte.js"
       ]
     },
@@ -24,6 +29,7 @@
         "frontend/compartilhado/interfaces-abertura.parte.js",
         "frontend/agentes/retratos-dos-agentes.parte.js",
         "frontend/compartilhado/exportar-e-icones.parte.js",
+        "frontend/agentes/voz-do-chat.parte.js",
         "frontend/agentes/conversa-do-orchestrator.parte.js",
         "frontend/inicio/tela-inicio.parte.js",
         "frontend/logs/tela-logs.parte.js",

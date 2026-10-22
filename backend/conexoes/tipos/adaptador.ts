@@ -38,6 +38,7 @@ export type OperacaoExtra = typeof operacoesExtras[number];
 
 export const filtrosSchema = z.object({
   q: z.string().trim().max(100).optional(), tipo: z.string().regex(/^[\p{L}\p{N} _.-]{1,60}$/u).optional(), status: z.string().regex(/^[\p{L}\p{N} _.-]{1,60}$/u).optional(),
+  situacao: z.enum(['aberto', 'andamento', 'concluido']).optional(),
   desde: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), ate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), pai: z.string().regex(/^[A-Z][A-Z0-9_]*-\d+$/).optional(),
   ref: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._/-]{0,100}$/).optional(), branch: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._/-]{0,100}$/).optional()
 }).strict();
