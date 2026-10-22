@@ -22,7 +22,7 @@ export const permitirContextosNoMcp = async (raiz: string, habilitar: boolean) =
   gravarPermissaoDeContextosNoMcp(await abrirProjetoVinculado(raiz), habilitar);
 
 /** Desatualizar mantém a versão histórica, sem apagar conteúdo que já foi aprovado. */
-function desatualizarContexto(projeto: Projeto, id: string, por: string, base?: string) {
+export function desatualizarContexto(projeto: Projeto, id: string, por: string, base?: string) {
   return mudarContexto(projeto, id, arquivo => {
     const ultima = ultimaVersaoDoContexto(arquivo);
     if (ultima.estado === 'DESATUALIZADO') {
@@ -36,7 +36,7 @@ export const desatualizarContextoDaPasta = async (raiz: string, id: string, por:
   desatualizarContexto(await abrirProjetoVinculado(raiz), id, por);
 
 /** Marca conflitos apenas entre dois contextos distintos e existentes no mesmo projeto. */
-function marcarConflito(projeto: Projeto, id: string, outroId: string, por: string, base?: string) {
+export function marcarConflito(projeto: Projeto, id: string, outroId: string, por: string, base?: string) {
   if (id === outroId) {
     throw new ErroQa('CONTEXT_CONFLICT', 'Um contexto não conflita consigo mesmo.');
   }
@@ -51,7 +51,7 @@ function marcarConflito(projeto: Projeto, id: string, outroId: string, por: stri
   }, base);
 }
 
-function resolverConflito(projeto: Projeto, id: string, por: string, base?: string) {
+export function resolverConflito(projeto: Projeto, id: string, por: string, base?: string) {
   return mudarContexto(projeto, id, arquivo => {
     const ultima = ultimaVersaoDoContexto(arquivo);
     return novaVersaoDoContexto('conflito_resolvido', 'RASCUNHO', ultima.conteudo, por, ultima);
@@ -65,7 +65,7 @@ export const conflitoDeContextoDaPasta = async (
   : resolverConflito(await abrirProjetoVinculado(raiz), id, por);
 
 /** Aprovação é humana, vinculada ao conteúdo exato e exige referência de origem. */
-function aprovarContexto(projeto: Projeto, id: string, por: string, base?: string) {
+export function aprovarContexto(projeto: Projeto, id: string, por: string, base?: string) {
   const anterior = obterContexto(projeto, id, base);
   if (anterior.estadoRegistrado === 'DESATUALIZADO') {
     throw new ErroQa('CONTEXT_OUTDATED', 'Contexto desatualizado não pode ser aprovado.');
@@ -94,7 +94,7 @@ export const aprovarContextoDaPasta = async (raiz: string, id: string, por: stri
   aprovarContexto(await abrirProjetoVinculado(raiz), id, por);
 
 /** Contextos novos nascem rascunho e nunca herdam aprovação de outro conteúdo. */
-function criarContexto(
+export function criarContexto(
   projeto: Projeto, entrada: unknown, por: string,
   opcoes: { substitui?: string } = {}, base?: string
 ) {
@@ -117,7 +117,7 @@ function criarContexto(
 }
 
 /** Uma edição de conteúdo invalida a aprovação anterior. */
-function editarContexto(projeto: Projeto, id: string, parcial: unknown, por: string, base?: string) {
+export function editarContexto(projeto: Projeto, id: string, parcial: unknown, por: string, base?: string) {
   return mudarContexto(projeto, id, arquivo => {
     const ultima = ultimaVersaoDoContexto(arquivo);
     if (ultima.estado === 'DESATUALIZADO') {
@@ -133,7 +133,7 @@ function editarContexto(projeto: Projeto, id: string, parcial: unknown, por: str
 }
 
 /** Substituição preserva o antigo como desatualizado; o novo precisa de nova aprovação. */
-function substituirContexto(projeto: Projeto, id: string, entrada: unknown, por: string, base?: string) {
+export function substituirContexto(projeto: Projeto, id: string, entrada: unknown, por: string, base?: string) {
   const antigo = obterContexto(projeto, id, base);
   if (antigo.estadoRegistrado === 'DESATUALIZADO') {
     throw new ErroQa('CONTEXT_OUTDATED', 'Já está desatualizado.');

@@ -66,7 +66,7 @@ export function iniciarWorker(e: EstadoDoWorker) {
 
 // Worker — responsabilidade deste trecho
 /** A trava só está viva quando o processo existe e o último batimento é recente. */
-function estadoDaTravaDoWorker(base?: string, agora = new Date()) {
+export function estadoDaTravaDoWorker(base?: string, agora = new Date()) {
   const trava = lerTravaDoWorker(base);
   if (!trava || !trava.ativo) {
     return { vivo: false, pid: null as number | null, ultimoBatimento: trava?.batimento ?? null };

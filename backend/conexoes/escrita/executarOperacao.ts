@@ -13,7 +13,7 @@ import { obterEspaco } from "../../projetos/banco/projetos.js";
 import { registrarEscritaExterna } from "../../projetos/servicoProjetos.js";
 
 // ── executarOperacaoUmaVez ──
-const codigoDaFalhaDeOperacao = (e: unknown) => e instanceof ErroServico ? (e.detalhe ? `${e.codigo}: ${e.detalhe}` : e.codigo) : (/^([A-Z][A-Z_]{2,60})\b/.exec((e as Error)?.message ?? '')?.[1] ?? 'OPERATION_FAILED');
+export const codigoDaFalhaDeOperacao = (e: unknown) => e instanceof ErroServico ? (e.detalhe ? `${e.codigo}: ${e.detalhe}` : e.codigo) : (/^([A-Z][A-Z_]{2,60})\b/.exec((e as Error)?.message ?? '')?.[1] ?? 'OPERATION_FAILED');
 
 const limparRespostaRemota = (r: Remoto): Remoto => ({ ...(r.id ? { id: r.id } : {}), ...(r.chave ? { chave: r.chave } : {}), ...(r.url ? { url: r.url } : {}), ...(r.detalhes ? { detalhes: Object.fromEntries(Object.entries(r.detalhes).filter(([, v]) => v !== undefined)) as Record<string, string | number | boolean | null> } : {}) });
 

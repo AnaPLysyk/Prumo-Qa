@@ -35,7 +35,7 @@ export function contextoParaRevisao(projeto: Projeto, id: string, base?: string)
 }
 
 /** Lista com filtros de tipo, chave, estado e busca textual, sem expor arquivos brutos. */
-function listarContextos(projeto: Projeto, filtro: Filtro = {}, base?: string) {
+export function listarContextos(projeto: Projeto, filtro: Filtro = {}, base?: string) {
   const { itens, problemas } = carregarTodosOsContextos(projeto, base);
   const termo = filtro.busca?.trim().toLowerCase();
   const textos = new Map(itens.map(item => {

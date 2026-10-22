@@ -122,7 +122,7 @@ export function revisarProposta(id: string, r: { duplicidade: boolean; requisito
 /** Pré-condição de publicação: IA exige revisão completa; as demais origens exigem ao menos a confirmação da pessoa (feita no diálogo nativo). */
 export function podePublicar(p: Proposta) { if (p.estado === 'PUBLICADA' || p.estado === 'VINCULADA' || p.estado === 'DESCARTADA') throw new Error('PROPOSAL_CLOSED'); if (p.origem === 'IA' && p.estado !== 'REVISADA') throw new Error('REVIEW_REQUIRED: proposta de IA precisa ser revisada antes de publicar.'); return true; }
 
-const marcarPublicada = (id: string, remoto: { id?: string; chave?: string; url?: string }, b?: string) => alterarProposta(id, p => { p.estado = 'PUBLICADA'; p.remoto = remoto; }, b);
+export const marcarPublicada = (id: string, remoto: { id?: string; chave?: string; url?: string }, b?: string) => alterarProposta(id, p => { p.estado = 'PUBLICADA'; p.remoto = remoto; }, b);
 
 /** Parâmetros da issue no GitHub a partir do rascunho local: o mesmo objeto alimenta a prévia confirmada e o envio. */
 export function parametrosDaIssueGithub(p: Proposta) {

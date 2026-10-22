@@ -210,3 +210,22 @@ test('aparelho e navegador aparecem só quando o runner os declarou', () => {
   assert.deepEqual([...modelo.ambientesDoTeste({ resultado: { ambientes: [{ projeto: 'mobile', dispositivo: 'Pixel 7', navegador: 'chromium', versaoDoNavegador: '126', viewport: '412x915' }, { projeto: 'desktop', navegador: 'webkit' }] } })], ['Pixel 7 · chromium 126 · 412x915', 'desktop · webkit']);
   assert.deepEqual([...modelo.ambientesDoTeste({ resultado: { status: 'PASS' } })], [], 'sem registro, nada é inferido');
 });
+
+test('o painel mostra o sistema ao vivo: terminal por agente com o diálogo, ações do sistema com descrição e conexões à parte', () => {
+  const js = fs.readFileSync('frontend/design-system/painel-atividades.js', 'utf8');
+  const modelo = vm.runInNewContext(js + '\nPrumoModeloAtividades;', { tr: (x, v) => x.replace(/\{(\w+)\}/g, (_, k) => v?.[k] ?? '') });
+  const em = new Date().toISOString();
+  const dados = { atividades: [], conversas: [{ id: 'c1', em, agente: 'regressao', agenteNome: 'Regressão', pergunta: 'Houve regressão?', modo: 'LOCAL', fontes: [] }], execucoes: [],
+    agentes: [{ id: 'regressao', nome: 'Regressão' }, { id: 'qa-geral', nome: 'QA Geral' }],
+    orquestracoes: [{ id: 'o1', em, estado: 'CONCLUIDA', agentes: ['regressao'], etapas: [{ agente: 'regressao', estado: 'CONCLUIDA', inicio: em, fim: em, fontes: ['Execuções'], fatos: ['3 execuções recentes'] }] }],
+    auditoria: [{ id: 'a1', at: em, canal: 'espacos:criar', estado: 'OK', duracaoMs: 20, descricao: 'Criar um projeto.' }, { id: 'a2', at: em, canal: 'servicos:listar', estado: 'OK', duracaoMs: 5, descricao: 'Listar as conexões.' }] };
+  const grafo = modelo.modelar(dados);
+  const dialogo = grafo.fontes.find(x => x.id === 'dialogo:regressao');
+  assert.ok(dialogo && dialogo.agenteId === 'regressao', 'o agente tem terminal próprio');
+  assert.ok(dialogo.linhas.some(l => l.texto.startsWith('Orchestrator ›')) && dialogo.linhas.some(l => l.texto.includes('3 execuções recentes')) && dialogo.linhas.some(l => l.texto.startsWith('Pessoa ›')), 'pedido, fato e fala da pessoa');
+  assert.ok(grafo.arestas.some(a => a.de === 'diagnostico:o1' && a.para === 'dialogo:regressao'), 'a investigação liga ao terminal do agente');
+  assert.equal(grafo.fontes.find(x => x.id === 'sistema:acoes').linhas[0].texto, 'Criar um projeto.');
+  assert.equal(grafo.fontes.find(x => x.id === 'sistema:conexoes').linhas[0].texto, 'Listar as conexões.');
+  assert.ok(grafo.hubs.some(h => h.id === 'agente:qa-geral'), 'agente sem atividade continua aparecendo pelo nome');
+  assert.ok(modelo.dispor(grafo, 1200, 700).pos.has('dialogo:regressao'));
+});

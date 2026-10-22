@@ -23,7 +23,7 @@ const PrumoModeloAtividades = (() => {
   /** Aparelho e navegador como o runner declarou ("Pixel 7 · Chromium 126 · 412x915"); sem registro, nada é mostrado nem inferido. */
   const ambientesDoTeste = (x) => (x.resultado?.ambientes || []).map((a) => [a.dispositivo || a.projeto, [a.navegador, a.versaoDoNavegador].filter(Boolean).join(' '), a.viewport, a.plataforma].filter(Boolean).join(' · '));
   const nomeCliente = (c) => (c === 'claude' ? 'Claude Code' : c === 'codex' ? 'Codex' : c || 'cliente');
-  const assinatura = (d) => JSON.stringify([d.atividades.map((a) => a.operationId + a.state), d.conversas.map((c) => c.id + ':' + (c.avaliacao || '')), d.execucoes.map((x) => x.id + x.estado), (d.orquestracoes || []).map((o) => o.id + ':' + o.estado + ':' + o.etapas.length + ':' + (o.emExecucao || ''))]);
+  const assinatura = (d) => JSON.stringify([d.atividades.map((a) => a.operationId + a.state), d.conversas.map((c) => c.id + ':' + (c.avaliacao || '')), (d.auditoria || []).map((a) => a.id + a.estado), d.execucoes.map((x) => x.id + x.estado), (d.orquestracoes || []).map((o) => o.id + ':' + o.estado + ':' + o.etapas.length + ':' + (o.emExecucao || ''))]);
 
   // ---------- Modelo: fontes (janelas), hubs e folhas, com as arestas que os registros comprovam ----------
   function modelar(d) {
@@ -152,6 +152,42 @@ const PrumoModeloAtividades = (() => {
         }
       });
     }
+    // 4) Conversa entre agentes: um terminal por agente com o diálogo Orchestrator → agente (pedidos, fatos e fontes) e as conversas com a pessoa.
+    {
+      const dialogos = new Map();
+      const poe = (id, linha) => { if (!dialogos.has(id)) dialogos.set(id, []); dialogos.get(id).push(linha); };
+      const nomeDe = (id) => (d.agentes || []).find(a => a.id === id)?.nome || id;
+      for (const o of d.orquestracoes) for (const et of o.etapas) {
+        poe(et.agente, { em: et.inicio, hora: curto(et.inicio), texto: 'Orchestrator › ' + tr('consulte o projeto'), estado: '', extra: '' });
+        for (const fato of (et.fatos || []).slice(0, 3)) poe(et.agente, { em: et.fim, hora: curto(et.fim), texto: nomeDe(et.agente) + ' › ' + String(fato).slice(0, 60), estado: et.estado, extra: '' });
+        if (et.erro) poe(et.agente, { em: et.fim, hora: curto(et.fim), texto: nomeDe(et.agente) + ' › ' + tr('falha na consulta'), estado: 'ERROR', extra: '' });
+      }
+      for (const c of d.conversas) poe(c.agente, { em: c.em, hora: curto(c.em), texto: tr('Pessoa') + ' › ' + (c.pergunta || tr('Atendimento sem texto persistido')).slice(0, 40), estado: '', extra: '' });
+      const ativos = [...dialogos].filter(([id]) => (d.agentes || []).some(a => a.id === id)).sort((a, b) => String(b[1].at(-1)?.em).localeCompare(String(a[1].at(-1)?.em))).slice(0, 6);
+      if (ativos.length) {
+        const sec = { id: 'dialogo', titulo: tr('Conversa entre agentes'), fontes: [], hubs: [] }; secoes.push(sec);
+        for (const [id, linhas] of ativos) {
+          const ordenadas = linhas.sort((a, b) => String(b.em).localeCompare(String(a.em))).slice(0, 7);
+          const f = { id: 'dialogo:' + id, tipo: 'dialogo', agenteId: id, titulo: id === 'orquestrador' ? tr('Guia do sistema') : nomeDe(id), sub: tr('{n} mensagens', { n: linhas.length }), vivo: ordenadas.some(l => recente(l.em)), cor: CORES_AGENTE[(d.agentes || []).findIndex(a => a.id === id) % CORES_AGENTE.length] || '#8fb4ff', linhas: ordenadas.map(({ hora, texto, estado, extra }) => ({ hora, texto, estado, extra })) };
+          fontes.push(f); sec.fontes.push(f);
+        }
+        // A conversa nasce no Orchestrator: liga a investigação de cada pedido ao terminal do agente que respondeu.
+        const janelas = new Set(sec.fontes.map(x => x.id));
+        for (const o of d.orquestracoes) for (const et of o.etapas) if (janelas.has('dialogo:' + et.agente) && fontes.some(x => x.id === 'diagnostico:' + o.id)) arestas.push({ de: 'diagnostico:' + o.id, para: 'dialogo:' + et.agente, tipo: 'fonte', vivo: o.estado === 'EXECUTANDO' && o.emExecucao === et.agente, peso: 1 });
+      }
+    }
+    // 5) Sistema e conexões: cada ação auditada, com a descrição do que ela faz; chamadas a Jira, Qase e GitHub ficam num terminal à parte.
+    if ((d.auditoria || []).length) {
+      const eventos = [...d.auditoria].sort((a, b) => b.at.localeCompare(a.at));
+      const ehConexao = (e) => /^(servicos|projetos|github|jira|qase|integracoes|conexoes):/.test(e.canal);
+      const monta = (id, titulo, lista, cor) => ({ id, tipo: 'sistema', titulo, sub: tr('{n} ações registradas', { n: lista.length }), vivo: lista.some(e => recente(e.at)), cor,
+        linhas: lista.slice(0, 7).map(e => ({ hora: curto(e.at), texto: (e.descricao || e.canal).slice(0, 46), estado: e.estado, extra: duracao(e.duracaoMs) })) });
+      const sec = { id: 'sistema', titulo: tr('Sistema Prumo e conexões'), fontes: [], hubs: [] };
+      const conexoes = eventos.filter(ehConexao), resto = eventos.filter(e => !ehConexao(e));
+      if (resto.length) sec.fontes.push(monta('sistema:acoes', tr('Sistema Prumo'), resto, '#9fb0ff'));
+      if (conexoes.length) sec.fontes.push(monta('sistema:conexoes', tr('Conexões Jira · Qase · GitHub'), conexoes, '#6fe0a0'));
+      if (sec.fontes.length) { secoes.push(sec); fontes.push(...sec.fontes); }
+    }
     // Elenco: todo agente do projeto aparece no fluxo, pelo nome, mesmo sem conversa registrada; clicar abre o fluxo dele.
     const cobertos = new Set(hubs.filter(x => x.agenteId).map(x => x.agenteId));
     const faltam = (d.agentes || []).filter(ag => !cobertos.has(ag.id));
@@ -190,7 +226,7 @@ const PrumoModeloAtividades = (() => {
       }
       const lf = sec.fontes.length * (JW + GAP.hub) - GAP.hub; largura = Math.max(largura, lf);
       sec.fontes.forEach((f, i) => local.set(f.id, { x: (largura - lf) / 2 + i * (JW + GAP.hub), y: TOPO, w: JW, h: JH }));
-      return { sec, local, largura, altura: y + alturaLinha };
+      return { sec, local, largura, altura: sec.hubs.length ? y + alturaLinha : TOPO + JH };
     });
     // Seções lado a lado, quebrando em faixas para o conjunto ficar próximo da proporção da tela.
     const area = blocos.reduce((n, b) => n + b.largura * b.altura, 0), alvo = Math.max(...blocos.map((b) => b.largura), Math.sqrt(area * aspecto));
@@ -368,7 +404,8 @@ const PrumoPainelAtividades = (() => {
     function janela(f, p) {
       const corpo = h('div', { class: 'pa-janela-corpo', 'data-i18n-ignore': '' }, ...f.linhas.map((l) => h('div', { class: 'pa-tty' }, h('span', { class: 'pa-tty-hora' }, l.hora), ' ', h('span', { class: 'pa-tty-cmd' }, l.texto), ' ', h('span', { class: 'pa-tty-estado ' + classe(String(l.estado).replace(/^→ /, '')) }, l.estado), l.extra ? h('span', { class: 'pa-tty-extra' }, ' ' + l.extra) : null)),
         h('div', { class: 'pa-tty pa-cursor' }, h('span', { class: 'pa-tty-hora' }, '$'), ' ', h('span', { class: 'pa-caret' })));
-      const el = h(f.dado ? 'button' : 'div', { ...(f.dado ? { type: 'button', onclick: () => o.abrirDiagnostico?.(f.dado) } : {}), class: 'pa-janela pa-' + f.tipo + (f.vivo ? ' vivo' : ''), 'data-no': f.id, role: f.dado ? undefined : 'group', 'aria-label': f.titulo + ' · ' + f.sub },
+      const abre = f.agenteId ? () => o.abrirAgente?.(((dados && dados.agentes) || []).find(g => g.id === f.agenteId) || { id: f.agenteId, nome: f.titulo }, { ...dados, ativos: modelo && modelo.ativos }) : f.dado ? () => o.abrirDiagnostico?.(f.dado) : null;
+      const el = h(abre ? 'button' : 'div', { ...(abre ? { type: 'button', onclick: abre } : {}), class: 'pa-janela pa-' + f.tipo + (f.vivo ? ' vivo' : ''), 'data-no': f.id, role: abre ? undefined : 'group', 'aria-label': f.titulo + ' · ' + f.sub },
         h('div', { class: 'pa-janela-titulo' }, h('span', { class: 'pa-luzes', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), h('strong', { 'data-i18n-ignore': '' }, f.titulo), f.vivo ? h('span', { class: 'pa-ao-vivo' }, tr('ATIVO')) : null),
         h('div', { class: 'pa-janela-sub' }, f.sub), corpo);
       el.style.setProperty('--cor', f.cor); pos(el, p); return el;

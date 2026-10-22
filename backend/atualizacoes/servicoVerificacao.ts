@@ -42,7 +42,7 @@ export function avisoDeVersaoPendente(instalada: string, base?: string) {
  * - notificar: versão ainda não vista nem notificada (notificação visual do Windows, uma vez por versão; "silenciar" só cala o som).
  * A decisão é gravada (versaoNotificada) para não repetir o som em consultas seguintes nem ao reabrir.
  */
-function registrarConsultaDeVersao(disponivel: { versao: string; notas: string } | null, base?: string) {
+export function registrarConsultaDeVersao(disponivel: { versao: string; notas: string } | null, base?: string) {
   const p = lerPreferencias(base); const agora = new Date().toISOString();
   if (!disponivel) { gravarPreferencias({ ...p, disponivel: null, ultimaConsulta: agora }, base); return { indicador: false, tocarSom: false, notificar: false, versao: null as string | null, notas: '' }; }
   const vista = !!p.versaoVisualizada && compararVersoes(disponivel.versao, p.versaoVisualizada) <= 0;

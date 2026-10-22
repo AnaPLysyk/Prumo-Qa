@@ -18,7 +18,7 @@ import { recursoDaResposta } from "./configuracaoDosServicos.js";
  * devolver um endereço só nesse caso dava "Invalid IP address: undefined" e derrubava toda conexão real com Qase, Jira e GitHub.
  */
 /** Bloqueia localhost, redes internas e IPs especiais antes de estabelecer HTTPS. */
-function enderecoPublico(ip:string){
+export function enderecoPublico(ip:string){
   // Conjunto conservador: descarta IPv6 no transporte inicial e todas as faixas especiais IPv4.
   if(isIP(ip)!==4)return false;const a=ip.split('.').map(Number);const[x,y]=a;
   const terceiro=a[2]!;

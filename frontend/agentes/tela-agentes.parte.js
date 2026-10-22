@@ -539,12 +539,12 @@
         aoAtualizar: dados => { void mostrarOrquestracoes(orq, dados.orquestracoes); },
         carregar: async () => {
           const root = estado.root;
-          const [hist, roster, execs, diagnosticos] = await Promise.all([root ? chamarSemAviso(() => api.historico(root, { limit: 1000 })) : null, chamarSemAviso(() => api.assistenteAgentes(e.id)), chamarSemAviso(() => api.execucoes({ espacoId: e.id, limite: 200 })), chamarSemAviso(() => api.agentesOrquestracoes(e.id))]);
+          const [hist, roster, execs, diagnosticos, sistema] = await Promise.all([root ? chamarSemAviso(() => api.historico(root, { limit: 1000 })) : null, chamarSemAviso(() => api.assistenteAgentes(e.id)), chamarSemAviso(() => api.execucoes({ espacoId: e.id, limite: 200 })), chamarSemAviso(() => api.agentesOrquestracoes(e.id)), chamarSemAviso(() => api.diagnostico())]);
           const agentes = roster?.agentes || [];
           // Conversas recentes de cada agente: só metadados e o texto que a própria pessoa deixou gravado neste computador.
           const conversas = (await Promise.all(agentes.map(a => chamarSemAviso(() => api.conversasListar(e.id, a.id)).then(l => (l || []).map(c => ({ ...c, fontes: (c.fontes || []).map(f => typeof f === 'string' ? f : f.rotulo), agenteNome: a.nome })))))).flat();
           const avisos = [!hist ? tr('Histórico do núcleo indisponível.') : null, hist && !hist.complete ? tr('Histórico parcial: registros inválidos excluídos.') : null, !execs ? tr('Execuções indisponíveis.') : null].filter(Boolean);
-          return { atividades: hist?.activities || [], conversas, agentes, execucoes: execs?.execucoes || [], orquestracoes: diagnosticos?.orquestracoes || [], totalExecucoes: execs?.total, avisos };
+          return { atividades: hist?.activities || [], conversas, auditoria: (sistema?.auditoria?.eventos || []).filter(x => !e.id || !x.espacoId || x.espacoId === e.id), agentes, execucoes: execs?.execucoes || [], orquestracoes: diagnosticos?.orquestracoes || [], totalExecucoes: execs?.total, avisos };
         },
         abrirAtividade: activityDetails,
         abrirDiagnostico: ({ registro, etapa, agente }) => caixa(tr('Investigação: ') + agente, [

@@ -9,7 +9,7 @@ import { analisarVersao } from "../ajuda/servicoAjuda.js";
 import { LIMITE_INSTALADOR, Opcoes, HOSTS } from "./contratos.js";
 import { repositorio } from "../ajuda/contratos.js";
 
-const enderecoDoInstalador = (v: string) => `https://github.com/${repositorio}/releases/download/v${v}/${nomeDoInstalador(v)}`;
+export const enderecoDoInstalador = (v: string) => `https://github.com/${repositorio}/releases/download/v${v}/${nomeDoInstalador(v)}`;
 
 /** Baixa e confere. Devolve o caminho do instalador verificado; em qualquer falha apaga o que baixou. */
 export async function baixarAtualizacao(versao: string, o: Opcoes = {}): Promise<{ arquivo: string; sha256: string; bytes: number }> {

@@ -25,7 +25,7 @@ export function criarBandeja() {
   setInterval(() => { try { vigiarWorker(); atualizarBandeja(); } catch { /* um ciclo com erro não derruba o processo */ } }, 15000).unref();
 }
 
-const dicaDaBandeja = (e: EstadoWorker, i: Idioma) => `Prumo QA — ${!e.executando ? textoNoIdioma('dicaParado', i) : e.pausado ? textoNoIdioma('dicaPausado', i) : e.emExecucao ? textoNoIdioma('dicaExecutando', i) : textoNoIdioma('dicaAtivo', i)}`;
+export const dicaDaBandeja = (e: EstadoWorker, i: Idioma) => `Prumo QA — ${!e.executando ? textoNoIdioma('dicaParado', i) : e.pausado ? textoNoIdioma('dicaPausado', i) : e.emExecucao ? textoNoIdioma('dicaExecutando', i) : textoNoIdioma('dicaAtivo', i)}`;
 
 export function atualizarBandeja() {
   const bandeja = estadoDoAplicativo.bandeja;
@@ -35,7 +35,7 @@ export function atualizarBandeja() {
 }
 
 /** Modelo puro do menu da bandeja. Pausar e Retomar nunca aparecem juntos; o item de estado reflete o worker real. */
-function itensDoMenuDaBandeja(e: EstadoWorker, i: Idioma): ItemMenu[] {
+export function itensDoMenuDaBandeja(e: EstadoWorker, i: Idioma): ItemMenu[] {
   return [
     { id: 'abrir', rotulo: textoNoIdioma('abrir', i) }, { id: 'agenda', rotulo: textoNoIdioma('agenda', i) }, { id: 'execucoes', rotulo: textoNoIdioma('execucoes', i) }, { id: 'separador', rotulo: '' },
     e.pausado ? { id: 'retomar', rotulo: textoNoIdioma('retomar', i) } : { id: 'pausar', rotulo: textoNoIdioma('pausar', i) },
