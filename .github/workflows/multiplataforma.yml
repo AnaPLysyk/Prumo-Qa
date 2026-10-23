@@ -1,11 +1,15 @@
 name: macOS e Linux — instaladores
 
 # Gera e confere os instaladores de macOS (.dmg, Apple Silicon e Intel) e de Linux (.AppImage e .deb), cada um na sua
-# máquina real. Em tags v*, espera o fluxo do Windows criar a release, anexa os arquivos com o SHA-256 e republica o site.
+# máquina real. Antes de publicar, homologa em cada sistema: smoke, integração e E2E do Prumo QA Lab (commit fixado, o
+# mesmo do windows.yml) com a janela real, e o aplicativo empacotado abrindo todas as telas.
+# Em tags v*, espera o fluxo do Windows criar a release, anexa os arquivos com o SHA-256 e republica o site.
+# Branches prumo/homologacao-* rodam a mesma homologação sem publicar nada.
 # Instaladores NÃO ASSINADOS: o macOS mostra o aviso de desenvolvedor não identificado (docs/ajuda/03-instalar.md).
 on:
   push:
     tags: ['v*']
+    branches: ['prumo/homologacao-*']
   pull_request:
     paths:
       - 'electron-builder.yml'
@@ -36,10 +40,13 @@ jobs:
   instalador:
     name: ${{ matrix.nome }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    # Homologação + instaladores + espera da release do Windows (que roda a regressão completa antes de publicar).
+    timeout-minutes: 120
     permissions:
       contents: write
       actions: write
+    env:
+      PRUMO_LAB_DIR: ${{ github.workspace }}/.lab
     strategy:
       fail-fast: false
       matrix:
@@ -48,6 +55,11 @@ jobs:
           - { nome: Linux, os: ubuntu-latest, alvo: linux }
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          repository: AnaPLysyk/Prumo-QA-Lab
+          ref: 139bf2079f937ac02a8bd5d03c006e137265b439
+          path: .lab
       - uses: actions/setup-node@v5
         with:
           node-version: 24
@@ -56,8 +68,12 @@ jobs:
         if: matrix.alvo == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libsecret-1-0 gnome-keyring zenity policykit-1 libfuse2 rpm fakeroot dpkg
+          sudo apt-get install -y xvfb libsecret-1-0 gnome-keyring dbus-x11 zenity policykit-1 libfuse2 rpm fakeroot dpkg
+          # Ubuntu 24.04 restringe namespaces sem privilégio (AppArmor) e o sandbox do Chromium não abre a janela sem eles.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - run: npm ci
+      - name: Dependências do servidor Better Auth (integração do Lab)
+        run: npm ci --prefix backend/login/servidor --omit=dev
       - name: Tipos e compilação
         run: |
           npm run typecheck
@@ -66,8 +82,40 @@ jobs:
         run: node --test --test-concurrency=1 testes/unitario/backend/aplicativo/multiplataforma.test.mjs testes/unitario/backend/testes/aprovacao-multiplataforma.test.mjs
       - name: Testes das conexões pelo navegador (GitHub App e Jira OAuth) em cada sistema
         run: node --test --test-concurrency=1 testes/unitario/backend/conexoes/autorizacao-no-servidor.test.mjs testes/unitario/backend/conexoes/autorizacao-pelo-navegador.test.mjs testes/unitario/backend/conexoes/cliente-do-servico-de-autorizacao.test.mjs testes/unitario/backend/conexoes/contas-oauth.test.mjs
+      # Linux: janela no Xvfb e cofre do GNOME destravado numa sessão D-Bus própria, como numa área de trabalho real.
+      - name: Homologar smoke, integração e E2E do Lab com a janela real
+        run: |
+          cat > "$RUNNER_TEMP/homologar.sh" <<'FIM'
+          set -e
+          for tipo in smoke integracao e2e; do
+            echo "::group::Lab $tipo"
+            node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo "$tipo"
+            echo "::endgroup::"
+          done
+          FIM
+          if [ "${{ matrix.alvo }}" = "linux" ]; then
+            dbus-run-session -- bash -c 'printf "" | gnome-keyring-daemon --unlock --components=secrets >/dev/null && xvfb-run -a -s "-screen 0 1440x900x24" bash "$RUNNER_TEMP/homologar.sh"'
+          else
+            bash "$RUNNER_TEMP/homologar.sh"
+          fi
       - name: Gerar instaladores
         run: npm run dist:${{ matrix.alvo }}
+      - name: Verificar o executável empacotado (todas as telas)
+        run: |
+          if [ "${{ matrix.alvo }}" = "mac" ]; then
+            exe=$(ls -d release/mac-arm64/*.app/Contents/MacOS/* release/mac/*.app/Contents/MacOS/* 2>/dev/null | head -1)
+          else
+            exe="release/linux-unpacked/$(node -p "require('./package.json').name")"
+            [ -x "$exe" ] || exe=$(find release/linux-unpacked -maxdepth 1 -type f -perm -u+x ! -name '*.so*' ! -name 'chrome*' | head -1)
+          fi
+          [ -n "$exe" ] && [ -x "$exe" ] || { echo "::error::Executável empacotado não encontrado"; ls -R release | head -50; exit 1; }
+          export PRUMO_APP_EXE="$PWD/$exe"; echo "Executável: $PRUMO_APP_EXE"
+          cmd='node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo e2e --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado'
+          if [ "${{ matrix.alvo }}" = "linux" ]; then
+            dbus-run-session -- bash -c "printf '' | gnome-keyring-daemon --unlock --components=secrets >/dev/null && xvfb-run -a -s '-screen 0 1440x900x24' $cmd"
+          else
+            $cmd
+          fi
       - name: Conferir os arquivos gerados e gerar o SHA-256
         run: |
           cd release
