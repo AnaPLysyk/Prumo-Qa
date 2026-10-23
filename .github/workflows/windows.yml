@@ -32,7 +32,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repository: AnaPLysyk/Prumo-QA-Lab
-          ref: 42c1f9c2b03c67b3db682b425517a9ffb50f4cfb
+          ref: 139bf2079f937ac02a8bd5d03c006e137265b439
           path: .lab
       - uses: actions/setup-node@v5
         with:
