@@ -85,12 +85,13 @@ jobs:
       # Linux: janela no Xvfb e cofre do GNOME destravado numa sessão D-Bus própria, como numa área de trabalho real.
       - name: Homologar smoke, integração e E2E do Lab com a janela real
         run: |
+          # O log do Actions exige login: cada teste que falha vira uma anotação pública (nome, local e erro).
           cat > "$RUNNER_TEMP/homologar.sh" <<'FIM'
-          set -e
           for tipo in smoke integracao e2e; do
             echo "::group::Lab $tipo"
-            node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo "$tipo"
+            node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo "$tipo" | tee "$RUNNER_TEMP/lab-$tipo.log"; codigo=${PIPESTATUS[0]}
             echo "::endgroup::"
+            if [ "$codigo" -ne 0 ]; then node site/release/anotar-falhas-dos-testes.mjs "$RUNNER_TEMP/lab-$tipo.log" "Lab $tipo (${{ matrix.nome }})"; exit "$codigo"; fi
           done
           FIM
           if [ "${{ matrix.alvo }}" = "linux" ]; then
@@ -112,10 +113,11 @@ jobs:
           export PRUMO_APP_EXE="$PWD/$exe"; echo "Executável: $PRUMO_APP_EXE"
           cmd='node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo e2e --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado'
           if [ "${{ matrix.alvo }}" = "linux" ]; then
-            dbus-run-session -- bash -c "printf '' | gnome-keyring-daemon --unlock --components=secrets >/dev/null && xvfb-run -a -s '-screen 0 1440x900x24' $cmd"
+            dbus-run-session -- bash -c "printf '' | gnome-keyring-daemon --unlock --components=secrets >/dev/null && xvfb-run -a -s '-screen 0 1440x900x24' $cmd" | tee "$RUNNER_TEMP/lab-empacotado.log"; codigo=${PIPESTATUS[0]}
           else
-            $cmd
+            $cmd | tee "$RUNNER_TEMP/lab-empacotado.log"; codigo=${PIPESTATUS[0]}
           fi
+          if [ "$codigo" -ne 0 ]; then node site/release/anotar-falhas-dos-testes.mjs "$RUNNER_TEMP/lab-empacotado.log" "Executável empacotado (${{ matrix.nome }})"; exit "$codigo"; fi
       - name: Conferir os arquivos gerados e gerar o SHA-256
         run: |
           cd release

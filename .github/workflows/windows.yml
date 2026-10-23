@@ -1,10 +1,11 @@
 name: Windows — unitários, instalador e release
 
 # Push e PR: unitários. Tag v*: unitários no Prumo QA e smoke/regressão do Prumo QA Lab (commit fixado) antes de publicar.
+# Branches prumo/homologacao-*: a mesma homologação da tag (Lab e executável empacotado), sem release.
 # Preserva publicação verificada do instalador, catálogo de versões e site.
 on:
   push:
-    branches: [main]
+    branches: [main, 'prumo/homologacao-*']
     tags: ['v*']
   pull_request:
   workflow_dispatch:
@@ -29,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/checkout@v5
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/prumo/homologacao-')
         with:
           repository: AnaPLysyk/Prumo-QA-Lab
           ref: 139bf2079f937ac02a8bd5d03c006e137265b439
@@ -49,27 +50,26 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:unitarios
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      # O log do Actions exige login: cada teste que falha vira uma anotação pública (nome, local e erro).
       - name: Homologar smoke, integração, E2E e regressão antes da release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/prumo/homologacao-')
         shell: pwsh
         run: |
-          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo smoke
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo integracao
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo e2e
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo regressao
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($tipo in 'smoke', 'integracao', 'e2e', 'regressao') {
+            node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo $tipo | Tee-Object -FilePath "$env:RUNNER_TEMP\lab-$tipo.log"
+            $codigo = $LASTEXITCODE
+            if ($codigo -ne 0) { node site/release/anotar-falhas-dos-testes.mjs "$env:RUNNER_TEMP\lab-$tipo.log" "Lab $tipo (Windows)"; exit $codigo }
+          }
       - name: Gerar instalador
         run: npm run dist
       - name: Verificar o executavel empacotado antes da release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/prumo/homologacao-')
         shell: pwsh
         run: |
           $env:PRUMO_APP_EXE = (Resolve-Path 'release/win-unpacked/Prumo QA.exe').Path
-          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo e2e --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo e2e --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado | Tee-Object -FilePath "$env:RUNNER_TEMP\lab-empacotado.log"
+          $codigo = $LASTEXITCODE
+          if ($codigo -ne 0) { node site/release/anotar-falhas-dos-testes.mjs "$env:RUNNER_TEMP\lab-empacotado.log" "Executável empacotado (Windows)"; exit $codigo }
       - name: SHA-256 do instalador
         shell: pwsh
         run: |
