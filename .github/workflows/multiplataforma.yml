@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           repository: AnaPLysyk/Prumo-QA-Lab
-          ref: 139bf2079f937ac02a8bd5d03c006e137265b439
+          ref: 2f2ae7c0d72af66a7563861c32514d7d29043b6d
           path: .lab
       - uses: actions/setup-node@v5
         with:
@@ -72,6 +72,9 @@ jobs:
           # Ubuntu 24.04 restringe namespaces sem privilégio (AppArmor) e o sandbox do Chromium não abre a janela sem eles.
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - run: npm ci
+      - name: Preparar o runtime Electron antes dos testes de janela
+        # Electron 44 baixa o binário no primeiro import. Esse provisionamento não faz parte do E2E.
+        run: node node_modules/electron/install.js
       - name: Dependências do servidor Better Auth (integração do Lab)
         run: npm ci --prefix backend/login/servidor --omit=dev
       - name: Tipos e compilação
@@ -113,9 +116,9 @@ jobs:
           export PRUMO_APP_EXE="$PWD/$exe"; echo "Executável: $PRUMO_APP_EXE"
           cmd='node .lab/automacao/prumo-qa/executar.mjs --qa . --tipo e2e --arquivo frontend/aplicativo/todas-as-telas.test.mjs --empacotado'
           if [ "${{ matrix.alvo }}" = "linux" ]; then
-            dbus-run-session -- bash -c "printf '' | gnome-keyring-daemon --unlock --components=secrets >/dev/null && xvfb-run -a -s '-screen 0 1440x900x24' $cmd" | tee "$RUNNER_TEMP/lab-empacotado.log"; codigo=${PIPESTATUS[0]}
+            if dbus-run-session -- bash -c "printf '' | gnome-keyring-daemon --unlock --components=secrets >/dev/null && xvfb-run -a -s '-screen 0 1440x900x24' $cmd" | tee "$RUNNER_TEMP/lab-empacotado.log"; then codigo=0; else codigo=${PIPESTATUS[0]}; fi
           else
-            $cmd | tee "$RUNNER_TEMP/lab-empacotado.log"; codigo=${PIPESTATUS[0]}
+            if $cmd | tee "$RUNNER_TEMP/lab-empacotado.log"; then codigo=0; else codigo=${PIPESTATUS[0]}; fi
           fi
           if [ "$codigo" -ne 0 ]; then node site/release/anotar-falhas-dos-testes.mjs "$RUNNER_TEMP/lab-empacotado.log" "Executável empacotado (${{ matrix.nome }})"; exit "$codigo"; fi
       - name: Conferir os arquivos gerados e gerar o SHA-256

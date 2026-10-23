@@ -13,4 +13,4 @@ No Prumo, você pode:
 
 Claude Code, Codex, GitHub Copilot e Gemini CLI são opcionais. Eles se conectam ao Prumo pelo MCP (protocolo de comunicação entre aplicativos).
 
-Os dados ficam neste computador. O Prumo não tem servidor próprio, inteligência artificial própria nem telemetria. Arquivos e contextos locais não são enviados automaticamente. Para publicar algo em outro serviço, você precisa confirmar.
+Projetos, arquivos e evidências locais ficam neste computador. Funções de conta, envio de e-mail e suporte usam o serviço do Prumo; as integrações e IAs externas usam os respectivos provedores, conforme suas autorizações. O Prumo não tem inteligência artificial própria nem telemetria. Arquivos e contextos locais não são enviados automaticamente. Para publicar algo em outro serviço, você precisa confirmar. Consulte **Privacidade e dados** para ver o que cada função envia.

@@ -33,13 +33,15 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref, 'refs/heads/prumo/homologacao-')
         with:
           repository: AnaPLysyk/Prumo-QA-Lab
-          ref: 139bf2079f937ac02a8bd5d03c006e137265b439
+          ref: 2f2ae7c0d72af66a7563861c32514d7d29043b6d
           path: .lab
       - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Preparar o runtime Electron antes dos testes de janela
+        run: node node_modules/electron/install.js
       - name: Instalar dependencias do servidor Better Auth para testes unitarios
         run: npm ci --prefix backend/login/servidor --omit=dev
       - name: Compilar e executar apenas testes unitários
