@@ -20,7 +20,7 @@ Entrada nova no topo com `status: "repositorio"`, `date: null`, `releaseUrl: nul
 
 ## 4. Verificação e main
 
-`npm run check` sem falhas (os de migração ficam `NOT_RUN`: exigem o executável e o perfil instalados e não rodam mais no CI). Commit e push para `main`. O push dispara o CI do Windows e o deploy do site (que passa a mostrar a versão nova no histórico como "código, sem release").
+`npm run check` sem falhas (os de migração ficam `NOT_RUN`: exigem o executável e o perfil instalados e não rodam mais no CI). Commit e push para `main`. O push dispara o CI do Windows e o deploy do site. O download permanece na última versão publicada até a release nova ser conferida e marcada no catálogo; as notas completas ficam na release oficial e na Ajuda do aplicativo.
 
 ## 5. Tag
 
