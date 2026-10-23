@@ -1843,3 +1843,74 @@ Object.assign(window.PRUMO_EN, {
   'Pulados': 'Skipped',
   'Inválidos': 'Invalid'
 });
+
+// 2.20.0: seletor de projeto, mapa de conexões de Projetos, voz e cenários do Repositório.
+Object.assign(window.PRUMO_EN, {
+  'Gerenciar projetos': 'Manage projects',
+  'Projetos e pastas locais': 'Projects and local folders',
+  'Contexto ativo: nenhum selecionado. Trocar projeto': 'Active context: none selected. Switch project',
+  'PROJETO EM EXIBIÇÃO': 'PROJECT ON DISPLAY',
+  'NÚCLEO DE QUALIDADE': 'QUALITY CORE',
+  'Cada conexão pertence a este projeto.': 'Each connection belongs to this project.',
+  'Fechar painel e voltar à bancada': 'Close panel and return to the workbench',
+  'Jira · gestão': 'Jira · management',
+  'Qase · qualidade': 'Qase · quality',
+  'GitHub · código': 'GitHub · code',
+  'Pasta local': 'Local folder',
+  'Conexão nativa': 'Native connection',
+  'Conectado': 'Connected',
+  'Não conectado': 'Not connected',
+  'Indisponível': 'Unavailable',
+  'Sem permissão': 'No permission',
+  'Precisa validar': 'Needs validation',
+  'Conta desconectada': 'Account disconnected',
+  'Não vinculado': 'Not linked',
+  'Não vinculada': 'Not linked',
+  'Vinculada': 'Linked',
+  'Disponível': 'Available',
+  'Desativado': 'Disabled',
+  'Sem recurso vinculado': 'No linked resource',
+  'Escolha um projeto da conta conectada': 'Choose a project from the connected account',
+  'Código e arquivos deste computador': 'Code and files on this computer',
+  'Casos, propostas e tickets locais': 'Local cases, proposals and tickets',
+  'Criação de casos e tickets locais suspensa; registros antigos preservados': 'Creating local cases and tickets is paused; existing records are kept',
+  'Escolher pasta': 'Choose folder',
+  'Trocar pasta': 'Change folder',
+  'Criar projeto do zero': 'Create project from scratch',
+  'Código e publicação': 'Code and publishing',
+  'Verificar': 'Check',
+  'Usar clone na IDE': 'Use clone in the IDE',
+  'Ativar manual': 'Enable manual',
+  'Desativar manual': 'Disable manual',
+  'Só ver': 'View only',
+  'Integrado': 'Integrated',
+  'O que muda no modo Integrado': 'What changes in Integrated mode',
+  'Você': 'You',
+  'Criança': 'Child',
+  'Padrão do idioma': 'Language default',
+  'As vozes são as instaladas no Windows (Configurações › Hora e idioma › Fala). Os personagens mudam tom e ritmo da voz.': 'The voices are the ones installed in Windows (Settings › Time & language › Speech). The characters change the tone and pace of the voice.',
+  'Falar para escrever a mensagem': 'Speak to type the message',
+  'Conversar só por voz': 'Voice-only conversation',
+  'Especializações oficiais e agentes pessoais com consultas locais verificáveis.': 'Official specializations and personal agents with verifiable local queries.',
+  'Os agentes oficiais respeitam as políticas do projeto. Os pessoais consultam dados locais somente quando acionados; os robôs são apenas a identidade visual.': 'Official agents follow the project policies. Personal agents query local data only when triggered; the robots are only the visual identity.',
+  'Ação auditada': 'Audited action',
+  'Novo cenário': 'New scenario',
+  'Salvo neste computador': 'Saved on this computer',
+  'Organiza os cenários do Prumo': 'Organizes Prumo scenarios',
+  'Nenhum cenário ainda': 'No scenarios yet',
+  'Use Criar › Novo cenário para escrever o primeiro. Para analisar automações do código, vincule uma pasta em Projetos.': 'Use Create › New scenario to write the first one. To analyze code automations, link a folder in Projects.'
+});
+// Rótulos do mapa de conexões ("Conectar — Jira · gestão" e afins), só com os cinco nomes do mapa; push: as regras anteriores valem primeiro.
+{
+  const conexoes = '(Jira · gestão|Qase · qualidade|GitHub · código|Manual / Prumo|Pasta local)';
+  const em = (t) => window.PRUMO_EN[t] || t;
+  window.PRUMO_EN_REGRAS.push(
+    [/^Contexto ativo: (.+)\. Trocar projeto$/, 'Active context: $1. Switch project'],
+    [/^CONEXÕES DO PROJETO · (\d+) vinculadas$/, 'PROJECT CONNECTIONS · $1 linked'],
+    [/^Mapa de conexões do projeto de qualidade (.+)$/, 'Connection map of quality project $1'],
+    [new RegExp('^Abrir conexão ' + conexoes + '$'), (m) => 'Open connection ' + em(m[1])],
+    [new RegExp('^Abrir configuração de ' + conexoes + '$'), (m) => 'Open settings for ' + em(m[1])],
+    [new RegExp('^Conectar ' + conexoes + '$'), (m) => 'Connect ' + em(m[1])],
+    [new RegExp('^Modo de ' + conexoes + '$'), (m) => 'Mode of ' + em(m[1])],
+    [new RegExp('^(.+) — ' + conexoes + '$'), (m) => em(m[1]) + ' — ' + em(m[2])]);
+}

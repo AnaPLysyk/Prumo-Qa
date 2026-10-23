@@ -360,7 +360,8 @@ function montarSecaoProjeto(espaco, projetos, escrita = null) {
     montarFluxoProjeto(espaco, abrirConexao, escrita),
     h('div', { class:'ds-proj-workspace-rodape' },
       h('span', {}, 'Cada conexão pertence a este projeto.'),
-      DS.acao('Abrir testes', () => escolherEspaco(espaco,'testes'), { compacto:true, id:'espaco-testes-'+espaco.id }),
+      // Sem permissão à tela Testes o atalho não aparece (como na 2.19); o backend também recusa.
+      (!window.PrumoConta || window.PrumoConta.pode('testes')) ? DS.acao('Abrir testes', () => escolherEspaco(espaco,'testes'), { compacto:true, id:'espaco-testes-'+espaco.id }) : null,
       DS.acao('Contas e permissões', () => {
         const area=abrirPainel('Contas e permissões deste projeto');
         void mostrarConexoesDoProjeto(area,espaco);
