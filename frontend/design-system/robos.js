@@ -20,6 +20,11 @@ const PrumoRobos = (() => {
   let renderer = null, falhou = false, ambiente = null;
   function obterRenderer() {
     if (renderer || falhou) return renderer;
+    // Sem WebGL (máquina virtual, GPU bloqueada, Linux sem aceleração) o Three.js escreve erro no console antes de falhar:
+    // sonda antes e cai direto no retrato estático de quem chama.
+    const sonda = document.createElement('canvas'), gl = sonda.getContext('webgl2') || sonda.getContext('webgl');
+    if (!gl) { falhou = true; return null; }
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
     try {
       renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
       renderer.setClearColor(0x000000, 0); renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = .95;
