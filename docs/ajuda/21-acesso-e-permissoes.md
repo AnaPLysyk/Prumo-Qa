@@ -68,7 +68,7 @@ Só contas com a marca admin podem abrir **Administração**, que reúne usuári
 - Quem tem a marca admin pode criar contas, aprovar cadastros, trocar papéis, desativar, desbloquear ou excluir contas. Ao criar uma conta ou redefinir uma senha, o Prumo mostra uma **senha temporária** uma vez. A pessoa cria a própria senha ao entrar pela primeira vez.
 - Em **Configurações gerais**: cadastro aberto ou não, aprovação, papel dos novos cadastros, tempo de inatividade e quantas tentativas erradas bloqueiam a conta.
 - Para trocar uma senha esquecida, escolha **Esqueci a senha**, informe o e-mail da conta, digite o código recebido e crie uma senha nova. Se a conta não tiver e-mail (por exemplo, se foi criada por um admin ou pelo GitHub/Google), um admin precisa redefinir a senha.
-- Abra **Minha conta** pela foto no canto superior. Em **Perfil**, altere o nome e a foto e consulte seus dados. Em **Segurança**, troque a senha, configure a verificação em duas etapas (quando disponível) ou recupere o acesso por e-mail. A **Redefinição de senha** (pelo e-mail) também fica em **Segurança**.
+- Abra **Minha conta** pela foto no canto superior. Em **Perfil**, altere o nome e a foto e consulte seus dados. Em **Meu perfil**, diga como quer ser chamada(o), seu papel, sua experiência e seu foco para os agentes. Em **Segurança**, troque a senha, configure a verificação em duas etapas (quando disponível) ou recupere o acesso por e-mail. A **Redefinição de senha** (pelo e-mail) também fica em **Segurança**.
 - **Verificação em duas etapas:** em **Minha conta**, ligue para que, depois da senha, um código vá ao seu e-mail a cada entrada. Em **Configurações gerais**, um admin pode exigir isso de todas as contas com e-mail. Contas sem e-mail entram só com a senha. Sem o serviço do Prumo no ar, quem precisa do código não consegue entrar.
 - **Esqueci a senha** fica sempre na tela de entrada.
 
@@ -92,7 +92,7 @@ Em **Administração › Agentes**, quem tem a marca admin pode ligar ou desliga
 
 ## Meu perfil
 
-No menu da engrenagem, **Meu perfil** guarda como chamar você, seu papel no time, sua experiência e seu foco (até 160 caracteres). O perfil é da sua conta: outra pessoa que entra neste computador não vê nem usa o seu. Os agentes usam essas informações para adaptar as respostas, e o histórico de atendimentos também é só seu. Claude Code e Codex só recebem esses dados se você marcar **Compartilhar experiência, foco e conta com a IA externa**. Essa opção vem desmarcada; quando compartilhadas, as informações são tratadas como dados, não como instruções.
+Em **Minha conta › Meu perfil** (pela foto no canto superior), você informa e o Prumo guarda como chamar você, seu papel no time, sua experiência e seu foco (até 160 caracteres). O perfil é da sua conta: outra pessoa que entra neste computador não vê nem usa o seu. Os agentes usam essas informações para adaptar as respostas, e o histórico de atendimentos também é só seu. Claude Code e Codex só recebem esses dados se você marcar **Compartilhar experiência, foco e conta com a IA externa**. Essa opção vem desmarcada; quando compartilhadas, as informações são tratadas como dados, não como instruções.
 ## Homologação do cadastro (sem afetar produção)
 
 **Fluxo local legado:** a primeira conta ativa o administrador do computador. O código de 6 dígitos depende de serviço de e-mail realmente configurado. O erro `EMAIL_SERVICE_NOT_CONFIGURED` indica ausência da chave/remetente e não deve ser contornado com código fixo.

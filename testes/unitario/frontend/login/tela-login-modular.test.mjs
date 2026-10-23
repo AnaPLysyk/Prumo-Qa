@@ -169,7 +169,12 @@ test('Minha conta separa perfil e segurança usando o modal acessível do Design
   assert.match(js, /DS\.modal\('Minha conta'/);
   assert.match(js, /\.\.\.DS\.abasModal\(/);
   assert.match(js, /\['perfil', 'Perfil', null, perfil\]/);
+  assert.match(js, /\['meu-perfil', 'Meu perfil', null, meuPerfil\]/);
   assert.match(js, /\['seguranca', 'Segurança', null, seguranca\]/);
+  // Meu perfil guarda cada campo ao sair dele e só a caixa de compartilhamento autoriza a IA externa.
+  for (const id of ['ia-pessoa', 'ia-papel', 'ia-experiencia', 'ia-foco', 'ia-compartilhar']) assert.ok(js.includes(id), 'campo do perfil perdido: ' + id);
+  assert.match(js, /api\.perfilObter\(\)/);
+  assert.match(js, /compartilharComIa: compartilhar\.checked/);
   for (const id of ['minha-trocar-foto', 'minha-salvar-nome', 'minha-trocar-senha', 'minha-recuperar-senha']) {
     assert.ok(js.includes(id), 'ação perdida: ' + id);
   }

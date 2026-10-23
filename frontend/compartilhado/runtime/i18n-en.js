@@ -1972,3 +1972,8 @@ Object.assign(window.PRUMO_EN, {
   'Publicação agendada…': 'Scheduled publishing…',
   'Relacionar falhas a tickets…': 'Link failures to tickets…'
 });
+
+// Meu perfil dentro de Minha conta.
+Object.assign(window.PRUMO_EN, {
+  'Os agentes usam estes dados para adaptar as respostas. O perfil é da sua conta: outra pessoa que entra neste computador não vê nem usa o seu.': 'Agents use this data to tailor their answers. The profile belongs to your account: someone else signing in on this computer neither sees nor uses yours.'
+});

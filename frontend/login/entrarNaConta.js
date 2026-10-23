@@ -280,6 +280,42 @@ window.PrumoConta = (() => {
         ])
       ];
     };
+    // Meu perfil: o que o Prumo sabe da pessoa. O assistente local usa tudo; a IA externa (Claude Code/Codex) só recebe experiência,
+    // foco e conta se a pessoa marcar "Compartilhar com a IA externa". Cada mudança é salva ao sair do campo.
+    const meuPerfil = async () => {
+      const PAPEIS = [['', 'Não informado'], ['qa', 'QA'], ['dev', 'Desenvolvimento'], ['po', 'Produto (PO)'], ['analista', 'Análise'], ['outro', 'Outro']];
+      const EXPERIENCIAS = [['', 'Não informada'], ['iniciante', 'Iniciante: explique os passos'], ['intermediario', 'Intermediária'], ['avancado', 'Avançada: direto ao ponto']];
+      const LIMITE_FOCO = 160;
+      const dados = await chamar(() => api.perfilObter()); if (!dados) return [DS.estadoTela('erro', 'Não foi possível carregar o perfil.', 'Tente de novo em instantes.', [], { compacto: true })];
+      const pessoa = h('input', { id: 'ia-pessoa', maxlength: 30, autocomplete: 'off', placeholder: tr('Como você quer ser chamada(o)'), value: dados.comoChamar || '' });
+      const papel = h('select', { id: 'ia-papel' }, PAPEIS.map(([value, rotulo]) => h('option', { value, selected: value === (dados.papel || '') }, tr(rotulo))));
+      const experiencia = h('select', { id: 'ia-experiencia' }, EXPERIENCIAS.map(([value, rotulo]) => h('option', { value, selected: value === (dados.experiencia || '') }, tr(rotulo))));
+      const foco = h('input', { id: 'ia-foco', maxlength: LIMITE_FOCO, autocomplete: 'off', placeholder: tr('Ex.: automação de API e regressão'), value: dados.foco || '' });
+      const contador = h('span', { class: 'ds-sub', 'aria-hidden': 'true' }, foco.value.length + '/' + LIMITE_FOCO);
+      const compartilhar = h('input', { type: 'checkbox', id: 'ia-compartilhar', checked: !!dados.compartilharComIa });
+      const situacao = h('p', { class: 'ds-sub', id: 'ia-perfil-estado', role: 'status', 'aria-live': 'polite' });
+      async function salvar(parcial) {
+        const r = await chamar(() => api.perfilSalvar(parcial));
+        if (!r) { situacao.textContent = ''; return; }
+        situacao.textContent = tr('Perfil salvo. Os agentes já usam estes dados.');
+        if (typeof conversa !== 'undefined') conversa.recarregar?.();
+      }
+      pessoa.addEventListener('change', () => salvar({ comoChamar: pessoa.value.trim() || null }));
+      papel.addEventListener('change', () => salvar({ papel: papel.value || null }));
+      experiencia.addEventListener('change', () => salvar({ experiencia: experiencia.value || null }));
+      foco.addEventListener('input', () => { contador.textContent = foco.value.length + '/' + LIMITE_FOCO; });
+      foco.addEventListener('change', () => salvar({ foco: foco.value.trim() || null }));
+      compartilhar.addEventListener('change', () => salvar({ compartilharComIa: compartilhar.checked }));
+      return [
+        DS.secao('Como o Prumo conhece você', [
+          DS.info('Os agentes usam estes dados para adaptar as respostas. O perfil é da sua conta: outra pessoa que entra neste computador não vê nem usa o seu.', { rotulo: 'Sobre o perfil' }),
+          DS.campo('Como chamar você', pessoa), DS.campo('Seu papel no time', papel), DS.campo('Experiência', experiencia),
+          DS.campo('Foco de trabalho', foco), contador,
+          h('label', { class: 'ds-linha-check' }, compartilhar, h('span', {}, tr('Compartilhar experiência, foco e conta com a IA externa'))),
+          DS.info('O assistente do Prumo usa estes dados neste computador. Só se você marcar isto, Claude Code e Codex também recebem experiência, foco e o papel da sua conta, como dados e não como instrução. O nome e o papel no time já iam para a IA externa autorizada.', { rotulo: 'Sobre o compartilhamento' }),
+          situacao])
+      ];
+    };
     const seguranca = () => {
       const atual = h('input', { id: 'minha-atual', type: 'password', autocomplete: 'current-password', maxlength: 200 });
       const nova = h('input', { id: 'minha-nova', type: 'password', autocomplete: 'new-password', maxlength: 200 });
@@ -343,6 +379,7 @@ window.PrumoConta = (() => {
     DS.modal('Minha conta', [cabecalho,
       ...DS.abasModal([
         ['perfil', 'Perfil', null, perfil],
+        ['meu-perfil', 'Meu perfil', null, meuPerfil],
         ['seguranca', 'Segurança', null, seguranca]
       ], 'perfil')
     ], { tamanho: 'md' });

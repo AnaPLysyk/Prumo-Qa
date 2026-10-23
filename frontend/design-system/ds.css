@@ -1507,3 +1507,5 @@ html body:has(.ds-ide-cheio) .topo-direita { top: 3px; }
 .rs .rs-caso > .qs-id { flex: none; min-width: 56px; }
 .rs .rs-caso > input, .rs .rs-todos > input, .rs .rs-suite > input { width: auto; margin: 0; }
 .rs .qs-busca { flex: 1 1 220px; width: auto; max-width: 340px; }
+.ds-linha-check { display: flex; flex-direction: row; align-items: center; gap: 8px; width: auto; text-align: left; }
+.ds-linha-check > input { width: auto; margin: 0; flex: none; }
