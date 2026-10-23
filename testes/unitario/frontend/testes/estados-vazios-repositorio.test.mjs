@@ -66,7 +66,7 @@ test('sem Qase, ausência de pasta não impede cadastrar casos e suítes locais'
 test('Runs distingue falha na consulta de lista vazia e permite repetir a busca', async () => {
   const codigo = fonte('frontend/testes/fluxos-planos-e-runs.parte.js');
   const inicio = codigo.indexOf('async function telaRuns(e, mem, corpo, esc) {');
-  const fim = codigo.indexOf('\n  async function prepararRun(', inicio);
+  const fim = codigo.indexOf('\n  // Casos sem id no Qase', inicio);
   assert.ok(inicio > 0 && fim > inicio);
   const elementos = new Map();
   const no = (tipo, atributos = {}, ...filhos) => {

@@ -13,7 +13,7 @@ import { atualizacaoAbrir, atualizacaoInstalar, atualizacaoVerificar, preferenci
 import { interfaceExportar } from "../../compartilhado/controlador.js";
 import { conexaoAplicar, conexaoTestar, escritaEstado, escritaHabilitar, operacoesExecutar, operacoesListar, projetoConexoes, servicosAceite, servicosAdicionar, servicosQaseprevia, servicosQasepreviaconta, servicosQaseimportar, servicosQasecancelar, servicosQaseconectar, servicosJiradescobrir, servicosConferir, servicosConsultar, servicosDesvincular, servicosAlternar, servicosListar, servicosGithubiniciar, servicosGithubestado, servicosAbrirCadastro, servicosAutorizar, servicosAutorizacaoestado, servicosAutorizacaoescolher, servicosAutorizacaodisponivel, servicosRecursos, servicosRemover, servicosTrocartoken, servicosValidar, servicosVincular } from "../../conexoes/controlador.js";
 import { preferenciasObter, preferenciasSalvar } from "../../configuracoes/controlador.js";
-import { projetoEvidencias, execucoesListar, vinculosMapa, jiraPrevia, jiraPublicar, runsApagar, runsBugs, runsCriar, runsEditar, runsExecutar, runsListar, runsPolitica, runsPreparar, runsPublicar, runsResultado, runsAndamento, runsEvidencias, runsEvidenciar, runsRevogar, testesArquivo, testesGravar, testesPipelines, testesCatalogo, repositorioImportar, repositorioListar, repositorioCaso, repositorioSuite } from "../../testes/controlador.js";
+import { projetoEvidencias, execucoesListar, vinculosMapa, jiraPrevia, jiraPublicar, runsApagar, runsBugs, runsCriar, runsEditar, runsExecutar, runsListar, runsPolitica, runsPreparar, runsPublicar, runsResultado, runsResultados, runsAndamento, runsEvidencias, runsEvidenciar, runsRevogar, testesArquivo, testesGravar, testesPipelines, testesCatalogo, repositorioImportar, repositorioListar, repositorioCaso, repositorioSuite } from "../../testes/controlador.js";
 import { projetoHistorico, diagnosticoListar, logsExportar, projetoLogs } from "../../logs/controlador.js";
 import { assistenteAbertura } from "../../inicio/controlador.js";
 import { vozEstado, vozPreparar, vozTranscrever } from "../../voz/controlador.js";
@@ -135,6 +135,7 @@ export function registrarCanaisIpc(): void {
   registrarCanal('runs:criar', runsCriar);
   registrarCanal('runs:executar', runsExecutar);
   registrarCanal('runs:resultado', runsResultado);
+  registrarCanal('runs:resultados', runsResultados);
   registrarCanal('runs:andamento', runsAndamento);
   registrarCanal('runs:evidencias', runsEvidencias);
   registrarCanal('runs:evidenciar', runsEvidenciar);

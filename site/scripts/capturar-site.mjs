@@ -56,8 +56,14 @@ try {
   }
   await api('escritaHabilitar', e.id, 'jira', true); await api('escritaHabilitar', e.id, 'qase', true);
   await api('propostaCriar', e.id, 'caso', { titulo: 'Login rejeita senha incorreta', descricao: 'Valida a mensagem de erro sem revelar se o usuário existe.', passos: [{ acao: 'Informar usuário válido e senha incorreta', esperado: 'Mensagem genérica de credenciais inválidas' }], automacao: 'a-automatizar' }, 'RQ-12 Autenticação', 'Acesso indevido');
-  await api('runPreparar', { espacoId: e.id, titulo: 'Regressão da sprint 42', ambiente: 'teste', casos: [{ casoId: 31, titulo: 'Caso fictício SFQ' }] });
-  await ir('projetos'); await page.locator(`[data-espaco="${e.id}"]`).getByRole('button', { name: 'Selecionar projeto' }).click();
+  const dado = async (fn, ...a) => { const r = await api(fn, ...a); if (!r.ok) throw new Error(fn + ': ' + JSON.stringify(r.error)); return r.data; };
+  const suites = {}; for (const t of ['Login', 'Checkout', 'Pedidos']) suites[t] = (await dado('suiteLocalSalvar', { espacoId: e.id, titulo: t })).id;
+  const cenarios = [['Login', 'Entrar com e-mail e senha válidos'], ['Login', 'Bloquear após 5 tentativas erradas'], ['Login', 'Recuperar senha pelo e-mail'], ['Checkout', 'Pagar com cartão de crédito'], ['Checkout', 'Aplicar cupom de desconto'], ['Checkout', 'Calcular frete por CEP'], ['Checkout', 'Recusar cartão expirado'], ['Pedidos', 'Listar pedidos do cliente'], ['Pedidos', 'Cancelar pedido antes do envio'], ['Pedidos', 'Rastrear entrega']];
+  const locais = []; for (const [suite, titulo] of cenarios) locais.push(await dado('casoLocalSalvar', { espacoId: e.id, suiteLocalId: suites[suite], dados: { titulo, passos: [{ acao: 'Abrir a loja', esperado: 'Página inicial carregada' }, { acao: 'Executar: ' + titulo.toLowerCase(), esperado: 'Comportamento esperado confirmado' }] } }));
+  const idLocal = (s) => { let x = 2166136261; for (const ch of s) { x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619) >>> 0; } return 1e9 + (x % 1e9); };
+  const run = await dado('runPreparar', { espacoId: e.id, titulo: 'Regressão da sprint 42', ambiente: 'teste', casos: locais.slice(0, 8).map((c) => ({ casoId: idLocal(c.id), casoLocalId: c.id, titulo: c.titulo })) });
+  for (const [i, st] of [[0, 'PASS'], [1, 'PASS'], [2, 'FAIL'], [3, 'PASS'], [4, 'BLOCKED']]) await dado('runResultado', run.id, run.casos[i].casoId, st, st === 'PASS' ? '' : 'Resultado observado na demonstração');
+  await ir('projetos'); await page.locator('#projeto-botao').click(); await page.locator(`.projeto-item[data-projeto="${e.id}"]`).click();
   await page.waitForFunction(() => document.querySelector('#projeto-atual').textContent === 'Loja Demo');
 
   const tirar = async (nome) => { await page.waitForTimeout(300); await page.screenshot({ path: path.join(saida, nome + '.png') }); console.log('ok', nome); };
@@ -87,16 +93,24 @@ try {
   await api('espacoPasta', e.id);
   const tema = (t) => page.evaluate((x) => { document.documentElement.dataset.tema = x; }, t);
   await tema('escuro');
+  await ir('projetos'); await page.waitForTimeout(900); await tirar('projetos');
   // 2.10: telas do Design System. Métricas fica fora: com dados sintéticos mínimos os gráficos sairiam vazios.
   const texto = (t) => page.waitForFunction((x) => document.querySelector('#conteudo')?.textContent.includes(x), t, { timeout: 15000 })
     .catch(async (erro) => { await page.screenshot({ path: path.join(repo, '.prumo', 'captura-falha.png') }); throw erro; });
   const sub = async (k) => { await page.click(`[data-sub=${k}]`); await page.waitForTimeout(600); };
   await ir('inicio'); await page.waitForTimeout(6500); await tirar('inicio');
-  await ir('testes'); await sub('repositorio'); await texto('aplica desconto progressivo'); await tirar('testes');
-  await sub('ide'); await page.click('.ds-ide-arquivo[data-arquivo="tests/e2e/checkout.spec.ts"]'); await page.waitForSelector('.ds-ide-linhas'); await page.click('#ide-editar'); await page.waitForSelector('.ds-wb-editor-quadro'); await page.waitForTimeout(500); await tirar('codigo');
+  await ir('testes'); await sub('repositorio'); await page.waitForSelector('#cat-lista');
+  // O Repositório agrupa por suíte e por arquivo de código: abre dois grupos para a imagem mostrar os cenários de verdade.
+  for (const grupo of ['Login', 'preco.test.ts']) await page.locator('#cat-lista summary', { hasText: grupo }).first().click();
+  await texto('aplica desconto progressivo'); await tirar('testes');
+  await sub('ide'); for (const p of ['tests', 'tests/e2e']) await page.evaluate((x) => { const d = document.querySelector(`details.ds-ide-pasta[data-pasta="${x}"]`); if (d) d.open = true; }, p);
+  await page.dblclick('.ds-ide-arquivo[data-arquivo="tests/e2e/checkout.spec.ts"]'); await page.waitForSelector('.ds-wb-editor-quadro, .ds-ide-linhas'); await page.waitForTimeout(1800); await tirar('codigo');
   await sub('runs'); await texto('Regressão da sprint 42'); await tirar('runs');
+  await page.click(`#runs-lista [data-run="${run.id}"]`); await page.waitForSelector('#run-local'); await page.waitForTimeout(900); await tirar('run');
+  await page.click('.qs-voltar'); await page.waitForSelector('#runs-lista'); await page.click('#run-nova'); await page.waitForSelector('.rs-corpo'); await page.waitForTimeout(700); await tirar('run-nova'); await page.keyboard.press('Escape'); await page.waitForTimeout(500);
   await ir('tickets'); await texto('SMART-1'); await tirar('tickets');
   await ir('agentes'); await page.waitForTimeout(1200); await tirar('agentes');
+  await ir('administracao'); await page.getByRole('tab', { name: 'Documentação viva' }).click(); await page.waitForSelector('.adm-ide'); await page.fill('#adm-busca', 'fluxos-planos'); await page.click('[data-caminho="frontend/testes/fluxos-planos-e-runs.parte.js"]'); await page.waitForSelector('.adm-codigo pre'); await tirar('docviva');
   await tema('claro'); await ir('inicio'); await page.waitForTimeout(6500); await tirar('inicio-claro');
   }} finally {
   try { await app?.close(); } finally {

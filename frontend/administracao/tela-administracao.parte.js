@@ -97,7 +97,9 @@
       caixa.querySelector('.adm-bolinha.ativo')?.scrollIntoView?.({ block: 'nearest' });
     }
     function alternar() { inteira = !inteira; if (ultimo) desenhar(...ultimo); return inteira; }
-    return { no: caixa, desenhar, alternar };
+    /** A largura da coluna mudou (divisória, recolher ou janela): o fluxo se redistribui. */
+    function redesenhar() { if (ultimo) desenhar(...ultimo); }
+    return { no: caixa, desenhar, alternar, redesenhar };
   }
 
   /** Código do arquivo com a explicação: o que faz, papel na arquitetura, funções, canais e quem usa. */
@@ -131,17 +133,70 @@
     const busca = DS.busca({ id: 'adm-busca', placeholder: 'Procurar arquivo, função ou canal', rotulo: 'Procurar na documentação' });
     const telaSel = DS.selecao({ id: 'adm-tela', rotulo: 'Tela', opcoes: mapa.telas.map((t) => [t.id, tr(t.id)]), valor: 'agentes', aoMudar: (v) => { telaAtual = v; fx.desenhar(v, selecionado); } });
     let telaAtual = mapa.telas.some((t) => t.id === 'agentes') ? 'agentes' : mapa.telas[0]?.id, selecionado = null;
-    const escolher = (caminho) => { const a = arquivos.get(caminho); if (!a) return; if (busca.input.value && !paraBusca(a.caminho + ' ' + (a.descricao || '') + ' ' + a.funcoes.join(' ')).includes(paraBusca(busca.input.value))) { busca.input.value = ''; arv.filtrar(''); } selecionado = caminho; telaAtual = a.tela; telaSel.value = a.tela; arv.marcar(caminho); fx.desenhar(a.tela, caminho); void lt.mostrar(caminho); };
+    const escolher = (caminho) => { const a = arquivos.get(caminho); if (!a) return; if (busca.input.value && !paraBusca(a.caminho + ' ' + (a.descricao || '') + ' ' + a.funcoes.join(' ')).includes(paraBusca(busca.input.value))) { busca.input.value = ''; arv.filtrar(''); } selecionado = caminho; telaAtual = a.tela; telaSel.value = a.tela; arv.marcar(caminho); if (painel.codigoFechado) { painel.codigoFechado = false; aplicar(); } fx.desenhar(a.tela, caminho); void lt.mostrar(caminho); };
     const arv = arvore(arquivos, escolher), fx = fluxo(mapa, arquivos, escolher), lt = leitor(mapa, arquivos);
     const alternar = DS.acao('Tela inteira', () => { const inteira = fx.alternar(); alternar.lastChild.textContent = tr(inteira ? 'Caminho do arquivo' : 'Tela inteira'); alternar.setAttribute('aria-pressed', String(inteira)); }, { id: 'adm-fluxo-modo', compacto: true });
     busca.input.addEventListener('input', () => arv.filtrar(busca.input.value));
     const origem = DS.info(tr('Gerado do código da versão {v} no build ({quando}). Procure pelo nome da tela do menu: a fonte visual fica em frontend/<tela>/, e a lógica em backend/<tela>/. Arquivos de servidor HTTP aparecem na seção servidor/; não edite cópias de dist/.', { v: mapa.versao + (mapa.commit ? ' · ' + mapa.commit : ''), quando: new Date(mapa.geradoEm).toLocaleString() }), { id: 'adm-origem' });
-    const ide = h('div', { class: 'adm-ide', id: 'adm-telas' },
-      h('aside', { class: 'adm-col adm-col-arvore' }, h('div', { class: 'adm-col-topo' }, h('span', {}, tr('Arquivos')), origem), busca.no, arv.no),
-      h('section', { class: 'adm-col adm-col-fluxo' }, h('div', { class: 'adm-col-topo' }, h('span', {}, tr('Fluxo')), h('span', { class: 'adm-fluxo-acoes' }, telaSel, alternar)), fx.no),
-      h('section', { class: 'adm-col adm-col-codigo' }, lt.no));
+
+    // Colunas ajustáveis: Arquivos e Código recolhem num trilho, as divisórias mudam a largura e o Código pode ocupar a área toda.
+    // As medidas ficam só neste computador (preferência visual de quem usa).
+    const CHAVE = 'prumo-docviva-colunas';
+    const salvo = (() => { try { return JSON.parse(localStorage.getItem(CHAVE) || '{}') || {}; } catch { return {}; } })();
+    const painel = { arvore: Number(salvo.arvore) || 250, codigo: Number(salvo.codigo) || 460, arvoreFechada: !!salvo.arvoreFechada, codigoFechado: true, amplo: false };
+    const guardar = () => { try { localStorage.setItem(CHAVE, JSON.stringify({ arvore: painel.arvore, codigo: painel.codigo, arvoreFechada: painel.arvoreFechada })); } catch { /* sem armazenamento: vale só nesta visita */ } };
+    const botaoMini = (rotulo, simbolo, fn, id) => h('button', { type: 'button', class: 'adm-mini', id, title: tr(rotulo), 'aria-label': tr(rotulo), onclick: fn }, simbolo);
+    const trilho = (rotulo, fn, id) => h('button', { type: 'button', class: 'adm-trilho', id, title: tr('Mostrar {c}', { c: tr(rotulo) }), 'aria-label': tr('Mostrar {c}', { c: tr(rotulo) }), onclick: fn }, h('span', { 'aria-hidden': 'true' }, '›'), h('span', { class: 'adm-trilho-rotulo' }, tr(rotulo)));
+    const recolherArvore = botaoMini('Recolher Arquivos', '‹', () => { painel.arvoreFechada = true; painel.amplo = false; aplicar(); guardar(); }, 'adm-arvore-recolher');
+    const ampliarCodigo = botaoMini('Ampliar Código', '⤢', () => { painel.amplo = !painel.amplo; aplicar(); }, 'adm-codigo-ampliar');
+    const fecharCodigo = botaoMini('Fechar Código', '×', () => { painel.codigoFechado = true; painel.amplo = false; aplicar(); }, 'adm-codigo-fechar');
+    const divisor = (rotulo, lado) => {
+      const d = h('div', { class: 'adm-divisor', role: 'separator', tabindex: '0', 'aria-orientation': 'vertical', 'aria-label': tr(rotulo), title: tr('Arraste para ajustar a largura; duplo clique volta ao padrão') });
+      const limites = () => { const total = ide.getBoundingClientRect().width; return lado === 'arvore' ? [180, Math.max(200, Math.min(520, total - painel.codigo - 300))] : [300, Math.max(320, total - (painel.arvoreFechada ? 44 : painel.arvore) - 260)]; };
+      const ajustar = (largura) => { const [min, max] = limites(); painel[lado] = Math.round(Math.min(max, Math.max(min, largura))); aplicar(); };
+      d.addEventListener('pointerdown', (ev) => {
+        if (d.dataset.inativo) return; ev.preventDefault(); d.setPointerCapture(ev.pointerId); d.classList.add('arrastando');
+        const x0 = ev.clientX, l0 = painel[lado];
+        const mover = (m) => ajustar(lado === 'arvore' ? l0 + (m.clientX - x0) : l0 - (m.clientX - x0));
+        const soltar = () => { d.classList.remove('arrastando'); d.removeEventListener('pointermove', mover); d.removeEventListener('pointerup', soltar); d.removeEventListener('pointercancel', soltar); guardar(); };
+        d.addEventListener('pointermove', mover); d.addEventListener('pointerup', soltar); d.addEventListener('pointercancel', soltar);
+      });
+      d.addEventListener('dblclick', () => { painel[lado] = lado === 'arvore' ? 250 : 460; aplicar(); guardar(); });
+      d.addEventListener('keydown', (ev) => {
+        const passo = ev.shiftKey ? 64 : 24; const sinal = lado === 'arvore' ? 1 : -1;
+        if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') { ev.preventDefault(); ajustar(painel[lado] + (ev.key === 'ArrowRight' ? passo : -passo) * sinal); guardar(); }
+        else if (ev.key === 'Home' || ev.key === 'End') { ev.preventDefault(); const [min, max] = limites(); ajustar((ev.key === 'Home') === (lado === 'arvore') ? min : max); guardar(); }
+      });
+      return d;
+    };
+    const divisorArvore = divisor('Largura de Arquivos', 'arvore'), divisorCodigo = divisor('Largura de Código', 'codigo');
+    const colArvore = h('aside', { class: 'adm-col adm-col-arvore' }, trilho('Arquivos', () => { painel.arvoreFechada = false; painel.amplo = false; aplicar(); guardar(); }, 'adm-arvore-mostrar'),
+      h('div', { class: 'adm-col-topo' }, h('span', {}, tr('Arquivos')), h('span', { class: 'adm-col-acoes' }, origem, recolherArvore)), busca.no, arv.no);
+    const colFluxo = h('section', { class: 'adm-col adm-col-fluxo' }, trilho('Fluxo', () => { painel.amplo = false; aplicar(); }, 'adm-fluxo-mostrar'),
+      h('div', { class: 'adm-col-topo' }, h('span', {}, tr('Fluxo')), h('span', { class: 'adm-fluxo-acoes' }, telaSel, alternar)), fx.no);
+    const colCodigo = h('section', { class: 'adm-col adm-col-codigo' }, trilho('Código', () => { painel.codigoFechado = false; aplicar(); }, 'adm-codigo-mostrar'),
+      h('div', { class: 'adm-col-topo' }, h('span', {}, tr('Código')), h('span', { class: 'adm-col-acoes' }, ampliarCodigo, fecharCodigo)), lt.no);
+    const ide = h('div', { class: 'adm-ide', id: 'adm-telas' }, colArvore, divisorArvore, colFluxo, divisorCodigo, colCodigo);
+    function aplicar() {
+      const arvoreFechada = painel.arvoreFechada || painel.amplo;
+      ide.style.setProperty('--adm-arvore', arvoreFechada ? '44px' : painel.arvore + 'px');
+      ide.style.setProperty('--adm-fluxo', painel.amplo ? '44px' : 'minmax(240px, 1fr)');
+      ide.style.setProperty('--adm-codigo', painel.codigoFechado ? '44px' : painel.amplo ? 'minmax(0, 1fr)' : painel.codigo + 'px');
+      ide.dataset.arvore = arvoreFechada ? 'fechada' : 'aberta';
+      ide.dataset.codigo = painel.codigoFechado ? 'fechado' : painel.amplo ? 'amplo' : 'aberto';
+      if (arvoreFechada) divisorArvore.dataset.inativo = ''; else delete divisorArvore.dataset.inativo;
+      if (painel.codigoFechado || painel.amplo) divisorCodigo.dataset.inativo = ''; else delete divisorCodigo.dataset.inativo;
+      for (const [d, lado] of [[divisorArvore, 'arvore'], [divisorCodigo, 'codigo']]) { d.setAttribute('aria-valuenow', String(painel[lado])); d.tabIndex = d.dataset.inativo === undefined ? 0 : -1; }
+      const rotuloAmpliar = tr(painel.amplo ? 'Voltar às três colunas' : 'Ampliar Código');
+      ampliarCodigo.setAttribute('aria-pressed', String(painel.amplo)); ampliarCodigo.title = rotuloAmpliar; ampliarCodigo.setAttribute('aria-label', rotuloAmpliar);
+    }
     area.replaceChildren(ide);
+    aplicar();
     fx.desenhar(telaAtual, null);
+    // O fluxo acompanha a largura da coluna (divisória, recolher, ampliar ou janela).
+    let largura = 0, pedido = 0;
+    const observador = new ResizeObserver(() => { if (!ide.isConnected) { observador.disconnect(); return; } const w = fx.no.clientWidth; if (Math.abs(w - largura) < 24) return; largura = w; cancelAnimationFrame(pedido); pedido = requestAnimationFrame(() => fx.redesenhar()); });
+    observador.observe(fx.no);
     // O explorador ocupa a altura que sobra na janela.
     const medir = () => { if (!ide.isConnected) { removeEventListener('resize', medir); return; } ide.style.height = Math.max(420, innerHeight - ide.getBoundingClientRect().top - 16) + 'px'; };
     requestAnimationFrame(medir); addEventListener('resize', medir);

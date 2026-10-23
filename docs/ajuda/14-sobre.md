@@ -12,6 +12,8 @@ Para contas com a marca admin, **Administração › Documentação viva** mostr
 - no meio, o caminho que o aplicativo percorre para atender à tela;
 - à direita, o código, as funções e os canais usados por cada arquivo.
 
+As colunas de arquivos e de código podem ser **recolhidas** pela seta no topo (viram uma faixa, que reabre com um clique), e as linhas entre as colunas se **arrastam** para ajustar a largura (duplo clique restaura o padrão). O painel de código tem **ampliar** e **fechar**. As medidas ficam guardadas neste computador.
+
 Você pode procurar por tela, arquivo, função ou canal. Para realizar manutenção, selecione primeiro a tela: o que aparece fica em `frontend/<tela>/`; o que executa as regras fica em `backend/<tela>/` (`api/`, `regras/`, `banco/`, `integracoes/`, `tipos/` e, quando necessário, `servidor/`). A Documentação Viva mostra o arquivo, sua responsabilidade e o código. Essa consulta não executa o código nem envia dados para fora do computador.
 
 **Importante:** arquivos em `dist/renderer/` são compilados. Alguns ainda possuem nomes históricos `v36`/`v40`, mas são montados automaticamente a partir dos fragmentos em `frontend/`; edite sempre a fonte da tela, não o bundle. Bibliotecas de terceiros ficam em `vendor/` e não devem ser confundidas com código próprio.

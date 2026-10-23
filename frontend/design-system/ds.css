@@ -1475,3 +1475,35 @@ html body:has(.ds-ide-cheio) .topo-direita { top: 3px; }
 .ds-wb-atalhos td { padding: 7px 8px; border-bottom: 1px solid var(--ds-linha-suave); font-size: 13px; }
 .ds-wb-atalhos td:first-child { width: 190px; white-space: nowrap; }
 .ds-wb-atalhos kbd { padding: 2px 8px; border: 1px solid var(--linha); border-radius: 6px; background: var(--fundo2); color: var(--suave); font: 600 12px var(--fonte-mono); }
+
+/* Run do Prumo no desenho da run do Qase: casos por suíte, "executado por" e a composição da run */
+.qs-run-local .qs-colunas, .qs-run-local .qs-caso { grid-template-columns: 20px 64px 86px minmax(0, 1fr) 120px 32px; }
+.qs-run-local[data-gaveta] .qs-colunas, .qs-run-local[data-gaveta] .qs-caso { grid-template-columns: 20px 56px 80px minmax(0, 1fr) 32px; }
+.qs-run-local[data-gaveta] .qs-colunas > span:nth-child(5), .qs-run-local[data-gaveta] .qs-caso > .qs-quem { display: none; }
+.qs-quem { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--suave); font-size: var(--ds-fs-sm); }
+.qs-composicao { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; padding: 6px 0; color: var(--suave); }
+.qs-composicao strong { color: var(--texto); }
+/* Escolha dos casos da run (nova run e "Casos da run"): suítes à esquerda, casos à direita, como no Qase */
+.rs { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.rs-topo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rs-resumo { margin: 0; color: var(--suave); font-size: var(--ds-fs-sm); }
+.rs-corpo { display: grid; grid-template-columns: minmax(200px, 270px) minmax(0, 1fr); min-height: 240px; max-height: 44vh; overflow: hidden; border: 1px solid var(--ds-linha-suave); border-radius: 8px; }
+.rs-suites { overflow: auto; padding: 4px 0; border-right: 1px solid var(--ds-linha-suave); }
+.rs-suite { display: flex; align-items: center; gap: 8px; padding: 2px 10px; }
+.rs-suite.ativa { background: var(--ds-selecionado); }
+.rs-suite-nome { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 5px 0; border: 0; background: none; color: var(--texto); font: inherit; text-align: left; cursor: pointer; }
+.rs-suite-texto { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rs-n { color: var(--suave); font-size: 12px; font-variant-numeric: tabular-nums; }
+.rs-origem { flex: none; padding: 0 7px; border-radius: 999px; background: var(--ds-hover); color: var(--suave); font-size: 12px; }
+.rs-casos { overflow: auto; padding: 4px 0; }
+.rs-todos, .rs-caso { display: flex; align-items: center; gap: 8px; padding: 5px 12px; cursor: pointer; }
+.rs-caso:hover { background: var(--ds-hover); }
+.rs-caso-titulo { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rs-grupo-titulo { display: flex; align-items: center; gap: 8px; margin: 8px 12px 2px; font-size: 12px; font-weight: 600; color: var(--suave); }
+.rs-vazio { padding: 12px; }
+.rs-suite input, .rs-caso input, .rs-todos input { flex: none; }
+@media (max-width: 760px) { .rs-corpo { grid-template-columns: 1fr; max-height: 56vh; } .rs-suites { max-height: 150px; border-right: 0; border-bottom: 1px solid var(--ds-linha-suave); } .qs-run-local .qs-colunas, .qs-run-local .qs-caso { grid-template-columns: 20px 52px minmax(0, 1fr) 32px; } .qs-run-local .qs-colunas > span:nth-child(3), .qs-run-local .qs-colunas > span:nth-child(5), .qs-run-local .qs-caso > .qs-status, .qs-run-local .qs-caso > .qs-quem { display: none; } }
+.rs .rs-todos, .rs .rs-caso { flex-direction: row; justify-content: flex-start; align-items: center; text-align: left; width: auto; font-size: inherit; }
+.rs .rs-caso > .qs-id { flex: none; min-width: 56px; }
+.rs .rs-caso > input, .rs .rs-todos > input, .rs .rs-suite > input { width: auto; margin: 0; }
+.rs .qs-busca { flex: 1 1 220px; width: auto; max-width: 340px; }

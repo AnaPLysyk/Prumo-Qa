@@ -5,7 +5,8 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 function tela({ resultado = null, somenteVer = false, salvarFalha = false, cancelar = false } = {}) {
-  const chamadas = [], modais = [], avatares = []; let voltas = 0;
+  const chamadas = [], modais = [], avatares = [], salvos = []; let voltas = 0;
+  const alvo = { tag: 'painel', filhos: [], replaceChildren(...nos) { this.filhos = nos.flat(Infinity).filter(x => x != null); } };
   function h(tag, attrs = {}, ...filhos) {
     return { tag, value: '', dataset: Object.fromEntries(Object.entries(attrs).filter(([k]) => k.startsWith('data-')).map(([k,v]) => [k.slice(5),v])), ...attrs, filhos: filhos.flat(Infinity).filter(x => x != null), append(...nos) { this.filhos.push(...nos); }, setAttribute(k, v) { this[k] = v; }, focus() { this.focou = true; } };
   }
@@ -25,7 +26,7 @@ function tela({ resultado = null, somenteVer = false, salvarFalha = false, cance
   const ctx = vm.createContext({ h, DS, api, window: { PrumoConta: { soVer: () => somenteVer } }, tr: t => t, hora: t => t, chamar: async fn => { const r = await fn(); return r.ok ? r.data : null; }, memoriaDaTela: () => ({}), vinc: () => false });
   vm.runInContext(fs.readFileSync('frontend/testes/execucao-manual.parte.js', 'utf8') + '\nglobalThis.executar = executarCasoLocal;', ctx);
   const todos = n => [n, ...(n.filhos || []).filter(x => typeof x === 'object').flatMap(todos)];
-  return { chamadas, modais, avatares, abrir: () => ctx.executar({ id: 'projeto' }, run, caso, () => { voltas++; }), nos: () => todos(modais.at(-1)), voltas: () => voltas };
+  return { chamadas, modais, avatares, salvos, abrir: () => ctx.executar({ id: 'projeto' }, run, caso, { alvo, aoSalvar: async (seguinte) => { voltas++; salvos.push(seguinte || null); } }), nos: () => todos(alvo), voltas: () => voltas };
 }
 
 test('abrir inicia o caso, mostra a foto do perfil e os passos; salvar avança após persistir', async () => {
@@ -35,10 +36,9 @@ test('abrir inicia o caso, mostra a foto do perfil e os passos; salvar avança a
   assert.ok(t.nos().some(n => n.filhos?.includes('Abrir formulário')));
   await t.nos().find(n => n.filhos?.includes('Aprovado')).onclick();
   await t.nos().find(n => n.id === 'manual-salvar').onclick();
-  assert.deepEqual(t.chamadas.map(c => c[0]), ['inicio', 'resultado', 'inicio']);
+  assert.deepEqual(t.chamadas.map(c => c[0]), ['inicio', 'resultado']);
   assert.equal(t.chamadas[1][3], 'PASS');
-  assert.equal(t.chamadas[2][3], 2);
-  assert.equal(t.modais.at(-1).titulo, 'Segundo cenário');
+  assert.equal(t.salvos.at(-1)?.casoId, 2, 'a página da run recebe o próximo caso manual pendente');
 });
 
 test('falha ou cancelamento ao salvar mantém o caso e não inicia o próximo', async () => {
@@ -47,7 +47,7 @@ test('falha ou cancelamento ao salvar mantém o caso e não inicia o próximo', 
     t.nos().find(n => n.filhos?.includes('Pulado')).onclick();
     await t.nos().find(n => n.id === 'manual-salvar').onclick();
     assert.deepEqual(t.chamadas.map(c => c[0]), ['inicio', 'resultado']);
-    assert.equal(t.modais.length, 1);
+    assert.equal(t.salvos.length, 0);
     assert.equal(t.voltas(), 0);
   }
 });

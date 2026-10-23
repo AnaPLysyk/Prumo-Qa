@@ -17,7 +17,7 @@ const statusLocal = z.enum(['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN']);
 
 const resultadoSchema = z.object({ status: z.enum(['PASS', 'FAIL', 'BLOCKED', 'NOT_RUN', 'SKIPPED', 'INVALID']), origem: z.enum(['EXECUCAO', 'MANUAL']), granularidade: z.enum(['CENARIO', 'RODADA', 'DECLARADO']), evidenciaId: z.string().uuid().optional(), comentario: z.string().max(2000).default(''), tempoMs: z.number().int().min(0).optional(), por: z.string().max(200).optional(), em: z.string().datetime() }).strict();
 
-const casoSchema = z.object({ casoId: z.number().int().positive(), casoLocalId: z.string().uuid().optional(), titulo: z.string().max(255), capability: z.string().max(80).nullable(), casoRunner: z.string().max(100).nullable(), resultado: resultadoSchema.nullable(), publicado: z.boolean() }).strict();
+const casoSchema = z.object({ casoId: z.number().int().positive(), casoLocalId: z.string().uuid().optional(), titulo: z.string().max(255), suite: z.string().max(255).optional(), capability: z.string().max(80).nullable(), casoRunner: z.string().max(100).nullable(), resultado: resultadoSchema.nullable(), publicado: z.boolean() }).strict();
 
 export const runSchema = z.object({
   id: z.string().uuid(), espacoId: z.string().uuid(), titulo: z.string().max(255), ambiente: z.string().max(40), runIdRemoto: z.number().int().positive().nullable(), planoId: z.number().int().positive().nullable(), marcoId: z.number().int().positive().nullable().optional(), ambienteQaseId: z.number().int().positive().nullable().optional(),

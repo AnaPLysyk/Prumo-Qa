@@ -47,6 +47,8 @@ const espacoOuNulo = z.object({ espacoId: z.string().uuid().nullable() }).strict
 const espacoOpcional = z.object({ espacoId: z.string().uuid().optional() }).strict();
 const raizEId = z.object({ root: raiz, id: z.string().uuid() }).strict();
 const vazio = z.object({}).strict();
+/** Caso escolhido para uma run: id (Qase ou local), título e a suíte em que aparece, para agrupar como no Qase. */
+const casoEscolhidoDaRun = z.object({ casoId: z.number().int().positive(), casoLocalId: z.string().uuid().optional(), titulo: z.string().max(255), suite: z.string().max(255).optional() }).strict();
 export const esquemasIpc = {
   'interface:exportar': z.object({ tipo: z.enum(['agente', 'metricas-json', 'metricas-csv', 'evidencia-json', 'repositorio-json']), texto: z.string().min(1).max(2 * 1024 * 1024) }).strict(),
   'espacos:listar': vazio,
@@ -103,8 +105,8 @@ export const esquemasIpc = {
   'propostas:vincular': z.object({id:z.string().uuid(),chave:z.string().trim().min(3).max(40)}).strict(),
   'propostas:publicar': z.object({id:z.string().uuid(),tipoId:z.string().regex(/^\d{1,12}$/).optional(),destino:z.enum(['jira','qase','github']).optional(),destinos:z.array(z.enum(['jira','qase','github'])).min(1).max(3).optional(),severidadeQase:z.number().int().min(1).max(20).optional(),marcoQase:z.number().int().positive().optional(),camposQase:z.record(z.string().regex(/^\d{1,12}$/),z.string().trim().min(1).max(2000)).optional()}).strict(),
   'runs:listar': somenteEspaco,
-  'runs:preparar': z.object({espacoId:z.string().uuid(),titulo:z.string().trim().min(3).max(255),ambiente:z.enum(ambientes),casos:z.array(z.object({casoId:z.number().int().positive(),casoLocalId:z.string().uuid().optional(),titulo:z.string().max(255)}).strict()).min(1).max(1000),runIdRemoto:z.number().int().positive().optional(),planoId:z.number().int().positive().optional(),marcoId:z.number().int().positive().optional(),ambienteQaseId:z.number().int().positive().optional()}).strict(),
-  'runs:editar': z.object({id:z.string().uuid(),titulo:z.string().trim().min(3).max(255),ambiente:z.enum(ambientes)}).strict(),
+  'runs:preparar': z.object({espacoId:z.string().uuid(),titulo:z.string().trim().min(3).max(255),ambiente:z.enum(ambientes),casos:z.array(casoEscolhidoDaRun).min(1).max(1000),runIdRemoto:z.number().int().positive().optional(),planoId:z.number().int().positive().optional(),marcoId:z.number().int().positive().optional(),ambienteQaseId:z.number().int().positive().optional()}).strict(),
+  'runs:editar': z.object({id:z.string().uuid(),titulo:z.string().trim().min(3).max(255),ambiente:z.enum(ambientes),casos:z.array(casoEscolhidoDaRun).min(1).max(1000).optional()}).strict(),
   'runs:apagar': somenteId,
   'runs:criar': somenteId,
   'runs:executar': somenteId,
@@ -112,6 +114,7 @@ export const esquemasIpc = {
   'runs:evidenciar': z.object({id:z.string().uuid(),casoId:z.number().int().positive()}).strict(),
   'runs:andamento': z.object({espacoId:z.string().uuid(),runId:z.union([z.string().uuid(),z.string().regex(/^qase-[1-9][0-9]{0,14}$/)]),casoId:z.number().int().positive().optional()}).strict(),
   'runs:resultado': z.object({id:z.string().uuid(),casoId:z.number().int().positive(),status:z.enum(['PASS','FAIL','BLOCKED','SKIPPED','INVALID']),comentario:z.string().trim().max(2000)}).strict(),
+  'runs:resultados': z.object({id:z.string().uuid(),casoIds:z.array(z.number().int().positive()).min(1).max(200),status:z.enum(['PASS','FAIL','BLOCKED','SKIPPED','INVALID']),comentario:z.string().trim().max(2000)}).strict(),
   'runs:publicar': z.object({id:z.string().uuid(),anexarEvidencia:z.boolean().optional()}).strict(),
   'runs:bugs': z.object({id:z.string().uuid(),classificacao:z.enum(['PRODUTO','OUTRO_BUG','MELHORIA']).optional()}).strict(),
   'runs:politica': z.object({espacoId:z.string().uuid(),runId:z.number().int().positive(),dias:z.number().int().min(1).max(30),maxUsos:z.number().int().min(1).max(1000)}).strict(),
@@ -456,7 +459,7 @@ Object.assign(ipc, {
   'ia:delegacao': extDesc('Autorizar ou revogar a delegação do chat ao Claude Code, Codex, Copilot ou Gemini.', 'Provedor e valor', 'Preferências atualizadas', 'Grava preferencias.json. Autorizar exige confirmação nativa; revogar não.', 'Confirmação nativa para autorizar'),
   'runs:listar': extDesc('Listar as runs locais do projeto (preparadas, criadas, executadas e publicadas).', 'Projeto', 'Runs com casos, resultados e publicações', 'Consulta local.', 'Nenhuma'),
   'runs:preparar': extDesc('Preparar uma run local com casos do Qase e identificar quais têm automação associada.', 'Projeto, título, ambiente e casos', 'Run local PREPARADA', 'Grava runs-qase.json. Não cria nada no Qase.', 'Ação explícita da pessoa'),
-  'runs:editar': extDesc('Editar o título e o ambiente de uma run local.', 'Id da run, título e ambiente', 'Run local atualizada', 'Grava runs-qase.json. Não altera a run no Qase.', 'Ação explícita da pessoa'),
+  'runs:editar': extDesc('Editar o título, o ambiente e, antes de a run existir no Qase, os casos de uma run local.', 'Id da run, título, ambiente e, opcionalmente, a lista de casos', 'Run local atualizada', 'Grava runs-qase.json. Casos que ficam guardam o resultado; tirar caso com resultado pede confirmação nativa. Não altera a run no Qase.', 'Ação explícita da pessoa'),
   'runs:apagar': extDesc('Apagar o registro local de uma run.', 'Id da run local', 'Registro local removido', 'Grava runs-qase.json. Não apaga nem altera a run no Qase; exige confirmação nativa.', 'Confirmação nativa'),
   'runs:criar': extDesc('Criar a run no Qase com os casos escolhidos.', 'Id da run local', 'Operação externa e id remoto da run', 'Cria a run no Qase após confirmação nativa. Criar a run não executa nada.', 'Escrita habilitada + confirmação nativa'),
   'runs:executar': extDesc('Executar as automações associadas aos casos da run (somente capabilities declaradas).', 'Id da run local', 'Resultados por caso e evidências', 'Executa processos locais; cada automação pede a autenticação nativa do Windows. Casos manuais ficam sem resultado.', 'Autenticação humana nativa por capability', { protecoes: [...extProt, 'Broker nativo do Windows'] }),
@@ -464,6 +467,7 @@ Object.assign(ipc, {
   'runs:evidenciar': extDesc('Anexar arquivos de evidência a um cenário da run local, escolhidos na janela nativa.', 'Run e caso (os arquivos vêm da janela nativa)', 'Nomes adicionados e arquivos recusados', 'Copia os arquivos para .prumo/evidencias/runs/<run>/<caso> do projeto (texto com segredos mascarados; até 10 por cenário, 10 MB cada). Não envia nada ao Qase: o envio acontece ao publicar a run.', 'Escolha do arquivo na janela nativa'),
   'runs:andamento': extDesc('Consultar ou iniciar o trabalho manual de um caso na run.', 'Projeto, run e caso opcional', 'Inícios locais com autoria da sessão', 'Grava andamento-manual.json somente ao iniciar; não publica resultado nem atribui no Qase.', 'Ação explícita da pessoa'),
   'runs:resultado': extDesc('Declarar o resultado de um caso manual.', 'Run, caso, status e comentário', 'Run atualizada', 'Grava runs-qase.json marcando MANUAL e quem declarou. Nunca sobrescreve resultado de execução.', 'Ação explícita da pessoa'),
+  'runs:resultados': extDesc('Declarar o mesmo resultado manual para vários casos da run de uma vez.', 'Run, casos (até 200), status e comentário', 'Run atualizada e casos mantidos por terem resultado de execução', 'Grava runs-qase.json marcando MANUAL e quem declarou, depois de uma confirmação nativa para o lote. Nunca sobrescreve resultado de execução.', 'Ação explícita da pessoa'),
   'runs:publicar': extDesc('Publicar no Qase os resultados ainda não publicados e reler a run.', 'Id da run local e se anexa evidências', 'Resultados enviados e confirmação', 'Envia resultados (passed, failed, blocked) após confirmação nativa; NOT_RUN nunca é enviado; repetir não duplica.', 'Escrita habilitada + confirmação nativa'),
   'runs:bugs': extDesc('Preparar rascunhos de bug para as falhas da run.', 'Id da run local e, se quiser, a classificação das falhas (bug de produto, outro bug ou melhoria)', 'Propostas de bug', 'Grava propostas.json. Não cria tickets.', 'Ação explícita da pessoa'),
   'runs:politica': extDesc('Aprovar uma política para publicar resultados de uma run em rotinas agendadas.', 'Projeto, run remota, validade e usos', 'Política de escrita', 'Grava autorizacoes.json. Sem política, rotina agendada não escreve no Qase.', 'Confirmação nativa'),

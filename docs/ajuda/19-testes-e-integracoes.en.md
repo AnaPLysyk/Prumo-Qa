@@ -54,9 +54,9 @@ The Repository supports up to **1,000 scenarios per project**. When creating pla
 
 This list combines local runs (manual or scheduled), runs prepared in Prumo and Qase runs. **Advanced filters** search by title or ID and filter by source, status/result, environment and date range. When a space is selected, filters are limited to it and apply to the loaded results.
 
-A local run can record manual results, run associated automations (with system authentication) and publish results to Qase after checking the run. **Prepare run** lets you select Repository cases by title or ID and loads all available pages. Without a Qase connection, it uses code tests and saves the run only on this computer. To publish to Qase, create the cases there and prepare a new run.
+A local run can record manual results, run associated automations (with system authentication) and publish results to Qase after checking the run. **Prepare run** opens the case picker in the Qase layout: suites on the left (each tagged Qase, Prumo or code) and cases on the right. Select one case, several, or a **whole suite** with the suite checkbox; search filters by title or ID and the summary shows how many cases and suites go into the run. Without a Qase connection, it uses Prumo scenarios and code tests and saves the run only on this computer. To publish to Qase, create the run in Qase after preparing it.
 
-In a local run's details, **Edit run** changes its title and environment; **Delete run** removes only the local record after confirmation and never deletes the Qase run.
+A run prepared in Prumo opens as a page, like a Qase run: title, state and composition (how many cases, from how many suites, how many manual and how many automated) on top; the actions **Start manual tests**, **Run cases**, **Run automations**, **Export** and the **⋯** menu (**Edit title and environment**, **Create run in Qase**, **Publish results to Qase**, **Delete run**); search and **Add filter** by status; and the cases grouped by suite, with each suite's result bar, who executed it and a **⋯** menu per case. On the right are the completion donut and the details. Selecting several cases (or a whole suite) lets **Mark result** apply one result to all of them at once, and **Remove from run** takes them out. Clicking a case opens the side panel with **Execution**, **Send result** and **Evidence**, where you pass, fail, block, skip or invalidate the case with a comment, and see or attach evidence. **Run cases** adds or removes cases while the run does not exist in Qase yet; once it is created there, the case list is fixed (prepare another run for other cases), and removing a case that already has a result asks for confirmation. **Delete run** removes only the local record after confirmation and never deletes the Qase run.
 
 **CLI/MCP evidence** opens the evidence recorded in the project folder.
 
@@ -97,7 +97,7 @@ By default, Prumo does not change data in connected services. To allow changes, 
 
 ## Shortcuts
 
-F5 or Ctrl+R refreshes the screen. The gear opens My profile, Appearance (theme, language and accent color) and Assistant. The side menu can be collapsed.
+F5 or Ctrl+R refreshes the screen. The gear opens Settings, with Appearance only (theme, language and accent color). Account and security live in **My account**, from the photo in the top corner. The side menu can be collapsed.
 
 ## Limits
 

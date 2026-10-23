@@ -126,24 +126,53 @@ export function automacaoDoCaso(espacoId: string, casoId: number, b?: string, ca
   const [capability, cenario] = rel.para.id.split('#'); return capability ? { capability, casoRunner: cenario || null } : null;
 }
 
-export function prepararRunLocal(espacoId: string, d: { titulo: string; ambiente: string; casos: { casoId: number; titulo: string; casoLocalId?: string }[]; runIdRemoto?: number; planoId?: number; marcoId?: number; ambienteQaseId?: number }, b?: string, agora = new Date()): RunLocal {
+type CasoEscolhido = { casoId: number; titulo: string; casoLocalId?: string; suite?: string };
+
+/** Cenários do Prumo só entram com o id local que a tela calcula e só se forem deste projeto. */
+function conferirCasosLocais(espacoId: string, casos: CasoEscolhido[], b?: string) {
+  if (!casos.some(c => c.casoLocalId)) return;
+  const locais = listarRepositorioLocal(espacoId, b).casos;
+  if (casos.some(c => c.casoLocalId && (c.casoId < CASO_LOCAL_MIN || !locais.some(l => l.id === c.casoLocalId)))) throw new Error('LOCAL_CASE_SCOPE');
+}
+
+/** Caso novo na run: sem resultado e com a automação declarada para ele, se houver. */
+function novoCasoDaRun(espacoId: string, c: CasoEscolhido, b?: string): RunLocal['casos'][number] {
+  const a = automacaoDoCaso(espacoId, c.casoId, b, c.casoLocalId);
+  return { casoId: c.casoId, ...(c.casoLocalId ? { casoLocalId: c.casoLocalId } : {}), titulo: c.titulo.slice(0, 255), ...(c.suite ? { suite: c.suite.slice(0, 255) } : {}), capability: a?.capability ?? null, casoRunner: a?.casoRunner ?? null, resultado: null, publicado: false };
+}
+
+const semRepetir = (casos: CasoEscolhido[]) => { const vistos = new Set<number>(); return casos.filter(c => !vistos.has(c.casoId) && vistos.add(c.casoId)); };
+
+export function prepararRunLocal(espacoId: string, d: { titulo: string; ambiente: string; casos: CasoEscolhido[]; runIdRemoto?: number; planoId?: number; marcoId?: number; ambienteQaseId?: number }, b?: string, agora = new Date()): RunLocal {
   obterEspaco(espacoId, b); if (!d.casos.length) throw new Error('RUN_WITHOUT_CASES');
-  if (d.casos.some(c => c.casoLocalId)) {
-    const locais = listarRepositorioLocal(espacoId, b).casos;
-    if (d.casos.some(c => c.casoLocalId && (c.casoId < CASO_LOCAL_MIN || !locais.some(l => l.id === c.casoLocalId)))) throw new Error('LOCAL_CASE_SCOPE');
-  }
-  const t = agora.toISOString(); const vistos = new Set<number>();
-  const casos = d.casos.filter(c => !vistos.has(c.casoId) && vistos.add(c.casoId)).map(c => { const a = automacaoDoCaso(espacoId, c.casoId, b, c.casoLocalId); return { casoId: c.casoId, ...(c.casoLocalId ? { casoLocalId: c.casoLocalId } : {}), titulo: c.titulo.slice(0, 255), capability: a?.capability ?? null, casoRunner: a?.casoRunner ?? null, resultado: null, publicado: false }; });
+  conferirCasosLocais(espacoId, d.casos, b);
+  const t = agora.toISOString();
+  const casos = semRepetir(d.casos).map(c => novoCasoDaRun(espacoId, c, b));
   const run = runSchema.parse({ id: randomUUID(), espacoId, titulo: d.titulo.trim().slice(0, 255), ambiente: d.ambiente, runIdRemoto: d.runIdRemoto ?? null, planoId: d.planoId ?? null, marcoId: d.marcoId ?? null, ambienteQaseId: d.ambienteQaseId ?? null, estado: d.runIdRemoto ? 'CRIADA' : 'PREPARADA', confirmadaNoQase: !!d.runIdRemoto, criadaEm: t, atualizadaEm: t, casos, execucoes: [], publicacoes: [] });
   const reg = lerRunsLocais(b); reg.itens.push(run); gravarRunsLocais(reg, b); return run;
 }
 
-export function editarRunLocal(id: string, d: { titulo: string; ambiente: string }, b?: string) {
+/** Casos que saem da run levando um resultado já registrado (a tela pede confirmação antes). */
+export function casosComResultadoRemovidos(id: string, casos: CasoEscolhido[] | undefined, b?: string) {
+  if (!casos) return [];
+  const ficam = new Set(casos.map(c => c.casoId));
+  return obterRunLocal(id, b).casos.filter(c => !ficam.has(c.casoId) && c.resultado && c.resultado.status !== 'NOT_RUN');
+}
+
+/** Título, ambiente e, enquanto a run não existe no Qase, os casos: os que ficam guardam o resultado; os novos entram sem resultado. */
+export function editarRunLocal(id: string, d: { titulo: string; ambiente: string; casos?: CasoEscolhido[] }, b?: string) {
   const titulo = d.titulo.trim().slice(0, 255);
   if (titulo.length < 3) throw new Error('RUN_TITLE_REQUIRED');
   return alterarRunLocal(id, run => {
     run.titulo = titulo;
     run.ambiente = d.ambiente;
+    if (!d.casos) return;
+    if (run.runIdRemoto) throw new Error('RUN_CASES_LOCKED: a run já existe no Qase; para outros casos, rode de novo com a nova seleção.');
+    if (!d.casos.length) throw new Error('RUN_WITHOUT_CASES');
+    conferirCasosLocais(run.espacoId, d.casos, b);
+    const atuais = new Map(run.casos.map(c => [c.casoId, c]));
+    run.casos = semRepetir(d.casos).map(c => atuais.get(c.casoId) ?? novoCasoDaRun(run.espacoId, c, b));
+    if (run.estado === 'EXECUTADA' && run.casos.some(c => !c.resultado || c.resultado.status === 'NOT_RUN')) run.estado = 'PARCIAL';
   }, b);
 }
 
@@ -177,6 +206,21 @@ export function declararResultadoManual(runLocalId: string, casoId: number, r: {
     const c = run.casos.find(k => k.casoId === casoId); if (!c) throw new Error('RUN_CASE_NOT_FOUND'); if (c.resultado?.origem === 'EXECUCAO' && c.resultado.status !== 'NOT_RUN') throw new Error('RESULT_FROM_EXECUTION: já existe resultado de execução.');
     c.resultado = { status: r.status, origem: 'MANUAL', granularidade: 'DECLARADO', comentario: r.comentario.slice(0, 2000), por, em: agora.toISOString() }; c.publicado = false;
   }, b, agora);
+}
+
+/** O mesmo resultado manual para vários casos de uma vez. Casos com resultado de execução ficam como estão e voltam em `mantidos`. */
+export function declararResultadosManuais(runLocalId: string, casoIds: number[], r: { status: 'PASS' | 'FAIL' | 'BLOCKED' | 'SKIPPED' | 'INVALID'; comentario: string }, por: string, b?: string, agora = new Date()) {
+  if (!['PASS', 'FAIL', 'BLOCKED', 'SKIPPED', 'INVALID'].includes(r.status)) throw new Error('MANUAL_STATUS_INVALID');
+  if (!['PASS', 'SKIPPED'].includes(r.status) && r.comentario.trim().length < 3) throw new Error('MANUAL_COMMENT_REQUIRED');
+  const mantidos: number[] = [];
+  const run = alterarRunLocal(runLocalId, run => {
+    for (const casoId of new Set(casoIds)) {
+      const c = run.casos.find(k => k.casoId === casoId); if (!c) throw new Error('RUN_CASE_NOT_FOUND');
+      if (c.resultado?.origem === 'EXECUCAO' && c.resultado.status !== 'NOT_RUN') { mantidos.push(casoId); continue; }
+      c.resultado = { status: r.status, origem: 'MANUAL', granularidade: 'DECLARADO', comentario: r.comentario.slice(0, 2000), por, em: agora.toISOString() }; c.publicado = false;
+    }
+  }, b, agora);
+  return { run, mantidos };
 }
 
 // --- listarEvidenciasDoProjeto ---

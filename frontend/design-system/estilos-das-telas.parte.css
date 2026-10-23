@@ -947,9 +947,25 @@ header#lateral nav button[aria-current=page]{box-shadow:inset 2px 0 0 var(--acen
 /* ==================== administracao/administracao.css ==================== */
 /* Tela Administração: Documentação viva como um editor — arquivos à esquerda, fluxo da tela no meio, código com explicação à direita.
    Sem cartões: colunas separadas por linhas finas, direto sobre o fundo; cores só dos tokens do Design System. */
-.adm-ide{display:grid;grid-template-columns:minmax(200px,250px) minmax(0,1fr) minmax(320px,36%);min-height:420px;border-top:1px solid var(--ds-linha-suave)}
-.adm-col{display:flex;flex-direction:column;min-width:0;min-height:0}
-.adm-col+.adm-col{border-left:1px solid var(--ds-linha-suave)}
+.adm-ide{display:grid;grid-template-columns:var(--adm-arvore,250px) 7px var(--adm-fluxo,minmax(240px,1fr)) 7px var(--adm-codigo,44px);min-height:420px;border-top:1px solid var(--ds-linha-suave)}
+.adm-col{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.adm-col-acoes{display:flex;align-items:center;gap:4px;text-transform:none;letter-spacing:0}
+.adm-mini{display:inline-grid;place-items:center;width:26px;height:26px;padding:0;border:1px solid transparent;border-radius:7px;background:none;color:var(--suave);font:600 15px/1 var(--fonte-ui);cursor:pointer}
+.adm-mini:hover{background:var(--ds-hover);color:var(--texto)}
+.adm-mini[aria-pressed=true]{background:var(--ds-selecionado);color:var(--texto)}
+.adm-mini:focus-visible,.adm-trilho:focus-visible{outline:2px solid var(--acento);outline-offset:-2px}
+/* Divisória arrastável entre as colunas (também pelo teclado: setas, Shift+setas, Home e End) */
+.adm-divisor{position:relative;cursor:col-resize;touch-action:none;outline:none}
+.adm-divisor::before{content:'';position:absolute;top:0;bottom:0;left:3px;width:1px;background:var(--ds-linha-suave);transition:background .15s,left .15s,width .15s}
+.adm-divisor:hover::before,.adm-divisor:focus-visible::before,.adm-divisor.arrastando::before{left:2px;width:3px;border-radius:2px;background:var(--acento)}
+.adm-divisor[data-inativo]{cursor:default}
+.adm-divisor[data-inativo]:hover::before{left:3px;width:1px;background:var(--ds-linha-suave)}
+/* Coluna recolhida vira um trilho estreito com o nome dela; clicar reabre */
+.adm-trilho{display:none;flex:1;flex-direction:column;align-items:center;gap:10px;width:100%;padding:12px 0;border:0;background:none;color:var(--suave);font:650 11px var(--fonte-ui);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.adm-trilho:hover{background:var(--ds-hover);color:var(--texto)}
+.adm-trilho-rotulo{writing-mode:vertical-rl}
+.adm-ide[data-arvore=fechada] .adm-col-arvore>:not(.adm-trilho),.adm-ide[data-codigo=fechado] .adm-col-codigo>:not(.adm-trilho),.adm-ide[data-codigo=amplo] .adm-col-fluxo>:not(.adm-trilho){display:none}
+.adm-ide[data-arvore=fechada] .adm-col-arvore>.adm-trilho,.adm-ide[data-codigo=fechado] .adm-col-codigo>.adm-trilho,.adm-ide[data-codigo=amplo] .adm-col-fluxo>.adm-trilho{display:flex}
 .adm-col-topo{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:6px 12px;font-size:11px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--suave)}
 .adm-col-topo select{max-width:180px;text-transform:none;letter-spacing:0}
 .adm-col-arvore .ds-busca{flex:none;margin:0 10px 6px}
@@ -998,8 +1014,9 @@ header#lateral nav button[aria-current=page]{box-shadow:inset 2px 0 0 var(--acen
 .adm-codigo{flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
 .adm-codigo pre{margin:0;padding:10px 0;font:12px/1.55 var(--fonte-mono);color:var(--texto);tab-size:2;white-space:pre}
 .adm-ln{display:inline-block;width:46px;margin-right:12px;padding-right:8px;text-align:right;color:var(--suave);opacity:.7;user-select:none;border-right:1px solid var(--ds-linha-suave)}
-@media(max-width:1100px){.adm-ide{grid-template-columns:minmax(200px,240px) minmax(0,1fr);height:auto!important}.adm-col-codigo{grid-column:1/-1;border-left:0;border-top:1px solid var(--ds-linha-suave);min-height:420px}}
-@media(max-width:700px){.adm-ide{grid-template-columns:1fr}.adm-col+.adm-col{border-left:0;border-top:1px solid var(--ds-linha-suave)}.adm-arvore{max-height:40vh}}
+/* Janela estreita: Arquivos e Fluxo lado a lado e o Código embaixo, sem divisórias */
+@media(max-width:1100px){.adm-ide{grid-template-columns:var(--adm-arvore,240px) minmax(0,1fr);height:auto!important}.adm-divisor{display:none}.adm-col-fluxo{border-left:1px solid var(--ds-linha-suave)}.adm-col-codigo{grid-column:1/-1;border-top:1px solid var(--ds-linha-suave);min-height:420px}.adm-ide[data-codigo=fechado] .adm-col-codigo{min-height:0}.adm-ide[data-codigo=fechado] .adm-trilho-rotulo{writing-mode:horizontal-tb}.adm-ide[data-codigo=fechado] .adm-col-codigo>.adm-trilho{flex-direction:row;justify-content:center}#adm-codigo-ampliar{display:none}}
+@media(max-width:700px){.adm-ide{grid-template-columns:1fr}.adm-col-fluxo{border-left:0;border-top:1px solid var(--ds-linha-suave)}.adm-arvore{max-height:40vh}.adm-ide[data-arvore=fechada] .adm-trilho-rotulo{writing-mode:horizontal-tb}.adm-ide[data-arvore=fechada] .adm-col-arvore>.adm-trilho{flex-direction:row;justify-content:center}}
 .adm-fluxo-acoes{display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0}
 
 
@@ -1664,3 +1681,6 @@ body[data-tela=inicio] main#conteudo::after,body[data-tela=logs] main#conteudo::
 /* O robô flutuante fica no canto: telas que rolam ganham folga no fim para a última linha não ficar embaixo dele. */
 body:is([data-tela=agentes],[data-tela=tickets],[data-tela=agenda],[data-tela=metricas],[data-tela=suporte],[data-tela=ajuda],[data-tela=administracao]) main#conteudo{padding-bottom:120px}
 .v36l-corpo{padding-bottom:96px}
+.adm-col-topo{flex-wrap:wrap}
+.adm-col-topo > :first-child{white-space:nowrap}
+.adm-col-topo .ds-acao,.adm-col-topo button{white-space:nowrap}

@@ -39,7 +39,7 @@ Only accounts with the admin mark can open **Administration**, which includes us
 - Admins can create accounts, approve sign-ups, change roles, disable, unlock or delete accounts. When an admin creates an account or resets its password, Prumo shows a **temporary password** once. The person sets a new password at first sign-in.
 - In **General settings**: open sign-up or not, approval, role for new sign-ups, inactivity time and how many wrong attempts lock the account.
 - To reset a password, choose **Forgot password**, enter the account e-mail, type the code that arrives and set a new password. If the account has no e-mail (for example, an account created by an admin or through GitHub/Google), an admin must reset it.
-- Each person changes their own name and password in **My account**, in the corner of the window. **Settings › My profile** also has **Reset password** (by e-mail) and **Sign out**.
+- Each person changes their own name and password in **My account**, in the corner of the window. **Reset password** (by e-mail) is also under **Security**.
 - **Two-step verification:** in **My account**, turn it on so that, after the password, a code is sent to your e-mail at every sign-in. In **General settings**, an admin can require it for all accounts with e-mail. Accounts without e-mail sign in with the password only. Without the Prumo service up, whoever needs the code cannot sign in.
 - **Forgot password** is always on the sign-in screen.
 

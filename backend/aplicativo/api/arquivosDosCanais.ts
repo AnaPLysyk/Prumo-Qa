@@ -161,6 +161,7 @@ export const arquivosDosCanais: Record<string, string> = {
   'runs:preparar': 'backend/testes/controlador.ts > runsPreparar',
   'runs:publicar': 'backend/testes/controlador.ts > runsPublicar',
   'runs:resultado': 'backend/testes/controlador.ts > runsResultado',
+  'runs:resultados': 'backend/testes/controlador.ts > runsResultados',
   'runs:revogar': 'backend/testes/controlador.ts > runsRevogar',
   'servicos:abrircadastro': 'backend/conexoes/controlador.ts > servicosAbrirCadastro',
   'servicos:aceite': 'backend/conexoes/controlador.ts > servicosAceite',

@@ -3,7 +3,7 @@ import { dialog } from "electron";
 import { TratadorDoCanal } from "../aplicativo/api/TratadorDoCanal.js";
 import { copiarEvidenciaManual, evidenciasDoCenario } from "./integracoes/evidenciasDaRun.js";
 import { importarRepositorioLocal } from "./servicoCasos.js";
-import { listarExecucoes, executarRunLocal, prepararRunLocal, editarRunLocal } from "./servicoExecucoes.js";
+import { listarExecucoes, executarRunLocal, prepararRunLocal, editarRunLocal, casosComResultadoRemovidos } from "./servicoExecucoes.js";
 import { listarEvidenciasDoProjeto } from "./servicoExecucoes.js";
 import { mapaDeVinculos } from "./regras/mapaDeVinculos.js";
 import { hash } from "../compartilhado/seguranca/hash.js";
@@ -24,7 +24,7 @@ import { executarValidacao } from "./regras/executarValidacao.js";
 import { criarPoliticaEscrita } from "../agendamentos/autorizacoes/autorizarRotina.js";
 import { usuarioDoWindows } from "../aplicativo/janela/usuarioDoWindows.js";
 import { publicarRunLocal } from "./integracoes/publicarRunLocal.js";
-import { declararResultadoManual } from "./servicoExecucoes.js";
+import { declararResultadoManual, declararResultadosManuais } from "./servicoExecucoes.js";
 import { revogarAutorizacao } from "../agendamentos/banco/autorizacoes.js";
 import { prepararPublicacao } from "./servicoExecucoes.js";
 import { publicarComentarioDeResultado } from "./integracoes/publicarRunLocal.js";
@@ -115,7 +115,15 @@ export const runsPreparar: TratadorDoCanal<'runs:preparar'> = async a => {
   return prepararRunLocal(a.espacoId, { titulo: a.titulo, ambiente: a.ambiente, casos: a.casos, runIdRemoto: a.runIdRemoto, planoId: a.planoId, marcoId: a.marcoId, ambienteQaseId: a.ambienteQaseId });
 };
 
-export const runsEditar: TratadorDoCanal<'runs:editar'> = a => editarRunLocal(a.id, { titulo: a.titulo, ambiente: a.ambiente });
+export const runsEditar: TratadorDoCanal<'runs:editar'> = async (a, j) => {
+  // Tirar da run um caso que já tem resultado apaga esse resultado deste computador: pede confirmação.
+  const perdidos = casosComResultadoRemovidos(a.id, a.casos);
+  if (perdidos.length) {
+    const i = idiomaAtual(); const lista = perdidos.slice(0, 12).map(c => `${c.titulo} · ${c.resultado!.status}`).join('\n') + (perdidos.length > 12 ? `\n… +${perdidos.length - 12}` : '');
+    if (!(await confirmarNoWindows(j, textoNoIdioma('remRunTitulo', i), textoNoIdioma('remRunMsg', i, { n: perdidos.length }), textoNoIdioma('remRunDet', i, { x: lista }), textoNoIdioma('remRunBtn', i)))) return { canceled: true };
+  }
+  return { canceled: false, run: editarRunLocal(a.id, { titulo: a.titulo, ambiente: a.ambiente, casos: a.casos }) };
+};
 
 export const runsApagar: TratadorDoCanal<'runs:apagar'> = async (a, j) => {
   const i = idiomaAtual(); const run = obterRunLocal(a.id);
@@ -135,6 +143,11 @@ export const runsPublicar: TratadorDoCanal<'runs:publicar'> = async (a, j) => {
 export const runsResultado: TratadorDoCanal<'runs:resultado'> = async (a, j) => {
   const i = idiomaAtual(); if (!(await confirmarNoWindows(j, textoNoIdioma('manTitulo', i), textoNoIdioma('manMsg', i, { s: a.status, c: a.casoId }), textoNoIdioma('manDet', i), textoNoIdioma('manBtn', i)))) return { canceled: true };
   return { canceled: false, run: declararResultadoManual(a.id, a.casoId, { status: a.status, comentario: a.comentario }, contaDaSessao()?.nome ?? usuarioDoWindows()) };
+};
+
+export const runsResultados: TratadorDoCanal<'runs:resultados'> = async (a, j) => {
+  const i = idiomaAtual(); if (!(await confirmarNoWindows(j, textoNoIdioma('manTitulo', i), textoNoIdioma('manLoteMsg', i, { s: a.status, n: new Set(a.casoIds).size }), textoNoIdioma('manDet', i), textoNoIdioma('manBtn', i)))) return { canceled: true };
+  return { canceled: false, ...declararResultadosManuais(a.id, a.casoIds, { status: a.status, comentario: a.comentario }, contaDaSessao()?.nome ?? usuarioDoWindows()) };
 };
 
 const casoDaRun = (id: string, casoId: number) => { const run = obterRunLocal(id); const caso = run.casos.find(c => c.casoId === casoId); if (!caso) throw new Error('RUN_CASE_NOT_FOUND'); return { run, caso, pasta: obterEspaco(run.espacoId).pastaLocal }; };

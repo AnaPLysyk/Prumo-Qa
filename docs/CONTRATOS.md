@@ -4,7 +4,7 @@
 
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
-- **IPC** (220 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
+- **IPC** (221 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
 - **MCP** (10 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
@@ -67,7 +67,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:propostas:publicar` | `camposQase`, `destino`, `destinos`, `id`, `marcoQase`, `severidadeQase`, `tipoId` | Cria o caso, o ticket, o defeito ou a issue somente no destino escolhido, depois da confirmação nativa, e registra o vínculo como REGISTRADO_PELO_PRUMO quando há relação conhecida. |
 | `prumo:runs:listar` | `espacoId` | Consulta local. |
 | `prumo:runs:preparar` | `ambiente`, `ambienteQaseId`, `casos`, `espacoId`, `marcoId`, `planoId`, `runIdRemoto`, `titulo` | Grava runs-qase.json. Não cria nada no Qase. |
-| `prumo:runs:editar` | `ambiente`, `id`, `titulo` | Grava runs-qase.json. Não altera a run no Qase. |
+| `prumo:runs:editar` | `ambiente`, `casos`, `id`, `titulo` | Grava runs-qase.json. Casos que ficam guardam o resultado; tirar caso com resultado pede confirmação nativa. Não altera a run no Qase. |
 | `prumo:runs:apagar` | `id` | Grava runs-qase.json. Não apaga nem altera a run no Qase; exige confirmação nativa. |
 | `prumo:runs:criar` | `id` | Cria a run no Qase após confirmação nativa. Criar a run não executa nada. |
 | `prumo:runs:executar` | `id` | Executa processos locais; cada automação pede a autenticação nativa do Windows. Casos manuais ficam sem resultado. |
@@ -75,6 +75,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `prumo:runs:evidenciar` | `casoId`, `id` | Copia os arquivos para .prumo/evidencias/runs/<run>/<caso> do projeto (texto com segredos mascarados; até 10 por cenário, 10 MB cada). Não envia nada ao Qase: o envio acontece ao publicar a run. |
 | `prumo:runs:andamento` | `casoId`, `espacoId`, `runId` | Grava andamento-manual.json somente ao iniciar; não publica resultado nem atribui no Qase. |
 | `prumo:runs:resultado` | `casoId`, `comentario`, `id`, `status` | Grava runs-qase.json marcando MANUAL e quem declarou. Nunca sobrescreve resultado de execução. |
+| `prumo:runs:resultados` | `casoIds`, `comentario`, `id`, `status` | Grava runs-qase.json marcando MANUAL e quem declarou, depois de uma confirmação nativa para o lote. Nunca sobrescreve resultado de execução. |
 | `prumo:runs:publicar` | `anexarEvidencia`, `id` | Envia resultados (passed, failed, blocked) após confirmação nativa; NOT_RUN nunca é enviado; repetir não duplica. |
 | `prumo:runs:bugs` | `classificacao`, `id` | Grava propostas.json. Não cria tickets. |
 | `prumo:runs:politica` | `dias`, `espacoId`, `maxUsos`, `runId` | Grava autorizacoes.json. Sem política, rotina agendada não escreve no Qase. |
@@ -1092,13 +1093,13 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 ### `prumo:runs:editar`
 
 - **Tipo:** IPC
-- **Finalidade:** Editar o título e o ambiente de uma run local.
+- **Finalidade:** Editar o título, o ambiente e, antes de a run existir no Qase, os casos de uma run local.
 - **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
 - **Destino:** backend/testes/controlador.ts > runsEditar
-- **Entrada:** Id da run, título e ambiente
+- **Entrada:** Id da run, título, ambiente e, opcionalmente, a lista de casos
 - **Saída:** Run local atualizada
 - **Permissões:** Ação explícita da pessoa
-- **Efeito:** Grava runs-qase.json. Não altera a run no Qase.
+- **Efeito:** Grava runs-qase.json. Casos que ficam guardam o resultado; tirar caso com resultado pede confirmação nativa. Não altera a run no Qase.
 - **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
@@ -1204,6 +1205,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Saída:** Run atualizada
 - **Permissões:** Ação explícita da pessoa
 - **Efeito:** Grava runs-qase.json marcando MANUAL e quem declarou. Nunca sobrescreve resultado de execução.
+- **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
+- **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
+- **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs
+- **Registro:** Livro-razão local de operações externas e histórico do projeto
+
+### `prumo:runs:resultados`
+
+- **Tipo:** IPC
+- **Finalidade:** Declarar o mesmo resultado manual para vários casos da run de uma vez.
+- **Origem:** Interface > Tickets, Testes, Runs, Vínculos, Agentes ou Conexões
+- **Destino:** backend/testes/controlador.ts > runsResultados
+- **Entrada:** Run, casos (até 200), status e comentário
+- **Saída:** Run atualizada e casos mantidos por terem resultado de execução
+- **Permissões:** Ação explícita da pessoa
+- **Efeito:** Grava runs-qase.json marcando MANUAL e quem declarou, depois de uma confirmação nativa para o lote. Nunca sobrescreve resultado de execução.
 - **Arquivos consultados:** %LOCALAPPDATA%\PrumoQA\plataforma\operacoes-externas.json, propostas.json, runs-qase.json, permissoes-servicos.json
 - **Erros possíveis:** INVALID_ARGUMENTS, IPC_SENDER_REJECTED, CREDENTIAL_UNAVAILABLE, CREDENTIAL_INVALID_OR_EXPIRED, SERVICE_PERMISSION, SERVICE_NOT_FOUND, SERVICE_RATE_LIMIT, SERVICE_TIMEOUT, SERVICE_UNAVAILABLE, SERVICE_RESPONSE_INVALID, SERVICE_REDIRECT_BLOCKED, SERVICE_RESPONSE_LIMIT, SERVICE_DESTINATION_BLOCKED, SERVICE_WRITE_BLOCKED, SERVICE_SCOPE_CHANGED, SERVICE_DUPLICATE, SERVICE_PLAN_LIMIT, WRITE_NOT_ENABLED, HUMAN_CONFIRMATION_REQUIRED, WRITE_POLICY_MISSING, OPERATION_UNKNOWN, OPERATION_RETRY_LIMIT, WORKSPACE_NOT_FOUND
 - **Proteções:** Remetente deve ser a página do aplicativo; Argumentos validados por esquema estrito; Resposta {ok,data|error} sem stack trace; Erros mascarados; Isolamento por projeto Prumo, conexão e instância; Rotas de escrita em lista fechada (conexoes/escrita/rotaEscritaPermitida.ts); Escrita desligada por padrão por projeto e serviço; Confirmação nativa que a página não consegue simular; Idempotência e reconciliação; sem token nos logs

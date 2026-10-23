@@ -10,7 +10,10 @@
       "features": [
         "Perguntas gerais de QA e TI podem ser encaminhadas para uma IA externa autorizada, sem enviar os dados do projeto quando o MCP não é necessário.",
         "Perguntas sobre o projeto podem usar o MCP do Prumo em modo somente leitura.",
-        "O chat identifica a IA que respondeu e diferencia MCP confirmado, MCP não confirmado, MCP sem projeto e pergunta geral sem necessidade de MCP."
+        "O chat identifica a IA que respondeu e diferencia MCP confirmado, MCP não confirmado, MCP sem projeto e pergunta geral sem necessidade de MCP.",
+        "A run preparada no Prumo abre como página, no desenho da run do Qase: casos por suíte com o resultado de cada um, resultado em lote, evidências e resumo ao lado.",
+        "Nova run escolhe casos ou suítes inteiras (como no Qase), e \"Casos da run\" inclui ou tira casos enquanto a run ainda não existe no Qase.",
+        "A Documentação viva tem colunas que recolhem, divisórias que se arrastam e painel de código que amplia."
       ],
       "improvements": [
         "A evidência lista as ferramentas MCP concluídas durante a pergunta, em vez de tratar disponibilidade como uso.",
