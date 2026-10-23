@@ -1,16 +1,14 @@
 # Como interpretar métricas e logs
 
-As métricas vêm de registros feitos pelo Prumo neste computador; não são estimativas.
-
 ## Métricas
 
-Os dados vêm das operações registradas pelo Prumo (MCP e terminal) e das execuções do projeto (agendadas ou manuais).
+As métricas não são estimativas. Vêm dos registros que o Prumo faz neste computador: operações (MCP e terminal) e execuções do projeto, agendadas ou manuais.
 
 - **Totais**: interações registradas, chamadas pelo MCP, revisões de cobertura, análises de contexto e execuções com resultado `PASS`, `FAIL`, `BLOCKED` ou `NOT_RUN`, durante todo o período.
-- **Gráficos**: seguem o período e os **Filtros** (fonte, resultado, tipo de rotina, ambiente, execução, ticket). Em **Editar gráficos** você escolhe, muda o formato e ordena. Dá para exportar CSV ou JSON e imprimir ou salvar em PDF.
+- **Gráficos**: seguem o período e os **Filtros** (fonte, resultado, tipo de rotina, ambiente, execução, ticket). Em **Editar gráficos** você escolhe, muda o formato e ordena. Você pode exportar CSV ou JSON e imprimir ou salvar em PDF.
 - **Achados e recomendações**: alertas e sugestões do Prumo. Ele não verifica se a IA seguiu essas sugestões.
 - **Lacunas**: requisito, fonte, oráculo ou rastreabilidade ausentes.
-- **Redundâncias**: cenários que parecem testar a mesma coisa. Você ou a IA ainda precisam confirmar se são mesmo repetidos.
+- **Redundâncias**: cenários que parecem testar a mesma coisa. Alguém ainda precisa confirmar se são repetidos.
 - **INFO** é uma consulta e não conta como PASS; **ERRO_INFRA** é falha da própria operação ou da infraestrutura.
 - **Tokens e custos** aparecem como indisponíveis: não há dados verificáveis. Conversas de Codex ou Claude Code não são capturadas.
 

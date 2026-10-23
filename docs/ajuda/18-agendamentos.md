@@ -1,6 +1,6 @@
 # Agendamentos, bandeja e execuções
 
-As rotinas de QA funcionam sem IA. Claude e Codex podem ajudar a interpretar um resultado, mas não criam rotinas, não executam testes nem publicam resultados.
+As rotinas funcionam sem IA. Claude e Codex podem ajudar a interpretar um resultado, mas não criam rotinas, não executam testes e não publicam resultados.
 
 ## Criar uma rotina
 
@@ -13,27 +13,27 @@ Em **Agendamentos**, clique em **Nova rotina**. Escolha o projeto, o tipo de rot
 - **Desempenho (k6)**: usa o k6 oficial instalado no computador, com até 50 usuários virtuais por até 600 segundos. Não pode ser executado em produção. Sem k6, fica `NOT_RUN`.
 - **Run do Qase**: roda as automações dos casos de uma run já criada no Qase.
 
-Você pode executar a rotina uma vez, a cada certo número de minutos, diariamente ou semanalmente. Ela usa o fuso horário escolhido. Na mudança para o horário de verão, um horário que não existe passa para o primeiro horário disponível; se um horário acontecer duas vezes, a rotina roda apenas uma.
+A rotina roda uma vez, a cada N minutos, todos os dias ou toda semana, no fuso horário escolhido. Na mudança de horário de verão, um horário que não existe passa para o primeiro disponível; um horário que acontece duas vezes roda só uma.
 
-A rotina só pode executar um comando permitido no projeto; ela não aceita comandos escritos livremente. O texto de um ticket é tratado como informação, nunca como uma instrução para o Prumo.
+A rotina só executa um comando permitido no projeto; não aceita comando digitado livremente. O texto de um ticket é informação, nunca instrução para o Prumo.
 
 ## Autorizar testes
 
-Executar testes exige autorização. Abra a rotina, escolha a aba **Autorização**, defina por quantos dias (de 1 a 30) e quantas vezes a autorização vale e clique em **Autorizar execuções agendadas…**. O Prumo mostra o que a rotina poderá fazer e pede sua confirmação e a autenticação do sistema.
+Executar testes exige autorização. Abra a rotina, vá à aba **Autorização**, defina por quantos dias (de 1 a 30) e quantas vezes ela vale e clique em **Autorizar execuções agendadas…**. O Prumo mostra o que a rotina poderá fazer e pede sua confirmação e a autenticação do sistema.
 
 - Vale apenas para aquele projeto, ambiente e comando.
-- Se o comando, o contrato ou os arquivos de teste mudarem, a autorização deixa de valer. A rotina fica `BLOCKED` até você autorizá-la novamente.
+- Se o comando, o contrato ou os arquivos de teste mudarem, a autorização deixa de valer e a rotina fica `BLOCKED` até você autorizar de novo.
 - Você pode revogar quando quiser.
 
 **Executar agora** é feito por você e pede a autenticação a cada vez.
 
 ## Bandeja e horário perdido
 
-Ao fechar a janela, o Prumo continua na área de notificação do sistema (bandeja), para que as rotinas possam rodar. No menu do ícone, você pode abrir o Prumo, ver ou pausar as rotinas e consultar o estado do worker (processo que executa as rotinas). **Sair do Prumo** encerra o worker e os processos que ele iniciou.
+Ao fechar a janela, o Prumo continua na bandeja do sistema para as rotinas poderem rodar. No menu do ícone você abre o Prumo, vê ou pausa as rotinas e consulta o estado do worker (o processo que executa as rotinas). **Sair do Prumo** encerra o worker e os processos que ele iniciou.
 
-Em **Políticas e preferências › Prumo residente** você liga **Iniciar o Prumo com o sistema**. Vem desligado.
+**Iniciar o Prumo com o sistema** fica em **Políticas e preferências › Prumo residente** e vem desligado.
 
-Pausar impede o início de novas execuções, mas não interrompe uma que já começou. Se o computador estiver desligado ou suspenso, ou se você sair do Prumo, a rotina não roda; o horário aparece como **PERDIDO**. Em **Se o Prumo estiver fechado no horário**, você pode escolher **Executar uma vez ao voltar**.
+Pausar impede novas execuções, mas não interrompe uma que já começou. Com o computador desligado ou suspenso, ou depois de **Sair do Prumo**, a rotina não roda e o horário aparece como **PERDIDO**. Em **Se o Prumo estiver fechado no horário**, você pode escolher **Executar uma vez ao voltar**.
 
 ## PASS, FAIL, BLOCKED e NOT_RUN
 
@@ -46,15 +46,15 @@ Falha de rede ou serviço aparece como erro de infraestrutura e pode ter nova te
 
 ## Consultar execuções
 
-Em **Testes › Runs** ficam as execuções manuais e agendadas, com filtro por origem e situação. Abra uma linha para ver resumo, etapas (tentativas), logs e evidências guardadas na pasta do projeto.
+As execuções manuais e agendadas ficam em **Testes › Runs**, com filtro por origem e situação. Abra uma linha para ver resumo, etapas (tentativas), logs e as evidências guardadas na pasta do projeto.
 
 ## Comentário no Jira
 
-Informe o ticket na rotina. O Prumo pode comentar o resultado no ticket: tipo, ambiente, cenários, resumo das falhas e a referência local da evidência. O comentário não aprova o ticket e nunca muda o status dele.
+Informe o ticket na rotina e o Prumo pode comentar o resultado nele: tipo, ambiente, cenários, resumo das falhas e a referência local da evidência. O comentário não aprova o ticket nem muda o status dele.
 
 - **Manual**: abra a execução (PASS ou FAIL) em Testes › Runs, clique em **Comentário Jira**, leia a prévia e use **Publicar no Jira…**.
 - **Agendado**: aprove antes uma política em **Políticas e preferências › Comentários no Jira**, restrita a tickets, tipos de rotina, validade e quantidade. Sem política, nenhuma rotina comenta.
 
-Repetir não duplica o comentário. Se a publicação falhar, o registro fica como pendência local.
+Repetir não duplica o comentário. Se a publicação falhar, fica uma pendência local.
 
-A rotina **Run do Qase** segue a mesma ideia: só publica no Qase com a política aprovada na aba **Publicação** da run (Testes › Runs). Você revoga essas políticas em **Políticas e preferências › Resultados no Qase**.
+A rotina **Run do Qase** segue a mesma regra: só publica no Qase com a política aprovada na aba **Publicação** da run (Testes › Runs). Você revoga essas políticas em **Políticas e preferências › Resultados no Qase**.

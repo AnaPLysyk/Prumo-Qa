@@ -229,9 +229,10 @@
       if (r) { avisar(tr('Run preparada com {n} caso(s). Ela ainda não existe no Qase.', { n: escolhidos.length })); DS.fecharModal(); await abrirRunLocal(e, r.id); }
     }, { id: 'run-preparar', primaria: true });
     const sel = seletorDeCasos(fonte, marcados, () => { preparar.disabled = !marcados.size; }); preparar.disabled = !marcados.size;
-    DS.modal('Nova run', [DS.info('Uma run reúne os casos que você vai executar agora: um caso, vários ou suítes inteiras. Ela é preparada neste computador; criá-la no Qase é um passo separado.'),
+    DS.modal('Nova run', [
       h('form', { class: 'ds-form', onsubmit: (ev) => ev.preventDefault() }, DS.campo('Título da run', titulo), DS.campo('Ambiente', amb), vinc(e, 'qase') ? DS.campo('Milestone no Qase', marcoQase) : null, vinc(e, 'qase') ? DS.campo('Ambiente no Qase', ambQase) : null),
       h('div', { class: 'ds-campo inteiro rs-campo' }, h('span', {}, tr('Casos do repositório ({n})', { n: fonte.itens.length })), sel.no),
+      DS.info('Uma run reúne os casos que você vai executar agora: um caso, vários ou suítes inteiras. Ela é preparada neste computador; criá-la no Qase é um passo separado.'),
       DS.rodape(DS.acao('Cancelar', () => DS.fecharModal()), preparar)], { tamanho: 'lg' });
   }
   /** Incluir e tirar casos de uma run do Prumo que ainda não existe no Qase: o mesmo seletor da criação, já com os casos dela marcados. */
@@ -276,7 +277,7 @@
     if (!destino) { mem.runAberta = id; (estado.sub ||= {}).testes = 'runs'; return mostrar('testes'); }
     const { corpo, voltar } = destino; mem.runAberta = id;
     if (!corpo.querySelector('.qs-run')) corpo.replaceChildren(DS.carregando('Abrindo a run…'));
-    const [rs, and, repo] = await Promise.all([api.runs(e.id), api.runAndamento(e.id, id), api.repositorioLocal(e.id)]); if (!corpo.isConnected) return;
+    const [rs, and, repo] = await Promise.all([api.runs(e.id), api.runAndamento(e.id, id), api.repositorioLocal(e.id)]);
     const sair = () => { delete mem.runAberta; return voltar(); };
     const r = rs.ok ? rs.data.find((x) => x.id === id) : null;
     if (!r) { corpo.replaceChildren(DS.estadoTela('erro', rs.ok ? 'Run não encontrada' : 'Não foi possível abrir a run', rs.ok ? 'Ela pode ter sido apagada deste computador.' : rs.error, [DS.acao('Voltar às runs', sair)])); return; }
@@ -298,7 +299,8 @@
     const filtro = { q: '', status: new Set() }; const selecionados = new Set(); let aberta = null, consultaDoCaso = 0, focoAnterior = null;
     const raiz = h('div', { class: 'qs-run qs-run-local', id: 'run-local', 'data-run': r.id }); const principal = h('div', { class: 'qs-run-principal' }); const lateral = h('aside', { class: 'qs-run-lateral', 'aria-label': tr('Resumo da run') }); const gaveta = h('aside', { class: 'qs-gaveta', id: 'qs-gaveta', hidden: true, 'aria-label': tr('Caso da run') });
     raiz.append(principal, lateral, gaveta); corpo.replaceChildren(raiz);
-    const medirArea = () => { if (!raiz.isConnected) { tamanho.disconnect(); return; } raiz.style.setProperty('--qs-altura', Math.max(0, window.innerHeight - raiz.getBoundingClientRect().top - 16) + 'px'); };
+    let jaNaTela = false; // a área só entra na tela depois que quem chamou termina de montá-la
+    const medirArea = () => { if (!raiz.isConnected) { if (jaNaTela) tamanho.disconnect(); return; } jaNaTela = true; raiz.style.setProperty('--qs-altura', Math.max(0, window.innerHeight - raiz.getBoundingClientRect().top - 16) + 'px'); };
     const tamanho = new ResizeObserver(medirArea); tamanho.observe(raiz); tamanho.observe(corpo); tamanho.observe(document.documentElement); medirArea();
     raiz.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !gaveta.hidden) { ev.preventDefault(); fecharGaveta(); } });
     const recarregar = (casoInicial) => abrirRunLocal(e, id, esc, { ...destino, casoInicial });

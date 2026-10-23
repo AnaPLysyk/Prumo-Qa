@@ -2,13 +2,13 @@
 
 O Prumo QA reúne projetos, testes, tickets e evidências no seu computador.
 
-Com o Prumo, você pode:
+No Prumo, você pode:
 
-- criar projetos ou importar projetos do Qase;
-- conectar Jira, Qase e GitHub, se precisar;
+- criar projetos ou importar do Jira, do Qase e do GitHub;
+- conectar Jira, Qase, GitHub e uma pasta local, se precisar;
 - registrar requisitos e ver o que são fatos ou hipóteses;
 - encontrar o que falta testar, possíveis testes repetidos e resultados esperados ausentes;
-- executar apenas verificações permitidas pelo projeto, depois de aprovar;
+- executar só o que o projeto permite, depois da sua aprovação;
 - consultar os resultados e as evidências guardados no computador.
 
 Claude Code, Codex, GitHub Copilot e Gemini CLI são opcionais. Eles se conectam ao Prumo pelo MCP (protocolo de comunicação entre aplicativos).

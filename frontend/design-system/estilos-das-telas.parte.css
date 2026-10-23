@@ -1684,3 +1684,4 @@ body:is([data-tela=agentes],[data-tela=tickets],[data-tela=agenda],[data-tela=me
 .adm-col-topo{flex-wrap:wrap}
 .adm-col-topo > :first-child{white-space:nowrap}
 .adm-col-topo .ds-acao,.adm-col-topo button{white-space:nowrap}
+.rep-barra { grid-template-columns: minmax(160px, 1fr) repeat(5, auto); }

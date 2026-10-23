@@ -1,10 +1,10 @@
 # O que o Prumo faz sem IA e o que depende dela
 
-O Prumo funciona sem uma conta de IA. Se quiser, uma IA pode ajudar; as decisões continuam sendo suas.
+O Prumo funciona sem conta de IA. Uma IA pode ajudar, mas a decisão é sua.
 
 ## Sem IA
 
-- criar projetos (à mão ou importados do Qase) e guardar as informações do projeto;
+- criar projetos (à mão ou importados do Jira, do Qase e do GitHub) e guardar as informações deles;
 - conectar Jira, Qase e GitHub com suas credenciais, consultar dados e, se você habilitar a escrita, publicar depois de confirmar;
 - registrar relações entre tickets e casos, com uma justificativa. Uma relação registrada não comprova que o caso cobre o ticket;
 - agendar rotinas (consulta Jira, smoke, regressão, validação por ticket, análise de mudanças, desempenho com k6 e run do Qase), com o worker na bandeja do sistema, e comentar o resultado no Jira com a sua aprovação;
@@ -16,7 +16,7 @@ O Prumo funciona sem uma conta de IA. Se quiser, uma IA pode ajudar; as decisõe
 
 ## Decisões que precisam de julgamento
 
-Você faz estas análises; uma IA externa pode auxiliar:
+Estas análises são suas; uma IA externa pode ajudar:
 
 - interpretar requisitos e decidir o que é risco de verdade;
 - julgar se dois cenários são equivalentes;

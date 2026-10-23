@@ -312,7 +312,7 @@
     const ligar = async (para, justificativa) => { const r = await api.espacoAssociar(e.id, { de: refDoCaso(e, l), para, justificativa }); if (!r.ok && !String(r.error || '').includes('TRACE_DUPLICATE')) { aviso.textContent = r.error; return; } await atualizarEspaco(e); aoMudar(); };
     const desligar = async ({ rel }) => { const r = await api.espacoAssociar(e.id, { de: rel.de, para: rel.para, justificativa: rel.justificativa || 'vínculo' }, true); if (!r.ok) { aviso.textContent = r.error; return; } if (r.data?.canceled) return; await atualizarEspaco(e); aoMudar(); };
     const x = (d) => iconBtn('fechar', 'Remover vínculo', () => desligar(d));
-    const entradaJira = vj ? h('input', { class: 'cp-in cp-in-curto', maxlength: 40, placeholder: vj.recurso.chave + '-123', value: ticketInicial || '', 'aria-label': tr('Ticket do Jira') }) : null;
+    const entradaJira = vj ? h('input', { class: 'cp-in cp-in-curto', maxlength: 40, placeholder: vj.recurso.chave + '-123', 'aria-label': tr('Ticket do Jira') }) : null;
     const adicionarJira = async () => { const chave = entradaJira.value.trim().toUpperCase(); if (!chave) return;
       if (!/^[A-Z][A-Z0-9_]*-\d+$/.test(chave)) { aviso.textContent = tr('Use o formato {k}-123.', { k: vj.recurso.chave }); return; }
       if (!chave.startsWith(vj.recurso.chave + '-')) { aviso.textContent = tr('O ticket deve pertencer ao projeto Jira vinculado.'); return; }
@@ -763,7 +763,7 @@
       if (consulta === consultaDoPainel && area.isConnected && f.sel === l.chave) painelSlot.replaceChildren(no);
     }
     area.replaceChildren(...[
-      h('div', { class: 'rep-layout', id: 'rep-layout' }, arvore, h('div', { class: 'rep-principal' }, h('div', { class: 'rep-barra' }, busca.no, importarCasos, exportarCasos, botaoPublicar, menuRaizNaBarra), ativosNo, contagem, lista), painelSlot),
+      h('div', { class: 'rep-layout', id: 'rep-layout' }, arvore, h('div', { class: 'rep-principal' }, h('div', { class: 'rep-barra' }, busca.no, h('div', { class: 'rep-filtros' }, botaoFiltros, popFiltros), importarCasos, exportarCasos, botaoPublicar, menuRaizNaBarra), ativosNo, contagem, lista), painelSlot),
       src.casos?.proxima != null ? DS.barra(DS.acao('Carregar mais casos do Qase', async () => {
         const offset = src.casos.proxima;
         const proxima = await F.carregarQase(e, mem, 'casos', { offset, limite: 100 });

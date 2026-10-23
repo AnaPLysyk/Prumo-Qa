@@ -1,6 +1,6 @@
 # Como funciona
 
-O fluxo de uma análise é:
+Uma análise segue este caminho:
 
 ```
 Projeto (qa.project.json) → IA (Claude Code, Codex) → MCP → núcleo do Prumo → resultado → evidências
@@ -22,4 +22,4 @@ Projeto (qa.project.json) → IA (Claude Code, Codex) → MCP → núcleo do Pru
 - **propor_caso** e **propor_bug**: criam um rascunho no computador. Nada é enviado ao Qase ou Jira.
 - **propor_aprendizado**: sugere um aprendizado para os agentes, como rascunho que você aprova.
 
-O Prumo não adivinha regras de negócio. Se faltar um requisito, ele avisa. Os detalhes de permissões, erros e proteções estão em **Ajuda › Integrações técnicas**.
+O Prumo não adivinha regras de negócio: se faltar um requisito, ele avisa. Permissões, erros e proteções estão em **Ajuda › Integrações técnicas**.
