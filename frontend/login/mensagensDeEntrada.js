@@ -15,6 +15,7 @@ window.PrumoMensagensEntrada = (() => {
       LOGIN_NOT_ACTIVE: 'Ainda não existe conta neste computador. Selecione Criar conta para começar.',
       LOGIN_SETUP_REQUIRED: 'Crie a primeira conta de Administrador para começar.',
       LOGIN_RATE_LIMIT: 'Muitas tentativas de acesso. Aguarde um minuto e tente novamente.',
+      LOGIN_IN_PROGRESS: 'Uma tentativa de entrada já está em andamento. Confira o resultado antes de tentar outra vez.',
       LOGIN_INVALID_FORMAT: 'Confira o formato do login informado.',
       LOGIN_TAKEN: 'Esse login já está em uso. Escolha outro.',
       LOGIN_ALREADY_ACTIVE: 'Já existe uma conta neste computador. Entre com ela.',

@@ -21,8 +21,6 @@ function aplicarMenu(fechado, salvar = true) { document.body.dataset.menu = fech
 function montarSeletorProjeto(espacos, pastas) {
   const btn = $('#projeto-botao'), lista = $('#projeto-lista');
   if (!btn || !lista) return;
-  const trocaAtual = (montarSeletorProjeto.troca || 0) + 1;
-  montarSeletorProjeto.troca = trocaAtual;
   const projetos = Array.isArray(espacos) ? espacos : [];
   const locais = (Array.isArray(pastas) ? pastas : []).filter(p =>
     p.root && !projetos.some(e => e.raizContextos === p.root || e.pastaLocal === p.root));
@@ -42,10 +40,9 @@ function montarSeletorProjeto(espacos, pastas) {
     try {
       await Promise.resolve(mostrar(estado.aba));
     } finally {
-      if (botao && trocaAtual === montarSeletorProjeto.troca) {
-        botao.setAttribute('data-contexto', 'ativo');
-        botao.disabled = false;
-      }
+      // mostrar() remonta o seletor, então o botão vigente é buscado de novo: a troca só termina quando ele volta a aceitar clique.
+      const vigente = $('#projeto-botao') || botao;
+      if (vigente) { vigente.setAttribute('data-contexto', 'ativo'); vigente.disabled = false; }
     }
   };
   const escolherLocal = async p => {
@@ -61,10 +58,8 @@ function montarSeletorProjeto(espacos, pastas) {
     try {
       await Promise.resolve(mostrar('projetos'));
     } finally {
-      if (botao && trocaAtual === montarSeletorProjeto.troca) {
-        botao.setAttribute('data-contexto', 'local');
-        botao.disabled = false;
-      }
+      const vigente = $('#projeto-botao') || botao;
+      if (vigente) { vigente.setAttribute('data-contexto', 'local'); vigente.disabled = false; }
     }
   };
   // Menos informação no seletor: título de grupo só quando há projetos e pastas juntos; busca só com muitos itens.

@@ -58,6 +58,8 @@ Limites conhecidos: o Qase não tem OAuth público documentado e segue por token
 
 ## Perguntas de conhecimento e pesquisa na web
 
+O cabeçalho do chat só confirma uso do MCP quando encontra uma chamada concluída com o identificador exclusivo daquela consulta, no diário do mesmo projeto e perfil. Esse identificador é passado pelo processo principal à instância MCP temporária; chamadas de outras sessões e registros antigos sem correlação não confirmam a resposta. O identificador é metadado, não autenticação nem autorização.
+
 No modo automático do chat (ninguém escolheu uma IA), uma pergunta de conhecimento de QA e TI — conceito, técnica, boa prática, nunca dado do projeto — vai para as IAs já autorizadas em Ajustes › Assistente, uma por vez (Claude Code, Copilot, Codex, Gemini), em pasta temporária vazia, sem o servidor MCP do Prumo e sem os fatos locais do projeto; só a pergunta, as últimas trocas da sessão (sem gravar) e o conhecimento aprovado da pessoa vão no prompt. Perguntas sobre execuções, falhas, métricas e demais dados do projeto continuam locais. Somente ao Claude Code, nesse caminho, são liberadas as ferramentas `WebSearch` e `WebFetch` (leitura da web; nenhuma outra ferramenta, edição ou execução). O conteúdo de páginas é tratado como dado, nunca como instrução, e a resposta passa pelo mascaramento de segredos. A Administração pode desligar o uso de IA externa, e então só a base offline responde. Quem escolhe uma IA ou a Mesa mantém o comportamento anterior (com o MCP do Prumo, somente leitura).
 
 ## Voz: microfone e transcrição local

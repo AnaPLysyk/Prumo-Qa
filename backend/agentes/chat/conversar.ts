@@ -163,7 +163,7 @@ function intencaoDeAprender(pergunta: string, espacoId: string | null, forcado: 
 
 function montarResposta(agente: AgenteChat, c: Coleta, modo: Resposta['modo'], estilo: Estilo, pessoa: string | null, extra: Partial<Resposta> & { rota?: Resposta['rota'] } = {}): Resposta {
   return ({ agente: { id: agente.id, nome: agente.nome, especializacao: agente.especializacao },
-    linhas: c.linhas.map((l) => mascarar(l)), fontes: c.fontes, modo, estilo, rota: extra.rota ?? [], fatos: c.fatos, proximos: extra.proximos ?? [], acoes: extra.acoes ?? [], pendente: extra.pendente ?? null, pessoa: extra.pessoa !== undefined ? extra.pessoa : pessoa, continuou: extra.continuou ?? false, ...(extra.aviso ? { aviso: extra.aviso } : {}), ...(extra.orquestracao ? { orquestracao: extra.orquestracao } : {}), ...(extra.mesa ? { mesa: extra.mesa } : {}) });
+    linhas: c.linhas.map((l) => mascarar(l)), fontes: c.fontes, modo, estilo, rota: extra.rota ?? [], fatos: c.fatos, proximos: extra.proximos ?? [], acoes: extra.acoes ?? [], pendente: extra.pendente ?? null, pessoa: extra.pessoa !== undefined ? extra.pessoa : pessoa, continuou: extra.continuou ?? false, ...(extra.aviso ? { aviso: extra.aviso } : {}), ...(extra.orquestracao ? { orquestracao: extra.orquestracao } : {}), ...(extra.mesa ? { mesa: extra.mesa } : {}), ...(extra.mcp ? { mcp: extra.mcp } : {}) });
 }
 
 /** Explica um teste aberto na visão de código: só o que a leitura do arquivo mostra (inferência declarada). */

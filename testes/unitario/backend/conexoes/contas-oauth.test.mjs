@@ -19,7 +19,7 @@ const protetor = { disponivel: () => true, proteger: (s) => Buffer.from(s, 'utf8
 const protetorIndisponivel = { disponivel: () => false, proteger: () => { throw new Error('sem cofre'); }, abrir: () => { throw new Error('sem cofre'); } };
 
 function ambiente(t, { renovar, revogar, protegido = protetor, repositorios } = {}) {
-  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-oauth-'));
+  const base = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'prumo-oauth-')));
   t.after(() => fs.rmSync(base, { recursive: true, force: true }));
   const pedidos = [];
   const transporte = async (p) => {

@@ -5,7 +5,7 @@
 O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as consultas REST externas de leitura estão documentadas separadamente em [SERVICOS.md](SERVICOS.md):
 
 - **IPC** (220 operações): entre a janela Electron e o processo principal, com remetente conferido e argumentos validados por esquema estrito.
-- **MCP** (9 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
+- **MCP** (10 ferramentas): para agentes de IA, por stdio, iniciado pelo próprio cliente.
 
 ## IPC (janela)
 
@@ -240,6 +240,7 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 | `revisar_cobertura` | `candidates`, `contextoId`, `contradictions`, `existingTests`, `requirement`, `source`, `sourcePath` | Somente leitura; não afirma que executou algo. |
 | `executar_validacao` | `capability`, `solicitarAprovacao` | Pode executar processo local autorizado e gravar evidência. Sem aprovação retorna BLOCKED. |
 | `consultar_evidencias` | `criterio`, `jobId` | Somente leitura. |
+| `consultar_repositorio` | `busca`, `limite` | Somente leitura. |
 | `listar_politicas` | — | Somente leitura. |
 | `propor_caso` | `automacao`, `camada`, `comportamento`, `descricao`, `instavel`, `passos`, `posCondicoes`, `preCondicoes`, `prioridade`, `requisito`, `risco`, `severidade`, `status`, `suiteId`, `tags`, `ticket`, `tipo`, `titulo` | Grava propostas.json. Não envia nada ao Qase; duplicata e excesso por hora são recusados. |
 | `propor_bug` | `descricao`, `origem`, `resumo`, `risco`, `rotulos` | Grava propostas.json. Não cria ticket no Jira. |
@@ -3606,6 +3607,21 @@ O Prumo não abre servidor HTTP local. Existem duas interfaces de entrada; as co
 - **Arquivos consultados:** <projeto>/.prumo/evidencias/*.json
 - **Erros possíveis:** INVALID_JOB, EVIDENCE_TAMPERED, PROJECT_MISMATCH
 - **Proteções:** Projeto fixado na configuração do servidor, nunca pela ferramenta; Leitura limitada à raiz autorizada; Registro de início e término; Integridade por hash; Isolamento por projeto
+- **Registro:** Histórico de atividades (origem MCP)
+
+### `consultar_repositorio`
+
+- **Tipo:** MCP
+- **Finalidade:** Ler os casos e suítes locais do Repositório do projeto antes de analisar cobertura ou propor novos casos.
+- **Origem:** Agente de IA por MCP (stdio)
+- **Destino:** backend/agentes/mcp/consultasDoProjeto.ts > registrarConsultarRepositorio
+- **Entrada:** Busca opcional de até 120 caracteres e limite de 1 a 100 casos
+- **Saída:** Casos (título, requisito, risco, tags e quantidade de passos), suítes e total de casos
+- **Permissões:** Projeto Prumo vinculado à raiz do servidor MCP
+- **Efeito:** Somente leitura.
+- **Arquivos consultados:** Repositório local do projeto Prumo vinculado
+- **Erros possíveis:** NO_WORKSPACE, INVALID_ARGUMENTS
+- **Proteções:** Projeto fixado na configuração do servidor, nunca pela ferramenta; Leitura limitada à raiz autorizada; Registro de início e término; Isolamento por projeto; Esquema estrito
 - **Registro:** Histórico de atividades (origem MCP)
 
 ### `listar_politicas`

@@ -52,7 +52,7 @@ export function consultarAtividades(p:Projeto,base?:string) {
         if(new Set(s.types.map(t=>t.type)).size!==s.types.length || s.findings!==s.types.reduce((n,t)=>n+t.count,0) || s.recommendations>s.findings || s.gaps!==s.types.filter(t=>achadoELacuna(t.type)).reduce((n,t)=>n+t.count,0) || s.candidateRedundancies!==(s.types.find(t=>t.type==='POTENTIAL_REDUNDANCY')?.count??0))falharCom('HISTORY_COUNTER_MISMATCH');
       }
       if(lidos[0]!.phase!=='start'||lidos[0]!.state!=='STARTED'||lidos[0]!.durationMs!==0)falharCom('HISTORY_CORRUPT');
-      if(lidos[1] && (lidos[1].phase!=='end'||lidos[1].state==='STARTED'||lidos[1].tool!==lidos[0]!.tool||lidos[1].origin!==lidos[0]!.origin||lidos[1].client!==lidos[0]!.client||lidos[1].manifestHash!==lidos[0]!.manifestHash||lidos[1].at<lidos[0]!.at))falharCom('HISTORY_CORRUPT');
+      if(lidos[1] && (lidos[1].phase!=='end'||lidos[1].state==='STARTED'||lidos[1].tool!==lidos[0]!.tool||lidos[1].origin!==lidos[0]!.origin||lidos[1].client!==lidos[0]!.client||lidos[1].consultaId!==lidos[0]!.consultaId||lidos[1].manifestHash!==lidos[0]!.manifestHash||lidos[1].at<lidos[0]!.at))falharCom('HISTORY_CORRUPT');
       eventos.push(...lidos);
     } catch(e) {
       if((e as Error).message==='HISTORY_READ_LIMIT')throw e;
@@ -126,6 +126,7 @@ export function iniciarAtividade(p:Projeto,tool:string,origem:Origem,entrada:unk
   const cliente=origem.origin==='CLI'?'terminal':/sdk|test|acceptance|demonstracao|lab-avaliador|inspector/i.test(origem.client??'')?'sdk':/codex/i.test(origem.client??'')?'codex':/claude/i.test(origem.client??'')?'claude':/copilot/i.test(origem.client??'')?'copilot':/gemini/i.test(origem.client??'')?'gemini':'outro';
   const e:Omit<Evento,'level'|'digest'>={version:1,operationId:id,projectId:hash(p.manifesto.id),rootHash:hash(p.raiz),manifestHash:p.manifestoHash,
     tool:ferramentas.includes(tool as typeof ferramentas[number])?tool as typeof ferramentas[number]:'desconhecida',origin:origem.origin,client:cliente,clientIdentity:'declarada',clientClassificationVersion:2,
+    ...(z.string().uuid().safeParse(origem.consultaId).success ? {consultaId:origem.consultaId} : {}),
     phase:'start',at:new Date().toISOString(),durationMs:0,state:'STARTED',input:tool==='revisar_cobertura'?{candidates:Math.min(comoLista(r.candidates).length,1000000),existingTests:Math.min(comoLista(r.existingTests).length,1000000),hasRequirement:typeof r.requirement==='string'&&!!r.requirement.trim(),hasSource:typeof r.source==='string'&&!!r.source.trim()}:{},summary:resumoVazio()};
   const avisar=opcoes.diagnostico??avisarFalhaDoDiario;let alvo:string|undefined;let encerrado=false;
   try {

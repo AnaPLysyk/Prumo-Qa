@@ -14,7 +14,7 @@ import { excluirTodosContextos } from "../agentes/banco/contextos.js";
 import { excluirEvidencias } from "../testes/banco/publicacoes.js";
 import { excluirAtividades } from "../logs/regras/iniciarAtividade.js";
 import { excluirDiagnostico } from "../logs/banco/diagnostico.js";
-import { projetoVinculado } from "../projetos/servicoProjetos.js";
+import { projetoVinculado, espacoDaRaiz } from "../projetos/servicoProjetos.js";
 import { resumirDados } from "./servicoAjuda.js";
 
 export const ajudaDocumentos: TratadorDoCanal<'ajuda:documentos'> = () => lerDocumentosDaAjuda(path.join(raizDoAplicativo, 'docs', 'ajuda'), versao);
@@ -28,7 +28,11 @@ export const dadosExcluir: TratadorDoCanal<'dados:excluir'> = async (a, janela) 
     message: textoExclusao[a.escopo], detail: 'Esta ação não pode ser desfeita. Código-fonte e demais arquivos do projeto não são tocados e o vínculo do projeto é mantido.' });
   if (r.response !== 1) return { canceled: true, deleted: 0, failed: [] };
   if (a.escopo === 'diagnostico') return { canceled: false, ...excluirDiagnostico() };
-  const p = await projetoVinculado(a.root);
+  let p = await projetoVinculado(a.root);
+  if (a.escopo === 'evidencias') {
+    const pastaLocal = espacoDaRaiz(p.raiz)?.pastaLocal;
+    if (pastaLocal) p = await projetoVinculado(pastaLocal);
+  }
   return { canceled: false, ...(a.escopo === 'historico' ? excluirAtividades(p) : a.escopo === 'contextos' ? excluirTodosContextos(p) : await excluirEvidencias(p)) };
 };
 

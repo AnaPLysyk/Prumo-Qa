@@ -65,7 +65,7 @@ export const eventoSchema = z.object({
   version:z.literal(1), operationId:z.string().uuid(), projectId:z.string().max(100), rootHash:z.string().regex(/^[a-f0-9]{64}$/),
   manifestHash:z.string().regex(/^[a-f0-9]{64}$/), tool:z.enum(ferramentas), origin:z.enum(['CLI','MCP']),
   client:z.enum(['codex','claude','copilot','gemini','sdk','outro','terminal']), clientIdentity:z.literal('declarada'),
-  clientClassificationVersion:z.literal(2).optional(),
+  clientClassificationVersion:z.literal(2).optional(), consultaId:z.string().uuid().optional(),
   phase:z.enum(['start','end']), at:z.string().datetime(), durationMs:z.number().finite().nonnegative(),
   state:z.enum(estados), input:entradaSchema, summary:resumoSchema,
   digest:z.string().regex(/^[a-f0-9]{64}$/),
@@ -74,7 +74,7 @@ export const eventoSchema = z.object({
 
 export type Evento = z.infer<typeof eventoSchema>;
 
-export type Origem = { origin:'CLI'|'MCP'; client?:string };
+export type Origem = { origin:'CLI'|'MCP'; client?:string; consultaId?:string };
 
 export const codigos = new Set(['POLICY_BLOCKED','CAPABILITY_NOT_ALLOWED','SCOPE_CHANGED','PRECONDITION_MISSING','HUMAN_APPROVAL_REQUIRED','RUNTIME_MISSING','TIMEOUT','OUTPUT_LIMIT','SUBPROCESS_ERROR','PROCESS_SIGNAL','INVALID_RESULT','INVALID_MANIFEST','PATH_FORBIDDEN','SECRET_FORBIDDEN','SYMLINK_FORBIDDEN','CONTEXT_LIMIT','EVIDENCE_TAMPERED','PROJECT_MISMATCH','INVALID_JOB','INVALID_ARGUMENTS','TOOL_ERROR']);
 

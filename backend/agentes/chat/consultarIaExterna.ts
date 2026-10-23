@@ -15,6 +15,7 @@ import { lerPreferenciasDosAgentes, PARA_TODOS_OS_AGENTES } from "../regras/agen
 import { situacaoDaSessao } from "../../login/regras/sessao.js";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
+import { randomUUID } from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import { localizarClienteDeIa, configuracaoDoServidorMcp, nodeDoComputador } from "../../conexoes/ia/conectarIa.js";
@@ -32,14 +33,14 @@ const ferramentasMcpDoChat = ['contexto_projeto', 'revisar_cobertura', 'consulta
 /** Pesquisa na web, somente leitura: a única ferramenta além das consultas do Prumo, liberada só nas perguntas gerais de QA e TI. */
 const ferramentasDeWeb = ['WebSearch', 'WebFetch'];
 
-async function evidenciaMcpDaConsulta(base: string | undefined, espacoId: string | null, inicio: number): Promise<NonNullable<Resposta['mcp']>> {
+async function evidenciaMcpDaConsulta(base: string | undefined, espacoId: string | null, consultaId: string): Promise<NonNullable<Resposta['mcp']>> {
   if (!espacoId) return { estado: 'SEM_PROJETO', ferramentas: [] };
   try {
     const pasta = obterEspaco(espacoId, base).pastaLocal;
     if (!pasta) return { estado: 'SEM_PROJETO', ferramentas: [] };
     const projeto = await carregarProjeto(pasta);
-    const ferramentas = consultarAtividades(projeto).activities
-      .filter(e => e.origin === 'MCP' && e.phase === 'end' && e.state !== 'ERROR' && Date.parse(e.at) >= inicio)
+    const ferramentas = consultarAtividades(projeto, base).activities
+      .filter(e => e.origin === 'MCP' && e.phase === 'end' && e.state !== 'ERROR' && e.consultaId === consultaId)
       .map(e => e.tool)
       .filter((tool, i, all) => all.indexOf(tool) === i);
     return ferramentas.length ? { estado: 'CONFIRMADO', ferramentas } : { estado: 'NAO_CONFIRMADO', ferramentas: [] };
@@ -48,11 +49,21 @@ async function evidenciaMcpDaConsulta(base: string | undefined, espacoId: string
   }
 }
 
-export function argumentosDoProvedorDeIa(provedor: Exclude<Provedor, 'local'>, prompt: string, raizDoProjeto?: string | null, web = false) {
+/** Identificador criado pelo processo principal, propagado apenas ao servidor MCP desta consulta. */
+function configuracaoMcpDaConsulta(raiz: string, consulta?: { id: string; base?: string }) {
+  const config = configuracaoDoServidorMcp(raiz);
+  if (consulta) {
+    config.env.PRUMO_MCP_CONSULTA_ID = consulta.id;
+    if (consulta.base) config.env.PRUMO_MCP_CONSULTA_BASE = consulta.base;
+  }
+  return config;
+}
+
+export function argumentosDoProvedorDeIa(provedor: Exclude<Provedor, 'local'>, prompt: string, raizDoProjeto?: string | null, web = false, consulta?: { id: string; base?: string }) {
   // A delegação do chat autoriza uma resposta, nunca edição, execução ou publicação.
   // Flags incompatíveis falham fechadas e conversar volta para a resposta local.
   // Com projeto vinculado, a IA recebe só o MCP do Prumo, restrito às consultas acima.
-  const mcp = raizDoProjeto ? configuracaoDoServidorMcp(raizDoProjeto) : null;
+  const mcp = raizDoProjeto ? configuracaoMcpDaConsulta(raizDoProjeto, consulta) : null;
   if (provedor === 'claude') {
     const servidores = mcp ? { [servidorMcp]: { type: 'stdio', ...mcp } } : {};
     const permitidas = [...(mcp ? ferramentasMcpDoChat.map(f => `mcp__${servidorMcp}__${f}`) : []), ...(web ? ferramentasDeWeb : [])];
@@ -155,10 +166,10 @@ export function prepararConsulta({ o, agente, pergunta, local, estilo, nome, per
 }
 
 /** Executa o CLI uma vez, com as travas somente-leitura de argumentosDoProvedorDeIa. */
-export async function consultarCliDaIa(o: Opcoes, provedor: Exclude<Provedor, 'local'>, exe: string, prompt: string, cwd: string | undefined, timeoutMs = 120000, web = false): Promise<ConsultaDaIa> {
+export async function consultarCliDaIa(o: Opcoes, provedor: Exclude<Provedor, 'local'>, exe: string, prompt: string, cwd: string | undefined, timeoutMs = 120000, web = false, consulta?: { id: string; base?: string }): Promise<ConsultaDaIa> {
   const nomeP = nomesDosProvedores[provedor];
   let x: Awaited<ReturnType<Executor>>;
-  try { x = await o.executor!(exe, argumentosDoProvedorDeIa(provedor, prompt, cwd, web), { timeoutMs, cwd, ...(provedor === 'gemini' ? { gemini: true, ...(cwd ? { mcpGemini: configuracaoDoServidorMcp(cwd) } : {}) } : {}) }); } catch { return { ok: false, aviso: 'Falha ao chamar a IA externa' }; }
+  try { x = await o.executor!(exe, argumentosDoProvedorDeIa(provedor, prompt, cwd, web, consulta), { timeoutMs, cwd, ...(provedor === 'gemini' ? { gemini: true, ...(cwd ? { mcpGemini: configuracaoMcpDaConsulta(cwd, consulta) } : {}) } : {}) }); } catch { return { ok: false, aviso: 'Falha ao chamar a IA externa' }; }
   const { texto: limpo, aprendizados } = separarAprendizados(mascarar(x.saida)); const texto = limpo.trim().slice(0, 6000);
   if (x.falhaAoExecutar) return { ok: false, aviso: `${nomeP} não pôde ser executado neste computador (erro de execução)` };
   if (x.codigo !== 0 || !texto) { const motivo = motivoDaFalhaDaIa(`${x.saida}\n${x.erro}`); return { ok: false, aviso: motivo ? `${nomeP} ${motivo}` : `${nomeP} não respondeu (código ${x.codigo ?? 'tempo esgotado'})` }; }
@@ -171,15 +182,15 @@ export async function consultarIaExterna(ctx: ContextoDelegacao): Promise<Respos
   const voltar = (aviso: string) => montar(agente, { ...local, linhas: vestido() }, 'LOCAL', { ...comum, aviso: `${aviso}; resposta local.` });
   const ia = localizarIaAutorizada(o, provedor); if ('aviso' in ia) return voltar(ia.aviso);
   try {
-    const inicioMcp = Date.now();
+    const consultaId = randomUUID();
     let preparo: ReturnType<typeof prepararConsulta>;
     try { preparo = prepararConsulta(ctx); } catch (erro) { return montar(agente, { ...local, linhas: vestido() }, 'LOCAL', { ...comum, aviso: (erro as Error).message }); }
-    const r = await consultarCliDaIa(o, provedor, ia.exe, preparo.prompt(), preparo.cwd);
+    const r = await consultarCliDaIa(o, provedor, ia.exe, preparo.prompt(), preparo.cwd, 120000, false, { id: consultaId, base: o.base });
     if (!r.ok) return voltar(r.aviso);
     const { acoes, sugeridos, naoRegistrados } = registrarSugestoesDaIa(o, agente, provedor, r.aprendizados);
     const linhas = r.texto.split(/\n{2,}/).map((l) => l.trim()).filter(Boolean).slice(0, 12);
     if (sugeridos) linhas.push(`${nomeP} sugeriu ${sugeridos} aprendizado(s); ficam como rascunho até você decidir.`);
-    const mcp = await evidenciaMcpDaConsulta(o.base, o.espacoId, inicioMcp);
+    const mcp = await evidenciaMcpDaConsulta(o.base, o.espacoId, consultaId);
     return montar(agente, { ...local, linhas }, modoDoProvedor[provedor], { ...comum, mcp, acoes, ...(naoRegistrados || preparo.avisoSkill ? { aviso: [naoRegistrados ? `${naoRegistrados} aprendizado(s) não foram registrados (limite ou armazenamento indisponível). A resposta da IA foi preservada.` : '', preparo.avisoSkill ?? ''].filter(Boolean).join(' ') } : {}) });
   } catch { return voltar('Falha ao chamar a IA externa'); }
 }

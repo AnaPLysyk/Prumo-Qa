@@ -15,14 +15,14 @@ import { definirUsuarioDoEscopo, executarNoEscopoDoUsuario } from "../../compart
 
 // --- transporteObservado ---
 /** Observa tools/call na fronteira do protocolo, inclusive rejeições de schema do SDK. */
-export function transporteObservado(transporte:Transport,p:Projeto,cliente:()=>string|undefined):Transport {
+export function transporteObservado(transporte:Transport,p:Projeto,cliente:()=>string|undefined,consulta:{consultaId?:string;base?:string}={}):Transport {
   const pendentes=new Map<string|number,ReturnType<typeof iniciarAtividade>>();
   const observado:Transport={
     async start() {
       transporte.onmessage=(mensagem,extra)=>{
         if('method' in mensagem && mensagem.method==='tools/call' && 'id' in mensagem) {
           const params=mensagem.params;
-          pendentes.set(mensagem.id,iniciarAtividade(p,typeof params?.name==='string'?params.name:'desconhecida',{origin:'MCP',client:cliente()},params?.arguments));
+          pendentes.set(mensagem.id,iniciarAtividade(p,typeof params?.name==='string'?params.name:'desconhecida',{origin:'MCP',client:cliente(),consultaId:consulta.consultaId},params?.arguments,{base:consulta.base}));
         }
         observado.onmessage?.(mensagem,extra);
       };
@@ -61,7 +61,7 @@ export async function criarServidor(raiz: string, contratoLeitura?: string) {
   const servidor = new McpServer({ name: 'prumo-qa', version: versaoDoPacote });
   const cliente = () => servidor.server.getClientVersion()?.name;
   const conectar = servidor.connect.bind(servidor);
-  servidor.connect = t => conectar(transporteObservado(t, vinculo, cliente));
+  servidor.connect = t => conectar(transporteObservado(t, vinculo, cliente, { consultaId: process.env.PRUMO_MCP_CONSULTA_ID, base: process.env.PRUMO_MCP_CONSULTA_BASE }));
   const espaco = () => espacoDaRaiz(raiz);
   // A cada chamada, o MCP revalida a sessão do Electron. Logout ou troca de conta revogam o acesso.
   const autorizado = async (capacidade: string, fn: () => Promise<unknown>) => {

@@ -19,7 +19,9 @@
       ],
       "fixes": [
         "Perguntas conceituais não dependem mais de selecionar um projeto para receber uma resposta.",
-        "O cabeçalho não chama uma resposta geral de 'via CLI, sem MCP' de forma ambígua."
+        "O cabeçalho não chama uma resposta geral de 'via CLI, sem MCP' de forma ambígua.",
+        "O estado MCP chega à interface e só é confirmado por chamadas da mesma consulta, sem atribuir atividade de outra sessão.",
+        "A exclusão de evidências na Ajuda alcança a pasta local vinculada ao projeto selecionado."
       ],
       "differential": "O chat separa claramente resposta externa, consulta MCP observada e resposta geral que não precisava de dados do projeto.",
       "howItWorks": [
@@ -50,8 +52,8 @@
     },
     {
       "version": "2.19.0",
-      "status": "publicada",
-      "date": "2026-10-21",
+      "status": "repositorio",
+      "date": null,
       "title": "Importar com destino claro e painel de conexões arrastável",
       "objective": "Deixar claro para onde cada importação vai, mostrar as conexões do projeto com a contagem certa e explicar em português as falhas de serviço.",
       "features": [
@@ -88,7 +90,7 @@
         "Conectar pelo navegador depende do serviço de identidade do Prumo; sem ele, o caminho é o token de API.",
         "A posição das conexões fica neste computador."
       ],
-      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.19.0",
+      "releaseUrl": null,
       "migration": "Não precisa migrar.",
       "afterUpdate": [
         "Abrir Projetos e conferir o novo fluxo Importar."
