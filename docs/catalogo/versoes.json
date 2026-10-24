@@ -26,7 +26,8 @@
         "O estado MCP chega à interface e só é confirmado por chamadas da mesma consulta, sem atribuir atividade de outra sessão.",
         "A exclusão de evidências na Ajuda alcança a pasta local vinculada ao projeto selecionado.",
         "Sem aceleração gráfica, os agentes usam retratos estáticos sem gerar erro de WebGL na interface.",
-        "A Ajuda distingue os dados locais dos serviços de conta, e-mail, suporte e integrações."
+        "A Ajuda distingue os dados locais dos serviços de conta, e-mail, suporte e integrações.",
+        "Os títulos e a orientação de pasta local do seletor de projetos são traduzidos no idioma inglês."
       ],
       "differential": "O chat separa claramente resposta externa, consulta MCP observada e resposta geral que não precisava de dados do projeto.",
       "howItWorks": [

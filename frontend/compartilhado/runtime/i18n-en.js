@@ -7,6 +7,7 @@ window.PRUMO_EN = {
   'Início': 'Home', 'Projetos': 'Projects', 'Contextos': 'Contexts', 'Tickets': 'Tickets', 'Testes': 'Tests', 'Automações': 'Automations', 'Agendamentos': 'Schedules', 'Execuções': 'Runs',
   'Rastreabilidade': 'Traceability', 'Métricas': 'Metrics', 'Logs': 'Logs', 'Histórico': 'History', 'Evidências': 'Evidence', 'Conexões': 'Connections', 'Agentes': 'Agents', 'Suporte': 'Support', 'Ajuda': 'Help',
   'Seções': 'Sections', 'nenhum selecionado': 'none selected', 'Worker': 'Worker', 'Atualizações do Prumo QA: nenhuma novidade': 'Prumo QA updates: nothing new',
+  'Pasta vinculada ao computador; abra Projetos para associá-la à qualidade': 'Folder linked to this computer; open Projects to associate it with a quality project',
   'Atualizações do Prumo QA: versão': 'Prumo QA updates: version', 'disponível': 'available', 'Nenhuma atualização pendente.': 'No pending update.', 'Clique para abrir Atualizações e verificar.': 'Click to open Updates and check.',
   'Clique para ver as notas completas (correções, segurança e compatibilidade). Nada é baixado nem instalado automaticamente.': 'Click to see the full notes (fixes, security and compatibility). Nothing is downloaded or installed automatically.',
   'NÃO CONFIGURADO': 'NOT CONFIGURED', 'NÃO APLICÁVEL': 'NOT APPLICABLE', 'ERRO DE INFRAESTRUTURA': 'INFRASTRUCTURE ERROR', 'indisponível': 'unavailable',
@@ -146,6 +147,8 @@ window.PRUMO_EN = {
 };
 // Regras para textos com números, nomes ou concatenação (aplicadas depois do dicionário exato).
 window.PRUMO_EN_REGRAS = [
+  [/^PROJETOS DE QUALIDADE · (\d+)$/, 'QUALITY PROJECTS · $1'],
+  [/^PASTAS LOCAIS · (\d+)$/, 'LOCAL FOLDERS · $1'],
   [/^Revogar (.+)$/, 'Revoke $1'], [/^Validar vínculo (.+)$/, 'Validate link $1'], [/^Remover vínculo (.+)$/, 'Remove link $1'], [/^Detalhar caso (.+)$/, 'Detail case $1'], [/^Resultados do run (.+)$/, 'Run results $1'], [/^Verificações (.+)$/, 'Checks $1'], [/^Detalhar PR (.+)$/, 'Detail PR $1'],
   [/^Versão (\S+) disponível$/, 'Version $1 available'], [/^Atualizações do Prumo QA: versão (\S+) disponível$/, 'Prumo QA updates: version $1 available'], [/^Testar integração (.+)$/, 'Test integration $1'], [/^Excluir (.+)…$/, 'Delete $1…'],
   [/^Não há (\d+) arquivo/, 'There are $1 file'], [/^Projeto: (.+)$/, 'Project: $1'], [/^Comentários de (.+)$/, 'Comments of $1'], [/^Usar (.+) como critérios de aceite$/, 'Use $1 as acceptance criteria'], [/^Importar (.+)$/, 'Import $1'], [/^Detalhar (.+)$/, 'Detail $1'],

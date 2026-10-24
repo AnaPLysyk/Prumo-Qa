@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           repository: AnaPLysyk/Prumo-QA-Lab
-          ref: 2f2ae7c0d72af66a7563861c32514d7d29043b6d
+          ref: 212281c5c9b6717e17decee18cfdf41e5e553e2a
           path: .lab
       - uses: actions/setup-node@v5
         with:
