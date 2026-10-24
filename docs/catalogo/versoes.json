@@ -3,8 +3,8 @@
   "versions": [
     {
       "version": "2.20.0",
-      "status": "repositorio",
-      "date": null,
+      "status": "publicada",
+      "date": "2026-10-24",
       "title": "Chat com IAs e evidência real do MCP",
       "objective": "Permitir conversar com IAs externas pelo chat e deixar explícito quando uma resposta usou ferramentas MCP de verdade.",
       "features": [
@@ -48,13 +48,17 @@
         "Perguntas gerais não usam o MCP do projeto por desenho.",
         "A IA externa precisa estar instalada, autorizada e autenticada no próprio cliente."
       ],
-      "releaseUrl": null,
+      "releaseUrl": "https://github.com/AnaPLysyk/Prumo-Qa/releases/tag/v2.20.0",
       "migration": "Não precisa migrar.",
       "afterUpdate": [
         "Abra o chat e escolha uma IA autorizada.",
         "Faça uma pergunta geral e depois uma pergunta sobre o projeto.",
         "Confira a diferença entre 'pergunta geral · MCP não necessário' e 'MCP confirmado'."
-      ]
+      ],
+      "installer": {
+        "file": "Prumo-QA-Setup-2.20.0.exe",
+        "sha256": "64e3e6906384be98ba6826e773d51e13eb52167f35670ab8dddb62faa722c5b9"
+      }
     },
     {
       "version": "2.19.0",
