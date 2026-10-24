@@ -142,7 +142,7 @@ export function configurarAceite(id:string,campo:string,base?:string){return atu
 
 /** Projeto Prumo (espaço) a que uma raiz autorizada pertence: a pasta de contextos do projeto ou a pasta de automação vinculada. */
 export function espacoDaRaiz(raiz: string, b?: string) {
-  const alvo = path.resolve(raiz).toLowerCase(); return listarEspacos(b).find(e => path.resolve(e.raizContextos).toLowerCase() === alvo || (e.pastaLocal && path.resolve(e.pastaLocal).toLowerCase() === alvo)) ?? null;
+  const alvo = caminhoComparavel(raiz); return listarEspacos(b).find(e => caminhoComparavel(e.raizContextos) === alvo || (e.pastaLocal && caminhoComparavel(e.pastaLocal) === alvo)) ?? null;
 }
 
 export function eventoEspaco(e:Espaco,acao:z.infer<typeof evento>['acao'],extra:Partial<z.infer<typeof evento>>={}){e.historico.push(evento.parse({at:new Date().toISOString(),acao,...extra}));e.historico=e.historico.slice(-1000);}
